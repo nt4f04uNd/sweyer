@@ -6,10 +6,8 @@ class MarqueeWidget extends StatefulWidget {
   final String text;
   final TextStyle textStyle;
 
-  ///滚动方向，水平或者垂直
   final Axis scrollAxis;
 
-  ///空白部分占控件的百分比
   final double ratioOfBlankToScreen;
 
   MarqueeWidget({
