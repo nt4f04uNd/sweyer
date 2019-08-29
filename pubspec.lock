@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
+  audioplayers:
+    dependency: "direct main"
+    description:
+      name: audioplayers
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -29,6 +36,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.14.11"
+  convert:
+    dependency: transitive
+    description:
+      name: convert
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.1"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.2"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -36,13 +57,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
-  flute_music_player:
-    dependency: "direct main"
-    description:
-      name: flute_music_player
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.6"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -53,6 +67,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: "direct main"
+    description:
+      name: fluttertoast
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.0"
   matcher:
     dependency: transitive
     description:
@@ -74,6 +95,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.2"
+  path_provider:
+    dependency: transitive
+    description:
+      name: path_provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   pedantic:
     dependency: transitive
     description:
@@ -81,6 +109,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  permission_handler:
+    dependency: "direct main"
+    description:
+      name: permission_handler
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.2.2"
   quiver:
     dependency: transitive
     description:
@@ -142,6 +177,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2"
   vector_math:
     dependency: transitive
     description:
@@ -151,3 +193,4 @@ packages:
     version: "2.0.8"
 sdks:
   dart: ">=2.2.2 <3.0.0"
+  flutter: ">=0.1.4 <2.0.0"

@@ -17,7 +17,12 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  flute_music_player: ^0.0.6
+  # flute_music_player: ^0.0.6
+  audioplayers: ^0.13.1
+  # media_notification: ^0.0.5
+  fluttertoast: ^3.1.0
+  permission_handler: '^3.2.0'
+
   flutter:
     sdk: flutter
 
@@ -40,8 +45,7 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/img/defaultAlbumArt.png
+  # assets:
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
