@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Startup Name Generator',
-      theme: ThemeData(brightness: Brightness.dark, accentColor: Colors.black),
+      theme: ThemeData(brightness: Brightness.dark, accentColor: Colors.black, ),
       home: WillPopScope(child: MainRoute(), onWillPop: onWillPop),
       // home: WillPopScope(child: SearchDemo(), onWillPop: onWillPop),
     );
