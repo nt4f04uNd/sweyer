@@ -79,6 +79,10 @@ class MusicPlayer {
   /// TODO: `_songs` list can be resorted so I should to write method that updates this variable on resort
   int playingIndexState = 0;
 
+  /// Is player tries to switch right now
+  /// TODO: improve implementation of this
+  bool switching = false;
+
   // Getters
   /// Get current playing song
   Song get currentSong {
@@ -102,6 +106,9 @@ class MusicPlayer {
   /// Get stream of changes on player state.
   Stream<AudioPlayerState> get onPlayerStateChanged =>
       _playerInstance.onPlayerStateChanged;
+
+  Stream<Duration> get onDurationChanged =>
+      _playerInstance.onDurationChanged;
 
   AudioPlayerState get playState => _playerInstance.state;
 
@@ -184,17 +191,26 @@ class MusicPlayer {
   ///
   /// `clickedListIndex` argument denotes an index of clicked row in track `ListView`
   Future<void> play(int clickedListIndex) async {
+    switching = true;
     await _requestFocus();
-
     int res;
     if (focusState == AudioFocusType.focus)
-      res = await _playerInstance.play(getSong(clickedListIndex).trackUri);
+      try {
+        res = await _playerInstance.play(getSong(clickedListIndex).trackUri);
+      } catch (e) {
+        res = 0;
+      }
     else if (focusState == AudioFocusType.focus_delayed)
-      // Set url if no focus has been granted
-      res = await _playerInstance.setUrl(getSong(clickedListIndex).trackUri);
+      try {
+        // Set url if no focus has been granted
+        res = await _playerInstance.setUrl(getSong(clickedListIndex).trackUri);
+      } catch (e) {
+        res = 0;
+      }
     // Do nothing if no focus has been granted
-
     if (res == 1) playingIndexState = clickedListIndex;
+
+    // debugPrint('${res.toString()} ${playingIndexState}');
   }
 
   /// Resume player
@@ -278,8 +294,7 @@ class MusicPlayer {
     if (permission == PermissionStatus.denied)
       permissions = await PermissionHandler()
           .requestPermissions([PermissionGroup.storage]);
-          
-          
+
     var songsJson =
         await _methodChannel.invokeListMethod<String>("retrieve_songs");
     for (String songJson in songsJson) {

@@ -32,8 +32,8 @@ class TrackTile extends StatelessWidget {
 
     /// Song in current row
     final song = musicPlayer.getSong(trackTileIndex);
-    void _handleTap() {
-      musicPlayer.clickTrackTile(trackTileIndex);
+    void _handleTap() async {
+      await musicPlayer.clickTrackTile(trackTileIndex);
     }
 
     return ListTile(

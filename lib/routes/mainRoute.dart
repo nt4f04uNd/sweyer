@@ -33,6 +33,9 @@ class MainRouteState extends State<MainRoute> {
         _musicPlayer.onPlayerStateChanged.listen((event) {
       setState(() {});
     });
+  _musicPlayer.onDurationChanged.listen((event) {
+      _musicPlayer.switching = false;
+    });
 
     if (_noisySubscription == null) {
       _noisySubscription =

@@ -36,12 +36,15 @@ class _PlayerRoute extends StatefulWidget {
 class _PlayerPageState extends State<_PlayerRoute> {
   /// Actual track position value
   Duration _value = Duration(seconds: 0);
+  // Duration of playing track
+  Duration _duration = Duration(seconds: 0);
 
   /// Value to perform drag
   double _localValue;
 
   /// Subscription for audio position change stream
-  StreamSubscription<Duration> _changeSubscription;
+  StreamSubscription<Duration> _changePositionSubscription;
+  StreamSubscription<dynamic> _changeStateSubscription;
 
   /// Is user dragging slider right now
   bool _isDragging = false;
@@ -53,18 +56,25 @@ class _PlayerPageState extends State<_PlayerRoute> {
 
     _setInitialCurrentPosition();
 
-    _changeSubscription =
-        MusicPlayer.getInstance.onAudioPositionChanged.listen((event) {
+    _changePositionSubscription =
+        _musicPlayer.onAudioPositionChanged.listen((event) {
       setState(() {
         _value = event;
+      });
+    });
+    _changeStateSubscription =
+        _musicPlayer.onPlayerStateChanged.listen((event) {
+      setState(() {
+        _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
       });
     });
   }
 
   _setInitialCurrentPosition() async {
-    var res = await MusicPlayer.getInstance.currentPosition;
+    var res = await _musicPlayer.currentPosition;
     setState(() {
       _value = Duration(milliseconds: res);
+      _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
     });
   }
 
@@ -89,13 +99,43 @@ class _PlayerPageState extends State<_PlayerRoute> {
     });
   }
 
+// TODO: refactor these to functions
+  String _calculateDisplayedPositionTime() {
+    /// Value to work with, depends on `_isDragging` state, either `_value` or `_localValue`
+    Duration workingValue;
+    if (_isDragging)
+      workingValue = Duration(seconds: _localValue.toInt());
+    else
+      workingValue = _value;
+
+    int minutes = workingValue.inMinutes;
+    // Seconds in 0-59 format
+    int seconds = workingValue.inSeconds % 60;
+    return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
+  }
+
+  String _calculateDisplayedDurationTime() {
+    int minutes = _duration.inMinutes;
+    // Seconds in 0-59 format
+    int seconds = _duration.inSeconds % 60;
+    return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO: add comments
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(63.0), // here the desired height
+        child: AppBar(
+          /// TODO: make back button effect to be overflowen out of appbar
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(Icons.keyboard_arrow_down),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          automaticallyImplyLeading: false,
+        ),
       ),
       body: Column(
         mainAxisSize: MainAxisSize.max,
@@ -140,24 +180,48 @@ class _PlayerPageState extends State<_PlayerRoute> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: Slider(
-                  activeColor: Colors.deepPurple.shade500,
-                  inactiveColor: Colors.white.withOpacity(0.2),
-                  // activeColor: ,
-                  value:
-                      _isDragging ? _localValue : _value.inSeconds.toDouble(),
-                  max: Duration(milliseconds: _musicPlayer.currentSong.duration)
-                      .inSeconds
-                      .toDouble(),
-                  min: 0,
-                  onChangeStart: _handleChangeStart,
-                  onChanged: _handleChanged,
-                  onChangeEnd: _handleChangeEnd,
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      transform: Matrix4.translationValues(5, 0, 0),
+                      child: Text(
+                        // TODO: move and refactor this code, and by the way split a whole page for separate widgets
+                        _calculateDisplayedPositionTime(),
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Expanded(
+                      child: Slider(
+                        activeColor: Colors.deepPurple.shade500,
+                        inactiveColor: Colors.white.withOpacity(0.2),
+                        value: _isDragging
+                            ? _localValue
+                            : _value.inSeconds.toDouble(),
+                        max: Duration(
+                                milliseconds: _musicPlayer.currentSong.duration)
+                            .inSeconds
+                            .toDouble(),
+                        min: 0,
+                        onChangeStart: _handleChangeStart,
+                        onChanged: _handleChanged,
+                        onChangeEnd: _handleChangeEnd,
+                      ),
+                    ),
+                    Container(
+                      transform: Matrix4.translationValues(-5, 0, 0),
+                      child: Text(
+                        _calculateDisplayedDurationTime(),
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(bottom: 40, top: 30),
+                padding: EdgeInsets.only(bottom: 40, top: 10),
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 50),
                   child: Row(
@@ -167,7 +231,9 @@ class _PlayerPageState extends State<_PlayerRoute> {
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                              width: 1, color: Colors.white.withOpacity(0.1)),
+                            width: 1,
+                            color: Colors.white.withOpacity(0.1),
+                          ),
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: InkWell(
@@ -175,14 +241,18 @@ class _PlayerPageState extends State<_PlayerRoute> {
                           borderRadius: BorderRadius.circular(100),
                           child: Padding(
                             padding: EdgeInsets.all(10),
-                            child: Icon(Icons.skip_previous,
-                                color: Colors.white.withOpacity(0.9)),
+                            child: Icon(
+                              Icons.skip_previous,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
                           ),
                           onTap: () {
-                            _musicPlayer.clickTrackTile(
-                                _musicPlayer.playingIndexState - 1 < 0
-                                    ? 0
-                                    : _musicPlayer.playingIndexState - 1);
+                            if (!_musicPlayer.switching)
+                              _musicPlayer.clickTrackTile(
+                                  _musicPlayer.playingIndexState - 1 < 0
+                                      // Additional svae
+                                      ? _musicPlayer.songsCount - 1
+                                      : _musicPlayer.playingIndexState - 1);
                           },
                         ),
                       ),
@@ -212,11 +282,13 @@ class _PlayerPageState extends State<_PlayerRoute> {
                             ),
                           ),
                           onTap: () {
-                            _musicPlayer.clickTrackTile(
-                                _musicPlayer.playingIndexState + 1 >=
-                                        _musicPlayer.songsCount
-                                    ? _musicPlayer.songsCount
-                                    : _musicPlayer.playingIndexState + 1);
+                            if (!_musicPlayer.switching) {
+                              _musicPlayer.clickTrackTile(
+                                  _musicPlayer.playingIndexState + 1 >=
+                                          _musicPlayer.songsCount
+                                      ? 0
+                                      : _musicPlayer.playingIndexState + 1);
+                            }
                           },
                         ),
                       ),
@@ -233,7 +305,8 @@ class _PlayerPageState extends State<_PlayerRoute> {
 
   @override
   void dispose() {
-    _changeSubscription.cancel();
+    _changePositionSubscription.cancel();
+    _changeStateSubscription.cancel();
     super.dispose();
   }
 }

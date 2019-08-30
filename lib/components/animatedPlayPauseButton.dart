@@ -40,8 +40,8 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     });
   }
 
-  void _handlePress() {
-    _musicPlayer.clickTrackTile(_musicPlayer.playingIndexState);
+  void _handlePress() async {
+    await _musicPlayer.clickTrackTile(_musicPlayer.playingIndexState);
   }
 
   @override
