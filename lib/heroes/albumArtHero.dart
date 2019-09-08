@@ -45,8 +45,7 @@ class _AlbumArtPicHero extends StatelessWidget {
               ? MediaQuery.of(context).size.width - 70
               : constraint.biggest.height,
           child: ClipRRect(
-            borderRadius: BorderRadius.all(
-                Radius.circular(isLarge ? 10 :25)),
+            borderRadius: BorderRadius.all(Radius.circular(isLarge ? 10 : 25)),
             child: Image.file(
               File(path),
               width: isLarge
@@ -74,31 +73,24 @@ class _AlbumArtPlaceholderHero extends StatelessWidget {
       return Hero(
         tag: 'AlbumArtPlaceholder',
         child: ClipRRect(
-          borderRadius: BorderRadius.all(
-              Radius.circular(isLarge ? 10 :25)),
+          borderRadius: BorderRadius.all(Radius.circular(isLarge ? 10 : 25)),
           child: Container(
-            height: isLarge
-                ? MediaQuery.of(context).size.width - 100
-                :50,
-            width: isLarge
-                ? MediaQuery.of(context).size.width - 100
-                : 50,
+            height: isLarge ? MediaQuery.of(context).size.width - 100 : constraint1.biggest.height,
+            width: isLarge ? MediaQuery.of(context).size.width - 100 : constraint1.biggest.height,
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.05),
-              // borderRadius: BorderRadius.all(
-              //     Radius.circular(isLarge ? 10 : constraint1.biggest.height)),
             ),
             child: LayoutBuilder(builder: (context, constraint) {
               return Icon(
                 Icons.music_note,
                 size: isLarge
                     ? constraint.biggest.height * 0.6 < 50
-                        ? 40
+                        ? 35
                         : constraint.biggest.height * 0.6
                     : constraint.biggest.width * 0.6 < 50
-                        ? 40
+                        ? 35
                         : constraint.biggest.width * 0.6,
-                color: Colors.deepPurple.shade500,
+                color: Colors.deepPurple,
               );
             }),
           ),

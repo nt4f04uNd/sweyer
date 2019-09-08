@@ -41,14 +41,14 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   }
 
   void _handlePress() async {
-    await _musicPlayer.clickTrackTile(_musicPlayer.playingIndexState);
+    await _musicPlayer.clickPausePlay();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: IconButton(
-        padding: EdgeInsets.all(0),
+        padding: const EdgeInsets.all(0),
         icon: Center(
           child: AnimatedIcon(
             icon: AnimatedIcons.play_pause,

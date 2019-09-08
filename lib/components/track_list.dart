@@ -1,5 +1,4 @@
 import 'package:app/components/albumArt.dart';
-// import 'package:app/components/albumArtPlaceholder.dart';
 import 'package:flutter/material.dart';
 import 'package:app/musicPlayer.dart';
 
@@ -9,11 +8,17 @@ class TrackList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: MusicPlayer.getInstance.songsCount,
-      itemBuilder: (context, index) {
-        return TrackTile(index);
-      },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 55.0),
+      child: ListView.builder(
+        itemCount: MusicPlayer.getInstance.songsCount,
+        padding: EdgeInsets.only(bottom: 10, top:5),
+        itemBuilder: (context, index) {
+          return TrackTile(index, additionalClickCallback: (){
+            MusicPlayer.getInstance.resetPlaylist();
+          },);
+        },
+      ),
     );
   }
 }
@@ -21,8 +26,9 @@ class TrackList extends StatelessWidget {
 /// `TrackTile` that represents a single track in `TrackList`
 class TrackTile extends StatelessWidget {
   /// Index of rendering element from
-  final trackTileIndex;
-  TrackTile(this.trackTileIndex);
+  final int trackTileIndex;
+  final Function additionalClickCallback;
+  TrackTile(this.trackTileIndex, {this.additionalClickCallback});
 
 //TODO: add comments
   @override
@@ -31,9 +37,11 @@ class TrackTile extends StatelessWidget {
     final musicPlayer = MusicPlayer.getInstance;
 
     /// Song in current row
-    final song = musicPlayer.getSong(trackTileIndex);
+    final song = musicPlayer.getSongByIndex(trackTileIndex);
+
     void _handleTap() async {
-      await musicPlayer.clickTrackTile(trackTileIndex);
+      if (additionalClickCallback != null) additionalClickCallback();
+      await musicPlayer.clickTrackTile(song.id);
     }
 
     return ListTile(
@@ -43,18 +51,11 @@ class TrackTile extends StatelessWidget {
           style: TextStyle(
               fontSize: 16 /* Default flutter title font size (not densed) */),
         ),
-        subtitle: Text(
-          // TODO: make unknown artist null istead of '<unknown>'
-          song.artist != '<unknown>' ? song.artist : 'Неизестный исполнитель',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-              fontSize:
-                  14 /* Default flutter subtitle font size (not densed) */),
-        ),
+        subtitle: Artist(artist: song.artist),
         dense: true,
         isThreeLine: false,
         leading: AlbumArt(path: song.albumArtUri),
-        contentPadding: EdgeInsets.only(left: 10, top: 0),
+        contentPadding: const EdgeInsets.only(left: 10, top: 0),
         onTap: _handleTap);
   }
 }

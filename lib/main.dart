@@ -1,8 +1,8 @@
-import 'package:app/components/search.dart';
 import 'package:app/routes/mainRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,10 +11,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Startup Name Generator',
-      theme: ThemeData(brightness: Brightness.dark, accentColor: Colors.black, ),
+      supportedLocales: [const Locale('ru')],
+      locale: Locale('ru'),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      title: 'Музыка',
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(color: Color(0xff070707)),
+        brightness: Brightness.dark,
+        accentColor: Colors.grey.shade900,
+        backgroundColor: Colors.black,
+        primaryColor:  Colors.deepPurple,
+
+        scaffoldBackgroundColor: Colors.black,
+        textSelectionColor: Colors.deepPurple,
+        textSelectionHandleColor: Colors.deepPurple,
+      ),
       home: WillPopScope(child: MainRoute(), onWillPop: onWillPop),
-      // home: WillPopScope(child: SearchDemo(), onWillPop: onWillPop),
     );
   }
 

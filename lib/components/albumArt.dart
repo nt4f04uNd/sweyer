@@ -80,7 +80,7 @@ class _AlbumArtPlaceholder extends StatelessWidget {
           size: useWidthForMaxSize
               ? constraint.biggest.width
               : constraint.biggest.height,
-          color: Colors.deepPurple.shade500,
+          color: Colors.deepPurple,
         );
       }),
     );

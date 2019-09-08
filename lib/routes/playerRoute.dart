@@ -1,12 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:app/components/animatedPlayPauseButton.dart';
+import 'package:app/constants/prefs.dart';
 import 'package:app/heroes/albumArtHero.dart';
-// import 'package:app/heroes/noteIconHero.dart';
 import 'package:flutter/material.dart';
-
 import 'package:app/musicPlayer.dart';
-import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
 Route createPlayerRoute() {
   return PageRouteBuilder(
@@ -44,30 +42,42 @@ class _PlayerPageState extends State<_PlayerRoute> {
 
   /// Subscription for audio position change stream
   StreamSubscription<Duration> _changePositionSubscription;
-  StreamSubscription<dynamic> _changeStateSubscription;
+  StreamSubscription<dynamic> _changeDurationSubscription;
 
   /// Is user dragging slider right now
   bool _isDragging = false;
   MusicPlayer _musicPlayer = MusicPlayer.getInstance;
+  SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
 
     _setInitialCurrentPosition();
+    _getPrefsInstance();
 
+    // Handle track position movement
     _changePositionSubscription =
         _musicPlayer.onAudioPositionChanged.listen((event) {
       setState(() {
         _value = event;
+        if (prefs != null)
+          prefs.setInt(PrefKeys.songPositionInt, _value.inSeconds);
       });
     });
-    _changeStateSubscription =
-        _musicPlayer.onPlayerStateChanged.listen((event) {
+
+    // Handle track swtich
+    _changeDurationSubscription =
+        _musicPlayer.onDurationChanged.listen((event) {
       setState(() {
+        _value = Duration(seconds: 0);
         _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
       });
     });
+  }
+
+  void _getPrefsInstance() async {
+    prefs = await SharedPreferences.getInstance();
   }
 
   _setInitialCurrentPosition() async {
@@ -78,6 +88,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
     });
   }
 
+  // Drag functions
   void _handleChangeStart(double newValue) async {
     setState(() {
       _localValue = newValue;
@@ -99,11 +110,10 @@ class _PlayerPageState extends State<_PlayerRoute> {
     });
   }
 
-// TODO: refactor these to functions
   String _calculateDisplayedPositionTime() {
     /// Value to work with, depends on `_isDragging` state, either `_value` or `_localValue`
     Duration workingValue;
-    if (_isDragging)
+    if (_isDragging) // Update time indicator when dragging
       workingValue = Duration(seconds: _localValue.toInt());
     else
       workingValue = _value;
@@ -124,11 +134,9 @@ class _PlayerPageState extends State<_PlayerRoute> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(63.0), // here the desired height
         child: AppBar(
-          /// TODO: make back button effect to be overflowen out of appbar
           backgroundColor: Colors.transparent,
           leading: IconButton(
             icon: Icon(Icons.keyboard_arrow_down),
@@ -143,14 +151,14 @@ class _PlayerPageState extends State<_PlayerRoute> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(top: 0),
+            padding: const EdgeInsets.only(top: 0),
             child: Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 30),
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: Text(
                       _musicPlayer.currentSong.title,
                       overflow: TextOverflow.ellipsis,
@@ -158,7 +166,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 5, bottom: 30),
+                    padding: const EdgeInsets.only(top: 5, bottom: 30),
                     child: Text(
                       _musicPlayer.currentSong.artist != '<unknown>'
                           ? _musicPlayer.currentSong.artist
@@ -166,7 +174,8 @@ class _PlayerPageState extends State<_PlayerRoute> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(left: 20, right: 20, top: 10),
+                    padding:
+                        const EdgeInsets.only(left: 20, right: 20, top: 10),
                     child: AlbumArtHero(
                       path: _musicPlayer.currentSong.albumArtUri,
                       isLarge: true,
@@ -179,8 +188,26 @@ class _PlayerPageState extends State<_PlayerRoute> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 17.0),
+                  child: IconButton(
+                    icon: Icon(Icons.loop),
+                    iconSize: 27,
+                    color: MusicPlayer.getInstance.loopModeState
+                        ? null
+                        : Colors.grey.shade800,
+                    onPressed: () {
+                      setState(() {
+                        MusicPlayer.getInstance.switchLoopMode();
+                      });
+                    },
+                  ),
+                ),
+              ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -195,7 +222,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
                     ),
                     Expanded(
                       child: Slider(
-                        activeColor: Colors.deepPurple.shade500,
+                        activeColor: Colors.deepPurple,
                         inactiveColor: Colors.white.withOpacity(0.2),
                         value: _isDragging
                             ? _localValue
@@ -221,9 +248,9 @@ class _PlayerPageState extends State<_PlayerRoute> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(bottom: 40, top: 10),
+                padding: const EdgeInsets.only(bottom: 40, top: 10),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 50),
+                  padding: const EdgeInsets.symmetric(horizontal: 50),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -240,24 +267,17 @@ class _PlayerPageState extends State<_PlayerRoute> {
                           radius: 50,
                           borderRadius: BorderRadius.circular(100),
                           child: Padding(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             child: Icon(
                               Icons.skip_previous,
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          onTap: () {
-                            if (!_musicPlayer.switching)
-                              _musicPlayer.clickTrackTile(
-                                  _musicPlayer.playingIndexState - 1 < 0
-                                      // Additional svae
-                                      ? _musicPlayer.songsCount - 1
-                                      : _musicPlayer.playingIndexState - 1);
-                          },
+                          onTap: _musicPlayer.clickPrev,
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           border: Border.all(
                               width: 1, color: Colors.white.withOpacity(0.15)),
@@ -275,21 +295,13 @@ class _PlayerPageState extends State<_PlayerRoute> {
                           radius: 50,
                           borderRadius: BorderRadius.circular(100),
                           child: Padding(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             child: Icon(
                               Icons.skip_next,
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          onTap: () {
-                            if (!_musicPlayer.switching) {
-                              _musicPlayer.clickTrackTile(
-                                  _musicPlayer.playingIndexState + 1 >=
-                                          _musicPlayer.songsCount
-                                      ? 0
-                                      : _musicPlayer.playingIndexState + 1);
-                            }
-                          },
+                          onTap: _musicPlayer.clickNext,
                         ),
                       ),
                     ],
@@ -306,7 +318,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
   @override
   void dispose() {
     _changePositionSubscription.cancel();
-    _changeStateSubscription.cancel();
+    _changeDurationSubscription.cancel();
     super.dispose();
   }
 }

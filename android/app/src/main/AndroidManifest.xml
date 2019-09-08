@@ -1,10 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nt4f04uNd.player">
 
    <!-- Allow read stoarage -->
    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-   <!-- Audio service -->
-   <!-- <uses-permission android:name="android.permission.WAKE_LOCK"/>
-   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/> -->
+   <!-- Allow medai notification -->
+   <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
 
    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
@@ -12,9 +11,10 @@
          In most cases you can leave this as-is, but you if you want to provide
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
-   <application android:name="io.flutter.app.FlutterApplication" android:label="Музыка" android:icon="@mipmap/ic_launcher_foreground">
+   <!-- TODO: Mipmap currently unused, probably should delete in the future -->
+   <application android:name="io.flutter.app.FlutterApplication" android:label="Музыка" android:icon="@drawable/ic_launcher_foreground" android:resizeableActivity="false">
       <!-- <activity android:name=".MainActivity" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:screenOrientation="portrait" android:windowSoftInputMode="adjustResize"> -->
-      <activity android:name=".MainActivity" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:screenOrientation="portrait" android:windowSoftInputMode="adjustResize">
+      <activity android:name=".MainActivity" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:screenOrientation="portrait" android:windowSoftInputMode="adjustNothing">
          <!-- This keeps the window background of the activity showing
                  until Flutter renders its first frame. It can be removed if
                  there is no splash screen (such as the default splash screen
@@ -25,27 +25,16 @@
             <category android:name="android.intent.category.LAUNCHER"/>
          </intent-filter>
 
-         <!-- Intent filter for audio files -->
+         <!-- Intent filter for opening audio files -->
          <intent-filter>
             <action android:name="android.intent.action.VIEW" />
             <data android:mimeType="audio/*" />
             <category android:name="android.intent.category.DEFAULT" />
          </intent-filter>
-
+         <!-- Intent for pressing media buttons -->
+         <!-- <intent-filter android:priority="100000">
+            <action android:name="android.intent.action.MEDIA_BUTTON" />
+         </intent-filter> -->
       </activity>
-
-      <!-- Audio service -->
-      <!-- <service android:name="com.ryanheise.audioservice.AudioService">
-      <intent-filter>
-        <action android:name="android.media.browse.MediaBrowserService" />
-      </intent-filter>
-    </service>
-
- <receiver android:name="androidx.media.session.MediaButtonReceiver">
-      <intent-filter>
-        <action android:name="android.intent.action.MEDIA_BUTTON" />
-      </intent-filter>
-    </receiver>  -->
-
    </application>
 </manifest>
