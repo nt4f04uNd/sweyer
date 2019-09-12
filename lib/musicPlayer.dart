@@ -16,16 +16,19 @@ class Song {
   final String albumArtUri;
   final String title;
   final String trackUri;
-  final int duration;
+  final Duration duration;
+  final int dateModified;
 
-  Song(
-      {@required this.id,
-      @required this.artist,
-      @required this.album,
-      @required this.albumArtUri,
-      @required this.title,
-      @required this.trackUri,
-      @required this.duration});
+  Song({
+    @required this.id,
+    @required this.artist,
+    @required this.album,
+    @required this.albumArtUri,
+    @required this.title,
+    @required this.trackUri,
+    @required this.duration,
+    @required this.dateModified,
+  });
 
   Song.fromMap(Map m)
       : id = m["id"],
@@ -34,7 +37,8 @@ class Song {
         albumArtUri = m["albumArtUri"],
         title = m["title"],
         trackUri = m["trackUri"],
-        duration = m["duration"];
+        duration = Duration(milliseconds: m["duration"]),
+        dateModified = m["dateModified"];
 }
 
 /// Type for audio manager focus
@@ -42,6 +46,9 @@ enum AudioFocusType { focus, no_focus, focus_delayed }
 
 /// Type for play process state
 enum PlayStateType { stopped, playing, paused }
+
+/// Features to sort by
+enum SortFeature { date, title }
 
 /// Function for call player functions from AudioPlayers package until they will be completed, or until recursive callstack will exceed 10
 ///
@@ -127,7 +134,10 @@ class MusicPlayer {
   /// Get current playing song
   Song get currentSong {
     _songsCheck();
-    return _songs.firstWhere((el) => el.id == playingTrackIdState);
+    return _songs.firstWhere(
+      (el) => el.id == playingTrackIdState,
+      orElse: () => _songs[0],
+    );
   }
 
   /// Get songs count
@@ -163,9 +173,9 @@ class MusicPlayer {
   AudioPlayerState get playState => _playerInstance.state;
 
   /// Get current position
-  Future<int> get currentPosition async {
+  Future<Duration> get currentPosition async {
     try {
-      return _playerInstance.getCurrentPosition();
+      return Duration(milliseconds: await _playerInstance.getCurrentPosition());
     } catch (e) {}
   }
 
@@ -270,7 +280,7 @@ class MusicPlayer {
           DateTime now = DateTime.now();
           if (_latestHookPressTime == null ||
               now.difference(_latestHookPressTime) >
-                  Duration(milliseconds: 500)) {
+                  Duration(milliseconds: 600)) {
             // If hook is pressed first time or last press were more than 0.5s ago
             _latestHookPressTime = now;
             _hookPressStack = 1;
@@ -287,7 +297,7 @@ class MusicPlayer {
   /// Play/pause, next or prev function depending on `_hookPressStack`
   void _handleHookDelayedPress() async {
     // Wait 0.5s
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: 600));
     switch (_hookPressStack) {
       case 1:
         clickPausePlay();
@@ -584,6 +594,22 @@ class MusicPlayer {
     _playList = [];
   }
 
+  /// Sort song by feature
+  void sortSongs(SortFeature feature) {
+    _songsCheck();
+    switch (feature) {
+      case SortFeature.date:
+        _songs.sort((a, b) => b.dateModified.compareTo(a.dateModified));
+        break;
+      case SortFeature.title:
+        _songs.sort((a, b) => a.title.compareTo(b.title));
+        break;
+    }
+
+    // Emit event to track change stream
+    _trackListChangeStreamController.emitEvent();
+  }
+
   /// Finds songs on user device and inits whole music instance
   void _fetchSongs() async {
     // _songs.removeWhere(
@@ -603,9 +629,6 @@ class MusicPlayer {
       _playerInstance.setReleaseMode(ReleaseMode.LOOP);
     }
 
-    // Setup initial playing state index from prefs
-    playingTrackIdState = savedSongId ?? getSongIdByIndex(0);
-
     // TODO: add button to re-request permissions
     PermissionStatus permission = await PermissionHandler()
         .checkPermissionStatus(PermissionGroup.storage);
@@ -620,6 +643,9 @@ class MusicPlayer {
     for (String songJson in songsJson) {
       _songs.add(Song.fromMap(jsonDecode(songJson)));
     }
+
+    // Setup initial playing state index from prefs
+    playingTrackIdState = savedSongId ?? getSongIdByIndex(0);
 
     // Set url of first track in player instance
     await _playerInstance.setUrl(currentSong.trackUri);

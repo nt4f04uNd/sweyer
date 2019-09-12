@@ -128,14 +128,14 @@ public class MainActivity extends FlutterActivity {
 
       String[] projection = { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.DURATION };
+            MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATE_MODIFIED };
 
       Cursor cursor = getApplicationContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection, selection, null, "DATE_MODIFIED DESC");
 
       while (cursor.moveToNext()) {
          songs.add(new Song(cursor.getInt(0), cursor.getString(1), cursor.getString(2), getAlbumArt(cursor.getInt(3)),
-               cursor.getString(4), cursor.getString(5), cursor.getInt(6)).toJson());
+               cursor.getString(4), cursor.getString(5), cursor.getInt(6),cursor.getInt(7)).toJson());
       }
       cursor.close();
       return songs;

@@ -71,7 +71,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
         _musicPlayer.onDurationChanged.listen((event) {
       setState(() {
         _value = Duration(seconds: 0);
-        _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
+        _duration = _musicPlayer.currentSong.duration;
       });
     });
   }
@@ -81,10 +81,10 @@ class _PlayerPageState extends State<_PlayerRoute> {
   }
 
   _setInitialCurrentPosition() async {
-    var res = await _musicPlayer.currentPosition;
+    var currentPosition = await _musicPlayer.currentPosition;
     setState(() {
-      _value = Duration(milliseconds: res);
-      _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
+      _value = currentPosition;
+      _duration = _musicPlayer.currentSong.duration;
     });
   }
 
@@ -227,9 +227,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
                         value: _isDragging
                             ? _localValue
                             : _value.inSeconds.toDouble(),
-                        max: Duration(
-                                milliseconds: _musicPlayer.currentSong.duration)
-                            .inSeconds
+                        max: _musicPlayer.currentSong.duration.inSeconds
                             .toDouble(),
                         min: 0,
                         onChangeStart: _handleChangeStart,
