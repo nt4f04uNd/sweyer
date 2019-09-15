@@ -35,6 +35,9 @@ import android.os.Build;
 import android.view.KeyEvent;
 import android.media.session.MediaSession;
 
+import android.os.AsyncTask;
+import java.lang.Runnable;
+
 public class MainActivity extends FlutterActivity {
    private static String TAG = "player/java file";
 
@@ -135,7 +138,7 @@ public class MainActivity extends FlutterActivity {
 
       while (cursor.moveToNext()) {
          songs.add(new Song(cursor.getInt(0), cursor.getString(1), cursor.getString(2), getAlbumArt(cursor.getInt(3)),
-               cursor.getString(4), cursor.getString(5), cursor.getInt(6),cursor.getInt(7)).toJson());
+               cursor.getString(4), cursor.getString(5), cursor.getInt(6), cursor.getInt(7)).toJson());
       }
       cursor.close();
       return songs;
@@ -269,6 +272,18 @@ public class MainActivity extends FlutterActivity {
       notificationManager.cancel(0);
    }
 
+   private class ConductSongsSearch extends AsyncTask<Void, Void, List<String>> {
+      @Override
+      protected List<String> doInBackground(Void... params) {
+         return retrieveSongs();
+      }
+
+      @Override
+      protected void onPostExecute(List<String> result) {
+         methodChannel.invokeMethod("SEND_SONGS", result);
+      }
+   }
+
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -339,7 +354,9 @@ public class MainActivity extends FlutterActivity {
                result.success(isIntentActionView());
                break;
             case "RETRIEVE_SONGS":
-               result.success(retrieveSongs());
+               // Run method on another thread
+               new ConductSongsSearch().execute();
+               result.success("");
                break;
             case "NOTIFICATION_SHOW":
                buildNotification(call.argument("title"), call.argument("artist"), call.argument("isPlaying"));

@@ -1,45 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:app/constants/channels.dart';
 import 'package:app/constants/prefs.dart';
+import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class Song {
-  final int id;
-  final String artist;
-  final String album;
-  final String albumArtUri;
-  final String title;
-  final String trackUri;
-  final Duration duration;
-  final int dateModified;
-
-  Song({
-    @required this.id,
-    @required this.artist,
-    @required this.album,
-    @required this.albumArtUri,
-    @required this.title,
-    @required this.trackUri,
-    @required this.duration,
-    @required this.dateModified,
-  });
-
-  Song.fromMap(Map m)
-      : id = m["id"],
-        artist = m["artist"],
-        album = m["album"],
-        albumArtUri = m["albumArtUri"],
-        title = m["title"],
-        trackUri = m["trackUri"],
-        duration = Duration(milliseconds: m["duration"]),
-        dateModified = m["dateModified"];
-}
 
 /// Type for audio manager focus
 enum AudioFocusType { focus, no_focus, focus_delayed }
@@ -85,7 +56,7 @@ class MusicPlayer {
   final _playerInstance = AudioPlayer();
 
   /// Paths of found tracks in `_fetchSongs` method
-  List<Song> _songs = [];
+  List<Song> _songs;
 
   /// Some songs collection to play (used in search currently), it has a bigger priority than songs list, so if in playlist there is more than zero songs, next and prev actions will prefer to play it
   List<Song> _playList = [];
@@ -136,6 +107,7 @@ class MusicPlayer {
     _songsCheck();
     return _songs.firstWhere(
       (el) => el.id == playingTrackIdState,
+      // FIXME: accessing _songs[0] can actually cause an error when there's no songs
       orElse: () => _songs[0],
     );
   }
@@ -147,7 +119,10 @@ class MusicPlayer {
   }
 
   /// Whether songs list instantiated or not (in the future will implement cashing so, but for now this depends on `_fetchSongs`)
-  bool get songsReady => _songs.isNotEmpty;
+  bool get songsReady => _songs != null;
+
+  /// If songs array is empty
+  bool get songsEmpty => _songs.isEmpty;
 
   /// Get stream of changes on audio position.
   Stream<Duration> get onAudioPositionChanged =>
@@ -179,13 +154,26 @@ class MusicPlayer {
     } catch (e) {}
   }
 
+  // Broken function
+  void _getSongsFromChannel(List<String> songsJsons) {
+    debugPrint('111111test111');
+    List<Song> foundSongs = [];
+    for (String songJson in songsJsons) {
+      foundSongs.add(Song.fromJson(jsonDecode(songJson)));
+    }
+    _songs = foundSongs;
+
+    // Emit event to track change stream
+    _trackListChangeStreamController.emitEvent();
+
+    _saveSongsJson();
+  }
+
   MusicPlayer() {
     getInstance = this;
 
     // Change player mode for sure
     _playerInstance.mode = PlayerMode.MEDIA_PLAYER;
-
-    _fetchSongs();
 
     _durationChangeListenerSubscription = onDurationChanged.listen((event) {
       switching = false;
@@ -218,9 +206,12 @@ class MusicPlayer {
       }
     });
 
-    onPlayerStateChanged.listen((event) async {
-      var prefs = await SharedPreferences.getInstance();
-      prefs.setInt(PrefKeys.songIdInt, currentSong.id);
+    _stateChangeSubscription = onPlayerStateChanged.listen((event) async {
+      if (!songsEmpty) {
+        // TODO: improve this code
+        var prefs = await SharedPreferences.getInstance();
+        prefs.setInt(PrefKeys.songIdInt, currentSong.id);
+      }
 
       switch (event) {
         case AudioPlayerState.PLAYING:
@@ -251,7 +242,8 @@ class MusicPlayer {
     // TODO: see how to improve focus and gaindelayed usage
     // Set listener for method calls for changing focus
     _methodChannel.setMethodCallHandler((MethodCall call) async {
-      debugPrint('${call.method}, ${call.arguments.toString()}');
+      // debugPrint('${call.method}, ${call.arguments.toString()}');
+
       if (call.method == MethodChannelConstants.methodFocusChange) {
         switch (call.arguments) {
           case MethodChannelConstants.argFocusGain:
@@ -274,6 +266,11 @@ class MusicPlayer {
           default:
             throw Exception('Incorrect method argument came from native code');
         }
+      } else if (call.method == "SEND_SONGS") {
+        debugPrint(call.arguments.runtimeType.toString()); // Log type of arguments
+        List<String> testVar =
+            call.arguments as List<String>; // FIXME: This fails without ANY ERROR
+        debugPrint('qwfqfwq'); // And any further instructions in this closure won't execute
       } else if (call.method == MethodChannelConstants.methodHookButtonClick) {
         // Avoid errors when app is loading
         if (songsReady) {
@@ -292,6 +289,8 @@ class MusicPlayer {
         }
       }
     });
+
+    _init();
   }
 
   /// Play/pause, next or prev function depending on `_hookPressStack`
@@ -513,7 +512,7 @@ class MusicPlayer {
           await resume();
           break;
         case AudioPlayerState.STOPPED:
-          // Currently unused and should't
+          // Currently unused and shouldn't
           await play(playingTrackIdState);
           break;
         case AudioPlayerState.COMPLETED:
@@ -533,7 +532,7 @@ class MusicPlayer {
 
   /// Function that fires when prev track button got clicked
   void clickPrev() async {
-    if (!switching) if (!switching) await play(getPrevSongId());
+    if (!switching) await play(getPrevSongId());
   }
 
   /// Function that handles click on track tile
@@ -610,12 +609,34 @@ class MusicPlayer {
     _trackListChangeStreamController.emitEvent();
   }
 
-  /// Finds songs on user device and inits whole music instance
-  void _fetchSongs() async {
-    // _songs.removeWhere(
-    //     // Remove all elements whose duration is shorter than 30 seconds
-    //     (item) => item.duration < Duration(seconds: 30).inMilliseconds);
-    // Emit event
+  _initSongsJson() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/songs.json');
+    if (!await file.exists()) {
+      await file.create();
+      await file.writeAsString(jsonEncode([]));
+    }
+  }
+
+  _readSongsJson() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/songs.json');
+    String jsonContent = await file.readAsString();
+    _songs = [...jsonDecode(jsonContent).map((el) => Song.fromJson(el))];
+  }
+
+  _saveSongsJson() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/songs.json');
+    var jsonContent = jsonEncode(_songs);
+    await file.writeAsString(jsonContent);
+    print('saved');
+  }
+
+  _init() async {
+    _songs = [];
+    // await _initSongsJson();
+    // await _readSongsJson();
 
     // Get saved data
     var prefs = await SharedPreferences.getInstance();
@@ -629,6 +650,7 @@ class MusicPlayer {
       _playerInstance.setReleaseMode(ReleaseMode.LOOP);
     }
 
+    // Permissions
     // TODO: add button to re-request permissions
     PermissionStatus permission = await PermissionHandler()
         .checkPermissionStatus(PermissionGroup.storage);
@@ -638,27 +660,36 @@ class MusicPlayer {
       permissions = await PermissionHandler()
           .requestPermissions([PermissionGroup.storage]);
 
-    var songsJson = await _methodChannel
-        .invokeListMethod<String>(MethodChannelConstants.methodRetrieveSongs);
-    for (String songJson in songsJson) {
-      _songs.add(Song.fromMap(jsonDecode(songJson)));
+    if (!songsEmpty) {
+      // Setup initial playing state index from prefs
+      playingTrackIdState = savedSongId ?? getSongIdByIndex(0);
+
+      // Set url of first track in player instance
+      await _playerInstance.setUrl(currentSong.trackUri);
+
+      // Seek to saved position
+      if (savedSongPos != null)
+        _playerInstance.seek(Duration(seconds: savedSongPos));
     }
-
-    // Setup initial playing state index from prefs
-    playingTrackIdState = savedSongId ?? getSongIdByIndex(0);
-
-    // Set url of first track in player instance
-    await _playerInstance.setUrl(currentSong.trackUri);
-
-    // Seek to saved position
-    if (savedSongPos != null)
-      _playerInstance.seek(Duration(seconds: savedSongPos));
 
     // Init player state
     await _playerInstance.pause();
 
     // Emit event to track change stream
-    _trackListChangeStreamController.emitEvent();
+    // _trackListChangeStreamController.emitEvent();
+
+    _fetchSongs();
+  }
+
+  /// Finds songs on user device and inits whole music instance
+  void _fetchSongs() async {
+    // _songs.removeWhere(
+    //     // Remove all elements whose duration is shorter than 30 seconds
+    //     (item) => item.duration < Duration(seconds: 30).inMilliseconds);
+    // Emit event
+
+    await _methodChannel
+        .invokeMethod<String>(MethodChannelConstants.methodRetrieveSongs);
   }
 
   /// Method that asserts that `_songs` is not `null`

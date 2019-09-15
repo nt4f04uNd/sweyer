@@ -3,7 +3,7 @@ import 'package:app/components/animatedPlayPauseButton.dart';
 import 'package:app/constants/prefs.dart';
 import 'package:app/heroes/albumArtHero.dart';
 import 'package:flutter/material.dart';
-import 'package:app/musicPlayer.dart';
+import 'package:app/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Route createPlayerRoute() {
@@ -71,7 +71,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
         _musicPlayer.onDurationChanged.listen((event) {
       setState(() {
         _value = Duration(seconds: 0);
-        _duration = _musicPlayer.currentSong.duration;
+        _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
       });
     });
   }
@@ -84,7 +84,7 @@ class _PlayerPageState extends State<_PlayerRoute> {
     var currentPosition = await _musicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = _musicPlayer.currentSong.duration;
+      _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
     });
   }
 
@@ -227,7 +227,9 @@ class _PlayerPageState extends State<_PlayerRoute> {
                         value: _isDragging
                             ? _localValue
                             : _value.inSeconds.toDouble(),
-                        max: _musicPlayer.currentSong.duration.inSeconds
+                        max: Duration(
+                                milliseconds: _musicPlayer.currentSong.duration)
+                            .inSeconds
                             .toDouble(),
                         min: 0,
                         onChangeStart: _handleChangeStart,

@@ -1,6 +1,6 @@
 import 'package:app/components/albumArt.dart';
 import 'package:flutter/material.dart';
-import 'package:app/musicPlayer.dart';
+import 'package:app/player/player.dart';
 
 /// List of fetched tracks
 class TrackList extends StatelessWidget {

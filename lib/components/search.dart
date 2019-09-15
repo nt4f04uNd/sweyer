@@ -1,7 +1,8 @@
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/constants/prefs.dart';
-import 'package:app/musicPlayer.dart';
+import 'package:app/player/player.dart';
+import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

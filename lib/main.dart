@@ -1,4 +1,4 @@
-import 'package:app/musicPlayer.dart';
+import 'package:app/player/player.dart';
 import 'package:app/routes/mainRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
