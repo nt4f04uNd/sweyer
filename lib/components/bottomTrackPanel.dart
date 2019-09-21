@@ -2,6 +2,7 @@ import 'package:app/heroes/albumArtHero.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
+import 'albumArt.dart';
 import 'animatedPlayPauseButton.dart';
 
 class BottomTrackPanel extends StatelessWidget {
@@ -10,7 +11,9 @@ class BottomTrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return !_musicPlayer.songsEmpty // Don't display if there's no tracks
+    return !_musicPlayer.songsEmpty ||
+            _musicPlayer.playingTrackIdState ==
+                null // Don't display if there's no tracks or if there's no `playingTrackIdState`
         ? Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -47,7 +50,7 @@ class BottomTrackPanel extends StatelessWidget {
                             ],
                           ),
                           isThreeLine: false,
-                          leading: AlbumArtHero(
+                          leading: AlbumArt(
                               path: _musicPlayer.currentSong.albumArtUri),
                           trailing: Container(
                             child: Container(

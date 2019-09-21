@@ -1,6 +1,6 @@
-// This is a file to all event and method channel constans
+// This is a file to all event and method channel constants
 
-abstract class EventChannelConstants {
+abstract class EventChannel {
   static const String channelName = 'eventChannelStream';
 
   /// Event when user disconnects headset
@@ -12,7 +12,7 @@ abstract class EventChannelConstants {
   static const String eventPrev = 'com.nt4f04uNd.player.NOTIFICATION_PREV';
 }
 
-abstract class MethodChannelConstants {
+abstract class MethodChannel {
   static const String channelName = 'methodChannelStream';
 
   /// Focus change method
@@ -42,6 +42,8 @@ abstract class MethodChannelConstants {
 
   /// Retrieve songs method
   static const String methodRetrieveSongs = 'RETRIEVE_SONGS';
+  /// Method that sends found songs from native code to flutter code
+  static const String methodSendSongs = 'SEND_SONGS';
 
   // Notifications methods
   static const String methodShowNotification = 'NOTIFICATION_SHOW';

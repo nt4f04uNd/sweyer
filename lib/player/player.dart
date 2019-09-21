@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:app/constants/channels.dart';
-import 'package:app/constants/prefs.dart';
+import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -46,16 +45,16 @@ class MusicPlayer {
 
   /// Channel for handling audio focus
   static const _methodChannel =
-      const MethodChannel(MethodChannelConstants.channelName);
+      const MethodChannel(Constants.MethodChannel.channelName);
 
   /// Event channel for receiving native android events
   static const _eventChannel =
-      const EventChannel(EventChannelConstants.channelName);
+      const EventChannel(Constants.EventChannel.channelName);
 
   /// `[MusicFinder]` player instance
   final _playerInstance = AudioPlayer();
 
-  /// Paths of found tracks in `_fetchSongs` method
+  /// Paths of found tracks in `fetchSongs` method
   List<Song> _songs;
 
   /// Some songs collection to play (used in search currently), it has a bigger priority than songs list, so if in playlist there is more than zero songs, next and prev actions will prefer to play it
@@ -73,6 +72,9 @@ class MusicPlayer {
   /// Subscription for completion changes
   StreamSubscription<void> _completionSubscription;
 
+  /// Subscription for completion changes
+  StreamSubscription<String> _playerErrorSubscription;
+
   /// Audio manager focus state
   AudioFocusType focusState = AudioFocusType.no_focus;
 
@@ -81,6 +83,11 @@ class MusicPlayer {
 
   /// Is notification visible
   bool loopModeState = false;
+
+  /// Flag to see if song searching is performing
+  ///
+  /// TODO: remove this value as it duplicates searchingOperation
+  bool searchingState = false;
 
   /// Hook handle
   /// Variable to save latest hook press time
@@ -101,6 +108,8 @@ class MusicPlayer {
   _TrackListChangeStreamController _trackListChangeStreamController =
       _TrackListChangeStreamController();
 
+  AsyncOperation searchingOperation = AsyncOperation();
+
   // Getters
   /// Get current playing song
   Song get currentSong {
@@ -118,7 +127,7 @@ class MusicPlayer {
     return _songs.length;
   }
 
-  /// Whether songs list instantiated or not (in the future will implement cashing so, but for now this depends on `_fetchSongs`)
+  /// Whether songs list instantiated or not (in the future will implement cashing so, but for now this depends on `fetchSongs`)
   bool get songsReady => _songs != null;
 
   /// If songs array is empty
@@ -154,14 +163,16 @@ class MusicPlayer {
     } catch (e) {}
   }
 
-  // Broken function
+  /// ATTENTION: IF YOU USE `call.arguemnts` WITH THIS FUNCTION, TYPE CAST IT THROUGH `List<T> List.cast<T>()`, because `call.arguemnts` `as` type cast will crash closure execution
   void _getSongsFromChannel(List<String> songsJsons) {
-    debugPrint('111111test111');
     List<Song> foundSongs = [];
     for (String songJson in songsJsons) {
       foundSongs.add(Song.fromJson(jsonDecode(songJson)));
     }
     _songs = foundSongs;
+
+    searchingState = false;
+    searchingOperation.finishOperation();
 
     // Emit event to track change stream
     _trackListChangeStreamController.emitEvent();
@@ -180,25 +191,26 @@ class MusicPlayer {
     });
 
     _completionSubscription = onPlayerCompletion.listen((event) {
+      // Play next track if not in loop mode
       if (!loopModeState) clickNext();
     });
 
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
       switch (event) {
-        case EventChannelConstants
-            .eventBecomeNoisy: // handle headphones disconnect
+        case Constants
+            .EventChannel.eventBecomeNoisy: // handle headphones disconnect
           pause();
           break;
-        case EventChannelConstants.eventPlay:
+        case Constants.EventChannel.eventPlay:
           clickPausePlay();
           break;
-        case EventChannelConstants.eventPause:
+        case Constants.EventChannel.eventPause:
           clickPausePlay();
           break;
-        case EventChannelConstants.eventNext:
+        case Constants.EventChannel.eventNext:
           clickNext();
           break;
-        case EventChannelConstants.eventPrev:
+        case Constants.EventChannel.eventPrev:
           clickPrev();
           break;
         default:
@@ -210,7 +222,7 @@ class MusicPlayer {
       if (!songsEmpty) {
         // TODO: improve this code
         var prefs = await SharedPreferences.getInstance();
-        prefs.setInt(PrefKeys.songIdInt, currentSong.id);
+        prefs.setInt(Constants.PrefKeys.songIdInt, currentSong.id);
       }
 
       switch (event) {
@@ -244,21 +256,22 @@ class MusicPlayer {
     _methodChannel.setMethodCallHandler((MethodCall call) async {
       // debugPrint('${call.method}, ${call.arguments.toString()}');
 
-      if (call.method == MethodChannelConstants.methodFocusChange) {
+      if (call.method == Constants.MethodChannel.methodFocusChange) {
         switch (call.arguments) {
-          case MethodChannelConstants.argFocusGain:
+          // TODO: rewrite instead of these methods my class methods (resume, pause, etc.)
+          case Constants.MethodChannel.argFocusGain:
             int res = await _recursiveCallback(_playerInstance.resume);
             if (res == 1) focusState = AudioFocusType.focus;
             break;
-          case MethodChannelConstants.argFocusLoss:
+          case Constants.MethodChannel.argFocusLoss:
             int res = await _recursiveCallback(_playerInstance.pause);
             if (res == 1) focusState = AudioFocusType.no_focus;
             break;
-          case MethodChannelConstants.argFocusLossTrans:
+          case Constants.MethodChannel.argFocusLossTrans:
             int res = await _recursiveCallback(_playerInstance.pause);
             if (res == 1) focusState = AudioFocusType.focus_delayed;
             break;
-          case MethodChannelConstants.argFocusLossTransCanDuck:
+          case Constants.MethodChannel.argFocusLossTransCanDuck:
             int res = await _recursiveCallback(_playerInstance.pause);
             if (res == 1) focusState = AudioFocusType.focus_delayed;
             // TODO: implement volume change
@@ -266,12 +279,10 @@ class MusicPlayer {
           default:
             throw Exception('Incorrect method argument came from native code');
         }
-      } else if (call.method == "SEND_SONGS") {
-        debugPrint(call.arguments.runtimeType.toString()); // Log type of arguments
-        List<String> testVar =
-            call.arguments as List<String>; // FIXME: This fails without ANY ERROR
-        debugPrint('qwfqfwq'); // And any further instructions in this closure won't execute
-      } else if (call.method == MethodChannelConstants.methodHookButtonClick) {
+      } else if (call.method == Constants.MethodChannel.methodSendSongs) {
+        // NOTE: cast method is must be here, `as` crashes code execution
+        _getSongsFromChannel(call.arguments.cast<String>());
+      } else if (call.method == Constants.MethodChannel.methodHookButtonClick) {
         // Avoid errors when app is loading
         if (songsReady) {
           DateTime now = DateTime.now();
@@ -314,7 +325,7 @@ class MusicPlayer {
 // TODO: add implementation for this function and change method name to `get_intent_action_view`
   Future<void> _isIntentActionView() async {
     debugPrint((await _methodChannel
-            .invokeMethod(MethodChannelConstants.methodIntentActionView))
+            .invokeMethod(Constants.MethodChannel.methodIntentActionView))
         .toString());
   }
 
@@ -322,14 +333,14 @@ class MusicPlayer {
   Future<void> _requestFocus() async {
     if (focusState == AudioFocusType.no_focus) {
       switch (await _methodChannel
-          .invokeMethod<String>(MethodChannelConstants.methodRequestFocus)) {
-        case MethodChannelConstants.returnRequestFail:
+          .invokeMethod<String>(Constants.MethodChannel.methodRequestFocus)) {
+        case Constants.MethodChannel.returnRequestFail:
           focusState = AudioFocusType.no_focus;
           break;
-        case MethodChannelConstants.returnRequestGrant:
+        case Constants.MethodChannel.returnRequestGrant:
           focusState = AudioFocusType.focus;
           break;
-        case MethodChannelConstants.returnRequestDelay:
+        case Constants.MethodChannel.returnRequestDelay:
           focusState = AudioFocusType.focus_delayed;
           break;
       }
@@ -339,7 +350,7 @@ class MusicPlayer {
   /// Abandon audio manager focus
   Future<void> _abandonFocus() async {
     await _methodChannel
-        .invokeMethod(MethodChannelConstants.methodAbandonFocus);
+        .invokeMethod(Constants.MethodChannel.methodAbandonFocus);
     focusState = AudioFocusType.no_focus;
   }
 
@@ -350,24 +361,24 @@ class MusicPlayer {
       @required String artist,
       @required bool isPlaying}) async {
     await _methodChannel.invokeMethod(
-        MethodChannelConstants.methodShowNotification,
+        Constants.MethodChannel.methodShowNotification,
         {"title": title, "artist": artist, "isPlaying": isPlaying});
   }
 
   /// Method to hide notification
   void _closeNotification() async {
     await _methodChannel
-        .invokeMethod(MethodChannelConstants.methodCloseNotification);
+        .invokeMethod(Constants.MethodChannel.methodCloseNotification);
   }
 
   void switchLoopMode() async {
     var prefs = await SharedPreferences.getInstance();
     if (loopModeState) {
       _playerInstance.setReleaseMode(ReleaseMode.STOP);
-      prefs.setBool(PrefKeys.loopModeBool, false);
+      prefs.setBool(Constants.PrefKeys.loopModeBool, false);
     } else {
       _playerInstance.setReleaseMode(ReleaseMode.LOOP);
-      prefs.setBool(PrefKeys.loopModeBool, true);
+      prefs.setBool(Constants.PrefKeys.loopModeBool, true);
     }
     loopModeState = !loopModeState;
   }
@@ -379,35 +390,79 @@ class MusicPlayer {
   Future<void> play(int songId) async {
     switching = true;
     await _requestFocus();
-    int res;
-    if (focusState == AudioFocusType.focus)
-      try {
+    int res = 0;
+    try {
+      if (focusState == AudioFocusType.focus)
         res = await _playerInstance.play(getSongById(songId).trackUri);
-      } catch (e) {
-        res = 0;
-      }
-    else if (focusState == AudioFocusType.focus_delayed)
-      try {
+      else if (focusState == AudioFocusType.focus_delayed)
         // Set url if no focus has been granted
         res = await _playerInstance.setUrl(getSongById(songId).trackUri);
-      } catch (e) {
-        res = 0;
+    } on PlatformException catch (e) {
+      if (e.code == "error") {
+        // If could not play for platform exception reasons
+        debugPrint(
+            'Error thrown in my player class play method - ${e.toString()}');
+        // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
+        // Play next track after broken one
+        await _playerInstance.play(getSongById(getNextSongId(songId)).trackUri);
+        _songs.removeAt(getSongIndexById(songId)); //Remove broken track
+        _trackListChangeStreamController.emitEvent();
+        fetchSongs(); // Perform fetching
       }
-    // Do nothing if no focus has been granted
-    if (res == 1) playingTrackIdState = songId;
-
-    // debugPrint('${res.toString()} ${playingIndexState}');
+    } catch (e) {
+      debugPrint(
+          'Error thrown in my player class play method - ${e.toString()}');
+    } finally {
+      // If res is successful, then change playing track id
+      if (res == 1)
+        playingTrackIdState = songId;
+      // If no focus has been granted or if error occured then set `switching` to false. In default case it is handled in `onDurationChanged` listener
+      else
+        switching = false;
+    }
   }
 
   /// Resume player
-  Future<void> resume() async {
+  ///
+  /// It handles errors the same way as play method above
+  /// Positional optional argument `songId` is needed to jump to next track when handling error
+  Future<void> resume([int songId]) async {
+    // If `songId` hasn't been provided then use playing id state
+    if (songId == null) songId = playingTrackIdState;
+    switching = true;
     await _requestFocus();
+    int res = 0;
+    try {
+      if (focusState == AudioFocusType.focus)
+        res = await _playerInstance.resume();
+      // Else if gainFocus is being handled in `setMethodCallHandler` listener above.
+      //When delay is over android triggers AUDIOFOCUS_GAIN and track starts to play
 
-    if (focusState == AudioFocusType.focus) await _playerInstance.resume();
-    // Else if gainFocus is being handled in `setMethodCallHandler` listener above.
-    //When delay is over android triggers AUDIOFOCUS_GAIN and track starts to play
+      // Do nothing if no focus has been granted
 
-    // Do nothing if no focus has been granted
+    } on PlatformException catch (e) {
+      if (e.code == "error") {
+        // If could not play for platform exception reasons
+        debugPrint(
+            'Error thrown in my player class play method - ${e.toString()}');
+        // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
+        // Play next track after broken one
+        await _playerInstance.play(getSongById(getNextSongId(songId)).trackUri);
+        _songs.removeAt(getSongIndexById(songId)); //Remove broken track
+        _trackListChangeStreamController.emitEvent();
+        fetchSongs(); // Perform fetching
+      }
+    } catch (e) {
+      debugPrint(
+          'Error thrown in my player class play method - ${e.toString()}');
+    } finally {
+      // If res is successful, then change playing track id
+      if (res == 1)
+        playingTrackIdState = songId;
+      // If no focus has been granted or if error occured then set `switching` to false. In default case it is handled in `onDurationChanged` listener
+      else
+        switching = false;
+    }
   }
 
   /// Pause player
@@ -465,16 +520,18 @@ class MusicPlayer {
   }
 
   /// Returns next song index
-  int getNextSongId() {
+  ///
+  /// If optional `index` is provided, function will return incremented index
+  int getNextSongId([int index]) {
+    if (index == null) index = playingTrackIdState;
     if (_playList.isEmpty) {
-      final int nextSongIndex = getSongIndexById(playingTrackIdState) + 1;
+      final int nextSongIndex = getSongIndexById(index) + 1;
       if (nextSongIndex >= songsCount) {
         return getSongIdByIndex(0);
       }
       return getSongIdByIndex(nextSongIndex);
     } else {
-      final int nextSongIndex =
-          getSongIndexByIdInPlaylist(playingTrackIdState) + 1;
+      final int nextSongIndex = getSongIndexByIdInPlaylist(index) + 1;
       if (nextSongIndex >= _playList.length) {
         return getSongIdByIndexInPlaylist(0);
       }
@@ -483,6 +540,8 @@ class MusicPlayer {
   }
 
   /// Returns prev song index
+  ///
+  /// If optional `index` is provided, function will return decremented index
   int getPrevSongId() {
     if (_playList.isEmpty) {
       final int prevSongIndex = getSongIndexById(playingTrackIdState) - 1;
@@ -502,6 +561,7 @@ class MusicPlayer {
 
   /// Function that fires when pause/play button got clicked
   void clickPausePlay() async {
+    debugPrint(switching.toString());
     // TODO: refactor
     if (!switching) {
       switch (playState) {
@@ -519,19 +579,19 @@ class MusicPlayer {
           await play(playingTrackIdState);
           break;
         default:
-          throw Exception('Invalid player state variant');
+          // throw Exception('Invalid player state variant');
           break;
       }
     }
   }
 
   /// Function that fires when next track button got clicked
-  void clickNext() async {
+  Future<void> clickNext() async {
     if (!switching) await play(getNextSongId());
   }
 
   /// Function that fires when prev track button got clicked
-  void clickPrev() async {
+  Future<void> clickPrev() async {
     if (!switching) await play(getPrevSongId());
   }
 
@@ -552,7 +612,7 @@ class MusicPlayer {
         case AudioPlayerState.PAUSED:
           // If user clicked the same track
           if (playingTrackIdState == clickedSongId)
-            await resume();
+            await resume(clickedSongId);
           // If user decided to click a new track
           else
             await play(clickedSongId);
@@ -565,7 +625,8 @@ class MusicPlayer {
           await play(clickedSongId);
           break;
         default:
-          throw Exception('Invalid player state variant');
+          // All other case, e.g. null or state after error
+          await play(clickedSongId);
           break;
       }
     }
@@ -609,20 +670,29 @@ class MusicPlayer {
     _trackListChangeStreamController.emitEvent();
   }
 
+  // TODO: refactor next 3 functions
+  ///
   _initSongsJson() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/songs.json');
     if (!await file.exists()) {
       await file.create();
       await file.writeAsString(jsonEncode([]));
+    } else if (await file.readAsString() == "") {
+      await file.writeAsString(jsonEncode([]));
     }
   }
 
   _readSongsJson() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/songs.json');
-    String jsonContent = await file.readAsString();
-    _songs = [...jsonDecode(jsonContent).map((el) => Song.fromJson(el))];
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/songs.json');
+      String jsonContent = await file.readAsString();
+      _songs = [...jsonDecode(jsonContent).map((el) => Song.fromJson(el))];
+    } catch (e) {
+      _songs = []; // Set empty array if error has been caught
+      debugPrint('Error reading songs json, setting to empty songs list');
+    }
   }
 
   _saveSongsJson() async {
@@ -630,19 +700,19 @@ class MusicPlayer {
     final file = File('${directory.path}/songs.json');
     var jsonContent = jsonEncode(_songs);
     await file.writeAsString(jsonContent);
-    print('saved');
+    debugPrint('Json saved');
   }
 
+  /// Init whole music instance
   _init() async {
-    _songs = [];
-    // await _initSongsJson();
-    // await _readSongsJson();
+    await _initSongsJson();
+    await _readSongsJson();
 
     // Get saved data
     var prefs = await SharedPreferences.getInstance();
-    var savedSongId = prefs.getInt(PrefKeys.songIdInt);
-    var savedSongPos = prefs.getInt(PrefKeys.songPositionInt);
-    var savedLoopMode = prefs.getBool(PrefKeys.loopModeBool);
+    var savedSongId = prefs.getInt(Constants.PrefKeys.songIdInt);
+    var savedSongPos = prefs.getInt(Constants.PrefKeys.songPositionInt);
+    var savedLoopMode = prefs.getBool(Constants.PrefKeys.loopModeBool);
 
     // Set loop mode to true if it is true in prefs
     if (savedLoopMode != null && savedLoopMode) {
@@ -661,11 +731,18 @@ class MusicPlayer {
           .requestPermissions([PermissionGroup.storage]);
 
     if (!songsEmpty) {
+      // songsEmpty condition is here to avoid errors when trying to get first song index
       // Setup initial playing state index from prefs
       playingTrackIdState = savedSongId ?? getSongIdByIndex(0);
 
-      // Set url of first track in player instance
-      await _playerInstance.setUrl(currentSong.trackUri);
+      try {
+        // Set url of first track in player instance
+        await _playerInstance.setUrl(currentSong.trackUri);
+      } catch (e) {
+        // playingTrackIdState =
+        //     null; // Set to null to display that there's no currently playing track and user could not go to player route (NOTE: THIS IS VERY UNRELIABLE)
+        debugPrint('Wasn\'t able to set url to _playerInstance');
+      }
 
       // Seek to saved position
       if (savedSongPos != null)
@@ -676,26 +753,69 @@ class MusicPlayer {
     await _playerInstance.pause();
 
     // Emit event to track change stream
-    // _trackListChangeStreamController.emitEvent();
+    _trackListChangeStreamController.emitEvent();
 
-    _fetchSongs();
+    await fetchSongs();
+
+    // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (playingTrackIdState == null)
+    if (!songsEmpty && playingTrackIdState == null) {
+      // Setup initial playing state index from prefs
+      playingTrackIdState = savedSongId ?? getSongIdByIndex(0);
+
+      try {
+        // Set url of first track in player instance
+        await _playerInstance.setUrl(currentSong.trackUri);
+      } catch (e) {
+        // playingTrackIdState =
+        //     null; // Set to null to display that there's no currently playing track and user could not go to player route (NOTE: THIS IS VERY UNRELIABLE)
+        debugPrint('Wasn\'t able to set url to _playerInstance');
+      }
+
+      // Seek to saved position
+      if (savedSongPos != null)
+        _playerInstance.seek(Duration(seconds: savedSongPos));
+    }
   }
 
-  /// Finds songs on user device and inits whole music instance
-  void _fetchSongs() async {
+  /// Finds songs on user device
+  Future<void> fetchSongs() async {
     // _songs.removeWhere(
     //     // Remove all elements whose duration is shorter than 30 seconds
     //     (item) => item.duration < Duration(seconds: 30).inMilliseconds);
     // Emit event
+    searchingState = true;
 
     await _methodChannel
-        .invokeMethod<String>(MethodChannelConstants.methodRetrieveSongs);
+        .invokeMethod<String>(Constants.MethodChannel.methodRetrieveSongs);
+
+    return await searchingOperation.doOperation();
   }
 
   /// Method that asserts that `_songs` is not `null`
   void _songsCheck() {
     assert(songsReady,
-        '_songs is null, probably because it is not initilized by _fetchSongs');
+        '_songs is null, probably because it is not initilized by fetchSongs');
+  }
+}
+
+/// TODO: improve this class
+class AsyncOperation {
+  Completer _completer = Completer();
+
+  // Send future object back to client.
+  Future<void> doOperation() {
+    return _completer.future;
+  }
+
+  // Something calls this when the value is ready.
+  void finishOperation() {
+    _completer.complete();
+    _completer = Completer(); // Update completer
+  }
+
+  // If something goes wrong, call this.
+  void errorHappened(error) {
+    _completer.completeError(error);
   }
 }
 

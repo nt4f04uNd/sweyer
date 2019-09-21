@@ -45,7 +45,6 @@ class MainRouteState extends State<MainRoute> {
                         fontSize: 16,
                         color: Theme.of(context).textTheme.caption.color,
                       ))),
-              // FIXME: fix material that goes out of border radius of bottom sheet
               ListTile(
                 title: Text("По названию"),
                 onTap: () {
@@ -100,18 +99,32 @@ class MainRouteState extends State<MainRoute> {
       body: StreamBuilder(
           stream: _musicPlayer.onTrackListChange,
           builder: (context, snapshot) {
-            return _musicPlayer.songsReady
-                ? Stack(
-                    children: <Widget>[
-                      TrackList(),
-                      BottomTrackPanel(),
-                    ],
-                  )
-                : Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
-                    ),
-                  );
+            return !_musicPlayer.songsReady
+                ? SizedBox.shrink()
+                : _musicPlayer.searchingState && _musicPlayer.songsEmpty
+                    ? Center(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 20.0),
+                                child: Text('Ищем треки...'),
+                              ),
+                              CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation(Colors.white),
+                              ),
+                            ]),
+                      )
+                    : _musicPlayer.songsEmpty
+                        ? Center(
+                            child: Text('На вашем устройстве нету музыки :( '))
+                        : Stack(
+                            children: <Widget>[
+                              TrackList(),
+                              BottomTrackPanel(),
+                            ],
+                          );
           }),
     );
   }

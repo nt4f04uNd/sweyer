@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
 import 'package:app/constants/prefs.dart';
 import 'package:app/heroes/albumArtHero.dart';
@@ -21,17 +22,17 @@ Route createPlayerRoute() {
       );
     },
     pageBuilder: (context, animation, secondaryAnimation) {
-      return _PlayerRoute();
+      return PlayerRoute();
     },
   );
 }
 
-class _PlayerRoute extends StatefulWidget {
+class PlayerRoute extends StatefulWidget {
   @override
   _PlayerPageState createState() => _PlayerPageState();
 }
 
-class _PlayerPageState extends State<_PlayerRoute> {
+class _PlayerPageState extends State<PlayerRoute> {
   /// Actual track position value
   Duration _value = Duration(seconds: 0);
   // Duration of playing track
@@ -145,172 +146,174 @@ class _PlayerPageState extends State<_PlayerRoute> {
           automaticallyImplyLeading: false,
         ),
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 0),
-            child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Text(
-                      _musicPlayer.currentSong.title,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 21),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5, bottom: 30),
-                    child: Text(
-                      _musicPlayer.currentSong.artist != '<unknown>'
-                          ? _musicPlayer.currentSong.artist
-                          : 'Неизестный исполнитель',
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 20, top: 10),
-                    child: AlbumArtHero(
-                      path: _musicPlayer.currentSong.albumArtUri,
-                      isLarge: true,
-                    ),
-                  ),
-                ]),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 17.0),
-                  child: IconButton(
-                    icon: Icon(Icons.loop),
-                    iconSize: 27,
-                    color: MusicPlayer.getInstance.loopModeState
-                        ? null
-                        : Colors.grey.shade800,
-                    onPressed: () {
-                      setState(() {
-                        MusicPlayer.getInstance.switchLoopMode();
-                      });
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
+      body: Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 0),
+              child: Column(
                   mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Container(
-                      transform: Matrix4.translationValues(5, 0, 0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
                       child: Text(
-                        // TODO: move and refactor this code, and by the way split a whole page for separate widgets
-                        _calculateDisplayedPositionTime(),
-                        style: TextStyle(fontSize: 12),
+                        _musicPlayer.currentSong.title,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 21),
                       ),
                     ),
-                    Expanded(
-                      child: Slider(
-                        activeColor: Colors.deepPurple,
-                        inactiveColor: Colors.white.withOpacity(0.2),
-                        value: _isDragging
-                            ? _localValue
-                            : _value.inSeconds.toDouble(),
-                        max: Duration(
-                                milliseconds: _musicPlayer.currentSong.duration)
-                            .inSeconds
-                            .toDouble(),
-                        min: 0,
-                        onChangeStart: _handleChangeStart,
-                        onChanged: _handleChanged,
-                        onChangeEnd: _handleChangeEnd,
-                      ),
-                    ),
-                    Container(
-                      transform: Matrix4.translationValues(-5, 0, 0),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5, bottom: 30),
                       child: Text(
-                        _calculateDisplayedDurationTime(),
-                        style: TextStyle(fontSize: 12),
+                        _musicPlayer.currentSong.artist != '<unknown>'
+                            ? _musicPlayer.currentSong.artist
+                            : 'Неизестный исполнитель',
                       ),
                     ),
-                  ],
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, right: 20, top: 10),
+                      child: AlbumArt(
+                        path: _musicPlayer.currentSong.albumArtUri,
+                        isLarge: true,
+                      ),
+                    ),
+                  ]),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 17.0),
+                    child: IconButton(
+                      icon: Icon(Icons.loop),
+                      iconSize: 27,
+                      color: MusicPlayer.getInstance.loopModeState
+                          ? null
+                          : Colors.grey.shade800,
+                      onPressed: () {
+                        setState(() {
+                          MusicPlayer.getInstance.switchLoopMode();
+                        });
+                      },
+                    ),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 40, top: 10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 50),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 1,
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                          borderRadius: BorderRadius.circular(100),
+                        transform: Matrix4.translationValues(5, 0, 0),
+                        child: Text(
+                          // TODO: move and refactor this code, and by the way split a whole page for separate widgets
+                          _calculateDisplayedPositionTime(),
+                          style: TextStyle(fontSize: 12),
                         ),
-                        child: InkWell(
-                          radius: 50,
-                          borderRadius: BorderRadius.circular(100),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Icon(
-                              Icons.skip_previous,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                          onTap: _musicPlayer.clickPrev,
+                      ),
+                      Expanded(
+                        child: Slider(
+                          activeColor: Colors.deepPurple,
+                          inactiveColor: Colors.white.withOpacity(0.2),
+                          value: _isDragging
+                              ? _localValue
+                              : _value.inSeconds.toDouble(),
+                          max: Duration(
+                                  milliseconds: _musicPlayer.currentSong.duration)
+                              .inSeconds
+                              .toDouble(),
+                          min: 0,
+                          onChangeStart: _handleChangeStart,
+                          onChanged: _handleChanged,
+                          onChangeEnd: _handleChangeEnd,
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              width: 1, color: Colors.white.withOpacity(0.15)),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: AnimatedPlayPauseButton(),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              width: 1, color: Colors.white.withOpacity(0.1)),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: InkWell(
-                          radius: 50,
-                          borderRadius: BorderRadius.circular(100),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Icon(
-                              Icons.skip_next,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                          onTap: _musicPlayer.clickNext,
+                        transform: Matrix4.translationValues(-5, 0, 0),
+                        child: Text(
+                          _calculateDisplayedDurationTime(),
+                          style: TextStyle(fontSize: 12),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 40, top: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 50),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: InkWell(
+                            radius: 50,
+                            borderRadius: BorderRadius.circular(100),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.skip_previous,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                            onTap: _musicPlayer.clickPrev,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                width: 1, color: Colors.white.withOpacity(0.15)),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: AnimatedPlayPauseButton(),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                width: 1, color: Colors.white.withOpacity(0.1)),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: InkWell(
+                            radius: 50,
+                            borderRadius: BorderRadius.circular(100),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.skip_next,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                            onTap: _musicPlayer.clickNext,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

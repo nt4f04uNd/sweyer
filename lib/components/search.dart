@@ -68,20 +68,27 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
             return Stack(
               children: <Widget>[
                 Container(
-                  child: ListView.builder(
-                    itemCount: _suggestions.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_suggestions[index]),
-                        leading: const Icon(Icons.history),
-                        onTap: () {
-                          // Do search onTap
-                          query = _suggestions[index];
-                          showResults(context);
-                        },
-                      );
-                    },
-                  ),
+                  child: _suggestions.length > 0
+                      ? ListView.builder(
+                          // TODO: exctract this to constnant
+                          key: PageStorageKey('SearchListView'),
+                          itemCount: _suggestions.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(_suggestions[index]),
+                              leading: const Icon(Icons.history),
+                              onTap: () {
+                                // Do search onTap
+                                query = _suggestions[index];
+                                showResults(context);
+                              },
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                              'Здесь будет отображаться история вашего поиска'),
+                        ),
                 ),
                 BottomTrackPanel(),
               ],
