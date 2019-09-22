@@ -83,15 +83,30 @@ class MainRouteState extends State<MainRoute> {
           child: ClipRRect(
             // FIXME: cliprrect doesn't work for material for some reason
             borderRadius: BorderRadius.circular(10),
-            child: TextField(
-              readOnly: true,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                fillColor: Colors.white.withOpacity(0.05),
-                filled: true,
-                hintText: 'Поиск треков на устройстве',
-              ),
+            child: GestureDetector(
               onTap: _showSearch,
+              child: FractionallySizedBox(
+                // heightFactor: 1,
+                widthFactor: 1,
+                child: Container(
+                  padding: const EdgeInsets.only(left:12.0,top: 10.0,bottom: 10.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Поиск треков на устройстве',
+                        style: TextStyle(
+                            color: Theme.of(context).hintColor, fontSize: 17),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
