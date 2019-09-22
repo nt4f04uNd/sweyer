@@ -190,24 +190,6 @@ class _PlayerPageState extends State<PlayerRoute> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 17.0),
-                    child: IconButton(
-                      icon: Icon(Icons.loop),
-                      iconSize: 27,
-                      color: MusicPlayer.getInstance.loopModeState
-                          ? null
-                          : Colors.grey.shade800,
-                      onPressed: () {
-                        setState(() {
-                          MusicPlayer.getInstance.switchLoopMode();
-                        });
-                      },
-                    ),
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -230,7 +212,8 @@ class _PlayerPageState extends State<PlayerRoute> {
                               ? _localValue
                               : _value.inSeconds.toDouble(),
                           max: Duration(
-                                  milliseconds: _musicPlayer.currentSong.duration)
+                                  milliseconds:
+                                      _musicPlayer.currentSong.duration)
                               .inSeconds
                               .toDouble(),
                           min: 0,
@@ -250,64 +233,94 @@ class _PlayerPageState extends State<PlayerRoute> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 40, top: 10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 50),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 1,
-                              color: Colors.white.withOpacity(0.1),
-                            ),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: InkWell(
-                            radius: 50,
-                            borderRadius: BorderRadius.circular(100),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Icon(
-                                Icons.skip_previous,
-                                color: Colors.white.withOpacity(0.9),
+                  padding: const EdgeInsets.only(bottom: 40, top: 10, left: 20, right: 20),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.loop),
+                        color: MusicPlayer.getInstance.loopModeState
+                            ? null
+                            : Colors.grey.shade800,
+                        onPressed: () {
+                          setState(() {
+                            MusicPlayer.getInstance.switchLoopMode();
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: Container(
+                          // padding: const EdgeInsets.symmetric(horizontal: 50),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 1,
+                                    color: Colors.white.withOpacity(0.1),
+                                  ),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: InkWell(
+                                  radius: 50,
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Icon(
+                                      Icons.skip_previous,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
+                                  ),
+                                  onTap: _musicPlayer.clickPrev,
+                                ),
                               ),
-                            ),
-                            onTap: _musicPlayer.clickPrev,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                width: 1, color: Colors.white.withOpacity(0.15)),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: AnimatedPlayPauseButton(),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                width: 1, color: Colors.white.withOpacity(0.1)),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: InkWell(
-                            radius: 50,
-                            borderRadius: BorderRadius.circular(100),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Icon(
-                                Icons.skip_next,
-                                color: Colors.white.withOpacity(0.9),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1,
+                                      color: Colors.white.withOpacity(0.15)),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: AnimatedPlayPauseButton(),
                               ),
-                            ),
-                            onTap: _musicPlayer.clickNext,
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      width: 1,
+                                      color: Colors.white.withOpacity(0.1)),
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: InkWell(
+                                  radius: 50,
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Icon(
+                                      Icons.skip_next,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
+                                  ),
+                                  onTap: _musicPlayer.clickNext,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      // SizedBox.fromSize(
+                      //   size: Size.square(48),
+                      // )
+                      Opacity(
+                        opacity: 0, // A workaround to display only one icon on the left from control buttons, because it's hard to manage this in a row
+                        child: IconButton(
+                          icon: Icon(Icons.loop),
+                          iconSize: 0,
+                          onPressed: null,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
