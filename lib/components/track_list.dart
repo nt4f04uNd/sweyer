@@ -11,7 +11,7 @@ class TrackList extends StatelessWidget {
       new GlobalKey<RefreshIndicatorState>();
 
   // TODO: exctract this to constnant
-  final _pageScrollKey = PageStorageKey('MainListView');
+  // final _pageScrollKey = PageStorageKey('MainListView');
 
   Future<void> _refreshHandler() async {
     await MusicPlayer.getInstance.fetchSongs();
@@ -28,7 +28,7 @@ class TrackList extends StatelessWidget {
           key: _refreshIndicatorKey,
           onRefresh: _refreshHandler,
           child: ListView.builder(
-            key: _pageScrollKey,
+            // key: _pageScrollKey,
             itemCount: MusicPlayer.getInstance.songsCount,
             padding: EdgeInsets.only(bottom: 10, top: 5),
             itemBuilder: (context, index) {

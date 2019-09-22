@@ -52,11 +52,7 @@ class BottomTrackPanel extends StatelessWidget {
                           isThreeLine: false,
                           leading: AlbumArt(
                               path: _musicPlayer.currentSong.albumArtUri),
-                          trailing: Container(
-                            child: Container(
-                              child: AnimatedPlayPauseButton(),
-                            ),
-                          ),
+                          trailing: AnimatedPlayPauseButton(),
                           dense: true,
                         );
                       }),

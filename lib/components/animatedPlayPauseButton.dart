@@ -52,7 +52,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
         icon: Center(
           child: AnimatedIcon(
             icon: AnimatedIcons.play_pause,
-            size: 40,
+            size: 35,
             color: Colors.white,
             progress: _animationController,
           ),
