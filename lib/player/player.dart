@@ -28,6 +28,8 @@ enum SortFeature { date, title }
 /// Seconds argument is initial callStackSize and optional
 ///
 /// TODO: test this method
+/// 
+/// #REMOVE(PROBABLY)
 Future<int> _recursiveCallback(Future<int> callback(),
     [int callStackSize = 0]) async {
   int res = await callback();
@@ -650,7 +652,7 @@ class MusicPlayer {
   }
 
   /// Search in song array by query
-  /// 
+  ///
   /// #MOVE
   Iterable<Song> searchSongs(String query) {
     if (query != '') {
@@ -664,16 +666,19 @@ class MusicPlayer {
     return null;
   }
 
+  /// #MOVE
   void setPlaylist(List<Song> songs) {
     // FIXME: try to optimize this, add some comparison e.g
     _playList = songs;
   }
 
+  /// #MOVE
   void resetPlaylist() {
     _playList = [];
   }
 
   /// Sort song by feature
+  /// #MOVE
   void sortSongs(SortFeature feature) {
     _songsCheck();
     switch (feature) {
@@ -690,7 +695,7 @@ class MusicPlayer {
   }
 
   // TODO: refactor next 3 functions
-  ///
+  /// #SEPARATE
   _initSongsJson() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/songs.json');
@@ -702,6 +707,7 @@ class MusicPlayer {
     }
   }
 
+  /// #SEPARATE
   _readSongsJson() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -714,6 +720,7 @@ class MusicPlayer {
     }
   }
 
+  /// #SEPARATE
   _saveSongsJson() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/songs.json');
@@ -723,6 +730,8 @@ class MusicPlayer {
   }
 
   /// Init whole music instance
+  /// 
+  /// #MOVE(PART REPLATED TO SONGS FETCHING)
   _init() async {
     await _initSongsJson();
     await _readSongsJson();
@@ -797,6 +806,7 @@ class MusicPlayer {
   }
 
   /// Finds songs on user device
+  /// #MOVE
   Future<void> fetchSongs() async {
     // _songs.removeWhere(
     //     // Remove all elements whose duration is shorter than 30 seconds
@@ -811,6 +821,7 @@ class MusicPlayer {
   }
 
   /// Method that asserts that `_songs` is not `null`
+  /// #REMOVE
   void _songsCheck() {
     assert(songsReady,
         '_songs is null, probably because it is not initilized by fetchSongs');
@@ -818,6 +829,7 @@ class MusicPlayer {
 }
 
 /// TODO: improve this class
+/// #MOVE
 class AsyncOperation {
   Completer _completer = Completer();
 
