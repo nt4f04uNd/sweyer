@@ -18,7 +18,7 @@ class Song {
   final String title;
   final String trackUri;
   final int duration;
-  final int dateModified;
+  final int dateAdded;
 
   Song({
     @required this.id,
@@ -28,7 +28,7 @@ class Song {
     @required this.title,
     @required this.trackUri,
     @required this.duration,
-    @required this.dateModified,
+    @required this.dateAdded,
   });
 
    /// A necessary factory constructor for creating a new User instance
@@ -40,14 +40,4 @@ class Song {
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$SongToJson(this);
-
-  // Song.fromMap(Map m)
-  //     : id = m["id"],
-  //       artist = m["artist"],
-  //       album = m["album"],
-  //       albumArtUri = m["albumArtUri"],
-  //       title = m["title"],
-  //       trackUri = m["trackUri"],
-  //       duration = Duration(milliseconds: m["duration"]),
-  //       dateModified = m["dateModified"];
 }
