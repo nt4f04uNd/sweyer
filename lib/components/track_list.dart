@@ -1,4 +1,5 @@
 import 'package:app/components/albumArt.dart';
+import 'package:app/player/playerWidgets.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';

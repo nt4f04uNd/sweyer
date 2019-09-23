@@ -1,4 +1,5 @@
 import 'package:app/heroes/albumArtHero.dart';
+import 'package:app/player/playerWidgets.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';

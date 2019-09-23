@@ -17,6 +17,8 @@ class MainRouteState extends State<MainRoute> {
     super.initState();
     // Init music player instance
     _musicPlayer = MusicPlayer();
+
+    // throw Exception('ffflellelelex');
   }
 
   void _showSearch() async {
@@ -89,7 +91,8 @@ class MainRouteState extends State<MainRoute> {
                 // heightFactor: 1,
                 widthFactor: 1,
                 child: Container(
-                  padding: const EdgeInsets.only(left:12.0,top: 10.0,bottom: 10.0),
+                  padding: const EdgeInsets.only(
+                      left: 12.0, top: 10.0, bottom: 10.0),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.05),
                   ),

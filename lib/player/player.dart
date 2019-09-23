@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:app/constants/constants.dart' as Constants;
+import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -51,7 +52,7 @@ class MusicPlayer {
   static const _eventChannel =
       const EventChannel(Constants.EventChannel.channelName);
 
-  /// `[MusicFinder]` player instance
+  /// `[AudioPlayer]` player instance
   final _playerInstance = AudioPlayer();
 
   /// Paths of found tracks in `fetchSongs` method
@@ -85,7 +86,7 @@ class MusicPlayer {
   bool loopModeState = false;
 
   /// Flag to see if song searching is performing
-  ///
+  /// #MOVE
   /// TODO: remove this value as it duplicates searchingOperation
   bool searchingState = false;
 
@@ -97,7 +98,7 @@ class MusicPlayer {
   int _hookPressStack = 0;
 
   /// Current index of playing track in `_songs`
-  ///
+  /// #MOVE
   /// TODO: `_songs` list can be resorted so I should to write method that updates this variable on resort
   int playingTrackIdState;
 
@@ -105,12 +106,16 @@ class MusicPlayer {
   /// TODO: improve implementation of this
   bool switching = false;
 
-  _TrackListChangeStreamController _trackListChangeStreamController =
-      _TrackListChangeStreamController();
+  /// #MOVE
+  TrackListChangeStreamController trackListChangeStreamController =
+      TrackListChangeStreamController();
 
+  /// #MOVE
   AsyncOperation searchingOperation = AsyncOperation();
 
   // Getters
+
+  /// #MOVE
   /// Get current playing song
   Song get currentSong {
     _songsCheck();
@@ -122,15 +127,18 @@ class MusicPlayer {
   }
 
   /// Get songs count
+  /// #DELETE
   int get songsCount {
     _songsCheck();
     return _songs.length;
   }
 
   /// Whether songs list instantiated or not (in the future will implement cashing so, but for now this depends on `fetchSongs`)
+  /// #MOVE
   bool get songsReady => _songs != null;
 
   /// If songs array is empty
+  /// #MOVE
   bool get songsEmpty => _songs.isEmpty;
 
   /// Get stream of changes on audio position.
@@ -151,8 +159,7 @@ class MusicPlayer {
   Stream<String> get onPlayerError => _playerInstance.onPlayerError;
 
   /// Get stream of notifier events about changes on track list
-  Stream<void> get onTrackListChange =>
-      _trackListChangeStreamController._controller.stream;
+  Stream<void> get onTrackListChange => trackListChangeStreamController.stream;
 
   AudioPlayerState get playState => _playerInstance.state;
 
@@ -163,6 +170,7 @@ class MusicPlayer {
     } catch (e) {}
   }
 
+  /// #MOVE
   /// ATTENTION: IF YOU USE `call.arguemnts` WITH THIS FUNCTION, TYPE CAST IT THROUGH `List<T> List.cast<T>()`, because `call.arguemnts` `as` type cast will crash closure execution
   void _getSongsFromChannel(List<String> songsJsons) {
     List<Song> foundSongs = [];
@@ -175,7 +183,7 @@ class MusicPlayer {
     searchingOperation.finishOperation();
 
     // Emit event to track change stream
-    _trackListChangeStreamController.emitEvent();
+    trackListChangeStreamController.emitEvent();
 
     _saveSongsJson();
   }
@@ -251,7 +259,7 @@ class MusicPlayer {
       }
     });
 
-    // TODO: see how to improve focus and gaindelayed usage
+    // TODO: see how to improve focus and implement gaindelayed usage
     // Set listener for method calls for changing focus
     _methodChannel.setMethodCallHandler((MethodCall call) async {
       // debugPrint('${call.method}, ${call.arguments.toString()}');
@@ -280,6 +288,7 @@ class MusicPlayer {
             throw Exception('Incorrect method argument came from native code');
         }
       } else if (call.method == Constants.MethodChannel.methodSendSongs) {
+        // #MOVE
         // NOTE: cast method is must be here, `as` crashes code execution
         _getSongsFromChannel(call.arguments.cast<String>());
       } else if (call.method == Constants.MethodChannel.methodHookButtonClick) {
@@ -310,19 +319,20 @@ class MusicPlayer {
     await Future.delayed(Duration(milliseconds: 600));
     switch (_hookPressStack) {
       case 1:
-        clickPausePlay();
+        await clickPausePlay();
         break;
       case 2:
-        clickNext();
+        await clickNext();
         break;
       case 3:
-        clickPrev();
+        await clickPrev();
         break;
     }
     _hookPressStack = 0;
   }
 
-// TODO: add implementation for this function and change method name to `get_intent_action_view`
+  // TODO: add implementation for this function and change method name to `get_intent_action_view`
+  // #SEPARATE
   Future<void> _isIntentActionView() async {
     debugPrint((await _methodChannel
             .invokeMethod(Constants.MethodChannel.methodIntentActionView))
@@ -406,7 +416,7 @@ class MusicPlayer {
         // Play next track after broken one
         await _playerInstance.play(getSongById(getNextSongId(songId)).trackUri);
         _songs.removeAt(getSongIndexById(songId)); //Remove broken track
-        _trackListChangeStreamController.emitEvent();
+        trackListChangeStreamController.emitEvent();
         fetchSongs(); // Perform fetching
       }
     } catch (e) {
@@ -449,7 +459,7 @@ class MusicPlayer {
         // Play next track after broken one
         await _playerInstance.play(getSongById(getNextSongId(songId)).trackUri);
         _songs.removeAt(getSongIndexById(songId)); //Remove broken track
-        _trackListChangeStreamController.emitEvent();
+        trackListChangeStreamController.emitEvent();
         fetchSongs(); // Perform fetching
       }
     } catch (e) {
@@ -484,43 +494,49 @@ class MusicPlayer {
   }
 
   /// Returns song object by index in songs array
+  /// #MOVE*
   Song getSongByIndex(int index) {
     _songsCheck();
     return _songs[index];
   }
 
   /// Returns song object by song id
+  /// #MOVE*
   Song getSongById(int id) {
     _songsCheck();
     return _songs.firstWhere((el) => el.id == id);
   }
 
   /// Returns song id in by its index in songs array
+  /// #MOVE*
   int getSongIdByIndex(int index) {
     _songsCheck();
     return _songs[index].id;
   }
 
   /// Returns song index in array by its id
+  /// #MOVE*
   int getSongIndexById(int id) {
     _songsCheck();
     return _songs.indexWhere((el) => el.id == id);
   }
 
   /// Returns song id in by its index in songs array
+  /// #REMOVE
   int getSongIdByIndexInPlaylist(int index) {
     assert(_playList.isNotEmpty, "_playList is empty!");
     return _playList[index].id;
   }
 
   /// Returns song index in array by its id
+  /// #REMOVE
   int getSongIndexByIdInPlaylist(int id) {
     assert(_playList.isNotEmpty, "_playList is empty!");
     return _playList.indexWhere((el) => el.id == id);
   }
 
   /// Returns next song index
-  ///
+  /// #MOVE*
   /// If optional `index` is provided, function will return incremented index
   int getNextSongId([int index]) {
     if (index == null) index = playingTrackIdState;
@@ -540,7 +556,7 @@ class MusicPlayer {
   }
 
   /// Returns prev song index
-  ///
+  /// #MOVE*
   /// If optional `index` is provided, function will return decremented index
   int getPrevSongId() {
     if (_playList.isEmpty) {
@@ -560,7 +576,7 @@ class MusicPlayer {
   }
 
   /// Function that fires when pause/play button got clicked
-  void clickPausePlay() async {
+  Future<void> clickPausePlay() async {
     debugPrint(switching.toString());
     // TODO: refactor
     if (!switching) {
@@ -579,6 +595,7 @@ class MusicPlayer {
           await play(playingTrackIdState);
           break;
         default:
+          // TODO: add exception
           // throw Exception('Invalid player state variant');
           break;
       }
@@ -633,6 +650,8 @@ class MusicPlayer {
   }
 
   /// Search in song array by query
+  /// 
+  /// #MOVE
   Iterable<Song> searchSongs(String query) {
     if (query != '') {
       // Lowercase to bring strings to one format
@@ -659,7 +678,7 @@ class MusicPlayer {
     _songsCheck();
     switch (feature) {
       case SortFeature.date:
-        _songs.sort((a, b) => b.dateModified.compareTo(a.dateModified));
+        _songs.sort((a, b) => b.dateAdded.compareTo(a.dateAdded));
         break;
       case SortFeature.title:
         _songs.sort((a, b) => a.title.compareTo(b.title));
@@ -667,7 +686,7 @@ class MusicPlayer {
     }
 
     // Emit event to track change stream
-    _trackListChangeStreamController.emitEvent();
+    trackListChangeStreamController.emitEvent();
   }
 
   // TODO: refactor next 3 functions
@@ -753,7 +772,7 @@ class MusicPlayer {
     await _playerInstance.pause();
 
     // Emit event to track change stream
-    _trackListChangeStreamController.emitEvent();
+    trackListChangeStreamController.emitEvent();
 
     await fetchSongs();
 
@@ -819,39 +838,6 @@ class AsyncOperation {
   }
 }
 
-/// Component to show artist, or automatically show "Неизвестный исоплнитель" instead of "<unknown>"
-class Artist extends StatelessWidget {
-  final String artist;
-  const Artist({Key key, @required this.artist}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text(
-        artist != '<unknown>' ? artist : 'Неизестный исполнитель',
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          //Default flutter subtitle font size (not densed)
-          fontSize: 14,
-          // This is used in ListTile elements
-          color: Theme.of(context).textTheme.caption.color,
-        ),
-      ),
-    );
-  }
-}
-
 /// Function that returns artist, or automatically show "Неизвестный исоплнитель" instead of "<unknown>"
 String artistString(String artist) =>
     artist != '<unknown>' ? artist : 'Неизестный исполнитель';
-
-/// Class to create change and control stream
-class _TrackListChangeStreamController {
-  /// Stream controller used to create stream of changes on track list (just to notify)
-  StreamController _controller = StreamController<void>.broadcast();
-
-  /// Emit change event
-  void emitEvent() {
-    _controller.add(null);
-  }
-}
