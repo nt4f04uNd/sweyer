@@ -4,8 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:catcher/catcher_plugin.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  CatcherOptions debugOptions =
+      CatcherOptions(DialogReportMode(), [ConsoleHandler()]);
+  CatcherOptions releaseOptions = CatcherOptions(DialogReportMode(), [
+    EmailManualHandler(["nt4f04uNd@gmail.com"])
+  ]);
+
+  Catcher(MyApp(), debugConfig: debugOptions, releaseConfig: releaseOptions);
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -18,6 +27,15 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: Catcher.navigatorKey,
+      // Uncomment to replace red screen of death 
+      builder: (BuildContext context, Widget widget) {
+        // Catcher.addDefaultErrorWidget(
+        //     showStacktrace: true,
+        //     customTitle: "Custom error title",
+        //     customDescription: "Custom error description");
+        return widget;
+      },
       supportedLocales: [const Locale('ru')],
       locale: Locale('ru'),
       localizationsDelegates: [
