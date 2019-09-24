@@ -79,7 +79,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
   }
 
   Widget _buildResultsAndSuggestions(BuildContext context) {
-    final Iterable<Song> searched = MusicPlayer.getInstance
+    final Iterable<Song> searched = MusicPlayer.getInstance.playlistControl
         .searchSongs(query.trim() /* Remove any whitespaces*/);
 
     // Display suggestions
@@ -295,15 +295,18 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     }
 
     // Display tiles
-    List<TrackTile> tiles = searched.map((el) {
-      return TrackTile(
-        MusicPlayer.getInstance.getSongIndexById(el.id),
+    List<TrackTile> tiles = [];
+    searched.toList().asMap().forEach((index, el) {
+      tiles.add(TrackTile(
+        index,
+        song: el,
         additionalClickCallback: () {
           _writeInputToSearchHistory(query);
-          MusicPlayer.getInstance.setPlaylist(searched.toList());
+          MusicPlayer.getInstance.playlistControl
+              .setPlaylist(searched.toList());
         },
-      );
-    }).toList();
+      ));
+    });
 
     return Stack(
       children: <Widget>[

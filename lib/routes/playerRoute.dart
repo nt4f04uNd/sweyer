@@ -72,7 +72,7 @@ class _PlayerPageState extends State<PlayerRoute> {
         _musicPlayer.onDurationChanged.listen((event) {
       setState(() {
         _value = Duration(seconds: 0);
-        _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
+        _duration = Duration(milliseconds: _musicPlayer.playlistControl.currentSong.duration);
       });
     });
   }
@@ -85,7 +85,7 @@ class _PlayerPageState extends State<PlayerRoute> {
     var currentPosition = await _musicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = Duration(milliseconds: _musicPlayer.currentSong.duration);
+      _duration = Duration(milliseconds: _musicPlayer.playlistControl.currentSong.duration);
     });
   }
 
@@ -162,7 +162,7 @@ class _PlayerPageState extends State<PlayerRoute> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30),
                       child: Text(
-                        _musicPlayer.currentSong.title,
+                        _musicPlayer.playlistControl.currentSong.title,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 21),
                       ),
@@ -170,8 +170,8 @@ class _PlayerPageState extends State<PlayerRoute> {
                     Padding(
                       padding: const EdgeInsets.only(top: 5, bottom: 30),
                       child: Text(
-                        _musicPlayer.currentSong.artist != '<unknown>'
-                            ? _musicPlayer.currentSong.artist
+                        _musicPlayer.playlistControl.currentSong.artist != '<unknown>'
+                            ? _musicPlayer.playlistControl.currentSong.artist
                             : 'Неизестный исполнитель',
                       ),
                     ),
@@ -179,7 +179,7 @@ class _PlayerPageState extends State<PlayerRoute> {
                       padding:
                           const EdgeInsets.only(left: 20, right: 20, top: 10),
                       child: AlbumArt(
-                        path: _musicPlayer.currentSong.albumArtUri,
+                        path: _musicPlayer.playlistControl.currentSong.albumArtUri,
                         isLarge: true,
                       ),
                     ),
@@ -199,7 +199,7 @@ class _PlayerPageState extends State<PlayerRoute> {
                       Container(
                         transform: Matrix4.translationValues(5, 0, 0),
                         child: Text(
-                          // TODO: move and refactor this code, and by the way split a whole page for separate widgets
+                          // TODO: move and refactor this code, and by the way split a whole page into separate widgets
                           _calculateDisplayedPositionTime(),
                           style: TextStyle(fontSize: 12),
                         ),
@@ -213,7 +213,7 @@ class _PlayerPageState extends State<PlayerRoute> {
                               : _value.inSeconds.toDouble(),
                           max: Duration(
                                   milliseconds:
-                                      _musicPlayer.currentSong.duration)
+                                      _musicPlayer.playlistControl.currentSong.duration)
                               .inSeconds
                               .toDouble(),
                           min: 0,

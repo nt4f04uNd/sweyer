@@ -43,6 +43,7 @@ public class MainActivity extends FlutterActivity {
 
    private static final String eventChannelStream = "eventChannelStream";
    private static final String methodChannelStream = "methodChannelStream";
+   private static final String songsChannelStream = "songsChannelStream";
 
    private static IntentFilter notificationIntentFilter = new IntentFilter();
    private static IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -61,6 +62,7 @@ public class MainActivity extends FlutterActivity {
    private static AudioFocusRequest focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
          .setAcceptsDelayedFocusGain(true).setOnAudioFocusChangeListener(new OnFocusChangeListener()).build();
    private static MethodChannel methodChannel;
+   private static MethodChannel songsChannel;
    private static EventChannel eventChannel;
 
    private AudioManager audioManager;
@@ -280,7 +282,7 @@ public class MainActivity extends FlutterActivity {
 
       @Override
       protected void onPostExecute(List<String> result) {
-         methodChannel.invokeMethod("SEND_SONGS", result);
+         songsChannel.invokeMethod("SEND_SONGS", result);
       }
    }
 
@@ -313,6 +315,8 @@ public class MainActivity extends FlutterActivity {
 
       // Setup methodChannel
       methodChannel = new MethodChannel(getFlutterView(), methodChannelStream);
+      // Setup songsChannel
+      songsChannel = new MethodChannel(getFlutterView(), songsChannelStream);
       // Setup event channel
       eventChannel = new EventChannel(getFlutterView(), eventChannelStream);
 
@@ -364,6 +368,22 @@ public class MainActivity extends FlutterActivity {
                break;
             case "NOTIFICATION_CLOSE":
                closeNotification();
+               result.success("");
+               break;
+            default:
+               Log.w(TAG, "Invalid method name call from Dart code");
+            }
+         }
+      });
+
+      songsChannel.setMethodCallHandler(new MethodCallHandler() {
+         @Override
+         public void onMethodCall(MethodCall call, Result result) {
+            // Note: this method is invoked on the main thread.
+            switch (call.method) {
+            case "RETRIEVE_SONGS":
+               // Run method on another thread
+               new ConductSongsSearch().execute();
                result.success("");
                break;
             default:

@@ -1,5 +1,6 @@
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/search.dart';
+import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/track_list.dart';
@@ -50,14 +51,14 @@ class MainRouteState extends State<MainRoute> {
               ListTile(
                 title: Text("По названию"),
                 onTap: () {
-                  _musicPlayer.sortSongs(SortFeature.title);
+                  _musicPlayer.playlistControl.sortSongs(SortFeature.title);
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 title: Text("По дате"),
                 onTap: () {
-                  _musicPlayer.sortSongs(SortFeature.date);
+                  _musicPlayer.playlistControl.sortSongs(SortFeature.date);
                   Navigator.pop(context);
                 },
               )
@@ -115,11 +116,13 @@ class MainRouteState extends State<MainRoute> {
         ),
       ),
       body: StreamBuilder(
-          stream: _musicPlayer.onTrackListChange,
+          stream: _musicPlayer.onPlaylistListChange,
           builder: (context, snapshot) {
-            return !_musicPlayer.songsReady
+            return !_musicPlayer.playlistControl.playReady
                 ? SizedBox.shrink()
-                : _musicPlayer.searchingState && _musicPlayer.songsEmpty
+                // TODO: do something to replace `searchingState` !!
+                // : _musicPlayer.searchingState && _musicPlayer.songsEmpty
+                :  _musicPlayer.playlistControl.songsEmpty
                     ? Center(
                         child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -134,7 +137,7 @@ class MainRouteState extends State<MainRoute> {
                               ),
                             ]),
                       )
-                    : _musicPlayer.songsEmpty
+                    : _musicPlayer.playlistControl.songsEmpty
                         ? Center(
                             child: Text('На вашем устройстве нету музыки :( '))
                         : Stack(

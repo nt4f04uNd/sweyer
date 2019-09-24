@@ -1,5 +1,6 @@
 import 'package:app/components/albumArt.dart';
 import 'package:app/player/playerWidgets.dart';
+import 'package:app/player/song.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
@@ -15,7 +16,7 @@ class TrackList extends StatelessWidget {
   // final _pageScrollKey = PageStorageKey('MainListView');
 
   Future<void> _refreshHandler() async {
-    await MusicPlayer.getInstance.fetchSongs();
+    await MusicPlayer.getInstance.playlistControl.refetchSongs();
     return Future.value();
   }
 
@@ -30,13 +31,13 @@ class TrackList extends StatelessWidget {
           onRefresh: _refreshHandler,
           child: ListView.builder(
             // key: _pageScrollKey,
-            itemCount: MusicPlayer.getInstance.songsCount,
+            itemCount: MusicPlayer.getInstance.playlistControl.globalPlaylist.length,
             padding: EdgeInsets.only(bottom: 10, top: 5),
             itemBuilder: (context, index) {
               return TrackTile(
                 index,
                 additionalClickCallback: () {
-                  MusicPlayer.getInstance.resetPlaylist();
+                  MusicPlayer.getInstance.playlistControl.resetPlaylist();
                 },
               );
             },
@@ -51,8 +52,11 @@ class TrackList extends StatelessWidget {
 class TrackTile extends StatelessWidget {
   /// Index of rendering element from
   final int trackTileIndex;
+
+  /// Provide song data to render it directly, not from playlist (e.g. used in search)
+  Song song;
   final Function additionalClickCallback;
-  TrackTile(this.trackTileIndex, {this.additionalClickCallback});
+  TrackTile(this.trackTileIndex, {this.song, this.additionalClickCallback});
 
 //TODO: add comments
   @override
@@ -60,8 +64,10 @@ class TrackTile extends StatelessWidget {
     /// Instance of music player
     final musicPlayer = MusicPlayer.getInstance;
 
-    /// Song in current row
-    final song = musicPlayer.getSongByIndex(trackTileIndex);
+    /// If song data is not provided, then find it by index of row in current row
+    if (song == null)
+      song =
+          musicPlayer.playlistControl.globalPlaylist.getSongByIndex(trackTileIndex);
 
     void _handleTap() async {
       if (additionalClickCallback != null) additionalClickCallback();

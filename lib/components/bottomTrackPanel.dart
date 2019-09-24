@@ -12,8 +12,8 @@ class BottomTrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return !_musicPlayer.songsEmpty ||
-            _musicPlayer.playingTrackIdState ==
+    return !_musicPlayer.playlistControl.songsEmpty ||
+            _musicPlayer.playlistControl.playingTrackIdState ==
                 null // Don't display if there's no tracks or if there's no `playingTrackIdState`
         ? Align(
             alignment: Alignment.bottomCenter,
@@ -39,20 +39,20 @@ class BottomTrackPanel extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                _musicPlayer.currentSong.title,
+                                _musicPlayer.playlistControl.currentSong.title,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(fontSize: 16),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(top: 1),
                                 child: Artist(
-                                    artist: _musicPlayer.currentSong.artist),
+                                    artist: _musicPlayer.playlistControl.currentSong.artist),
                               ),
                             ],
                           ),
                           isThreeLine: false,
                           leading: AlbumArt(
-                              path: _musicPlayer.currentSong.albumArtUri),
+                              path: _musicPlayer.playlistControl.currentSong.albumArtUri),
                           trailing: AnimatedPlayPauseButton(),
                           dense: true,
                         );
