@@ -122,7 +122,7 @@ class MainRouteState extends State<MainRoute> {
                 ? SizedBox.shrink()
                 // TODO: do something to replace `searchingState` !!
                 // : _musicPlayer.searchingState && _musicPlayer.songsEmpty
-                :  _musicPlayer.playlistControl.songsEmpty
+                : _musicPlayer.playlistControl.songsEmpty
                     ? Center(
                         child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -137,7 +137,7 @@ class MainRouteState extends State<MainRoute> {
                               ),
                             ]),
                       )
-                    : _musicPlayer.playlistControl.songsEmpty
+                    : _musicPlayer.playlistControl.songsEmpty // FIXME: this ternatry will never be reached 
                         ? Center(
                             child: Text('На вашем устройстве нету музыки :( '))
                         : Stack(

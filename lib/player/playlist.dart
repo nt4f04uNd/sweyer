@@ -48,7 +48,7 @@ class Playlist {
 
   /// Returns song object by song id
   Song getSongById(int id) {
-    return songs.firstWhere((el) => el.id == id);
+    return songs.firstWhere((el) => el.id == id, orElse: () => songs[0]);
   }
 
   /// Returns song id in by its index in songs array
@@ -87,7 +87,7 @@ class Playlist {
 /// What playlist is now playing? type
 enum PlayingPlaylistType { global, custom }
 
-// TODO: add comments
+/// A class to fetch songs/control json/control playlists/search in playlists
 class PlaylistControl {
   /// Playlist for songs
   Playlist globalPlaylist;
@@ -101,7 +101,7 @@ class PlaylistControl {
   /// Songs fetcher class instance
   final SongsFetcher fetcher = SongsFetcher();
 
-  /// Current index of playing track in `_songs`
+  /// Current index of playing track in `playlist`
   int playingTrackIdState;
 
   /// Controller for stream of playlist changes
@@ -121,8 +121,7 @@ class PlaylistControl {
   ///
   /// FIXME: 0 index reference may fail
   Song get currentSong {
-    return playlist.getSongById(playingTrackIdState) ??
-        playlist.getSongByIndex(0);
+    return globalPlaylist.getSongById(playingTrackIdState);
   }
 
   /// Whether playlist control is ready to provide player instance sources to play tracks
@@ -131,20 +130,24 @@ class PlaylistControl {
   /// Is songs list empty?
   bool get songsEmpty => playlist.isEmpty;
 
+  /// Returns current playlist songs list
   List<Song> get songs => playlist.songs;
 
-  // TODO: add comments
+  /// A stream of changes on playlist
   Stream<dynamic> get onPlaylistListChange =>
       _songsListChangeStreamController.stream;
 
+  /// Emit event to `onPlaylistListChange`
   void emitPlaylistChange() {
     _songsListChangeStreamController.emitEvent();
   }
 
-  // int getPrevSongId(int index) => playlist.getPrevSongId(index);
-  Song getSongById(int index) => playlist.getSongById(index);
+  // Methods from playlist class
+  /// Works on `globalPlaylist`
+  Song getSongById(int index) => globalPlaylist.getSongById(index);
   Song getSongByIndex(int index) => playlist.getSongByIndex(index);
-  int getSongIdByIndex(int index) => playlist.getSongIdByIndex(index);
+  /// Works on `globalPlaylist`
+  int getSongIdByIndex(int index) => globalPlaylist.getSongIdByIndex(index);
   int getSongIndexById(int index) => playlist.getSongIndexById(index);
   int getNextSongId(int index) => playlist.getNextSongId(index);
   int getPrevSongId(int index) => playlist.getPrevSongId(index);
@@ -180,7 +183,7 @@ class PlaylistControl {
 
       try {
         // Set url of first track in player instance
-        await MusicPlayer.getInstance.nativePlayerInstance
+        await MusicPlayer.instance.nativePlayerInstance
             .setUrl(currentSong.trackUri);
       } catch (e) {
         // playingTrackIdState =
@@ -190,12 +193,12 @@ class PlaylistControl {
 
       // Seek to saved position
       if (savedSongPos != null)
-        MusicPlayer.getInstance.nativePlayerInstance
+        MusicPlayer.instance.nativePlayerInstance
             .seek(Duration(seconds: savedSongPos));
     }
 
     // Init player state
-    await MusicPlayer.getInstance.nativePlayerInstance.pause();
+    await MusicPlayer.instance.nativePlayerInstance.pause();
 
     // Emit event to track change stream
     emitPlaylistChange();
@@ -209,7 +212,7 @@ class PlaylistControl {
 
       try {
         // Set url of first track in player instance
-        await MusicPlayer.getInstance.nativePlayerInstance
+        await MusicPlayer.instance.nativePlayerInstance
             .setUrl(currentSong.trackUri);
       } catch (e) {
         // playingTrackIdState =
@@ -219,21 +222,25 @@ class PlaylistControl {
 
       // Seek to saved position
       if (savedSongPos != null)
-        MusicPlayer.getInstance.nativePlayerInstance
+        MusicPlayer.instance.nativePlayerInstance
             .seek(Duration(seconds: savedSongPos));
     }
+
+    // Emit event to track change stream TODO: test this line
+    emitPlaylistChange();
   }
 
   /// Fetch songs and update playlist
   Future<void> refetchSongs() async {
     globalPlaylist = Playlist(await fetcher.fetchSongs());
+    emitPlaylistChange();
   }
 
   /// Set another playlist to play
   void setPlaylist(List<Song> songs) {
     // FIXME: try to optimize this, add some comparison e.g ???
+    _customPlaylist = Playlist(songs); // NOTE The order of these two instruction matters
     _playingPlaylist = PlayingPlaylistType.custom;
-    _customPlaylist = Playlist(songs);
   }
 
   /// Sets playlist default that is made from list of all song on user device
@@ -254,7 +261,8 @@ class PlaylistControl {
             RegExp('\\b\\w')
                 .allMatches(el.title.toLowerCase())
                 .fold("", (a, b) => a += b.group(0))
-                .contains(query); // Find abbreviations (big baby tape - bbt) //TODO: this is not working as expected, probably delete
+                .contains(
+                    query); // Find abbreviations (big baby tape - bbt) //TODO: this is not working as expected, probably delete
       });
     }
     return null;

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
-import 'package:app/constants/prefs.dart';
+import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/heroes/albumArtHero.dart';
+import 'package:app/components/marquee.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,12 +43,13 @@ class _PlayerPageState extends State<PlayerRoute> {
   double _localValue;
 
   /// Subscription for audio position change stream
+  /// TODO: move all this stuff into separate class (e.g. inherited widget) as it is also used in bottom track panel
   StreamSubscription<Duration> _changePositionSubscription;
   StreamSubscription<dynamic> _changeDurationSubscription;
 
   /// Is user dragging slider right now
   bool _isDragging = false;
-  MusicPlayer _musicPlayer = MusicPlayer.getInstance;
+  MusicPlayer _musicPlayer = MusicPlayer.instance;
   SharedPreferences prefs;
 
   @override
@@ -63,7 +65,7 @@ class _PlayerPageState extends State<PlayerRoute> {
       setState(() {
         _value = event;
         if (prefs != null)
-          prefs.setInt(PrefKeys.songPositionInt, _value.inSeconds);
+          prefs.setInt(Constants.PrefKeys.songPositionInt, _value.inSeconds);
       });
     });
 
@@ -72,9 +74,17 @@ class _PlayerPageState extends State<PlayerRoute> {
         _musicPlayer.onDurationChanged.listen((event) {
       setState(() {
         _value = Duration(seconds: 0);
-        _duration = Duration(milliseconds: _musicPlayer.playlistControl.currentSong.duration);
+        _duration = Duration(
+            milliseconds: _musicPlayer.playlistControl.currentSong.duration);
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _changePositionSubscription.cancel();
+    _changeDurationSubscription.cancel();
+    super.dispose();
   }
 
   void _getPrefsInstance() async {
@@ -85,7 +95,8 @@ class _PlayerPageState extends State<PlayerRoute> {
     var currentPosition = await _musicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = Duration(milliseconds: _musicPlayer.playlistControl.currentSong.duration);
+      _duration = Duration(
+          milliseconds: _musicPlayer.playlistControl.currentSong.duration);
     });
   }
 
@@ -161,25 +172,26 @@ class _PlayerPageState extends State<PlayerRoute> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Text(
-                        _musicPlayer.playlistControl.currentSong.title,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 21),
+                      child: MarqueeWidget(
+                        text: Text(
+                          _musicPlayer.playlistControl.currentSong.title,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 21),
+                        ),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 5, bottom: 30),
                       child: Text(
-                        _musicPlayer.playlistControl.currentSong.artist != '<unknown>'
-                            ? _musicPlayer.playlistControl.currentSong.artist
-                            : 'Неизестный исполнитель',
+                         artistString(_musicPlayer.playlistControl.currentSong.artist),
                       ),
                     ),
                     Padding(
                       padding:
                           const EdgeInsets.only(left: 20, right: 20, top: 10),
                       child: AlbumArt(
-                        path: _musicPlayer.playlistControl.currentSong.albumArtUri,
+                        path: _musicPlayer
+                            .playlistControl.currentSong.albumArtUri,
                         isLarge: true,
                       ),
                     ),
@@ -212,8 +224,8 @@ class _PlayerPageState extends State<PlayerRoute> {
                               ? _localValue
                               : _value.inSeconds.toDouble(),
                           max: Duration(
-                                  milliseconds:
-                                      _musicPlayer.playlistControl.currentSong.duration)
+                                  milliseconds: _musicPlayer
+                                      .playlistControl.currentSong.duration)
                               .inSeconds
                               .toDouble(),
                           min: 0,
@@ -233,18 +245,19 @@ class _PlayerPageState extends State<PlayerRoute> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 40, top: 10, left: 20, right: 20),
+                  padding: const EdgeInsets.only(
+                      bottom: 40, top: 10, left: 20, right: 20),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       IconButton(
                         icon: Icon(Icons.loop),
-                        color: MusicPlayer.getInstance.loopModeState
+                        color: MusicPlayer.instance.loopModeState
                             ? null
                             : Colors.grey.shade800,
                         onPressed: () {
                           setState(() {
-                            MusicPlayer.getInstance.switchLoopMode();
+                            MusicPlayer.instance.switchLoopMode();
                           });
                         },
                       ),
@@ -313,7 +326,8 @@ class _PlayerPageState extends State<PlayerRoute> {
                       //   size: Size.square(48),
                       // )
                       Opacity(
-                        opacity: 0, // A workaround to display only one icon on the left from control buttons, because it's hard to manage this in a row
+                        opacity:
+                            0, // A workaround to display only one icon on the left from control buttons, because it's hard to manage this in a row
                         child: IconButton(
                           icon: Icon(Icons.loop),
                           iconSize: 0,
@@ -329,12 +343,5 @@ class _PlayerPageState extends State<PlayerRoute> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _changePositionSubscription.cancel();
-    _changeDurationSubscription.cancel();
-    super.dispose();
   }
 }

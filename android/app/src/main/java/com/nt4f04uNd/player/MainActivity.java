@@ -38,6 +38,10 @@ import android.media.session.MediaSession;
 import android.os.AsyncTask;
 import java.lang.Runnable;
 
+import java.io.File;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 public class MainActivity extends FlutterActivity {
    private static String TAG = "player/java file";
 
@@ -252,12 +256,15 @@ public class MainActivity extends FlutterActivity {
 
    }
 
-   private void buildNotification(String title, String artist, boolean isPlaying) {
+   private void buildNotification(String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
+
       NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),
             Constants.NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                   .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                   .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
-                  .setSmallIcon(R.drawable.round_music_note_white_48).setOngoing(true) // Persistent setting
+                  .setSmallIcon(R.drawable.round_music_note_white_48)
+                  .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length))
+                  .setOngoing(isPlaying) // Persistent setting
                   .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
                                                                // notification
                   .setContentTitle(title).setContentText(artist)
@@ -363,7 +370,8 @@ public class MainActivity extends FlutterActivity {
                result.success("");
                break;
             case "NOTIFICATION_SHOW":
-               buildNotification(call.argument("title"), call.argument("artist"), call.argument("isPlaying"));
+               buildNotification(call.argument("title"), call.argument("artist"), call.argument("albumArtBytes"),
+                     call.argument("isPlaying"));
                result.success("");
                break;
             case "NOTIFICATION_CLOSE":

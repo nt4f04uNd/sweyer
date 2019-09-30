@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
@@ -8,13 +9,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// VIEW https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
+import 'package:flutter/services.dart' show rootBundle;
+
 /// Type for audio manager focus
 enum AudioFocusType { focus, no_focus, focus_delayed }
-
 
 /// Function for call player functions from AudioPlayers package until they will be completed, or until recursive callstack will exceed 10
 ///
@@ -39,7 +43,10 @@ Future<int> _recursiveCallback(Future<int> callback(),
 
 // FIXME: conduct a massive refactor of methods and properties
 class MusicPlayer {
-  static MusicPlayer getInstance;
+  static MusicPlayer instance;
+
+  /// Image bytes to display in notification
+  Uint8List _placeholderImgBytes;
 
   /// Channel for handling audio focus
   MethodChannel _methodChannel =
@@ -111,8 +118,7 @@ class MusicPlayer {
   Stream<String> get onPlayerError => nativePlayerInstance.onPlayerError;
 
   /// Get stream of notifier events about changes on track list
-  Stream<void> get onPlaylistListChange =>
-      playlistControl.onPlaylistListChange;
+  Stream<void> get onPlaylistListChange => playlistControl.onPlaylistListChange;
 
   AudioPlayerState get playState => nativePlayerInstance.state;
 
@@ -125,7 +131,7 @@ class MusicPlayer {
   }
 
   MusicPlayer() {
-    getInstance = this;
+    instance = this;
 
     // Change player mode for sure
     nativePlayerInstance.mode = PlayerMode.MEDIA_PLAYER;
@@ -166,8 +172,8 @@ class MusicPlayer {
       if (!playlistControl.songsEmpty) {
         // TODO: improve this code + add comments
         var prefs = await SharedPreferences.getInstance();
-        prefs.setInt(Constants.PrefKeys.songIdInt,
-            playlistControl.currentSong.id);
+        prefs.setInt(
+            Constants.PrefKeys.songIdInt, playlistControl.currentSong.id);
       }
 
       switch (event) {
@@ -175,6 +181,7 @@ class MusicPlayer {
           _showNotification(
               artist: artistString(playlistControl.currentSong.artist),
               title: playlistControl.currentSong.title,
+              albumArtUri: playlistControl.currentSong.albumArtUri,
               isPlaying: true);
           notificationState = true;
           break;
@@ -183,6 +190,7 @@ class MusicPlayer {
             _showNotification(
                 artist: artistString(playlistControl.currentSong.artist),
                 title: playlistControl.currentSong.title,
+                albumArtUri: playlistControl.currentSong.albumArtUri,
                 isPlaying: false);
           break;
         case AudioPlayerState.STOPPED:
@@ -230,7 +238,10 @@ class MusicPlayer {
           DateTime now = DateTime.now();
           if (_latestHookPressTime == null ||
               now.difference(_latestHookPressTime) >
-                  Duration(milliseconds: 600)) {
+                  // TODO: extract delays to constant
+                  // TODO: add async task instead of 200 safe delay
+                  // `_handleHookDelayedPress` delay + sfe delay (trying to fix hook button press bug)
+                  Duration(milliseconds: 600 + 50)) {
             // If hook is pressed first time or last press were more than 0.5s ago
             _latestHookPressTime = now;
             _hookPressStack = 1;
@@ -248,7 +259,7 @@ class MusicPlayer {
 
   /// Play/pause, next or prev function depending on `_hookPressStack`
   void _handleHookDelayedPress() async {
-    // Wait 0.5s
+    // Wait 0.6s
     await Future.delayed(Duration(milliseconds: 600));
     switch (_hookPressStack) {
       case 1:
@@ -302,10 +313,29 @@ class MusicPlayer {
   void _showNotification(
       {@required String title,
       @required String artist,
+      @required String albumArtUri,
       @required bool isPlaying}) async {
-    await _methodChannel.invokeMethod(
-        Constants.MethodChannel.methodShowNotification,
-        {"title": title, "artist": artist, "isPlaying": isPlaying});
+    Uint8List albumArtBytes;
+
+    if (albumArtUri ==
+        null) // Set placeholder as an image if album art is absent
+      albumArtBytes = _placeholderImgBytes;
+    else {
+      try {
+        albumArtBytes = await File(albumArtUri).readAsBytes() as Uint8List;
+      } catch (e) {
+        albumArtBytes = _placeholderImgBytes;
+        debugPrint('Album art read error in _showNotification');
+      }
+    }
+
+    await _methodChannel
+        .invokeMethod(Constants.MethodChannel.methodShowNotification, {
+      "title": title,
+      "artist": artist,
+      "albumArtBytes": albumArtBytes,
+      "isPlaying": isPlaying
+    });
   }
 
   /// Method to hide notification
@@ -336,20 +366,30 @@ class MusicPlayer {
     int res = 0;
     try {
       if (focusState == AudioFocusType.focus)
-        res = await nativePlayerInstance.play(playlistControl.getSongById(songId).trackUri);
+        res = await nativePlayerInstance.play(
+            playlistControl.getSongById(songId).trackUri,
+            stayAwake:
+                true // This is very important for player to stay play even in background
+            );
       else if (focusState == AudioFocusType.focus_delayed)
         // Set url if no focus has been granted
-        res = await nativePlayerInstance.setUrl(playlistControl.getSongById(songId).trackUri);
+        res = await nativePlayerInstance
+            .setUrl(playlistControl.getSongById(songId).trackUri);
     } on PlatformException catch (e) {
       if (e.code == "error") {
+        Fluttertoast.showToast(
+            msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
+            backgroundColor: Color.fromRGBO(18, 18, 18, 1));
         // If could not play for platform exception reasons
         debugPrint(
             'Error thrown in my player class play method - ${e.toString()}');
         // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
         // Play next track after broken one
-        await nativePlayerInstance
-            .play(playlistControl.getSongById(playlistControl.getNextSongId(songId)).trackUri);
-        playlistControl.songs.removeAt(playlistControl.getSongIndexById(songId)); //Remove broken track
+        await nativePlayerInstance.play(playlistControl
+            .getSongById(playlistControl.getNextSongId(songId))
+            .trackUri);
+        playlistControl.songs.removeAt(
+            playlistControl.getSongIndexById(songId)); //Remove broken track
         playlistControl.emitPlaylistChange();
         playlistControl.refetchSongs(); // Perform fetching
       }
@@ -386,14 +426,19 @@ class MusicPlayer {
 
     } on PlatformException catch (e) {
       if (e.code == "error") {
+        Fluttertoast.showToast(
+            msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
+            backgroundColor: Color.fromRGBO(18, 18, 18, 1));
         // If could not play for platform exception reasons
         debugPrint(
             'Error thrown in my player class play method - ${e.toString()}');
         // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
         // Play next track after broken one
-        await nativePlayerInstance
-            .play(playlistControl.getSongById(playlistControl.getNextSongId(songId)).trackUri);
-        playlistControl.songs.removeAt(playlistControl.getSongIndexById(songId)); //Remove broken track
+        await nativePlayerInstance.play(playlistControl
+            .getSongById(playlistControl.getNextSongId(songId))
+            .trackUri);
+        playlistControl.songs.removeAt(
+            playlistControl.getSongIndexById(songId)); //Remove broken track
         playlistControl.emitPlaylistChange();
         playlistControl.refetchSongs(); // Perform fetching
       }
@@ -457,12 +502,16 @@ class MusicPlayer {
 
   /// Function that fires when next track button got clicked
   Future<void> clickNext() async {
-    if (!switching) await play(playlistControl.getNextSongId(playlistControl.playingTrackIdState));
+    if (!switching)
+      await play(
+          playlistControl.getNextSongId(playlistControl.playingTrackIdState));
   }
 
   /// Function that fires when prev track button got clicked
   Future<void> clickPrev() async {
-    if (!switching) await play(playlistControl.getPrevSongId(playlistControl.playingTrackIdState));
+    if (!switching)
+      await play(
+          playlistControl.getPrevSongId(playlistControl.playingTrackIdState));
   }
 
   /// Function that handles click on track tile
@@ -514,9 +563,15 @@ class MusicPlayer {
       loopModeState = savedLoopMode;
       nativePlayerInstance.setReleaseMode(ReleaseMode.LOOP);
     }
+
+    final directory = await getApplicationDocumentsDirectory();
+    _placeholderImgBytes =
+        (await rootBundle.load('images/placeholder_thumb.png'))
+            .buffer
+            .asUint8List();
   }
 }
 
 /// Function that returns artist, or automatically show "Неизвестный исоплнитель" instead of "<unknown>"
 String artistString(String artist) =>
-    artist != '<unknown>' ? artist : 'Неизестный исполнитель';
+    artist != '<unknown>' ? artist : 'Неизвестный исполнитель';
