@@ -4,7 +4,8 @@
    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
    <!-- Allow medai notification -->
    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
-
+   <!-- Needed to stay awake feature in audioplayrs -->
+   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.

@@ -38,11 +38,16 @@ import android.media.session.MediaSession;
 import android.os.AsyncTask;
 import java.lang.Runnable;
 
+import java.io.File;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 public class MainActivity extends FlutterActivity {
    private static String TAG = "player/java file";
 
    private static final String eventChannelStream = "eventChannelStream";
    private static final String methodChannelStream = "methodChannelStream";
+   private static final String songsChannelStream = "songsChannelStream";
 
    private static IntentFilter notificationIntentFilter = new IntentFilter();
    private static IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -61,6 +66,7 @@ public class MainActivity extends FlutterActivity {
    private static AudioFocusRequest focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
          .setAcceptsDelayedFocusGain(true).setOnAudioFocusChangeListener(new OnFocusChangeListener()).build();
    private static MethodChannel methodChannel;
+   private static MethodChannel songsChannel;
    private static EventChannel eventChannel;
 
    private AudioManager audioManager;
@@ -250,12 +256,15 @@ public class MainActivity extends FlutterActivity {
 
    }
 
-   private void buildNotification(String title, String artist, boolean isPlaying) {
+   private void buildNotification(String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
+
       NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),
             Constants.NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                   .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                   .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
-                  .setSmallIcon(R.drawable.round_music_note_white_48).setOngoing(true) // Persistent setting
+                  .setSmallIcon(R.drawable.round_music_note_white_48)
+                  .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length))
+                  .setOngoing(isPlaying) // Persistent setting
                   .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
                                                                // notification
                   .setContentTitle(title).setContentText(artist)
@@ -280,7 +289,7 @@ public class MainActivity extends FlutterActivity {
 
       @Override
       protected void onPostExecute(List<String> result) {
-         methodChannel.invokeMethod("SEND_SONGS", result);
+         songsChannel.invokeMethod("SEND_SONGS", result);
       }
    }
 
@@ -313,6 +322,8 @@ public class MainActivity extends FlutterActivity {
 
       // Setup methodChannel
       methodChannel = new MethodChannel(getFlutterView(), methodChannelStream);
+      // Setup songsChannel
+      songsChannel = new MethodChannel(getFlutterView(), songsChannelStream);
       // Setup event channel
       eventChannel = new EventChannel(getFlutterView(), eventChannelStream);
 
@@ -359,11 +370,28 @@ public class MainActivity extends FlutterActivity {
                result.success("");
                break;
             case "NOTIFICATION_SHOW":
-               buildNotification(call.argument("title"), call.argument("artist"), call.argument("isPlaying"));
+               buildNotification(call.argument("title"), call.argument("artist"), call.argument("albumArtBytes"),
+                     call.argument("isPlaying"));
                result.success("");
                break;
             case "NOTIFICATION_CLOSE":
                closeNotification();
+               result.success("");
+               break;
+            default:
+               Log.w(TAG, "Invalid method name call from Dart code");
+            }
+         }
+      });
+
+      songsChannel.setMethodCallHandler(new MethodCallHandler() {
+         @Override
+         public void onMethodCall(MethodCall call, Result result) {
+            // Note: this method is invoked on the main thread.
+            switch (call.method) {
+            case "RETRIEVE_SONGS":
+               // Run method on another thread
+               new ConductSongsSearch().execute();
                result.success("");
                break;
             default:

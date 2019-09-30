@@ -1,5 +1,8 @@
 // This is a file to all event and method channel constants
 
+
+// TODO: rename channels to "playerEventChannel", "songsMethodChannel" or something like that
+
 abstract class EventChannel {
   static const String channelName = 'eventChannelStream';
 
@@ -40,11 +43,6 @@ abstract class MethodChannel {
   /// Abandon focus method
   static const String methodAbandonFocus = 'ABANDON_FOCUS';
 
-  /// Retrieve songs method
-  static const String methodRetrieveSongs = 'RETRIEVE_SONGS';
-  /// Method that sends found songs from native code to flutter code
-  static const String methodSendSongs = 'SEND_SONGS';
-
   // Notifications methods
   static const String methodShowNotification = 'NOTIFICATION_SHOW';
  
@@ -55,5 +53,16 @@ abstract class MethodChannel {
 
   /// Click on headset hook button
   static const String methodHookButtonClick = 'HOOK_BUTTON_CLICK';
+
+}
+
+abstract class SongsChannel {
+  static const String channelName = 'songsChannelStream';
+
+  /// Retrieve songs method
+  static const String methodRetrieveSongs = 'RETRIEVE_SONGS';
+  /// Method that sends found songs from native code to flutter code
+  static const String methodSendSongs = 'SEND_SONGS';
+
 
 }

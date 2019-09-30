@@ -11,7 +11,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     with SingleTickerProviderStateMixin {
-  final _musicPlayer = MusicPlayer.getInstance;
+  final _musicPlayer = MusicPlayer.instance;
   AnimationController _animationController;
   StreamSubscription<AudioPlayerState> _playerChangeSubscription;
 
@@ -48,11 +48,11 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   Widget build(BuildContext context) {
     return Container(
       child: IconButton(
-        padding: const EdgeInsets.all(0),
+        padding: const EdgeInsets.all(0.0),
         icon: Center(
           child: AnimatedIcon(
             icon: AnimatedIcons.play_pause,
-            size: 35,
+            size: 32,
             color: Colors.white,
             progress: _animationController,
           ),

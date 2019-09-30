@@ -44,7 +44,8 @@ class _MyAppState extends State<MyApp> {
       ],
       title: 'Музыка',
       theme: ThemeData(
-        appBarTheme: AppBarTheme(color: Color(0xff070707)),
+        // appBarTheme: AppBarTheme(color: Color(0xff070707)),
+        appBarTheme: AppBarTheme(color: Colors.black),
         brightness: Brightness.dark,
         accentColor: Colors.grey.shade900,
         backgroundColor: Colors.black,
@@ -78,7 +79,7 @@ class _MyAppState extends State<MyApp> {
       return Future.value(false);
     }
     // Stop player before exiting app
-    await MusicPlayer.getInstance.stop();
+    await MusicPlayer.instance.stop();
     return Future.value(true);
   }
 }

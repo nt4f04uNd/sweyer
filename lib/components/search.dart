@@ -1,6 +1,6 @@
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/track_list.dart';
-import 'package:app/constants/prefs.dart';
+import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/player.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +14,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     assert(context != null);
     final ThemeData theme = Theme.of(context);
     assert(theme != null);
+    /// FIXME: change this to correspond with main app bar
     return theme.copyWith(primaryColor: Color(0xff070707));
   }
 
@@ -31,7 +32,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
   Future<void> _fetchSearchHistory() async {
     final prefs = await SharedPreferences.getInstance();
     var searchHistoryList =
-        prefs.getStringList(PrefKeys.searchHistoryStringList);
+        prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
     if (searchHistoryList == null)
       _suggestions = [];
     else
@@ -42,9 +43,9 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
   Future<void> _deleteItemFromHistory(BuildContext context, int index) async {
     final prefs = await SharedPreferences.getInstance();
     var searchHistoryList =
-        prefs.getStringList(PrefKeys.searchHistoryStringList);
+        prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
     searchHistoryList.removeAt(index);
-    prefs.setStringList(PrefKeys.searchHistoryStringList, searchHistoryList);
+    prefs.setStringList(Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
     _suggestions.removeAt(index); // Remove element from _suggestions list too
     showSuggestions(context); // Update suggestions ListView
   }
@@ -55,7 +56,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     if (input.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
       var searchHistoryList =
-          prefs.getStringList(PrefKeys.searchHistoryStringList);
+          prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
       if (searchHistoryList == null) {
         searchHistoryList = <String>[input];
       } else {
@@ -67,19 +68,19 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
         }
       }
 
-      prefs.setStringList(PrefKeys.searchHistoryStringList, searchHistoryList);
+      prefs.setStringList(Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
     }
   }
 
   Future<void> _resetSearchHistory(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(PrefKeys.searchHistoryStringList, []);
+    prefs.setStringList(Constants.PrefKeys.searchHistoryStringList, []);
     _suggestions = [];
     showSuggestions(context); // Update suggestions ListView
   }
 
   Widget _buildResultsAndSuggestions(BuildContext context) {
-    final Iterable<Song> searched = MusicPlayer.getInstance
+    final Iterable<Song> searched = MusicPlayer.instance.playlistControl
         .searchSongs(query.trim() /* Remove any whitespaces*/);
 
     // Display suggestions
@@ -109,16 +110,18 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                                   children: <Widget>[
                                     Text("История поиска",
                                         style: TextStyle(
+                                          fontWeight: FontWeight.w600,
                                           fontSize: 17,
                                           color: Theme.of(context).hintColor,
                                         )),
                                     IconButton(
-                                      icon: Icon(Icons.delete_outline),
+                                      icon: Icon(Icons.delete),
                                       color: Theme.of(context).hintColor,
                                       onPressed: () {
                                         showDialog(
                                             context: context,
                                             builder: (context) => AlertDialog(
+                                              backgroundColor: Color(0xff151515),
                                                   title: Text(
                                                       "Очистить историю поиска"),
                                                   content: Text(
@@ -126,8 +129,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                                                   contentPadding:
                                                       EdgeInsets.only(
                                                           top: 24.0,
-                                                          left: 24.0,
-                                                          right: 24.0),
+                                                          left: 27.0,
+                                                          right: 27.0),
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
                                                         BorderRadius.all(
@@ -197,14 +200,14 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                                 // Show dialog to remove element from search hisory
                                 showDialog(
                                     context: context,
-                                    builder: (context) => AlertDialog(
+                                    builder: (context) => AlertDialog( backgroundColor: Color(0xff151515),
                                           title: Text("Удалить запрос"),
                                           content: Text(
                                               "Вы действительно хотите удалить этот запрос из истории?"),
                                           contentPadding: EdgeInsets.only(
                                               top: 24.0,
-                                              left: 24.0,
-                                              right: 24.0),
+                                              left: 27.0,
+                                              right: 27.0),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.all(
                                               Radius.circular(10),
@@ -295,15 +298,18 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     }
 
     // Display tiles
-    List<TrackTile> tiles = searched.map((el) {
-      return TrackTile(
-        MusicPlayer.getInstance.getSongIndexById(el.id),
+    List<TrackTile> tiles = [];
+    searched.toList().asMap().forEach((index, el) {
+      tiles.add(TrackTile(
+        index,
+        song: el,
         additionalClickCallback: () {
           _writeInputToSearchHistory(query);
-          MusicPlayer.getInstance.setPlaylist(searched.toList());
+          MusicPlayer.instance.playlistControl
+              .setPlaylist(searched.toList());
         },
-      );
-    }).toList();
+      ));
+    });
 
     return Stack(
       children: <Widget>[
