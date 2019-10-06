@@ -25,6 +25,12 @@ class _MyAppState extends State<MyApp> {
   DateTime currentBackPressTime;
 
   @override
+  void dispose() {
+    MusicPlayer.instance.stop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: Catcher.navigatorKey,
@@ -62,6 +68,7 @@ class _MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Colors.black,
         textSelectionColor: Colors.deepPurple,
         textSelectionHandleColor: Colors.deepPurple,
+        cursorColor: Colors.deepPurple,
       ),
       home: WillPopScope(child: MainRoute(), onWillPop: onWillPop),
     );

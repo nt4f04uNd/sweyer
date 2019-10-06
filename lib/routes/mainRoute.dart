@@ -17,9 +17,8 @@ class MainRouteState extends State<MainRoute> {
   void initState() {
     super.initState();
     // Init music player instance
+    // It is not in main function, because we need catcher to catch errors
     _musicPlayer = MusicPlayer();
-
-    // throw Exception('ffflellelelex');
   }
 
   void _showSearch() async {
@@ -137,12 +136,16 @@ class MainRouteState extends State<MainRoute> {
                               ),
                             ]),
                       )
-                    : _musicPlayer.playlistControl.songsEmpty // FIXME: this ternatry will never be reached 
+                    : _musicPlayer.playlistControl
+                            .songsEmpty // FIXME: this ternatry will never be reached
                         ? Center(
                             child: Text('На вашем устройстве нету музыки :( '))
                         : Stack(
                             children: <Widget>[
-                              TrackList(),
+                              TrackList(
+                                bottomPadding:
+                                    const EdgeInsets.only(bottom: 55.0),
+                              ),
                               BottomTrackPanel(),
                             ],
                           );

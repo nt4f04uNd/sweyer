@@ -183,6 +183,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.2"
+  exif:
+    dependency: "direct main"
+    description:
+      name: exif
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   fixnum:
     dependency: transitive
     description:
@@ -518,6 +525,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.5"
+  sprintf:
+    dependency: transitive
+    description:
+      name: sprintf
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.2"
   stack_trace:
     dependency: transitive
     description:

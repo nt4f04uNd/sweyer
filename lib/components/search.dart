@@ -14,6 +14,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     assert(context != null);
     final ThemeData theme = Theme.of(context);
     assert(theme != null);
+
     /// FIXME: change this to correspond with main app bar
     return theme.copyWith(primaryColor: Color(0xff070707));
   }
@@ -45,7 +46,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     var searchHistoryList =
         prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
     searchHistoryList.removeAt(index);
-    prefs.setStringList(Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
+    prefs.setStringList(
+        Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
     _suggestions.removeAt(index); // Remove element from _suggestions list too
     showSuggestions(context); // Update suggestions ListView
   }
@@ -68,7 +70,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
         }
       }
 
-      prefs.setStringList(Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
+      prefs.setStringList(
+          Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
     }
   }
 
@@ -121,7 +124,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                                         showDialog(
                                             context: context,
                                             builder: (context) => AlertDialog(
-                                              backgroundColor: Color(0xff151515),
+                                                  backgroundColor:
+                                                      Color(0xff151515),
                                                   title: Text(
                                                       "Очистить историю поиска"),
                                                   content: Text(
@@ -200,7 +204,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                                 // Show dialog to remove element from search hisory
                                 showDialog(
                                     context: context,
-                                    builder: (context) => AlertDialog( backgroundColor: Color(0xff151515),
+                                    builder: (context) => AlertDialog(
+                                          backgroundColor: Color(0xff151515),
                                           title: Text("Удалить запрос"),
                                           content: Text(
                                               "Вы действительно хотите удалить этот запрос из истории?"),
@@ -298,6 +303,22 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     }
 
     // Display tiles
+    // List<StreamBuilder> tiles = [];
+    // searched.toList().asMap().forEach((index, el) {
+    //   tiles.add(StreamBuilder(
+    //       stream: MusicPlayer.instance.onDurationChanged,
+    //       builder: (context, snapshot) {
+    //         return TrackTile(
+    //           index,
+    //           song: el,
+    //           additionalClickCallback: () {
+    //             _writeInputToSearchHistory(query);
+    //             MusicPlayer.instance.playlistControl
+    //                 .setPlaylist(searched.toList());
+    //           },
+    //         );
+    //       }));
+    // });
     List<TrackTile> tiles = [];
     searched.toList().asMap().forEach((index, el) {
       tiles.add(TrackTile(
@@ -305,8 +326,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
         song: el,
         additionalClickCallback: () {
           _writeInputToSearchHistory(query);
-          MusicPlayer.instance.playlistControl
-              .setPlaylist(searched.toList());
+          MusicPlayer.instance.playlistControl.setPlaylist(searched.toList());
         },
       ));
     });

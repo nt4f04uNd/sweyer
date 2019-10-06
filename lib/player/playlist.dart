@@ -85,7 +85,7 @@ class Playlist {
 }
 
 /// What playlist is now playing? type
-enum PlayingPlaylistType { global, custom }
+enum PlaylistType { global, custom, shuffled }
 
 /// A class to fetch songs/control json/control playlists/search in playlists
 class PlaylistControl {
@@ -96,7 +96,7 @@ class PlaylistControl {
   Playlist _customPlaylist;
 
   /// What playlist is now playing?
-  PlayingPlaylistType _playingPlaylist = PlayingPlaylistType.global;
+  PlaylistType playlistType = PlaylistType.global;
 
   /// Songs fetcher class instance
   final SongsFetcher fetcher = SongsFetcher();
@@ -110,9 +110,9 @@ class PlaylistControl {
 
   // Getters
 
-  /// Common field for both `globalPlaylist` and `_customPlaylist`, its return depends on which playlist is now playing (`_playingPlaylist`)
+  /// Common field for both `globalPlaylist` and `_customPlaylist`, its return depends on which playlist is now playing (`playlistType`)
   Playlist get playlist {
-    return _playingPlaylist == PlayingPlaylistType.global
+    return playlistType == PlaylistType.global
         ? globalPlaylist
         : _customPlaylist;
   }
@@ -146,6 +146,7 @@ class PlaylistControl {
   /// Works on `globalPlaylist`
   Song getSongById(int index) => globalPlaylist.getSongById(index);
   Song getSongByIndex(int index) => playlist.getSongByIndex(index);
+
   /// Works on `globalPlaylist`
   int getSongIdByIndex(int index) => globalPlaylist.getSongIdByIndex(index);
   int getSongIndexById(int index) => playlist.getSongIndexById(index);
@@ -159,13 +160,22 @@ class PlaylistControl {
   Future<void> _init() async {
     // Permissions
     // TODO: add button to re-request permissions
-    PermissionStatus permission = await PermissionHandler()
+    PermissionStatus permissionStorage = await PermissionHandler()
         .checkPermissionStatus(PermissionGroup.storage);
+    // PermissionStatus permissionBattery = await PermissionHandler()
+    //     .checkPermissionStatus(PermissionGroup.ignoreBatteryOptimizations);
 
+    // For return values of `requestPermissions`s
     Map<PermissionGroup, PermissionStatus> permissions;
-    if (permission == PermissionStatus.denied)
-      permissions = await PermissionHandler()
-          .requestPermissions([PermissionGroup.storage]);
+
+    if (permissionStorage != PermissionStatus.granted)
+      await PermissionHandler().requestPermissions([
+        PermissionGroup.storage,
+      ]);
+
+    // if (permissionBattery != PermissionStatus.granted)
+    //   await PermissionHandler()
+    //       .requestPermissions([PermissionGroup.ignoreBatteryOptimizations]);
 
     await fetcher.serializer.initJson(); // Init songs json actions
     globalPlaylist = Playlist(await fetcher.serializer
@@ -239,14 +249,26 @@ class PlaylistControl {
   /// Set another playlist to play
   void setPlaylist(List<Song> songs) {
     // FIXME: try to optimize this, add some comparison e.g ???
-    _customPlaylist = Playlist(songs); // NOTE The order of these two instruction matters
-    _playingPlaylist = PlayingPlaylistType.custom;
+    _customPlaylist =
+        Playlist(songs); // NOTE The order of these two instruction matters
+    playlistType = PlaylistType.custom;
+    emitPlaylistChange();
+  }
+
+  void setShuffledPlaylist() {
+    List<Song> shuffledSongs =List.from(songs);
+    shuffledSongs.shuffle();
+    _customPlaylist =
+        Playlist(shuffledSongs); // NOTE The order of these two instruction matters
+    playlistType = PlaylistType.shuffled;
+    emitPlaylistChange();
   }
 
   /// Sets playlist default that is made from list of all song on user device
   void resetPlaylist() {
-    _playingPlaylist = PlayingPlaylistType.global;
+    playlistType = PlaylistType.global;
     _customPlaylist = Playlist([]);
+    emitPlaylistChange();
   }
 
   /// Search in playlist song array by query

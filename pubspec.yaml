@@ -28,6 +28,7 @@ dependencies:
   flutter_svg: ^0.14.1
   catcher: ^0.2.4
   percent_indicator: ^2.1.1+1
+  exif: ^1.0.1
 
   flutter:
     sdk: flutter

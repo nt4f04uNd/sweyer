@@ -133,6 +133,7 @@ class MusicPlayer {
   MusicPlayer() {
     instance = this;
 
+    nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
     // Change player mode for sure
     nativePlayerInstance.mode = PlayerMode.MEDIA_PLAYER;
 
@@ -339,7 +340,7 @@ class MusicPlayer {
   }
 
   /// Method to hide notification
-  void _closeNotification() async {
+  Future<void> _closeNotification() async {
     await _methodChannel
         .invokeMethod(Constants.MethodChannel.methodCloseNotification);
   }
@@ -464,6 +465,7 @@ class MusicPlayer {
   /// Stop player
   Future<void> stop() async {
     final int result = await nativePlayerInstance.stop();
+    // await _closeNotification();
     // Change state if result is successful
     await _abandonFocus();
   }
@@ -553,7 +555,7 @@ class MusicPlayer {
 
   /// Init whole music instance
   ///
-  _init() async {
+  Future<void> _init() async {
     // Get saved data
     var prefs = await SharedPreferences.getInstance();
     var savedLoopMode = prefs.getBool(Constants.PrefKeys.loopModeBool);

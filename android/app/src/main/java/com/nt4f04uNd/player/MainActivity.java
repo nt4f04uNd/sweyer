@@ -63,18 +63,29 @@ public class MainActivity extends FlutterActivity {
    PendingIntent pendingNotificationIntent;
 
    /** Focus request for audio manager */
-   private static AudioFocusRequest focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-         .setAcceptsDelayedFocusGain(true).setOnAudioFocusChangeListener(new OnFocusChangeListener()).build();
+   private static AudioFocusRequest focusRequest;
    private static MethodChannel methodChannel;
    private static MethodChannel songsChannel;
    private static EventChannel eventChannel;
 
    private AudioManager audioManager;
+   AudioManager.OnAudioFocusChangeListener afChangeListener; // Listener for lower than 8.0 android version
    private MediaSession audioSession;
 
    /** Request audio manager focus for app */
    private String requestFocus() {
-      int res = audioManager.requestAudioFocus(focusRequest);
+      int res;
+      if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+         res = audioManager.requestAudioFocus(focusRequest);
+      } else {
+         // NOTE This causes message "uses or overrides a deprecated API."
+         res = audioManager.requestAudioFocus(afChangeListener,
+               // Use the music stream.
+               AudioManager.STREAM_MUSIC,
+               // Request permanent focus.
+               AudioManager.AUDIOFOCUS_GAIN);
+      }
+
       Log.w(TAG, "REQUEST FOCUS " + res);
       if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
          return "AUDIOFOCUS_REQUEST_FAILED";
@@ -87,7 +98,14 @@ public class MainActivity extends FlutterActivity {
    }
 
    private int abandonFocus() {
-      int res = audioManager.abandonAudioFocusRequest(focusRequest);
+      int res;
+
+      if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+         res = audioManager.abandonAudioFocusRequest(focusRequest);
+      } else {
+         res = audioManager.abandonAudioFocus(afChangeListener);
+      }
+
       Log.w(TAG, "ABANDON FOCUS " + res);
       return res;
    }
@@ -264,7 +282,7 @@ public class MainActivity extends FlutterActivity {
                   .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
                   .setSmallIcon(R.drawable.round_music_note_white_48)
                   .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length))
-                  .setOngoing(isPlaying) // Persistent setting
+                  .setOngoing(true) // Persistent setting
                   .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
                                                                // notification
                   .setContentTitle(title).setContentText(artist)
@@ -349,6 +367,13 @@ public class MainActivity extends FlutterActivity {
       // Audio manager focus
       if (audioManager == null)
          audioManager = (AudioManager) getApplicationContext().getSystemService(getApplicationContext().AUDIO_SERVICE);
+
+      if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+         focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAcceptsDelayedFocusGain(true)
+               .setOnAudioFocusChangeListener(new OnFocusChangeListener()).build();
+      } else {
+         afChangeListener = new OnFocusChangeListener();
+      }
 
       methodChannel.setMethodCallHandler(new MethodCallHandler() {
          @Override
@@ -439,12 +464,14 @@ public class MainActivity extends FlutterActivity {
    // return false;
    // }
 
+
    @Override
    protected void onDestroy() {
       super.onDestroy();
       unregisterReceiver(myNoisyAudioStreamReceiver);
       unregisterReceiver(myPlayerReceiver);
       closeNotification();
+      audioSession.release();
    }
 }
 

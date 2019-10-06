@@ -96,7 +96,8 @@ class _AlbumArtPlaceholder extends StatelessWidget {
                       -2 // Border width
                 : constraint1.maxHeight,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.04),
+          // color: Colors.white.withOpacity(0.04),
+          color: isLarge ?  Colors.white.withOpacity(0.9):Colors.white.withOpacity(1),
           borderRadius: BorderRadius.all(Radius.circular(round ? 500 : 10)),
         ),
         padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round?8:10),
