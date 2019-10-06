@@ -19,10 +19,10 @@ enum SortFeature { date, title }
 ///
 class SongsListChangeStreamController {
   /// Stream controller used to create stream of changes on track list (just to notify)
-  StreamController _controller = StreamController<void>.broadcast();
+  StreamController<void> _controller = StreamController<void>.broadcast();
 
   /// Get stream of notifier events about changes on track list
-  Stream<dynamic> get stream => _controller.stream;
+  Stream<void> get stream => _controller.stream;
 
   /// Emit change event
   void emitEvent() {
@@ -33,6 +33,17 @@ class SongsListChangeStreamController {
 class Playlist {
   final List<Song> songs;
   Playlist(this.songs);
+
+  /// Creates playlist and shuffles specified songs array
+  Playlist.shuffled(List<Song> songs)
+      : this.songs = Playlist.shuffleSongs(songs);
+
+  /// Returns a shuffled copy of songs
+  static List<Song> shuffleSongs(List<Song> songs) {
+    List<Song> shuffledSongs = List.from(songs);
+    shuffledSongs.shuffle();
+    return shuffledSongs;
+  }
 
   /// Getters
   ///
@@ -61,22 +72,18 @@ class Playlist {
     return songs.indexWhere((el) => el.id == id);
   }
 
-  /// Returns next song index
-  ///
-  /// Function will return incremented `index`
-  int getNextSongId(int index) {
-    final int nextSongIndex = getSongIndexById(index) + 1;
+  /// Returns next song id
+  int getNextSongId(int id) {
+    final int nextSongIndex = getSongIndexById(id) + 1;
     if (nextSongIndex >= length) {
       return getSongIdByIndex(0);
     }
     return getSongIdByIndex(nextSongIndex);
   }
 
-  /// Returns prev song index
-  ///
-  /// Function will return decremented `index`
-  int getPrevSongId(int index) {
-    final int prevSongIndex = getSongIndexById(index) - 1;
+  /// Returns prev song id
+  int getPrevSongId(int id) {
+    final int prevSongIndex = getSongIndexById(id) - 1;
     if (prevSongIndex < 0) {
       return getSongIdByIndex(length - 1);
     }
@@ -85,15 +92,18 @@ class Playlist {
 }
 
 /// What playlist is now playing? type
-enum PlaylistType { global, custom, shuffled }
+enum PlaylistType { global, searched, shuffled }
 
 /// A class to fetch songs/control json/control playlists/search in playlists
 class PlaylistControl {
   /// Playlist for songs
   Playlist globalPlaylist;
 
-  /// Playlist some other playlist, less then global e.g.
-  Playlist _customPlaylist;
+  /// Playlist used to save searched tracks
+  Playlist searchedPlaylist;
+
+  /// Shuffled version of global playlist
+  Playlist shuffledPlaylist;
 
   /// What playlist is now playing?
   PlaylistType playlistType = PlaylistType.global;
@@ -101,57 +111,121 @@ class PlaylistControl {
   /// Songs fetcher class instance
   final SongsFetcher fetcher = SongsFetcher();
 
-  /// Current index of playing track in `playlist`
+  /// Current id of playing track
   int playingTrackIdState;
 
   /// Controller for stream of playlist changes
   SongsListChangeStreamController _songsListChangeStreamController =
       SongsListChangeStreamController();
 
-  // Getters
+  /// Controller for stream of current song changes
+  SongsListChangeStreamController _songChangeStreamController =
+      SongsListChangeStreamController();
 
-  /// Common field for both `globalPlaylist` and `_customPlaylist`, its return depends on which playlist is now playing (`playlistType`)
-  Playlist get playlist {
-    return playlistType == PlaylistType.global
-        ? globalPlaylist
-        : _customPlaylist;
+  /// Returns current playlist (by default)
+  ///
+  /// If optional `argPlaylistType` is specified, then returns playlist respectively to it
+  Playlist currentPlaylist([PlaylistType argPlaylistType]) {
+    if (argPlaylistType == null) argPlaylistType = playlistType;
+    switch (argPlaylistType) {
+      case PlaylistType.global:
+        return globalPlaylist;
+      case PlaylistType.searched:
+        return searchedPlaylist;
+      case PlaylistType.shuffled:
+        return shuffledPlaylist;
+      default:
+        throw 'Invalid playlist type';
+    }
   }
 
-  /// Get current playing song
-  ///
-  /// FIXME: 0 index reference may fail
+  /// Get current playing song (always being searched in globalPlaylist)
   Song get currentSong {
     return globalPlaylist.getSongById(playingTrackIdState);
+  }
+
+  /// Util function to select playlist by `argPlaylistType`
+  ///
+  /// Returns current playlist if `argPlaylistType` is `null`
+  Playlist _selectPlaylist([PlaylistType argPlaylistType]) {
+    if (argPlaylistType == null) return currentPlaylist();
+    return currentPlaylist(argPlaylistType);
+  }
+
+  /// Returns a `currentSong` index in current playlist (by default)
+  ///
+  /// If optional `playlistType` is specified, then returns index in selected playlist type
+  int currentSongIndex([PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType)
+        .getSongIndexById(playingTrackIdState);
+  }
+
+  /// Returns `songs` of current playlist (by default)
+  ///
+  /// If optional `playlistType` is specified, then returns `songs` of selected playlist type
+  List<Song> songs([PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).songs;
+  }
+
+  /// Returns `length` of current playlist (by default)
+  ///
+  /// If optional `playlistType` is specified, then returns `length` of selected playlist type
+  int length([PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).length;
+  }
+
+  /// Returns `isEmpty` of current playlist (by default)
+  ///
+  /// If optional `playlistType` is specified, then returns `isEmpty` of selected playlist type
+  bool songsEmpty([PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).isEmpty;
   }
 
   /// Whether playlist control is ready to provide player instance sources to play tracks
   bool get playReady => globalPlaylist != null;
 
-  /// Is songs list empty?
-  bool get songsEmpty => playlist.isEmpty;
-
-  /// Returns current playlist songs list
-  List<Song> get songs => playlist.songs;
+  /// A stream of changes on playlist
+  Stream<void> get onPlaylistListChange =>
+      _songsListChangeStreamController.stream;
 
   /// A stream of changes on playlist
-  Stream<dynamic> get onPlaylistListChange =>
-      _songsListChangeStreamController.stream;
+  Stream<void> get onSongChange => _songChangeStreamController.stream;
 
   /// Emit event to `onPlaylistListChange`
   void emitPlaylistChange() {
     _songsListChangeStreamController.emitEvent();
   }
 
-  // Methods from playlist class
-  /// Works on `globalPlaylist`
-  Song getSongById(int index) => globalPlaylist.getSongById(index);
-  Song getSongByIndex(int index) => playlist.getSongByIndex(index);
+  /// Emit event to `onSongChange`
+  void emitSongChange() {
+    _songChangeStreamController.emitEvent();
+  }
 
-  /// Works on `globalPlaylist`
-  int getSongIdByIndex(int index) => globalPlaylist.getSongIdByIndex(index);
-  int getSongIndexById(int index) => playlist.getSongIndexById(index);
-  int getNextSongId(int index) => playlist.getNextSongId(index);
-  int getPrevSongId(int index) => playlist.getPrevSongId(index);
+  // Methods from playlist class
+  /// Searches awlays on `globbalPlaylist`
+  Song getSongById(int id) {
+    return globalPlaylist.getSongById(id);
+  }
+
+  Song getSongByIndex(int index, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getSongByIndex(index);
+  }
+
+  int getSongIdByIndex(int index, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getSongIdByIndex(index);
+  }
+
+  int getSongIndexById(int id, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getSongIndexById(id);
+  }
+
+  int getNextSongId(int id, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getNextSongId(id);
+  }
+
+  int getPrevSongId(int id, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getPrevSongId(id);
+  }
 
   PlaylistControl() {
     _init();
@@ -187,9 +261,10 @@ class PlaylistControl {
     int savedSongPos = prefs.getInt(Constants.PrefKeys.songPositionInt);
 
     // songsEmpty condition is here to avoid errors when trying to get first song index
-    if (!songsEmpty) {
+    if (!songsEmpty()) {
       // Setup initial playing state index from prefs
-      playingTrackIdState = savedSongId ?? playlist.getSongIdByIndex(0);
+      playingTrackIdState =
+          savedSongId ?? currentPlaylist().getSongIdByIndex(0);
 
       try {
         // Set url of first track in player instance
@@ -216,9 +291,10 @@ class PlaylistControl {
     globalPlaylist = Playlist(await fetcher.fetchSongs()); // Fetch songs
 
     // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (playingTrackIdState == null)
-    if (!songsEmpty && playingTrackIdState == null) {
+    if (!songsEmpty() && playingTrackIdState == null) {
       // Setup initial playing state index from prefs
-      playingTrackIdState = savedSongId ?? playlist.getSongIdByIndex(0);
+      playingTrackIdState =
+          savedSongId ?? currentPlaylist().getSongIdByIndex(0);
 
       try {
         // Set url of first track in player instance
@@ -246,28 +322,44 @@ class PlaylistControl {
     emitPlaylistChange();
   }
 
-  /// Set another playlist to play
-  void setPlaylist(List<Song> songs) {
+  /// Create and sets specific playlist to play
+  ///
+  /// NOTE: YOU SHOULD NEVER SET GLOBAL PLAYLIST THROUGH THIS EXCEPT FOR APP INIT PROCESS
+  void setPlaylist(List<Song> songs, PlaylistType argPlaylistType) {
     // FIXME: try to optimize this, add some comparison e.g ???
-    _customPlaylist =
-        Playlist(songs); // NOTE The order of these two instruction matters
-    playlistType = PlaylistType.custom;
+    switch (argPlaylistType) {
+      case PlaylistType.searched:
+        // NOTE The order of these two instruction matters
+        searchedPlaylist = Playlist(songs);
+        playlistType = argPlaylistType;
+        emitPlaylistChange();
+        break;
+      case PlaylistType.shuffled:
+        shuffledPlaylist = Playlist(songs);
+        playlistType = argPlaylistType;
+        emitPlaylistChange();
+        break;
+      case PlaylistType.global: // Do nothing
+        break;
+      default:
+        throw 'Invalid playlistType';
+    }
     emitPlaylistChange();
   }
 
-  void setShuffledPlaylist() {
-    List<Song> shuffledSongs =List.from(songs);
-    shuffledSongs.shuffle();
-    _customPlaylist =
-        Playlist(shuffledSongs); // NOTE The order of these two instruction matters
-    playlistType = PlaylistType.shuffled;
-    emitPlaylistChange();
+  /// Shuffles from current playlist (by default)
+  ///
+  /// If `argPlaylistType` specified - shuffles from it
+  void setShuffledPlaylist([PlaylistType argPlaylistType]) {
+    setPlaylist(
+        Playlist.shuffleSongs(songs(argPlaylistType)), PlaylistType.shuffled);
   }
 
-  /// Sets playlist default that is made from list of all song on user device
-  void resetPlaylist() {
+  /// Switches tp global Resets all playlists except it
+  void resetPlaylists() {
     playlistType = PlaylistType.global;
-    _customPlaylist = Playlist([]);
+    searchedPlaylist = Playlist([]);
+    shuffledPlaylist = Playlist([]);
     emitPlaylistChange();
   }
 

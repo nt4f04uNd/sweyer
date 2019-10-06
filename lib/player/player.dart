@@ -1,17 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/playlist.dart';
-import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// VIEW https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
@@ -57,12 +53,12 @@ class MusicPlayer {
       const EventChannel(Constants.EventChannel.channelName);
 
   /// `[AudioPlayer]` player instance
-  final nativePlayerInstance = AudioPlayer();
+  final nativePlayerInstance = AudioPlayer(mode: PlayerMode.MEDIA_PLAYER);
 
   PlaylistControl playlistControl = PlaylistControl();
 
-  /// A subscription to duration change in constructior
-  StreamSubscription<Duration> _durationChangeListenerSubscription;
+  /// A subscription to song change
+  StreamSubscription<void> _songChangeListenerSubscription;
 
   /// Subscription for events stream
   StreamSubscription _eventSubscription;
@@ -120,6 +116,9 @@ class MusicPlayer {
   /// Get stream of notifier events about changes on track list
   Stream<void> get onPlaylistListChange => playlistControl.onPlaylistListChange;
 
+  /// Get stream of notifier events about changes on current song
+  Stream<void> get onSongChange => playlistControl.onSongChange;
+
   AudioPlayerState get playState => nativePlayerInstance.state;
 
   /// Get current position
@@ -134,16 +133,15 @@ class MusicPlayer {
     instance = this;
 
     nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
-    // Change player mode for sure
-    nativePlayerInstance.mode = PlayerMode.MEDIA_PLAYER;
 
-    _durationChangeListenerSubscription = onDurationChanged.listen((event) {
+    _songChangeListenerSubscription = onSongChange.listen((event) {
       switching = false;
     });
 
     _completionSubscription = onPlayerCompletion.listen((event) {
       // Play next track if not in loop mode
       if (!loopModeState) clickNext();
+      playlistControl.emitSongChange();
     });
 
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
@@ -170,7 +168,7 @@ class MusicPlayer {
     });
 
     _stateChangeSubscription = onPlayerStateChanged.listen((event) async {
-      if (!playlistControl.songsEmpty) {
+      if (!playlistControl.songsEmpty(PlaylistType.global)) {
         // TODO: improve this code + add comments
         var prefs = await SharedPreferences.getInstance();
         prefs.setInt(
@@ -364,46 +362,48 @@ class MusicPlayer {
   Future<void> play(int songId) async {
     switching = true;
     await _requestFocus();
-    int res = 0;
+    // NOTE that this is defaults to 1 and if needed you have to set it manually to 0
+    int res = 1;
     try {
+      final uri = playlistControl.getSongById(songId).trackUri;
       if (focusState == AudioFocusType.focus)
-        res = await nativePlayerInstance.play(
-            playlistControl.getSongById(songId).trackUri,
+        res = await nativePlayerInstance.play(uri,
             stayAwake:
                 true // This is very important for player to stay play even in background
             );
       else if (focusState == AudioFocusType.focus_delayed)
         // Set url if no focus has been granted
-        res = await nativePlayerInstance
-            .setUrl(playlistControl.getSongById(songId).trackUri);
+        res = await nativePlayerInstance.setUrl(uri);
     } on PlatformException catch (e) {
+      /// `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
+      /// `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
+      debugPrint(
+          'Error thrown in my player class play method - {code: ${e.code} --- details: ${e.details} --- message:${e.message}}');
+
       if (e.code == "error") {
-        Fluttertoast.showToast(
-            msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
-            backgroundColor: Color.fromRGBO(18, 18, 18, 1));
-        // If could not play for platform exception reasons
-        debugPrint(
-            'Error thrown in my player class play method - ${e.toString()}');
-        // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
-        // Play next track after broken one
-        await nativePlayerInstance.play(playlistControl
-            .getSongById(playlistControl.getNextSongId(songId))
-            .trackUri);
-        playlistControl.songs.removeAt(
-            playlistControl.getSongIndexById(songId)); //Remove broken track
-        playlistControl.emitPlaylistChange();
-        playlistControl.refetchSongs(); // Perform fetching
+        if (e.message ==
+            "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
+          Fluttertoast.showToast(
+              msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
+              backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+
+          // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
+          // Play next track after broken one
+          await play(playlistControl.getNextSongId(songId));
+          res = 0;
+          playlistControl.songs(PlaylistType.global).removeAt(
+              playlistControl.getSongIndexById(songId)); //Remove broken track
+          playlistControl.emitPlaylistChange();
+          playlistControl.refetchSongs(); // Perform fetching
+        }
       }
     } catch (e) {
-      debugPrint(
-          'Error thrown in my player class play method - ${e.toString()}');
+      debugPrint('Error thrown in my player class play method - error: $e');
     } finally {
       // If res is successful, then change playing track id
-      if (res == 1)
-        playlistControl.playingTrackIdState = songId;
-      // If no focus has been granted or if error occured then set `switching` to false. In default case it is handled in `onDurationChanged` listener
-      else
-        switching = false;
+      if (res == 1) playlistControl.playingTrackIdState = songId;
+      // Switching is set to false in `onSongChange` listener
+      playlistControl.emitSongChange();
     }
   }
 
@@ -416,7 +416,8 @@ class MusicPlayer {
     if (songId == null) songId = playlistControl.playingTrackIdState;
     switching = true;
     await _requestFocus();
-    int res = 0;
+    // NOTE that this is defaults to 1 and if needed you have to set it manually to 0
+    int res = 1;
     try {
       if (focusState == AudioFocusType.focus)
         res = await nativePlayerInstance.resume();
@@ -426,33 +427,35 @@ class MusicPlayer {
       // Do nothing if no focus has been granted
 
     } on PlatformException catch (e) {
+      /// `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
+      /// `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
+      debugPrint(
+          'Error thrown in my player class play method - {code: ${e.code} --- details: ${e.details} --- message:${e.message}}');
+
       if (e.code == "error") {
-        Fluttertoast.showToast(
-            msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
-            backgroundColor: Color.fromRGBO(18, 18, 18, 1));
-        // If could not play for platform exception reasons
-        debugPrint(
-            'Error thrown in my player class play method - ${e.toString()}');
-        // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
-        // Play next track after broken one
-        await nativePlayerInstance.play(playlistControl
-            .getSongById(playlistControl.getNextSongId(songId))
-            .trackUri);
-        playlistControl.songs.removeAt(
-            playlistControl.getSongIndexById(songId)); //Remove broken track
-        playlistControl.emitPlaylistChange();
-        playlistControl.refetchSongs(); // Perform fetching
+        if (e.message ==
+            "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
+          Fluttertoast.showToast(
+              msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
+              backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+
+          // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
+          // Play next track after broken one
+          await play(playlistControl.getNextSongId(songId));
+          res = 0;
+          playlistControl.songs(PlaylistType.global).removeAt(
+              playlistControl.getSongIndexById(songId)); //Remove broken track
+          playlistControl.emitPlaylistChange();
+          playlistControl.refetchSongs(); // Perform fetching
+        }
       }
     } catch (e) {
-      debugPrint(
-          'Error thrown in my player class play method - ${e.toString()}');
+      debugPrint('Error thrown in my player class play method - error: $e');
     } finally {
       // If res is successful, then change playing track id
-      if (res == 1)
-        playlistControl.playingTrackIdState = songId;
-      // If no focus has been granted or if error occured then set `switching` to false. In default case it is handled in `onDurationChanged` listener
-      else
-        switching = false;
+      if (res == 1) playlistControl.playingTrackIdState = songId;
+      // Switching is set to false
+      switching = false;
     }
   }
 
@@ -505,15 +508,13 @@ class MusicPlayer {
   /// Function that fires when next track button got clicked
   Future<void> clickNext() async {
     if (!switching)
-      await play(
-          playlistControl.getNextSongId(playlistControl.playingTrackIdState));
+      play(playlistControl.getNextSongId(playlistControl.playingTrackIdState));
   }
 
   /// Function that fires when prev track button got clicked
   Future<void> clickPrev() async {
     if (!switching)
-      await play(
-          playlistControl.getPrevSongId(playlistControl.playingTrackIdState));
+      play(playlistControl.getPrevSongId(playlistControl.playingTrackIdState));
   }
 
   /// Function that handles click on track tile
@@ -566,7 +567,6 @@ class MusicPlayer {
       nativePlayerInstance.setReleaseMode(ReleaseMode.LOOP);
     }
 
-    final directory = await getApplicationDocumentsDirectory();
     _placeholderImgBytes =
         (await rootBundle.load('images/placeholder_thumb.png'))
             .buffer

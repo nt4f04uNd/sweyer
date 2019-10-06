@@ -2,6 +2,7 @@ import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/player.dart';
+import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,7 +98,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                 Container(
                   child: _suggestions.length > 0
                       ? ListView.builder(
-                          // TODO: exctract this to constnant
+                          // TODO: extract this to constant
                           // key: PageStorageKey('SearchListView'),
                           itemCount: _suggestions.length +
                               1, // Plus 1 'cause we need to render list header
@@ -201,7 +202,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                               title: Text(_suggestions[index]),
                               leading: const Icon(Icons.history),
                               onLongPress: () {
-                                // Show dialog to remove element from search hisory
+                                // Show dialog to remove element from search history
                                 showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
@@ -303,33 +304,38 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     }
 
     // Display tiles
-    // List<StreamBuilder> tiles = [];
-    // searched.toList().asMap().forEach((index, el) {
-    //   tiles.add(StreamBuilder(
-    //       stream: MusicPlayer.instance.onDurationChanged,
-    //       builder: (context, snapshot) {
-    //         return TrackTile(
-    //           index,
-    //           song: el,
-    //           additionalClickCallback: () {
-    //             _writeInputToSearchHistory(query);
-    //             MusicPlayer.instance.playlistControl
-    //                 .setPlaylist(searched.toList());
-    //           },
-    //         );
-    //       }));
-    // });
-    List<TrackTile> tiles = [];
+    List<StreamBuilder> tiles = [];
     searched.toList().asMap().forEach((index, el) {
-      tiles.add(TrackTile(
-        index,
-        song: el,
-        additionalClickCallback: () {
-          _writeInputToSearchHistory(query);
-          MusicPlayer.instance.playlistControl.setPlaylist(searched.toList());
-        },
-      ));
+      tiles.add(StreamBuilder(
+          stream: MusicPlayer.instance.onSongChange,
+          builder: (context, snapshot) {
+            return TrackTile(
+              index,
+              song: el,
+              playing: MusicPlayer.instance.playlistControl.playlistType ==
+                      PlaylistType.searched &&
+                  index ==
+                      MusicPlayer.instance.playlistControl
+                          .currentSongIndex(PlaylistType.searched),
+              additionalClickCallback: () {
+                _writeInputToSearchHistory(query);
+                MusicPlayer.instance.playlistControl
+                    .setPlaylist(searched.toList(), PlaylistType.searched);
+              },
+            );
+          }));
     });
+    // List<TrackTile> tiles = [];
+    // searched.toList().asMap().forEach((index, el) {
+    //   tiles.add(TrackTile(
+    //     index,
+    //     song: el,
+    //     additionalClickCallback: () {
+    //       _writeInputToSearchHistory(query);
+    //       MusicPlayer.instance.playlistControl.setPlaylist(searched.toList());
+    //     },
+    //   ));
+    // });
 
     return Stack(
       children: <Widget>[

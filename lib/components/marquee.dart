@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class MarqueeWidget extends StatefulWidget {
@@ -7,12 +6,13 @@ class MarqueeWidget extends StatefulWidget {
   Duration animationDuration, backDuration, pauseDuration;
 
   MarqueeWidget({
+    Key key,
     @required this.text,
     this.direction = Axis.horizontal,
     Duration animationDuration = const Duration(milliseconds: 6000),
     Duration backDuration = const Duration(milliseconds: 3500),
     this.pauseDuration = const Duration(milliseconds: 2000),
-  }) {
+  }) : super(key: key) {
     if (text.data.length > (text.style.fontSize == 14 ? 75 : 50)) {
       // And respect font
       // Increase duration for when large string is provided

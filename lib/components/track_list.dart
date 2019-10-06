@@ -1,10 +1,10 @@
 import 'package:app/components/SingleTouchRecognizer.dart';
 import 'package:app/components/albumArt.dart';
 import 'package:app/player/playerWidgets.dart';
+import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -48,32 +48,30 @@ class _TrackListState extends State<TrackList> {
                     MusicPlayer.instance.playlistControl.globalPlaylist.length,
                 padding: EdgeInsets.only(bottom: 10, top: 5),
                 itemBuilder: (context, index) {
-                  // return StreamBuilder(
-                  //     stream: MusicPlayer.instance.onDurationChanged,
-                  //     builder: (context, snapshot) {
-                  //       return TrackTile(
-                  //         index,
-                  //         playing: MusicPlayer
-                  //                 .instance.playlistControl.globalPlaylist
-                  //                 .getSongIndexById(MusicPlayer.instance
-                  //                     .playlistControl.currentSong.id) ==
-                  //             index,
-                  //         additionalClickCallback: () {
-                  //           MusicPlayer.instance.playlistControl
-                  //               .resetPlaylist();
-                  //         },
-                  //       );
-                  //     });
-                  return TrackTile(
-                    index,
-                    playing: MusicPlayer.instance.playlistControl.globalPlaylist
-                            .getSongIndexById(MusicPlayer
-                                .instance.playlistControl.currentSong.id) ==
-                        index,
-                    additionalClickCallback: () {
-                      MusicPlayer.instance.playlistControl.resetPlaylist();
-                    },
-                  );
+                  return StreamBuilder(
+                      stream: MusicPlayer.instance.onSongChange,
+                      builder: (context, snapshot) {
+                        return TrackTile(
+                          index,
+                          playing: index ==
+                              MusicPlayer.instance.playlistControl
+                                  .currentSongIndex(PlaylistType.global),
+                          additionalClickCallback: () {
+                            MusicPlayer.instance.playlistControl
+                                .resetPlaylists();
+                          },
+                        );
+                      });
+                  // return TrackTile(
+                  //   index,
+                  //   playing: MusicPlayer.instance.playlistControl.globalPlaylist
+                  //           .getSongIndexById(MusicPlayer
+                  //               .instance.playlistControl.currentSong.id) ==
+                  //       index,
+                  //   additionalClickCallback: () {
+                  //     MusicPlayer.instance.playlistControl.resetPlaylist();
+                  //   },
+                  // );
                 },
               ),
             ),
@@ -88,6 +86,8 @@ class _TrackListState extends State<TrackList> {
 class TrackList2 extends StatefulWidget {
   final EdgeInsets bottomPadding;
 
+  final bool scrolling;
+
   /// If button is already shown
   final bool scrollButtonShown;
 
@@ -96,6 +96,7 @@ class TrackList2 extends StatefulWidget {
   TrackList2({
     Key key,
     this.scrollButtonShown: false,
+    this.scrolling: false,
     @required this.showHideScrollButton,
     this.bottomPadding: const EdgeInsets.only(bottom: 0.0),
   })  : assert(showHideScrollButton != null),
@@ -108,62 +109,70 @@ class TrackList2 extends StatefulWidget {
 class TrackListState2 extends State<TrackList2> {
   ItemScrollController itemScrollController = ItemScrollController();
   // TODO: FIXME: DELETE BACKSCROLLCONTROLLER AS IT DOES NOTHING AND ADD COMMENTS
-  ScrollController _frontScrollController = ScrollController();
+  ScrollController frontScrollController = ScrollController();
   ScrollController _backScrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((duration) {
       // itemScrollController.
-      _frontScrollController.addListener(() {
-        if (_frontScrollController.offset > 400) {
-          if (!widget.scrollButtonShown)
-            widget.showHideScrollButton(true, ScrollButtonType.up);
-        } else if (_frontScrollController.offset < -400) {
-          if (!widget.scrollButtonShown)
-            widget.showHideScrollButton(true, ScrollButtonType.down);
-        } else {
-          if (widget.scrollButtonShown) widget.showHideScrollButton(false);
+      frontScrollController.addListener(() {
+        // print(
+        //     "${widget.scrolling}, ${frontScrollController.offset > 70}, ${frontScrollController.offset < -700}, ${widget.scrollButtonShown}");
+        if (!widget.scrolling) {
+          // Disable manipulations when scroll is performing
+          if (frontScrollController.offset > 70) {
+            if (!widget.scrollButtonShown)
+              widget.showHideScrollButton(true, ScrollButtonType.up);
+          } else if (frontScrollController.offset < -700) {
+            if (!widget.scrollButtonShown)
+              widget.showHideScrollButton(true, ScrollButtonType.down);
+          } else {
+            if (widget.scrollButtonShown) widget.showHideScrollButton(false);
+          }
         }
       });
     });
+    int initialScrollIndex;
+    final int length = MusicPlayer.instance.playlistControl.length();
+    final int currentSongIndex =
+        MusicPlayer.instance.playlistControl.currentSongIndex();
+    if (length > 11) {
+      initialScrollIndex =
+          currentSongIndex > length - 6 ? length - 6 : currentSongIndex;
+    } else
+      initialScrollIndex = 0;
+
     return Padding(
       padding: widget.bottomPadding,
       child: Container(
         child: SingleTouchRecognizerWidget(
           child: ScrollablePositionedList.builder(
-            frontScrollController: _frontScrollController,
+            frontScrollController: frontScrollController,
             itemScrollController: itemScrollController,
-            itemCount: MusicPlayer.instance.playlistControl.playlist.length,
+            itemCount: length,
             padding: EdgeInsets.only(bottom: 10, top: 5),
-            initialScrollIndex: MusicPlayer.instance.playlistControl.playlist
-                .getSongIndexById(
-                    MusicPlayer.instance.playlistControl.currentSong.id),
+            initialScrollIndex: initialScrollIndex,
             itemBuilder: (context, index) {
-              // return StreamBuilder(
-              //     stream: MusicPlayer.instance.onDurationChanged,
-              //     builder: (context, snapshot) {
-              //       return TrackTile(
-              //         index,
-              //         playing: MusicPlayer
-              //                 .instance.playlistControl.globalPlaylist
-              //                 .getSongIndexById(MusicPlayer
-              //                     .instance.playlistControl.currentSong.id) ==
-              //             index,
-              //         song: MusicPlayer.instance.playlistControl.playlist
-              //             .getSongByIndex(index),
-              //         pushToPlayerRouteOnClick: false,
-              //       );
-              //     });
-             return TrackTile(
-                index,
-                playing: MusicPlayer.instance.playlistControl.globalPlaylist
-                        .getSongIndexById(MusicPlayer
-                            .instance.playlistControl.currentSong.id) ==
-                    index,
-                song: MusicPlayer.instance.playlistControl.playlist
-                    .getSongByIndex(index),
-                pushToPlayerRouteOnClick: false,
-              );
+              return StreamBuilder(
+                  stream: MusicPlayer.instance.onSongChange,
+                  builder: (context, snapshot) {
+                    return TrackTile(
+                      index,
+                      playing: index == currentSongIndex,
+                      song: MusicPlayer.instance.playlistControl.getSongByIndex(index),
+                      pushToPlayerRouteOnClick: false,
+                    );
+                  });
+              // return TrackTile(
+              //   index,
+              //   playing: MusicPlayer.instance.playlistControl.globalPlaylist
+              //           .getSongIndexById(MusicPlayer
+              //               .instance.playlistControl.currentSong.id) ==
+              //       index,
+              //   song: MusicPlayer.instance.playlistControl.playlist
+              //       .getSongByIndex(index),
+              //   pushToPlayerRouteOnClick: false,
+              // );
             },
           ),
         ),

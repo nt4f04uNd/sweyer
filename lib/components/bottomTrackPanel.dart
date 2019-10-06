@@ -1,7 +1,6 @@
-import 'package:app/heroes/albumArtHero.dart';
 import 'package:app/player/playerWidgets.dart';
+import 'package:app/player/playlist.dart';
 import 'package:app/routes/playerRoute.dart';
-import 'package:app/constants/constants.dart' as Constants;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
@@ -35,7 +34,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
 
   /// Subscription for audio position change stream
   StreamSubscription<Duration> _changePositionSubscription;
-  StreamSubscription<Duration> _changeDurationSubscription;
+  StreamSubscription<void> _changeSongSubscription;
   StreamSubscription<AudioPlayerState> _playerStateChangeSubscription;
 
   SharedPreferences prefs;
@@ -59,9 +58,12 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
       });
 
     // Spawn animation settings
-    if (_musicPlayer.playState == AudioPlayerState.PLAYING) controller.repeat();
-    else if(_musicPlayer.playState == AudioPlayerState.PAUSED) controller.stop();
-    else if(_musicPlayer.playState == AudioPlayerState.STOPPED) controller.stop();
+    if (_musicPlayer.playState == AudioPlayerState.PLAYING)
+      controller.repeat();
+    else if (_musicPlayer.playState == AudioPlayerState.PAUSED)
+      controller.stop();
+    else if (_musicPlayer.playState == AudioPlayerState.STOPPED)
+      controller.stop();
 
     _playerStateChangeSubscription =
         _musicPlayer.onPlayerStateChanged.listen((event) {
@@ -86,14 +88,19 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
     // Handle track position movement
     _changePositionSubscription =
         _musicPlayer.onAudioPositionChanged.listen((event) {
-      setState(() {
-        _value = event;
-      });
+      if (event.inSeconds - 0.9 > _value.inSeconds) // Prevent waste updates
+        setState(() {
+          _value = event;
+        });
+      else if (event.inMilliseconds < 200) {
+        setState(() {
+          _value = event;
+        });
+      }
     });
 
     // Handle track switch
-    _changeDurationSubscription =
-        _musicPlayer.onDurationChanged.listen((event) {
+    _changeSongSubscription = _musicPlayer.onSongChange.listen((event) {
       setState(() {
         _value = Duration(seconds: 0);
         _duration = Duration(
@@ -107,7 +114,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
     controller.dispose();
     _playerStateChangeSubscription.cancel();
     _changePositionSubscription.cancel();
-    _changeDurationSubscription.cancel();
+    _changeSongSubscription.cancel();
     super.dispose();
   }
 
@@ -126,9 +133,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
 
   @override
   Widget build(BuildContext context) {
-    return !_musicPlayer.playlistControl.songsEmpty ||
-            _musicPlayer.playlistControl.playingTrackIdState ==
-                null // Don't display if there's no tracks or if there's no `playingTrackIdState`
+    return !_musicPlayer.playlistControl.songsEmpty(PlaylistType.global)
         ? Align(
             alignment: Alignment.bottomCenter,
             child: Container(

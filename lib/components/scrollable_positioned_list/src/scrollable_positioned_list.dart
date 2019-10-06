@@ -118,8 +118,8 @@ class ScrollablePositionedList extends StatefulWidget {
   /// See [SliverChildBuilderDelegate.addRepaintBoundaries].
   final bool addRepaintBoundaries;
 
-  final frontScrollController;
-  final backScrollController;
+  final ScrollController frontScrollController;
+  final ScrollController backScrollController;
 
   @override
   State<StatefulWidget> createState() => _ScrollablePositionedListState();
