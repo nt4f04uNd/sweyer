@@ -12,7 +12,7 @@ enum SortFeature { date, title }
 
 /// Class to create change and control stream
 ///
-class SongsListChangeStreamController {
+class ManualStreamController {
   /// Stream controller used to create stream of changes on track list (just to notify)
   StreamController<void> _controller = StreamController<void>.broadcast();
 
@@ -110,12 +110,12 @@ class PlaylistControl {
   int playingTrackIdState;
 
   /// Controller for stream of playlist changes
-  SongsListChangeStreamController _songsListChangeStreamController =
-      SongsListChangeStreamController();
+  ManualStreamController _songsListChangeStreamController =
+      ManualStreamController();
 
   /// Controller for stream of current song changes
-  SongsListChangeStreamController _songChangeStreamController =
-      SongsListChangeStreamController();
+  ManualStreamController _songChangeStreamController =
+      ManualStreamController();
 
   /// Returns current playlist (by default)
   ///
