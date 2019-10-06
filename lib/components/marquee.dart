@@ -3,28 +3,16 @@ import 'package:flutter/material.dart';
 class MarqueeWidget extends StatefulWidget {
   final Text text;
   final Axis direction;
-  Duration animationDuration, backDuration, pauseDuration;
+  final Duration animationDuration, backDuration, pauseDuration;
 
   MarqueeWidget({
     Key key,
     @required this.text,
     this.direction = Axis.horizontal,
-    Duration animationDuration = const Duration(milliseconds: 6000),
-    Duration backDuration = const Duration(milliseconds: 3500),
+    this.animationDuration = const Duration(milliseconds: 6000),
+    this.backDuration = const Duration(milliseconds: 3500),
     this.pauseDuration = const Duration(milliseconds: 2000),
-  }) : super(key: key) {
-    if (text.data.length > (text.style.fontSize == 14 ? 75 : 50)) {
-      // And respect font
-      // Increase duration for when large string is provided
-      this.animationDuration =
-          animationDuration + Duration(milliseconds: 100 * text.data.length);
-      this.backDuration =
-          animationDuration + Duration(milliseconds: 50 * text.data.length);
-    } else {
-      this.animationDuration = animationDuration;
-      this.backDuration = backDuration;
-    }
-  }
+  }) : super(key: key);
 
   @override
   _MarqueeWidgetState createState() => _MarqueeWidgetState();
@@ -32,11 +20,25 @@ class MarqueeWidget extends StatefulWidget {
 
 class _MarqueeWidgetState extends State<MarqueeWidget> {
   ScrollController scrollController = ScrollController();
+  Duration animationDuration, backDuration, pauseDuration;
 
   @override
   void initState() {
-    scroll();
     super.initState();
+    scroll();
+
+    if (widget.text.data.length >
+        (widget.text.style.fontSize == 14 ? 75 : 50)) {
+      // And respect font
+      // Increase duration for when large string is provided
+      animationDuration = widget.animationDuration +
+          Duration(milliseconds: 100 * widget.text.data.length);
+      backDuration = widget.animationDuration +
+          Duration(milliseconds: 50 * widget.text.data.length);
+    } else {
+      animationDuration = widget.animationDuration;
+      backDuration = widget.backDuration;
+    }
   }
 
   @override

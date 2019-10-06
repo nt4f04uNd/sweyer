@@ -69,9 +69,6 @@ class MusicPlayer {
   /// Subscription for completion changes
   StreamSubscription<void> _completionSubscription;
 
-  /// Subscription for completion changes
-  StreamSubscription<String> _playerErrorSubscription;
-
   /// Audio manager focus state
   AudioFocusType focusState = AudioFocusType.no_focus;
 
@@ -122,11 +119,16 @@ class MusicPlayer {
   AudioPlayerState get playState => nativePlayerInstance.state;
 
   /// Get current position
+  ///
+  /// TODO: report this bu
   Future<Duration> get currentPosition async {
     try {
       return Duration(
           milliseconds: await nativePlayerInstance.getCurrentPosition());
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('nativePlayerInstance getCurrentPosition error! - error: $e');
+      return Duration(seconds: 0);
+    }
   }
 
   MusicPlayer() {
@@ -203,7 +205,7 @@ class MusicPlayer {
       }
     });
 
-    // TODO: see how to improve focus and implement gaindelayed usage
+    // TODO: see how to improve focus and implement gain delayed usage
     // Set listener for method calls for changing focus
     _methodChannel.setMethodCallHandler((MethodCall call) async {
       // debugPrint('${call.method}, ${call.arguments.toString()}');
@@ -461,13 +463,13 @@ class MusicPlayer {
 
   /// Pause player
   Future<void> pause() async {
-    final int result = await nativePlayerInstance.pause();
+    await nativePlayerInstance.pause();
     await _abandonFocus();
   }
 
   /// Stop player
   Future<void> stop() async {
-    final int result = await nativePlayerInstance.stop();
+    await nativePlayerInstance.stop();
     // await _closeNotification();
     // Change state if result is successful
     await _abandonFocus();
@@ -540,7 +542,7 @@ class MusicPlayer {
             await play(clickedSongId);
           break;
         case AudioPlayerState.STOPPED:
-          // Currently unused and should't
+          // Currently unused and shouldn't
           await play(clickedSongId);
           break;
         case AudioPlayerState.COMPLETED:
@@ -572,8 +574,16 @@ class MusicPlayer {
             .buffer
             .asUint8List();
   }
+
+  // TODO: improve and implement this method
+  void dispose() {
+    _songChangeListenerSubscription.cancel();
+    _eventSubscription.cancel();
+    _stateChangeSubscription.cancel();
+    _completionSubscription.cancel();
+  }
 }
 
-/// Function that returns artist, or automatically show "Неизвестный исоплнитель" instead of "<unknown>"
+/// Function that returns artist, or automatically show "Неизвестный исполнитель" instead of "<unknown>"
 String artistString(String artist) =>
     artist != '<unknown>' ? artist : 'Неизвестный исполнитель';

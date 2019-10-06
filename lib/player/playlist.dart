@@ -1,14 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:app/player/fetcher.dart';
 import 'package:app/player/player.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:app/constants/constants.dart' as Constants;
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -202,7 +197,7 @@ class PlaylistControl {
   }
 
   // Methods from playlist class
-  /// Searches awlays on `globbalPlaylist`
+  /// Searches always on `globalPlaylist`
   Song getSongById(int id) {
     return globalPlaylist.getSongById(id);
   }

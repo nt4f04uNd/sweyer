@@ -20,7 +20,7 @@ class TrackList extends StatefulWidget {
 }
 
 class _TrackListState extends State<TrackList> {
-  // TODO: exctract this to constnant
+  // TODO: extract this to constant
   static final PageStorageKey _pageScrollKey = PageStorageKey('MainListView');
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -108,9 +108,7 @@ class TrackList2 extends StatefulWidget {
 
 class TrackListState2 extends State<TrackList2> {
   ItemScrollController itemScrollController = ItemScrollController();
-  // TODO: FIXME: DELETE BACKSCROLLCONTROLLER AS IT DOES NOTHING AND ADD COMMENTS
   ScrollController frontScrollController = ScrollController();
-  ScrollController _backScrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((duration) {
@@ -159,7 +157,8 @@ class TrackListState2 extends State<TrackList2> {
                     return TrackTile(
                       index,
                       playing: index == currentSongIndex,
-                      song: MusicPlayer.instance.playlistControl.getSongByIndex(index),
+                      song: MusicPlayer.instance.playlistControl
+                          .getSongByIndex(index),
                       pushToPlayerRouteOnClick: false,
                     );
                   });
@@ -195,19 +194,12 @@ class TrackTile extends StatefulWidget {
   final Function additionalClickCallback;
 
   /// Provide song data to render it directly, not from playlist (e.g. used in search)
-  Song song;
+  final Song song;
   TrackTile(this.trackTileIndex,
       {this.pushToPlayerRouteOnClick: true,
       this.playing: false,
-      song,
-      this.additionalClickCallback}) {
-    /// If song data is not provided, then find it by index of row in current row
-    if (song == null)
-      this.song = MusicPlayer.instance.playlistControl.globalPlaylist
-          .getSongByIndex(trackTileIndex);
-    else
-      this.song = song;
-  }
+      this.song,
+      this.additionalClickCallback});
 
   @override
   _TrackTileState createState() => _TrackTileState();
@@ -216,6 +208,17 @@ class TrackTile extends StatefulWidget {
 class _TrackTileState extends State<TrackTile> {
   /// Instance of music player
   final musicPlayer = MusicPlayer.instance;
+  Song _song;
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// If song data is not provided, then find it by index of row in current row
+    _song = widget.song ??
+        MusicPlayer.instance.playlistControl.globalPlaylist
+            .getSongByIndex(widget.trackTileIndex);
+  }
 
   void _handleTap() async {
     // TODO: this should be re-declared on every widget rebuild
@@ -234,15 +237,15 @@ class _TrackTileState extends State<TrackTile> {
     return ListTile(
         // title: Text("${widget.trackTileIndex}"));
         title: Text(
-          widget.song.title,
+          _song.title,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-              fontSize: 16 /* Default flutter title font size (not densed) */),
+              fontSize: 16 /* Default flutter title font size (not dense) */),
         ),
-        subtitle: Artist(artist: widget.song.artist),
+        subtitle: Artist(artist: _song.artist),
         dense: true,
         isThreeLine: false,
-        leading: AlbumArt(path: widget.song.albumArtUri),
+        leading: AlbumArt(path: _song.albumArtUri),
         trailing: widget.playing
             ? Padding(
                 padding: const EdgeInsets.only(right: 16.0),

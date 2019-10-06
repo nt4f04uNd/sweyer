@@ -29,7 +29,7 @@ class MainRouteState extends State<MainRoute> {
   }
 
   void _showSortModal() {
-    // TODO: add indicatior to current sort feature
+    // TODO: add indicator to current sort feature
     // TODO: maybe make bottom sheet transparent and add container, so it would fly on the center of the screen
     // TODO: maybe make search results to ignore sort order
     // TODO: add sort order to shared prefs

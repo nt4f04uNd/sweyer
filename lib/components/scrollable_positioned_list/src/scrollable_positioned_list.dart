@@ -48,7 +48,6 @@ class ScrollablePositionedList extends StatefulWidget {
       this.addSemanticIndexes = true,
       this.addAutomaticKeepAlives = true,
       this.addRepaintBoundaries = true,
-      this.backScrollController,
       @required this.frontScrollController})
       : assert(itemCount != null),
         assert(itemBuilder != null),
@@ -119,7 +118,6 @@ class ScrollablePositionedList extends StatefulWidget {
   final bool addRepaintBoundaries;
 
   final ScrollController frontScrollController;
-  final ScrollController backScrollController;
 
   @override
   State<StatefulWidget> createState() => _ScrollablePositionedListState();
@@ -190,7 +188,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     backAlignment = widget.initialAlignment;
     widget.itemScrollController?._attach(this);
     frontScrollController = widget.frontScrollController ?? ScrollController();
-    backScrollController = widget.backScrollController ?? ScrollController();
+    backScrollController = ScrollController();
     frontItemPositionNotifier.itemPositions.addListener(_updatePositions);
     backItemPositionNotifier.itemPositions.addListener(_updatePositions);
   }

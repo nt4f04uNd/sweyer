@@ -98,7 +98,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                 Container(
                   child: _suggestions.length > 0
                       ? ListView.builder(
-                          // TODO: extract this to constant
+                          // TODO: implement this and extract this to constant
                           // key: PageStorageKey('SearchListView'),
                           itemCount: _suggestions.length +
                               1, // Plus 1 'cause we need to render list header

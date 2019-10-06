@@ -3,7 +3,6 @@ import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/constants/constants.dart' as Constants;
-import 'package:app/heroes/albumArtHero.dart';
 import 'package:app/components/marquee.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/routes/exifRoute.dart';
@@ -129,7 +128,7 @@ class __PlaylistTabState extends State<_PlaylistTab>
     globalKeyTrackList.currentState.itemScrollController.jumpTo(index: index);
   }
 
-  /// A more complex funtion with additional checks
+  /// A more complex function with additional checks
   Future<void> performScrolling() async {
     final int playlistLength = MusicPlayer.instance.playlistControl.length();
 
@@ -195,6 +194,7 @@ class __PlaylistTabState extends State<_PlaylistTab>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return StreamBuilder(
         stream: MusicPlayer.instance.onPlaylistListChange,
         builder: (context, snapshot) {
@@ -326,7 +326,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
       }
     });
 
-    // Handle track swtich
+    // Handle track switch
     _changeSongSubscription = MusicPlayer.instance.onSongChange.listen((event) {
       // Create new key for marque widget to reset scroll
       marqueeKey = UniqueKey();

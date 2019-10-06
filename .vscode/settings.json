@@ -1,7 +1,9 @@
 {
    "java.configuration.updateBuildConfiguration": "interactive",
    "cSpell.words": [
+      "BACKSCROLLCONTROLLER",
       "Exif",
+      "RGBO",
       "cupertino"
    ]
 }
