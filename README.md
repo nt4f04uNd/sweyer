@@ -1,8 +1,10 @@
-# app
+# Flutter Music Player
 
-A new Flutter project.
+This is an open-source non-commercial repo of music player that is built with flutter
 
-## Getting Started
+You can pull it if you want, run `flutter build apk` and start testing it on your device (android only)
+
+<!-- ## Getting Started
 
 This project is a starting point for a Flutter application.
 
@@ -13,4 +15,4 @@ A few resources to get you started if this is your first Flutter project:
 
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+samples, guidance on mobile development, and a full API reference. -->
