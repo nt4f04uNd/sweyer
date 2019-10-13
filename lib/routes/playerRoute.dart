@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
 import 'package:app/components/track_list.dart';
-import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/components/marquee.dart';
 import 'package:app/player/playlist.dart';
+import 'package:app/player/prefs.dart';
 import 'package:app/routes/exifRoute.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,32 +38,77 @@ class PlayerRoute extends StatefulWidget {
   _PlayerRouteState createState() => _PlayerRouteState();
 }
 
-class _PlayerRouteState extends State<PlayerRoute> {
+class _PlayerRouteState extends State<PlayerRoute>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
+  final GlobalKey<_PlaylistTabState> _playlistTabKey =
+      GlobalKey<_PlaylistTabState>();
+  final int _tabsLength = 2;
+  int openedTabIndex = 0;
+  int prevTabIndex = 0;
+  bool isChangingTabIndex = false;
+  bool initialRender = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: _tabsLength);
+    _tabController.addListener(() {
+      setState(() {
+        if (openedTabIndex != _tabController.index)
+          openedTabIndex = _tabController.index;
+        if (isChangingTabIndex != _tabController.indexIsChanging)
+          isChangingTabIndex = _tabController.indexIsChanging;
+        if (openedTabIndex == 0 && initialRender ||
+            _tabController.previousIndex == 1) {
+          if (initialRender) initialRender = false;
+          _playlistTabKey.currentState.jumpToSong();
+        }
+        // prevTabIndex
+        // _playlistTabKey.currentState.
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: TabBarView(children: [
+    return TabBarView(
+      controller: _tabController,
+      children: [
         MainPlayerTab(),
-        _PlaylistTab()
-        // Scaffold(
-        //   body: TrackList2(),
-        // )
-      ]),
+        _PlaylistTab(
+            key: _playlistTabKey,
+            openedTabIndex: openedTabIndex,
+            isChangingTabIndex: isChangingTabIndex)
+      ],
     );
   }
 }
 
 class _PlaylistTab extends StatefulWidget {
+  final int openedTabIndex;
+  final bool isChangingTabIndex;
+  _PlaylistTab(
+      {Key key,
+      @required this.openedTabIndex,
+      @required this.isChangingTabIndex})
+      : super(key: key);
+
   @override
-  __PlaylistTabState createState() => __PlaylistTabState();
+  _PlaylistTabState createState() => _PlaylistTabState();
 }
 
 /// TODO: FIXME: add comments refactor add typedefs do renaming
 /// TODO: add animation to scroll button show/hide
 enum ScrollButtonType { up, down }
 
-class __PlaylistTabState extends State<_PlaylistTab>
+class _PlaylistTabState extends State<_PlaylistTab>
     with AutomaticKeepAliveClientMixin<_PlaylistTab> {
   @override
   bool get wantKeepAlive => true;
@@ -74,46 +119,37 @@ class __PlaylistTabState extends State<_PlaylistTab>
 
   GlobalKey<TrackListState2> globalKeyTrackList = GlobalKey();
 
-  bool scrollButtonShown = false;
-
   /// A bool var to disable show/hide in tracklist controller listener when manual `scrollToSong` is performing
   bool scrolling = false;
   ScrollButtonType scrollButtonType = ScrollButtonType.up;
   StreamSubscription<void> _songChangeSubscription;
   StreamSubscription<void> _playlistChangeSubscription;
 
-  int prevPlayingIndex =
-      MusicPlayer.instance.playlistControl.currentSongIndex();
-
-  void showHideScrollButton(bool value, [ScrollButtonType scrollButtonType]) {
-    setState(() {
-      this.scrollButtonShown = value;
-      if (scrollButtonType != null) this.scrollButtonType = scrollButtonType;
-    });
-  }
+  int prevPlayingIndex = PlaylistControl.currentSongIndex();
 
   /// Scrolls to current song
   ///
   /// If optional `index` is provided - scrolls to it
   Future<void> scrollToSong([int index]) async {
     if (!scrolling) {
-      if (index == null)
-        index = MusicPlayer.instance.playlistControl.currentSongIndex();
+      if (index == null) index = PlaylistControl.currentSongIndex();
 
       setState(() {
         scrolling = true;
       });
-      Future.delayed(
-          // Set a future to resolve `scrolling` to false after scroll performed
-          scrollDuration,
-          () => setState(() {
-                scrolling = false;
-              }));
-      showHideScrollButton(false);
       await globalKeyTrackList.currentState.itemScrollController.scrollTo(
           index: index, duration: scrollDuration, curve: Curves.easeInOut);
       // Call `jumpTo` to reset scroll controller offset
       globalKeyTrackList.currentState.itemScrollController.jumpTo(index: index);
+      if (scrolling)
+        setState(() {
+          scrolling = false;
+        });
+    } else {
+      setState(() {
+        jumpToSong();
+        scrolling = false;
+      });
     }
   }
 
@@ -121,25 +157,25 @@ class __PlaylistTabState extends State<_PlaylistTab>
   ///
   /// If optional `index` is provided - jumps to it
   void jumpToSong([int index]) async {
-    if (index == null)
-      index = MusicPlayer.instance.playlistControl.currentSongIndex();
+    if (index == null) index = PlaylistControl.currentSongIndex();
 
-    showHideScrollButton(false);
     globalKeyTrackList.currentState.itemScrollController.jumpTo(index: index);
   }
 
   /// A more complex function with additional checks
   Future<void> performScrolling() async {
-    final int playlistLength = MusicPlayer.instance.playlistControl.length();
+    final int playlistLength = PlaylistControl.length();
 
-    final int playingIndex =
-        MusicPlayer.instance.playlistControl.currentSongIndex();
+    final int playingIndex = PlaylistControl.currentSongIndex();
 
     if (playlistLength > tracksScrollOffset) {
       // If playlist is longer than 12
       if (prevPlayingIndex == 0 && playingIndex == playlistLength - 1) {
         // Scroll to bottom from first track
         jumpToSong(playlistLength - 1 - tracksScrollOffset);
+      } else if (prevPlayingIndex == playlistLength - 1 && playingIndex == 0) {
+        // When prev track was last in playlist
+        jumpToSong();
       } else if (playingIndex == 0) {
         //  await scrollToSong(0);
         setState(() {
@@ -153,9 +189,6 @@ class __PlaylistTabState extends State<_PlaylistTab>
             curve: Curves.easeInOut);
 
         jumpToSong(); // Reset scrollcontroller's position
-      } else if (prevPlayingIndex == playlistLength - 1 && playingIndex == 0) {
-        // When prev track was last in playlist
-        jumpToSong();
       } else if (playingIndex < playlistLength - tracksScrollOffset) {
         // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
         await scrollToSong();
@@ -171,17 +204,18 @@ class __PlaylistTabState extends State<_PlaylistTab>
   void initState() {
     super.initState();
     _playlistChangeSubscription =
-        MusicPlayer.instance.onPlaylistListChange.listen((event) async {
+        PlaylistControl.onPlaylistListChange.listen((event) async {
       // Reset value when playlist changes
-      prevPlayingIndex =
-          MusicPlayer.instance.playlistControl.currentSongIndex();
+      prevPlayingIndex = PlaylistControl.currentSongIndex();
       // Jump when tracklist changes (e.g. shuffle happened)
       jumpToSong();
     });
     _songChangeSubscription =
-        MusicPlayer.instance.onSongChange.listen((event) async {
+        PlaylistControl.onSongChange.listen((event) async {
       // Scroll when track changes
-      await performScrolling();
+      if (widget.openedTabIndex == 0)
+        await performScrolling();
+      else if (widget.openedTabIndex == 1) setState(() {});
     });
   }
 
@@ -196,7 +230,7 @@ class __PlaylistTabState extends State<_PlaylistTab>
   Widget build(BuildContext context) {
     super.build(context);
     return StreamBuilder(
-        stream: MusicPlayer.instance.onPlaylistListChange,
+        stream: PlaylistControl.onPlaylistListChange,
         builder: (context, snapshot) {
           return Scaffold(
             appBar: PreferredSize(
@@ -204,23 +238,23 @@ class __PlaylistTabState extends State<_PlaylistTab>
               child: Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: AppBar(
-                  actions: <Widget>[
-                    Visibility(
-                      visible: scrollButtonShown,
-                      maintainState: true,
-                      maintainAnimation: true,
-                      child: AnimatedOpacity(
-                        opacity: scrollButtonShown ? 1 : 0,
-                        duration: Duration(milliseconds: 600),
-                        child: IconButton(
-                            splashColor: Colors.transparent,
-                            icon: scrollButtonType == ScrollButtonType.up
-                                ? Icon(Icons.keyboard_arrow_up)
-                                : Icon(Icons.keyboard_arrow_down),
-                            onPressed: performScrolling),
-                      ),
-                    )
-                  ],
+                  // actions: <Widget>[
+                  //   Visibility(
+                  //     visible: scrollButtonShown,
+                  //     maintainState: true,
+                  //     maintainAnimation: true,
+                  //     child: AnimatedOpacity(
+                  //       opacity: scrollButtonShown ? 1 : 0,
+                  //       duration: Duration(milliseconds: 600),
+                  //       child: IconButton(
+                  //           splashColor: Colors.transparent,
+                  //           icon: scrollButtonType == ScrollButtonType.up
+                  //               ? Icon(Icons.keyboard_arrow_up)
+                  //               : Icon(Icons.keyboard_arrow_down),
+                  //           onPressed: performScrolling),
+                  //     ),
+                  //   )
+                  // ],
                   title: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,8 +264,7 @@ class __PlaylistTabState extends State<_PlaylistTab>
                         'Далее',
                         style: TextStyle(fontSize: 24),
                       ),
-                      MusicPlayer.instance.playlistControl.playlistType ==
-                              PlaylistType.global
+                      PlaylistControl.playlistType == PlaylistType.global
                           ? Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
@@ -239,7 +272,7 @@ class __PlaylistTabState extends State<_PlaylistTab>
                                 style: TextStyle(fontSize: 14),
                               ),
                             )
-                          : MusicPlayer.instance.playlistControl.playlistType ==
+                          : PlaylistControl.playlistType ==
                                   PlaylistType.shuffled
                               ? Padding(
                                   padding: const EdgeInsets.only(top: 5.0),
@@ -265,9 +298,6 @@ class __PlaylistTabState extends State<_PlaylistTab>
               padding: const EdgeInsets.only(top: 4.0),
               child: TrackList2(
                 key: globalKeyTrackList,
-                showHideScrollButton: showHideScrollButton,
-                scrollButtonShown: scrollButtonShown,
-                scrolling: scrolling,
               ),
             ),
           );
@@ -282,129 +312,42 @@ class MainPlayerTab extends StatefulWidget {
 }
 
 class _MainPlayerTabState extends State<MainPlayerTab> {
-  /// Actual track position value
-  Duration _value = Duration(seconds: 0);
   // Duration of playing track
   Duration _duration = Duration(seconds: 0);
-
-  /// Value to perform drag
-  double _localValue;
-
-  /// Subscription for audio position change stream
-  /// TODO: move all this stuff into separate class (e.g. inherited widget) as it is also used in bottom track panel
-  StreamSubscription<Duration> _changePositionSubscription;
-  StreamSubscription<void> _changeSongSubscription;
-
-  /// Is user dragging slider right now
-  bool _isDragging = false;
-  // MusicPlayer MusicPlayer.instance = MusicPlayer.instance;
-  SharedPreferences prefs;
+  // #ANCHOR route
 
   /// Key for `MarqueeWidget` to reset its scroll on song change
   UniqueKey marqueeKey = UniqueKey();
+
+  StreamSubscription<void> _changeSongSubscription;
 
   @override
   void initState() {
     super.initState();
 
     _setInitialCurrentPosition();
-    _getPrefsInstance();
-
-    // Handle track position movement
-    _changePositionSubscription =
-        MusicPlayer.instance.onAudioPositionChanged.listen((event) {
-      if (event.inSeconds - 0.9 > _value.inSeconds) // Prevent waste updates
-        setState(() {
-          _value = event;
-          if (prefs != null)
-            prefs.setInt(Constants.PrefKeys.songPositionInt, _value.inSeconds);
-        });
-      else if (event.inMilliseconds < 200) {
-        setState(() {
-          _value = event;
-        });
-      }
-    });
 
     // Handle track switch
-    _changeSongSubscription = MusicPlayer.instance.onSongChange.listen((event) {
+    _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
       // Create new key for marque widget to reset scroll
       marqueeKey = UniqueKey();
       setState(() {
-        _value = Duration(seconds: 0);
-        _duration = Duration(
-            milliseconds:
-                MusicPlayer.instance.playlistControl.currentSong.duration);
+        _duration =
+            Duration(milliseconds: PlaylistControl.currentSong?.duration);
       });
     });
   }
 
   @override
   void dispose() {
-    _changePositionSubscription.cancel();
     _changeSongSubscription.cancel();
     super.dispose();
   }
 
-  void _getPrefsInstance() async {
-    prefs = await SharedPreferences.getInstance();
-  }
-
-  _setInitialCurrentPosition() async {
-    var currentPosition = await MusicPlayer.instance.currentPosition;
+  Future<void> _setInitialCurrentPosition() async {
     setState(() {
-      _value = currentPosition;
-      _duration = Duration(
-          milliseconds:
-              MusicPlayer.instance.playlistControl.currentSong.duration);
+      _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
     });
-  }
-
-  // Drag functions
-  void _handleChangeStart(double newValue) async {
-    print('_isDragging1 $_isDragging');
-    setState(() {
-      _isDragging = true;
-      _localValue = newValue;
-    });
-    print('_isDragging2 $_isDragging');
-  }
-
-  void _handleChanged(double newValue) {
-    setState(() {
-      _isDragging = true;
-      _localValue = newValue;
-    });
-  }
-
-  void _handleChangeEnd(double newValue) async {
-    await MusicPlayer.instance.seek(newValue.toInt());
-    setState(() {
-      _isDragging = false;
-      _value = Duration(seconds: newValue.toInt());
-    });
-  }
-
-  String _calculateDisplayedPositionTime() {
-    // print(_isDragging);
-    /// Value to work with, depends on `_isDragging` state, either `_value` or `_localValue`
-    Duration workingValue;
-    if (_isDragging) // Update time indicator when dragging
-      workingValue = Duration(seconds: _localValue.toInt());
-    else
-      workingValue = _value;
-
-    int minutes = workingValue.inMinutes;
-    // Seconds in 0-59 format
-    int seconds = workingValue.inSeconds % 60;
-    return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
-  }
-
-  String _calculateDisplayedDurationTime() {
-    int minutes = _duration.inMinutes;
-    // Seconds in 0-59 format
-    int seconds = _duration.inSeconds % 60;
-    return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
   }
 
   @override
@@ -431,13 +374,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                     ))),
                 child: PopupMenuButton<void>(
                   // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-                  onSelected: (dynamic result) {
+                  onSelected: (_) {
                     Navigator.of(context).push(createExifRoute(widget));
-                    // Navigator.push(
-                    //     context,
-                    //     PageTransition(
-                    //         type: PageTransitionType.rightToLeftWithFade,
-                    //         child: ExifRoute()));
                   },
                   padding: const EdgeInsets.all(0.0),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<void>>[
@@ -479,8 +417,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         child: MarqueeWidget(
                           key: marqueeKey,
                           text: Text(
-                            MusicPlayer
-                                .instance.playlistControl.currentSong.title,
+                            PlaylistControl.currentSong?.title,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontSize: 21),
                           ),
@@ -489,16 +426,14 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                       Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 30),
                         child: Text(
-                          artistString(MusicPlayer
-                              .instance.playlistControl.currentSong.artist),
+                          artistString(PlaylistControl.currentSong?.artist),
                         ),
                       ),
                       Padding(
                         padding:
                             const EdgeInsets.only(left: 20, right: 20, top: 10),
                         child: AlbumArt(
-                          path: MusicPlayer
-                              .instance.playlistControl.currentSong.albumArtUri,
+                          path: PlaylistControl.currentSong?.albumArtUri,
                           isLarge: true,
                         ),
                       ),
@@ -512,40 +447,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Container(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            transform: Matrix4.translationValues(5, 0, 0),
-                            child: Text(
-                              // TODO: move and refactor this code, and by the way split a whole page into separate widgets
-                              _calculateDisplayedPositionTime(),
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                          Expanded(
-                            child: Slider(
-                              activeColor: Colors.deepPurple,
-                              inactiveColor: Colors.white.withOpacity(0.2),
-                              value: _isDragging
-                                  ? _localValue
-                                  : _value.inSeconds.toDouble(),
-                              max: _duration.inSeconds.toDouble(),
-                              min: 0,
-                              onChangeStart: _handleChangeStart,
-                              onChanged: _handleChanged,
-                              onChangeEnd: _handleChangeEnd,
-                            ),
-                          ),
-                          Container(
-                            transform: Matrix4.translationValues(-5, 0, 0),
-                            child: Text(
-                              _calculateDisplayedDurationTime(),
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
+                      child: TrackSlider(
+                        duration: _duration,
                       ),
                     ),
                   ),
@@ -557,21 +460,17 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                       children: <Widget>[
                         IconButton(
                           icon: Icon(Icons.shuffle),
-                          color: MusicPlayer
-                                      .instance.playlistControl.playlistType ==
+                          color: PlaylistControl.playlistType ==
                                   PlaylistType.shuffled
                               ? null
                               : Colors.grey.shade800,
                           onPressed: () {
                             setState(() {
-                              if (MusicPlayer
-                                      .instance.playlistControl.playlistType ==
+                              if (PlaylistControl.playlistType ==
                                   PlaylistType.shuffled)
-                                MusicPlayer.instance.playlistControl
-                                    .resetPlaylists();
+                                PlaylistControl.resetPlaylists();
                               else
-                                MusicPlayer.instance.playlistControl
-                                    .setShuffledPlaylist();
+                                PlaylistControl.setShuffledPlaylist();
                             });
                           },
                         ),
@@ -599,7 +498,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                         color: Colors.white.withOpacity(0.9),
                                       ),
                                     ),
-                                    onTap: MusicPlayer.instance.clickPrev,
+                                    onTap: MusicPlayer.clickPrev,
                                   ),
                                 ),
                                 Container(
@@ -629,7 +528,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                         color: Colors.white.withOpacity(0.9),
                                       ),
                                     ),
-                                    onTap: MusicPlayer.instance.clickNext,
+                                    onTap: MusicPlayer.clickNext,
                                   ),
                                 ),
                               ],
@@ -641,12 +540,12 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         // )
                         IconButton(
                           icon: Icon(Icons.loop),
-                          color: MusicPlayer.instance.loopModeState
+                          color: MusicPlayer.loopModeState
                               ? null
                               : Colors.grey.shade800,
                           onPressed: () {
                             setState(() {
-                              MusicPlayer.instance.switchLoopMode();
+                              MusicPlayer.switchLoopMode();
                             });
                           },
                         ),
@@ -660,5 +559,173 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
         ),
       ),
     );
+  }
+}
+
+class TrackSlider extends StatefulWidget {
+  final Duration duration;
+  TrackSlider({Key key, @required this.duration})
+      : assert(duration != null),
+        super(key: key);
+
+  _TrackSliderState createState() => _TrackSliderState();
+}
+
+class _TrackSliderState extends State<TrackSlider> {
+// #ANCHOR slider
+  /// Actual track position value
+  Duration _value = Duration(seconds: 0);
+
+  /// Value to perform drag
+  double _localValue;
+
+  SharedPreferences prefs;
+
+  /// Subscription for audio position change stream
+  /// TODO: move all this stuff into separate class (e.g. inherited widget) as it is also used in bottom track panel
+  StreamSubscription<Duration> _changePositionSubscription;
+  StreamSubscription<void> _changeSongSubscription;
+
+  /// Is user dragging slider right now
+  bool _isDragging = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _setInitialCurrentPosition();
+    _getPrefsInstance();
+
+    // Handle track position movement
+    _changePositionSubscription =
+        MusicPlayer.onAudioPositionChanged.listen((event) {
+      if (event.inSeconds - 0.9 > _value.inSeconds && !_isDragging) {
+        // Prevent waste updates
+        setState(() {
+          _value = event;
+          if (prefs != null)
+            Prefs.byKey.songPositionInt.setPref(_value.inSeconds, prefs);
+        });
+      } else if (event.inMilliseconds < 200) {
+        setState(() {
+          _isDragging = false;
+          _localValue = event.inSeconds.toDouble();
+          _value = event;
+        });
+      }
+    });
+
+    // Handle track switch
+    _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
+      setState(() {
+        _isDragging = false;
+        _localValue = 0.0;
+        _value = Duration(seconds: 0);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _changePositionSubscription.cancel();
+    _changeSongSubscription.cancel();
+    super.dispose();
+  }
+
+  Future<void> _setInitialCurrentPosition() async {
+    var currentPosition = await MusicPlayer.currentPosition;
+    setState(() {
+      _value = currentPosition;
+    });
+  }
+
+  void _getPrefsInstance() async {
+    prefs = await Prefs.sharedInstance;
+  }
+
+  // Drag functions
+  void _handleChangeStart(double newValue) async {
+    setState(() {
+      _isDragging = true;
+      _localValue = newValue;
+    });
+  }
+
+  void _handleChanged(double newValue) {
+    setState(() {
+      if (!_isDragging) _isDragging = true;
+      _localValue = newValue;
+    });
+  }
+
+  /// FIXME: this called multiple times since it is inside `TabBarView`, currently unable to fix, as this issue relies deeply to flutter architecture
+  void _handleChangeEnd(double newValue) async {
+    // if (_isDragging) {
+    await MusicPlayer.seek(newValue.toInt());
+    setState(() {
+      _isDragging = false;
+      _value = Duration(seconds: newValue.toInt());
+    });
+    // }
+  }
+
+  String _calculateDisplayedPositionTime() {
+    /// Value to work with, depends on `_isDragging` state, either `_value` or `_localValue`
+    Duration workingValue;
+    if (_isDragging) // Update time indicator when dragging
+      workingValue = Duration(seconds: _localValue.toInt());
+    else
+      workingValue = _value;
+
+    int minutes = workingValue.inMinutes;
+    // Seconds in 0-59 format
+    int seconds = workingValue.inSeconds % 60;
+    return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
+  }
+
+  String _calculateDisplayedDurationTime() {
+    int minutes = widget.duration.inMinutes;
+    // Seconds in 0-59 format
+    int seconds = widget.duration.inSeconds % 60;
+    return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          transform: Matrix4.translationValues(5, 0, 0),
+          child: Text(
+            // TODO: move and refactor this code, and by the way split a whole page into separate widgets
+            _calculateDisplayedPositionTime(),
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: Slider(
+            activeColor: Colors.deepPurple,
+            inactiveColor: Colors.white.withOpacity(0.2),
+            value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
+            // value: _value.inSeconds.toDouble(),
+            max: widget.duration.inSeconds.toDouble(),
+            min: 0,
+            onChangeStart: _handleChangeStart,
+            onChanged: _handleChanged,
+            onChangeEnd: _handleChangeEnd,
+          ),
+        ),
+        Container(
+          transform: Matrix4.translationValues(-5, 0, 0),
+          child: Text(
+            _calculateDisplayedDurationTime(),
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
+    ));
   }
 }

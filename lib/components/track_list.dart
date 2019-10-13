@@ -1,13 +1,20 @@
 import 'package:app/components/SingleTouchRecognizer.dart';
+import 'package:app/components/SlideStackRightRoute.dart';
 import 'package:app/components/albumArt.dart';
+import 'package:app/components/bottomTrackPanel.dart';
+import 'package:app/components/search.dart';
+import 'package:app/player/permissions.dart';
 import 'package:app/player/playerWidgets.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
 import 'package:app/routes/playerRoute.dart';
+import 'package:app/routes/settingsRoute.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:app/components/refresh_indicator.dart';
 
 /// List of fetched tracks
 class TrackList extends StatefulWidget {
@@ -26,57 +33,282 @@ class _TrackListState extends State<TrackList> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
 
+  bool refreshing = false;
+
   Future<void> _refreshHandler() async {
-    await MusicPlayer.instance.playlistControl.refetchSongs();
+    await PlaylistControl.refetchSongs();
     return Future.value();
+  }
+
+  /// Delegate for search
+  final SongsSearchDelegate _songsSearchDelegate = SongsSearchDelegate();
+
+  void _showSearch() async {
+    await showSearch<Song>(
+      context: context,
+      delegate: _songsSearchDelegate,
+    );
+  }
+
+  void _showSortModal() {
+    // TODO: add indicator for a current sort feature
+    showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(top: 15, bottom: 15, left: 12),
+                  child: Text("Сортировать",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.caption.color,
+                      ))),
+              ListTile(
+                title: Text("По названию"),
+                onTap: () {
+                  PlaylistControl.sortSongs(SortFeature.title);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text("По дате"),
+                onTap: () {
+                  PlaylistControl.sortSongs(SortFeature.date);
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  Future<void> _handlePermissionRequest() async {
+    if (mounted)
+      setState(() {
+        refreshing = true;
+      });
+    else
+      refreshing = true;
+
+    Permissions.requestStorage();
+
+    if (mounted)
+      setState(() {
+        refreshing = false;
+      });
+    else
+      refreshing = false;
+  }
+
+  Future<void> _handleClickSettings() async {
+    Navigator.pop(context);
+    await Future.delayed(Duration(
+        milliseconds: 246 -
+            46)); // Default drawer close time minus some time// Wait before pop sidebar closes plus delay
+    Navigator.of(context).push(createSettingsRoute(widget));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: widget.bottomPadding,
-      child: Container(
-        child: RefreshIndicator(
-          color: Colors.white,
-          key: _refreshIndicatorKey,
-          onRefresh: _refreshHandler,
-          child: SingleTouchRecognizerWidget(
-            child: Container(
-              child: ListView.builder(
-                key: _pageScrollKey,
-                itemCount:
-                    MusicPlayer.instance.playlistControl.globalPlaylist.length,
-                padding: EdgeInsets.only(bottom: 10, top: 5),
-                itemBuilder: (context, index) {
-                  return StreamBuilder(
-                      stream: MusicPlayer.instance.onSongChange,
-                      builder: (context, snapshot) {
-                        return TrackTile(
-                          index,
-                          playing: index ==
-                              MusicPlayer.instance.playlistControl
-                                  .currentSongIndex(PlaylistType.global),
-                          additionalClickCallback: () {
-                            MusicPlayer.instance.playlistControl
-                                .resetPlaylists();
-                          },
-                        );
-                      });
-                  // return TrackTile(
-                  //   index,
-                  //   playing: MusicPlayer.instance.playlistControl.globalPlaylist
-                  //           .getSongIndexById(MusicPlayer
-                  //               .instance.playlistControl.currentSong.id) ==
-                  //       index,
-                  //   additionalClickCallback: () {
-                  //     MusicPlayer.instance.playlistControl.resetPlaylist();
-                  //   },
-                  // );
-                },
+    if (Permissions.permissionStorageStatus != MyPermissionStatus.granted)
+      return Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child:
+                        Text('Пожалуйста, предоставьте доступ к хранилищу'))),
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: ButtonTheme(
+                minWidth: 130.0, // specific value
+                height: 40.0,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(15.0),
+                  ),
+                  color: Colors.deepPurple,
+                  child: refreshing
+                      ? SizedBox(
+                          width: 25.0,
+                          height: 25.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : Text('Предоставить'),
+                  onPressed: _handlePermissionRequest,
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    if (PlaylistControl.songsEmpty(PlaylistType.global))
+      return Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Text('На вашем устройстве нету музыки :( '))),
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: ButtonTheme(
+                minWidth: 130.0, // specific value
+                height: 40.0,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(15.0),
+                  ),
+                  color: Colors.deepPurple,
+                  child: refreshing
+                      ? SizedBox(
+                          width: 25.0,
+                          height: 25.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : Text('Обновить'),
+                  onPressed: () async {
+                    setState(() {
+                      refreshing = true;
+                    });
+                    await _refreshHandler();
+                    setState(() {
+                      refreshing = false;
+                    });
+                  },
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    return Scaffold(
+      drawer: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor:
+              Color(0xff070707), //This will change the drawer background
+        ),
+        child: Drawer(
+          child: ListView(
+            physics: NeverScrollableScrollPhysics(),
+            // Important: Remove any padding from the ListView.
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(
+                // height: 100.0,
+                padding:
+                    const EdgeInsets.only(left: 15.0, top: 40.0, bottom: 20.0),
+                child: Text('Меню', style: TextStyle(fontSize: 35.0)),
+              ),
+              ListTile(
+                  title: Text('Настройки',
+                      style: TextStyle(
+                          fontSize: 17.0, color: Colors.deepPurple.shade300)),
+                  onTap: _handleClickSettings),
+            ],
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        // automaticallyImplyLeading: false,
+        // leading: IconButton(
+        //     icon: Icon(Icons.menu),
+        //   ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.sort),
+            onPressed: () {
+              _showSortModal();
+            },
+          ),
+        ],
+        titleSpacing: 0.0,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 0.0),
+          child: ClipRRect(
+            // FIXME: cliprrect doesn't work for material for some reason
+            borderRadius: BorderRadius.circular(10),
+            child: GestureDetector(
+              onTap: _showSearch,
+              child: FractionallySizedBox(
+                // heightFactor: 1,
+                widthFactor: 1,
+                child: Container(
+                  padding: const EdgeInsets.only(
+                      left: 12.0, top: 10.0, bottom: 10.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Поиск треков на устройстве',
+                        style: TextStyle(
+                            color: Theme.of(context).hintColor, fontSize: 17),
+                      )
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Padding(
+            padding: widget.bottomPadding,
+            child: Container(
+              child: CustomRefreshIndicator(
+                color: Colors.white,
+                strokeWidth: 2.5,
+                key: _refreshIndicatorKey,
+                onRefresh: _refreshHandler,
+                child: SingleTouchRecognizerWidget(
+                  child: Container(
+                    child: ListView.builder(
+                      key: _pageScrollKey,
+                      itemCount: PlaylistControl.globalPlaylist.length,
+                      padding: EdgeInsets.only(bottom: 10, top: 5),
+                      itemBuilder: (context, index) {
+                        return StreamBuilder(
+                            stream: PlaylistControl.onSongChange,
+                            builder: (context, snapshot) {
+                              return TrackTile(
+                                index,
+                                key: UniqueKey(),
+                                playing: index ==
+                                    PlaylistControl.currentSongIndex(
+                                        PlaylistType.global),
+                                additionalClickCallback: () {
+                                  PlaylistControl.resetPlaylists();
+                                },
+                              );
+                            });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          BottomTrackPanel(),
+        ],
       ),
     );
   }
@@ -85,22 +317,10 @@ class _TrackListState extends State<TrackList> {
 /// TODO: unite this into one class with `TrackList`
 class TrackList2 extends StatefulWidget {
   final EdgeInsets bottomPadding;
-
-  final bool scrolling;
-
-  /// If button is already shown
-  final bool scrollButtonShown;
-
-  /// Function to show scroll button
-  final Function showHideScrollButton;
   TrackList2({
     Key key,
-    this.scrollButtonShown: false,
-    this.scrolling: false,
-    @required this.showHideScrollButton,
     this.bottomPadding: const EdgeInsets.only(bottom: 0.0),
-  })  : assert(showHideScrollButton != null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   TrackListState2 createState() => TrackListState2();
@@ -111,29 +331,9 @@ class TrackListState2 extends State<TrackList2> {
   ScrollController frontScrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((duration) {
-      // itemScrollController.
-      frontScrollController.addListener(() {
-        // print(
-        //     "${widget.scrolling}, ${frontScrollController.offset > 70}, ${frontScrollController.offset < -700}, ${widget.scrollButtonShown}");
-        if (!widget.scrolling) {
-          // Disable manipulations when scroll is performing
-          if (frontScrollController.offset > 70) {
-            if (!widget.scrollButtonShown)
-              widget.showHideScrollButton(true, ScrollButtonType.up);
-          } else if (frontScrollController.offset < -700) {
-            if (!widget.scrollButtonShown)
-              widget.showHideScrollButton(true, ScrollButtonType.down);
-          } else {
-            if (widget.scrollButtonShown) widget.showHideScrollButton(false);
-          }
-        }
-      });
-    });
     int initialScrollIndex;
-    final int length = MusicPlayer.instance.playlistControl.length();
-    final int currentSongIndex =
-        MusicPlayer.instance.playlistControl.currentSongIndex();
+    final int length = PlaylistControl.length();
+    final int currentSongIndex = PlaylistControl.currentSongIndex();
     if (length > 11) {
       initialScrollIndex =
           currentSongIndex > length - 6 ? length - 6 : currentSongIndex;
@@ -152,23 +352,23 @@ class TrackListState2 extends State<TrackList2> {
             initialScrollIndex: initialScrollIndex,
             itemBuilder: (context, index) {
               return StreamBuilder(
-                  stream: MusicPlayer.instance.onSongChange,
+                  stream: PlaylistControl.onSongChange,
                   builder: (context, snapshot) {
                     return TrackTile(
                       index,
+                      key: UniqueKey(),
                       playing: index == currentSongIndex,
-                      song: MusicPlayer.instance.playlistControl
-                          .getSongByIndex(index),
+                      song: PlaylistControl.getSongByIndex(index),
                       pushToPlayerRouteOnClick: false,
                     );
                   });
               // return TrackTile(
               //   index,
-              //   playing: MusicPlayer.instance.playlistControl.globalPlaylist
+              //   playing: PlaylistControlglobalPlaylist
               //           .getSongIndexById(MusicPlayer
-              //               .instance.playlistControl.currentSong.id) ==
+              //               .playlistControl.currentSong.id) ==
               //       index,
-              //   song: MusicPlayer.instance.playlistControl.playlist
+              //   song: PlaylistControlplaylist
               //       .getSongByIndex(index),
               //   pushToPlayerRouteOnClick: false,
               // );
@@ -196,10 +396,12 @@ class TrackTile extends StatefulWidget {
   /// Provide song data to render it directly, not from playlist (e.g. used in search)
   final Song song;
   TrackTile(this.trackTileIndex,
-      {this.pushToPlayerRouteOnClick: true,
+      {Key key,
+      this.pushToPlayerRouteOnClick: true,
       this.playing: false,
       this.song,
-      this.additionalClickCallback});
+      this.additionalClickCallback})
+      : super(key: key);
 
   @override
   _TrackTileState createState() => _TrackTileState();
@@ -207,7 +409,6 @@ class TrackTile extends StatefulWidget {
 
 class _TrackTileState extends State<TrackTile> {
   /// Instance of music player
-  final musicPlayer = MusicPlayer.instance;
   Song _song;
 
   @override
@@ -216,18 +417,17 @@ class _TrackTileState extends State<TrackTile> {
 
     /// If song data is not provided, then find it by index of row in current row
     _song = widget.song ??
-        MusicPlayer.instance.playlistControl.globalPlaylist
-            .getSongByIndex(widget.trackTileIndex);
+        PlaylistControl.globalPlaylist.getSongByIndex(widget.trackTileIndex);
   }
 
   void _handleTap() async {
     // TODO: this should be re-declared on every widget rebuild
-    await musicPlayer.clickTrackTile(widget.song.id);
+    await MusicPlayer.clickTrackTile(_song.id);
     if (widget.additionalClickCallback != null)
       widget.additionalClickCallback();
     // Playing because clickTrackTile changes any other type to it
     if (widget.pushToPlayerRouteOnClick &&
-        musicPlayer.playState == AudioPlayerState.PLAYING)
+        MusicPlayer.playState == AudioPlayerState.PLAYING)
       Navigator.of(context).push(createPlayerRoute());
   }
 

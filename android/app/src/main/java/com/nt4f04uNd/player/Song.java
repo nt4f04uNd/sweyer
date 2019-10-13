@@ -9,10 +9,10 @@ public class Song {
    private final String title;
    private final String trackUri;
    private final int duration;
-   private final int dateAdded;
+   private final int dateModified;
 
    Song(final int id, final String artist, final String album, final String albumArtUri, final String title,
-         final String trackUri, final int duration, final int dateAdded) {
+         final String trackUri, final int duration, final int dateModified) {
       this.id = id;
       this.artist = artist;
       this.album = album;
@@ -20,7 +20,7 @@ public class Song {
       this.title = title;
       this.trackUri = trackUri;
       this.duration = duration;
-      this.dateAdded = dateAdded;
+      this.dateModified = dateModified;
    }
 
    static private char commaChar = '"';
@@ -33,9 +33,9 @@ public class Song {
 
    String toJson() {
       return String.format(
-            "{\"id\":%d,\"artist\": %s,\"album\": %s,\"albumArtUri\": %s,\"title\": %s,\"trackUri\": %s,\"duration\": %d, \"dateAdded\": %d}",
+            "{\"id\":%d,\"artist\": %s,\"album\": %s,\"albumArtUri\": %s,\"title\": %s,\"trackUri\": %s,\"duration\": %d, \"dateModified\": %d}",
             this.id, wrapWithCommas(this.artist), wrapWithCommas(this.album), wrapWithCommas(this.albumArtUri),
-            wrapWithCommas(this.title), wrapWithCommas(this.trackUri), this.duration, this.dateAdded);
+            wrapWithCommas(this.title), wrapWithCommas(this.trackUri), this.duration, this.dateModified);
    }
 
 }

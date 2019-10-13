@@ -5,7 +5,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'albumArt.dart';
 import 'animatedPlayPauseButton.dart';
 import 'dart:async';
@@ -22,8 +21,6 @@ class BottomTrackPanel extends StatefulWidget {
 /// FIXME: art rotating on main and search routes are distinct
 class _BottomTrackPanelState extends State<BottomTrackPanel>
     with SingleTickerProviderStateMixin {
-  final _musicPlayer = MusicPlayer.instance;
-
   Animation<double> animation;
   AnimationController controller;
 
@@ -37,14 +34,11 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
   StreamSubscription<void> _changeSongSubscription;
   StreamSubscription<AudioPlayerState> _playerStateChangeSubscription;
 
-  SharedPreferences prefs;
-
   @override
   void initState() {
     super.initState();
 
     _setInitialCurrentPosition();
-    _getPrefsInstance();
 
     controller =
         AnimationController(duration: const Duration(seconds: 15), vsync: this);
@@ -58,15 +52,15 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
       });
 
     // Spawn animation settings
-    if (_musicPlayer.playState == AudioPlayerState.PLAYING)
+    if (MusicPlayer.playState == AudioPlayerState.PLAYING)
       controller.repeat();
-    else if (_musicPlayer.playState == AudioPlayerState.PAUSED)
+    else if (MusicPlayer.playState == AudioPlayerState.PAUSED)
       controller.stop();
-    else if (_musicPlayer.playState == AudioPlayerState.STOPPED)
+    else if (MusicPlayer.playState == AudioPlayerState.STOPPED)
       controller.stop();
 
     _playerStateChangeSubscription =
-        _musicPlayer.onPlayerStateChanged.listen((event) {
+        MusicPlayer.onPlayerStateChanged.listen((event) {
       switch (event) {
         case AudioPlayerState.PLAYING:
           controller.repeat();
@@ -87,7 +81,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
 
     // Handle track position movement
     _changePositionSubscription =
-        _musicPlayer.onAudioPositionChanged.listen((event) {
+        MusicPlayer.onAudioPositionChanged.listen((event) {
       if (event.inSeconds - 0.9 > _value.inSeconds) // Prevent waste updates
         setState(() {
           _value = event;
@@ -100,11 +94,11 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
     });
 
     // Handle track switch
-    _changeSongSubscription = _musicPlayer.onSongChange.listen((event) {
+    _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
       setState(() {
         _value = Duration(seconds: 0);
-        _duration = Duration(
-            milliseconds: _musicPlayer.playlistControl.currentSong.duration);
+        _duration =
+            Duration(milliseconds:  PlaylistControl.currentSong?.duration);
       });
     });
   }
@@ -118,22 +112,17 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
     super.dispose();
   }
 
-  void _getPrefsInstance() async {
-    prefs = await SharedPreferences.getInstance();
-  }
-
   _setInitialCurrentPosition() async {
-    var currentPosition = await _musicPlayer.currentPosition;
+    var currentPosition = await MusicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = Duration(
-          milliseconds: _musicPlayer.playlistControl.currentSong.duration);
+      _duration = Duration(milliseconds:  PlaylistControl.currentSong?.duration);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return !_musicPlayer.playlistControl.songsEmpty(PlaylistType.global)
+    return !PlaylistControl.songsEmpty(PlaylistType.global)
         ? Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -150,7 +139,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
                   color: Color(0xff070707),
                   // color: Colors.grey.shade900,
                   child: StreamBuilder(
-                      stream: _musicPlayer.onPlayerStateChanged,
+                      stream: MusicPlayer.onPlayerStateChanged,
                       builder: (context, snapshot) {
                         return ListTile(
                           contentPadding: EdgeInsets.only(
@@ -160,15 +149,14 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                _musicPlayer.playlistControl.currentSong.title,
+                                 PlaylistControl.currentSong?.title,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(fontSize: 16),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(top: 1),
                                 child: Artist(
-                                    artist: _musicPlayer
-                                        .playlistControl.currentSong.artist),
+                                    artist:  PlaylistControl.currentSong?.artist),
                               ),
                             ],
                           ),
@@ -190,8 +178,8 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
                                 child: Container(
                                   // padding: const EdgeInsets.all(5.0),
                                   child: AlbumArt(
-                                    path: _musicPlayer.playlistControl
-                                        .currentSong.albumArtUri,
+                                    path:
+                                         PlaylistControl.currentSong?.albumArtUri,
                                     round: true,
                                   ),
                                 ),
@@ -204,14 +192,14 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
                               //  IconButton(
                               //   icon: Icon(Icons.skip_previous),
                               //   iconSize: 32,
-                              //   onPressed: _musicPlayer.clickPrev,
+                              //   onPressed: MusicPlayer.clickPrev,
                               // ),
                               Container(
                                   width: 32, child: AnimatedPlayPauseButton()),
                               IconButton(
                                 icon: Icon(Icons.skip_next),
                                 iconSize: 32,
-                                onPressed: _musicPlayer.clickNext,
+                                onPressed: MusicPlayer.clickNext,
                               ),
                             ],
                           ),

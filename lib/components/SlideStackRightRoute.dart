@@ -5,15 +5,16 @@ class SlideStackRightRoute extends PageRouteBuilder {
   final Widget enterPage;
   final Widget exitPage;
   static var exBegin = Offset(0.0, 0.0);
-  static var exEnd = Offset(-0.5, 0.0);
+  static var exEnd = Offset(-0.3, 0.0);
   static var entBegin = Offset(1.0, 0.0);
   static var entEnd = Offset.zero;
-  static var curveIn = Curves.easeOutSine;
-  static var curveOut = Curves.easeInSine;
+  static var curveIn = Curves.linearToEaseOut;
+  static var curveOut = Curves.easeInToLinear;
 
   SlideStackRightRoute({@required this.exitPage, @required this.enterPage})
       : super(
-          transitionDuration: Duration(milliseconds: 600),
+          transitionDuration: Duration(milliseconds: 400),
+          maintainState: true,
           pageBuilder: (
             BuildContext context,
             Animation<double> animation,
@@ -37,7 +38,9 @@ class SlideStackRightRoute extends PageRouteBuilder {
                     foregroundDecoration: BoxDecoration(
                       color: Colors.black.withOpacity(animation.value / 2),
                     ),
-                    child: exitPage),
+                    child:
+                        // FIXME: this creates new `exitPage` instance animation
+                        exitPage),
               ),
               SlideTransition(
                 position: Tween(begin: entBegin, end: entEnd)

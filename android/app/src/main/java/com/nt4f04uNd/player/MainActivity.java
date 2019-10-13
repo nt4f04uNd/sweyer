@@ -45,10 +45,6 @@ import android.graphics.BitmapFactory;
 public class MainActivity extends FlutterActivity {
    private static String TAG = "player/java file";
 
-   private static final String eventChannelStream = "eventChannelStream";
-   private static final String methodChannelStream = "methodChannelStream";
-   private static final String songsChannelStream = "songsChannelStream";
-
    private static IntentFilter notificationIntentFilter = new IntentFilter();
    private static IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 
@@ -64,7 +60,7 @@ public class MainActivity extends FlutterActivity {
 
    /** Focus request for audio manager */
    private static AudioFocusRequest focusRequest;
-   private static MethodChannel methodChannel;
+   private static MethodChannel playerChannel;
    private static MethodChannel songsChannel;
    private static EventChannel eventChannel;
 
@@ -88,12 +84,13 @@ public class MainActivity extends FlutterActivity {
 
       Log.w(TAG, "REQUEST FOCUS " + res);
       if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-         return "AUDIOFOCUS_REQUEST_FAILED";
+         return Constants.PLAYER_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED;
       } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-         return "AUDIOFOCUS_REQUEST_GRANTED";
+         return Constants.PLAYER_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED;
       } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
-         return "AUDIOFOCUS_REQUEST_DELAYED";
+         return Constants.PLAYER_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED;
       }
+      Log.w(TAG, "WRONG_EVENT");
       return "WRONG_EVENT";
    }
 
@@ -117,20 +114,24 @@ public class MainActivity extends FlutterActivity {
          Log.w(TAG, "ONFOCUSCHANGE: " + focusChange);
          switch (focusChange) {
          case AudioManager.AUDIOFOCUS_GAIN:
-            Log.w(TAG, "GAIN");
-            methodChannel.invokeMethod("FOCUS_CHANGE", "AUDIOFOCUS_GAIN");
+            Log.w(TAG, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
+            playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
+                  Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
             break;
          case AudioManager.AUDIOFOCUS_LOSS:
-            Log.w(TAG, "LOSS");
-            methodChannel.invokeMethod("FOCUS_CHANGE", "AUDIOFOCUS_LOSS");
+            Log.w(TAG, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
+            playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
+                  Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
             break;
          case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-            Log.w(TAG, "ANOTHER LOSS");
-            methodChannel.invokeMethod("FOCUS_CHANGE", "AUDIOFOCUS_LOSS_TRANSIENT");
+            Log.w(TAG, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
+            playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
+                  Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
             break;
          case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-            Log.w(TAG, "KAVO");
-            methodChannel.invokeMethod("FOCUS_CHANGE", "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+            Log.w(TAG, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
+            playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
+                  Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
             break;
          }
       }
@@ -155,10 +156,10 @@ public class MainActivity extends FlutterActivity {
 
       String[] projection = { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATE_ADDED };
+            MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATE_MODIFIED };
 
       Cursor cursor = getApplicationContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection, selection, null, "DATE_ADDED DESC");
+            projection, selection, null, "DATE_MODIFIED DESC");
 
       while (cursor.moveToNext()) {
          songs.add(new Song(cursor.getInt(0), cursor.getString(1), cursor.getString(2), getAlbumArt(cursor.getInt(3)),
@@ -192,7 +193,7 @@ public class MainActivity extends FlutterActivity {
       @Override
       public void onReceive(Context context, Intent intent) {
          if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-            eventSink.success("com.nt4f04uNd.player.BECAME_NOISY");
+            eventSink.success(Constants.EVENT_BECOME_NOISY);
          }
       }
    }
@@ -209,14 +210,14 @@ public class MainActivity extends FlutterActivity {
       @Override
       public void onReceive(Context context, Intent intent) {
          Log.w(TAG, intent.getAction().toString());
-         if (Constants.NOTIFICATION_INTENT_PLAY.equals(intent.getAction())) {
-            eventSink.success(Constants.NOTIFICATION_INTENT_PLAY);
-         } else if (Constants.NOTIFICATION_INTENT_PAUSE.equals(intent.getAction())) {
-            eventSink.success(Constants.NOTIFICATION_INTENT_PAUSE);
-         } else if (Constants.NOTIFICATION_INTENT_NEXT.equals(intent.getAction())) {
-            eventSink.success(Constants.NOTIFICATION_INTENT_NEXT);
-         } else if (Constants.NOTIFICATION_INTENT_PREV.equals(intent.getAction())) {
-            eventSink.success(Constants.NOTIFICATION_INTENT_PREV);
+         if (Constants.EVENT_NOTIFICATION_INTENT_PLAY.equals(intent.getAction())) {
+            eventSink.success(Constants.EVENT_NOTIFICATION_INTENT_PLAY);
+         } else if (Constants.EVENT_NOTIFICATION_INTENT_PAUSE.equals(intent.getAction())) {
+            eventSink.success(Constants.EVENT_NOTIFICATION_INTENT_PAUSE);
+         } else if (Constants.EVENT_NOTIFICATION_INTENT_NEXT.equals(intent.getAction())) {
+            eventSink.success(Constants.EVENT_NOTIFICATION_INTENT_NEXT);
+         } else if (Constants.EVENT_NOTIFICATION_INTENT_PREV.equals(intent.getAction())) {
+            eventSink.success(Constants.EVENT_NOTIFICATION_INTENT_PREV);
          }
       }
    }
@@ -228,7 +229,8 @@ public class MainActivity extends FlutterActivity {
          CharSequence name = "Управление музыкой";
          String description = "Канал уведомлений для управления фоновым воспроизведением музыки";
          int importance = NotificationManager.IMPORTANCE_LOW;
-         NotificationChannel channel = new NotificationChannel(Constants.NOTIFICATION_CHANNEL_ID, name, importance);
+         NotificationChannel channel = new NotificationChannel(Constants.EVENT_NOTIFICATION_CHANNEL_ID, name,
+               importance);
          channel.setDescription(description);
          // Register the channel with the system; you can't change the importance
          // or other notification behaviors after this
@@ -242,10 +244,10 @@ public class MainActivity extends FlutterActivity {
       createNotificationChannel();
 
       // Init intent filters
-      notificationIntentFilter.addAction(Constants.NOTIFICATION_INTENT_PLAY);
-      notificationIntentFilter.addAction(Constants.NOTIFICATION_INTENT_PAUSE);
-      notificationIntentFilter.addAction(Constants.NOTIFICATION_INTENT_PREV);
-      notificationIntentFilter.addAction(Constants.NOTIFICATION_INTENT_NEXT);
+      notificationIntentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_PLAY);
+      notificationIntentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_PAUSE);
+      notificationIntentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_PREV);
+      notificationIntentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_NEXT);
 
       // Intent for switching to activity instead of opening a new one
       final Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -255,10 +257,10 @@ public class MainActivity extends FlutterActivity {
       pendingNotificationIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
 
       // Init intents
-      Intent playIntent = new Intent().setAction(Constants.NOTIFICATION_INTENT_PLAY);
-      Intent pauseIntent = new Intent().setAction(Constants.NOTIFICATION_INTENT_PAUSE);
-      Intent prevIntent = new Intent().setAction(Constants.NOTIFICATION_INTENT_PREV);
-      Intent nextIntent = new Intent().setAction(Constants.NOTIFICATION_INTENT_NEXT);
+      Intent playIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_PLAY);
+      Intent pauseIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_PAUSE);
+      Intent prevIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_PREV);
+      Intent nextIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_NEXT);
 
       // Make them pending
       playPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, playIntent,
@@ -277,12 +279,12 @@ public class MainActivity extends FlutterActivity {
    private void buildNotification(String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
 
       NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),
-            Constants.NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            Constants.EVENT_NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                   .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                   .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
                   .setSmallIcon(R.drawable.round_music_note_white_48)
-                  .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length))
-                  .setOngoing(true) // Persistent setting
+                  .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length)).setOngoing(true) // Persistent
+                                                                                                                        // setting
                   .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
                                                                // notification
                   .setContentTitle(title).setContentText(artist)
@@ -307,7 +309,7 @@ public class MainActivity extends FlutterActivity {
 
       @Override
       protected void onPostExecute(List<String> result) {
-         songsChannel.invokeMethod("SEND_SONGS", result);
+         songsChannel.invokeMethod(Constants.SONGS_METHOD_METHOD_SEND_SONGS, result);
       }
    }
 
@@ -330,7 +332,7 @@ public class MainActivity extends FlutterActivity {
                if (event.getAction() == KeyEvent.ACTION_DOWN) {
                   switch (event.getKeyCode()) {
                   case KeyEvent.KEYCODE_HEADSETHOOK:
-                     methodChannel.invokeMethod("HOOK_BUTTON_CLICK", null);
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_HOOK_BUTTON_CLICK, null);
                   }
                }
             }
@@ -338,12 +340,12 @@ public class MainActivity extends FlutterActivity {
          }
       });
 
-      // Setup methodChannel
-      methodChannel = new MethodChannel(getFlutterView(), methodChannelStream);
+      // Setup playerChannel
+      playerChannel = new MethodChannel(getFlutterView(), Constants.PLAYER_CHANNEL_STREAM);
       // Setup songsChannel
-      songsChannel = new MethodChannel(getFlutterView(), songsChannelStream);
+      songsChannel = new MethodChannel(getFlutterView(), Constants.SONGS_CHANNEL_STREAM);
       // Setup event channel
-      eventChannel = new EventChannel(getFlutterView(), eventChannelStream);
+      eventChannel = new EventChannel(getFlutterView(), Constants.EVENT_CHANNEL_STREAM);
 
       // Audio manager become noisy event
       eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
@@ -375,54 +377,47 @@ public class MainActivity extends FlutterActivity {
          afChangeListener = new OnFocusChangeListener();
       }
 
-      methodChannel.setMethodCallHandler(new MethodCallHandler() {
+      playerChannel.setMethodCallHandler(new MethodCallHandler() {
          @Override
          public void onMethodCall(MethodCall call, Result result) {
-            // Note: this method is invoked on the main thread.
-            switch (call.method) {
-            case "REQUEST_FOCUS":
+            // NOTE: this method is invoked on the main thread.
+            final String method = call.method;
+            if (method.equals(Constants.PLAYER_METHOD_REQUEST_FOCUS)) {
                result.success(requestFocus());
-               break;
-            case "ABANDON_FOCUS":
+            } else if (method.equals(Constants.PLAYER_METHOD_ABANDON_FOCUS)) {
                result.success(abandonFocus());
-               break;
-            case "INTENT_ACTION_VIEW":
+            } else if (method.equals(Constants.PLAYER_METHOD_INTENT_ACTION_VIEW)) {
                result.success(isIntentActionView());
-               break;
-            case "RETRIEVE_SONGS":
-               // Run method on another thread
-               new ConductSongsSearch().execute();
+            } else if (method.equals(Constants.PLAYER_METHOD_NOTIFICATION_SHOW)) {
+               buildNotification(call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_TITLE),
+                     call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_ARTIST),
+                     call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_ALBUM_ART_BYTES),
+                     call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_IS_PLAYING));
                result.success("");
-               break;
-            case "NOTIFICATION_SHOW":
-               buildNotification(call.argument("title"), call.argument("artist"), call.argument("albumArtBytes"),
-                     call.argument("isPlaying"));
-               result.success("");
-               break;
-            case "NOTIFICATION_CLOSE":
+            } else if (method.equals(Constants.PLAYER_METHOD_NOTIFICATION_CLOSE)) {
                closeNotification();
                result.success("");
-               break;
-            default:
-               Log.w(TAG, "Invalid method name call from Dart code");
+            } else {
+               Log.w(TAG, "playerChannel: Invalid method name call from Dart code");
             }
          }
       });
 
       songsChannel.setMethodCallHandler(new MethodCallHandler() {
+
          @Override
          public void onMethodCall(MethodCall call, Result result) {
             // Note: this method is invoked on the main thread.
-            switch (call.method) {
-            case "RETRIEVE_SONGS":
+            final String method = call.method;
+            if (method.equals(Constants.SONGS_METHOD_METHOD_RETRIEVE_SONGS)) {
                // Run method on another thread
                new ConductSongsSearch().execute();
                result.success("");
-               break;
-            default:
-               Log.w(TAG, "Invalid method name call from Dart code");
+            } else {
+               Log.w(TAG, "songsChannel: Invalid method name call from Dart code");
             }
          }
+
       });
    }
 
@@ -458,12 +453,11 @@ public class MainActivity extends FlutterActivity {
 
    // Handling single headset button
    // case KeyEvent.KEYCODE_HEADSETHOOK:
-   // methodChannel.invokeMethod("HOOK_BUTTON_CLICK", null);
+   // playerChannel.invokeMethod("PLAYER_METHOD_HOOK_BUTTON_CLICK", null);
    // return true;
    // }
    // return false;
    // }
-
 
    @Override
    protected void onDestroy() {

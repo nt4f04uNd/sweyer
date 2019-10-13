@@ -8,10 +8,10 @@ import 'package:catcher/catcher_plugin.dart';
 
 void main() {
   CatcherOptions debugOptions =
-      CatcherOptions(DialogReportMode(), [ConsoleHandler()]);
+      CatcherOptions(DialogReportMode(),  [ConsoleHandler()]);
   CatcherOptions releaseOptions = CatcherOptions(DialogReportMode(), [
     EmailManualHandler(["nt4f04uNd@gmail.com"])
-  ]);
+  ] );
 
   Catcher(MyApp(), debugConfig: debugOptions, releaseConfig: releaseOptions);
 }
@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    MusicPlayer.instance.stop();
+    MusicPlayer.stop();
     super.dispose();
   }
 
@@ -39,7 +39,8 @@ class _MyAppState extends State<MyApp> {
         // Catcher.addDefaultErrorWidget(
         //     showStacktrace: true,
         //     customTitle: "Custom error title",
-        //     customDescription: "Custom error description");
+        //     customDescription: "Custom error description",
+        //     );
         return widget;
       },
       supportedLocales: [const Locale('ru')],
@@ -86,7 +87,7 @@ class _MyAppState extends State<MyApp> {
       return Future.value(false);
     }
     // Stop player before exiting app
-    await MusicPlayer.instance.stop();
+    await MusicPlayer.stop();
     return Future.value(true);
   }
 }

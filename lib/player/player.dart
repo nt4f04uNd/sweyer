@@ -3,12 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/playlist.dart';
+import 'package:app/player/prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// VIEW https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
 import 'package:flutter/services.dart' show rootBundle;
@@ -38,90 +38,81 @@ Future<int> _recursiveCallback(Future<int> callback(),
 }
 
 // FIXME: conduct a massive refactor of methods and properties
-class MusicPlayer {
-  static MusicPlayer instance;
-
+abstract class MusicPlayer {
   /// Image bytes to display in notification
-  Uint8List _placeholderImgBytes;
+  static Uint8List _placeholderImgBytes;
 
   /// Channel for handling audio focus
-  MethodChannel _methodChannel =
-      const MethodChannel(Constants.MethodChannel.channelName);
+  static MethodChannel _playerChannel =
+      const MethodChannel(Constants.PlayerChannel.channelName);
 
   /// Event channel for receiving native android events
-  EventChannel _eventChannel =
+  static EventChannel _eventChannel =
       const EventChannel(Constants.EventChannel.channelName);
 
   /// `[AudioPlayer]` player instance
-  final nativePlayerInstance = AudioPlayer(mode: PlayerMode.MEDIA_PLAYER);
-
-  PlaylistControl playlistControl = PlaylistControl();
+  static final nativePlayerInstance =
+      AudioPlayer(mode: PlayerMode.MEDIA_PLAYER);
 
   /// A subscription to song change
-  StreamSubscription<void> _songChangeListenerSubscription;
+  static StreamSubscription<void> _songChangeListenerSubscription;
 
   /// Subscription for events stream
-  StreamSubscription _eventSubscription;
+  static StreamSubscription _eventSubscription;
 
   /// Subscription for changes in state
-  StreamSubscription<AudioPlayerState> _stateChangeSubscription;
+  static StreamSubscription<AudioPlayerState> _stateChangeSubscription;
 
   /// Subscription for completion changes
-  StreamSubscription<void> _completionSubscription;
+  static StreamSubscription<void> _completionSubscription;
 
   /// Audio manager focus state
-  AudioFocusType focusState = AudioFocusType.no_focus;
+  static AudioFocusType focusState = AudioFocusType.no_focus;
 
   /// Is notification visible
-  bool notificationState = false;
+  static bool notificationState = false;
 
   /// Is notification visible
-  bool loopModeState = false;
+  static bool loopModeState = false;
 
   /// Hook handle
   /// Variable to save latest hook press time
-  DateTime _latestHookPressTime;
+  static DateTime _latestHookPressTime;
 
   /// How much times hook has been pressed during handle multiple presses time (e.g. 700ms)
-  int _hookPressStack = 0;
+  static int _hookPressStack = 0;
 
   /// Is player tries to switch right now
   /// TODO: improve implementation of this
-  bool switching = false;
+  static bool switching = false;
 
   // Getters
 
   /// Get stream of changes on audio position.
-  Stream<Duration> get onAudioPositionChanged =>
+  static Stream<Duration> get onAudioPositionChanged =>
       nativePlayerInstance.onAudioPositionChanged;
 
   /// Get stream of changes on player state.
-  Stream<AudioPlayerState> get onPlayerStateChanged =>
+  static Stream<AudioPlayerState> get onPlayerStateChanged =>
       nativePlayerInstance.onPlayerStateChanged;
 
   /// Get stream of changes on audio duration
-  Stream<Duration> get onDurationChanged =>
+  static Stream<Duration> get onDurationChanged =>
       nativePlayerInstance.onDurationChanged;
 
   /// Get stream of player completions
-  Stream<void> get onPlayerCompletion =>
+  static Stream<void> get onPlayerCompletion =>
       nativePlayerInstance.onPlayerCompletion;
 
   /// Get stream of player errors
-  Stream<String> get onPlayerError => nativePlayerInstance.onPlayerError;
+  static Stream<String> get onPlayerError => nativePlayerInstance.onPlayerError;
 
-  /// Get stream of notifier events about changes on track list
-  Stream<void> get onPlaylistListChange => playlistControl.onPlaylistListChange;
-
-  /// Get stream of notifier events about changes on current song
-  Stream<void> get onSongChange => playlistControl.onSongChange;
-
-  AudioPlayerState get playState => nativePlayerInstance.state;
+  static AudioPlayerState get playState => nativePlayerInstance.state;
 
   /// Get current position
   ///
   /// TODO: report this bu
-  Future<Duration> get currentPosition async {
+  static Future<Duration> get currentPosition async {
     try {
       return Duration(
           milliseconds: await nativePlayerInstance.getCurrentPosition());
@@ -131,19 +122,22 @@ class MusicPlayer {
     }
   }
 
-  MusicPlayer() {
-    instance = this;
-
+  /// Init whole music instance
+  ///
+  static Future<void> init() async {
     nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
 
-    _songChangeListenerSubscription = onSongChange.listen((event) {
+    _songChangeListenerSubscription =
+        PlaylistControl.onSongChange.listen((event) {
+      Prefs.byKey.songIdInt.setPref( PlaylistControl.currentSong?.id);
+
       switching = false;
     });
 
     _completionSubscription = onPlayerCompletion.listen((event) {
       // Play next track if not in loop mode
       if (!loopModeState) clickNext();
-      playlistControl.emitSongChange();
+      PlaylistControl.emitSongChange();
     });
 
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
@@ -170,28 +164,21 @@ class MusicPlayer {
     });
 
     _stateChangeSubscription = onPlayerStateChanged.listen((event) async {
-      if (!playlistControl.songsEmpty(PlaylistType.global)) {
-        // TODO: improve this code + add comments
-        var prefs = await SharedPreferences.getInstance();
-        prefs.setInt(
-            Constants.PrefKeys.songIdInt, playlistControl.currentSong.id);
-      }
-
       switch (event) {
         case AudioPlayerState.PLAYING:
           _showNotification(
-              artist: artistString(playlistControl.currentSong.artist),
-              title: playlistControl.currentSong.title,
-              albumArtUri: playlistControl.currentSong.albumArtUri,
+              artist: artistString( PlaylistControl.currentSong?.artist),
+              title:  PlaylistControl.currentSong?.title,
+              albumArtUri:  PlaylistControl.currentSong?.albumArtUri,
               isPlaying: true);
           notificationState = true;
           break;
         case AudioPlayerState.PAUSED:
           if (notificationState)
             _showNotification(
-                artist: artistString(playlistControl.currentSong.artist),
-                title: playlistControl.currentSong.title,
-                albumArtUri: playlistControl.currentSong.albumArtUri,
+                artist: artistString( PlaylistControl.currentSong?.artist),
+                title:  PlaylistControl.currentSong?.title,
+                albumArtUri:  PlaylistControl.currentSong?.albumArtUri,
                 isPlaying: false);
           break;
         case AudioPlayerState.STOPPED:
@@ -207,25 +194,25 @@ class MusicPlayer {
 
     // TODO: see how to improve focus and implement gain delayed usage
     // Set listener for method calls for changing focus
-    _methodChannel.setMethodCallHandler((MethodCall call) async {
+    _playerChannel.setMethodCallHandler((MethodCall call) async {
       // debugPrint('${call.method}, ${call.arguments.toString()}');
 
-      if (call.method == Constants.MethodChannel.methodFocusChange) {
+      if (call.method == Constants.PlayerChannel.methodFocusChange) {
         switch (call.arguments) {
           // TODO: rewrite instead of these methods my class methods (resume, pause, etc.)
-          case Constants.MethodChannel.argFocusGain:
+          case Constants.PlayerChannel.argFocusGain:
             int res = await _recursiveCallback(nativePlayerInstance.resume);
             if (res == 1) focusState = AudioFocusType.focus;
             break;
-          case Constants.MethodChannel.argFocusLoss:
+          case Constants.PlayerChannel.argFocusLoss:
             int res = await _recursiveCallback(nativePlayerInstance.pause);
             if (res == 1) focusState = AudioFocusType.no_focus;
             break;
-          case Constants.MethodChannel.argFocusLossTrans:
+          case Constants.PlayerChannel.argFocusLossTrans:
             int res = await _recursiveCallback(nativePlayerInstance.pause);
             if (res == 1) focusState = AudioFocusType.focus_delayed;
             break;
-          case Constants.MethodChannel.argFocusLossTransCanDuck:
+          case Constants.PlayerChannel.argFocusLossTransCanDuck:
             int res = await _recursiveCallback(nativePlayerInstance.pause);
             if (res == 1) focusState = AudioFocusType.focus_delayed;
             // TODO: implement volume change
@@ -233,9 +220,9 @@ class MusicPlayer {
           default:
             throw Exception('Incorrect method argument came from native code');
         }
-      } else if (call.method == Constants.MethodChannel.methodHookButtonClick) {
+      } else if (call.method == Constants.PlayerChannel.methodHookButtonClick) {
         // Avoid errors when app is loading
-        if (playlistControl.playReady) {
+        if (PlaylistControl.playReady) {
           DateTime now = DateTime.now();
           if (_latestHookPressTime == null ||
               now.difference(_latestHookPressTime) >
@@ -255,11 +242,31 @@ class MusicPlayer {
       }
     });
 
-    _init();
+    // Get saved data
+    var savedLoopMode = await Prefs.byKey.loopModeBool.getPref();
+
+    // Set loop mode to true if it is true in prefs
+    if (savedLoopMode != null && savedLoopMode) {
+      loopModeState = savedLoopMode;
+      nativePlayerInstance.setReleaseMode(ReleaseMode.LOOP);
+    }
+
+    _placeholderImgBytes =
+        (await rootBundle.load('images/placeholder_thumb.png'))
+            .buffer
+            .asUint8List();
+  }
+
+  // TODO: improve and implement this method
+  static void dispose() {
+    _songChangeListenerSubscription.cancel();
+    _eventSubscription.cancel();
+    _stateChangeSubscription.cancel();
+    _completionSubscription.cancel();
   }
 
   /// Play/pause, next or prev function depending on `_hookPressStack`
-  void _handleHookDelayedPress() async {
+  static Future<void> _handleHookDelayedPress() async {
     // Wait 0.6s
     await Future.delayed(Duration(milliseconds: 600));
     switch (_hookPressStack) {
@@ -278,24 +285,24 @@ class MusicPlayer {
 
   // TODO: add implementation for this function and change method name to `get_intent_action_view`
   // #SEPARATE
-  Future<void> _isIntentActionView() async {
-    debugPrint((await _methodChannel
-            .invokeMethod(Constants.MethodChannel.methodIntentActionView))
+  static Future<void> _isIntentActionView() async {
+    debugPrint((await _playerChannel
+            .invokeMethod(Constants.PlayerChannel.methodIntentActionView))
         .toString());
   }
 
   /// Request audio manager focus
-  Future<void> _requestFocus() async {
+  static Future<void> _requestFocus() async {
     if (focusState == AudioFocusType.no_focus) {
-      switch (await _methodChannel
-          .invokeMethod<String>(Constants.MethodChannel.methodRequestFocus)) {
-        case Constants.MethodChannel.returnRequestFail:
+      switch (await _playerChannel
+          .invokeMethod<String>(Constants.PlayerChannel.methodRequestFocus)) {
+        case Constants.PlayerChannel.returnRequestFail:
           focusState = AudioFocusType.no_focus;
           break;
-        case Constants.MethodChannel.returnRequestGrant:
+        case Constants.PlayerChannel.returnRequestGrant:
           focusState = AudioFocusType.focus;
           break;
-        case Constants.MethodChannel.returnRequestDelay:
+        case Constants.PlayerChannel.returnRequestDelay:
           focusState = AudioFocusType.focus_delayed;
           break;
       }
@@ -303,15 +310,15 @@ class MusicPlayer {
   }
 
   /// Abandon audio manager focus
-  Future<void> _abandonFocus() async {
-    await _methodChannel
-        .invokeMethod(Constants.MethodChannel.methodAbandonFocus);
+  static Future<void> _abandonFocus() async {
+    await _playerChannel
+        .invokeMethod(Constants.PlayerChannel.methodAbandonFocus);
     focusState = AudioFocusType.no_focus;
   }
 
 // TODO: move notification methods to separate class maybe
   /// Method to show/update notification
-  void _showNotification(
+  static Future<void> _showNotification(
       {@required String title,
       @required String artist,
       @required String albumArtUri,
@@ -330,29 +337,28 @@ class MusicPlayer {
       }
     }
 
-    await _methodChannel
-        .invokeMethod(Constants.MethodChannel.methodShowNotification, {
-      "title": title,
-      "artist": artist,
-      "albumArtBytes": albumArtBytes,
-      "isPlaying": isPlaying
+    await _playerChannel
+        .invokeMethod(Constants.PlayerChannel.methodShowNotification, {
+      Constants.PlayerChannel.argTitle: title,
+      Constants.PlayerChannel.argArtist: artist,
+      Constants.PlayerChannel.argAlbumArtBytes: albumArtBytes,
+      Constants.PlayerChannel.argIsPlaying: isPlaying
     });
   }
 
   /// Method to hide notification
-  Future<void> _closeNotification() async {
-    await _methodChannel
-        .invokeMethod(Constants.MethodChannel.methodCloseNotification);
+  static Future<void> _closeNotification() async {
+    await _playerChannel
+        .invokeMethod(Constants.PlayerChannel.methodCloseNotification);
   }
 
-  void switchLoopMode() async {
-    var prefs = await SharedPreferences.getInstance();
+  static Future<void> switchLoopMode() async {
     if (loopModeState) {
       nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
-      prefs.setBool(Constants.PrefKeys.loopModeBool, false);
+      Prefs.byKey.loopModeBool.setPref(false);
     } else {
       nativePlayerInstance.setReleaseMode(ReleaseMode.LOOP);
-      prefs.setBool(Constants.PrefKeys.loopModeBool, true);
+      Prefs.byKey.loopModeBool.setPref(true);
     }
     loopModeState = !loopModeState;
   }
@@ -361,13 +367,13 @@ class MusicPlayer {
   /// Play track
   ///
   /// `songId` argument denotes an id track to play
-  Future<void> play(int songId) async {
+  static Future<void> play(int songId) async {
     switching = true;
     await _requestFocus();
     // NOTE that this is defaults to 1 and if needed you have to set it manually to 0
-    int res = 1;
+    int res = 0;
     try {
-      final uri = playlistControl.getSongById(songId).trackUri;
+      final uri = PlaylistControl.getSongById(songId).trackUri;
       if (focusState == AudioFocusType.focus)
         res = await nativePlayerInstance.play(uri,
             stayAwake:
@@ -391,31 +397,39 @@ class MusicPlayer {
 
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
-          await play(playlistControl.getNextSongId(songId));
+          await play(PlaylistControl.getNextSongId(songId));
           res = 0;
-          playlistControl.songs(PlaylistType.global).removeAt(
-              playlistControl.getSongIndexById(songId)); //Remove broken track
-          playlistControl.emitPlaylistChange();
-          playlistControl.refetchSongs(); // Perform fetching
+          PlaylistControl.songs(PlaylistType.global).removeAt(
+              PlaylistControl.getSongIndexById(songId)); //Remove broken track
+          PlaylistControl.emitPlaylistChange();
+          PlaylistControl.refetchSongs(); // form fetching
+        } else if (e.message ==
+            "Unsupported value: java.lang.IllegalStateException") {
+          await play(PlaylistControl.getNextSongId(songId)); // Retry play track
         }
       }
     } catch (e) {
       debugPrint('Error thrown in my player class play method - error: $e');
     } finally {
       // If res is successful, then change playing track id
-      if (res == 1) playlistControl.playingTrackIdState = songId;
-      // Switching is set to false in `onSongChange` listener
-      playlistControl.emitSongChange();
+      if (res == 1) {
+        PlaylistControl.playingTrackIdState = songId;
+        // Switching is set to false in `onSongChange` listener
+        PlaylistControl.emitSongChange();
+      }
+      switching = false;
     }
   }
 
   /// Resume player
   ///
+  /// TODO: rewrite like `play()` method
+  ///
   /// It handles errors the same way as play method above
   /// Positional optional argument `songId` is needed to jump to next track when handling error
-  Future<void> resume([int songId]) async {
+  static Future<void> resume([int songId]) async {
     // If `songId` hasn't been provided then use playing id state
-    if (songId == null) songId = playlistControl.playingTrackIdState;
+    if (songId == null) songId = PlaylistControl.playingTrackIdState;
     switching = true;
     await _requestFocus();
     // NOTE that this is defaults to 1 and if needed you have to set it manually to 0
@@ -443,32 +457,32 @@ class MusicPlayer {
 
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
-          await play(playlistControl.getNextSongId(songId));
+          await play(PlaylistControl.getNextSongId(songId));
           res = 0;
-          playlistControl.songs(PlaylistType.global).removeAt(
-              playlistControl.getSongIndexById(songId)); //Remove broken track
-          playlistControl.emitPlaylistChange();
-          playlistControl.refetchSongs(); // Perform fetching
+          PlaylistControl.songs(PlaylistType.global).removeAt(
+              PlaylistControl.getSongIndexById(songId)); //Remove broken track
+          PlaylistControl.emitPlaylistChange();
+          PlaylistControl.refetchSongs(); // Perform fetching
         }
       }
     } catch (e) {
       debugPrint('Error thrown in my player class play method - error: $e');
     } finally {
       // If res is successful, then change playing track id
-      if (res == 1) playlistControl.playingTrackIdState = songId;
+      if (res == 1) PlaylistControl.playingTrackIdState = songId;
       // Switching is set to false
       switching = false;
     }
   }
 
   /// Pause player
-  Future<void> pause() async {
+  static Future<void> pause() async {
     await nativePlayerInstance.pause();
     await _abandonFocus();
   }
 
   /// Stop player
-  Future<void> stop() async {
+  static Future<void> stop() async {
     await nativePlayerInstance.stop();
     // await _closeNotification();
     // Change state if result is successful
@@ -476,12 +490,12 @@ class MusicPlayer {
   }
 
   /// Seek
-  Future<void> seek(int seconds) async {
+  static Future<void> seek(int seconds) async {
     await nativePlayerInstance.seek(Duration(seconds: seconds));
   }
 
   /// Function that fires when pause/play button got clicked
-  Future<void> clickPausePlay() async {
+  static Future<void> clickPausePlay() async {
     debugPrint(switching.toString());
     // TODO: refactor
     if (!switching) {
@@ -494,10 +508,10 @@ class MusicPlayer {
           break;
         case AudioPlayerState.STOPPED:
           // Currently unused and shouldn't
-          await play(playlistControl.playingTrackIdState);
+          await play(PlaylistControl.playingTrackIdState);
           break;
         case AudioPlayerState.COMPLETED:
-          await play(playlistControl.playingTrackIdState);
+          await play(PlaylistControl.playingTrackIdState);
           break;
         default:
           // TODO: add exception
@@ -508,26 +522,27 @@ class MusicPlayer {
   }
 
   /// Function that fires when next track button got clicked
-  Future<void> clickNext() async {
+  static Future<void> clickNext() async {
     if (!switching)
-      play(playlistControl.getNextSongId(playlistControl.playingTrackIdState));
+      await play(
+          PlaylistControl.getNextSongId(PlaylistControl.playingTrackIdState));
   }
 
   /// Function that fires when prev track button got clicked
-  Future<void> clickPrev() async {
+  static Future<void> clickPrev() async {
     if (!switching)
-      play(playlistControl.getPrevSongId(playlistControl.playingTrackIdState));
+      play(PlaylistControl.getPrevSongId(PlaylistControl.playingTrackIdState));
   }
 
   /// Function that handles click on track tile
   ///
   /// `clickedSongId` argument denotes an id of clicked track `TrackList`
-  Future<void> clickTrackTile(int clickedSongId) async {
+  static Future<void> clickTrackTile(int clickedSongId) async {
     if (!switching) {
       switch (playState) {
         case AudioPlayerState.PLAYING:
           // If user clicked the same track
-          if (playlistControl.playingTrackIdState == clickedSongId)
+          if (PlaylistControl.playingTrackIdState == clickedSongId)
             await pause();
           // If user decided to click a new track
           else
@@ -535,7 +550,7 @@ class MusicPlayer {
           break;
         case AudioPlayerState.PAUSED:
           // If user clicked the same track
-          if (playlistControl.playingTrackIdState == clickedSongId)
+          if (PlaylistControl.playingTrackIdState == clickedSongId)
             await resume(clickedSongId);
           // If user decided to click a new track
           else
@@ -554,33 +569,6 @@ class MusicPlayer {
           break;
       }
     }
-  }
-
-  /// Init whole music instance
-  ///
-  Future<void> _init() async {
-    // Get saved data
-    var prefs = await SharedPreferences.getInstance();
-    var savedLoopMode = prefs.getBool(Constants.PrefKeys.loopModeBool);
-
-    // Set loop mode to true if it is true in prefs
-    if (savedLoopMode != null && savedLoopMode) {
-      loopModeState = savedLoopMode;
-      nativePlayerInstance.setReleaseMode(ReleaseMode.LOOP);
-    }
-
-    _placeholderImgBytes =
-        (await rootBundle.load('images/placeholder_thumb.png'))
-            .buffer
-            .asUint8List();
-  }
-
-  // TODO: improve and implement this method
-  void dispose() {
-    _songChangeListenerSubscription.cancel();
-    _eventSubscription.cancel();
-    _stateChangeSubscription.cancel();
-    _completionSubscription.cancel();
   }
 }
 

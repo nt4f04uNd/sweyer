@@ -11,7 +11,6 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     with SingleTickerProviderStateMixin {
-  final _musicPlayer = MusicPlayer.instance;
   AnimationController _animationController;
   StreamSubscription<AudioPlayerState> _playerChangeSubscription;
 
@@ -22,14 +21,14 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
 
     // TODO: bad approach, change this to _animationController.value = 1 or 0q
-    if (_musicPlayer.playState == AudioPlayerState.PLAYING) {
+    if (MusicPlayer.playState == AudioPlayerState.PLAYING) {
       _animationController.value = 1;
     } else {
       _animationController.value = 0;
     }
 
     _playerChangeSubscription =
-        _musicPlayer.onPlayerStateChanged.listen((event) {
+        MusicPlayer.onPlayerStateChanged.listen((event) {
       setState(() {
         if (event == AudioPlayerState.PLAYING) {
           _animationController.forward();
@@ -41,7 +40,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   }
 
   void _handlePress() async {
-    await _musicPlayer.clickPausePlay();
+    await MusicPlayer.clickPausePlay();
   }
 
   @override

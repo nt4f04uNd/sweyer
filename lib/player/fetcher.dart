@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:app/player/serialization.dart';
 import 'package:app/player/song.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app/constants/constants.dart' as Constants;
 
@@ -15,15 +14,14 @@ class SongsFetcher {
   /// An instance of `AsyncOperation` to track if tracks are fetching
   AsyncOperation fetchingOperation = AsyncOperation();
 
-  /// An object to serialize songs
-  SongsSerialization serializer = SongsSerialization();
-
   /// A temporary container for found songs
   List<Song> _foundSongsTemp;
 
-  SongsFetcher() {
+  /// Function from `SongsSerializer` to save songs after fetching
+  final Function saveJson;
+
+  SongsFetcher(this.saveJson) {
     _songsChannel.setMethodCallHandler((MethodCall call) async {
-      debugPrint(call.method.toString());
       if (call.method == Constants.SongsChannel.methodSendSongs) {
         // NOTE: cast method is must be here, `as` crashes code execution
         _getSongsFromChannel(call.arguments.cast<String>());
@@ -43,7 +41,7 @@ class SongsFetcher {
   }
 
   /// Method that is used to get songs from method channel
-  /// 
+  ///
   /// ATTENTION: IF YOU USE `call.arguments` WITH THIS FUNCTION, TYPE CAST IT THROUGH `List<T> List.cast<T>()`, because `call.arguments` `as` type cast will crash closure execution
   void _getSongsFromChannel(List<String> songsJsons) {
     List<Song> foundSongs = [];
@@ -53,7 +51,7 @@ class SongsFetcher {
     // Save songs to temp container
     _foundSongsTemp = foundSongs;
     // Serialize found songs
-    serializer.saveJson(foundSongs);
+    saveJson(foundSongs);
     // Say to `fetchSongs` that operation ended and it can continue its execution
     fetchingOperation.finishOperation();
 
@@ -61,7 +59,6 @@ class SongsFetcher {
     // trackListChangeStreamController.emitEvent();
   }
 }
-
 
 /// TODO: improve this class
 class AsyncOperation {

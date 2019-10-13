@@ -1,11 +1,9 @@
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/track_list.dart';
-import 'package:app/constants/constants.dart' as Constants;
-import 'package:app/player/player.dart';
 import 'package:app/player/playlist.dart';
+import 'package:app/player/prefs.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SongsSearchDelegate extends SearchDelegate<Song> {
   List<String> _suggestions = [];
@@ -32,9 +30,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
 
   /// Function to fetch user search from shared preferences
   Future<void> _fetchSearchHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    var searchHistoryList =
-        prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
+    var searchHistoryList = await Prefs.byKey.searchHistoryStringList.getPref();
     if (searchHistoryList == null)
       _suggestions = [];
     else
@@ -43,12 +39,11 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
 
   /// Delete item from search history by its index
   Future<void> _deleteItemFromHistory(BuildContext context, int index) async {
-    final prefs = await SharedPreferences.getInstance();
+    var prefs = await Prefs.sharedInstance;
     var searchHistoryList =
-        prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
+        await Prefs.byKey.searchHistoryStringList.getPref(prefs);
     searchHistoryList.removeAt(index);
-    prefs.setStringList(
-        Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
+    await Prefs.byKey.searchHistoryStringList.setPref(searchHistoryList, prefs);
     _suggestions.removeAt(index); // Remove element from _suggestions list too
     showSuggestions(context); // Update suggestions ListView
   }
@@ -57,9 +52,9 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
   Future<void> _writeInputToSearchHistory(String input) async {
     input = input.trim(); // Remove any whitespaces
     if (input.isNotEmpty) {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await Prefs.sharedInstance;
       var searchHistoryList =
-          prefs.getStringList(Constants.PrefKeys.searchHistoryStringList);
+          await Prefs.byKey.searchHistoryStringList.getPref(prefs);
       if (searchHistoryList == null) {
         searchHistoryList = <String>[input];
       } else {
@@ -71,21 +66,20 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
         }
       }
 
-      prefs.setStringList(
-          Constants.PrefKeys.searchHistoryStringList, searchHistoryList);
+      await Prefs.byKey.searchHistoryStringList
+          .setPref(searchHistoryList, prefs);
     }
   }
 
   Future<void> _resetSearchHistory(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(Constants.PrefKeys.searchHistoryStringList, []);
+    await Prefs.byKey.searchHistoryStringList.setPref([]);
     _suggestions = [];
     showSuggestions(context); // Update suggestions ListView
   }
 
   Widget _buildResultsAndSuggestions(BuildContext context) {
-    final Iterable<Song> searched = MusicPlayer.instance.playlistControl
-        .searchSongs(query.trim() /* Remove any whitespaces*/);
+    final Iterable<Song> searched =
+        PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/);
 
     // Display suggestions
     if (searched == null) {
@@ -98,8 +92,6 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                 Container(
                   child: _suggestions.length > 0
                       ? ListView.builder(
-                          // TODO: implement this and extract this to constant
-                          // key: PageStorageKey('SearchListView'),
                           itemCount: _suggestions.length +
                               1, // Plus 1 'cause we need to render list header
                           itemBuilder: (context, index) {
@@ -265,8 +257,12 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                           },
                         )
                       : Center(
-                          child: Text(
-                              'Здесь будет отображаться история вашего поиска'),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Text(
+                                'Здесь будет отображаться история вашего поиска'),
+                          ),
                         ),
                 ),
                 BottomTrackPanel(),
@@ -304,45 +300,40 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     }
 
     // Display tiles
-    List<StreamBuilder> tiles = [];
-    searched.toList().asMap().forEach((index, el) {
-      tiles.add(StreamBuilder(
-          stream: MusicPlayer.instance.onSongChange,
-          builder: (context, snapshot) {
-            return TrackTile(
-              index,
-              song: el,
-              playing: MusicPlayer.instance.playlistControl.playlistType ==
-                      PlaylistType.searched &&
-                  index ==
-                      MusicPlayer.instance.playlistControl
-                          .currentSongIndex(PlaylistType.searched),
-              additionalClickCallback: () {
-                _writeInputToSearchHistory(query);
-                MusicPlayer.instance.playlistControl
-                    .setPlaylist(searched.toList(), PlaylistType.searched);
-              },
-            );
-          }));
-    });
-    // List<TrackTile> tiles = [];
-    // searched.toList().asMap().forEach((index, el) {
-    //   tiles.add(TrackTile(
-    //     index,
-    //     song: el,
-    //     additionalClickCallback: () {
-    //       _writeInputToSearchHistory(query);
-    //       MusicPlayer.instance.playlistControl.setPlaylist(searched.toList());
-    //     },
-    //   ));
-    // });
+    List<Song> searchedList = searched.toList();
 
     return Stack(
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(bottom: 55.0),
-          child: ListView(
-              padding: EdgeInsets.only(bottom: 10, top: 5), children: tiles),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onPanDown: (_) {
+              // Close keyboard on scroll
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+            child: ListView.builder(
+                padding: EdgeInsets.only(bottom: 10, top: 5),
+                itemCount: searched.length,
+                itemBuilder: (context, index) {
+                  return StreamBuilder(
+                      stream: PlaylistControl.onSongChange,
+                      builder: (context, snapshot) {
+                        return TrackTile(
+                          index,
+                          key: UniqueKey(),
+                          song: searchedList[index],
+                          playing: searchedList[index].id ==
+                              PlaylistControl.currentSong?.id,
+                          additionalClickCallback: () {
+                            _writeInputToSearchHistory(query);
+                            PlaylistControl.setPlaylist(
+                                searched.toList(), PlaylistType.searched);
+                          },
+                        );
+                      });
+                }),
+          ),
         ),
         BottomTrackPanel(),
       ],

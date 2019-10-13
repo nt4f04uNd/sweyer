@@ -37,32 +37,42 @@ class _AlbumArtPic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraint) {
-      return ClipRRect(
-        borderRadius: BorderRadius.all(
-            Radius.circular(round ? constraint.maxHeight : 10)),
-        child: Image.file(
-          File(path),
-          width: isLarge
-              ? constraint.maxWidth - 80
-              : round // Reduce the size of art if using round
-                  ? constraint.maxHeight -
-                      6 -
-                      3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
-                        -2 // Border width
-                  : constraint.maxHeight,
-          height: isLarge
-              ? constraint.maxWidth - 80
-              : round // Reduce the size of art if using round
-                  ? constraint.maxHeight -
-                      6 -
-                      3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
-                        -2 // Border width
-                  : constraint.maxHeight,
-          fit: BoxFit.fill,
-        ),
-      );
-    });
+    File file;
+    try {
+      file = File(path); // TODO: add error message
+    } catch (e) {}
+
+    return file != null
+        ? LayoutBuilder(builder: (context, constraint) {
+            return ClipRRect(
+              borderRadius: BorderRadius.all(
+                  Radius.circular(round ? constraint.maxHeight : 10)),
+              child: Image.file(
+                File(path),
+                width: isLarge
+                    ? constraint.maxWidth - 80
+                    : round // Reduce the size of art if using round
+                        ? constraint.maxHeight -
+                            6 -
+                            3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
+                            -
+                            2 // Border width
+                        : constraint.maxHeight,
+                height: isLarge
+                    ? constraint.maxWidth - 80
+                    : round // Reduce the size of art if using round
+                        ? constraint.maxHeight -
+                            6 -
+                            3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
+                            -
+                            2 // Border width
+                        : constraint.maxHeight,
+                fit: BoxFit.fill,
+              ),
+            );
+          })
+        : _AlbumArtPlaceholder(
+            isLarge: isLarge, round: round); // TODO: add error icon
   }
 }
 
@@ -85,7 +95,8 @@ class _AlbumArtPlaceholder extends StatelessWidget {
                 ? constraint1.maxHeight -
                     6 -
                     3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
-                    -2 // Border width
+                    -
+                    2 // Border width
                 : constraint1.maxHeight,
         height: isLarge
             ? constraint1.maxWidth - 80
@@ -93,14 +104,17 @@ class _AlbumArtPlaceholder extends StatelessWidget {
                 ? constraint1.maxHeight -
                     6 -
                     3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
-                      -2 // Border width
+                    -
+                    2 // Border width
                 : constraint1.maxHeight,
         decoration: BoxDecoration(
           // color: Colors.white.withOpacity(0.04),
-          color: isLarge ?  Colors.white.withOpacity(0.9):Colors.white.withOpacity(1),
+          color: isLarge
+              ? Colors.white.withOpacity(0.9)
+              : Colors.white.withOpacity(1),
           borderRadius: BorderRadius.all(Radius.circular(round ? 500 : 10)),
         ),
-        padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round?8:10),
+        padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round ? 8 : 10),
         child: LayoutBuilder(builder: (context, constraint) {
           // return Icon(
           //   Icons.music_note,

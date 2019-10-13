@@ -18,7 +18,7 @@ class Song {
   final String title;
   final String trackUri;
   final int duration;
-  final int dateAdded;
+  final int dateModified;
 
   Song({
     @required this.id,
@@ -28,7 +28,7 @@ class Song {
     @required this.title,
     @required this.trackUri,
     @required this.duration,
-    @required this.dateAdded,
+    @required this.dateModified,
   });
 
    /// A necessary factory constructor for creating a new User instance
