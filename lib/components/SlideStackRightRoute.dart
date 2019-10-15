@@ -8,8 +8,12 @@ class SlideStackRightRoute extends PageRouteBuilder {
   static var exEnd = Offset(-0.3, 0.0);
   static var entBegin = Offset(1.0, 0.0);
   static var entEnd = Offset.zero;
-  static var curveIn = Curves.linearToEaseOut;
-  static var curveOut = Curves.easeInToLinear;
+  // static var curveIn = Curves.linearToEaseOut;
+  // static var curveOut = Curves.easeInToLinear;
+  // static var curveIn = Curves.linear;
+  // static var curveOut = Curves.linear;
+  static var curveIn = Curves.easeInToLinear;
+  static var curveOut = Curves.linearToEaseOut;
 
   SlideStackRightRoute({@required this.exitPage, @required this.enterPage})
       : super(
@@ -35,19 +39,27 @@ class SlideStackRightRoute extends PageRouteBuilder {
                     .chain(CurveTween(curve: curveOut))
                     .animate(animation),
                 child: Container(
-                    foregroundDecoration: BoxDecoration(
-                      color: Colors.black.withOpacity(animation.value / 2),
-                    ),
-                    child:
-                        // FIXME: this creates new `exitPage` instance animation
-                        exitPage),
+                  foregroundDecoration: BoxDecoration(
+                    color: Colors.black.withOpacity(animation.value / 1.1),
+                  ),
+                  // FIXME: this creates new `exitPage` instance animation
+                  child: IgnorePointer(
+                    // Disable any touch events on fake exit route
+                    ignoring: true,
+                    child: exitPage,
+                  ),
+                ),
               ),
               SlideTransition(
                 position: Tween(begin: entBegin, end: entEnd)
                     .chain(CurveTween(curve: curveIn))
                     .chain(CurveTween(curve: curveOut))
                     .animate(animation),
-                child: enterPage,
+                child: IgnorePointer(
+                  // Disable any touch events on fake exit route only while transitioning
+                  ignoring: animation.status != AnimationStatus.completed,
+                  child: enterPage,
+                ),
               )
             ],
           ),

@@ -1,5 +1,4 @@
 import 'package:app/components/SlideStackRightRoute.dart';
-import 'package:app/components/track_list.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +9,7 @@ Route createSettingsRoute(Widget oldRoute) {
   // final GlobalKey globalKey = GlobalKey<TrackListState>();
   // print(globalKey.currentState.);
   // return SlideStackRightRoute(exitPage: oldRoute, enterPage: SettingsRoute());
-  return SlideStackRightRoute(
-      exitPage: oldRoute, enterPage: SettingsRoute());
+  return SlideStackRightRoute(exitPage: oldRoute, enterPage: SettingsRoute());
 }
 
 class SettingsRoute extends StatefulWidget {
@@ -26,6 +24,8 @@ class _SettingsRouteState extends State<SettingsRoute> {
   bool isChanged = false;
 
   /// Value before change
+  ///
+  /// Needed to check whether setting value has been increased or decreased
   int initSettingMinFileDuration = 30;
   int settingMinFileDuration = 30;
 
@@ -47,26 +47,32 @@ class _SettingsRouteState extends State<SettingsRoute> {
     });
   }
 
-  void setChanged({int settingMinFileDuration}) {
-    if (!isChanged)
+  void handleSliderChange(int newSettingMinFileDuration) {
+    if (initSettingMinFileDuration != newSettingMinFileDuration)
       setState(() {
         isChanged = true;
+        settingMinFileDuration = newSettingMinFileDuration;
       });
-    if (settingMinFileDuration != null) {
-      this.settingMinFileDuration = settingMinFileDuration;
-    }
+    else
+      setState(() {
+        isChanged = false;
+        settingMinFileDuration = newSettingMinFileDuration;
+      });
   }
 
   void _handleSave() async {
-    if (initSettingMinFileDuration < settingMinFileDuration)
+    Prefs.byKey.settingMinFileDurationInt.setPref(settingMinFileDuration);
+    if (initSettingMinFileDuration <= settingMinFileDuration)
       PlaylistControl.filterSongs();
     else
       PlaylistControl.refetchSongs();
-    Prefs.byKey.settingMinFileDurationInt.setPref(settingMinFileDuration);
     initSettingMinFileDuration = settingMinFileDuration;
     Fluttertoast.showToast(
         msg: "Настройки сохранены",
         backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+    setState(() {
+      isChanged = false;
+    });
   }
 
   @override
@@ -79,18 +85,22 @@ class _SettingsRouteState extends State<SettingsRoute> {
           backgroundColor: Colors.transparent,
           title: Text("Настройки"),
           actions: <Widget>[
-            AnimatedOpacity(
-              duration: Duration(milliseconds: 500),
-              opacity: isChanged ? 1.0 : 0.0,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(15.0),
+            IgnorePointer(
+              ignoring: !isChanged,
+              child: AnimatedOpacity(
+                duration: Duration(milliseconds: 500),
+                opacity: isChanged ? 1.0 : 0.0,
+                child: Padding(
+                  padding:
+                      EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
+                  child: RaisedButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(15.0),
+                    ),
+                    child: Text("Сохранить"),
+                    color: Colors.deepPurple,
+                    onPressed: _handleSave,
                   ),
-                  child: Text("Сохранить"),
-                  color: Colors.deepPurple,
-                  onPressed: _handleSave,
                 ),
               ),
             )
@@ -99,12 +109,6 @@ class _SettingsRouteState extends State<SettingsRoute> {
             icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context, false),
           ),
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: Icon(Icons.more_vert),
-          //     onPressed: () => Navigator.pop(context, false),
-          //   ),
-          // ],
           automaticallyImplyLeading: false,
         ),
       ),
@@ -119,7 +123,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
                 padding: const EdgeInsets.only(left: 12.0),
                 child: MinFileDurationSlider(
                   key: sliderKey,
-                  setChanged: setChanged,
+                  parentHandleChange: handleSliderChange,
                   initValue: settingMinFileDuration,
                 ),
               );
@@ -130,12 +134,12 @@ class _SettingsRouteState extends State<SettingsRoute> {
 }
 
 class MinFileDurationSlider extends StatefulWidget {
-  final Function setChanged;
+  final Function parentHandleChange;
   final int initValue;
   MinFileDurationSlider(
-      {Key key, @required this.initValue, @required this.setChanged})
+      {Key key, @required this.initValue, @required this.parentHandleChange})
       : assert(initValue != null),
-        assert(setChanged != null),
+        assert(parentHandleChange != null),
         super(key: key);
 
   _MinFileDurationSliderState createState() => _MinFileDurationSliderState();
@@ -157,14 +161,14 @@ class _MinFileDurationSliderState extends State<MinFileDurationSlider> {
   }
 
   void _handleChange(double newValue) {
-    widget.setChanged();
+    widget.parentHandleChange(newValue.toInt());
     setState(() {
       _value = newValue;
     });
   }
 
   void _handleChangeEnd(double newValue) {
-    widget.setChanged(settingMinFileDuration: _value.toInt());
+    widget.parentHandleChange(_value.toInt());
     setState(() {
       _value = newValue;
     });
@@ -175,11 +179,12 @@ class _MinFileDurationSliderState extends State<MinFileDurationSlider> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Миниальная длительность файла', style: TextStyle(fontSize: 16.0)),
+        Text('Минимальная длительность файла',
+            style: TextStyle(fontSize: 16.0)),
         Padding(
           padding: const EdgeInsets.only(top: 2.0),
           child: Text(
-            'Скрыть файлы короче ${_calcLabel()}',
+            'Скрыть файлы короче, чем ${_calcLabel()}',
             style: TextStyle(color: Theme.of(context).textTheme.caption.color),
           ),
         ),
@@ -190,8 +195,6 @@ class _MinFileDurationSliderState extends State<MinFileDurationSlider> {
             Container(
               transform: Matrix4.translationValues(0, 0, 0),
               child: Text(
-                // TODO: move and refactor this code, and by the way split a whole page into separate widgets
-                // _calculateDisplayedPositionTime(),
                 '0 c',
                 style: TextStyle(fontSize: 13),
               ),

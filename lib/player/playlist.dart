@@ -169,7 +169,7 @@ abstract class PlaylistControl {
       case PlaylistType.shuffled:
         return shuffledPlaylist;
       default:
-        throw 'Invalid playlist type';
+        throw Exception('Invalid playlist type');
     }
   }
 
@@ -275,13 +275,11 @@ abstract class PlaylistControl {
       await playlistSerializer.initJson(); // Init playlist json
       // Get songs from json and create global playlist
       globalPlaylist = Playlist(await songsSerializer.readJson());
-
       await _getSavedSortFeature();
-
       await filterSongs();
       sortSongs();
 
-      await _afterTrackLoaded();
+      await _restorePlayer();
       await _restorePlaylist();
 
       // Init player state
@@ -296,7 +294,7 @@ abstract class PlaylistControl {
 
       // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (playingTrackIdState == null)
       if (playingTrackIdState == null) {
-        await _afterTrackLoaded();
+        await _restorePlayer();
       }
     } else {
       // Init empty playlist if no permission granted
@@ -308,7 +306,7 @@ abstract class PlaylistControl {
     emitPlaylistChange();
   }
 
-  /// Fetch songs and update playlist
+  /// Refetch songs and update playlist
   static Future<void> refetchSongs() async {
     globalPlaylist = Playlist(await songsFetcher.fetchSongs());
     await filterSongs();
@@ -342,9 +340,9 @@ abstract class PlaylistControl {
         emitPlaylistChange();
         break;
       default:
-        throw 'Invalid playlistType';
+        throw Exception(
+            'In setPlaylist - invalid argPlaylistType: $argPlaylistType');
     }
-    emitPlaylistChange();
   }
 
   /// Shuffles from current playlist (by default)
@@ -402,6 +400,7 @@ abstract class PlaylistControl {
         Prefs.byKey.sortFeatureInt.setPref(1);
         break;
       default:
+        throw Exception('In sortSongs - invalid sort feature: $feature');
         break;
     }
 
@@ -409,8 +408,7 @@ abstract class PlaylistControl {
     emitPlaylistChange();
   }
 
-  /// Filter songs by min duration (for now, in future by size will be implemened)
-  /// FIXME: try to make better method logics and playlist sync, e.g. `emitPlaylistChange` is called in sort, which is not really cool and in a generally, when i fetch songs from somewhere, i make 3 actions: assign `globalPlaylist` and call `filterSongs`, `sortSongs`
+  /// Filter songs by min duration (for now, in future by size will be implemented)
   static Future<void> filterSongs() async {
     globalPlaylist.filter(FilterFeature.duration,
         duration: Duration(
@@ -462,29 +460,33 @@ abstract class PlaylistControl {
   /// Function that fires right after json has fetched and when initial songs fetch has done
   ///
   /// Its main purpose to setup player to work with playlists
-  static Future<void> _afterTrackLoaded() async {
-    // Get saved data
-    SharedPreferences prefs = await Prefs.sharedInstance;
-    int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs);
-    int savedSongPos = await Prefs.byKey.songPositionInt.getPref(prefs);
+  static Future<void> _restorePlayer() async {
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (!songsEmpty()) {
+      // Get saved data
+      SharedPreferences prefs = await Prefs.sharedInstance;
+      int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs) ??
+          currentPlaylist().getSongIdByIndex(0);
+      int savedSongPos = await Prefs.byKey.songPositionInt.getPref(prefs);
+
       // Setup initial playing state index from prefs
-      playingTrackIdState =
-          savedSongId ?? currentPlaylist().getSongIdByIndex(0);
+      playingTrackIdState = savedSongId;
 
       try {
         // Set url of first track in player instance
         await MusicPlayer.nativePlayerInstance.setUrl(currentSong.trackUri);
       } catch (e) {
-        // playingTrackIdState =
-        //     null; // Set to null to display that there's no currently playing track and user could not go to player route (NOTE: THIS IS VERY UNRELIABLE)
-        debugPrint('Wasn\'t able to set url to _playerInstance');
+        debugPrint('Wasn\'t able to set url of saved song id');
       }
 
-      // Seek to saved position
-      if (savedSongPos != null)
-        MusicPlayer.nativePlayerInstance.seek(Duration(seconds: savedSongPos));
+      try {
+        // Seek to saved position
+        if (savedSongPos != null)
+         await MusicPlayer.nativePlayerInstance
+              .seek(Duration(seconds: savedSongPos));
+      } catch (e) {
+        debugPrint('Wasn\'t able to seek to saved position');
+      }
     }
   }
 }

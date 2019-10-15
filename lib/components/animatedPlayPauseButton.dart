@@ -63,8 +63,8 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
 
   @override
   void dispose() {
-    super.dispose();
-    _playerChangeSubscription.cancel();
     _animationController.dispose();
+    _playerChangeSubscription.cancel();
+    super.dispose();
   }
 }

@@ -6,6 +6,8 @@ import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 
 class SongsSearchDelegate extends SearchDelegate<Song> {
+  final GlobalKey<BottomTrackPanelState> bottomPanelGlobalKey;
+  SongsSearchDelegate({@required this.bottomPanelGlobalKey});
   List<String> _suggestions = [];
 
   @override
@@ -14,8 +16,12 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
     final ThemeData theme = Theme.of(context);
     assert(theme != null);
 
-    /// FIXME: change this to correspond with main app bar
-    return theme.copyWith(primaryColor: Color(0xff070707));
+    return theme.copyWith(
+      primaryColor: Theme.of(context).appBarTheme.color,
+      textTheme: TextTheme(
+        title: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+      ),
+    );
   }
 
   @override
@@ -92,13 +98,14 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                 Container(
                   child: _suggestions.length > 0
                       ? ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
                           itemCount: _suggestions.length +
                               1, // Plus 1 'cause we need to render list header
                           itemBuilder: (context, index) {
                             if (index == 0)
                               return Padding(
                                 padding:
-                                    const EdgeInsets.only(top: 5.0, left: 13.0),
+                                    const EdgeInsets.only(top: 0.0, left: 13.0),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -106,8 +113,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                                   children: <Widget>[
                                     Text("История поиска",
                                         style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 17,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 16,
                                           color: Theme.of(context).hintColor,
                                         )),
                                     IconButton(
@@ -265,7 +272,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                           ),
                         ),
                 ),
-                BottomTrackPanel(),
+                BottomTrackPanel(initAlbumArtRotation: bottomPanelGlobalKey.currentState.controller.value,),
               ],
             );
           });
@@ -294,7 +301,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
               ],
             ),
           ),
-          BottomTrackPanel(),
+          BottomTrackPanel(initAlbumArtRotation: bottomPanelGlobalKey.currentState.controller.value,),
         ],
       );
     }
@@ -306,36 +313,30 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(bottom: 55.0),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onPanDown: (_) {
-              // Close keyboard on scroll
-              FocusScope.of(context).requestFocus(FocusNode());
-            },
-            child: ListView.builder(
-                padding: EdgeInsets.only(bottom: 10, top: 5),
-                itemCount: searched.length,
-                itemBuilder: (context, index) {
-                  return StreamBuilder(
-                      stream: PlaylistControl.onSongChange,
-                      builder: (context, snapshot) {
-                        return TrackTile(
-                          index,
-                          key: UniqueKey(),
-                          song: searchedList[index],
-                          playing: searchedList[index].id ==
-                              PlaylistControl.currentSong?.id,
-                          additionalClickCallback: () {
-                            _writeInputToSearchHistory(query);
-                            PlaylistControl.setPlaylist(
-                                searched.toList(), PlaylistType.searched);
-                          },
-                        );
-                      });
-                }),
-          ),
+          child: ListView.builder( // FIXME add gesture detector that closes keyboard on scroll
+              padding: EdgeInsets.only(bottom: 10, top: 5),
+              itemCount: searched.length,
+              itemBuilder: (context, index) {
+                return StreamBuilder(
+                    stream: PlaylistControl.onSongChange,
+                    builder: (context, snapshot) {
+                      return TrackTile(
+                        index,
+                        key: UniqueKey(),
+                        song: searchedList[index],
+                        playing: searchedList[index].id ==
+                            PlaylistControl.currentSong?.id,
+                        additionalClickCallback: () {
+                          _writeInputToSearchHistory(query);
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          PlaylistControl.setPlaylist(
+                              searched.toList(), PlaylistType.searched);
+                        },
+                      );
+                    });
+              }),
         ),
-        BottomTrackPanel(),
+       BottomTrackPanel(initAlbumArtRotation: bottomPanelGlobalKey.currentState.controller.value,),
       ],
     );
   }

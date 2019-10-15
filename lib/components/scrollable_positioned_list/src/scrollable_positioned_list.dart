@@ -34,7 +34,8 @@ const int _screenScrollCount = 2;
 class ScrollablePositionedList extends StatefulWidget {
   /// Create a [ScrollablePositionedList] whose items are provided by [itemBuilder].
   const ScrollablePositionedList.builder(
-      {@required this.itemCount,
+      {Key key,
+      @required this.itemCount,
       @required this.itemBuilder,
       this.itemScrollController,
       ItemPositionsListener itemPositionsListener,
@@ -48,11 +49,11 @@ class ScrollablePositionedList extends StatefulWidget {
       this.addSemanticIndexes = true,
       this.addAutomaticKeepAlives = true,
       this.addRepaintBoundaries = true,
-      @required this.frontScrollController})
+      this.frontScrollController})
       : assert(itemCount != null),
         assert(itemBuilder != null),
-        assert(frontScrollController != null),
-        itemPositionNotifier = itemPositionsListener;
+        itemPositionNotifier = itemPositionsListener,
+        super(key: key);
 
   /// Number of items the [itemBuilder] can produce.
   final int itemCount;
@@ -168,7 +169,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   final frontItemPositionNotifier = ItemPositionsNotifier();
   final backItemPositionNotifier = ItemPositionsNotifier();
   ScrollController frontScrollController;
- ScrollController backScrollController;
+  ScrollController backScrollController;
   final frontOpacity =
       ProxyAnimation(const AlwaysStoppedAnimation<double>(1.0));
 

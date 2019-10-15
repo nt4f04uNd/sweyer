@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
+import 'package:app/components/popup_menu.dart' as customPopup;
 import 'package:app/components/track_list.dart';
 import 'package:app/components/marquee.dart';
 import 'package:app/player/playlist.dart';
@@ -13,11 +14,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Route createPlayerRoute() {
   return PageRouteBuilder(
+    // TODO: move this into separate module that will contain all page `PageRouteBuilder`s
     transitionDuration: Duration(milliseconds: 500),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       var begin = Offset(0.0, 1.0);
       var end = Offset.zero;
-      // var curve = Curves.fastLinearToSlowEaseIn;
       var curve = Curves.fastOutSlowIn;
 
       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
@@ -51,7 +52,7 @@ class _PlayerRouteState extends State<PlayerRoute>
 
   @override
   void initState() {
-    super.initState();
+    super.initState(); // TODO: add comments
     _tabController = TabController(vsync: this, length: _tabsLength);
     _tabController.addListener(() {
       setState(() {
@@ -62,10 +63,8 @@ class _PlayerRouteState extends State<PlayerRoute>
         if (openedTabIndex == 0 && initialRender ||
             _tabController.previousIndex == 1) {
           if (initialRender) initialRender = false;
-          _playlistTabKey.currentState.jumpToSong();
+          _playlistTabKey.currentState.jumpOnTabChange();
         }
-        // prevTabIndex
-        // _playlistTabKey.currentState.
       });
     });
   }
@@ -117,7 +116,8 @@ class _PlaylistTabState extends State<_PlaylistTab>
   static const int tracksScrollOffset = 6;
   static const Duration scrollDuration = const Duration(milliseconds: 600);
 
-  GlobalKey<TrackListState2> globalKeyTrackList = GlobalKey();
+  GlobalKey<CurrentPlaylistWidgetState> globalKeyCurrentPlaylistWidget =
+      GlobalKey();
 
   /// A bool var to disable show/hide in tracklist controller listener when manual `scrollToSong` is performing
   bool scrolling = false;
@@ -126,79 +126,6 @@ class _PlaylistTabState extends State<_PlaylistTab>
   StreamSubscription<void> _playlistChangeSubscription;
 
   int prevPlayingIndex = PlaylistControl.currentSongIndex();
-
-  /// Scrolls to current song
-  ///
-  /// If optional `index` is provided - scrolls to it
-  Future<void> scrollToSong([int index]) async {
-    if (!scrolling) {
-      if (index == null) index = PlaylistControl.currentSongIndex();
-
-      setState(() {
-        scrolling = true;
-      });
-      await globalKeyTrackList.currentState.itemScrollController.scrollTo(
-          index: index, duration: scrollDuration, curve: Curves.easeInOut);
-      // Call `jumpTo` to reset scroll controller offset
-      globalKeyTrackList.currentState.itemScrollController.jumpTo(index: index);
-      if (scrolling)
-        setState(() {
-          scrolling = false;
-        });
-    } else {
-      setState(() {
-        jumpToSong();
-        scrolling = false;
-      });
-    }
-  }
-
-  /// Jumps to current song
-  ///
-  /// If optional `index` is provided - jumps to it
-  void jumpToSong([int index]) async {
-    if (index == null) index = PlaylistControl.currentSongIndex();
-
-    globalKeyTrackList.currentState.itemScrollController.jumpTo(index: index);
-  }
-
-  /// A more complex function with additional checks
-  Future<void> performScrolling() async {
-    final int playlistLength = PlaylistControl.length();
-
-    final int playingIndex = PlaylistControl.currentSongIndex();
-
-    if (playlistLength > tracksScrollOffset) {
-      // If playlist is longer than 12
-      if (prevPlayingIndex == 0 && playingIndex == playlistLength - 1) {
-        // Scroll to bottom from first track
-        jumpToSong(playlistLength - 1 - tracksScrollOffset);
-      } else if (prevPlayingIndex == playlistLength - 1 && playingIndex == 0) {
-        // When prev track was last in playlist
-        jumpToSong();
-      } else if (playingIndex == 0) {
-        //  await scrollToSong(0);
-        setState(() {
-          scrolling = scrolling; // Trigger setstate
-        });
-        // Call `frontScrollController`'s animate as `scrollTo` gives ragged animation on first list element
-        await globalKeyTrackList.currentState.frontScrollController.animateTo(
-            globalKeyTrackList
-                .currentState.frontScrollController.position.minScrollExtent,
-            duration: scrollDuration,
-            curve: Curves.easeInOut);
-
-        jumpToSong(); // Reset scrollcontroller's position
-      } else if (playingIndex < playlistLength - tracksScrollOffset) {
-        // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
-        await scrollToSong();
-      } else if (playingIndex >= playlistLength - 1 - tracksScrollOffset) {
-        // If at the end of the list
-        await scrollToSong(playlistLength - 1 - tracksScrollOffset);
-      }
-    }
-    prevPlayingIndex = playingIndex;
-  }
 
   @override
   void initState() {
@@ -213,8 +140,10 @@ class _PlaylistTabState extends State<_PlaylistTab>
     _songChangeSubscription =
         PlaylistControl.onSongChange.listen((event) async {
       // Scroll when track changes
-      if (widget.openedTabIndex == 0)
+      if (widget.openedTabIndex == 0){
+      setState((){});
         await performScrolling();
+      }
       else if (widget.openedTabIndex == 1) setState(() {});
     });
   }
@@ -224,6 +153,91 @@ class _PlaylistTabState extends State<_PlaylistTab>
     super.dispose();
     _playlistChangeSubscription.cancel();
     _songChangeSubscription.cancel();
+  }
+
+  /// Scrolls to current song
+  ///
+  /// If optional `index` is provided - scrolls to it
+  Future<void> scrollToSong([int index]) async {
+    if (index == null) index = PlaylistControl.currentSongIndex();
+
+    await globalKeyCurrentPlaylistWidget.currentState.itemScrollController
+        .scrollTo(
+            index: index, duration: scrollDuration, curve: Curves.easeInOut);
+    // Call `jumpTo` to reset scroll controller offset
+    globalKeyCurrentPlaylistWidget.currentState.itemScrollController
+        .jumpTo(index: index);
+  }
+
+  /// Jumps to current song
+  ///
+  /// If optional `index` is provided - jumps to it
+  void jumpToSong([int index]) async {
+    if (index == null) index = PlaylistControl.currentSongIndex();
+
+    globalKeyCurrentPlaylistWidget.currentState.itemScrollController
+        .jumpTo(index: index);
+  }
+
+  /// A more complex function with additional checks
+  Future<void> performScrolling() async {
+    final int playlistLength = PlaylistControl.length();
+    final int playingIndex = PlaylistControl.currentSongIndex();
+    final int maxScrollIndex = playlistLength - 1 - tracksScrollOffset;
+
+    // Exit immediately if index didn't change
+    if (prevPlayingIndex == playingIndex) return;
+
+    // If playlist is longer than e.g. 6
+    if (playlistLength > tracksScrollOffset) {
+      if (prevPlayingIndex >= maxScrollIndex && playingIndex == 0) {
+        // When prev track was last in playlist
+        jumpToSong();
+      } else if (playingIndex == 0) {
+        setState(() {
+          // Trigger setstate
+        });
+        // Call `frontScrollController`'s animate as `scrollTo` gives ragged animation on first list element
+        await globalKeyCurrentPlaylistWidget.currentState.frontScrollController
+            .animateTo(
+                globalKeyCurrentPlaylistWidget.currentState
+                    .frontScrollController.position.minScrollExtent,
+                duration: scrollDuration,
+                curve: Curves.easeInOut);
+
+        jumpToSong(); // Reset scrollcontroller's position
+      } else if (playingIndex < maxScrollIndex) {
+        // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
+        await scrollToSong();
+      } else if (prevPlayingIndex > maxScrollIndex) {
+        // Do nothing when it is already scrolled to `maxScrollIndex`
+        return;
+      } else if (playingIndex >= maxScrollIndex) {
+        if (prevPlayingIndex == 0)
+          jumpToSong(maxScrollIndex);
+        // If at the end of the list
+        else
+          await scrollToSong(maxScrollIndex);
+      }
+      prevPlayingIndex = playingIndex;
+    }
+  }
+
+  /// Jump to song when changing tab to `0`
+  Future<void> jumpOnTabChange() async {
+    final int playlistLength = PlaylistControl.length();
+    final int playingIndex = PlaylistControl.currentSongIndex();
+    final int maxScrollIndex = playlistLength - 1 - tracksScrollOffset;
+
+    // If playlist is longer than e.g. 6
+    if (playlistLength > tracksScrollOffset) {
+      if (playingIndex < maxScrollIndex) {
+        jumpToSong();
+      } else if (playingIndex >= maxScrollIndex) {
+        // If at the end of the list
+        jumpToSong(maxScrollIndex);
+      }
+    }
   }
 
   @override
@@ -238,23 +252,6 @@ class _PlaylistTabState extends State<_PlaylistTab>
               child: Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: AppBar(
-                  // actions: <Widget>[
-                  //   Visibility(
-                  //     visible: scrollButtonShown,
-                  //     maintainState: true,
-                  //     maintainAnimation: true,
-                  //     child: AnimatedOpacity(
-                  //       opacity: scrollButtonShown ? 1 : 0,
-                  //       duration: Duration(milliseconds: 600),
-                  //       child: IconButton(
-                  //           splashColor: Colors.transparent,
-                  //           icon: scrollButtonType == ScrollButtonType.up
-                  //               ? Icon(Icons.keyboard_arrow_up)
-                  //               : Icon(Icons.keyboard_arrow_down),
-                  //           onPressed: performScrolling),
-                  //     ),
-                  //   )
-                  // ],
                   title: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,8 +293,8 @@ class _PlaylistTabState extends State<_PlaylistTab>
             ),
             body: Container(
               padding: const EdgeInsets.only(top: 4.0),
-              child: TrackList2(
-                key: globalKeyTrackList,
+              child: CurrentPlaylistWidget(
+                key: globalKeyCurrentPlaylistWidget,
               ),
             ),
           );
@@ -314,7 +311,6 @@ class MainPlayerTab extends StatefulWidget {
 class _MainPlayerTabState extends State<MainPlayerTab> {
   // Duration of playing track
   Duration _duration = Duration(seconds: 0);
-  // #ANCHOR route
 
   /// Key for `MarqueeWidget` to reset its scroll on song change
   UniqueKey marqueeKey = UniqueKey();
@@ -372,29 +368,27 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         Radius.circular(100),
                       ),
                     ))),
-                child: PopupMenuButton<void>(
-                  // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-                  onSelected: (_) {
-                    Navigator.of(context).push(createExifRoute(widget));
-                  },
-                  padding: const EdgeInsets.all(0.0),
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<void>>[
-                    PopupMenuItem<void>(
-                      value: '',
-                      height: 30.0,
-                      child: Transform.translate(
-                          offset: Offset(0.0, 10.0),
-                          child: Text('Изменить информацию о треке')),
-                    ),
-                  ],
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    cardColor: Color(0xff121212),
+                  ),
+                  child: customPopup.CustomPopupMenuButton<void>(
+                    // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
+                    onSelected: (_) {
+                      Navigator.of(context).push(createExifRoute(widget));
+                    },
+                    padding: const EdgeInsets.all(0.0),
+                    itemBuilder: (BuildContext context) =>
+                        <customPopup.PopupMenuEntry<void>>[
+                      customPopup.PopupMenuItem<void>(
+                        value: '',
+                        // height: 30.0,
+                        child: Text('Изменить информацию о треке'),
+                      ),
+                    ],
+                  ),
                 ),
               )
-              // IconButton(
-              //   icon: Icon(Icons.more_vert),
-              //   // onPressed: () => Navigator.of(context)
-              //   //     .push(createExifRoute(widget)),
-
-              // ),
             ],
             automaticallyImplyLeading: false,
           ),
@@ -572,7 +566,6 @@ class TrackSlider extends StatefulWidget {
 }
 
 class _TrackSliderState extends State<TrackSlider> {
-// #ANCHOR slider
   /// Actual track position value
   Duration _value = Duration(seconds: 0);
 

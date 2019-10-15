@@ -34,6 +34,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: Catcher.navigatorKey,
+      // navigatorKey: navigatorKey,
       // Uncomment to replace red screen of death 
       builder: (BuildContext context, Widget widget) {
         // Catcher.addDefaultErrorWidget(
@@ -44,7 +45,7 @@ class _MyAppState extends State<MyApp> {
         return widget;
       },
       supportedLocales: [const Locale('ru')],
-      locale: Locale('ru'),
+      locale:const Locale('ru'),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

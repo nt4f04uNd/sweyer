@@ -11,15 +11,19 @@ import 'dart:async';
 import 'dart:math' as math;
 
 class BottomTrackPanel extends StatefulWidget {
-  BottomTrackPanel({Key key}) : super(key: key);
+  /// A value from 0.0 to 1.0 to set initial album art rotation
+  final double initAlbumArtRotation;
+  BottomTrackPanel({Key key, this.initAlbumArtRotation: 0.0})
+      : assert(initAlbumArtRotation >= 0 && initAlbumArtRotation <= 1.0),
+        super(key: key);
 
   @override
-  _BottomTrackPanelState createState() => _BottomTrackPanelState();
+  BottomTrackPanelState createState() => BottomTrackPanelState();
 }
 
 /// FIXME: circular progress not rendering on app start
 /// FIXME: art rotating on main and search routes are distinct
-class _BottomTrackPanelState extends State<BottomTrackPanel>
+class BottomTrackPanelState extends State<BottomTrackPanel>
     with SingleTickerProviderStateMixin {
   Animation<double> animation;
   AnimationController controller;
@@ -42,7 +46,8 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
 
     controller =
         AnimationController(duration: const Duration(seconds: 15), vsync: this);
-
+    controller.value = widget.initAlbumArtRotation;
+    
     // animation = Tween<double>(begin: 0, end: 1).animate(controller)
     controller
       ..addListener(() {
@@ -73,7 +78,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
         case AudioPlayerState.STOPPED:
           controller.stop();
           break;
-        default:
+        default: // Can be null so don't throw, just stop animation
           controller.stop();
           break;
       }
@@ -98,7 +103,7 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
       setState(() {
         _value = Duration(seconds: 0);
         _duration =
-            Duration(milliseconds:  PlaylistControl.currentSong?.duration);
+            Duration(milliseconds: PlaylistControl.currentSong?.duration);
       });
     });
   }
@@ -116,100 +121,105 @@ class _BottomTrackPanelState extends State<BottomTrackPanel>
     var currentPosition = await MusicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = Duration(milliseconds:  PlaylistControl.currentSong?.duration);
+      _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return !PlaylistControl.songsEmpty(PlaylistType.global)
-        ? Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-                child: GestureDetector(
-              onTap: () async {
-                // Push to player route
-                Navigator.of(context).push(createPlayerRoute());
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25)),
-                child: Material(
-                  color: Color(0xff070707),
-                  // color: Colors.grey.shade900,
-                  child: StreamBuilder(
-                      stream: MusicPlayer.onPlayerStateChanged,
-                      builder: (context, snapshot) {
-                        return ListTile(
-                          contentPadding: EdgeInsets.only(
-                              top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
-                          title: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                 PlaylistControl.currentSong?.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 1),
-                                child: Artist(
-                                    artist:  PlaylistControl.currentSong?.artist),
-                              ),
-                            ],
-                          ),
-                          isThreeLine: false,
-                          leading:
-                              LayoutBuilder(builder: (context, constraints) {
-                            const lineWidth = 3.0;
-                            return CircularPercentIndicator(
-                              percent: _value.inMilliseconds /
-                                  _duration.inMilliseconds,
-                              radius: constraints.maxHeight - lineWidth,
-                              lineWidth: lineWidth,
-                              circularStrokeCap: CircularStrokeCap.round,
-                              progressColor: Colors.deepPurple,
-                              // backgroundColor: Colors.white.withOpacity(0.05),
-                              backgroundColor: Colors.transparent,
-                              center: Transform.rotate(
-                                angle: controller.value * 2 * math.pi,
-                                child: Container(
-                                  // padding: const EdgeInsets.all(5.0),
-                                  child: AlbumArt(
-                                    path:
-                                         PlaylistControl.currentSong?.albumArtUri,
-                                    round: true,
-                                  ),
+    if (!PlaylistControl.songsEmpty(PlaylistType.global)) {
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          // padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+              // bottomLeft: Radius.circular(26),
+              // bottomRight: Radius.circular(26),
+            ),
+            child: StreamBuilder(
+                stream: MusicPlayer.onPlayerStateChanged,
+                builder: (context, snapshot) {
+                  return Material(
+                    color: Color(0xff090909),
+                    child: GestureDetector(
+                      onTap: () async {
+                        // Push to player route
+                        Navigator.of(context).push(createPlayerRoute());
+                      },
+                      child: ListTile(
+                        contentPadding: EdgeInsets.only(
+                            top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              PlaylistControl.currentSong?.title,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 1),
+                              child: Artist(
+                                  artist: PlaylistControl.currentSong?.artist),
+                            ),
+                          ],
+                        ),
+                        isThreeLine: false,
+                        leading: LayoutBuilder(builder: (context, constraints) {
+                          const lineWidth = 3.0;
+                          return CircularPercentIndicator(
+                            percent: _value.inMilliseconds /
+                                _duration.inMilliseconds,
+                            radius: constraints.maxHeight - lineWidth,
+                            lineWidth: lineWidth,
+                            circularStrokeCap: CircularStrokeCap.round,
+                            progressColor: Colors.deepPurple,
+                            backgroundColor: Colors.transparent,
+                            center: Transform.rotate(
+                              angle: controller.value * 2 * math.pi,
+                              child: Container(
+                                child: AlbumArt(
+                                  path:
+                                      PlaylistControl.currentSong?.albumArtUri,
+                                  round: true,
                                 ),
                               ),
-                            );
-                          }),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              //  IconButton(
-                              //   icon: Icon(Icons.skip_previous),
-                              //   iconSize: 32,
-                              //   onPressed: MusicPlayer.clickPrev,
-                              // ),
-                              Container(
-                                  width: 32, child: AnimatedPlayPauseButton()),
-                              IconButton(
-                                icon: Icon(Icons.skip_next),
-                                iconSize: 32,
-                                onPressed: MusicPlayer.clickNext,
-                              ),
-                            ],
-                          ),
-                          dense: true,
-                        );
-                      }),
-                ),
-              ),
-            )),
-          )
-        : SizedBox.shrink();
+                            ),
+                          );
+                        }),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            //  IconButton(
+                            //   icon: Icon(Icons.skip_previous),
+                            //   iconSize: 32,
+                            //   onPressed: MusicPlayer.clickPrev,
+                            // ),
+                            Container(
+                              width: 32,
+                              child: AnimatedPlayPauseButton(),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.skip_next),
+                              iconSize: 32,
+                              onPressed: MusicPlayer.clickNext,
+                            ),
+                          ],
+                        ),
+                        dense: true,
+                      ),
+                    ),
+                  );
+                }),
+          ),
+        ),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
   }
 }
