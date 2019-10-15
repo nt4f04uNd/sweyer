@@ -520,28 +520,32 @@ abstract class MusicPlayer {
   }
 
   /// Function that fires when next track button got clicked
-  static Future<void> clickNext() async {
-    final nextSongId =
+  ///
+  /// If provided `songId` - plays next from this id
+  static Future<void> clickNext([int songId]) async {
+    songId ??=
         PlaylistControl.getNextSongId(PlaylistControl.playingTrackIdState);
     try {
-      await play(nextSongId);
-    } on PlatformException catch(e) {
+      await play(songId);
+    } on PlatformException catch (e) {
       // Retry play track
       // Next, not same, because of the specific of play function, to keep it sync with current song id (actually, I don't completely understand why, it just works)
-      play(PlaylistControl.getNextSongId(nextSongId));
+      await clickNext(songId);
     }
   }
 
   /// Function that fires when prev track button got clicked
-  static Future<void> clickPrev() async {
-    final prev =
+  ///
+  /// If provided `songId` - plays prev from this id
+  static Future<void> clickPrev([int songId]) async {
+    songId ??=
         PlaylistControl.getPrevSongId(PlaylistControl.playingTrackIdState);
     try {
-      play(prev);
-    } on PlatformException catch(e) {
+      await play(songId);
+    } on PlatformException catch (e) {
       // Retry play track
       // Prev, not same, because of the specific of play function, to keep it sync with current song id (actually, I don't completely understand why, it just works)
-      play(PlaylistControl.getPrevSongId(prev));
+      await clickPrev(songId);
     }
   }
 

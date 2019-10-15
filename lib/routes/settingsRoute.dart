@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 /// @oldRoute needed cause this route transition utilizes `SlideStackRightRoute`
-Route createSettingsRoute(Widget oldRoute) {
+Route createSettingsRoute([Widget oldRoute]) {
   // final GlobalKey globalKey = GlobalKey<TrackListState>();
   // print(globalKey.currentState.);
   // return SlideStackRightRoute(exitPage: oldRoute, enterPage: SettingsRoute());
@@ -107,7 +107,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
           ],
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context),
           ),
           automaticallyImplyLeading: false,
         ),

@@ -4,10 +4,10 @@ import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
+import 'package:app/components/custom_search.dart' as custom_search;
 
-class SongsSearchDelegate extends SearchDelegate<Song> {
-  final GlobalKey<BottomTrackPanelState> bottomPanelGlobalKey;
-  SongsSearchDelegate({@required this.bottomPanelGlobalKey});
+class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
+  SongsSearchDelegate();
   List<String> _suggestions = [];
 
   @override
@@ -272,7 +272,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                           ),
                         ),
                 ),
-                BottomTrackPanel(initAlbumArtRotation: bottomPanelGlobalKey.currentState.controller.value,),
+                BottomTrackPanel(),
               ],
             );
           });
@@ -301,7 +301,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
               ],
             ),
           ),
-          BottomTrackPanel(initAlbumArtRotation: bottomPanelGlobalKey.currentState.controller.value,),
+          BottomTrackPanel(),
         ],
       );
     }
@@ -313,7 +313,8 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(bottom: 55.0),
-          child: ListView.builder( // FIXME add gesture detector that closes keyboard on scroll
+          child: ListView.builder(
+              // FIXME add gesture detector that closes keyboard on scroll
               padding: EdgeInsets.only(bottom: 10, top: 5),
               itemCount: searched.length,
               itemBuilder: (context, index) {
@@ -336,7 +337,7 @@ class SongsSearchDelegate extends SearchDelegate<Song> {
                     });
               }),
         ),
-       BottomTrackPanel(initAlbumArtRotation: bottomPanelGlobalKey.currentState.controller.value,),
+        BottomTrackPanel(),
       ],
     );
   }

@@ -147,7 +147,8 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                     child: GestureDetector(
                       onTap: () async {
                         // Push to player route
-                        Navigator.of(context).push(createPlayerRoute());
+                        // Navigator.of(context).push(createPlayerRoute());
+                        Navigator.of(context).pushNamed("/player");
                       },
                       child: ListTile(
                         contentPadding: EdgeInsets.only(

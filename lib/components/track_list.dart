@@ -1,6 +1,7 @@
 import 'package:app/components/SingleTouchRecognizer.dart';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/bottomTrackPanel.dart';
+import 'package:app/components/custom_search.dart';
 import 'package:app/components/search.dart';
 import 'package:app/player/permissions.dart';
 import 'package:app/player/playerWidgets.dart';
@@ -59,9 +60,9 @@ class _TrackListState extends State<TrackList> {
   /// Delegate for search
 
   void _showSearch() async {
-    await showSearch<Song>(
+    await showCustomSearch<Song>(
       context: context,
-      delegate: SongsSearchDelegate(bottomPanelGlobalKey: bottomPanelGlobalKey),
+      delegate: SongsSearchDelegate(),
     );
   }
 
@@ -125,34 +126,35 @@ class _TrackListState extends State<TrackList> {
         didTapDrawerTile = true;
       });
       // itemScrollController.jumpTo()
-      Navigator.pop(context);
+      // Navigator.pop(context);
       await Future.delayed(Duration(
           milliseconds:
               246)); // Default drawer close time
-      await Navigator.of(context).push(createSettingsRoute(_buildTracks(true)));
+      // await Navigator.of(context).push(createSettingsRoute(_buildTracks(true)));
+      await Navigator.of(context).popAndPushNamed("/settings");
       setState(() {
         didTapDrawerTile = false;
       });
     }
   }
 
-  Widget _buildTracks([bool isFake = false]) {
-    /// `ScrollablePositionedList` initial index offset
-    int indexOffset;
+  Widget _buildTracks() {
+    // /// `ScrollablePositionedList` initial index offset
+    // int indexOffset;
 
-    /// `ScrollablePositionedList` initial scroll offset (in range of 0 to `tileHeight`)
-    double additionalScrollOffset;
+    // /// `ScrollablePositionedList` initial scroll offset (in range of 0 to `tileHeight`)
+    // double additionalScrollOffset;
 
-    if (isFake) {
-      // Stop possible scrolling
-      listScrollController.jumpTo(listScrollController.offset);
+    // if (isFake) {
+    //   // Stop possible scrolling
+    //   listScrollController.jumpTo(listScrollController.offset);
 
-      // Calc init offsets
-      indexOffset = listScrollController.offset ~/ tileHeight;
-      additionalScrollOffset = listScrollController.offset % tileHeight;
-    }
+    //   // Calc init offsets
+    //   indexOffset = listScrollController.offset ~/ tileHeight;
+    //   additionalScrollOffset = listScrollController.offset % tileHeight;
+    // }
     return IgnorePointer(
-      key: isFake ? null : trackListGlobalKey,
+      // key: isFake ? null : trackListGlobalKey,
       ignoring: didTapDrawerTile, // Disable entire fake touch events
       child: Scaffold(
         drawer: Theme(
@@ -235,17 +237,18 @@ class _TrackListState extends State<TrackList> {
                   color: Colors.white,
                   backgroundColor: Color(0xff101010),
                   strokeWidth: 2.5,
-                  key: isFake ? null : _refreshIndicatorKey,
+                  // key: isFake ? null : _refreshIndicatorKey,
+                  key:  _refreshIndicatorKey,
                   onRefresh: _refreshHandler,
                   child: SingleTouchRecognizerWidget(
                     child: Container(
-                      child: ScrollablePositionedList.builder(
-                        initialScrollIndex: isFake ? indexOffset : 0,
+                      child: ListView.builder(
+                        // initialScrollIndex: isFake ? indexOffset : 0,
                         
-                        frontScrollController: isFake
-                            ? ScrollController(
-                                initialScrollOffset: additionalScrollOffset)
-                            : listScrollController,
+                        // frontScrollController: isFake
+                        //     ? ScrollController(
+                        //         initialScrollOffset: additionalScrollOffset)
+                            // : listScrollController,
                         itemCount: PlaylistControl.globalPlaylist.length,
                         padding: EdgeInsets.only(bottom: 65, top: 0),
                         itemBuilder: (context, index) {
@@ -270,11 +273,12 @@ class _TrackListState extends State<TrackList> {
                 ),
               ),
             ),
-            BottomTrackPanel(
-              key: isFake ? null : bottomPanelGlobalKey,
-              initAlbumArtRotation:
-                  isFake ? bottomPanelGlobalKey.currentState.controller.value : 0.0,
-            ),
+            BottomTrackPanel( ),
+            // BottomTrackPanel(
+            //   key: isFake ? null : bottomPanelGlobalKey,
+            //   initAlbumArtRotation:
+            //       isFake ? bottomPanelGlobalKey.currentState.controller.value : 0.0,
+            // ),
           ],
         ),
       ),
@@ -474,7 +478,8 @@ class _TrackTileState extends State<TrackTile> {
     // Playing because clickTrackTile changes any other type to it
     if (widget.pushToPlayerRouteOnClick &&
         MusicPlayer.playState == AudioPlayerState.PLAYING)
-      Navigator.of(context).push(createPlayerRoute());
+      // Navigator.of(context).push(createPlayerRoute());
+      Navigator.of(context).pushNamed("/player");
   }
 
 // TODO: add playing indicator

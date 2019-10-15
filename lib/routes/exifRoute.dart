@@ -32,12 +32,12 @@ TextEditingController _textController;
           backgroundColor: Colors.transparent,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context),
           ),
           // actions: <Widget>[
           //   IconButton(
           //     icon: Icon(Icons.more_vert),
-          //     onPressed: () => Navigator.pop(context, false),
+          //     onPressed: () => Navigator.pop(context),
           //   ),
           // ],
           automaticallyImplyLeading: false,

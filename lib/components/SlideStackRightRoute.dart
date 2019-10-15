@@ -33,23 +33,22 @@ class SlideStackRightRoute extends PageRouteBuilder {
           ) =>
               Stack(
             children: <Widget>[
-              SlideTransition(
-                position: Tween(begin: exBegin, end: exEnd)
-                    .chain(CurveTween(curve: curveIn))
-                    .chain(CurveTween(curve: curveOut))
-                    .animate(animation),
-                child: Container(
-                  foregroundDecoration: BoxDecoration(
-                    color: Colors.black.withOpacity(animation.value / 1.1),
-                  ),
-                  // FIXME: this creates new `exitPage` instance animation
-                  child: IgnorePointer(
-                    // Disable any touch events on fake exit route
-                    ignoring: true,
-                    child: exitPage,
-                  ),
-                ),
-              ),
+              // SlideTransition(
+              //   position: Tween(begin: exBegin, end: exEnd)
+              //       .chain(CurveTween(curve: curveIn))
+              //       .chain(CurveTween(curve: curveOut))
+              //       .animate(animation),
+              //   child: Container(
+              //     foregroundDecoration: BoxDecoration(
+              //       color: Colors.black.withOpacity(animation.value / 1.1),
+              //     ),
+              //     child: IgnorePointer(
+              //       // Disable any touch events on fake exit route
+              //       ignoring: true,
+              //       child: exitPage,
+              //     ),
+              //   ),
+              // ),
               SlideTransition(
                 position: Tween(begin: entBegin, end: entEnd)
                     .chain(CurveTween(curve: curveIn))
