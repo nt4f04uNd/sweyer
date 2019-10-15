@@ -9,7 +9,7 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
 
   /// Function that checks whether to play enter animation or not
   ///
-  /// E.G disable exit animation for main route
+  /// E.G disable enter animation for main route
   BoolFunction checkEntAnimationEnabled,
 
   /// Function that checks whether to play exit animation or not
