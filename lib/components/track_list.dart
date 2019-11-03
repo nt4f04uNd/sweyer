@@ -3,6 +3,8 @@ import 'package:app/components/albumArt.dart';
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/custom_search.dart';
 import 'package:app/components/search.dart';
+import 'package:app/constants/colors.dart';
+import 'package:app/constants/themes.dart';
 import 'package:app/player/logger.dart';
 import 'package:app/player/permissions.dart';
 import 'package:app/player/playerWidgets.dart';
@@ -21,13 +23,14 @@ class DrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: SizedBox(
-        height: 28.0,
-        width: 28.0,
-        child: Icon(Icons.menu),
+    return SizedBox(
+      height: 15.0,
+      width: 15.0,
+      child: IconButton(
+        icon: Icon(Icons.menu),
+        color: Theme.of(context).iconTheme.color,
+        onPressed: Scaffold.of(context).openDrawer,
       ),
-      onPressed: Scaffold.of(context).openDrawer,
     );
   }
 }
@@ -70,7 +73,7 @@ class _TrackListState extends State<TrackList> {
     // TODO: add indicator for a current sort feature
     showModalBottomSheet<void>(
         context: context,
-        backgroundColor: Color(0xff262626),
+        backgroundColor: AppTheme.modal.auto(context),
         builder: (BuildContext context) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,13 +139,10 @@ class _TrackListState extends State<TrackList> {
       drawer: Theme(
         data: Theme.of(context).copyWith(
           canvasColor: //This will change the drawer background
-              Colors.grey.shade900,
+              AppTheme.drawer.auto(context),
         ),
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            systemNavigationBarColor:
-                Colors.grey.shade900, // navigation bar color
-          ),
+          value: AppSystemUIThemes.allScreens.auto(context),
           child: Drawer(
             child: ListView(
               physics: NeverScrollableScrollPhysics(),
@@ -180,6 +180,7 @@ class _TrackListState extends State<TrackList> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.sort),
+            color: Theme.of(context).iconTheme.color,
             onPressed: () {
               _showSortModal();
             },
@@ -199,7 +200,7 @@ class _TrackListState extends State<TrackList> {
                   padding: const EdgeInsets.only(
                       left: 12.0, top: 10.0, bottom: 10.0),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: AppTheme.searchFakeInput.auto(context),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -452,7 +453,8 @@ class _TrackTileState extends State<TrackTile> {
 
     /// If song data is not provided, then find it by index of row in current row
     _song = widget.song ??
-        PlaylistControl.getSongByIndex(widget.trackTileIndex, PlaylistType.global);
+        PlaylistControl.getSongByIndex(
+            widget.trackTileIndex, PlaylistType.global);
   }
 
   void _handleTap() async {
@@ -462,7 +464,6 @@ class _TrackTileState extends State<TrackTile> {
     // Playing because clickTrackTile changes any other type to it
     if (widget.pushToPlayerRouteOnClick &&
         MusicPlayer.playState == AudioPlayerState.PLAYING)
-      // Navigator.of(context).push(createPlayerRoute());
       Navigator.of(context).pushNamed("/player");
   }
 

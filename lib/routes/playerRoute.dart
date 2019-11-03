@@ -4,6 +4,7 @@ import 'package:app/components/animatedPlayPauseButton.dart';
 import 'package:app/components/popup_menu.dart' as customPopup;
 import 'package:app/components/track_list.dart';
 import 'package:app/components/marquee.dart';
+import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:flutter/gestures.dart';
@@ -259,14 +260,21 @@ class _PlaylistTabState extends State<_PlaylistTab>
                     children: <Widget>[
                       Text(
                         'Далее',
-                        style: TextStyle(fontSize: 24),
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: Theme.of(context).textTheme.title.color),
                       ),
                       PlaylistControl.playlistType == PlaylistType.global
                           ? Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
                                 'Основной плейлист',
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        .color),
                               ),
                             )
                           : PlaylistControl.playlistType ==
@@ -275,14 +283,24 @@ class _PlaylistTabState extends State<_PlaylistTab>
                                   padding: const EdgeInsets.only(top: 5.0),
                                   child: Text(
                                     'Перемешанный плейлист',
-                                    style: TextStyle(fontSize: 14),
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .caption
+                                            .color),
                                   ),
                                 )
                               : Padding(
                                   padding: const EdgeInsets.only(top: 5.0),
                                   child: Text(
                                     'Найденный плейлист',
-                                    style: TextStyle(fontSize: 14),
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .caption
+                                            .color),
                                   ),
                                 )
                     ],
@@ -355,13 +373,15 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             leading: IconButton(
-              icon: Icon(Icons.keyboard_arrow_down),
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Theme.of(context).iconTheme.color,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             actions: <Widget>[
               Theme(
                 data: Theme.of(context).copyWith(
-                    cardColor: Color(0xff151515),
                     cardTheme: CardTheme(
                         shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
@@ -370,7 +390,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                     ))),
                 child: Theme(
                   data: Theme.of(context).copyWith(
-                    cardColor: Color(0xff333333),
+                    cardColor:AppTheme.popupMenu.auto(context),
                   ),
                   child: customPopup.CustomPopupMenuButton<void>(
                     // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
@@ -378,6 +398,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                       // Navigator.of(context).push(createExifRoute(widget));
                       Navigator.of(context).pushNamed("/exif");
                     },
+                    tooltipEnabled: false,
                     padding: const EdgeInsets.all(0.0),
                     itemBuilder: (BuildContext context) =>
                         <customPopup.PopupMenuEntry<void>>[
@@ -457,8 +478,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                           icon: Icon(Icons.shuffle),
                           color: PlaylistControl.playlistType ==
                                   PlaylistType.shuffled
-                              ? null
-                              : Colors.grey.shade800,
+                              ? AppTheme.activeIcon.auto(context)
+                              : AppTheme.disabledIcon.auto(context),
                           onPressed: () {
                             setState(() {
                               if (PlaylistControl.playlistType ==
@@ -479,7 +500,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       width: 1,
-                                      color: Colors.white.withOpacity(0.1),
+                                      color:
+                                          AppTheme.prevNextBorder.auto(context),
                                     ),
                                     borderRadius: BorderRadius.circular(100),
                                   ),
@@ -490,7 +512,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                       padding: const EdgeInsets.all(10),
                                       child: Icon(
                                         Icons.skip_previous,
-                                        color: Colors.white.withOpacity(0.9),
+                                        color: AppTheme.prevNextIcons
+                                            .auto(context),
                                       ),
                                     ),
                                     onTap: MusicPlayer.playPrev,
@@ -501,7 +524,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         width: 1,
-                                        color: Colors.white.withOpacity(0.15)),
+                                        color: AppTheme.playPauseBorder
+                                            .auto(context)),
                                     borderRadius: BorderRadius.circular(100),
                                   ),
                                   child: AnimatedPlayPauseButton(),
@@ -510,7 +534,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         width: 1,
-                                        color: Colors.white.withOpacity(0.1)),
+                                        color: AppTheme.prevNextBorder
+                                            .auto(context)),
                                     borderRadius: BorderRadius.circular(100),
                                   ),
                                   child: InkWell(
@@ -520,7 +545,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                       padding: const EdgeInsets.all(10),
                                       child: Icon(
                                         Icons.skip_next,
-                                        color: Colors.white.withOpacity(0.9),
+                                        color: AppTheme.prevNextIcons
+                                            .auto(context),
                                       ),
                                     ),
                                     onTap: MusicPlayer.playNext,
@@ -536,8 +562,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         IconButton(
                           icon: Icon(Icons.loop),
                           color: MusicPlayer.loopModeState
-                              ? null
-                              : Colors.grey.shade800,
+                              ? AppTheme.activeIcon.auto(context)
+                              : AppTheme.disabledIcon.auto(context),
                           onPressed: () {
                             setState(() {
                               MusicPlayer.switchLoopMode();
@@ -702,7 +728,7 @@ class _TrackSliderState extends State<TrackSlider> {
         Expanded(
           child: Slider(
             activeColor: Colors.deepPurple,
-            inactiveColor: Colors.white.withOpacity(0.2),
+            inactiveColor: AppTheme.sliderInactive.auto(context),
             value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
             // value: _value.inSeconds.toDouble(),
             max: widget.duration.inSeconds.toDouble(),

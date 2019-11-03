@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:app/player/player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:app/constants/themes.dart';
 
 class AnimatedPlayPauseButton extends StatefulWidget {
   AnimatedPlayPauseButton({Key key}) : super(key: key);
@@ -52,7 +53,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
           child: AnimatedIcon(
             icon: AnimatedIcons.play_pause,
             size: 32,
-            color: Colors.white,
+            color: AppTheme.playPauseIcon.auto(context),
             progress: _animationController,
           ),
         ),

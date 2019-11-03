@@ -9,26 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'manual_stream_controller.dart';
+
 /// Features to sort by
 enum SortFeature { date, title }
 
 /// Features to filter playlist by
 enum FilterFeature { duration, fileSize }
-
-/// Class to create change and control stream
-///
-class ManualStreamController {
-  /// Stream controller used to create stream of changes on track list (just to notify)
-  StreamController<void> _controller = StreamController<void>.broadcast();
-
-  /// Get stream of notifier events about changes on track list
-  Stream<void> get stream => _controller.stream;
-
-  /// Emit change event
-  void emitEvent() {
-    _controller.add(null);
-  }
-}
 
 class Playlist {
   List<Song> _songs;

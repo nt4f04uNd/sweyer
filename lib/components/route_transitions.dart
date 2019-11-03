@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 /// Type for function that returns boolean
 typedef BoolFunction = bool Function();
 
+/// Type for function that returns `SystemUiOverlayStyle`
+typedef UIFunction = SystemUiOverlayStyle Function();
+
 /// Returns `PageRouteBuilder` that performs slide to right animation
 PageRouteBuilder<T> createRouteTransition<T extends Widget>({
   @required final T route,
@@ -63,7 +66,10 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
   final SystemUiOverlayStyle enterSystemUI,
 
   /// `SystemUiOverlayStyle` applied on route exit (when `animation`)
-  final SystemUiOverlayStyle exitSystemUI,
+  final UIFunction exitSystemUI,
+
+  /// Function, that returns `SystemUiOverlayStyle`, that will be applied for a static route
+  final UIFunction routeSystemUI,
 
   /// A duration of transition
   ///
@@ -139,7 +145,7 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
                 secondaryAnimation.status == AnimationStatus.forward ||
             exitIgnoreEventsReverse &&
                 secondaryAnimation.status == AnimationStatus.reverse;
-
+                
         if (playMaterial)
           return TurnableSlideTransition(
             enabled: entEnabled,
@@ -183,8 +189,11 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
                                       animation.status ==
                                           AnimationStatus.completed)
                               ? AnnotatedRegion<SystemUiOverlayStyle>(
-                                  value: exitSystemUI, child: child)
-                              : child,
+                                  value: exitSystemUI(), child: child)
+                              : routeSystemUI != null
+                                  ? AnnotatedRegion<SystemUiOverlayStyle>(
+                                      value: routeSystemUI(), child: child)
+                                  : child,
                     ),
                   ),
                 ),
@@ -218,16 +227,17 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
                   // Disable any touch events on exit while in transition
                   ignoring: secondaryIgnore,
                   child: enterSystemUI != null &&
-                          (animation.status == AnimationStatus.forward ||
-                              animation.status == AnimationStatus.completed)
+                          (animation.status == AnimationStatus.forward)
                       ? AnnotatedRegion<SystemUiOverlayStyle>(
                           value: enterSystemUI, child: child)
                       : exitSystemUI != null &&
-                              (animation.status == AnimationStatus.reverse ||
-                                  animation.status == AnimationStatus.completed)
+                              (animation.status == AnimationStatus.reverse)
                           ? AnnotatedRegion<SystemUiOverlayStyle>(
-                              value: exitSystemUI, child: child)
-                          : child,
+                              value: exitSystemUI(), child: child)
+                          : routeSystemUI != null
+                              ? AnnotatedRegion<SystemUiOverlayStyle>(
+                                  value: routeSystemUI(), child: child)
+                              : child,
                 ),
               ),
             ),

@@ -17,9 +17,7 @@ environment:
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
-  # flute_music_player: ^0.0.6
   audioplayers: ^0.13.1
-  # media_notification: ^0.0.5
   fluttertoast: ^3.1.0
   permission_handler: '^3.2.0'
   shared_preferences: ^0.5.3+4

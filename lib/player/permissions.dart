@@ -1,4 +1,5 @@
 import 'package:app/player/playlist.dart';
+import 'package:app/player/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -23,8 +24,10 @@ abstract class Permissions {
     }
     if (!canOpen) {
       await Permissions.requestPermission(PermissionGroup.storage);
-      if (Permissions.permissionStorageStatus == MyPermissionStatus.granted)
+      if (Permissions.permissionStorageStatus == MyPermissionStatus.granted){
         await PlaylistControl.init();
+        await ThemeControl.init();
+      }
     }
   }
 

@@ -1,1 +1,3 @@
-export 'package:app/constants/channels.dart';
+export 'channels.dart';
+export 'colors.dart';
+export 'themes.dart';

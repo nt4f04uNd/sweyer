@@ -22,7 +22,7 @@ const double _kMenuItemHeight = 48.0;
 const double _kMenuDividerHeight = 16.0;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
-const double _kMenuVerticalPadding = 0.0;
+const double _kMenuVerticalPadding = 6.5;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
@@ -838,6 +838,7 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
     this.onSelected,
     this.onCanceled,
     this.tooltip,
+    this.tooltipEnabled = true,
     this.elevation = 8.0,
     this.padding = const EdgeInsets.all(8.0),
     this.child,
@@ -873,6 +874,11 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
   /// This text is displayed when the user long-presses on the button and is
   /// used for accessibility.
   final String tooltip;
+
+  /// Whether tooltip is enabled
+  ///
+  /// @default true
+  final bool tooltipEnabled;
 
   /// The z-coordinate at which to place the menu when open. This controls the
   /// size of the shadow below the menu.
@@ -970,8 +976,10 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
         : IconButton(
             icon: widget.icon ?? _getIcon(Theme.of(context).platform),
             padding: widget.padding,
-            tooltip: widget.tooltip ??
-                MaterialLocalizations.of(context).showMenuTooltip,
+            tooltip: widget.tooltipEnabled
+                ? widget.tooltip ??
+                    MaterialLocalizations.of(context).showMenuTooltip
+                : null,
             onPressed: widget.enabled ? showButtonMenu : null,
           );
   }

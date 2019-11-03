@@ -37,6 +37,14 @@ class _PrefKeys {
   final Pref<int> settingMinFileDurationInt =
       const Pref<int>(key: 'setting_min_file_duration');
 
+  /// Stores theme brightness
+  /// 
+  /// `false` means light
+  /// 
+  /// `true` means dark
+  final Pref<bool> themeBrightnessBool =
+      const Pref<bool>(key: 'theme_brightness');
+
   const _PrefKeys();
 }
 

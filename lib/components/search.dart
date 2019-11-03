@@ -1,5 +1,6 @@
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/track_list.dart';
+import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:app/player/song.dart';
@@ -19,6 +20,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
     return theme.copyWith(
       primaryColor: Theme.of(context).appBarTheme.color,
+      primaryColorBrightness: Theme.of(context).appBarTheme.brightness,
       textTheme: TextTheme(
         title: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       ),
@@ -28,7 +30,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
       onPressed: () {
         close(context, null);
       },
@@ -131,11 +133,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                                       "Очистить историю поиска"),
                                                   content: AnnotatedRegion<
                                                       SystemUiOverlayStyle>(
-                                                    value: SystemUiOverlayStyle(
-                                                      systemNavigationBarColor:
-                                                          Color(
-                                                              0xff111111), // navigation bar color
-                                                    ),
+                                                    value: AppSystemUIThemes.dialogScreen.auto(context),
                                                     child: Text(
                                                         "Вы действительно хотите очистить историю?"),
                                                   ),
@@ -217,10 +215,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                           title: Text("Удалить запрос"),
                                           content: AnnotatedRegion<
                                               SystemUiOverlayStyle>(
-                                            value: SystemUiOverlayStyle(
-                                              systemNavigationBarColor: Color(
-                                                  0xff111111), // navigation bar color
-                                            ),
+                                            value:  AppSystemUIThemes.dialogScreen.auto(context),
                                             child: Text(
                                                 "Вы действительно хотите удалить этот запрос из истории?"),
                                           ),

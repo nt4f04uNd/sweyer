@@ -14,13 +14,12 @@ class ExifRoute extends StatefulWidget {
 }
 
 class _ExifRouteState extends State<ExifRoute> {
-TextEditingController _textController;
-  
-@override
+  TextEditingController _textController;
+
+  @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: 'Имя трека');
-  
   }
 
   @override
@@ -31,7 +30,8 @@ TextEditingController _textController;
         child: AppBar(
           backgroundColor: Colors.transparent,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back,
+                color: Theme.of(context).iconTheme.color),
             onPressed: () => Navigator.pop(context),
           ),
           // actions: <Widget>[
@@ -53,7 +53,6 @@ TextEditingController _textController;
             ),
             Flexible(
               child: TextField(controller: _textController),
-              
             ),
           ],
         ),

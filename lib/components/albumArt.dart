@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:app/constants/themes.dart';
 
 /// Album art
 class AlbumArt extends StatelessWidget {
@@ -108,28 +109,15 @@ class _AlbumArtPlaceholder extends StatelessWidget {
                     2 // Border width
                 : constraint1.maxHeight,
         decoration: BoxDecoration(
-          // color: Colors.white.withOpacity(0.04),
           color: isLarge
-              // ? Colors.white.withOpacity(0.9)
-              // ? Colors.grey.shade900
-              // ? Colors.white.withOpacity(0.09)
-              ? Color(0xFF333333)
-              // : Colors.white.withOpacity(0.09),
-              : round?Color(0xFF353535) :Color(0xFF313131) ,
-              // ? Color(0xFF202020)
-              // : Color(0xFF202020),
-              // : Colors.white.withOpacity(1),
+              ? AppTheme.albumArtLarge.auto(context)
+              : round
+                  ? AppTheme.albumArtSmallRound.auto(context)
+                  : AppTheme.albumArtSmall.auto(context),
           borderRadius: BorderRadius.all(Radius.circular(round ? 500 : 10)),
         ),
         padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round ? 8 : 10),
         child: LayoutBuilder(builder: (context, constraint) {
-          // return Icon(
-          //   Icons.music_note,
-          //   size: isLarge
-          //       ? constraint.biggest.width - 115
-          //       : constraint.biggest.height,
-          //   color: Colors.deepPurple,
-          // );
           return SvgPicture.asset(
             'images/icons/note_rounded.svg',
           );

@@ -1,4 +1,5 @@
 import 'package:app/player/playlist.dart';
+import 'package:app/player/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/player/player.dart';
@@ -10,8 +11,10 @@ class MainRouteState extends State<MainRoute> {
     // Init music player
     // It is not in main function, because we need catcher to catch errors
     MusicPlayer.init();
-    // Init playlist controller
+    // Init playlist control
     PlaylistControl.init();
+    // Init theme control
+    ThemeControl.init();
   }
 
   @override

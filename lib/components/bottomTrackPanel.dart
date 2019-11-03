@@ -1,3 +1,4 @@
+import 'package:app/constants/themes.dart';
 import 'package:app/player/playerWidgets.dart';
 import 'package:app/player/playlist.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -84,15 +85,15 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
     // Handle track position movement
     _changePositionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
-      if (event.inSeconds != _value.inSeconds) {// Prevent waste updates
+      if (event.inSeconds != _value.inSeconds) {
+        // Prevent waste updates
         setState(() {
           _value = event;
         });
       }
     });
 
-
-    // Handle song change 
+    // Handle song change
     _changeSongSubscription =
         PlaylistControl.onSongChange.listen((event) async {
       _value = await MusicPlayer.currentPosition;
@@ -139,7 +140,7 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                 builder: (context, snapshot) {
                   return Material(
                     // color: Color(0xff090909),
-                    color: Color(0xff262626),
+                    color: AppTheme.bottomTrackPanel.auto(context),
                     child: GestureDetector(
                       onTap: () async {
                         // Push to player route
@@ -203,6 +204,7 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                             IconButton(
                               icon: Icon(Icons.skip_next),
                               iconSize: 32,
+                              color: AppTheme.playPauseIcon.auto(context),
                               onPressed: MusicPlayer.playNext,
                             ),
                           ],

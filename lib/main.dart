@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:app/player/player.dart';
+import 'package:app/player/theme.dart';
 import 'package:app/routes/exifRoute.dart';
+import 'package:app/routes/extendedSettings.dart';
 import 'package:app/routes/mainRoute.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:app/routes/settingsRoute.dart';
@@ -11,12 +15,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:catcher/catcher_plugin.dart';
 import 'package:app/components/route_transitions.dart';
 
+import 'constants/colors.dart';
+import 'constants/themes.dart';
+
 void main() {
 // Color of system bottom navigation bar and status bar
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    systemNavigationBarColor: Color(0xff262626), // navigation bar color
-    statusBarColor: Colors.transparent, // status bar color
-  ));
+  // SystemChrome.setSystemUIOverlayStyle(AppThemes.darkMainScreen);
 
   CatcherOptions debugOptions =
       CatcherOptions(DialogReportMode(), [ConsoleHandler()]);
@@ -33,27 +37,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static final nativeTheme = SystemUiOverlayStyle(
-    // systemNavigationBarColor: Colors.grey.shade900, // navigation bar color
-    systemNavigationBarColor: Colors.grey.shade900, // navigation bar color
-    statusBarColor: Colors.transparent, // status bar color
-  );
-  static const nativeThemeMainScreen = SystemUiOverlayStyle(
-    systemNavigationBarColor: Color(0xff262626), // navigation bar color
-    statusBarColor: Colors.transparent, // status bar color
-  );
-
   /// Needed to disable animations on some routes
   String _currentRoute = "/";
 
   // Var to show toast in `_handleHomePop`
   DateTime _currentBackPressTime;
-
-  @override
-  void dispose() {
-    MusicPlayer.stop();
-    super.dispose();
-  }
 
   /// Changes the value of `_currentRoute`
   void _setCurrentRoute(String newValue) {
@@ -84,113 +72,128 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: Catcher.navigatorKey,
-      // color: Colors.grey.shade900,
-      // Uncomment to replace red screen of death
-      builder: (BuildContext context, Widget widget) {
-        // Catcher.addDefaultErrorWidget(
-        //     showStacktrace: true,
-        //     customTitle: "Custom error title",
-        //     customDescription: "Custom error description",
-        //     );
-        return widget;
-      },
-      supportedLocales: [const Locale('ru')],
-      locale: const Locale('ru'),
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      title: 'Музыка',
-      theme: ThemeData(
-        // appBarTheme: AppBarTheme(color: Color(0xff070707)),
-        // appBarTheme: AppBarTheme(color: Colors.black, elevation: 0,),
-        appBarTheme: AppBarTheme(
-          color: Colors.grey.shade900,
-          elevation: 0,
-        ),
-        // scaffoldBackgroundColor: Colors.black,
-        scaffoldBackgroundColor: Colors.grey.shade900,
-        brightness: Brightness.dark,
-        accentColor: Colors.grey.shade900,
-        backgroundColor: Colors.grey.shade900,
-        primaryColor: Colors.deepPurple,
-        bottomSheetTheme: BottomSheetThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-          ),
-          backgroundColor: Color(0xff070707),
-        ),
-        textSelectionColor: Colors.deepPurple,
-        textSelectionHandleColor: Colors.deepPurple,
-        cursorColor: Colors.deepPurple,
-      ),
-      // home: WillPopScope(child: MainRoute(), onWillPop: onWillPop),
-      initialRoute: "/",
-      onGenerateRoute: (settings) {
-        _setCurrentRoute(settings.name);
-        print(_currentRoute);
+    return StreamBuilder(
+        stream: ThemeControl.onThemeChange,
+        builder: (context, snapshot) {
+          final themeMode =
+              ThemeControl.isDark ? ThemeMode.dark : ThemeMode.light;
+          return MaterialApp(
+            title: 'Музыка',
+            navigatorKey: Catcher.navigatorKey,
 
-        if (settings.isInitialRoute) {
-          return createRouteTransition(
-            checkExitAnimationEnabled: () => _currentRouteEquals("/settings"),
-            checkEntAnimationEnabled: () => false,
-            exitCurve: Curves.linearToEaseOut,
-            exitReverseCurve: Curves.fastOutSlowIn,
-            maintainState: true,
-            enterSystemUI: nativeThemeMainScreen,
-            transitionDuration: const Duration(milliseconds: 500),
-            route: WillPopScope(
-                child: AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: nativeThemeMainScreen,
-                  child: MainRoute(),
-                ),
-                onWillPop: _handleHomePop),
+            // Uncomment to replace red screen of death
+            builder: (BuildContext context, Widget widget) {
+              // Catcher.addDefaultErrorWidget(
+              //     showStacktrace: true,
+              //     customTitle: "Custom error title",
+              //     customDescription: "Custom error description",
+              //     );
+              return widget;
+            },
+            supportedLocales: [const Locale('ru')],
+            locale: const Locale('ru'),
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+
+            themeMode: themeMode,
+            theme: AppTheme.materialApp.light,
+            darkTheme: AppTheme.materialApp.dark,
+
+            initialRoute: "/",
+
+            onGenerateRoute: (settings) {
+              _setCurrentRoute(settings.name);
+              // print(_currentRoute);
+              if (settings.isInitialRoute) {
+                return createRouteTransition(
+                  checkExitAnimationEnabled: () =>
+                      _currentRouteEquals("/settings"),
+                  checkEntAnimationEnabled: () => false,
+                  exitCurve: Curves.linearToEaseOut,
+                  exitReverseCurve: Curves.fastOutSlowIn,
+                  maintainState: true,
+                  routeSystemUI: () => AppSystemUIThemes.mainScreen
+                      .autoBr(ThemeControl.brightness),
+                  enterSystemUI: AppSystemUIThemes.mainScreen
+                      .autoBr(ThemeControl.brightness),
+                  exitIgnoreEventsReverse: true,
+                  exitIgnoreEventsForward: true,
+                  transitionDuration: const Duration(milliseconds: 500),
+                  route: WillPopScope(
+                      child:
+                          // AnnotatedRegion<SystemUiOverlayStyle>(
+                          //   value: AppSystemUIThemes.mainScreen
+                          //       .autoBr(_brightness),
+                          //   child:
+                          MainRoute(),
+                      // ),
+                      onWillPop: _handleHomePop),
+                );
+              } else if (settings.name == "/player") {
+                return createRouteTransition(
+                  playMaterial: true,
+                  entCurve: Curves.fastOutSlowIn,
+                  exitCurve: Curves.linearToEaseOut,
+                  exitReverseCurve: Curves.fastOutSlowIn,
+                  entBegin: Offset(0.0, 1.0),
+                  checkExitAnimationEnabled: () => _currentRouteEquals("/exif"),
+                  opaque: false,
+                  enterSystemUI: AppSystemUIThemes.allScreens
+                      .autoBr(ThemeControl.brightness),
+                  exitSystemUI: () => AppSystemUIThemes.mainScreen
+                      .autoBr(ThemeControl.brightness),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  route: PlayerRoute(),
+                );
+              } else if (settings.name == "/settings") {
+                return createRouteTransition(
+                  transitionDuration: const Duration(milliseconds: 500),
+                  enterSystemUI: AppSystemUIThemes.allScreens
+                      .autoBr(ThemeControl.brightness),
+                  exitSystemUI: () => AppSystemUIThemes.mainScreen
+                      .autoBr(ThemeControl.brightness),
+                  exitCurve: Curves.linearToEaseOut,
+                  exitReverseCurve: Curves.fastOutSlowIn,
+                  entCurve: Curves.linearToEaseOut,
+                  entReverseCurve: Curves.fastOutSlowIn,
+                  entIgnoreEventsForward: true,
+                  exitIgnoreEventsReverse: true,
+                  exitIgnoreEventsForward: true,
+                  route: SettingsRoute(),
+                );
+              } else if (settings.name == "/extendedSettings") {
+                return createRouteTransition(
+                  transitionDuration: const Duration(milliseconds: 500),
+                  enterSystemUI: AppSystemUIThemes.allScreens
+                      .autoBr(ThemeControl.brightness),
+                  exitSystemUI: () => AppSystemUIThemes.allScreens
+                      .autoBr(ThemeControl.brightness),
+                  entCurve: Curves.linearToEaseOut,
+                  entReverseCurve: Curves.fastOutSlowIn,
+                  exitIgnoreEventsReverse: true,
+                  exitIgnoreEventsForward: true,
+                  route: ExtendedSettingsRoute(),
+                );
+              } else if (settings.name == "/exif") {
+                return createRouteTransition(
+                  transitionDuration: const Duration(milliseconds: 500),
+                  entCurve: Curves.linearToEaseOut,
+                  entReverseCurve: Curves.fastOutSlowIn,
+                  route: AnnotatedRegion<SystemUiOverlayStyle>(
+                    value: AppSystemUIThemes.allScreens
+                        .autoBr(ThemeControl.brightness),
+                    child: ExifRoute(),
+                  ),
+                );
+              } else if (settings.name == "/search") {
+                return (settings.arguments as Map<String, Route>)["route"];
+              }
+              // FIXME: add unknown route
+              return null;
+            },
           );
-        } else if (settings.name == "/player") {
-          return createRouteTransition(
-            playMaterial: true,
-            entCurve: Curves.fastOutSlowIn,
-            exitCurve: Curves.linearToEaseOut,
-            exitReverseCurve: Curves.fastOutSlowIn,
-            entBegin: Offset(0.0, 1.0),
-            checkExitAnimationEnabled: () => _currentRouteEquals("/exif"),
-            opaque: false,
-            enterSystemUI: nativeTheme,
-            exitSystemUI: nativeThemeMainScreen,
-            exitIgnoreEventsForward: true,
-            transitionDuration: const Duration(milliseconds: 500),
-            route: PlayerRoute(),
-          );
-        } else if (settings.name == "/settings") {
-          return createRouteTransition(
-             transitionDuration: const Duration(milliseconds: 500),
-            enterSystemUI: nativeTheme,
-            exitSystemUI: nativeThemeMainScreen,
-            entCurve: Curves.linearToEaseOut,
-            entReverseCurve: Curves.fastOutSlowIn,
-            route: SettingsRoute(),
-          );
-        } else if (settings.name == "/exif") {
-          return createRouteTransition(
-             transitionDuration: const Duration(milliseconds: 500),
-            entCurve: Curves.linearToEaseOut,
-            entReverseCurve: Curves.fastOutSlowIn,
-            route: AnnotatedRegion<SystemUiOverlayStyle>(
-              value: nativeTheme,
-              child: ExifRoute(),
-            ),
-          );
-        } else if (settings.name == "/search") {
-          return (settings.arguments as Map<String, Route>)["route"];
-        }
-        // FIXME: add unknown route
-        return null;
-      },
-    );
+        });
   }
 }
