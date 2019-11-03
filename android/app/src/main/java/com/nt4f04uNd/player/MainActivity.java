@@ -331,8 +331,42 @@ public class MainActivity extends FlutterActivity {
                KeyEvent event = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
                if (event.getAction() == KeyEvent.ACTION_DOWN) {
                   switch (event.getKeyCode()) {
+                  case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_AUDIO_TRACK);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_FAST_FORWARD);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_REWIND:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_REWIND);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_NEXT:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_NEXT);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PREVIOUS);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY_PAUSE);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_PLAY:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY);
+                     break;
+                  case KeyEvent.KEYCODE_MEDIA_STOP:
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_STOP);
+                     break;
                   case KeyEvent.KEYCODE_HEADSETHOOK:
-                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_HOOK_BUTTON_CLICK, null);
+                     playerChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
+                           Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_HOOK);
+                     break;
                   }
                }
             }
@@ -470,7 +504,7 @@ public class MainActivity extends FlutterActivity {
 }
 
 // TODO: add support for headset and/or bluetooth buttons (check vk)
-// TODO: probably? add luanch entent broadcast receiver and get extra agrument
+// TODO: probably? add launch intent broadcast receiver and get extra argument
 // that denotes that activity has been opened from notification
 
 // TODO: as I specify very big priority for mediabutton intent-filter, i should

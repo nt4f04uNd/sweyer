@@ -1,6 +1,5 @@
 import 'package:app/player/playerWidgets.dart';
 import 'package:app/player/playlist.dart';
-import 'package:app/routes/playerRoute.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
@@ -21,7 +20,6 @@ class BottomTrackPanel extends StatefulWidget {
   BottomTrackPanelState createState() => BottomTrackPanelState();
 }
 
-/// FIXME: circular progress not rendering on app start
 /// FIXME: art rotating on main and search routes are distinct
 class BottomTrackPanelState extends State<BottomTrackPanel>
     with SingleTickerProviderStateMixin {
@@ -47,8 +45,7 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
     controller =
         AnimationController(duration: const Duration(seconds: 15), vsync: this);
     controller.value = widget.initAlbumArtRotation;
-    
-    // animation = Tween<double>(begin: 0, end: 1).animate(controller)
+
     controller
       ..addListener(() {
         setState(() {
@@ -87,21 +84,19 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
     // Handle track position movement
     _changePositionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
-      if (event.inSeconds - 0.9 > _value.inSeconds) // Prevent waste updates
-        setState(() {
-          _value = event;
-        });
-      else if (event.inMilliseconds < 200) {
+      if (event.inSeconds != _value.inSeconds) {// Prevent waste updates
         setState(() {
           _value = event;
         });
       }
     });
 
-    // Handle track switch
-    _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
+
+    // Handle song change 
+    _changeSongSubscription =
+        PlaylistControl.onSongChange.listen((event) async {
+      _value = await MusicPlayer.currentPosition;
       setState(() {
-        _value = Duration(seconds: 0);
         _duration =
             Duration(milliseconds: PlaylistControl.currentSong?.duration);
       });
@@ -143,7 +138,8 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                 stream: MusicPlayer.onPlayerStateChanged,
                 builder: (context, snapshot) {
                   return Material(
-                    color: Color(0xff090909),
+                    // color: Color(0xff090909),
+                    color: Color(0xff262626),
                     child: GestureDetector(
                       onTap: () async {
                         // Push to player route
@@ -198,7 +194,7 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                             //  IconButton(
                             //   icon: Icon(Icons.skip_previous),
                             //   iconSize: 32,
-                            //   onPressed: MusicPlayer.clickPrev,
+                            //   onPressed: MusicPlayer.playPrev,
                             // ),
                             Container(
                               width: 32,
@@ -207,7 +203,7 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                             IconButton(
                               icon: Icon(Icons.skip_next),
                               iconSize: 32,
-                              onPressed: MusicPlayer.clickNext,
+                              onPressed: MusicPlayer.playNext,
                             ),
                           ],
                         ),

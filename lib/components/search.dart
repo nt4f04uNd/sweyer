@@ -5,6 +5,7 @@ import 'package:app/player/prefs.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/custom_search.dart' as custom_search;
+import 'package:flutter/services.dart';
 
 class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   SongsSearchDelegate();
@@ -124,12 +125,20 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                         showDialog(
                                             context: context,
                                             builder: (context) => AlertDialog(
-                                                  backgroundColor:
-                                                      Color(0xff151515),
+                                                  // backgroundColor:
+                                                  //     Color(0xff151515),
                                                   title: Text(
                                                       "Очистить историю поиска"),
-                                                  content: Text(
-                                                      "Вы действительно хотите очистить историю?"),
+                                                  content: AnnotatedRegion<
+                                                      SystemUiOverlayStyle>(
+                                                    value: SystemUiOverlayStyle(
+                                                      systemNavigationBarColor:
+                                                          Color(
+                                                              0xff111111), // navigation bar color
+                                                    ),
+                                                    child: Text(
+                                                        "Вы действительно хотите очистить историю?"),
+                                                  ),
                                                   contentPadding:
                                                       EdgeInsets.only(
                                                           top: 24.0,
@@ -205,10 +214,16 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                 showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                          backgroundColor: Color(0xff151515),
                                           title: Text("Удалить запрос"),
-                                          content: Text(
-                                              "Вы действительно хотите удалить этот запрос из истории?"),
+                                          content: AnnotatedRegion<
+                                              SystemUiOverlayStyle>(
+                                            value: SystemUiOverlayStyle(
+                                              systemNavigationBarColor: Color(
+                                                  0xff111111), // navigation bar color
+                                            ),
+                                            child: Text(
+                                                "Вы действительно хотите удалить этот запрос из истории?"),
+                                          ),
                                           contentPadding: EdgeInsets.only(
                                               top: 24.0,
                                               left: 27.0,
@@ -330,8 +345,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                         additionalClickCallback: () {
                           _writeInputToSearchHistory(query);
                           FocusScope.of(context).requestFocus(FocusNode());
-                          PlaylistControl.setPlaylist(
-                              searched.toList(), PlaylistType.searched);
+                          PlaylistControl.setSearchedPlaylist(searched.toList());
                         },
                       );
                     });

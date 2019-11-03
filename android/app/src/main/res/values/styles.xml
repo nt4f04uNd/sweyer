@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+   <color name="splash_background">#212121</color>
+   
    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
       <item name="android:navigationBarColor">#000</item>
       <!-- <item name="android:windowFullscreen">true</item> 

@@ -3,16 +3,16 @@ import 'package:app/components/albumArt.dart';
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/custom_search.dart';
 import 'package:app/components/search.dart';
+import 'package:app/player/logger.dart';
 import 'package:app/player/permissions.dart';
 import 'package:app/player/playerWidgets.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
-import 'package:app/routes/playerRoute.dart';
-import 'package:app/routes/settingsRoute.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
+import 'package:flutter/services.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:app/components/refresh_indicator.dart';
 
@@ -22,7 +22,11 @@ class DrawerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.menu),
+      icon: SizedBox(
+        height: 28.0,
+        width: 28.0,
+        child: Icon(Icons.menu),
+      ),
       onPressed: Scaffold.of(context).openDrawer,
     );
   }
@@ -41,12 +45,8 @@ class TrackList extends StatefulWidget {
 class _TrackListState extends State<TrackList> {
   // TODO: extract this to constant
   // static final PageStorageKey _pageScrollKey = PageStorageKey('MainListView');
-  static final GlobalKey trackListGlobalKey = GlobalKey();
-  static final GlobalKey<BottomTrackPanelState> bottomPanelGlobalKey =
+  static final GlobalKey<BottomTrackPanelState> _bottomPanelGlobalKey =
       GlobalKey<BottomTrackPanelState>();
-  static final int tileHeight = 64;
-  final ScrollController listScrollController = ScrollController();
-  bool didTapDrawerTile = false;
 
   bool refreshing = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -70,6 +70,7 @@ class _TrackListState extends State<TrackList> {
     // TODO: add indicator for a current sort feature
     showModalBottomSheet<void>(
         context: context,
+        backgroundColor: Color(0xff262626),
         builder: (BuildContext context) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,47 +121,27 @@ class _TrackListState extends State<TrackList> {
   }
 
   Future<void> _handleClickSettings() async {
-    if (!didTapDrawerTile) {
-      setState(() {
-        // Make sure that user won't be able to click drawer twice
-        didTapDrawerTile = true;
-      });
-      // itemScrollController.jumpTo()
-      // Navigator.pop(context);
-      await Future.delayed(Duration(
-          milliseconds:
-              246)); // Default drawer close time
-      // await Navigator.of(context).push(createSettingsRoute(_buildTracks(true)));
-      await Navigator.of(context).popAndPushNamed("/settings");
-      setState(() {
-        didTapDrawerTile = false;
-      });
-    }
+    await Future.delayed(
+        Duration(milliseconds: 246)); // Default drawer close time
+    // await Navigator.of(context).push(createSettingsRoute(_buildTracks(true)));
+    await Navigator.of(context).popAndPushNamed("/settings");
+  }
+
+  void _handleClickSendLog() {
+    Logger.send();
   }
 
   Widget _buildTracks() {
-    // /// `ScrollablePositionedList` initial index offset
-    // int indexOffset;
-
-    // /// `ScrollablePositionedList` initial scroll offset (in range of 0 to `tileHeight`)
-    // double additionalScrollOffset;
-
-    // if (isFake) {
-    //   // Stop possible scrolling
-    //   listScrollController.jumpTo(listScrollController.offset);
-
-    //   // Calc init offsets
-    //   indexOffset = listScrollController.offset ~/ tileHeight;
-    //   additionalScrollOffset = listScrollController.offset % tileHeight;
-    // }
-    return IgnorePointer(
-      // key: isFake ? null : trackListGlobalKey,
-      ignoring: didTapDrawerTile, // Disable entire fake touch events
-      child: Scaffold(
-        drawer: Theme(
-          data: Theme.of(context).copyWith(
-            canvasColor:
-                Color(0xff070707), //This will change the drawer background
+    return Scaffold(
+      drawer: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: //This will change the drawer background
+              Colors.grey.shade900,
+        ),
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            systemNavigationBarColor:
+                Colors.grey.shade900, // navigation bar color
           ),
           child: Drawer(
             child: ListView(
@@ -170,117 +151,120 @@ class _TrackListState extends State<TrackList> {
               children: <Widget>[
                 Container(
                   padding: const EdgeInsets.only(
-                      left: 15.0, top: 40.0, bottom: 20.0),
+                      left: 18.0, top: 60.0, bottom: 20.0),
                   child: Text('Меню', style: TextStyle(fontSize: 35.0)),
                 ),
                 ListTile(
+                    leading: Icon(
+                      Icons.settings,
+                      color: Colors.deepPurple.shade300,
+                    ),
                     title: Text('Настройки',
                         style: TextStyle(
                             fontSize: 17.0, color: Colors.deepPurple.shade300)),
                     onTap: _handleClickSettings),
+                ListTile(
+                    leading: Icon(Icons.assignment,
+                        color: Colors.deepPurple.shade300),
+                    title: Text('Отправить лог',
+                        style: TextStyle(
+                            fontSize: 17.0, color: Colors.deepPurple.shade300)),
+                    onTap: _handleClickSendLog),
               ],
             ),
           ),
         ),
-        appBar: AppBar(
-          leading: DrawerButton(),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.sort),
-              onPressed: () {
-                _showSortModal();
-              },
-            ),
-          ],
-          titleSpacing: 0.0,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 0.0),
-            child: ClipRRect(
-              // FIXME: cliprrect doesn't work for material for some reason
-              borderRadius: BorderRadius.circular(10),
-              child: GestureDetector(
-                onTap: _showSearch,
-                child: FractionallySizedBox(
-                  widthFactor: 1,
-                  child: Container(
-                    padding: const EdgeInsets.only(
-                        left: 12.0, top: 10.0, bottom: 10.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          'Поиск треков на устройстве',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: Theme.of(context).hintColor,
-                              fontSize: 17),
-                        )
-                      ],
-                    ),
+      ),
+      appBar: AppBar(
+        leading: DrawerButton(),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.sort),
+            onPressed: () {
+              _showSortModal();
+            },
+          ),
+        ],
+        titleSpacing: 0.0,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 0.0),
+          child: ClipRRect(
+            // FIXME: cliprrect doesn't work for material for some reason
+            borderRadius: BorderRadius.circular(10),
+            child: GestureDetector(
+              onTap: _showSearch,
+              child: FractionallySizedBox(
+                widthFactor: 1,
+                child: Container(
+                  padding: const EdgeInsets.only(
+                      left: 12.0, top: 10.0, bottom: 10.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Поиск треков на устройстве',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            color: Theme.of(context).hintColor,
+                            fontSize: 17),
+                      )
+                    ],
                   ),
                 ),
               ),
             ),
           ),
         ),
-        body: Stack(
-          children: <Widget>[
-            Padding(
-              padding: widget.bottomPadding,
-              child: Container(
-                child: CustomRefreshIndicator(
-                  color: Colors.white,
-                  backgroundColor: Color(0xff101010),
-                  strokeWidth: 2.5,
-                  // key: isFake ? null : _refreshIndicatorKey,
-                  key:  _refreshIndicatorKey,
-                  onRefresh: _refreshHandler,
-                  child: SingleTouchRecognizerWidget(
-                    child: Container(
-                      child: ListView.builder(
-                        // initialScrollIndex: isFake ? indexOffset : 0,
-                        
-                        // frontScrollController: isFake
-                        //     ? ScrollController(
-                        //         initialScrollOffset: additionalScrollOffset)
-                            // : listScrollController,
-                        itemCount: PlaylistControl.globalPlaylist.length,
-                        padding: EdgeInsets.only(bottom: 65, top: 0),
-                        itemBuilder: (context, index) {
-                          return StreamBuilder(
-                              stream: PlaylistControl.onSongChange,
-                              builder: (context, snapshot) {
-                                return TrackTile(
-                                  index,
-                                  key: UniqueKey(),
-                                  playing: index ==
-                                      PlaylistControl.currentSongIndex(
-                                          PlaylistType.global),
-                                  additionalClickCallback: () {
-                                    PlaylistControl.resetPlaylists();
-                                  },
-                                );
-                              });
-                        },
-                      ),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Padding(
+            padding: widget.bottomPadding,
+            child: Container(
+              child: CustomRefreshIndicator(
+                color: Colors.white,
+                backgroundColor: Color(0xff101010),
+                strokeWidth: 2.5,
+                // key: isFake ? null : _refreshIndicatorKey,
+                key: _refreshIndicatorKey,
+                onRefresh: _refreshHandler,
+                child: SingleTouchRecognizerWidget(
+                  child: Container(
+                    child: ListView.builder(
+                      itemCount: PlaylistControl.length(PlaylistType.global),
+                      padding: EdgeInsets.only(bottom: 65, top: 0),
+                      itemBuilder: (context, index) {
+                        return StreamBuilder(
+                            stream: PlaylistControl.onSongChange,
+                            builder: (context, snapshot) {
+                              return TrackTile(
+                                index,
+                                key: UniqueKey(),
+                                playing: index ==
+                                    PlaylistControl.currentSongIndex(
+                                        PlaylistType.global),
+                                additionalClickCallback: () {
+                                  PlaylistControl.resetPlaylists();
+                                },
+                              );
+                            });
+                      },
                     ),
                   ),
                 ),
               ),
             ),
-            BottomTrackPanel( ),
-            // BottomTrackPanel(
-            //   key: isFake ? null : bottomPanelGlobalKey,
-            //   initAlbumArtRotation:
-            //       isFake ? bottomPanelGlobalKey.currentState.controller.value : 0.0,
-            // ),
-          ],
-        ),
+          ),
+          BottomTrackPanel(),
+          // BottomTrackPanel(
+          //   key: isFake ? null : _bottomPanelGlobalKey,
+          // ),
+        ],
       ),
     );
   }
@@ -468,7 +452,7 @@ class _TrackTileState extends State<TrackTile> {
 
     /// If song data is not provided, then find it by index of row in current row
     _song = widget.song ??
-        PlaylistControl.globalPlaylist.getSongByIndex(widget.trackTileIndex);
+        PlaylistControl.getSongByIndex(widget.trackTileIndex, PlaylistType.global);
   }
 
   void _handleTap() async {

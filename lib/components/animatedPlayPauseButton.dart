@@ -40,7 +40,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   }
 
   void _handlePress() async {
-    await MusicPlayer.clickPausePlay();
+    await MusicPlayer.playPause();
   }
 
   @override

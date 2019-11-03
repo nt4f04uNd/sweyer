@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/constants/constants.dart' as Constants;
+import 'package:app/player/logger.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:flutter/material.dart';
@@ -125,7 +126,7 @@ abstract class MusicPlayer {
   /// Init whole music instance
   ///
   static Future<void> init() async {
-    nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
+    nativePlayerInstance.setReleaseMode(ReleaseMode.RELEASE);
 
     _songChangeListenerSubscription =
         PlaylistControl.onSongChange.listen((event) {
@@ -135,9 +136,8 @@ abstract class MusicPlayer {
     });
 
     _completionSubscription = onPlayerCompletion.listen((event) {
-      // Play next track if not in loop mode
-      if (!loopModeState) clickNext();
-      PlaylistControl.emitSongChange();
+      // Play next track if not in loop mode, as in loop mode this event is not triggered
+      playNext();
     });
 
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
@@ -147,16 +147,16 @@ abstract class MusicPlayer {
           pause();
           break;
         case Constants.EventChannel.eventPlay:
-          clickPausePlay();
+          playPause();
           break;
         case Constants.EventChannel.eventPause:
-          clickPausePlay();
+          playPause();
           break;
         case Constants.EventChannel.eventNext:
-          clickNext();
+          playNext();
           break;
         case Constants.EventChannel.eventPrev:
-          clickPrev();
+          playPrev();
           break;
         default:
           throw Exception('Invalid event');
@@ -164,6 +164,8 @@ abstract class MusicPlayer {
     });
 
     _stateChangeSubscription = onPlayerStateChanged.listen((event) async {
+      Logger.log("stateChange", event.toString());
+
       switch (event) {
         case AudioPlayerState.PLAYING:
           _showNotification(
@@ -220,23 +222,45 @@ abstract class MusicPlayer {
           default:
             throw Exception('Incorrect method argument came from native code');
         }
-      } else if (call.method == Constants.PlayerChannel.methodHookButtonClick) {
-        // Avoid errors when app is loading
-        if (PlaylistControl.playReady) {
-          DateTime now = DateTime.now();
-          if (_latestHookPressTime == null ||
-              now.difference(_latestHookPressTime) >
-                  // TODO: extract delays to constant
-                  // TODO: add async task instead of 200 safe delay
-                  // `_handleHookDelayedPress` delay + sfe delay (trying to fix hook button press bug)
-                  Duration(milliseconds: 600 + 50)) {
-            // If hook is pressed first time or last press were more than 0.5s ago
-            _latestHookPressTime = now;
-            _hookPressStack = 1;
-            _handleHookDelayedPress();
-          } else if (_hookPressStack == 1 || _hookPressStack == 2) {
-            // This condition ensures that nothing more than 3 will not be assigned to _hookPressStack
-            _hookPressStack++;
+      } else if (call.method ==
+          Constants.PlayerChannel.methodMediaButtonClick) {
+        Logger.log('playerChannel',
+            'method: ${call.method}, argument ${call.arguments}');
+
+        if (call.arguments == Constants.PlayerChannel.argAudioTrack) {
+          await playNext();
+        } else if (call.arguments == Constants.PlayerChannel.argFastForward) {
+          await fastForward();
+        } else if (call.arguments == Constants.PlayerChannel.argRewind) {
+          await rewind();
+        } else if (call.arguments == Constants.PlayerChannel.argNext) {
+          await playNext();
+        } else if (call.arguments == Constants.PlayerChannel.argPrevious) {
+          await playPrev();
+        } else if (call.arguments == Constants.PlayerChannel.argPlayPause) {
+          await playPause();
+        } else if (call.arguments == Constants.PlayerChannel.argPlay) {
+          await resume();
+        } else if (call.arguments == Constants.PlayerChannel.argStop) {
+          await pause();
+        } else if (call.arguments == Constants.PlayerChannel.argHookButton) {
+          // Avoid errors when app is loading
+          if (PlaylistControl.playReady) {
+            DateTime now = DateTime.now();
+            if (_latestHookPressTime == null ||
+                now.difference(_latestHookPressTime) >
+                    // TODO: extract delays to constant
+                    // TODO: add async task instead of 200 safe delay
+                    // `_handleHookDelayedPress` delay + sfe delay (trying to fix hook button press bug)
+                    Duration(milliseconds: 600 + 50)) {
+              // If hook is pressed first time or last press were more than 0.5s ago
+              _latestHookPressTime = now;
+              _hookPressStack = 1;
+              _handleHookDelayedPress();
+            } else if (_hookPressStack == 1 || _hookPressStack == 2) {
+              // This condition ensures that nothing more than 3 will not be assigned to _hookPressStack
+              _hookPressStack++;
+            }
           }
         }
       }
@@ -271,13 +295,16 @@ abstract class MusicPlayer {
     await Future.delayed(Duration(milliseconds: 600));
     switch (_hookPressStack) {
       case 1:
-        await clickPausePlay();
+        Logger.log('hookPressRes', 'play/pause');
+        await playPause();
         break;
       case 2:
-        await clickNext();
+        Logger.log('hookPressRes', 'next');
+        await playNext();
         break;
       case 3:
-        await clickPrev();
+        await playPrev();
+        Logger.log('hookPressRes', 'prev');
         break;
     }
     _hookPressStack = 0;
@@ -354,7 +381,7 @@ abstract class MusicPlayer {
 
   static Future<void> switchLoopMode() async {
     if (loopModeState) {
-      nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
+      nativePlayerInstance.setReleaseMode(ReleaseMode.RELEASE);
       Prefs.byKey.loopModeBool.setPref(false);
     } else {
       nativePlayerInstance.setReleaseMode(ReleaseMode.LOOP);
@@ -389,6 +416,8 @@ abstract class MusicPlayer {
         debugPrint(
             'Error thrown in my player class play method - {code: ${e.code} --- details: ${e.details} --- message:${e.message}}');
 
+        Logger.log('Play error', e.toString());
+
         if (e.code == "error") {
           if (e.message ==
               "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
@@ -406,7 +435,7 @@ abstract class MusicPlayer {
             PlaylistControl.refetchSongs(); // form fetching
           } else if (e.message ==
               "Unsupported value: java.lang.IllegalStateException") {
-            rethrow; // Rethrow and handle this in `clickNext` and `clickPrev`
+            rethrow; // Rethrow and handle this in `playNext` and `playPrev`
           }
         }
       } catch (e) {
@@ -456,6 +485,8 @@ abstract class MusicPlayer {
               msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
               backgroundColor: Color.fromRGBO(18, 18, 18, 1));
 
+          Logger.log('Resume error', e.toString());
+
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
           await play(PlaylistControl.getNextSongId(songId));
@@ -490,14 +521,29 @@ abstract class MusicPlayer {
   }
 
   /// Seek
-  static Future<void> seek(int seconds) async {
-    await nativePlayerInstance.seek(Duration(seconds: seconds));
+  static Future<void> seek(Duration timing) async {
+    await nativePlayerInstance.seek(timing);
+  }
+
+  /// Seek 3 seconds forward
+  ///
+  /// @param (optional) interval makes it possible to seek for specified interval
+  static Future<void> fastForward([Duration interval]) async {
+    if (interval == null) interval = Duration(seconds: 3);
+    await nativePlayerInstance.seek(((await currentPosition) + interval));
+  }
+
+  /// Seek 3 seconds backwards
+  ///
+  /// @param (optional) interval makes it possible to seek for specified interval
+  static Future<void> rewind([Duration interval]) async {
+    if (interval == null) interval = Duration(seconds: 3);
+    await nativePlayerInstance.seek(((await currentPosition) - interval));
   }
 
   /// Function that fires when pause/play button got clicked
-  static Future<void> clickPausePlay() async {
+  static Future<void> playPause() async {
     debugPrint(switching.toString());
-    // TODO: refactor
     if (!switching) {
       switch (playState) {
         case AudioPlayerState.PLAYING:
@@ -522,7 +568,7 @@ abstract class MusicPlayer {
   /// Function that fires when next track button got clicked
   ///
   /// If provided `songId` - plays next from this id
-  static Future<void> clickNext([int songId]) async {
+  static Future<void> playNext([int songId]) async {
     songId ??=
         PlaylistControl.getNextSongId(PlaylistControl.playingTrackIdState);
     try {
@@ -530,14 +576,14 @@ abstract class MusicPlayer {
     } on PlatformException catch (e) {
       // Retry play track
       // Next, not same, because of the specific of play function, to keep it sync with current song id (actually, I don't completely understand why, it just works)
-      await clickNext(songId);
+      await playNext(songId);
     }
   }
 
   /// Function that fires when prev track button got clicked
   ///
   /// If provided `songId` - plays prev from this id
-  static Future<void> clickPrev([int songId]) async {
+  static Future<void> playPrev([int songId]) async {
     songId ??=
         PlaylistControl.getPrevSongId(PlaylistControl.playingTrackIdState);
     try {
@@ -545,7 +591,7 @@ abstract class MusicPlayer {
     } on PlatformException catch (e) {
       // Retry play track
       // Prev, not same, because of the specific of play function, to keep it sync with current song id (actually, I don't completely understand why, it just works)
-      await clickPrev(songId);
+      await playPrev(songId);
     }
   }
 

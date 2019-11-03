@@ -68,7 +68,19 @@ abstract class PlayerChannel {
       "PLAYER_METHOD_INTENT_ACTION_VIEW";
 
   /// Click on headset hook button
-  static const String methodHookButtonClick = "PLAYER_METHOD_HOOK_BUTTON_CLICK";
+  // see
+  // https://developer.android.com/reference/android/view/KeyEvent.html#KEYCODE_MEDIA_AUDIO_TRACK
+  // for keycodes docs
+  static const String methodMediaButtonClick = "PLAYER_METHOD_MEDIA_BUTTON_CLICK";
+  static const String argAudioTrack = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_AUDIO_TRACK";
+  static const String argFastForward = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_FAST_FORWARD";
+  static const String argRewind = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_REWIND";
+  static const String argNext = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_NEXT";
+  static const String argPrevious = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PREVIOUS";
+  static const String argPlayPause = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY_PAUSE";
+  static const String argPlay = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY";
+  static const String argStop = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_STOP";
+  static const String argHookButton = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_HOOK";
 }
 
 abstract class SongsChannel {

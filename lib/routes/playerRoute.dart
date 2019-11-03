@@ -6,7 +6,6 @@ import 'package:app/components/track_list.dart';
 import 'package:app/components/marquee.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
-import 'package:app/routes/exifRoute.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
@@ -140,11 +139,10 @@ class _PlaylistTabState extends State<_PlaylistTab>
     _songChangeSubscription =
         PlaylistControl.onSongChange.listen((event) async {
       // Scroll when track changes
-      if (widget.openedTabIndex == 0){
-      setState((){});
+      if (widget.openedTabIndex == 0) {
+        setState(() {});
         await performScrolling();
-      }
-      else if (widget.openedTabIndex == 1) setState(() {});
+      } else if (widget.openedTabIndex == 1) setState(() {});
     });
   }
 
@@ -193,7 +191,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
       if (prevPlayingIndex >= maxScrollIndex && playingIndex == 0) {
         // When prev track was last in playlist
         jumpToSong();
-      } 
+      }
       // else if (playingIndex == 0) {
       //   setState(() {
       //     // Trigger setstate
@@ -207,7 +205,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
       //           curve: Curves.easeInOut);
 
       //   jumpToSong(); // Reset scrollcontroller's position
-      // } 
+      // }
       else if (playingIndex < maxScrollIndex) {
         // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
         await scrollToSong();
@@ -372,7 +370,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                     ))),
                 child: Theme(
                   data: Theme.of(context).copyWith(
-                    cardColor: Color(0xff121212),
+                    cardColor: Color(0xff333333),
                   ),
                   child: customPopup.CustomPopupMenuButton<void>(
                     // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
@@ -465,7 +463,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                             setState(() {
                               if (PlaylistControl.playlistType ==
                                   PlaylistType.shuffled)
-                                PlaylistControl.resetPlaylists();
+                                PlaylistControl.returnFromShuffledPlaylist();
                               else
                                 PlaylistControl.setShuffledPlaylist();
                             });
@@ -495,7 +493,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                         color: Colors.white.withOpacity(0.9),
                                       ),
                                     ),
-                                    onTap: MusicPlayer.clickPrev,
+                                    onTap: MusicPlayer.playPrev,
                                   ),
                                 ),
                                 Container(
@@ -525,7 +523,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                         color: Colors.white.withOpacity(0.9),
                                       ),
                                     ),
-                                    onTap: MusicPlayer.clickNext,
+                                    onTap: MusicPlayer.playNext,
                                   ),
                                 ),
                               ],
@@ -657,7 +655,7 @@ class _TrackSliderState extends State<TrackSlider> {
   /// FIXME: this called multiple times since it is inside `TabBarView`, currently unable to fix, as this issue relies deeply to flutter architecture
   void _handleChangeEnd(double newValue) async {
     // if (_isDragging) {
-    await MusicPlayer.seek(newValue.toInt());
+    await MusicPlayer.seek(Duration(seconds: newValue.toInt()));
     setState(() {
       _isDragging = false;
       _value = Duration(seconds: newValue.toInt());

@@ -110,8 +110,15 @@ class _AlbumArtPlaceholder extends StatelessWidget {
         decoration: BoxDecoration(
           // color: Colors.white.withOpacity(0.04),
           color: isLarge
-              ? Colors.white.withOpacity(0.9)
-              : Colors.white.withOpacity(1),
+              // ? Colors.white.withOpacity(0.9)
+              // ? Colors.grey.shade900
+              // ? Colors.white.withOpacity(0.09)
+              ? Color(0xFF333333)
+              // : Colors.white.withOpacity(0.09),
+              : round?Color(0xFF353535) :Color(0xFF313131) ,
+              // ? Color(0xFF202020)
+              // : Color(0xFF202020),
+              // : Colors.white.withOpacity(1),
           borderRadius: BorderRadius.all(Radius.circular(round ? 500 : 10)),
         ),
         padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round ? 8 : 10),

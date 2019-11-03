@@ -40,7 +40,7 @@ class MainRouteState extends State<MainRoute> {
                     )
                   : TrackList(
                       // bottomPadding: const EdgeInsets.only(bottom: 55.0),
-                    )
+                      )
               : SizedBox.shrink();
         });
   }

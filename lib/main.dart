@@ -3,6 +3,7 @@ import 'package:app/routes/exifRoute.dart';
 import 'package:app/routes/mainRoute.dart';
 import 'package:app/routes/playerRoute.dart';
 import 'package:app/routes/settingsRoute.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,12 @@ import 'package:catcher/catcher_plugin.dart';
 import 'package:app/components/route_transitions.dart';
 
 void main() {
+// Color of system bottom navigation bar and status bar
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    systemNavigationBarColor: Color(0xff262626), // navigation bar color
+    statusBarColor: Colors.transparent, // status bar color
+  ));
+
   CatcherOptions debugOptions =
       CatcherOptions(DialogReportMode(), [ConsoleHandler()]);
   CatcherOptions releaseOptions = CatcherOptions(DialogReportMode(), [
@@ -26,6 +33,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  static final nativeTheme = SystemUiOverlayStyle(
+    // systemNavigationBarColor: Colors.grey.shade900, // navigation bar color
+    systemNavigationBarColor: Colors.grey.shade900, // navigation bar color
+    statusBarColor: Colors.transparent, // status bar color
+  );
+  static const nativeThemeMainScreen = SystemUiOverlayStyle(
+    systemNavigationBarColor: Color(0xff262626), // navigation bar color
+    statusBarColor: Colors.transparent, // status bar color
+  );
+
   /// Needed to disable animations on some routes
   String _currentRoute = "/";
 
@@ -69,7 +86,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: Catcher.navigatorKey,
-
+      // color: Colors.grey.shade900,
       // Uncomment to replace red screen of death
       builder: (BuildContext context, Widget widget) {
         // Catcher.addDefaultErrorWidget(
@@ -88,10 +105,16 @@ class _MyAppState extends State<MyApp> {
       title: 'Музыка',
       theme: ThemeData(
         // appBarTheme: AppBarTheme(color: Color(0xff070707)),
-        appBarTheme: AppBarTheme(color: Colors.black),
+        // appBarTheme: AppBarTheme(color: Colors.black, elevation: 0,),
+        appBarTheme: AppBarTheme(
+          color: Colors.grey.shade900,
+          elevation: 0,
+        ),
+        // scaffoldBackgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.grey.shade900,
         brightness: Brightness.dark,
         accentColor: Colors.grey.shade900,
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.grey.shade900,
         primaryColor: Colors.deepPurple,
         bottomSheetTheme: BottomSheetThemeData(
           shape: RoundedRectangleBorder(
@@ -102,7 +125,6 @@ class _MyAppState extends State<MyApp> {
           ),
           backgroundColor: Color(0xff070707),
         ),
-        scaffoldBackgroundColor: Colors.black,
         textSelectionColor: Colors.deepPurple,
         textSelectionHandleColor: Colors.deepPurple,
         cursorColor: Colors.deepPurple,
@@ -114,37 +136,54 @@ class _MyAppState extends State<MyApp> {
         print(_currentRoute);
 
         if (settings.isInitialRoute) {
-          return createRouteTransition<WillPopScope>(
+          return createRouteTransition(
             checkExitAnimationEnabled: () => _currentRouteEquals("/settings"),
             checkEntAnimationEnabled: () => false,
             exitCurve: Curves.linearToEaseOut,
-            exitReverseCurve: Curves.easeInToLinear,
+            exitReverseCurve: Curves.fastOutSlowIn,
             maintainState: true,
-            route: WillPopScope(child: MainRoute(), onWillPop: _handleHomePop),
+            enterSystemUI: nativeThemeMainScreen,
+            transitionDuration: const Duration(milliseconds: 500),
+            route: WillPopScope(
+                child: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: nativeThemeMainScreen,
+                  child: MainRoute(),
+                ),
+                onWillPop: _handleHomePop),
           );
         } else if (settings.name == "/player") {
-          return createRouteTransition<PlayerRoute>(
-            entCurve: Curves.linearToEaseOut,
-            entReverseCurve: Curves.fastOutSlowIn,
+          return createRouteTransition(
+            playMaterial: true,
+            entCurve: Curves.fastOutSlowIn,
             exitCurve: Curves.linearToEaseOut,
-            exitReverseCurve: Curves.easeInToLinear,
+            exitReverseCurve: Curves.fastOutSlowIn,
             entBegin: Offset(0.0, 1.0),
-            entIgnoreEvents: true,
             checkExitAnimationEnabled: () => _currentRouteEquals("/exif"),
+            opaque: false,
+            enterSystemUI: nativeTheme,
+            exitSystemUI: nativeThemeMainScreen,
+            exitIgnoreEventsForward: true,
             transitionDuration: const Duration(milliseconds: 500),
             route: PlayerRoute(),
           );
         } else if (settings.name == "/settings") {
-          return createRouteTransition<SettingsRoute>(
+          return createRouteTransition(
+             transitionDuration: const Duration(milliseconds: 500),
+            enterSystemUI: nativeTheme,
+            exitSystemUI: nativeThemeMainScreen,
             entCurve: Curves.linearToEaseOut,
-            entReverseCurve: Curves.easeInToLinear,
+            entReverseCurve: Curves.fastOutSlowIn,
             route: SettingsRoute(),
           );
         } else if (settings.name == "/exif") {
-          return createRouteTransition<ExifRoute>(
+          return createRouteTransition(
+             transitionDuration: const Duration(milliseconds: 500),
             entCurve: Curves.linearToEaseOut,
-            entReverseCurve: Curves.easeInToLinear,
-            route: ExifRoute(),
+            entReverseCurve: Curves.fastOutSlowIn,
+            route: AnnotatedRegion<SystemUiOverlayStyle>(
+              value: nativeTheme,
+              child: ExifRoute(),
+            ),
           );
         } else if (settings.name == "/search") {
           return (settings.arguments as Map<String, Route>)["route"];
