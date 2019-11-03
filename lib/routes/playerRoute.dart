@@ -384,13 +384,13 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                 data: Theme.of(context).copyWith(
                     cardTheme: CardTheme(
                         shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(100),
-                      ),
-                    ))),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(100),
+                  ),
+                ))),
                 child: Theme(
                   data: Theme.of(context).copyWith(
-                    cardColor:AppTheme.popupMenu.auto(context),
+                    cardColor: AppTheme.popupMenu.auto(context),
                   ),
                   child: customPopup.CustomPopupMenuButton<void>(
                     // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
@@ -478,8 +478,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                           icon: Icon(Icons.shuffle),
                           color: PlaylistControl.playlistType ==
                                   PlaylistType.shuffled
-                              ? AppTheme.activeIcon.auto(context)
-                              : AppTheme.disabledIcon.auto(context),
+                              ? AppTheme.disabledIcon.auto(context) // yes it's weird, but it works, i don't understand it :)
+                              : AppTheme.activeIcon.auto(context),
                           onPressed: () {
                             setState(() {
                               if (PlaylistControl.playlistType ==
@@ -562,8 +562,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         IconButton(
                           icon: Icon(Icons.loop),
                           color: MusicPlayer.loopModeState
-                              ? AppTheme.activeIcon.auto(context)
-                              : AppTheme.disabledIcon.auto(context),
+                              ? AppTheme.disabledIcon.auto(context) // yes it's weird, but it works, i don't understand it :)
+                              : AppTheme.activeIcon.auto(context),
                           onPressed: () {
                             setState(() {
                               MusicPlayer.switchLoopMode();
