@@ -131,12 +131,14 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                                   //     Color(0xff151515),
                                                   title: Text(
                                                       "Очистить историю поиска"),
-                                                  content: AnnotatedRegion<
-                                                      SystemUiOverlayStyle>(
-                                                    value: AppSystemUIThemes.dialogScreen.auto(context),
-                                                    child: Text(
-                                                        "Вы действительно хотите очистить историю?"),
-                                                  ),
+                                                  content:
+                                                      // AnnotatedRegion<
+                                                      // SystemUiOverlayStyle>(
+                                                      // value: AppSystemUIThemes.dialogScreen.auto(context),
+                                                      // child:
+                                                      Text(
+                                                          "Вы действительно хотите очистить историю?"),
+                                                  // ),
                                                   contentPadding:
                                                       EdgeInsets.only(
                                                           top: 24.0,
@@ -176,7 +178,10 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                                         FlatButton(
                                                           child: Text('Отмена'),
                                                           textColor:
-                                                              Colors.white,
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .caption
+                                                                  .color,
                                                           shape:
                                                               RoundedRectangleBorder(
                                                             borderRadius:
@@ -213,12 +218,15 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                     context: context,
                                     builder: (context) => AlertDialog(
                                           title: Text("Удалить запрос"),
-                                          content: AnnotatedRegion<
-                                              SystemUiOverlayStyle>(
-                                            value:  AppSystemUIThemes.dialogScreen.auto(context),
-                                            child: Text(
-                                                "Вы действительно хотите удалить этот запрос из истории?"),
-                                          ),
+                                          content:
+                                              //  AnnotatedRegion<
+                                              // SystemUiOverlayStyle>(
+                                              // value:  AppSystemUIThemes.dialogScreen.auto(context),
+                                              // value:  SystemUiOverlayStyle(systemNavigationBarColor: Color(0xff777777)),
+                                              // child:
+                                              Text(
+                                                  "Вы действительно хотите удалить этот запрос из истории?"),
+                                          // ),
                                           contentPadding: EdgeInsets.only(
                                               top: 24.0,
                                               left: 27.0,
@@ -249,7 +257,10 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                                 ),
                                                 FlatButton(
                                                   child: Text('Отмена'),
-                                                  textColor: Colors.white,
+                                                  textColor: Theme.of(context)
+                                                      .textTheme
+                                                      .caption
+                                                      .color,
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
                                                         BorderRadius.all(
@@ -321,31 +332,28 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
     return Stack(
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 55.0),
-          child: ListView.builder(
-              // FIXME add gesture detector that closes keyboard on scroll
-              padding: EdgeInsets.only(bottom: 10, top: 5),
-              itemCount: searched.length,
-              itemBuilder: (context, index) {
-                return StreamBuilder(
-                    stream: PlaylistControl.onSongChange,
-                    builder: (context, snapshot) {
-                      return TrackTile(
-                        index,
-                        key: UniqueKey(),
-                        song: searchedList[index],
-                        playing: searchedList[index].id ==
-                            PlaylistControl.currentSong?.id,
-                        additionalClickCallback: () {
-                          _writeInputToSearchHistory(query);
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          PlaylistControl.setSearchedPlaylist(searched.toList());
-                        },
-                      );
-                    });
-              }),
-        ),
+        ListView.builder(
+            // FIXME add gesture detector that closes keyboard on scroll
+             padding: EdgeInsets.only(bottom: 65, top: 0),
+            itemCount: searched.length,
+            itemBuilder: (context, index) {
+              return StreamBuilder(
+                  stream: PlaylistControl.onSongChange,
+                  builder: (context, snapshot) {
+                    return TrackTile(
+                      index,
+                      key: UniqueKey(),
+                      song: searchedList[index],
+                      playing: searchedList[index].id ==
+                          PlaylistControl.currentSong?.id,
+                      additionalClickCallback: () {
+                        _writeInputToSearchHistory(query);
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        PlaylistControl.setSearchedPlaylist(searched.toList());
+                      },
+                    );
+                  });
+            }),
         BottomTrackPanel(),
       ],
     );

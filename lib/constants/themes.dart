@@ -133,11 +133,13 @@ abstract class AppSystemUIThemes {
   );
 
   /// Theme for dialog screen
+  /// 
+  /// TODO: implement this with dialogs
   static final ThemeContainer<SystemUiOverlayStyle> dialogScreen =
       ThemeContainer(
     light:
-        allScreens.light.copyWith(systemNavigationBarColor: Color(0xff111111)),
-    dark: allScreens.dark.copyWith(systemNavigationBarColor: Colors.white),
+        allScreens.light.copyWith(systemNavigationBarColor:Color(0xffaaaaaa)),
+    dark: allScreens.dark.copyWith(systemNavigationBarColor: Color(0xff111111)),
   );
 }
 
