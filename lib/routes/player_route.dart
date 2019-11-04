@@ -93,7 +93,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   static const int tracksScrollOffset = 6;
   static const Duration scrollDuration = const Duration(milliseconds: 600);
 
-  GlobalKey<CurrentPlaylistWidgetState> globalKeyCurrentPlaylistWidget =
+  GlobalKey<PlayerRoutePlaylistState> globalKeyPlayerRoutePlaylist =
       GlobalKey();
 
   /// A bool var to disable show/hide in tracklist controller listener when manual `scrollToSong` is performing
@@ -136,7 +136,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   Future<void> scrollToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
 
-    await globalKeyCurrentPlaylistWidget.currentState.itemScrollController
+    await globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .scrollTo(
             index: index, duration: scrollDuration, curve: Curves.easeInOut);
   }
@@ -147,7 +147,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   void jumpToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
 
-    globalKeyCurrentPlaylistWidget.currentState.itemScrollController
+    globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .jumpTo(index: index);
   }
 
@@ -269,8 +269,8 @@ class _PlaylistTabState extends State<_PlaylistTab>
             ),
             body: Container(
               padding: const EdgeInsets.only(top: 4.0),
-              child: CurrentPlaylistWidget(
-                key: globalKeyCurrentPlaylistWidget,
+              child: PlayerRoutePlaylist(
+                key: globalKeyPlayerRoutePlaylist,
               ),
             ),
           );

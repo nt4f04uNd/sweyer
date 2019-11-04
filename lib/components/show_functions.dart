@@ -1,19 +1,93 @@
-// This is a workaround to rename show functions
+import 'package:app/components/buttons.dart';
+import 'package:app/components/custom_search.dart';
+import 'package:app/components/search.dart';
 import 'package:app/constants/themes.dart';
+import 'package:app/player/playlist.dart';
+import 'package:app/player/song.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+// This is a workaround to rename show functions
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart' hide showDialog;
-
 const flutterShowDialog = material.showDialog;
 
 /// Class that contains 'show' functions, like `showDialog` and others
 abstract class ShowFunctions {
-  static void showDialog(
+  /// Shows toast from `Fluttertoast` with already set `backgroundColor` to `Color.fromRGBO(18, 18, 18, 1)`
+  static Future<bool> showToast({
+    @required String msg,
+    Toast toastLength,
+    int timeInSecForIos = 1,
+    double fontSize = 16.0,
+    ToastGravity gravity,
+    Color textColor,
+    Color backgroundColor,
+  }) async {
+    backgroundColor ??= Color.fromRGBO(18, 18, 18, 1);
+
+    return await Fluttertoast.showToast(
+        msg: msg,
+        toastLength: toastLength,
+        timeInSecForIos: timeInSecForIos,
+        fontSize: fontSize,
+        gravity: gravity,
+        textColor: textColor,
+        backgroundColor: backgroundColor);
+  }
+
+  /// Function that calls `showCustomSearch` and opens `SongsSearchDelegate` to search songs
+  static Future<void> showSongsSearch(BuildContext context) async {
+    await showCustomSearch<Song>(
+      context: context,
+      delegate: SongsSearchDelegate(),
+    );
+  }
+
+  /// Function that handles click in bottom modal and sorts tracks
+  static void _handleSortClick(BuildContext context, SortFeature feature) {
+    PlaylistControl.sortSongs(feature);
+    Navigator.pop(context);
+  }
+
+  /// Function that calls `showModalBottomSheet` and allows user to sort songs
+  static void showSongsSortModal(BuildContext context) {
+    // TODO: add indicator for a current sort feature
+    showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: AppTheme.modal.auto(context),
+        builder: (BuildContext context) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(top: 15, bottom: 15, left: 12),
+                  child: Text("Сортировать",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.caption.color,
+                      ))),
+              ListTile(
+                title: Text("По названию"),
+                onTap: () => _handleSortClick(context, SortFeature.title),
+              ),
+              ListTile(
+                title: Text("По дате"),
+                onTap: () => _handleSortClick(context, SortFeature.date),
+              )
+            ],
+          );
+        });
+  }
+
+  /// Calls `showDialog` function from flutter material library
+  static Future<dynamic> showDialog(
     BuildContext context, {
     Widget title: const Text("Диалог"),
     Widget content: const Text("Контент"),
     DialogFlatButton acceptButton,
     DialogFlatButton declineButton,
-  }) {
+  }) async {
     acceptButton ??= DialogFlatButton(
       child: Text('Принять'),
       textColor: AppTheme.redFlatButton.auto(context),
@@ -25,7 +99,7 @@ abstract class ShowFunctions {
       onPressed: () => Navigator.of(context).pop(),
     );
 
-    flutterShowDialog(
+    return await flutterShowDialog(
         context: context,
         builder: (context) => AlertDialog(
               title: title,
@@ -53,23 +127,4 @@ abstract class ShowFunctions {
               ],
             ));
   }
-}
-
-/// Creates `FlatButton` with border radius
-class DialogFlatButton extends FlatButton {
-  DialogFlatButton(
-      {@required Widget child,
-      @required Function onPressed,
-      Color textColor,
-      double borderRadius: 5})
-      : super(
-          child: child,
-          onPressed: onPressed,
-          textColor: textColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(borderRadius),
-            ),
-          ),
-        );
 }

@@ -1,9 +1,9 @@
-import 'package:app/components/SlideStackRightRoute.dart';
+import 'package:app/components/buttons.dart';
+import 'package:app/components/show_functions.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class ExtendedSettingsRoute extends StatefulWidget {
   const ExtendedSettingsRoute({Key key}) : super(key: key);
@@ -60,9 +60,7 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
     else
       PlaylistControl.refetchSongs();
     initSettingMinFileDuration = settingMinFileDuration;
-    Fluttertoast.showToast(
-        msg: "Настройки сохранены",
-        backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+    ShowFunctions.showToast(msg: "Настройки сохранены");
     setState(() {
       isChanged = false;
     });
@@ -87,20 +85,8 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
                 child: Padding(
                   padding:
                       EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(15.0),
-                    ),
-                    child: Text("Сохранить",
-                        style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.light
-                                    ? Colors.white
-                                    : Colors.white)),
-                    // child: Text("Сохранить", style: TextStyle(color: Theme.of(context).textTheme.button.color)),
-                    color: Colors.deepPurple,
-                    onPressed: _handleSave,
-                  ),
+                  child: PrimaryRaisedButton(
+                      text: "Сохранить", onPressed: _handleSave),
                 ),
               ),
             )

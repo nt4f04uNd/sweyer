@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:app/components/show_functions.dart';
 import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/logger.dart';
 import 'package:app/player/playlist.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// VIEW https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
 import 'package:flutter/services.dart' show rootBundle;
@@ -311,7 +311,6 @@ abstract class MusicPlayer {
   }
 
   // TODO: add implementation for this function and change method name to `get_intent_action_view`
-  // #SEPARATE
   static Future<void> _isIntentActionView() async {
     debugPrint((await _playerChannel
             .invokeMethod(Constants.PlayerChannel.methodIntentActionView))
@@ -421,9 +420,8 @@ abstract class MusicPlayer {
         if (e.code == "error") {
           if (e.message ==
               "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
-            Fluttertoast.showToast(
-                msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
-                backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+            ShowFunctions.showToast(
+                msg: 'Произошла ошибка при воспроизведении,\n удаление трека');
 
             // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
             // Play next track after broken one
@@ -481,9 +479,8 @@ abstract class MusicPlayer {
       if (e.code == "error") {
         if (e.message ==
             "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
-          Fluttertoast.showToast(
-              msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
-              backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+          ShowFunctions.showToast(
+              msg: 'Произошла ошибка при воспроизведении,\n удаление трека');
 
           Logger.log('Resume error', e.toString());
 
@@ -597,7 +594,7 @@ abstract class MusicPlayer {
 
   /// Function that handles click on track tile
   ///
-  /// `clickedSongId` argument denotes an id of clicked track `TrackList`
+  /// `clickedSongId` argument denotes an id of clicked track `MainRouteTrackList`
   static Future<void> clickTrackTile(int clickedSongId) async {
     if (!switching) {
       switch (playState) {

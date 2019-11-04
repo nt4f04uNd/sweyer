@@ -1,4 +1,4 @@
-import 'package:app/player/manual_stream_controller.dart';
+import 'package:app/utils/async.dart';
 import 'package:app/player/prefs.dart';
 import 'package:app/constants/themes.dart';
 import 'package:flutter/cupertino.dart';
@@ -38,7 +38,11 @@ abstract class ThemeControl {
   }
 
   static final ManualStreamController _controller = ManualStreamController();
+
+  /// Gets stream of changes on theme
   static Stream<void> get onThemeChange => _controller.stream;
+
+  /// Emit theme change into stream
   static void emitThemeChange() {
     _controller.emitEvent();
   }

@@ -33,6 +33,7 @@ abstract class Serialization<TRead, TSave> {
 
 /// Implementation of `Serialization` to serialize songs
 class SongsSerialization extends Serialization<Song, Song> {
+  @override
   final String fileName = 'songs.json';
 
   // / Reads json and returns decoded data
@@ -65,6 +66,7 @@ class SongsSerialization extends Serialization<Song, Song> {
 ///
 /// Saves only songs ids, so you have to search indexes in `globalPlaylist` to restore playlist
 class PlaylistSerialization extends Serialization<int, Song> {
+  @override
   final String fileName = 'playlist.json';
 
   // / Reads json and returns decoded data

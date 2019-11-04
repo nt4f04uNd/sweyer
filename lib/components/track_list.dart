@@ -1,175 +1,49 @@
-import 'package:app/components/SingleTouchRecognizer.dart';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/bottomTrackPanel.dart';
-import 'package:app/components/custom_icon_button.dart';
 import 'package:app/components/custom_refresh_indicator.dart';
-import 'package:app/components/custom_search.dart';
-import 'package:app/components/search.dart';
+import 'package:app/components/drawer.dart';
+import 'package:app/components/gestures.dart';
+import 'package:app/components/show_functions.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/logger.dart';
-import 'package:app/player/permissions.dart';
-import 'package:app/player/playerWidgets.dart';
+import 'package:app/player/player_widgets.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
-import 'package:flutter/services.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class DrawerButton extends StatelessWidget {
-  const DrawerButton({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomIconButton(
-      icon: Icon(Icons.menu),
-      color: Theme.of(context).iconTheme.color,
-      onPressed: Scaffold.of(context).openDrawer,
-    );
-  }
-}
-
 /// List of fetched tracks
-class TrackList extends StatefulWidget {
+class MainRouteTrackList extends StatefulWidget {
   final EdgeInsets bottomPadding;
-  TrackList({Key key, this.bottomPadding: const EdgeInsets.only(bottom: 0.0)})
+  MainRouteTrackList({Key key, this.bottomPadding: const EdgeInsets.only(bottom: 0.0)})
       : super(key: key);
 
   @override
-  _TrackListState createState() => _TrackListState();
+  _MainRouteTrackListState createState() => _MainRouteTrackListState();
 }
 
-class _TrackListState extends State<TrackList> {
-  // TODO: extract this to constant
-  // static final PageStorageKey _pageScrollKey = PageStorageKey('MainListView');
-  static final GlobalKey<BottomTrackPanelState> _bottomPanelGlobalKey =
-      GlobalKey<BottomTrackPanelState>();
+class _MainRouteTrackListState extends State<MainRouteTrackList> {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   bool refreshing = false;
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      new GlobalKey<RefreshIndicatorState>();
 
+  /// Performs tracks refetch
   Future<void> _refreshHandler() async {
-    await PlaylistControl.refetchSongs();
-    return Future.value();
+    return await PlaylistControl.refetchSongs();
   }
 
-  /// Delegate for search
-
-  void _showSearch() async {
-    await showCustomSearch<Song>(
-      context: context,
-      delegate: SongsSearchDelegate(),
-    );
-  }
-
-  void _showSortModal() {
-    // TODO: add indicator for a current sort feature
-    showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: AppTheme.modal.auto(context),
-        builder: (BuildContext context) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                  padding: EdgeInsets.only(top: 15, bottom: 15, left: 12),
-                  child: Text("Сортировать",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).textTheme.caption.color,
-                      ))),
-              ListTile(
-                title: Text("По названию"),
-                onTap: () {
-                  PlaylistControl.sortSongs(SortFeature.title);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text("По дате"),
-                onTap: () {
-                  PlaylistControl.sortSongs(SortFeature.date);
-                  Navigator.pop(context);
-                },
-              )
-            ],
-          );
-        });
-  }
-
-  Future<void> _handlePermissionRequest() async {
-    if (mounted)
-      setState(() {
-        refreshing = true;
-      });
-    else
-      refreshing = true;
-
-    Permissions.requestStorage();
-
-    if (mounted)
-      setState(() {
-        refreshing = false;
-      });
-    else
-      refreshing = false;
-  }
-
-  Future<void> _handleClickSettings() async {
-    await Future.delayed(
-        Duration(milliseconds: 246)); // Default drawer close time
-    // await Navigator.of(context).push(createSettingsRoute(_buildTracks(true)));
-    await Navigator.of(context).popAndPushNamed("/settings");
-  }
-
-  void _handleClickSendLog() {
-    Logger.send();
-  }
-
-  Widget _buildTracks() {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       drawer: Theme(
         data: Theme.of(context).copyWith(
           canvasColor: //This will change the drawer background
               AppTheme.drawer.auto(context),
         ),
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: AppSystemUIThemes.allScreens.auto(context),
-          child: Drawer(
-            child: ListView(
-              physics: NeverScrollableScrollPhysics(),
-              // Important: Remove any padding from the ListView.
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                Container(
-                  padding: const EdgeInsets.only(
-                      left: 18.0, top: 60.0, bottom: 20.0),
-                  child: Text('Меню', style: TextStyle(fontSize: 35.0)),
-                ),
-                ListTile(
-                    leading: Icon(
-                      Icons.settings,
-                      color:AppTheme.drawerListItem.auto(context),
-                    ),
-                    title: Text('Настройки',
-                        style: TextStyle(
-                            fontSize: 17.0, color: AppTheme.drawerListItem.auto(context))),
-                    onTap: _handleClickSettings),
-                ListTile(
-                    leading: Icon(Icons.assignment,
-                        color: AppTheme.drawerListItem.auto(context)),
-                    title: Text('Отправить лог',
-                        style: TextStyle(
-                            fontSize: 17.0, color:AppTheme.drawerListItem.auto(context))),
-                    onTap: _handleClickSendLog),
-              ],
-            ),
-          ),
-        ),
+        child: DrawerWidget(),
       ),
       appBar: AppBar(
         leading: DrawerButton(),
@@ -177,19 +51,16 @@ class _TrackListState extends State<TrackList> {
           IconButton(
             icon: Icon(Icons.sort),
             color: Theme.of(context).iconTheme.color,
-            onPressed: () {
-              _showSortModal();
-            },
+            onPressed: () => ShowFunctions.showSongsSortModal(context),
           ),
         ],
         titleSpacing: 0.0,
         title: Padding(
           padding: const EdgeInsets.only(left: 0.0),
           child: ClipRRect(
-            // FIXME: cliprrect doesn't work for material for some reason
             borderRadius: BorderRadius.circular(10),
             child: GestureDetector(
-              onTap: _showSearch,
+              onTap: () => ShowFunctions.showSongsSearch(context),
               child: FractionallySizedBox(
                 widthFactor: 1,
                 child: Container(
@@ -198,20 +69,12 @@ class _TrackListState extends State<TrackList> {
                   decoration: BoxDecoration(
                     color: AppTheme.searchFakeInput.auto(context),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      // Text(
-                      //   'Поиск треков',
-                      //   style: TextStyle(
-                      //       fontWeight: FontWeight.w400,
-                      //       color: Theme.of(context).hintColor,
-                      //       fontSize: 17),
-                      // ),
-                      Icon(Icons.search, color: Theme.of(context).textTheme.caption.color,),
-                    ],
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.search,
+                      color: Theme.of(context).textTheme.caption.color,
+                    ),
                   ),
                 ),
               ),
@@ -228,7 +91,6 @@ class _TrackListState extends State<TrackList> {
                 color: Colors.white,
                 backgroundColor: Color(0xff101010),
                 strokeWidth: 2.5,
-                // key: isFake ? null : _refreshIndicatorKey,
                 key: _refreshIndicatorKey,
                 onRefresh: _refreshHandler,
                 child: SingleTouchRecognizerWidget(
@@ -259,116 +121,30 @@ class _TrackListState extends State<TrackList> {
             ),
           ),
           BottomTrackPanel(),
-          // BottomTrackPanel(
-          //   key: isFake ? null : _bottomPanelGlobalKey,
-          // ),
         ],
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    if (Permissions.permissionStorageStatus != MyPermissionStatus.granted)
-      return Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child:
-                        Text('Пожалуйста, предоставьте доступ к хранилищу'))),
-            Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: ButtonTheme(
-                minWidth: 130.0, // specific value
-                height: 40.0,
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(15.0),
-                  ),
-                  color: Colors.deepPurple,
-                  child: refreshing
-                      ? SizedBox(
-                          width: 25.0,
-                          height: 25.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
-                          ),
-                        )
-                      : Text('Предоставить'),
-                  onPressed: _handlePermissionRequest,
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-    if (PlaylistControl.songsEmpty(PlaylistType.global))
-      return Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Text('На вашем устройстве нету музыки :( '))),
-            Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: ButtonTheme(
-                minWidth: 130.0, // specific value
-                height: 40.0,
-                child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(15.0),
-                  ),
-                  color: Colors.deepPurple,
-                  child: refreshing
-                      ? SizedBox(
-                          width: 25.0,
-                          height: 25.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
-                          ),
-                        )
-                      : Text('Обновить'),
-                  onPressed: () async {
-                    setState(() {
-                      refreshing = true;
-                    });
-                    await _refreshHandler();
-                    setState(() {
-                      refreshing = false;
-                    });
-                  },
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-    return _buildTracks();
-  }
 }
 
-/// TODO: unite this into one class with `TrackList`
-class CurrentPlaylistWidget extends StatefulWidget {
-  final EdgeInsets bottomPadding;
-  CurrentPlaylistWidget({
+/// Widget to render current playlist in player right right tab
+///
+/// Stateful because I need its state is needed to use global key
+class PlayerRoutePlaylist extends StatefulWidget {
+  PlayerRoutePlaylist({
     Key key,
-    this.bottomPadding: const EdgeInsets.only(bottom: 0.0),
   }) : super(key: key);
 
   @override
-  CurrentPlaylistWidgetState createState() => CurrentPlaylistWidgetState();
+  PlayerRoutePlaylistState createState() =>
+      PlayerRoutePlaylistState();
 }
 
-class CurrentPlaylistWidgetState extends State<CurrentPlaylistWidget> {
-  ItemScrollController itemScrollController = ItemScrollController();
-  ScrollController frontScrollController = ScrollController();
+class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
+  final ItemScrollController itemScrollController = ItemScrollController();
+
+  final ScrollController frontScrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     int initialScrollIndex;
@@ -380,30 +156,27 @@ class CurrentPlaylistWidgetState extends State<CurrentPlaylistWidget> {
     } else
       initialScrollIndex = 0;
 
-    return Padding(
-      padding: widget.bottomPadding,
-      child: Container(
-        child: SingleTouchRecognizerWidget(
-          child: ScrollablePositionedList.builder(
-            frontScrollController: frontScrollController,
-            itemScrollController: itemScrollController,
-            itemCount: length,
-            padding: EdgeInsets.only(bottom: 10, top: 5),
-            initialScrollIndex: initialScrollIndex,
-            itemBuilder: (context, index) {
-              return StreamBuilder(
-                  stream: PlaylistControl.onSongChange,
-                  builder: (context, snapshot) {
-                    return TrackTile(
-                      index,
-                      key: UniqueKey(),
-                      playing: index == currentSongIndex,
-                      song: PlaylistControl.getSongByIndex(index),
-                      pushToPlayerRouteOnClick: false,
-                    );
-                  });
-            },
-          ),
+    return Container(
+      child: SingleTouchRecognizerWidget(
+        child: ScrollablePositionedList.builder(
+          frontScrollController: frontScrollController,
+          itemScrollController: itemScrollController,
+          itemCount: length,
+          padding: EdgeInsets.only(bottom: 10, top: 5),
+          initialScrollIndex: initialScrollIndex,
+          itemBuilder: (context, index) {
+            return StreamBuilder(
+                stream: PlaylistControl.onSongChange,
+                builder: (context, snapshot) {
+                  return TrackTile(
+                    index,
+                    key: UniqueKey(),
+                    playing: index == currentSongIndex,
+                    song: PlaylistControl.getSongByIndex(index),
+                    pushToPlayerRouteOnClick: false,
+                  );
+                });
+          },
         ),
       ),
     );
@@ -412,6 +185,15 @@ class CurrentPlaylistWidgetState extends State<CurrentPlaylistWidget> {
 
 /// `TrackTile` that represents a single track in `TrackList`
 class TrackTile extends StatefulWidget {
+  TrackTile(this.trackTileIndex,
+      {Key key,
+      this.pushToPlayerRouteOnClick: true,
+      this.playing: false,
+      this.song,
+      this.enabled: true,
+      this.additionalClickCallback})
+      : super(key: key);
+
   /// Index of rendering element from
   final int trackTileIndex;
 
@@ -427,14 +209,6 @@ class TrackTile extends StatefulWidget {
 
   /// Provide song data to render it directly, not from playlist (e.g. used in search)
   final Song song;
-  TrackTile(this.trackTileIndex,
-      {Key key,
-      this.pushToPlayerRouteOnClick: true,
-      this.playing: false,
-      this.song,
-      this.enabled: true,
-      this.additionalClickCallback})
-      : super(key: key);
 
   @override
   _TrackTileState createState() => _TrackTileState();
@@ -464,11 +238,9 @@ class _TrackTileState extends State<TrackTile> {
       Navigator.of(context).pushNamed("/player");
   }
 
-// TODO: add playing indicator
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        // title: Text("${widget.trackTileIndex}"));
         title: Text(
           _song.title,
           overflow: TextOverflow.ellipsis,

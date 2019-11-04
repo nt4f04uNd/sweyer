@@ -1,7 +1,6 @@
+import 'package:app/components/show_functions.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/theme.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,15 +15,13 @@ abstract class Permissions {
     bool canOpen = false;
     if (Permissions.permissionStorageStatus ==
         MyPermissionStatus.doNotAskAgain) {
-      await Fluttertoast.showToast(
-          msg: 'Предоставьте доступ вручную',
-          backgroundColor: Color.fromRGBO(18, 18, 18, 1));
+      await ShowFunctions.showToast(msg: 'Предоставьте доступ вручную');
       canOpen = await PermissionHandler().openAppSettings();
       Permissions.permissionStorageStatus = MyPermissionStatus.notGranted;
     }
     if (!canOpen) {
       await Permissions.requestPermission(PermissionGroup.storage);
-      if (Permissions.permissionStorageStatus == MyPermissionStatus.granted){
+      if (Permissions.permissionStorageStatus == MyPermissionStatus.granted) {
         await PlaylistControl.init();
         await ThemeControl.init();
       }

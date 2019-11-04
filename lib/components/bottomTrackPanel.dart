@@ -1,6 +1,5 @@
-import 'package:app/components/custom_icon_button.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/player/playerWidgets.dart';
+import 'package:app/player/player_widgets.dart';
+import 'package:app/constants/constants.dart';
 import 'package:app/player/playlist.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'animatedPlayPauseButton.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
+/// Renders current playing track
 class BottomTrackPanel extends StatefulWidget {
   /// A value from 0.0 to 1.0 to set initial album art rotation
   final double initAlbumArtRotation;
@@ -146,7 +146,7 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                       onTap: () async {
                         // Push to player route
                         // Navigator.of(context).push(createPlayerRoute());
-                        Navigator.of(context).pushNamed("/player");
+                        Navigator.of(context).pushNamed(Routes.player.value);
                       },
                       child: ListTile(
                         contentPadding: EdgeInsets.only(

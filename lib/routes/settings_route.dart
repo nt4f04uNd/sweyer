@@ -1,11 +1,5 @@
-import 'package:app/components/SlideStackRightRoute.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/prefs.dart';
 import 'package:app/player/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class SettingsRoute extends StatefulWidget {
   const SettingsRoute({Key key}) : super(key: key);
@@ -52,15 +46,6 @@ class _SettingsRouteState extends State<SettingsRoute> {
         child: ListView(
           physics: NeverScrollableScrollPhysics(),
           children: <Widget>[
-            // Padding(
-            //   padding: const EdgeInsets.only(left: 12.0),
-            //   child: MinFileDurationSlider(
-            //     key: sliderKey,
-            //     parentHandleChange: handleSliderChange,
-            //     initValue: settingMinFileDuration,
-            //   ),
-            // ),
-            // Divider(),
             ListTile(
               title: Text("Расширенные настройки"),
               onTap: () {

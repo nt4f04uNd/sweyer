@@ -1,4 +1,5 @@
 import 'package:app/components/bottomTrackPanel.dart';
+import 'package:app/components/buttons.dart';
 import 'package:app/components/custom_icon_button.dart';
 import 'package:app/components/show_functions.dart';
 import 'package:app/components/track_list.dart';
@@ -8,7 +9,6 @@ import 'package:app/player/prefs.dart';
 import 'package:app/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/custom_search.dart' as custom_search;
-import 'package:flutter/services.dart';
 
 class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   SongsSearchDelegate();
@@ -115,79 +115,24 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     showSuggestions(context); // Update suggestions ListView
   }
 
+  /// This method called both for build suggestions and results
+  ///
+  /// This because we need user to see actual suggestions only when query is empty
+  ///
+  /// And when query is not empty - found songs will be displayed
   Widget _buildResultsAndSuggestions(BuildContext context) {
+    /// Search songs on every call
     final Iterable<Song> searched =
         PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/);
 
-    // Display suggestions
-    if (searched == null) {
-      return FutureBuilder<void>(
-          future: _fetchSearchHistory(),
-          builder: (context, snapshot) {
-            // I could use snapshot from builder to display returned suggestions from `_fetchSearchHistory`, but if I would do, the search would blink on mount, so I user `_suggestions` array that is set in `_fetchSearchHistory`
-            return Stack(
-              children: <Widget>[
-                Container(
-                  child: _suggestions.length > 0
-                      ? ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: _suggestions.length +
-                              1, // Plus 1 'cause we need to render list header
-                          itemBuilder: (context, index) {
-                            if (index == 0)
-                              return _buildSuggestionsHeader(context);
-                            // Minus 1 'cause we need to render list header
-                            index -= 1;
-
-                            return _buildSuggestionTile(context, index);
-                          },
-                        )
-                      : Center(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Text(
-                                'Здесь будет отображаться история вашего поиска'),
-                          ),
-                        ),
-                ),
-                BottomTrackPanel(),
-              ],
-            );
-          });
-    }
+    // Display suggestions on start screen
+    if (searched == null) return _buildSuggestions();
 
     // Display when nothing has been found
-    if (searched != null && searched.length == 0) {
-      return Stack(
-        children: <Widget>[
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Icon(Icons.error_outline),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 80.0),
-                  child: Text(
-                    'Ничего не найдено',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          BottomTrackPanel(),
-        ],
-      );
-    }
+    if (searched != null && searched.length == 0) return _buildEmptyResults();
 
-    // Display tiles
-
-    List<Song> searchedList = searched.toList();
+    // Display results if something had been found
+    final List<Song> searchedList = searched.toList();
 
     return Stack(
       children: <Widget>[
@@ -213,6 +158,71 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                     );
                   });
             }),
+        BottomTrackPanel(),
+      ],
+    );
+  }
+
+  /// Method that builds suggestions list
+  Widget _buildSuggestions() {
+    return FutureBuilder<void>(
+        future: _fetchSearchHistory(),
+        builder: (context, snapshot) {
+          // I could use snapshot from builder to display returned suggestions from `_fetchSearchHistory`, but if I would do, the search would blink on mount, so I user `_suggestions` array that is set in `_fetchSearchHistory`
+          return Stack(
+            children: <Widget>[
+              Container(
+                child: _suggestions.length > 0
+                    ? ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: _suggestions.length +
+                            1, // Plus 1 'cause we need to render list header
+                        itemBuilder: (context, index) {
+                          if (index == 0)
+                            return _buildSuggestionsHeader(context);
+                          // Minus 1 'cause we need to render list header
+                          index -= 1;
+
+                          return _buildSuggestionTile(context, index);
+                        },
+                      )
+                    : Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Text(
+                              'Здесь будет отображаться история вашего поиска'),
+                        ),
+                      ),
+              ),
+              BottomTrackPanel(),
+            ],
+          );
+        });
+  }
+
+  /// Builds screen with message that nothing had been found
+  Widget _buildEmptyResults() {
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Icon(Icons.error_outline),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 80.0),
+                child: Text(
+                  'Ничего не найдено',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
         BottomTrackPanel(),
       ],
     );

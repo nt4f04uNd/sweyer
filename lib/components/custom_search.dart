@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:app/constants/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // A file for custom `showSearch`, because I need search to be named route
@@ -91,8 +92,8 @@ Future<T> showCustomSearch<T>({
   assert(context != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  // TODO: add comments
-  return Navigator.of(context).pushNamed('/search', arguments: <String, Route>{
+  // Pass delegate through route options
+  return Navigator.of(context).pushNamed(Routes.search.value, arguments: <String, Route>{
     "route": SearchPageRoute<T>(
       delegate: delegate,
     )

@@ -1,10 +1,5 @@
-import 'package:app/components/SlideStackRightRoute.dart';
 import 'package:flutter/material.dart';
 
-/// @oldRoute needed cause this route transition utilizes `SlideStackRightRoute`
-Route createExifRoute(Widget oldRoute) {
-  return SlideStackRightRoute(exitPage: oldRoute, enterPage: ExifRoute());
-}
 
 class ExifRoute extends StatefulWidget {
   const ExifRoute({Key key}) : super(key: key);

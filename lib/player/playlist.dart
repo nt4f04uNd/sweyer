@@ -5,17 +5,19 @@ import 'package:app/player/player.dart';
 import 'package:app/player/prefs.dart';
 import 'package:app/player/serialization.dart';
 import 'package:app/player/song.dart';
+import 'package:app/utils/async.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'manual_stream_controller.dart';
 
 /// Features to sort by
 enum SortFeature { date, title }
 
 /// Features to filter playlist by
 enum FilterFeature { duration, fileSize }
+
+/// What playlist is now playing? type
+enum PlaylistType { global, searched, shuffled }
 
 class Playlist {
   List<Song> _songs;
@@ -89,9 +91,6 @@ class Playlist {
     }
   }
 }
-
-/// What playlist is now playing? type
-enum PlaylistType { global, searched, shuffled }
 
 /// A class to
 /// 1. Fetch songs
