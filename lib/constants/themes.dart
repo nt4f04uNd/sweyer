@@ -22,13 +22,19 @@ abstract class AppTheme {
       ThemeContainer(light: Colors.black.withOpacity(0.05), dark:Colors.white.withOpacity(0.05));
 
   static final ThemeContainer<Color> popupMenu =
-      ThemeContainer(light:  Color(0xffeeeeee), dark: Color(0xff333333));
+      ThemeContainer(light:  Color(0xFFeeeeee), dark: Color(0xFF333333));
+
+  static final ThemeContainer<Color> declineButton =
+      ThemeContainer(light: Color(0xFF606060), dark: null);
+
+  static final ThemeContainer<Color> redFlatButton =
+      ThemeContainer(light:  Colors.red.shade300, dark:  Colors.red.shade200);
 
   static final ThemeContainer<Color> activeIcon =
-      ThemeContainer(light: Colors.grey.shade900, dark: Colors.grey.shade800);
+      ThemeContainer(light: Colors.grey.shade900, dark: null);
 
   static final ThemeContainer<Color> disabledIcon =
-      ThemeContainer(light: Colors.grey.shade500, dark: null);
+      ThemeContainer(light: Colors.grey.shade500, dark: Colors.grey.shade800);
 
   static final ThemeContainer<Color> prevNextIcons =
       ThemeContainer(light: Colors.grey.shade800.withOpacity(0.9), dark: Colors.white.withOpacity(0.9));
@@ -50,6 +56,10 @@ abstract class AppTheme {
 
   static final ThemeContainer<Color> drawer =
       ThemeContainer(light: Colors.white, dark: AppColors.grey);
+
+            
+  static final ThemeContainer<Color> drawerListItem =
+      ThemeContainer(light:  Colors.deepPurple.shade500, dark:  Colors.deepPurple.shade300);
 
   static final ThemeContainer<ThemeData> materialApp = ThemeContainer(
     light: ThemeData(

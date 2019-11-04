@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:app/components/custom_icon_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -840,9 +841,10 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
     this.tooltip,
     this.tooltipEnabled = true,
     this.elevation = 8.0,
-    this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
+    this.buttonSize =  40.0,
+    this.buttonIconSize =  24.0,
     this.offset = Offset.zero,
     this.enabled = true,
   })  : assert(itemBuilder != null),
@@ -886,16 +888,17 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
   /// Defaults to 8, the appropriate elevation for popup menus.
   final double elevation;
 
-  /// Matches IconButton's 8 dps padding by default. In some cases, notably where
-  /// this button appears as the trailing element of a list item, it's useful to be able
-  /// to set the padding to zero.
-  final EdgeInsetsGeometry padding;
-
   /// If provided, the widget used for this button.
   final Widget child;
 
   /// If provided, the icon used for this button.
   final Icon icon;
+
+  /// Size of `CustomIconButton`
+  final double buttonSize;
+
+  /// Size of icon in `CustomIconButton`
+  final double buttonIconSize;
 
   /// The offset applied to the Popup Menu Button.
   ///
@@ -973,9 +976,10 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
             onTap: widget.enabled ? showButtonMenu : null,
             child: widget.child,
           )
-        : IconButton(
+        : CustomIconButton(
             icon: widget.icon ?? _getIcon(Theme.of(context).platform),
-            padding: widget.padding,
+            size: widget.buttonSize,
+            iconSize:  widget.buttonIconSize,
             tooltip: widget.tooltipEnabled
                 ? widget.tooltip ??
                     MaterialLocalizations.of(context).showMenuTooltip

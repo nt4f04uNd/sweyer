@@ -1,9 +1,10 @@
 import 'package:app/components/SingleTouchRecognizer.dart';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/bottomTrackPanel.dart';
+import 'package:app/components/custom_icon_button.dart';
+import 'package:app/components/custom_refresh_indicator.dart';
 import 'package:app/components/custom_search.dart';
 import 'package:app/components/search.dart';
-import 'package:app/constants/colors.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/logger.dart';
 import 'package:app/player/permissions.dart';
@@ -16,21 +17,16 @@ import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'package:flutter/services.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:app/components/refresh_indicator.dart';
 
 class DrawerButton extends StatelessWidget {
   const DrawerButton({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 15.0,
-      width: 15.0,
-      child: IconButton(
-        icon: Icon(Icons.menu),
-        color: Theme.of(context).iconTheme.color,
-        onPressed: Scaffold.of(context).openDrawer,
-      ),
+    return CustomIconButton(
+      icon: Icon(Icons.menu),
+      color: Theme.of(context).iconTheme.color,
+      onPressed: Scaffold.of(context).openDrawer,
     );
   }
 }
@@ -157,18 +153,18 @@ class _TrackListState extends State<TrackList> {
                 ListTile(
                     leading: Icon(
                       Icons.settings,
-                      color: Colors.deepPurple.shade300,
+                      color:AppTheme.drawerListItem.auto(context),
                     ),
                     title: Text('Настройки',
                         style: TextStyle(
-                            fontSize: 17.0, color: Colors.deepPurple.shade300)),
+                            fontSize: 17.0, color: AppTheme.drawerListItem.auto(context))),
                     onTap: _handleClickSettings),
                 ListTile(
                     leading: Icon(Icons.assignment,
-                        color: Colors.deepPurple.shade300),
+                        color: AppTheme.drawerListItem.auto(context)),
                     title: Text('Отправить лог',
                         style: TextStyle(
-                            fontSize: 17.0, color: Colors.deepPurple.shade300)),
+                            fontSize: 17.0, color:AppTheme.drawerListItem.auto(context))),
                     onTap: _handleClickSendLog),
               ],
             ),
@@ -198,22 +194,23 @@ class _TrackListState extends State<TrackList> {
                 widthFactor: 1,
                 child: Container(
                   padding: const EdgeInsets.only(
-                      left: 12.0, top: 10.0, bottom: 10.0),
+                      left: 12.0, top: 7.0, bottom: 7.0, right: 12.0),
                   decoration: BoxDecoration(
                     color: AppTheme.searchFakeInput.auto(context),
                   ),
-                  child: Column(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      Text(
-                        'Поиск треков на устройстве',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: Theme.of(context).hintColor,
-                            fontSize: 17),
-                      )
+                      // Text(
+                      //   'Поиск треков',
+                      //   style: TextStyle(
+                      //       fontWeight: FontWeight.w400,
+                      //       color: Theme.of(context).hintColor,
+                      //       fontSize: 17),
+                      // ),
+                      Icon(Icons.search, color: Theme.of(context).textTheme.caption.color,),
                     ],
                   ),
                 ),

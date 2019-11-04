@@ -19,8 +19,9 @@ abstract class ThemeControl {
         _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Prefs.byKey.themeBrightnessBool.setPref(_brightness == Brightness.dark);
     emitThemeChange();
-    await Future.delayed(Duration(milliseconds: 400)); 
-    SystemChrome.setSystemUIOverlayStyle(AppSystemUIThemes.allScreens.autoBr(_brightness));
+    await Future.delayed(Duration(milliseconds: 400));
+    SystemChrome.setSystemUIOverlayStyle(
+        AppSystemUIThemes.allScreens.autoBr(_brightness));
   }
 
   /// Inits theme, fetches brightness from `PrefKeys`
@@ -30,7 +31,10 @@ abstract class ThemeControl {
       _brightness = Brightness.dark;
     else
       _brightness = savedBrightness ? Brightness.dark : Brightness.light;
-      emitThemeChange();
+
+    SystemChrome.setSystemUIOverlayStyle(
+        AppSystemUIThemes.allScreens.autoBr(_brightness));
+    emitThemeChange();
   }
 
   static final ManualStreamController _controller = ManualStreamController();

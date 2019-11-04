@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
+import 'package:app/components/custom_icon_button.dart';
 import 'package:app/components/popup_menu.dart' as customPopup;
 import 'package:app/components/track_list.dart';
 import 'package:app/components/marquee.dart';
@@ -11,28 +12,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-Route createPlayerRoute() {
-  return PageRouteBuilder(
-    // TODO: move this into separate module that will contain all page `PageRouteBuilder`s
-    transitionDuration: Duration(milliseconds: 500),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      var begin = Offset(0.0, 1.0);
-      var end = Offset.zero;
-      var curve = Curves.fastOutSlowIn;
-
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-      return SlideTransition(
-        position: animation.drive(tween),
-        child: child,
-      );
-    },
-    pageBuilder: (context, animation, secondaryAnimation) {
-      return PlayerRoute();
-    },
-  );
-}
 
 class PlayerRoute extends StatefulWidget {
   @override
@@ -52,7 +31,7 @@ class _PlayerRouteState extends State<PlayerRoute>
 
   @override
   void initState() {
-    super.initState(); // TODO: add comments
+    super.initState();
     _tabController = TabController(vsync: this, length: _tabsLength);
     _tabController.addListener(() {
       setState(() {
@@ -105,8 +84,6 @@ class _PlaylistTab extends StatefulWidget {
 
 /// TODO: FIXME: add comments refactor add typedefs do renaming
 /// TODO: add animation to scroll button show/hide
-enum ScrollButtonType { up, down }
-
 class _PlaylistTabState extends State<_PlaylistTab>
     with AutomaticKeepAliveClientMixin<_PlaylistTab> {
   @override
@@ -121,7 +98,6 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// A bool var to disable show/hide in tracklist controller listener when manual `scrollToSong` is performing
   bool scrolling = false;
-  ScrollButtonType scrollButtonType = ScrollButtonType.up;
   StreamSubscription<void> _songChangeSubscription;
   StreamSubscription<void> _playlistChangeSubscription;
 
@@ -163,9 +139,6 @@ class _PlaylistTabState extends State<_PlaylistTab>
     await globalKeyCurrentPlaylistWidget.currentState.itemScrollController
         .scrollTo(
             index: index, duration: scrollDuration, curve: Curves.easeInOut);
-    // // Call `jumpTo` to reset scroll controller offset
-    // globalKeyCurrentPlaylistWidget.currentState.itemScrollController
-    //     .jumpTo(index: index);
   }
 
   /// Jumps to current song
@@ -192,22 +165,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
       if (prevPlayingIndex >= maxScrollIndex && playingIndex == 0) {
         // When prev track was last in playlist
         jumpToSong();
-      }
-      // else if (playingIndex == 0) {
-      //   setState(() {
-      //     // Trigger setstate
-      //   });
-      //   // Call `frontScrollController`'s animate as `scrollTo` gives ragged animation on first list element
-      //   await globalKeyCurrentPlaylistWidget.currentState.frontScrollController
-      //       .animateTo(
-      //           globalKeyCurrentPlaylistWidget.currentState
-      //               .frontScrollController.position.minScrollExtent,
-      //           duration: scrollDuration,
-      //           curve: Curves.easeInOut);
-
-      //   jumpToSong(); // Reset scrollcontroller's position
-      // }
-      else if (playingIndex < maxScrollIndex) {
+      } else if (playingIndex < maxScrollIndex) {
         // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
         await scrollToSong();
       } else if (prevPlayingIndex > maxScrollIndex) {
@@ -372,11 +330,12 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
           preferredSize: Size.fromHeight(63.0), // here the desired height
           child: AppBar(
             backgroundColor: Colors.transparent,
-            leading: IconButton(
+            leading: CustomIconButton(
               icon: Icon(
                 Icons.keyboard_arrow_down,
                 color: Theme.of(context).iconTheme.color,
               ),
+              size: 52.0,
               onPressed: () => Navigator.pop(context),
             ),
             actions: <Widget>[
@@ -399,7 +358,8 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                       Navigator.of(context).pushNamed("/exif");
                     },
                     tooltipEnabled: false,
-                    padding: const EdgeInsets.all(0.0),
+                    // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,
+                    buttonSize: 52.0,
                     itemBuilder: (BuildContext context) =>
                         <customPopup.PopupMenuEntry<void>>[
                       customPopup.PopupMenuItem<void>(
@@ -474,21 +434,25 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.shuffle),
-                          color: PlaylistControl.playlistType ==
-                                  PlaylistType.shuffled
-                              ? AppTheme.disabledIcon.auto(context) // yes it's weird, but it works, i don't understand it :)
-                              : AppTheme.activeIcon.auto(context),
-                          onPressed: () {
-                            setState(() {
-                              if (PlaylistControl.playlistType ==
-                                  PlaylistType.shuffled)
-                                PlaylistControl.returnFromShuffledPlaylist();
-                              else
-                                PlaylistControl.setShuffledPlaylist();
-                            });
-                          },
+                        Transform.translate(
+                          offset: Offset(-5.0, 0.0),
+                          child: CustomIconButton(
+                            icon: Icon(Icons.shuffle),
+                            size: 50.0,
+                            color: PlaylistControl.playlistType ==
+                                    PlaylistType.shuffled
+                                ? AppTheme.activeIcon.auto(context)
+                                : AppTheme.disabledIcon.auto(context),
+                            onPressed: () {
+                              setState(() {
+                                if (PlaylistControl.playlistType ==
+                                    PlaylistType.shuffled)
+                                  PlaylistControl.returnFromShuffledPlaylist();
+                                else
+                                  PlaylistControl.setShuffledPlaylist();
+                              });
+                            },
+                          ),
                         ),
                         Expanded(
                           child: Container(
@@ -528,7 +492,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                             .auto(context)),
                                     borderRadius: BorderRadius.circular(100),
                                   ),
-                                  child: AnimatedPlayPauseButton(),
+                                  child: AnimatedPlayPauseButton(isLarge: true),
                                 ),
                                 Container(
                                   decoration: BoxDecoration(
@@ -559,16 +523,20 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         // SizedBox.fromSize(
                         //   size: Size.square(48),
                         // )
-                        IconButton(
-                          icon: Icon(Icons.loop),
-                          color: MusicPlayer.loopModeState
-                              ? AppTheme.disabledIcon.auto(context) // yes it's weird, but it works, i don't understand it :)
-                              : AppTheme.activeIcon.auto(context),
-                          onPressed: () {
-                            setState(() {
-                              MusicPlayer.switchLoopMode();
-                            });
-                          },
+                        Transform.translate(
+                          offset: Offset(5.0, 0.0),
+                          child: CustomIconButton(
+                            icon: Icon(Icons.loop),
+                            size: 50.0,
+                            color: MusicPlayer.loopModeState
+                                ? AppTheme.activeIcon.auto(context)
+                                : AppTheme.disabledIcon.auto(context),
+                            onPressed: () {
+                              setState(() {
+                                MusicPlayer.switchLoopMode();
+                              });
+                            },
+                          ),
                         ),
                       ],
                     ),

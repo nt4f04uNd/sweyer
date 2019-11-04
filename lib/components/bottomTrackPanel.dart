@@ -1,3 +1,4 @@
+import 'package:app/components/custom_icon_button.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/playerWidgets.dart';
 import 'package:app/player/playlist.dart';
@@ -197,16 +198,23 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                             //   iconSize: 32,
                             //   onPressed: MusicPlayer.playPrev,
                             // ),
-                            Container(
-                              width: 32,
-                              child: AnimatedPlayPauseButton(),
+                            Transform.translate(
+                              offset: Offset(10, 0),
+                              child: AnimatedPlayPauseButton(
+                                isLarge: true,
+                              ),
                             ),
+
+                            //       Transform.translate(
+                            // offset: Offset(-20.0, 0.0),
+                            // child:
                             IconButton(
                               icon: Icon(Icons.skip_next),
                               iconSize: 32,
                               color: AppTheme.playPauseIcon.auto(context),
                               onPressed: MusicPlayer.playNext,
                             ),
+                            // ),
                           ],
                         ),
                         dense: true,

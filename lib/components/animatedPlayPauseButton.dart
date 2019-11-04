@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'package:app/components/custom_icon_button.dart';
 import 'package:app/player/player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:app/constants/themes.dart';
 
 class AnimatedPlayPauseButton extends StatefulWidget {
-  AnimatedPlayPauseButton({Key key}) : super(key: key);
+  AnimatedPlayPauseButton({Key key, this.isLarge = false}) : super(key: key);
+
+  /// Creates button of big size
+  final bool isLarge;
 
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
@@ -47,18 +51,26 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: IconButton(
-        padding: const EdgeInsets.all(0.0),
-        icon: Center(
-          child: AnimatedIcon(
-            icon: AnimatedIcons.play_pause,
-            size: 32,
-            color: AppTheme.playPauseIcon.auto(context),
-            progress: _animationController,
-          ),
-        ),
-        onPressed: _handlePress,
-      ),
+      child: widget.isLarge
+          ? IconButton(
+              icon: AnimatedIcon(
+                icon: AnimatedIcons.play_pause,
+                size: 32,
+                color: AppTheme.playPauseIcon.auto(context),
+                progress: _animationController,
+              ),
+              onPressed: _handlePress,
+            )
+          : CustomIconButton(
+              icon: AnimatedIcon(
+                icon: AnimatedIcons.play_pause,
+                color: AppTheme.playPauseIcon.auto(context),
+                progress: _animationController,
+              ),
+              iconSize: 32,
+              size: 48,
+              onPressed: _handlePress,
+            ),
     );
   }
 

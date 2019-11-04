@@ -1,4 +1,6 @@
 import 'package:app/components/bottomTrackPanel.dart';
+import 'package:app/components/custom_icon_button.dart';
+import 'package:app/components/show_functions.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
@@ -29,12 +31,39 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return IconButton(
+    return CustomIconButton(
       icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
       onPressed: () {
         close(context, null);
       },
     );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // Save search query to history when click submit button
+    _writeInputToSearchHistory(query);
+    return _buildResultsAndSuggestions(context);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return _buildResultsAndSuggestions(context);
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return <Widget>[
+      query.isEmpty
+          ? SizedBox.shrink()
+          : IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                query = '';
+                showSuggestions(context);
+              },
+            ),
+    ];
   }
 
   /// Function to fetch user search from shared preferences
@@ -106,182 +135,11 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                               1, // Plus 1 'cause we need to render list header
                           itemBuilder: (context, index) {
                             if (index == 0)
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 0.0, left: 13.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Text("История поиска",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 16,
-                                          color: Theme.of(context).hintColor,
-                                        )),
-                                    IconButton(
-                                      icon: Icon(Icons.delete),
-                                      color: Theme.of(context).hintColor,
-                                      onPressed: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                                  // backgroundColor:
-                                                  //     Color(0xff151515),
-                                                  title: Text(
-                                                      "Очистить историю поиска"),
-                                                  content:
-                                                      // AnnotatedRegion<
-                                                      // SystemUiOverlayStyle>(
-                                                      // value: AppSystemUIThemes.dialogScreen.auto(context),
-                                                      // child:
-                                                      Text(
-                                                          "Вы действительно хотите очистить историю?"),
-                                                  // ),
-                                                  contentPadding:
-                                                      EdgeInsets.only(
-                                                          top: 24.0,
-                                                          left: 27.0,
-                                                          right: 27.0),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                      Radius.circular(10),
-                                                    ),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    ButtonBar(
-                                                      children: <Widget>[
-                                                        FlatButton(
-                                                          child:
-                                                              Text('Удалить'),
-                                                          textColor: Colors
-                                                              .red.shade200,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(
-                                                              Radius.circular(
-                                                                  5),
-                                                            ),
-                                                          ),
-                                                          onPressed: () async {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                            await _resetSearchHistory(
-                                                                context);
-                                                          },
-                                                        ),
-                                                        FlatButton(
-                                                          child: Text('Отмена'),
-                                                          textColor:
-                                                              Theme.of(context)
-                                                                  .textTheme
-                                                                  .caption
-                                                                  .color,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(
-                                                              Radius.circular(
-                                                                  5),
-                                                            ),
-                                                          ),
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ));
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
+                              return _buildSuggestionsHeader(context);
                             // Minus 1 'cause we need to render list header
                             index -= 1;
 
-                            return ListTile(
-                              title: Text(_suggestions[index]),
-                              leading: const Icon(Icons.history),
-                              onLongPress: () {
-                                // Show dialog to remove element from search history
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                          title: Text("Удалить запрос"),
-                                          content:
-                                              //  AnnotatedRegion<
-                                              // SystemUiOverlayStyle>(
-                                              // value:  AppSystemUIThemes.dialogScreen.auto(context),
-                                              // value:  SystemUiOverlayStyle(systemNavigationBarColor: Color(0xff777777)),
-                                              // child:
-                                              Text(
-                                                  "Вы действительно хотите удалить этот запрос из истории?"),
-                                          // ),
-                                          contentPadding: EdgeInsets.only(
-                                              top: 24.0,
-                                              left: 27.0,
-                                              right: 27.0),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(10),
-                                            ),
-                                          ),
-                                          actions: <Widget>[
-                                            ButtonBar(
-                                              children: <Widget>[
-                                                FlatButton(
-                                                  child: Text('Удалить'),
-                                                  textColor:
-                                                      Colors.red.shade200,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                      Radius.circular(5),
-                                                    ),
-                                                  ),
-                                                  onPressed: () async {
-                                                    Navigator.of(context).pop();
-                                                    await _deleteItemFromHistory(
-                                                        context, index);
-                                                  },
-                                                ),
-                                                FlatButton(
-                                                  child: Text('Отмена'),
-                                                  textColor: Theme.of(context)
-                                                      .textTheme
-                                                      .caption
-                                                      .color,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                      Radius.circular(5),
-                                                    ),
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ));
-                              },
-                              onTap: () {
-                                // Do search onTap
-                                query = _suggestions[index];
-                                showResults(context);
-                              },
-                            );
+                            return _buildSuggestionTile(context, index);
                           },
                         )
                       : Center(
@@ -328,13 +186,14 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     }
 
     // Display tiles
+
     List<Song> searchedList = searched.toList();
 
     return Stack(
       children: <Widget>[
         ListView.builder(
             // FIXME add gesture detector that closes keyboard on scroll
-             padding: EdgeInsets.only(bottom: 65, top: 0),
+            padding: EdgeInsets.only(bottom: 65, top: 0),
             itemCount: searched.length,
             itemBuilder: (context, index) {
               return StreamBuilder(
@@ -359,30 +218,81 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     );
   }
 
-  @override
-  Widget buildResults(BuildContext context) {
-    // Save search query to history when click submit button
-    _writeInputToSearchHistory(query);
-    return _buildResultsAndSuggestions(context);
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return _buildResultsAndSuggestions(context);
-  }
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return <Widget>[
-      query.isEmpty
-          ? SizedBox.shrink()
-          : IconButton(
-              icon: const Icon(Icons.clear),
+  Widget _buildSuggestionsHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 0.0, left: 13.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text("История поиска",
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 16,
+                color: Theme.of(context).hintColor,
+              )),
+          IconButton(
+              icon: Icon(Icons.delete),
+              color: Theme.of(context).hintColor,
               onPressed: () {
-                query = '';
-                showSuggestions(context);
-              },
-            ),
-    ];
+                ShowFunctions.showDialog(
+                  context,
+                  title: Text("Очистить историю поиска"),
+                  content: Text("Вы действительно хотите очистить историю?"),
+                  acceptButton: DialogFlatButton(
+                    child: Text('Удалить'),
+                    textColor: AppTheme.redFlatButton.auto(context),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await _resetSearchHistory(context);
+                    },
+                  ),
+                  declineButton: DialogFlatButton(
+                    child: Text('Отмена'),
+                    textColor: AppTheme.declineButton.auto(context),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                );
+              }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionTile(BuildContext context, int index) {
+    return ListTile(
+      title: Text(_suggestions[index]),
+      leading: const Icon(Icons.history),
+      onLongPress: () {
+        ShowFunctions.showDialog(
+          context,
+          title: Text("Удалить запрос"),
+          content:
+              Text("Вы действительно хотите удалить этот запрос из истории?"),
+          acceptButton: DialogFlatButton(
+            child: Text('Удалить'),
+            textColor: AppTheme.redFlatButton.auto(context),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _deleteItemFromHistory(context, index);
+            },
+          ),
+          declineButton: DialogFlatButton(
+            child: Text('Отмена'),
+            textColor: AppTheme.declineButton.auto(context),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      },
+      onTap: () {
+        // Do search onTap
+        query = _suggestions[index];
+        showResults(context);
+      },
+    );
   }
 }
