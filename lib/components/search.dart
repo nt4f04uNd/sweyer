@@ -56,12 +56,16 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     return <Widget>[
       query.isEmpty
           ? SizedBox.shrink()
-          : IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                query = '';
-                showSuggestions(context);
-              },
+          : Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: CustomIconButton(
+                icon: const Icon(Icons.clear),
+                color: Theme.of(context).iconTheme.color,
+                onPressed: () {
+                  query = '';
+                  showSuggestions(context);
+                },
+              ),
             ),
     ];
   }
