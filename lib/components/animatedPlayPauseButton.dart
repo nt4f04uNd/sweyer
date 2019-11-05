@@ -50,27 +50,15 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: widget.isLarge
-          ? IconButton(
-              icon: AnimatedIcon(
-                icon: AnimatedIcons.play_pause,
-                size: 32,
-                color: AppTheme.playPauseIcon.auto(context),
-                progress: _animationController,
-              ),
-              onPressed: _handlePress,
-            )
-          : CustomIconButton(
-              icon: AnimatedIcon(
-                icon: AnimatedIcons.play_pause,
-                color: AppTheme.playPauseIcon.auto(context),
-                progress: _animationController,
-              ),
-              iconSize: 32,
-              size: 48,
-              onPressed: _handlePress,
-            ),
-    );
+        child: IconButton(
+      icon: AnimatedIcon(
+        icon: AnimatedIcons.play_pause,
+        size: 32,
+        color: AppTheme.playPauseIcon.auto(context),
+        progress: _animationController,
+      ),
+      onPressed: _handlePress,
+    ));
   }
 
   @override

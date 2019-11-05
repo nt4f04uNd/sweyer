@@ -193,28 +193,18 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            //  IconButton(
-                            //   icon: Icon(Icons.skip_previous),
-                            //   iconSize: 32,
-                            //   onPressed: MusicPlayer.playPrev,
-                            // ),
                             Transform.translate(
                               offset: Offset(10, 0),
                               child: AnimatedPlayPauseButton(
                                 isLarge: true,
                               ),
                             ),
-
-                            //       Transform.translate(
-                            // offset: Offset(-20.0, 0.0),
-                            // child:
                             IconButton(
                               icon: Icon(Icons.skip_next),
                               iconSize: 32,
                               color: AppTheme.playPauseIcon.auto(context),
                               onPressed: MusicPlayer.playNext,
                             ),
-                            // ),
                           ],
                         ),
                         dense: true,

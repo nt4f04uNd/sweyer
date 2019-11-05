@@ -1,3 +1,4 @@
+import 'package:app/player/catcher.dart';
 import 'package:app/player/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +8,12 @@ import 'constants/constants.dart';
 import 'routes/route_control.dart';
 
 void main() {
-// Color of system bottom navigation bar and status bar
-  // SystemChrome.setSystemUIOverlayStyle(AppThemes.darkMainScreen);
-
-  CatcherOptions debugOptions =
-      CatcherOptions(DialogReportMode(), [ConsoleHandler()]);
-  CatcherOptions releaseOptions = CatcherOptions(DialogReportMode(), [
-    EmailManualHandler(["nt4f04uNd@gmail.com"])
+  final CatcherOptions debugOptions = CatcherOptions(CustomDialogReportMode(), [
+    ConsoleHandler(),
+  ]);
+  final CatcherOptions releaseOptions =
+      CatcherOptions(CustomDialogReportMode(), [
+    EmailManualHandler(["nt4f04uNd@gmail.com"]),
   ]);
 
   Catcher(MyApp(), debugConfig: debugOptions, releaseConfig: releaseOptions);
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
             },
             supportedLocales: [const Locale('ru')],
             locale: const Locale('ru'),
-            localizationsDelegates: [
+            localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
             ],

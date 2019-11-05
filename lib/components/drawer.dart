@@ -1,4 +1,5 @@
 import 'package:app/components/custom_icon_button.dart';
+import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/logger.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class DrawerWidget extends StatefulWidget {
 
 class _DrawerWidgetState extends State<DrawerWidget> {
   Future<void> _handleClickSettings() async =>
-      await Navigator.of(context).popAndPushNamed("/settings");
+      await Navigator.of(context).popAndPushNamed(Routes.settings.value);
 
   void _handleClickSendLog() => Logger.send();
 

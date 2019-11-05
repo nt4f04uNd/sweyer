@@ -245,31 +245,35 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                 fontSize: 16,
                 color: Theme.of(context).hintColor,
               )),
-          IconButton(
-              icon: Icon(Icons.delete),
-              color: Theme.of(context).hintColor,
-              onPressed: () {
-                ShowFunctions.showDialog(
-                  context,
-                  title: Text("Очистить историю поиска"),
-                  content: Text("Вы действительно хотите очистить историю?"),
-                  acceptButton: DialogFlatButton(
-                    child: Text('Удалить'),
-                    textColor: AppTheme.redFlatButton.auto(context),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await _resetSearchHistory(context);
-                    },
-                  ),
-                  declineButton: DialogFlatButton(
-                    child: Text('Отмена'),
-                    textColor: AppTheme.declineButton.auto(context),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                );
-              }),
+          Padding(
+            padding: const EdgeInsets.only(right:4.0),
+            child: CustomIconButton(
+                icon: Icon(Icons.delete),
+                size: 45.0,
+                color: Theme.of(context).hintColor,
+                onPressed: () {
+                  ShowFunctions.showDialog(
+                    context,
+                    title: Text("Очистить историю поиска"),
+                    content: Text("Вы действительно хотите очистить историю?"),
+                    acceptButton: DialogFlatButton(
+                      child: Text('Удалить'),
+                      textColor: AppTheme.redFlatButton.auto(context),
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        await _resetSearchHistory(context);
+                      },
+                    ),
+                    declineButton: DialogFlatButton(
+                      child: Text('Отмена'),
+                      textColor: AppTheme.declineButton.auto(context),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  );
+                }),
+          ),
         ],
       ),
     );

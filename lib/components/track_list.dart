@@ -4,6 +4,7 @@ import 'package:app/components/custom_refresh_indicator.dart';
 import 'package:app/components/drawer.dart';
 import 'package:app/components/gestures.dart';
 import 'package:app/components/show_functions.dart';
+import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/player_widgets.dart';
 import 'package:app/player/playlist.dart';
@@ -12,6 +13,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
+import 'custom_icon_button.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
 
 /// List of fetched tracks
@@ -48,10 +50,14 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
       appBar: AppBar(
         leading: DrawerButton(),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.sort),
-            color: Theme.of(context).iconTheme.color,
-            onPressed: () => ShowFunctions.showSongsSortModal(context),
+          // IconButton(
+          Padding(
+            padding: const EdgeInsets.only(left:5.0, right:5.0),
+            child: CustomIconButton(
+              icon: Icon(Icons.sort),
+              color: Theme.of(context).iconTheme.color,
+              onPressed: () => ShowFunctions.showSongsSortModal(context),
+            ),
           ),
         ],
         titleSpacing: 0.0,
@@ -235,7 +241,7 @@ class _TrackTileState extends State<TrackTile> {
     // Playing because clickTrackTile changes any other type to it
     if (widget.pushToPlayerRouteOnClick &&
         MusicPlayer.playState == AudioPlayerState.PLAYING)
-      Navigator.of(context).pushNamed("/player");
+      Navigator.of(context).pushNamed(Routes.player.value);
   }
 
   @override

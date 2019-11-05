@@ -131,8 +131,8 @@ abstract class PlaylistControl {
   static final SongsFetcher songsFetcher =
       SongsFetcher(songsSerializer.saveJson);
 
-  /// Current id of playing track
-  static int playingTrackIdState;
+  /// Current id of playing song
+  static int _playingSongIdState;
 
   /// Controller for stream of playlist changes
   static ManualStreamController _songsListChangeStreamController =
@@ -164,8 +164,19 @@ abstract class PlaylistControl {
 
   /// Get current playing song (always being searched in _globalPlaylist)
   static Song get currentSong {
-    return _globalPlaylist.getSongById(playingTrackIdState) ??
+    return _globalPlaylist.getSongById(_playingSongIdState) ??
         _globalPlaylist.getSongByIndex(0);
+  }
+
+  /// Get current playing id
+  static int get currentSongId {
+    return _playingSongIdState;
+  }
+
+  /// Changes current songs id and emits song change event
+  static void changeSong(int songId) {
+    _playingSongIdState = songId;
+    emitSongChange();
   }
 
   /// Util function to select playlist by `argPlaylistType`
@@ -181,7 +192,7 @@ abstract class PlaylistControl {
   /// If optional `playlistType` is specified, then returns index in selected playlist type
   static int currentSongIndex([PlaylistType argPlaylistType]) {
     return _selectPlaylist(argPlaylistType)
-        .getSongIndexById(playingTrackIdState);
+        .getSongIndexById(_playingSongIdState);
   }
 
   /// Returns `songs` of current playlist (by default)
@@ -282,8 +293,8 @@ abstract class PlaylistControl {
       await filterSongs();
       sortSongs();
 
-      // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (playingTrackIdState == null)
-      if (playingTrackIdState == null) {
+      // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (_playingSongIdState == null)
+      if (_playingSongIdState == null) {
         await _restorePlayer();
       }
     } else {
@@ -471,7 +482,7 @@ abstract class PlaylistControl {
       int savedSongPos = await Prefs.byKey.songPositionInt.getPref(prefs);
 
       // Setup initial playing state index from prefs
-      playingTrackIdState = savedSongId;
+      _playingSongIdState = savedSongId;
 
       try {
         // Set url of first track in player instance

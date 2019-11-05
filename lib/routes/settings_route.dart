@@ -1,3 +1,4 @@
+import 'package:app/constants/routes.dart';
 import 'package:app/player/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -49,7 +50,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
             ListTile(
               title: Text("Расширенные настройки"),
               onTap: () {
-                Navigator.of(context).pushNamed("/extendedSettings");
+                Navigator.of(context).pushNamed(Routes.extendedSettings.value);
               },
             ),
             GestureDetector(

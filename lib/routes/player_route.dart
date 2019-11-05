@@ -5,6 +5,7 @@ import 'package:app/components/custom_icon_button.dart';
 import 'package:app/components/popup_menu.dart' as customPopup;
 import 'package:app/components/track_list.dart';
 import 'package:app/components/marquee.dart';
+import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
@@ -355,7 +356,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                     // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
                     onSelected: (_) {
                       // Navigator.of(context).push(createExifRoute(widget));
-                      Navigator.of(context).pushNamed("/exif");
+                      Navigator.of(context).pushNamed(Routes.exif.value);
                     },
                     tooltipEnabled: false,
                     // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,

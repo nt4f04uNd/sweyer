@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 /// Class to create, change and control stream
@@ -15,12 +14,12 @@ class ManualStreamController {
   }
 }
 
-
 /// A class that represents some async operation
 ///
 /// Can add to queue calls if it is still in work
 class AsyncOperation {
   final Completer _completer = Completer();
+  /// Async callback
   final Function _callback;
   AsyncOperation(Function callback) : this._callback = callback;
 
@@ -73,7 +72,7 @@ class OperationsQueue {
         .wait(); // Return future to wait before operation completion
   }
 
-  /// Finishes currentOperation
+  /// Finishes _currentOperation
   void finishCurrent() {
     _currentOperation.finish();
   }
