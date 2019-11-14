@@ -4,6 +4,7 @@ import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:flutter/material.dart';
+import 'package:app/components/buttons.dart';
 
 class ExtendedSettingsRoute extends StatefulWidget {
   const ExtendedSettingsRoute({Key key}) : super(key: key);
@@ -91,11 +92,7 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
               ),
             )
           ],
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).iconTheme.color),
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: CustomBackButton(),
           automaticallyImplyLeading: false,
         ),
       ),

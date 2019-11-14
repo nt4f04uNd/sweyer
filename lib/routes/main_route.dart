@@ -2,7 +2,6 @@ import 'package:app/components/buttons.dart';
 import 'package:app/player/permissions.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/theme.dart';
-import 'package:catcher/core/catcher.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/player/player.dart';

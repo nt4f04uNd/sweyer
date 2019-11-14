@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:app/components/icon_button_splash.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -126,7 +127,7 @@ class CustomIconButton extends StatelessWidget {
   const CustomIconButton({
     Key key,
     this.iconSize = 24.0,
-    this.size = 40.0,
+    this.size = 36.0,
     @required this.icon,
     this.color,
     this.focusColor,
@@ -284,7 +285,7 @@ class CustomIconButton extends StatelessWidget {
 
     /// Max size of `size` and `iconSize`
     final maxSize = math.max(size, iconSize);
-    
+
     return Semantics(
       button: true,
       enabled: onPressed != null,
@@ -294,7 +295,9 @@ class CustomIconButton extends StatelessWidget {
         child: Container(
           width: maxSize,
           height: maxSize,
-          child: InkResponse(
+          child: InkWell(
+            // splashFactory: CustomInkRipple.splashFactory,
+            splashFactory: IconButtonInkRipple.splashFactory(radius: size / 2),
             focusNode: focusNode,
             autofocus: autofocus,
             canRequestFocus: onPressed != null,
@@ -303,9 +306,9 @@ class CustomIconButton extends StatelessWidget {
             child: result,
             focusColor: focusColor ?? Theme.of(context).focusColor,
             hoverColor: hoverColor ?? Theme.of(context).hoverColor,
-            highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+            highlightColor: highlightColor ?? Colors.transparent,
             splashColor: splashColor ?? Theme.of(context).splashColor,
-            radius: maxSize / 2,
+            // radius: maxSize / 2,
             customBorder: CircleBorder(side: BorderSide(width: 0)),
           ),
         ),

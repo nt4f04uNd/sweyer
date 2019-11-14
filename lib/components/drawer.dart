@@ -13,6 +13,7 @@ class DrawerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomIconButton(
       icon: Icon(Icons.menu),
+      splashColor: AppTheme.splash.auto(context),
       color: Theme.of(context).iconTheme.color,
       onPressed: Scaffold.of(context).openDrawer,
     );

@@ -1,3 +1,4 @@
+import 'package:app/components/buttons.dart';
 import 'package:app/constants/routes.dart';
 import 'package:app/player/theme.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 
   void _switchTheme() {
     setState(() {
-      ThemeControl.switchTheme();
+      ThemeControl.switchTheme(true);
       _switched = !_switched;
     });
   }
@@ -35,11 +36,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
           backgroundColor: Colors.transparent,
           title: Text("Настройки",
               style: TextStyle(color: Theme.of(context).textTheme.title.color)),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).iconTheme.color),
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading:CustomBackButton(),
           automaticallyImplyLeading: false,
         ),
       ),

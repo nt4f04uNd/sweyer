@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:app/components/show_functions.dart';
 import 'package:app/player/fetcher.dart';
 import 'package:app/player/permissions.dart';
 import 'package:app/player/player.dart';
@@ -42,6 +44,14 @@ class Playlist {
   int get length => songs.length;
 
   bool get isEmpty => songs.isEmpty;
+
+  void removeSongById(int id) {
+    _songs.removeWhere((el) => el.id == id);
+  }
+
+  void removeSongByIndex(int index) {
+    _songs.removeAt(index);
+  }
 
   /// Returns song object by index in songs array
   Song getSongByIndex(int index) {
@@ -424,6 +434,32 @@ abstract class PlaylistControl {
                 await Prefs.byKey.settingMinFileDurationInt.getPref() ?? 30));
     // Emit event to track change stream
     emitPlaylistChange();
+  }
+
+  /// Deletes song from device by id
+  static Future<void> deleteSongFromDevice(int id) async {
+    final File file = File(getSongById(id).trackUri);
+    await file.delete();
+    print('fqwf');
+  }
+
+  /// Deletes songs by specified id set
+  static Future<void> deleteSongs(Set<int> idSet) async {
+    // List<Future<void>> futures = [];
+    // for (var id in idSet) {
+      // Switch playing track in silent mode if it is playing now
+      // if (_playingSongIdState == id) MusicPlayer.playNext(silent: true);
+    // print(getSongById(id).title);
+      // futures.add(deleteSongFromDevice(id));
+      // _globalPlaylist.removeSongById(id);
+    // }
+    // emitPlaylistChange();
+    // try {
+    //   await Future.wait(futures);
+    // } catch (e) {
+    //   ShowFunctions.showToast(msg: "Ошибка при удалении");
+    //   debugPrint("Deleting error: $e");
+    // }
   }
 
   /// Gets saved sort feature from `SharedPreferences`

@@ -9,6 +9,7 @@ import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
+import 'package:app/player/theme.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
@@ -332,11 +333,12 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             leading: CustomIconButton(
+              splashColor: AppTheme.splash.auto(context),
               icon: Icon(
                 Icons.keyboard_arrow_down,
                 color: Theme.of(context).iconTheme.color,
               ),
-              size: 52.0,
+              size: 40.0,
               onPressed: () => Navigator.pop(context),
             ),
             actions: <Widget>[
@@ -352,23 +354,27 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                   data: Theme.of(context).copyWith(
                     cardColor: AppTheme.popupMenu.auto(context),
                   ),
-                  child: customPopup.CustomPopupMenuButton<void>(
-                    // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-                    onSelected: (_) {
-                      // Navigator.of(context).push(createExifRoute(widget));
-                      Navigator.of(context).pushNamed(Routes.exif.value);
-                    },
-                    tooltipEnabled: false,
-                    // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,
-                    buttonSize: 52.0,
-                    itemBuilder: (BuildContext context) =>
-                        <customPopup.PopupMenuEntry<void>>[
-                      customPopup.PopupMenuItem<void>(
-                        value: '',
-                        // height: 30.0,
-                        child: Text('Изменить информацию о треке'),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 5.0),
+                    child: customPopup.CustomPopupMenuButton<void>(
+                      // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
+                      onSelected: (_) {
+                        // Navigator.of(context).push(createExifRoute(widget));
+                        Navigator.of(context).pushNamed(Routes.exif.value);
+                      },
+
+                      tooltipEnabled: false,
+                      // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,
+                      buttonSize: 40.0,
+                      itemBuilder: (BuildContext context) =>
+                          <customPopup.PopupMenuEntry<void>>[
+                        customPopup.PopupMenuItem<void>(
+                          value: '',
+                          // height: 30.0,
+                          child: Text('Изменить информацию о треке'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -435,25 +441,22 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        Transform.translate(
-                          offset: Offset(-5.0, 0.0),
-                          child: CustomIconButton(
-                            icon: Icon(Icons.shuffle),
-                            size: 50.0,
-                            color: PlaylistControl.playlistType ==
-                                    PlaylistType.shuffled
-                                ? AppTheme.activeIcon.auto(context)
-                                : AppTheme.disabledIcon.auto(context),
-                            onPressed: () {
-                              setState(() {
-                                if (PlaylistControl.playlistType ==
-                                    PlaylistType.shuffled)
-                                  PlaylistControl.returnFromShuffledPlaylist();
-                                else
-                                  PlaylistControl.setShuffledPlaylist();
-                              });
-                            },
-                          ),
+                        CustomIconButton(
+                          splashColor: AppTheme.splash.auto(context),
+                          icon: Icon(Icons.shuffle),
+                          color: PlaylistControl.playlistType ==
+                                  PlaylistType.shuffled
+                              ? AppTheme.activeIcon.auto(context)
+                              : AppTheme.disabledIcon.auto(context),
+                          onPressed: () {
+                            setState(() {
+                              if (PlaylistControl.playlistType ==
+                                  PlaylistType.shuffled)
+                                PlaylistControl.returnFromShuffledPlaylist();
+                              else
+                                PlaylistControl.setShuffledPlaylist();
+                            });
+                          },
                         ),
                         Expanded(
                           child: Container(
@@ -524,20 +527,17 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                         // SizedBox.fromSize(
                         //   size: Size.square(48),
                         // )
-                        Transform.translate(
-                          offset: Offset(5.0, 0.0),
-                          child: CustomIconButton(
-                            icon: Icon(Icons.loop),
-                            size: 50.0,
-                            color: MusicPlayer.loopModeState
-                                ? AppTheme.activeIcon.auto(context)
-                                : AppTheme.disabledIcon.auto(context),
-                            onPressed: () {
-                              setState(() {
-                                MusicPlayer.switchLoopMode();
-                              });
-                            },
-                          ),
+                        CustomIconButton(
+                          splashColor: AppTheme.splash.auto(context),
+                          icon: Icon(Icons.loop),
+                          color: MusicPlayer.loopModeState
+                              ? AppTheme.activeIcon.auto(context)
+                              : AppTheme.disabledIcon.auto(context),
+                          onPressed: () {
+                            setState(() {
+                              MusicPlayer.switchLoopMode();
+                            });
+                          },
                         ),
                       ],
                     ),

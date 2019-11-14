@@ -107,7 +107,7 @@ class _AlbumArtPlaceholder extends StatelessWidget {
                     3 // The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
                     -
                     2 // Border width
-                : constraint1.maxHeight,
+                : constraint1.maxHeight, // TODO: rewrite with constant value
         decoration: BoxDecoration(
           color: isLarge
               ? AppTheme.albumArtLarge.auto(context)

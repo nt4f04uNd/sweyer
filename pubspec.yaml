@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0-dev.8.2.flutter-bbe2ac28c9 <3.0.0"
+  sdk: ">=2.6.0<3.0.0"
 
 dependencies:
   audioplayers: ^0.13.2

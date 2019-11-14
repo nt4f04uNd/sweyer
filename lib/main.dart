@@ -16,10 +16,10 @@ void main() {
     EmailManualHandler(["nt4f04uNd@gmail.com"]),
   ]);
 
-  Catcher(MyApp(), debugConfig: debugOptions, releaseConfig: releaseOptions);
+  Catcher(App(), debugConfig: debugOptions, releaseConfig: releaseOptions);
 }
 
-class MyApp extends StatelessWidget {
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(

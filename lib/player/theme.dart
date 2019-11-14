@@ -14,12 +14,14 @@ abstract class ThemeControl {
   static bool get isDark => _brightness == Brightness.dark;
 
   /// Changes theme to opposite and saves new value to pref
-  static void switchTheme() async {
+  /// 
+  /// Optional `delayed` allows to delay color switch by 200ms
+  static void switchTheme([bool delayed = false]) async {
     _brightness =
         _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Prefs.byKey.themeBrightnessBool.setPref(_brightness == Brightness.dark);
     emitThemeChange();
-    await Future.delayed(Duration(milliseconds: 400));
+    if(delayed) await Future.delayed(Duration(milliseconds: 200));
     SystemChrome.setSystemUIOverlayStyle(
         AppSystemUIThemes.allScreens.autoBr(_brightness));
   }

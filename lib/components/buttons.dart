@@ -1,4 +1,20 @@
+import 'package:app/components/custom_icon_button.dart';
+import 'package:app/constants/themes.dart';
 import 'package:flutter/material.dart';
+
+/// Button to go back from page
+class CustomBackButton extends StatelessWidget {
+  const CustomBackButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomIconButton(
+      icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+      splashColor: AppTheme.splash.auto(context),
+      onPressed: () => Navigator.of(context).pop(),
+    );
+  }
+}
 
 /// Creates `Raised` with border radius, by default colored into main app color - `Colors.deepPurple`
 class PrimaryRaisedButton extends RaisedButton {

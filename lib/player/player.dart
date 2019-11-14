@@ -7,7 +7,6 @@ import 'package:app/constants/constants.dart' as Constants;
 import 'package:app/player/logger.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
-import 'package:catcher/core/catcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -127,8 +126,11 @@ abstract class MusicPlayer {
     nativePlayerInstance.setReleaseMode(ReleaseMode.STOP);
 
     _songChangeListenerSubscription =
-        PlaylistControl.onSongChange.listen((event) {
+        PlaylistControl.onSongChange.listen((event) async {
       Prefs.byKey.songIdInt.setPref(PlaylistControl.currentSong?.id);
+
+      // nativePlayerInstance.release();
+      nativePlayerInstance.setUrl(PlaylistControl.currentSong.trackUri);
     });
 
     _errorSubscription = nativePlayerInstance.onPlayerError.listen((event) {
@@ -297,6 +299,23 @@ abstract class MusicPlayer {
       case 1:
         Logger.log('hookPressRes', 'play/pause');
         await playPause();
+        // if (nativePlayerInstance.state == AudioPlayerState.PLAYING) {
+        // await nativePlayerInstance.pause();
+        // await nativePlayerInstance.resume();
+
+        // for (int i = 100; i >= 0; i-=3) {
+        //   await nativePlayerInstance.setVolume(i / 100);
+        // }
+        // await playPause();
+        // } else {
+        // await playPause();
+        // for (int i = 0; i < 100; i+=3) {
+        //   await nativePlayerInstance.setVolume(i / 100);
+        // }
+        // await nativePlayerInstance.setVolume(0.99);
+        // await nativePlayerInstance.resume();
+        // await nativePlayerInstance.pause();
+        // }
         break;
       case 2:
         Logger.log('hookPressRes', 'next');
@@ -392,21 +411,24 @@ abstract class MusicPlayer {
   /// Play track
   ///
   /// `songId` argument denotes an id track to play
-  static Future<void> play(int songId) async {
+  ///
+  /// If `silent` is true, won't play track, but just switch to it
+  /// (the difference with the `setUrl` with this parameter is that this function will also update current playing song respectively)
+  static Future<void> play(int songId, {bool silent = false}) async {
     await _requestFocus();
     int res = 1;
     try {
       final uri = PlaylistControl.getSongById(songId).trackUri;
-      if (focusState == AudioFocusType.focus)
+      if (focusState == AudioFocusType.focus && !silent)
         await nativePlayerInstance.play(
           uri,
           stayAwake:
               true, // This is very important for player to stay play even in background
           isLocal: true,
         );
-      else if (focusState == AudioFocusType.focus_delayed)
+      else if (focusState == AudioFocusType.focus_delayed && silent)
         // Set url if no focus has been granted
-        await nativePlayerInstance.setUrl(uri);
+        setUrl(uri);
     } on PlatformException catch (e) {
       /// `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
       /// `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
@@ -423,7 +445,7 @@ abstract class MusicPlayer {
 
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
-          await play(PlaylistControl.getNextSongId(songId));
+          await play(PlaylistControl.getNextSongId(songId), silent:silent);
           PlaylistControl.songs(PlaylistType.global).removeAt(
               PlaylistControl.getSongIndexById(songId)); //Remove broken track
           PlaylistControl.emitPlaylistChange();
@@ -439,12 +461,22 @@ abstract class MusicPlayer {
           'Unexpected error thrown in my player class play method - error: $e');
     } finally {
       // Change playing track id
-      // NOTE that we change it always
       // TODO: check for deleted track error case;
       if (res == 1)
         PlaylistControl.changeSong(songId);
       else
-        play(PlaylistControl.currentSongId);
+        play(PlaylistControl.currentSongId, silent:silent);
+    }
+  }
+
+  /// Sets track url
+  ///
+  /// Unlike [play], the playback will not resume, but song will be switched if it player is playing
+  static Future<void> setUrl(String url) {
+    try {
+      nativePlayerInstance.setUrl(url);
+    } catch (e) {
+      debugPrint("Error from `setUrl` method: $e");
     }
   }
 
@@ -557,17 +589,17 @@ abstract class MusicPlayer {
   /// Function that fires when next track button got clicked
   ///
   /// If provided `songId` - plays next from this id
-  static Future<void> playNext([int songId]) async {
+  static Future<void> playNext({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getNextSongId(PlaylistControl.currentSongId);
-    await play(songId);
+    await play(songId, silent:silent);
   }
 
   /// Function that fires when prev track button got clicked
   ///
   /// If provided `songId` - plays prev from this id
-  static Future<void> playPrev([int songId]) async {
+  static Future<void> playPrev({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPrevSongId(PlaylistControl.currentSongId);
-    await play(songId);
+    await play(songId, silent:silent);
   }
 
   /// Function that handles click on track tile

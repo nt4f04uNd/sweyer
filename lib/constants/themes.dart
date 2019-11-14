@@ -30,6 +30,9 @@ abstract class AppTheme {
   static final ThemeContainer<Color> redFlatButton =
       ThemeContainer(light:  Colors.red.shade300, dark:  Colors.red.shade200);
 
+  static final ThemeContainer<Color> splash =
+      ThemeContainer(light: Color(0x90c8c8c8), dark: Color(0x44c8c8c8));
+
   static final ThemeContainer<Color> activeIcon =
       ThemeContainer(light: Colors.grey.shade900, dark: null);
 
