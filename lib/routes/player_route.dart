@@ -9,8 +9,6 @@ import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
-import 'package:app/player/theme.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:app/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -465,6 +463,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
                                 Container(
+                                  padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       width: 1,
@@ -473,22 +472,18 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                     ),
                                     borderRadius: BorderRadius.circular(100),
                                   ),
-                                  child: InkWell(
-                                    radius: 50,
-                                    borderRadius: BorderRadius.circular(100),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Icon(
-                                        Icons.skip_previous,
-                                        color: AppTheme.prevNextIcons
-                                            .auto(context),
-                                      ),
+                                  child: CustomIconButton(
+                                    size: 34,
+                                    icon: Icon(
+                                      Icons.skip_previous,
+                                      color:
+                                          AppTheme.prevNextIcons.auto(context),
                                     ),
-                                    onTap: MusicPlayer.playPrev,
+                                    onPressed: MusicPlayer.playPrev,
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         width: 1,
@@ -499,6 +494,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                   child: AnimatedPlayPauseButton(isLarge: true),
                                 ),
                                 Container(
+                                  padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         width: 1,
@@ -506,18 +502,14 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                                             .auto(context)),
                                     borderRadius: BorderRadius.circular(100),
                                   ),
-                                  child: InkWell(
-                                    radius: 50,
-                                    borderRadius: BorderRadius.circular(100),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Icon(
-                                        Icons.skip_next,
-                                        color: AppTheme.prevNextIcons
-                                            .auto(context),
-                                      ),
+                                  child: CustomIconButton(
+                                    size: 34,
+                                    icon: Icon(
+                                      Icons.skip_next,
+                                      color:
+                                          AppTheme.prevNextIcons.auto(context),
                                     ),
-                                    onTap: MusicPlayer.playNext,
+                                    onPressed: MusicPlayer.playNext,
                                   ),
                                 ),
                               ],

@@ -6,10 +6,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 const Duration _kUnconfirmedRippleDuration = Duration(milliseconds: 500);
-const Duration _kFadeInDuration = Duration(milliseconds: 75);
+const Duration _kFadeInDuration = Duration(milliseconds: 200);
 const Duration _kRadiusDuration = Duration(milliseconds: 225);
 const Duration _kFadeOutDuration = Duration(milliseconds: 375);
-const Duration _kCancelDuration = Duration(milliseconds: 75);
+const Duration _kCancelDuration = Duration(milliseconds: 200);
 
 // The fade out begins 225ms after the _fadeOutController starts. See confirm().
 const double _kFadeOutIntervalStart = 225.0 / 375.0;

@@ -4,7 +4,6 @@ import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:flutter/material.dart';
-import 'package:app/components/buttons.dart';
 
 class ExtendedSettingsRoute extends StatefulWidget {
   const ExtendedSettingsRoute({Key key}) : super(key: key);

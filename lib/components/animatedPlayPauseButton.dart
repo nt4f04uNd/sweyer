@@ -4,6 +4,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:app/constants/themes.dart';
 
+import 'custom_icon_button.dart';
+
 class AnimatedPlayPauseButton extends StatefulWidget {
   AnimatedPlayPauseButton({Key key, this.isLarge = false}) : super(key: key);
 
@@ -49,10 +51,12 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: IconButton(
+        child: CustomIconButton(
+      iconSize: 32,
+      splashColor: AppTheme.splash.auto(context),
+      size: 56,
       icon: AnimatedIcon(
         icon: AnimatedIcons.play_pause,
-        size: 32,
         color: AppTheme.playPauseIcon.auto(context),
         progress: _animationController,
       ),

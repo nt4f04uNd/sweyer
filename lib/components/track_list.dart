@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/bottomTrackPanel.dart';
 import 'package:app/components/buttons.dart';
@@ -12,7 +10,6 @@ import 'package:app/constants/themes.dart';
 import 'package:app/player/player_widgets.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/song.dart';
-import 'package:app/player/theme.dart';
 import 'package:app/utils/switcher.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,7 +49,9 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
 
   /// Performs tracks refetch
   Future<void> _refreshHandler() async {
-    return await PlaylistControl.refetchSongs();
+    await PlaylistControl.refetchSongs();
+    _switcher.change();
+    return Future.value();
   }
 
   /// Adds item index to set and enables selection mode if needed
@@ -89,10 +88,18 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
     }
   }
 
-  void _handleCloseSelection() {
+  void _handleCloseSelection() async {
     setState(() {
       unselecting = true;
       _switcher.change();
+    });
+    // Needed to release clear set fully when animation is ended, cause some tiles may be out of scope
+    await Future.delayed(Duration(milliseconds: 300));
+    _switcher.change();
+    setState(() {
+      selectionSet = {};
+      selectionMode = false;
+      unselecting = false;
     });
   }
 
@@ -218,42 +225,47 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
             padding: widget.bottomPadding,
             child: Container(
               child: CustomRefreshIndicator(
-                color: Colors.white,
-                backgroundColor: Color(0xff101010),
+                color: AppTheme.refreshIndicatorArrow.auto(context),
+                backgroundColor:
+                    AppTheme.refreshIndicatorBackground.auto(context),
                 strokeWidth: 2.5,
                 key: _refreshIndicatorKey,
                 onRefresh: _refreshHandler,
                 child: SingleTouchRecognizerWidget(
                   child: Container(
-                    child: ListView.builder(
-                      itemCount: PlaylistControl.length(PlaylistType.global),
-                      padding: EdgeInsets.only(bottom: 65, top: 0),
-                      itemBuilder: (context, index) {
-                        return StreamBuilder(
-                            stream: PlaylistControl.onSongChange,
-                            builder: (context, snapshot) {
-                              final int id = PlaylistControl.getSongByIndex(
-                                      index, PlaylistType.global)
-                                  .id;
-                              return TrackTile(
-                                index,
-                                // Specify object key that can be changed to re-render song tile
-                                key: ObjectKey(index + _switcher.value * 10000),
-                                selectable: true,
-                                selected: selectionSet.contains(id),
-                                someSelected: selectionMode,
-                                unselecting: unselecting,
-                                playing: id == PlaylistControl.currentSongId,
-                                additionalClickCallback: () {
-                                  PlaylistControl.resetPlaylists();
-                                },
-                                onSelected: () => _handleSelect(id),
-                                onUnselected: () => _handleUnselect(id),
-                                notifyUnselection: () =>
-                                    _handleNotifyUnselection(),
-                              );
-                            });
-                      },
+                    child: Scrollbar(
+                      child: ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        itemCount: PlaylistControl.length(PlaylistType.global),
+                        padding: EdgeInsets.only(bottom: 65, top: 0),
+                        itemBuilder: (context, index) {
+                          return StreamBuilder(
+                              stream: PlaylistControl.onSongChange,
+                              builder: (context, snapshot) {
+                                final int id = PlaylistControl.getSongByIndex(
+                                        index, PlaylistType.global)
+                                    .id;
+                                return TrackTile(
+                                  index,
+                                  // Specify object key that can be changed to re-render song tile
+                                  key: ObjectKey(
+                                      index + _switcher.value * 10000),
+                                  selectable: true,
+                                  selected: selectionSet.contains(id),
+                                  someSelected: selectionMode,
+                                  unselecting: unselecting,
+                                  playing: id == PlaylistControl.currentSongId,
+                                  additionalClickCallback: () {
+                                    PlaylistControl.resetPlaylists();
+                                  },
+                                  onSelected: () => _handleSelect(id),
+                                  onUnselected: () => _handleUnselect(id),
+                                  notifyUnselection: () =>
+                                      _handleNotifyUnselection(),
+                                );
+                              });
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -297,7 +309,9 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
 
     return Container(
       child: SingleTouchRecognizerWidget(
-        child: ScrollablePositionedList.builder(
+        child:Scrollbar(
+                      child:  ScrollablePositionedList.builder(
+          physics: BouncingScrollPhysics(),
           frontScrollController: frontScrollController,
           itemScrollController: itemScrollController,
           itemCount: length,
@@ -316,6 +330,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
                   );
                 });
           },
+        ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:app/components/custom_icon_button.dart';
 import 'package:app/player/player_widgets.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/player/playlist.dart';
@@ -199,9 +200,11 @@ class BottomTrackPanelState extends State<BottomTrackPanel>
                                 isLarge: true,
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.skip_next),
+                            CustomIconButton(
                               iconSize: 32,
+                              splashColor: AppTheme.splash.auto(context),
+                              size: 56,
+                              icon: Icon(Icons.skip_next),
                               color: AppTheme.playPauseIcon.auto(context),
                               onPressed: MusicPlayer.playNext,
                             ),

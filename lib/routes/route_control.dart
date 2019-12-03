@@ -3,6 +3,7 @@ import 'package:app/components/show_functions.dart';
 import 'package:app/constants/constants.dart';
 import 'package:app/player/player.dart';
 import 'package:app/player/theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:app/routes/exif_route.dart';
 import 'package:app/routes/extendedSettings.dart';
@@ -46,22 +47,20 @@ abstract class RouteControl {
 
   static Route<dynamic> handleOnGenerateRoute(RouteSettings settings) {
     _setCurrentRoute(settings.name);
-    // print(_currentRoute);
 
     if (settings.isInitialRoute)
       return createRouteTransition(
         checkExitAnimationEnabled: () =>
-            _currentRouteEquals(Routes.settings.value),
+            _currentRouteEquals(Routes.settings.value) ||
+                _currentRouteEquals(Routes.extendedSettings.value),
         checkEntAnimationEnabled: () => false,
-        exitCurve: Curves.linearToEaseOut,
-        exitReverseCurve: Curves.fastOutSlowIn,
         maintainState: true,
+        
         routeSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         enterSystemUI:
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
-        exitIgnoreEventsForward: true,
-        transitionDuration: const Duration(milliseconds: 500),
+        exitIgnoreEventsForward: false,
         route: WillPopScope(
             child:
                 // AnnotatedRegion<SystemUiOverlayStyle>(
@@ -72,51 +71,39 @@ abstract class RouteControl {
             // ),
             onWillPop: _handleHomePop),
       );
-    else if (settings.name == Routes.player.value)
+    else if (settings.name == Routes.player.value) {
       return createRouteTransition(
         playMaterial: true,
+        materialAnimationStyle: MaterialRouteTransitionStyle.expand,
         entCurve: Curves.fastOutSlowIn,
         exitCurve: Curves.linearToEaseOut,
         exitReverseCurve: Curves.fastOutSlowIn,
         entBegin: Offset(0.0, 1.0),
         checkExitAnimationEnabled: () => _currentRouteEquals(Routes.exif.value),
-        opaque: false,
         enterSystemUI:
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         exitSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
-        transitionDuration: const Duration(milliseconds: 500),
         route: PlayerRoute(),
       );
-    else if (settings.name == Routes.settings.value)
+    } else if (settings.name == Routes.settings.value)
       return createRouteTransition(
-        transitionDuration: const Duration(milliseconds: 500),
         enterSystemUI:
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         exitSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
-        exitCurve: Curves.linearToEaseOut,
-        exitReverseCurve: Curves.fastOutSlowIn,
-        entCurve: Curves.linearToEaseOut,
-        entReverseCurve: Curves.fastOutSlowIn,
         route: SettingsRoute(),
       );
     else if (settings.name == Routes.extendedSettings.value)
       return createRouteTransition(
-        transitionDuration: const Duration(milliseconds: 500),
         enterSystemUI:
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         exitSystemUI: () =>
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
-        entCurve: Curves.linearToEaseOut,
-        entReverseCurve: Curves.fastOutSlowIn,
         route: ExtendedSettingsRoute(),
       );
     else if (settings.name == Routes.exif.value)
       return createRouteTransition(
-        transitionDuration: const Duration(milliseconds: 500),
-        entCurve: Curves.linearToEaseOut,
-        entReverseCurve: Curves.fastOutSlowIn,
         route: AnnotatedRegion<SystemUiOverlayStyle>(
           value: AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
           child: ExifRoute(),

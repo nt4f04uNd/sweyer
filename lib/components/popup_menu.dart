@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:app/components/custom_icon_button.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

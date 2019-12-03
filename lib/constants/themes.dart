@@ -18,41 +18,46 @@ abstract class AppTheme {
   static final ThemeContainer<Color> bottomTrackPanel =
       ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
-  static final ThemeContainer<Color> searchFakeInput =
-      ThemeContainer(light: Colors.black.withOpacity(0.05), dark:Colors.white.withOpacity(0.05));
+  static final ThemeContainer<Color> searchFakeInput = ThemeContainer(
+      light: Colors.black.withOpacity(0.05),
+      dark: Colors.white.withOpacity(0.05));
 
   static final ThemeContainer<Color> popupMenu =
-      ThemeContainer(light:  Color(0xFFeeeeee), dark: Color(0xFF333333));
+      ThemeContainer(light: Color(0xFFeeeeee), dark: Color(0xFF333333));
 
   static final ThemeContainer<Color> declineButton =
       ThemeContainer(light: Color(0xFF606060), dark: null);
 
   static final ThemeContainer<Color> redFlatButton =
-      ThemeContainer(light:  Colors.red.shade300, dark:  Colors.red.shade200);
+      ThemeContainer(light: Colors.red.shade300, dark: Colors.red.shade200);
 
-  static final ThemeContainer<Color> splash =
-      ThemeContainer(light: Color(0x90c8c8c8), dark: Color(0x44c8c8c8));
-
+ static final ThemeContainer<Color> splash =
+      ThemeContainer(light: Color(0x90bbbbbb), dark: Color(0x44c8c8c8));
+      
   static final ThemeContainer<Color> activeIcon =
       ThemeContainer(light: Colors.grey.shade900, dark: null);
 
   static final ThemeContainer<Color> disabledIcon =
       ThemeContainer(light: Colors.grey.shade500, dark: Colors.grey.shade800);
 
-  static final ThemeContainer<Color> prevNextIcons =
-      ThemeContainer(light: Colors.grey.shade800.withOpacity(0.9), dark: Colors.white.withOpacity(0.9));
+  static final ThemeContainer<Color> prevNextIcons = ThemeContainer(
+      light: Colors.grey.shade800.withOpacity(0.9),
+      dark: Colors.white.withOpacity(0.9));
 
-  static final ThemeContainer<Color> prevNextBorder =
-      ThemeContainer(light: Colors.black.withOpacity(0.1), dark: Colors.white.withOpacity(0.1));
+  static final ThemeContainer<Color> prevNextBorder = ThemeContainer(
+      light: Colors.black.withOpacity(0.1),
+      dark: Colors.white.withOpacity(0.1));
 
   static final ThemeContainer<Color> playPauseIcon =
       ThemeContainer(light: Colors.grey.shade800, dark: Colors.white);
-      
-  static final ThemeContainer<Color> playPauseBorder =
-      ThemeContainer(light: Colors.black.withOpacity(0.15), dark: Colors.white.withOpacity(0.15));
 
-  static final ThemeContainer<Color> sliderInactive =
-      ThemeContainer(light: Colors.black.withOpacity(0.2), dark: Colors.white.withOpacity(0.2));
+  static final ThemeContainer<Color> playPauseBorder = ThemeContainer(
+      light: Colors.black.withOpacity(0.15),
+      dark: Colors.white.withOpacity(0.15));
+
+  static final ThemeContainer<Color> sliderInactive = ThemeContainer(
+      light: Colors.black.withOpacity(0.2),
+      dark: Colors.white.withOpacity(0.2));
 
   static final ThemeContainer<Color> modal =
       ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
@@ -60,12 +65,23 @@ abstract class AppTheme {
   static final ThemeContainer<Color> drawer =
       ThemeContainer(light: Colors.white, dark: AppColors.grey);
 
-            
-  static final ThemeContainer<Color> drawerListItem =
-      ThemeContainer(light:  Colors.deepPurple.shade500, dark:  Colors.deepPurple.shade300);
+  static final ThemeContainer<Color> drawerListItem = ThemeContainer(
+      light: Colors.deepPurple.shade500, dark: Colors.deepPurple.shade300);
+
+  static final ThemeContainer<Color> refreshIndicatorArrow =
+      ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
+  static final ThemeContainer<Color> refreshIndicatorBackground =
+      ThemeContainer(light:Colors.deepPurple, dark: AppColors.greyLight);
 
   static final ThemeContainer<ThemeData> materialApp = ThemeContainer(
     light: ThemeData(
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: OpenUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
+        },
+      ),
       appBarTheme: AppBarTheme(
         brightness: Brightness.light,
         color: Colors.white,
@@ -90,6 +106,13 @@ abstract class AppTheme {
       cursorColor: Colors.deepPurple,
     ),
     dark: ThemeData(
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: OpenUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
+        },
+      ),
       appBarTheme: AppBarTheme(
         // brightness: Brightness.dark,
         color: AppColors.grey,
@@ -146,12 +169,12 @@ abstract class AppSystemUIThemes {
   );
 
   /// Theme for dialog screen
-  /// 
+  ///
   /// TODO: implement this with dialogs
   static final ThemeContainer<SystemUiOverlayStyle> dialogScreen =
       ThemeContainer(
     light:
-        allScreens.light.copyWith(systemNavigationBarColor:Color(0xffaaaaaa)),
+        allScreens.light.copyWith(systemNavigationBarColor: Color(0xffaaaaaa)),
     dark: allScreens.dark.copyWith(systemNavigationBarColor: Color(0xff111111)),
   );
 }
@@ -171,7 +194,7 @@ class ThemeContainer<T> {
       Theme.of(context).brightness == Brightness.dark ? dark : light;
 
   /// Copy `auto`, but accepts brightness instead of context
-  /// 
+  ///
   /// Also checks theme and automatically returns corresponding ui style
   ///
   /// Requires `Brightness`

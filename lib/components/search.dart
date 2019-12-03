@@ -7,7 +7,6 @@ import 'package:app/constants/themes.dart';
 import 'package:app/player/playlist.dart';
 import 'package:app/player/prefs.dart';
 import 'package:app/player/song.dart';
-import 'package:app/player/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/custom_search.dart' as custom_search;
 
@@ -33,7 +32,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   @override
   Widget buildLeading(BuildContext context) {
     return CustomIconButton(
-       splashColor:AppTheme.splash.auto(context),
+      splashColor: AppTheme.splash.auto(context),
       icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
       onPressed: () {
         close(context, null);
@@ -61,7 +60,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
           : Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: CustomIconButton(
-                 splashColor: AppTheme.splash.auto(context),
+                splashColor: AppTheme.splash.auto(context),
                 icon: const Icon(Icons.clear),
                 color: Theme.of(context).iconTheme.color,
                 onPressed: () {
@@ -143,29 +142,32 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
     return Stack(
       children: <Widget>[
-        ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics (),
-            // FIXME add gesture detector that closes keyboard on scroll
-            padding: EdgeInsets.only(bottom: 65, top: 0),
-            itemCount: searched.length,
-            itemBuilder: (context, index) {
-              return StreamBuilder(
-                  stream: PlaylistControl.onSongChange,
-                  builder: (context, snapshot) {
-                    return TrackTile(
-                      index,
-                      key: UniqueKey(),
-                      song: searchedList[index],
-                      playing: searchedList[index].id ==
-                          PlaylistControl.currentSong?.id,
-                      additionalClickCallback: () {
-                        _writeInputToSearchHistory(query);
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        PlaylistControl.setSearchedPlaylist(searched.toList());
-                      },
-                    );
-                  });
-            }),
+        Scrollbar(
+          child: ListView.builder(
+              physics: const BouncingScrollPhysics(),
+              // FIXME add gesture detector that closes keyboard on scroll
+              padding: EdgeInsets.only(bottom: 65, top: 0),
+              itemCount: searched.length,
+              itemBuilder: (context, index) {
+                return StreamBuilder(
+                    stream: PlaylistControl.onSongChange,
+                    builder: (context, snapshot) {
+                      return TrackTile(
+                        index,
+                        key: UniqueKey(),
+                        song: searchedList[index],
+                        playing: searchedList[index].id ==
+                            PlaylistControl.currentSong?.id,
+                        additionalClickCallback: () {
+                          _writeInputToSearchHistory(query);
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          PlaylistControl.setSearchedPlaylist(
+                              searched.toList());
+                        },
+                      );
+                    });
+              }),
+        ),
         BottomTrackPanel(),
       ],
     );
@@ -250,11 +252,11 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                 color: Theme.of(context).hintColor,
               )),
           Padding(
-            padding: const EdgeInsets.only(right:4.0),
+            padding: const EdgeInsets.only(right: 4.0),
             child: Padding(
-              padding: const EdgeInsets.only(right:3.0,top:5.0),
+              padding: const EdgeInsets.only(right: 3.0, top: 5.0),
               child: CustomIconButton(
-                 splashColor: AppTheme.splash.auto(context),
+                  splashColor: AppTheme.splash.auto(context),
                   icon: Icon(Icons.delete),
                   // size: 45.0,
                   color: Theme.of(context).hintColor,
@@ -262,7 +264,8 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                     ShowFunctions.showDialog(
                       context,
                       title: Text("Очистить историю поиска"),
-                      content: Text("Вы действительно хотите очистить историю?"),
+                      content:
+                          Text("Вы действительно хотите очистить историю?"),
                       acceptButton: DialogFlatButton(
                         child: Text('Удалить'),
                         textColor: AppTheme.redFlatButton.auto(context),

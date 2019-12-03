@@ -36,7 +36,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
           backgroundColor: Colors.transparent,
           title: Text("Настройки",
               style: TextStyle(color: Theme.of(context).textTheme.title.color)),
-          leading:CustomBackButton(),
+          leading: CustomBackButton(),
           automaticallyImplyLeading: false,
         ),
       ),
@@ -50,19 +50,27 @@ class _SettingsRouteState extends State<SettingsRoute> {
                 Navigator.of(context).pushNamed(Routes.extendedSettings.value);
               },
             ),
-            GestureDetector(
-              onTap: _switchTheme,
-              child: ListTile(
-                title: Text("Темная тема"),
-                trailing: Switch(
-                  activeColor: Theme.of(context).primaryColor,
-                  value: _switched,
-                  onChanged: (value) {
-                    _switchTheme();
-                  },
-                ),
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: _switchTheme,
+            //   child: ListTile(
+            //     title: Text("Темная тема"),
+            //     trailing: Switch(
+            //       activeColor: Theme.of(context).primaryColor,
+            //       value: _switched,
+            //       onChanged: (value) {
+            //         _switchTheme();
+            //       },
+            //     ),
+            //   ),
+            // ),
+            SwitchListTile(
+              title: Text("Темная тема"),
+              activeColor: Theme.of(context).primaryColor,
+              value: _switched,
+              onChanged: (value) {
+                _switchTheme();
+              },
+            )
           ],
         ),
       ),
