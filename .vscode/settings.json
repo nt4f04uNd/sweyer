@@ -1,5 +1,5 @@
 {
-   "java.configuration.updateBuildConfiguration": "interactive",
+   "java.configuration.updateBuildConfiguration": "disabled",
    "cSpell.words": [
       "BACKSCROLLCONTROLLER",
       "Exif",

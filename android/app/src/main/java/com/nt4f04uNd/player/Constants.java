@@ -1,6 +1,7 @@
 package com.nt4f04uNd.player;
 
 public class Constants {
+   public static final String LogTag = "com.nt4f04und.player";
 
    public static final String EVENT_CHANNEL_STREAM = "EVENT_CHANNEL_STREAM";
    public static final String PLAYER_CHANNEL_STREAM = "PLAYER_CHANNEL_STREAM";

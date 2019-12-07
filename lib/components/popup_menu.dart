@@ -734,8 +734,9 @@ Future<T> showCustomMenu<T>({
   assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
   String label = semanticLabel;
-  switch (defaultTargetPlatform) {
+  switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
       label = semanticLabel;
       break;
     case TargetPlatform.android:
@@ -844,8 +845,8 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
     this.elevation = 8.0,
     this.child,
     this.icon,
-    this.buttonSize =  40.0,
-    this.buttonIconSize =  24.0,
+    this.buttonSize = 40.0,
+    this.buttonIconSize = 24.0,
     this.offset = Offset.zero,
     this.enabled = true,
   })  : assert(itemBuilder != null),
@@ -964,6 +965,7 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
       case TargetPlatform.fuchsia:
         return const Icon(Icons.more_vert);
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return const Icon(Icons.more_horiz);
     }
     return null;
@@ -978,10 +980,10 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
             child: widget.child,
           )
         : CustomIconButton(
-           splashColor: AppTheme.splash.auto(context),
+            splashColor: AppTheme.splash.auto(context),
             icon: widget.icon ?? _getIcon(Theme.of(context).platform),
             size: widget.buttonSize,
-            iconSize:  widget.buttonIconSize,
+            iconSize: widget.buttonIconSize,
             tooltip: widget.tooltipEnabled
                 ? widget.tooltip ??
                     MaterialLocalizations.of(context).showMenuTooltip
