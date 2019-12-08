@@ -1,5 +1,6 @@
 package com.nt4f04uNd.player.handlers;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,10 +22,11 @@ import androidx.core.app.NotificationManagerCompat;
  * Handler for notifications
  */
 public class NotificationHandler {
-/**
- * @param appContext should be from `getApplicationContext()`
- * */
-    public NotificationHandler(Context appContext) {
+    /**
+     * @param appContext should be from `getApplicationContext()`
+     */
+    public static void init(Context appContext) {
+
         // Create notifications channel
         createNotificationChannel(appContext);
 
@@ -63,18 +65,18 @@ public class NotificationHandler {
     /**
      * A notification intent filter
      */
-    public IntentFilter intentFilter = new IntentFilter();
+    public static IntentFilter intentFilter = new IntentFilter();
 
-    private final NotificationManagerCompat notificationManager;
-    private final PendingIntent playPendingIntent;
-    private final PendingIntent pausePendingIntent;
-    private final PendingIntent prevPendingIntent;
-    private final PendingIntent nextPendingIntent;
+    private static NotificationManagerCompat notificationManager;
+    private static PendingIntent playPendingIntent;
+    private static PendingIntent pausePendingIntent;
+    private static PendingIntent prevPendingIntent;
+    private static PendingIntent nextPendingIntent;
     /**
      * Intent that will fire when the user taps the notification
      * Will open application
      */
-    private final PendingIntent pendingNotificationIntent;
+    private static PendingIntent pendingNotificationIntent;
 
     static private void createNotificationChannel(Context appContext) {
         // Create the NotificationChannel, but only on API 26+ because
@@ -102,7 +104,7 @@ public class NotificationHandler {
      *
      * @param appContext should be from `getApplicationContext()`
      */
-    public void buildNotification(Context appContext, String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
+    public static void buildNotification(Context appContext, String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext,
                 Constants.EVENT_NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -123,7 +125,34 @@ public class NotificationHandler {
         notificationManager.notify(0, builder.build());
     }
 
-    public void closeNotification() {
+    /**
+     * Creates media notification with buttons
+     * When notification is clicked, the app will be opened
+     *
+     * @param appContext should be from `getApplicationContext()`
+     */
+    public static Notification getForegroundNotification(Context appContext, String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext,
+                Constants.EVENT_NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
+                .setSmallIcon(R.drawable.round_music_note_white_48)
+                .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length)).setOngoing(true) // Persistent
+                // setting
+                .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
+                // notification
+                .setContentTitle(title).setContentText(artist)
+                .addAction(R.drawable.round_skip_previous_black_36, "Previous", prevPendingIntent)
+                .addAction(isPlaying ? R.drawable.round_pause_black_36 : R.drawable.round_play_arrow_black_36,
+                        isPlaying ? "Pause" : "Play", isPlaying ? pausePendingIntent : playPendingIntent)
+                .addAction(R.drawable.round_skip_next_black_36, "Next", nextPendingIntent);
+
+
+        return builder.build();
+    }
+
+    public static void closeNotification() {
         notificationManager.cancel(0);
     }
 }

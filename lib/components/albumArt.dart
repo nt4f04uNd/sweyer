@@ -118,11 +118,17 @@ class _AlbumArtPlaceholder extends StatelessWidget {
         ),
         padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round ? 8 : 10),
         child: LayoutBuilder(builder: (context, constraint) {
-          return SvgPicture.asset(
-            'images/icons/note_rounded.svg',
-          );
+          // return SvgPicture.asset(
+          //   'images/icons/note_rounded.svg',
+          // );
+          return isLarge
+              ? SvgPicture.asset(
+                  'images/icons/note_rounded.svg',
+                )
+              : Image.asset('images/placeholder_thumb.png');
         }),
       );
+      return Text("T");
     });
   }
 }

@@ -1,7 +1,7 @@
 import 'package:app/components/custom_icon_button.dart';
 import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/logger.dart';
+import 'package:app/logic/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

@@ -39,8 +39,19 @@ public abstract class SongFetcher {
         }
 
         while (cursor.moveToNext()) {
-            songs.add(new Song(cursor.getInt(0), cursor.getString(1), cursor.getString(2), getAlbumArt(appContext.getContentResolver(), cursor.getInt(3)),
-                    cursor.getString(4), cursor.getString(5), cursor.getInt(6), cursor.getInt(7)).toJson());
+            songs.add(
+                    Song.jsonString(
+                            cursor.getInt(0),
+                            cursor.getString(1),
+                            cursor.getString(2),
+                            getAlbumArt(appContext.getContentResolver(),
+                                    cursor.getInt(3)),
+                            cursor.getString(4),
+                            cursor.getString(5),
+                            cursor.getInt(6),
+                            cursor.getInt(7)
+                    )
+            );
         }
         cursor.close();
         return songs;

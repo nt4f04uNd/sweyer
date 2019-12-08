@@ -1,10 +1,15 @@
 import 'package:app/components/custom_icon_button.dart';
-import 'package:app/player/player_widgets.dart';
+import 'package:app/logic/player/player_widgets.dart';
 import 'package:app/constants/constants.dart';
-import 'package:app/player/playlist.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:app/logic/player/playlist.dart';
+
+
+// import 'package:audioplayers/audioplayers.dart';
+import 'package:app/logic/player/nativePlayer.dart';
+
+
 import 'package:flutter/material.dart';
-import 'package:app/player/player.dart';
+import 'package:app/logic/player/player.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'albumArt.dart';
 import 'animatedPlayPauseButton.dart';

@@ -1,21 +1,27 @@
 package com.nt4f04uNd.player;
 
+import com.nt4f04uNd.player.channels.AudioFocusChannelHandler;
+import com.nt4f04uNd.player.channels.GeneralChannelHandler;
+import com.nt4f04uNd.player.channels.NotificationChannelHandler;
+import com.nt4f04uNd.player.channels.PlayerChannelWrapper;
+import com.nt4f04uNd.player.channels.SongChannelHandler;
 import com.nt4f04uNd.player.handlers.*;
+import com.nt4f04uNd.player.player.PlayerForegroundService;
 import com.nt4f04uNd.player.receivers.*;
 import com.nt4f04uNd.player.songs.*;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
+import io.flutter.Log;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.util.Log;
 
 // Method channel
 import io.flutter.plugin.common.MethodChannel;
@@ -23,175 +29,206 @@ import io.flutter.plugin.common.MethodChannel;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import android.view.KeyEvent;
-import android.media.session.MediaSession;
-
 import android.os.AsyncTask;
 
 public class MainActivity extends FlutterActivity {
 
-   private static IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+    private static IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 
-   private static NotificationReceiver myNotificationReceiver = null;
-   private static BecomingNoisyReceiver myNoisyAudioStreamReceiver = null;
+    private static NotificationReceiver myNotificationReceiver = null;
+    private static BecomingNoisyReceiver myNoisyAudioStreamReceiver = null;
 
-   private static MethodChannel playerChannel;
-   private static MethodChannel songsChannel;
-   private static EventChannel eventChannel;
+    private static MethodChannel audioFocusChannel;
+    private static EventChannel eventChannel;
+    private static MethodChannel generalChannel;
+    private static MethodChannel mediaButtonChannel;
+    private static MethodChannel notificationChannel;
+    private static MethodChannel playerChannel;
+    private static MethodChannel songsChannel;
 
-   private AudioFocusHandler audioFocusHandler;
-   private NotificationHandler notificationHandler;
-   private MediaButtonsHandler mediaButtonsHandler;
+    private static PlayerChannelWrapper playerChannelWrapper;
 
-   private class AudioFocusHandler extends AudioFocusHandlerAbstraction {
-      AudioFocusHandler() {
-         super(getApplicationContext());
-      }
+    private class OnAudioFocusListener extends com.nt4f04uNd.player.handlers.OnAudioFocusChangeListener {
+        @Override
+        protected void onFocusGain() {
+            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
+            audioFocusChannel.invokeMethod(
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN
+            );
+        }
 
-      @Override
-      protected void onFocusGain() {
-         Log.w(Constants.LogTag, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
-         playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
-               Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
-      }
+        @Override
+        protected void onFocusLoss() {
+            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
+            audioFocusChannel.invokeMethod(
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS
+            );
+        }
 
-      @Override
-      protected void onFocusLoss() {
-         Log.w(Constants.LogTag, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
-         playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
-               Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
-      }
+        @Override
+        protected void onFocusLossTransient() {
+            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
+            audioFocusChannel.invokeMethod(
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT
+            );
+        }
 
-      @Override
-      protected void onFocusLossTransient() {
-         Log.w(Constants.LogTag, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
-         playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
-               Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
-      }
+        @Override
+        protected void onFocusLossTransientCanDuck() {
+            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
+            audioFocusChannel.invokeMethod(
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+            );
+        }
+    }
 
-      @Override
-      protected void onFocusLossTransientCanDuck() {
-         Log.w(Constants.LogTag, Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
-         playerChannel.invokeMethod(Constants.PLAYER_METHOD_FOCUS_CHANGE,
-               Constants.PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
-      }
-   }
+    private class OnMediaButtonListener extends com.nt4f04uNd.player.handlers.OnMediaButtonListener {
 
-   private static class TaskSearchSongs extends AsyncTask<Void, Void, List<String>> {
-      private WeakReference<Context> appReference;
+        @Override
+        protected void onAudioTrack() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_AUDIO_TRACK);
+        }
 
-      // only retain a weak reference to the activity
-      // see https://stackoverflow.com/a/46166223/9710294
-      TaskSearchSongs(Context context) {
-         appReference = new WeakReference<>(context);
-      }
+        @Override
+        protected void onFastForward() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_FAST_FORWARD);
+        }
 
-      @Override
-      protected List<String> doInBackground(Void... params) {
-         return SongFetcher.retrieveSongs(appReference.get());
-      }
+        @Override
+        protected void onRewind() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_REWIND);
+        }
 
-      @Override
-      protected void onPostExecute(List<String> result) {
-         songsChannel.invokeMethod(Constants.SONGS_METHOD_METHOD_SEND_SONGS, result);
-      }
-   }
+        @Override
+        protected void onNext() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_NEXT);
+        }
 
-   /**
-    * Check for if Intent action is VIEW
-    */
-   private boolean isIntentActionView() {
-      Intent intent = getIntent();
-      return Intent.ACTION_VIEW.equals(intent.getAction());
-   }
+        @Override
+        protected void onPrevious() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_PREVIOUS);
+        }
 
-   @Override
-   protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      GeneratedPluginRegistrant.registerWith(this);
+        @Override
+        protected void onPlayPause() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_PLAY_PAUSE);
+        }
 
-      audioFocusHandler = new AudioFocusHandler();
-      notificationHandler = new NotificationHandler(getApplicationContext());
-      mediaButtonsHandler = new MediaButtonsHandler(getApplicationContext(), playerChannel);
+        @Override
+        protected void onPlay() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_PLAY);
+        }
 
-      // Setup playerChannel
-      playerChannel = new MethodChannel(getFlutterView(), Constants.PLAYER_CHANNEL_STREAM);
-      // Setup songsChannel
-      songsChannel = new MethodChannel(getFlutterView(), Constants.SONGS_CHANNEL_STREAM);
-      // Setup event channel
-      eventChannel = new EventChannel(getFlutterView(), Constants.EVENT_CHANNEL_STREAM);
+        @Override
+        protected void onStop() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_STOP);
+        }
 
-      eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
-         @Override
-         public void onListen(Object args, final EventChannel.EventSink events) {
-            myNotificationReceiver = new NotificationReceiver(events);
-            myNoisyAudioStreamReceiver = new BecomingNoisyReceiver(events);
-            registerReceiver(myNotificationReceiver, notificationHandler.intentFilter);
-            registerReceiver(myNoisyAudioStreamReceiver, noisyIntentFilter);
+        @Override
+        protected void onHook() {
+            mediaButtonChannel.invokeMethod(Constants.MEDIABUTTON_METHOD_CLICK,
+                    Constants.MEDIABUTTON_METHOD_CLICK_ARG_HOOK);
+        }
+    }
 
-            mediaButtonsHandler.turnActive();
-         }
+    public static class TaskSearchSongs extends AsyncTask<Void, Void, List<String>> {
+        private WeakReference<Context> appReference;
 
-         @Override
-         public void onCancel(Object args) {
-            unregisterReceiver(myNotificationReceiver);
-            unregisterReceiver(myNoisyAudioStreamReceiver);
-         }
-      });
+        // only retain a weak reference to the activity
+        // see https://stackoverflow.com/a/46166223/9710294
+        public TaskSearchSongs(Context context) {
+            appReference = new WeakReference<>(context);
+        }
 
-      playerChannel.setMethodCallHandler((call, result) -> {
-         // NOTE: this method is invoked on the main thread.
-         final String method = call.method;
-         if (method.equals(Constants.PLAYER_METHOD_REQUEST_FOCUS)) {
-            result.success(audioFocusHandler.requestFocus());
-         } else if (method.equals(Constants.PLAYER_METHOD_ABANDON_FOCUS)) {
-            result.success(audioFocusHandler.abandonFocus());
-         } else if (method.equals(Constants.PLAYER_METHOD_INTENT_ACTION_VIEW)) {
-            result.success(isIntentActionView());
-         } else if (method.equals(Constants.PLAYER_METHOD_NOTIFICATION_SHOW)) {
-            notificationHandler.buildNotification(getApplicationContext(),
-                  call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_TITLE),
-                  call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_ARTIST),
-                  call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_ALBUM_ART_BYTES),
-                  call.argument(Constants.PLAYER_METHOD_NOTIFICATION_SHOW_ARG_IS_PLAYING));
-            result.success("");
-         } else if (method.equals(Constants.PLAYER_METHOD_NOTIFICATION_CLOSE)) {
-            notificationHandler.closeNotification();
-            result.success("");
-         } else {
-            Log.w(Constants.LogTag, "playerChannel: Invalid method name call from Dart code");
-         }
-      });
+        @Override
+        protected List<String> doInBackground(Void... params) {
+            return SongFetcher.retrieveSongs(appReference.get());
+        }
 
-      songsChannel.setMethodCallHandler((call, result) -> {
-         // Note: this method is invoked on the main thread.
-         final String method = call.method;
-         if (method.equals(Constants.SONGS_METHOD_METHOD_RETRIEVE_SONGS)) {
-            // Run method on another thread
-            new TaskSearchSongs(getApplicationContext()).execute();
-            result.success("");
-         } else {
-            Log.w(Constants.LogTag, "songsChannel: Invalid method name call from Dart code");
-         }
-      });
-   }
+        @Override
+        protected void onPostExecute(List<String> result) {
+            songsChannel.invokeMethod(Constants.SONGS_METHOD_METHOD_SEND_SONGS, result);
+        }
+    }
 
-   @Override
-   protected void onDestroy() {
-      super.onDestroy();
-      audioFocusHandler.abandonFocus();
-      notificationHandler.closeNotification();
-      mediaButtonsHandler.release();
-      unregisterReceiver(myNoisyAudioStreamReceiver);
-      unregisterReceiver(myNotificationReceiver);
-   }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        GeneratedPluginRegistrant.registerWith(this);
+
+        // Setup action handlers
+        AudioFocusHandler.init(getApplicationContext(), new OnAudioFocusListener());
+        NotificationHandler.init(getApplicationContext());
+        MediaButtonHandler.init(getApplicationContext(), new OnMediaButtonListener());
+
+        // Setup channels
+        audioFocusChannel = new MethodChannel(getFlutterView(), Constants.AUDIO_FOCUS_CHANNEL);
+        eventChannel = new EventChannel(getFlutterView(), Constants.EVENT_CHANNEL_STREAM);
+        generalChannel = new MethodChannel(getFlutterView(), Constants.GENERAL_CHANNEL_STREAM);
+        mediaButtonChannel = new MethodChannel(getFlutterView(), Constants.MEDIABUTTON_CHANNEL_STREAM);
+        notificationChannel = new MethodChannel(getFlutterView(), Constants.NOTIFICATION_CHANNEL_STREAM);
+        playerChannel = new MethodChannel(getFlutterView(), Constants.PLAYER_CHANNEL_STREAM);
+        songsChannel = new MethodChannel(getFlutterView(), Constants.SONGS_CHANNEL_STREAM);
+
+        audioFocusChannel.setMethodCallHandler(new AudioFocusChannelHandler());
+        eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object args, final EventChannel.EventSink events) {
+                myNotificationReceiver = new NotificationReceiver(events);
+                myNoisyAudioStreamReceiver = new BecomingNoisyReceiver(events);
+                registerReceiver(myNotificationReceiver, NotificationHandler.intentFilter);
+                registerReceiver(myNoisyAudioStreamReceiver, noisyIntentFilter);
+
+                MediaButtonHandler.turnActive();
+            }
+
+            @Override
+            public void onCancel(Object args) {
+                unregisterReceiver(myNotificationReceiver);
+                unregisterReceiver(myNoisyAudioStreamReceiver);
+            }
+        });
+        generalChannel.setMethodCallHandler(new GeneralChannelHandler(this));
+        notificationChannel.setMethodCallHandler(new NotificationChannelHandler(getApplicationContext()));
+        playerChannelWrapper = new PlayerChannelWrapper(playerChannel, getApplicationContext());
+        songsChannel.setMethodCallHandler(new SongChannelHandler(getApplicationContext()));
+
+
+//        Intent forService = new Intent(getApplicationContext(), PlayerForegroundService.class);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(forService);
+//        } else {
+//            startService(forService);
+//        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AudioFocusHandler.abandonFocus();
+        NotificationHandler.closeNotification();
+        MediaButtonHandler.release();
+        unregisterReceiver(myNoisyAudioStreamReceiver);
+        unregisterReceiver(myNotificationReceiver);
+    }
 }
 
-// TODO: add support for headset and/or bluetooth buttons (check vk)
 // TODO: probably? add launch intent broadcast receiver and get extra argument
 // that denotes that activity has been opened from notification
 
 // TODO: as I specify very big priority for mediabutton intent-filter, i should
-// add handler to start music when media buttonm got clicked, but application is
+// add handler to start music when media button gets clicked, but the application is
 // not started
-// TODO: add broadreceiver that will handle hook click in background

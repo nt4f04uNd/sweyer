@@ -4,15 +4,18 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/components/show_functions.dart';
 import 'package:app/constants/constants.dart' as Constants;
-import 'package:app/player/logger.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/prefs.dart';
+import 'package:app/logic/logger.dart';
+import 'playlist.dart';
+import 'package:app/logic/prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:audioplayers/audioplayers.dart';
+
+import 'nativePlayer.dart';
+// import 'package:audioplayers/audioplayers.dart';
+
 import 'package:flutter/services.dart';
 
-/// VIEW https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
+/// SEE https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
 import 'package:flutter/services.dart' show rootBundle;
 
 /// Type for audio manager focus
@@ -43,13 +46,19 @@ abstract class MusicPlayer {
   /// Image bytes to display in notification
   static Uint8List _placeholderImgBytes;
 
-  /// Channel for handling audio focus
-  static MethodChannel _playerChannel =
-      const MethodChannel(Constants.PlayerChannel.channelName);
+  static MethodChannel _audioFocusChannel =
+      const MethodChannel(Constants.AudioFocusChannel.CHANNEL_NAME);
 
   /// Event channel for receiving native android events
   static EventChannel _eventChannel =
-      const EventChannel(Constants.EventChannel.channelName);
+      const EventChannel(Constants.EventChannel.CHANNEL_NAME);
+
+  static MethodChannel _mediabuttonChannel =
+      const MethodChannel(Constants.MediaButtonChannel.CHANNEL_NAME);
+  static MethodChannel _notificationChannel =
+      const MethodChannel(Constants.NotificationChannel.CHANNEL_NAME);
+  // static MethodChannel _playerChannel =
+  //     const MethodChannel(Constants.PlayerChannel.CHANNEL_NAME);
 
   /// `[AudioPlayer]` player instance
   static final nativePlayerInstance =
@@ -167,7 +176,7 @@ abstract class MusicPlayer {
 
     _stateChangeSubscription = onPlayerStateChanged.listen((event) async {
       Logger.log("stateChange", event.toString());
-
+print("stateChange $event");
       switch (event) {
         case AudioPlayerState.PLAYING:
           _showNotification(
@@ -198,25 +207,29 @@ abstract class MusicPlayer {
 
     // TODO: see how to improve focus and implement gain delayed usage
     // Set listener for method calls for changing focus
-    _playerChannel.setMethodCallHandler((MethodCall call) async {
-      // debugPrint('${call.method}, ${call.arguments.toString()}');
+    _audioFocusChannel.setMethodCallHandler((MethodCall call) async {
+      debugPrint('${call.method}, ${call.arguments.toString()}');
 
-      if (call.method == Constants.PlayerChannel.methodFocusChange) {
+      if (call.method == Constants.AudioFocusChannel.METHOD_FOCUS_CHANGE) {
         switch (call.arguments) {
           // TODO: rewrite instead of these methods my class methods (resume, pause, etc.)
-          case Constants.PlayerChannel.argFocusGain:
+          case Constants
+              .AudioFocusChannel.METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN:
             int res = await _recursiveCallback(nativePlayerInstance.resume);
             if (res == 1) focusState = AudioFocusType.focus;
             break;
-          case Constants.PlayerChannel.argFocusLoss:
+          case Constants
+              .AudioFocusChannel.METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS:
             int res = await _recursiveCallback(nativePlayerInstance.pause);
             if (res == 1) focusState = AudioFocusType.no_focus;
             break;
-          case Constants.PlayerChannel.argFocusLossTrans:
+          case Constants.AudioFocusChannel
+              .METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT:
             int res = await _recursiveCallback(nativePlayerInstance.pause);
             if (res == 1) focusState = AudioFocusType.focus_delayed;
             break;
-          case Constants.PlayerChannel.argFocusLossTransCanDuck:
+          case Constants.AudioFocusChannel
+              .METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
             int res = await _recursiveCallback(nativePlayerInstance.pause);
             if (res == 1) focusState = AudioFocusType.focus_delayed;
             // TODO: implement volume change
@@ -224,28 +237,41 @@ abstract class MusicPlayer {
           default:
             throw Exception('Incorrect method argument came from native code');
         }
-      } else if (call.method ==
-          Constants.PlayerChannel.methodMediaButtonClick) {
+      }
+    });
+
+    _mediabuttonChannel.setMethodCallHandler((MethodCall call) async {
+      if (call.method ==
+          Constants.MediaButtonChannel.MEDIABUTTON_METHOD_CLICK) {
         Logger.log('playerChannel',
             'method: ${call.method}, argument ${call.arguments}');
 
-        if (call.arguments == Constants.PlayerChannel.argAudioTrack) {
+        if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_AUDIO_TRACK) {
           await playNext();
-        } else if (call.arguments == Constants.PlayerChannel.argFastForward) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_FAST_FORWARD) {
           await fastForward();
-        } else if (call.arguments == Constants.PlayerChannel.argRewind) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_REWIND) {
           await rewind();
-        } else if (call.arguments == Constants.PlayerChannel.argNext) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_NEXT) {
           await playNext();
-        } else if (call.arguments == Constants.PlayerChannel.argPrevious) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_PREVIOUS) {
           await playPrev();
-        } else if (call.arguments == Constants.PlayerChannel.argPlayPause) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_PLAY_PAUSE) {
           await playPause();
-        } else if (call.arguments == Constants.PlayerChannel.argPlay) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_PLAY) {
           await resume();
-        } else if (call.arguments == Constants.PlayerChannel.argStop) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_STOP) {
           await pause();
-        } else if (call.arguments == Constants.PlayerChannel.argHookButton) {
+        } else if (call.arguments ==
+            Constants.MediaButtonChannel.METHOD_CLICK_ARG_HOOK) {
           // Avoid errors when app is loading
           if (PlaylistControl.playReady) {
             DateTime now = DateTime.now();
@@ -329,25 +355,21 @@ abstract class MusicPlayer {
     _hookPressStack = 0;
   }
 
-  // TODO: add implementation for this function and change method name to `get_intent_action_view`
-  static Future<void> _isIntentActionView() async {
-    debugPrint((await _playerChannel
-            .invokeMethod(Constants.PlayerChannel.methodIntentActionView))
-        .toString());
-  }
-
   /// Request audio manager focus
   static Future<void> _requestFocus() async {
     if (focusState == AudioFocusType.no_focus) {
-      switch (await _playerChannel
-          .invokeMethod<String>(Constants.PlayerChannel.methodRequestFocus)) {
-        case Constants.PlayerChannel.returnRequestFail:
+      switch (await _audioFocusChannel.invokeMethod<String>(
+          Constants.AudioFocusChannel.METHOD_REQUEST_FOCUS)) {
+        case Constants.AudioFocusChannel
+            .METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED:
           focusState = AudioFocusType.no_focus;
           break;
-        case Constants.PlayerChannel.returnRequestGrant:
+        case Constants.AudioFocusChannel
+            .METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED:
           focusState = AudioFocusType.focus;
           break;
-        case Constants.PlayerChannel.returnRequestDelay:
+        case Constants.AudioFocusChannel
+            .METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED:
           focusState = AudioFocusType.focus_delayed;
           break;
       }
@@ -356,8 +378,8 @@ abstract class MusicPlayer {
 
   /// Abandon audio manager focus
   static Future<void> _abandonFocus() async {
-    await _playerChannel
-        .invokeMethod(Constants.PlayerChannel.methodAbandonFocus);
+    await _audioFocusChannel
+        .invokeMethod(Constants.AudioFocusChannel.METHOD_ABANDON_FOCUS);
     focusState = AudioFocusType.no_focus;
   }
 
@@ -382,19 +404,20 @@ abstract class MusicPlayer {
       }
     }
 
-    await _playerChannel
-        .invokeMethod(Constants.PlayerChannel.methodShowNotification, {
-      Constants.PlayerChannel.argTitle: title,
-      Constants.PlayerChannel.argArtist: artist,
-      Constants.PlayerChannel.argAlbumArtBytes: albumArtBytes,
-      Constants.PlayerChannel.argIsPlaying: isPlaying
+    await _notificationChannel
+        .invokeMethod(Constants.NotificationChannel.METHOD_SHOW, {
+      Constants.NotificationChannel.METHOD_SHOW_ARG_TITLE: title,
+      Constants.NotificationChannel.METHOD_SHOW_ARG_ARTIST: artist,
+      Constants.NotificationChannel.METHOD_SHOW_ARG_ALBUM_ART_BYTES:
+          albumArtBytes,
+      Constants.NotificationChannel.METHOD_SHOW_ARG_IS_PLAYING: isPlaying
     });
   }
 
   /// Method to hide notification
   static Future<void> _closeNotification() async {
-    await _playerChannel
-        .invokeMethod(Constants.PlayerChannel.methodCloseNotification);
+    await _notificationChannel
+        .invokeMethod(Constants.NotificationChannel.NOTIFICATION_METHOD_CLOSE);
   }
 
   static Future<void> switchLoopMode() async {
@@ -445,7 +468,7 @@ abstract class MusicPlayer {
 
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
-          await play(PlaylistControl.getNextSongId(songId), silent:silent);
+          await play(PlaylistControl.getNextSongId(songId), silent: silent);
           PlaylistControl.songs(PlaylistType.global).removeAt(
               PlaylistControl.getSongIndexById(songId)); //Remove broken track
           PlaylistControl.emitPlaylistChange();
@@ -465,7 +488,7 @@ abstract class MusicPlayer {
       if (res == 1)
         PlaylistControl.changeSong(songId);
       else
-        play(PlaylistControl.currentSongId, silent:silent);
+        play(PlaylistControl.currentSongId, silent: silent);
     }
   }
 
@@ -591,7 +614,7 @@ abstract class MusicPlayer {
   /// If provided `songId` - plays next from this id
   static Future<void> playNext({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getNextSongId(PlaylistControl.currentSongId);
-    await play(songId, silent:silent);
+    await play(songId, silent: silent);
   }
 
   /// Function that fires when prev track button got clicked
@@ -599,7 +622,7 @@ abstract class MusicPlayer {
   /// If provided `songId` - plays prev from this id
   static Future<void> playPrev({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPrevSongId(PlaylistControl.currentSongId);
-    await play(songId, silent:silent);
+    await play(songId, silent: silent);
   }
 
   /// Function that handles click on track tile

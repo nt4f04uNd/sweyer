@@ -7,14 +7,17 @@ import 'package:app/components/gestures.dart';
 import 'package:app/components/show_functions.dart';
 import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/player_widgets.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/song.dart';
+import 'package:app/logic/player/player_widgets.dart';
+import 'package:app/logic/player/playlist.dart';
+import 'package:app/logic/player/song.dart';
 import 'package:app/utils/switcher.dart';
-import 'package:audioplayers/audioplayers.dart';
+
+// import 'package:audioplayers/audioplayers.dart';
+import 'package:app/logic/player/nativePlayer.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:app/player/player.dart';
+import 'package:app/logic/player/player.dart';
 import 'custom_icon_button.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
 

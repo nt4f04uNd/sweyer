@@ -1,6 +1,6 @@
 import 'package:app/components/show_functions.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/theme.dart';
+import 'package:app/logic/player/playlist.dart';
+import 'package:app/logic/theme.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

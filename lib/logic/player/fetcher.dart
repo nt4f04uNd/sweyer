@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:app/player/song.dart';
 import 'package:app/utils/async.dart';
 import 'package:flutter/services.dart';
 import 'package:app/constants/constants.dart' as Constants;
+
+import 'song.dart';
 
 class SongsFetcher {
   /// Channel for handling audio focus
@@ -23,7 +24,7 @@ class SongsFetcher {
 
   SongsFetcher(this.saveJson) {
     _songsChannel.setMethodCallHandler((MethodCall call) async {
-      if (call.method == Constants.SongsChannel.methodSendSongs) {
+      if (call.method == Constants.SongsChannel.SONGS_METHOD_METHOD_RETRIEVE_SONGS) {
         // List to songs that come from channel
         // NOTE: cast method is must be here, `as` crashes code execution
         _getSongsFromChannel(call.arguments.cast<String>());
@@ -37,7 +38,7 @@ class SongsFetcher {
   Future<List<Song>> fetchSongs() async {
     await _fetchQueue.add(() {
       _songsChannel
-          .invokeMethod<String>(Constants.SongsChannel.methodRetrieveSongs);
+          .invokeMethod<String>(Constants.SongsChannel.SONGS_METHOD_METHOD_RETRIEVE_SONGS);
     });
     // Save it to local var to clear `_foundSongsTemp`
     List<Song> retSongs = _foundSongsTemp;

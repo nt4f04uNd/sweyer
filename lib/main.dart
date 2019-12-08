@@ -1,5 +1,5 @@
-import 'package:app/player/catcher.dart';
-import 'package:app/player/theme.dart';
+import 'package:app/logic/catcher.dart';
+import 'package:app/logic/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

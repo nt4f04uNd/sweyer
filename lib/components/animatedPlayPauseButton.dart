@@ -1,6 +1,11 @@
 import 'dart:async';
-import 'package:app/player/player.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:app/logic/player/player.dart';
+
+
+// import 'package:audioplayers/audioplayers.dart';
+import 'package:app/logic/player/nativePlayer.dart';
+
+
 import 'package:flutter/material.dart';
 import 'package:app/constants/themes.dart';
 

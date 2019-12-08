@@ -1,6 +1,6 @@
 import 'package:app/components/buttons.dart';
 import 'package:app/constants/routes.dart';
-import 'package:app/player/theme.dart';
+import 'package:app/logic/theme.dart';
 import 'package:flutter/material.dart';
 
 class SettingsRoute extends StatefulWidget {

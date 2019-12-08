@@ -7,10 +7,10 @@ import 'package:app/components/track_list.dart';
 import 'package:app/components/marquee.dart';
 import 'package:app/constants/routes.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/prefs.dart';
+import 'package:app/logic/player/playlist.dart';
+import 'package:app/logic/prefs.dart';
 import 'package:flutter/material.dart';
-import 'package:app/player/player.dart';
+import 'package:app/logic/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayerRoute extends StatefulWidget {

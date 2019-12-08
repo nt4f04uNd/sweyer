@@ -2,8 +2,8 @@ import 'package:app/components/buttons.dart';
 import 'package:app/components/custom_search.dart';
 import 'package:app/components/search.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/song.dart';
+import 'package:app/logic/player/playlist.dart';
+import 'package:app/logic/player/song.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 // This is a workaround to rename show functions

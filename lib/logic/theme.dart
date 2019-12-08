@@ -1,5 +1,5 @@
 import 'package:app/utils/async.dart';
-import 'package:app/player/prefs.dart';
+import 'package:app/logic/prefs.dart';
 import 'package:app/constants/themes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';

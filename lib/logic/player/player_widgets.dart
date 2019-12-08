@@ -1,4 +1,4 @@
-import 'package:app/player/player.dart';
+import 'player.dart';
 import 'package:flutter/material.dart';
 
 /// Component to show artist, or automatically show "Неизвестный исполнитель" instead of "<unknown>"

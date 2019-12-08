@@ -1,7 +1,31 @@
 // This is a file to all event and method channel constants
 
+abstract class AudioFocusChannel {
+  static const String CHANNEL_NAME = 'AUDIO_FOCUS_CHANNEL';
+
+  static const String METHOD_REQUEST_FOCUS = "AUDIOFOCUS_METHOD_REQUEST_FOCUS";
+  static const String METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED =
+      "AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED";
+  static const String METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED =
+      "AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED";
+  static const String METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED =
+      "AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED";
+  static const String METHOD_FOCUS_CHANGE = "AUDIOFOCUS_METHOD_FOCUS_CHANGE";
+  static const String METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN =
+      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN";
+  static const String METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS =
+      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS";
+  static const String METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT =
+      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT";
+  static const String
+      METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK =
+      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
+
+  static const String METHOD_ABANDON_FOCUS = "AUDIOFOCUS_METHOD_ABANDON_FOCUS";
+}
+
 abstract class EventChannel {
-  static const String channelName = 'EVENT_CHANNEL_STREAM';
+  static const String CHANNEL_NAME = 'EVENT_CHANNEL_STREAM';
 
   /// Event when user disconnects headset
   static const String eventBecomeNoisy =
@@ -17,79 +41,72 @@ abstract class EventChannel {
       'com.nt4f04uNd.player.EVENT_NOTIFICATION_PREV';
 }
 
-abstract class PlayerChannel {
-  static const String channelName = 'PLAYER_CHANNEL_STREAM';
+abstract class GeneralChannel {
+  static const String CHANNEL_NAME = 'GENERAL_CHANNEL_STREAM';
 
-  /// Focus change method
-  static const String methodFocusChange = 'PLAYER_METHOD_FOCUS_CHANGE';
-  // Arguments for focus change method
-  static const String argFocusGain =
-      "PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN";
-  static const String argFocusLoss =
-      "PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS";
+  static const String METHOD_INTENT_ACTION_VIEW =
+      "GENERAL_METHOD_INTENT_ACTION_VIEW";
 
-  /// Focus lost but will be returned soon
-  static const String argFocusLossTrans =
-      "PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT";
+  static const String KILL_ACTIVITY =
+      "GENERAL_METHOD_KILL_ACTIVITY";
+}
 
-  /// Focus lost but will be returned soon (possible not to stop audio and just reduce sound)
-  static const String argFocusLossTransCanDuck =
-      "PLAYER_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
+abstract class MediaButtonChannel {
+  static const String CHANNEL_NAME = 'MEDIABUTTON_CHANNEL_STREAM';
 
-  /// Request focus method
-  static const String methodRequestFocus = "PLAYER_METHOD_REQUEST_FOCUS";
-  // Possible returns for request method
-  static const String returnRequestFail =
-      "PLAYER_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED";
-
-  static const String returnRequestGrant =
-      "PLAYER_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED";
-
-  static const String returnRequestDelay =
-      "PLAYER_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED";
-
-  /// Abandon focus method
-  static const String methodAbandonFocus = "PLAYER_METHOD_ABANDON_FOCUS";
-
-  // Notifications methods
-  static const String methodShowNotification =
-      "PLAYER_METHOD_NOTIFICATION_SHOW";
-  static String argTitle = "PLAYER_METHOD_NOTIFICATION_SHOW_ARG_TITLE";
-  static String argArtist = "PLAYER_METHOD_NOTIFICATION_SHOW_ARG_ARTIST";
-  static String argAlbumArtBytes =
-      "PLAYER_METHOD_NOTIFICATION_SHOW_ARG_ALBUM_ART_BYTES";
-  static String argIsPlaying = "PLAYER_METHOD_NOTIFICATION_SHOW_ARG_IS_PLAYING";
-
-  static const String methodCloseNotification =
-      "PLAYER_METHOD_NOTIFICATION_CLOSE";
-
-  /// Method to check if intent action is view (when user opens audio file with that app)
-  static const String methodIntentActionView =
-      "PLAYER_METHOD_INTENT_ACTION_VIEW";
-
-  /// Click on headset hook button
+  static const String MEDIABUTTON_METHOD_CLICK = "MEDIABUTTON_METHOD_CLICK";
   // see
   // https://developer.android.com/reference/android/view/KeyEvent.html#KEYCODE_MEDIA_AUDIO_TRACK
   // for keycodes docs
-  static const String methodMediaButtonClick = "PLAYER_METHOD_MEDIA_BUTTON_CLICK";
-  static const String argAudioTrack = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_AUDIO_TRACK";
-  static const String argFastForward = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_FAST_FORWARD";
-  static const String argRewind = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_REWIND";
-  static const String argNext = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_NEXT";
-  static const String argPrevious = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PREVIOUS";
-  static const String argPlayPause = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY_PAUSE";
-  static const String argPlay = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY";
-  static const String argStop = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_STOP";
-  static const String argHookButton = "PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_HOOK";
+  static const String METHOD_CLICK_ARG_AUDIO_TRACK =
+      "MEDIABUTTON_METHOD_CLICK_ARG_AUDIO_TRACK";
+  static const String METHOD_CLICK_ARG_FAST_FORWARD =
+      "MEDIABUTTON_METHOD_CLICK_ARG_FAST_FORWARD";
+  static const String METHOD_CLICK_ARG_REWIND =
+      "MEDIABUTTON_METHOD_CLICK_ARG_REWIND";
+  static const String METHOD_CLICK_ARG_NEXT =
+      "MEDIABUTTON_METHOD_CLICK_ARG_NEXT";
+  static const String METHOD_CLICK_ARG_PREVIOUS =
+      "MEDIABUTTON_METHOD_CLICK_ARG_PREVIOUS";
+  static const String METHOD_CLICK_ARG_PLAY_PAUSE =
+      "MEDIABUTTON_METHOD_CLICK_ARG_PLAY_PAUSE";
+  static const String METHOD_CLICK_ARG_PLAY =
+      "MEDIABUTTON_METHOD_CLICK_ARG_PLAY";
+  static const String METHOD_CLICK_ARG_STOP =
+      "MEDIABUTTON_METHOD_CLICK_ARG_STOP";
+  static const String METHOD_CLICK_ARG_HOOK =
+      "MEDIABUTTON_METHOD_CLICK_ARG_HOOK";
+}
+
+abstract class NotificationChannel {
+  static const String CHANNEL_NAME = 'NOTIFICATION_CHANNEL_STREAM';
+
+  static final String METHOD_SHOW = "NOTIFICATION_METHOD_SHOW";
+  static final String METHOD_SHOW_ARG_TITLE =
+      "NOTIFICATION_METHOD_SHOW_ARG_TITLE";
+  static final String METHOD_SHOW_ARG_ARTIST =
+      "NOTIFICATION_METHOD_SHOW_ARG_ARTIST";
+  static final String METHOD_SHOW_ARG_ALBUM_ART_BYTES =
+      "NOTIFICATION_METHOD_SHOW_ARG_ALBUM_ART_BYTES";
+  static final String METHOD_SHOW_ARG_IS_PLAYING =
+      "NOTIFICATION_METHOD_SHOW_ARG_IS_PLAYING";
+
+  static final String NOTIFICATION_METHOD_CLOSE = "NOTIFICATION_METHOD_CLOSE";
+}
+
+abstract class PlayerChannel {
+  static const String CHANNEL_NAME = 'PLAYER_CHANNEL_STREAM';
+
 }
 
 abstract class SongsChannel {
   static const String channelName = 'SONGS_CHANNEL_STREAM';
 
   /// Retrieve songs method
-  static const String methodRetrieveSongs =
+  static final String SONGS_METHOD_METHOD_RETRIEVE_SONGS =
       "SONGS_METHOD_METHOD_RETRIEVE_SONGS";
 
   /// Method that sends found songs from native code to flutter code
-  static const String methodSendSongs = "SONGS_METHOD_METHOD_SEND_SONGS";
+   static final String SONGS_METHOD_METHOD_SEND_SONGS =
+      "SONGS_METHOD_METHOD_SEND_SONGS";
 }

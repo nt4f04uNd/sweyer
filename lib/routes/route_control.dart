@@ -1,8 +1,8 @@
 import 'package:app/components/route_transitions.dart';
 import 'package:app/components/show_functions.dart';
 import 'package:app/constants/constants.dart';
-import 'package:app/player/player.dart';
-import 'package:app/player/theme.dart';
+import 'package:app/logic/player/player.dart';
+import 'package:app/logic/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:app/routes/exif_route.dart';

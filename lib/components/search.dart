@@ -4,9 +4,9 @@ import 'package:app/components/custom_icon_button.dart';
 import 'package:app/components/show_functions.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/prefs.dart';
-import 'package:app/player/song.dart';
+import 'package:app/logic/player/playlist.dart';
+import 'package:app/logic/prefs.dart';
+import 'package:app/logic/player/song.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/custom_search.dart' as custom_search;
 

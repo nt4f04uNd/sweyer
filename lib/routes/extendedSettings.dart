@@ -1,8 +1,8 @@
 import 'package:app/components/buttons.dart';
 import 'package:app/components/show_functions.dart';
 import 'package:app/constants/themes.dart';
-import 'package:app/player/playlist.dart';
-import 'package:app/player/prefs.dart';
+import 'package:app/logic/player/playlist.dart';
+import 'package:app/logic/prefs.dart';
 import 'package:flutter/material.dart';
 
 class ExtendedSettingsRoute extends StatefulWidget {

@@ -9,13 +9,12 @@ import android.view.KeyEvent;
 import com.nt4f04uNd.player.Constants;
 
 import androidx.annotation.NonNull;
-import io.flutter.plugin.common.MethodChannel;
 
-public class MediaButtonsHandler {
-    /** @param appContext should be from `getApplicationContext()`
-     * @param methodChannel is methodChannel to call event methods (should be sort of playerChannel)
-     *  */
-    public MediaButtonsHandler(Context appContext, MethodChannel methodChannel) {
+public class MediaButtonHandler {
+    /**
+     * @param appContext should be from `getApplicationContext()`
+     */
+    public static void init(Context appContext, OnMediaButtonListener listener) {
         // TODO: change tag maybe and move it to Constants
         audioSession = new MediaSession(appContext, "TAG");
         audioSession.setCallback(new MediaSession.Callback() {
@@ -33,40 +32,31 @@ public class MediaButtonsHandler {
                     if (event.getAction() == KeyEvent.ACTION_DOWN) {
                         switch (event.getKeyCode()) {
                             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_AUDIO_TRACK);
+                                listener.onAudioTrack();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_FAST_FORWARD);
+                                listener.onFastForward();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_REWIND:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_REWIND);
+                                listener.onRewind();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_NEXT:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_NEXT);
+                                listener.onNext();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PREVIOUS);
+                                listener.onPrevious();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY_PAUSE);
+                                listener.onPlayPause();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_PLAY);
+                                listener.onPlay();
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_STOP:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_STOP);
+                                listener.onStop();
                                 break;
                             case KeyEvent.KEYCODE_HEADSETHOOK:
-                                methodChannel.invokeMethod(Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK,
-                                        Constants.PLAYER_METHOD_MEDIA_BUTTON_CLICK_ARG_HOOK);
+                                listener.onHook();
                                 break;
                         }
                     }
@@ -76,13 +66,15 @@ public class MediaButtonsHandler {
         });
     }
 
-    private final MediaSession audioSession;
+    private static MediaSession audioSession;
 
-    public void turnActive(){
+    public static void turnActive() {
         audioSession.setActive(true);
     }
 
-    public void release(){
+    public static void release() {
         audioSession.release();
     }
+
+
 }
