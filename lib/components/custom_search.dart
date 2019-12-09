@@ -1,6 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) The Chromium Authors.
+*  See ThirdPartyNotices.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
 
 import 'package:app/constants/routes.dart';
 import 'package:flutter/foundation.dart';

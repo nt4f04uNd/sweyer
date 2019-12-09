@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
@@ -176,7 +181,7 @@ abstract class MusicPlayer {
 
     _stateChangeSubscription = onPlayerStateChanged.listen((event) async {
       Logger.log("stateChange", event.toString());
-print("stateChange $event");
+      print("stateChange $event");
       switch (event) {
         case AudioPlayerState.PLAYING:
           _showNotification(

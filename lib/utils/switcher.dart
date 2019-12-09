@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+
 /// Dumb switcher, that changes its value from true to false
 abstract class Switcher<T> {
   Switcher(T value) : _value = value;
