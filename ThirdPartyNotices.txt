@@ -1,4 +1,4 @@
-All licenses are places inside "=========================================" closures
+All licenses are placed inside "=========================================" closures
 
 1. google/flutter.widgets (The Fuchsia Authors, or the Dart project authors, in file the first notation is used, in license they use the second, so it's not clear which is right)
 
