@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+
 import 'dart:async';
 import 'package:app/components/albumArt.dart';
 import 'package:app/components/animatedPlayPauseButton.dart';
