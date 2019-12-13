@@ -9,19 +9,26 @@ import io.flutter.Log;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
+import io.flutter.view.FlutterView;
 
-public class NotificationChannelHandler implements MethodCallHandler {
-    public NotificationChannelHandler(Context appContext) {
-        this.appContext = appContext;
+public class NotificationChannel implements MethodCallHandler {
+
+    public static void init(FlutterView view, Context appContext) {
+        channel = new MethodChannel(view, Constants.NOTIFICATION_CHANNEL_STREAM);
+        channel.setMethodCallHandler(new NotificationChannel());
+        NotificationHandler.init(appContext);
+    }
+    public static void kill(){
+        NotificationHandler.closeNotification();
     }
 
-    private Context appContext;
+    public static MethodChannel channel;
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
         final String method = call.method;
         if (method.equals(Constants.NOTIFICATION_METHOD_SHOW)) {
-            NotificationHandler.buildNotification(appContext,
+            NotificationHandler.buildNotification(
                     call.argument(Constants.NOTIFICATION_METHOD_SHOW_ARG_TITLE),
                     call.argument(Constants.NOTIFICATION_METHOD_SHOW_ARG_ARTIST),
                     call.argument(Constants.NOTIFICATION_METHOD_SHOW_ARG_ALBUM_ART_BYTES),

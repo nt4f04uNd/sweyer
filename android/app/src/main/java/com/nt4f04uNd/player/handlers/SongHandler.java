@@ -1,14 +1,39 @@
-package com.nt4f04uNd.player.songs;
+package com.nt4f04uNd.player.handlers;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 
+import com.nt4f04uNd.player.Constants;
+import com.nt4f04uNd.player.channels.SongChannel;
+import com.nt4f04uNd.player.player.Song;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class SongFetcher {
+public class SongHandler {
+    public static class TaskSearchSongs extends AsyncTask<Void, Void, List<String>> {
+        private WeakReference<Context> appReference;
+
+        // only retain a weak reference to the activity
+        // see https://stackoverflow.com/a/46166223/9710294
+        public TaskSearchSongs(Context context) {
+            appReference = new WeakReference<>(context);
+        }
+
+        @Override
+        protected List<String> doInBackground(Void... params) {
+            return retrieveSongs(appReference.get());
+        }
+
+        @Override
+        protected void onPostExecute(List<String> result) {
+            SongChannel.channel.invokeMethod(Constants.SONGS_METHOD_METHOD_SEND_SONGS, result);
+        }
+    }
 
     private static final String[] defaultProjection = {
             MediaStore.Audio.Media._ID,

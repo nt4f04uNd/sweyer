@@ -7,7 +7,8 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.PowerManager;
 
-import com.nt4f04uNd.player.channels.PlayerChannelWrapper;
+import com.nt4f04uNd.player.channels.PlayerChannel;
+import com.nt4f04uNd.player.handlers.PlayerHandler;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -31,10 +32,8 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     private int shouldSeekTo = -1;
 
     private MediaPlayer player;
-    private PlayerChannelWrapper playerChannel;
 
-    public Player(PlayerChannelWrapper playerChannel, String playerId) {
-        this.playerChannel = playerChannel;
+    public Player(String playerId) {
         this.playerId = playerId;
     }
 
@@ -136,7 +135,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.player.prepareAsync();
             } else if (this.prepared) {
                 this.player.start();
-                this.playerChannel.handleIsPlaying(this);
+                PlayerHandler.handleIsPlaying(this);
             }
         }
     }
@@ -201,10 +200,10 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     @Override
     public void onPrepared(final MediaPlayer mediaPlayer) {
         this.prepared = true;
-        playerChannel.handleDuration(this);
+        PlayerHandler.handleDuration(this);
         if (this.playing) {
             this.player.start();
-            playerChannel.handleIsPlaying(this);
+            PlayerHandler.handleIsPlaying(this);
         }
         if (this.shouldSeekTo >= 0) {
             this.player.seekTo(this.shouldSeekTo);
@@ -217,7 +216,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         if (releaseMode != ReleaseMode.LOOP) {
             this.stop();
         }
-        playerChannel.handleCompletion(this);
+        PlayerHandler.handleCompletion(this);
     }
 
     /**

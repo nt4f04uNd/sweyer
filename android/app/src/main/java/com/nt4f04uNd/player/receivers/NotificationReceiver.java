@@ -20,7 +20,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.w(Constants.LogTag, intent.getAction().toString());
+        Log.w(Constants.LogTag, intent.getAction());
         if (Constants.EVENT_NOTIFICATION_INTENT_PLAY.equals(intent.getAction())) {
             eventSink.success(Constants.EVENT_NOTIFICATION_INTENT_PLAY);
         } else if (Constants.EVENT_NOTIFICATION_INTENT_PAUSE.equals(intent.getAction())) {

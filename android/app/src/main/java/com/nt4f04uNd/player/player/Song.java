@@ -1,4 +1,4 @@
-package com.nt4f04uNd.player.songs;
+package com.nt4f04uNd.player.player;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -7,14 +7,14 @@ import org.json.JSONObject;
  * Class representing a song
  */
 public class Song {
-    private final int id;
-    private final String artist;
-    private final String album;
-    private final String albumArtUri;
-    private final String title;
-    private final String trackUri;
-    private final int duration;
-    private final int dateModified;
+    public final int id;
+    public final String artist;
+    public final String album;
+    public final String albumArtUri;
+    public final String title;
+    public final String trackUri;
+    public final int duration;
+    public final int dateModified;
 
     public Song(
             final int id,
@@ -51,6 +51,24 @@ public class Song {
             throw new RuntimeException(e);
         }
         return json.toString();
+    }
+
+    public static Song fromJson(JSONObject jsonObject) {
+        try {
+            return new Song(
+                    jsonObject.getInt("id"),
+                    jsonObject.getString("artist"),
+                    jsonObject.getString("album"),
+                    jsonObject.getString("albumArtUri"),
+                    jsonObject.getString("title"),
+                    jsonObject.getString("trackUri"),
+                    jsonObject.getInt("duration"),
+                    jsonObject.getInt("dateModified")
+            );
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String jsonString(

@@ -15,13 +15,15 @@ public abstract class AudioFocusHandler {
      * @param listener   instance of implemented listener
      */
     public static void init(Context appContext, OnAudioFocusChangeListener listener) {
-        audioManager = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
+        if(audioManager == null) {
+            audioManager = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
-            focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(listener).build();
-        } else {
-            afChangeListener = listener;
+            if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+                focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAcceptsDelayedFocusGain(true)
+                        .setOnAudioFocusChangeListener(listener).build();
+            } else {
+                afChangeListener = listener;
+            }
         }
     }
 
