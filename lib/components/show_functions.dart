@@ -59,7 +59,7 @@ abstract class ShowFunctions {
     // TODO: add indicator for a current sort feature
     showModalBottomSheet<void>(
         context: context,
-        backgroundColor: AppTheme.modal.auto(context),
+        backgroundColor: AppTheme.main.auto(context),
         builder: (BuildContext context) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

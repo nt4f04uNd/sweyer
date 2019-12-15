@@ -5,23 +5,27 @@ import android.content.Context;
 import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.handlers.MediaButtonHandler;
 
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.view.FlutterView;
 
 public class MediaButtonChannel implements MethodCallHandler {
-    public static void init(FlutterView view, Context appContext) {
+    public static void init(FlutterView view) {
         channel = new MethodChannel(view, Constants.MEDIABUTTON_CHANNEL_STREAM);
         channel.setMethodCallHandler(new MediaButtonChannel());
-        MediaButtonHandler.init(appContext);
         MediaButtonHandler.addListener(new ImplementedOnMediaButtonListener());
     }
     public static void kill(){
         MediaButtonHandler.release();
     }
 
-    public static MethodChannel channel;
+    private static MethodChannel channel;
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {

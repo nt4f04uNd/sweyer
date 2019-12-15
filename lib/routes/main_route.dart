@@ -4,9 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:app/components/buttons.dart';
+import 'package:app/constants/themes.dart';
+import 'package:app/logic/error_bridge.dart';
+import 'package:app/logic/launch.dart';
 import 'package:app/logic/permissions.dart';
 import 'package:app/logic/player/playlist.dart';
-import 'package:app/logic/theme.dart';
+import 'package:catcher/core/catcher.dart';
 import 'package:flutter/material.dart';
 import 'package:app/components/track_list.dart';
 import 'package:app/logic/player/player.dart';
@@ -20,13 +23,7 @@ class MainRouteState extends State<MainRoute> {
   @override
   void initState() {
     super.initState();
-    // Init music player
-    // It is not in main function, because we need catcher to catch errors
-    MusicPlayer.init();
-    // Init playlist control
-    PlaylistControl.init();
-    // Init theme control
-    ThemeControl.init();
+    LaunchControl.afterAppMount();
   }
 
   @override
@@ -55,6 +52,7 @@ class SearchingSongsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.main.auto(context),
       body: Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
           Padding(
@@ -87,6 +85,7 @@ class _SongsEmptyScreenState extends State<SongsEmptyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.main.auto(context),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -151,7 +150,9 @@ class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(Theme.of(context).brightness);
     return Scaffold(
+      backgroundColor: AppTheme.main.auto(context),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

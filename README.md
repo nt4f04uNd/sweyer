@@ -1,8 +1,21 @@
 # Flutter Music Player
 
 This is an open-source non-commercial repo of music player that is built with flutter
+This app is just my vision of how UI/UX in music apps should be
 
-You can pull it if you want, run `flutter build apk` and start testing it on your device (android only)
+You can pull it if you want, run `flutter build apk` and start testing it on your device (Android only)
+
+## In plans
+
+* Albums and artists grouping support
+* More extended playlist capabilities
+* Full media buttons and maximum devices support
+* Desktop widgets
+* Desktop context menu
+* Open music files with player
+* Flexible personalization settings
+* Exif-data editor
+* Integration with some music API (lyrics, album arts, etc., maybe even machine learning)
 
 <!-- ## Getting Started
 

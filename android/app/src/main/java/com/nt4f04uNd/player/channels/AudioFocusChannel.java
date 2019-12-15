@@ -1,6 +1,9 @@
-package com.nt4f04uNd.player.channels;
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-import android.content.Context;
+package com.nt4f04uNd.player.channels;
 
 import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.handlers.AudioFocusHandler;
@@ -12,16 +15,16 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.view.FlutterView;
 
 public class AudioFocusChannel implements MethodCallHandler {
-    public static void init(FlutterView view, Context appContext) {
+    public static void init(FlutterView view) {
         channel = new MethodChannel(view, Constants.AUDIO_FOCUS_CHANNEL);
         channel.setMethodCallHandler(new AudioFocusChannel());
-        AudioFocusHandler.init(appContext,new ImplementedOnAudioFocusListener());
-    }
-    public static void kill(){
-        AudioFocusHandler.abandonFocus();
     }
 
-    public static MethodChannel channel;
+    private static MethodChannel channel;
+
+    public static void invokeMethod(String method, String arg) {
+        if (channel != null) channel.invokeMethod(method, arg);
+    }
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
@@ -37,42 +40,5 @@ public class AudioFocusChannel implements MethodCallHandler {
         }
     }
 
-    static private class ImplementedOnAudioFocusListener extends com.nt4f04uNd.player.handlers.OnAudioFocusChangeListener {
-        @Override
-        protected void onFocusGain() {
-            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
-            channel.invokeMethod(
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN
-            );
-        }
-
-        @Override
-        protected void onFocusLoss() {
-            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
-            channel.invokeMethod(
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS
-            );
-        }
-
-        @Override
-        protected void onFocusLossTransient() {
-            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
-            channel.invokeMethod(
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT
-            );
-        }
-
-        @Override
-        protected void onFocusLossTransientCanDuck() {
-            Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
-            channel.invokeMethod(
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                    Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
-            );
-        }
-    }
 
 }

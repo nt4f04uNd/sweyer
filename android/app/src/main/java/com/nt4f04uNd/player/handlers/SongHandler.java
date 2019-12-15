@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.handlers;
 
 import android.content.ContentResolver;
@@ -13,6 +18,8 @@ import com.nt4f04uNd.player.player.Song;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.flutter.Log;
 
 public class SongHandler {
     public static class TaskSearchSongs extends AsyncTask<Void, Void, List<String>> {
@@ -31,7 +38,7 @@ public class SongHandler {
 
         @Override
         protected void onPostExecute(List<String> result) {
-            SongChannel.channel.invokeMethod(Constants.SONGS_METHOD_METHOD_SEND_SONGS, result);
+            SongChannel.channel.invokeMethod(Constants.SONGS_METHOD_SEND_SONGS, result);
         }
     }
 

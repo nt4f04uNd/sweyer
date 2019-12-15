@@ -18,14 +18,21 @@
          FlutterApplication and put your custom class here. -->
 
    <!-- TODO: Mipmap currently unused, probably should delete in the future -->
-   <application android:name="io.flutter.app.FlutterApplication" android:label="Музыка" android:icon="@drawable/ic_launcher_final_foreground" android:resizeableActivity="false">
-      <activity android:name=".MainActivity" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:screenOrientation="portrait" android:windowSoftInputMode="adjustNothing">
+   <application android:name="io.flutter.app.FlutterApplication" android:label="Музыка" android:icon="@mipmap/ic_launcher" android:resizeableActivity="false">
+      <activity android:name=".MainActivity"
+          android:launchMode="singleTop"
+          android:theme="@style/LaunchThemeSystemUILight"
+          android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+          android:hardwareAccelerated="true"
+          android:screenOrientation="portrait"
+          android:windowSoftInputMode="adjustNothing">
+<!--         android:theme="@style/LaunchThemeSystemUILight"-->
 
          <!-- This keeps the window background of the activity showing
                  until Flutter renders its first frame. It can be removed if
                  there is no splash screen (such as the default splash screen
                  defined in @style/LaunchTheme). -->
-         <meta-data android:name="io.flutter.app.android.SplashScreenUntilFirstFrame" android:value="true" />
+            <meta-data android:name="io.flutter.app.android.SplashScreenUntilFirstFrame" android:value="true" />
          <intent-filter>
             <action android:name="android.intent.action.MAIN"/>
             <category android:name="android.intent.category.LAUNCHER"/>
@@ -39,9 +46,9 @@
          </intent-filter>
       </activity>
 
-<!--      <service android:name="com.nt4f04uNd.player.player.PlayerForegroundService" android:enabled="true">-->
+      <service android:name="com.nt4f04uNd.player.player.PlayerForegroundService" android:enabled="true">
 
-<!--      </service>-->
+      </service>
 
    </application>
 </manifest>

@@ -108,10 +108,10 @@ abstract class SongsChannel {
   static const String channelName = 'SONGS_CHANNEL_STREAM';
 
   /// Retrieve songs method
-  static final String SONGS_METHOD_METHOD_RETRIEVE_SONGS =
-      "SONGS_METHOD_METHOD_RETRIEVE_SONGS";
+  static const String SONGS_METHOD_RETRIEVE_SONGS =
+      "SONGS_METHOD_RETRIEVE_SONGS";
 
   /// Method that sends found songs from native code to flutter code
-   static final String SONGS_METHOD_METHOD_SEND_SONGS =
-      "SONGS_METHOD_METHOD_SEND_SONGS";
+   static const String SONGS_METHOD_SEND_SONGS =
+      "SONGS_METHOD_SEND_SONGS";
 }

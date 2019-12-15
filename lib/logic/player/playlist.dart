@@ -149,12 +149,12 @@ abstract class PlaylistControl {
   static int _playingSongIdState;
 
   /// Controller for stream of playlist changes
-  static ManualStreamController _songsListChangeStreamController =
-      ManualStreamController();
+  static ManualStreamController<void> _songsListChangeStreamController =
+      ManualStreamController<void>();
 
   /// Controller for stream of current song changes
-  static ManualStreamController _songChangeStreamController =
-      ManualStreamController();
+  static ManualStreamController<void> _songChangeStreamController =
+      ManualStreamController<void>();
 
   /// Represents songs fetch on app start
   static bool initFetching = true;
@@ -242,12 +242,12 @@ abstract class PlaylistControl {
 
   /// Emit event to `onPlaylistListChange`
   static void emitPlaylistChange() {
-    _songsListChangeStreamController.emitEvent();
+    _songsListChangeStreamController.emitEvent(null);
   }
 
   /// Emit event to `onSongChange`
   static void emitSongChange() {
-    _songChangeStreamController.emitEvent();
+    _songChangeStreamController.emitEvent(null);
   }
 
   // Methods from playlist class

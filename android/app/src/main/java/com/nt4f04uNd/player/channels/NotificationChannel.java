@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.channels;
 
 import android.content.Context;
@@ -16,13 +21,12 @@ public class NotificationChannel implements MethodCallHandler {
     public static void init(FlutterView view, Context appContext) {
         channel = new MethodChannel(view, Constants.NOTIFICATION_CHANNEL_STREAM);
         channel.setMethodCallHandler(new NotificationChannel());
-        NotificationHandler.init(appContext);
     }
     public static void kill(){
         NotificationHandler.closeNotification();
     }
 
-    public static MethodChannel channel;
+    private static MethodChannel channel;
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {

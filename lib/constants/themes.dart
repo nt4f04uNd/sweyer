@@ -62,7 +62,8 @@ abstract class AppTheme {
       light: Colors.black.withOpacity(0.2),
       dark: Colors.white.withOpacity(0.2));
 
-  static final ThemeContainer<Color> modal =
+/// Main colors - `whiteDarkened` and `greyLight`
+  static final ThemeContainer<Color> main =
       ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
   static final ThemeContainer<Color> drawer =

@@ -1,13 +1,20 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *
+ *  Copyright (c) Luan Nico.
+ *  See ThirdPartyNotices.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.player;
 
 import android.content.Context;
+
 abstract class PlayerAbstract {
 
     protected static boolean objectEquals(Object o1, Object o2) {
         return o1 == null && o2 == null || o1 != null && o1.equals(o2);
     }
-
-    abstract String getPlayerId();
 
     abstract void play();
 
@@ -24,6 +31,8 @@ abstract class PlayerAbstract {
     abstract void configAttributes(boolean respectSilence, boolean stayAwake, Context context);
 
     abstract void setReleaseMode(ReleaseMode releaseMode);
+
+    abstract double getVolume();
 
     abstract int getDuration();
 

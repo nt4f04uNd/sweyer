@@ -1,0 +1,25 @@
+
+/// Wrapper for exception and stacktrace from catch clause
+class CaughtError {
+  final dynamic exception;
+  final StackTrace stackTrace;
+  CaughtError(this.exception, this.stackTrace);
+}
+typedef ReportCallback = void Function(CaughtError);
+
+
+/// Abstract class used to create error bridge between app initialization processes
+/// to bring error messages to UI to display them in dialog message
+abstract class CatcherErrorBridge {
+   static List<CaughtError> _queue = [];
+
+  static add(CaughtError e) {
+    _queue.add(e);
+  }
+
+  /// Applies a callback for each element in queue and clears it
+  static report(ReportCallback callback) {
+     _queue.forEach(callback);
+    _queue = null;
+  }
+}

@@ -1,3 +1,11 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *
+ *  Copyright (c) Luan Nico.
+ *  See ThirdPartyNotices.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.player;
 
 import android.content.Context;
@@ -7,17 +15,15 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.PowerManager;
 
-import com.nt4f04uNd.player.channels.PlayerChannel;
 import com.nt4f04uNd.player.handlers.PlayerHandler;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
+/** Basic wrapper over media player, very raw */
 public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     // TODO: logging
-    private Logger LOGGER = Logger.getLogger(Player.class.getCanonicalName());
-
-    private String playerId;
+    //private Logger LOGGER = Logger.getLogger(Player.class.getCanonicalName());
 
     private String url;
     private double volume = 1.0;
@@ -32,10 +38,6 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     private int shouldSeekTo = -1;
 
     private MediaPlayer player;
-
-    public Player(String playerId) {
-        this.playerId = playerId;
-    }
 
     /**
      * Setter methods
@@ -100,6 +102,12 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
      * Getter methods
      */
 
+
+    @Override
+    public double getVolume() {
+        return volume;
+    }
+
     @Override
     public int getDuration() {
         return this.player.getDuration();
@@ -108,11 +116,6 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     @Override
     public int getCurrentPosition() {
         return this.player.getCurrentPosition();
-    }
-
-    @Override
-    public String getPlayerId() {
-        return this.playerId;
     }
 
     @Override
@@ -135,7 +138,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.player.prepareAsync();
             } else if (this.prepared) {
                 this.player.start();
-                PlayerHandler.handleIsPlaying(this);
+                PlayerHandler.handleIsPlaying();
             }
         }
     }
@@ -203,7 +206,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         PlayerHandler.handleDuration(this);
         if (this.playing) {
             this.player.start();
-            PlayerHandler.handleIsPlaying(this);
+            PlayerHandler.handleIsPlaying();
         }
         if (this.shouldSeekTo >= 0) {
             this.player.seekTo(this.shouldSeekTo);

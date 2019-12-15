@@ -1,6 +1,10 @@
-
-// TODO: ADD AUDIOPLAYERS PLUGIN LICENSE AND DO FOR JAVA CODE PART THE SAME
-
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*
+*  Copyright (c) Luan Nico.
+*  See ThirdPartyNotices.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
 
@@ -199,7 +203,8 @@ class AudioPlayer {
   /// Creates a new instance and assigns an unique id to it.
   AudioPlayer({this.mode = PlayerMode.MEDIA_PLAYER}) {
     this.mode ??= PlayerMode.MEDIA_PLAYER;
-    playerId = _uuid.v4();
+    // playerId = _uuid.v4();
+    playerId = "0";
     players[playerId] = this;
   }
 

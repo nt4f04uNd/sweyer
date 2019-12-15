@@ -1,3 +1,11 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *
+ *  Copyright (c) Luan Nico.
+ *  See ThirdPartyNotices.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.channels;
 
 import android.content.Context;
@@ -5,12 +13,7 @@ import android.os.Handler;
 
 import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.handlers.PlayerHandler;
-import com.nt4f04uNd.player.player.Player;
 import com.nt4f04uNd.player.player.ReleaseMode;
-
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.flutter.Log;
 import io.flutter.plugin.common.MethodCall;
@@ -22,11 +25,9 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
     public static void init(FlutterView view, Context appContext) {
         channel = new MethodChannel(view, Constants.PLAYER_CHANNEL_STREAM);
         channel.setMethodCallHandler(new PlayerChannel());
-        appContext = appContext;
     }
 
     public static MethodChannel channel;
-    private static Context appContext;
 
     @Override
     public void onMethodCall(final MethodCall call, final MethodChannel.Result response) {
@@ -39,72 +40,59 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
     }
 
     private static void handleMethodCall(final MethodCall call, final MethodChannel.Result response) {
-        final String playerId = call.argument("playerId");
-        final String mode = call.argument("mode");
-        final Player player = PlayerHandler.getPlayer(playerId, mode);
-
+        // TODO: add getVolume
         switch (call.method) {
             case "play": {
-                final String url = call.argument("url");
-                final double volume = call.argument("volume");
-                final Integer position = call.argument("position");
-                final boolean respectSilence = call.argument("respectSilence");
-                final boolean isLocal = call.argument("isLocal");
-                final boolean stayAwake = call.argument("stayAwake");
-                player.configAttributes(respectSilence, stayAwake, appContext);
-                player.setVolume(volume);
-                player.setUrl(url, isLocal);
-                if (position != null && !mode.equals("PlayerMode.LOW_LATENCY")) {
-                    player.seek(position);
-                }
-                player.play();
+                PlayerHandler.play(
+                        call.argument("url"),
+                        call.argument("volume"),
+                        call.argument("position"),
+                        call.argument("respectSilence"),
+                        call.argument("isLocal"),
+                        call.argument("stayAwake")
+                );
                 break;
             }
             case "resume": {
-                player.play();
+                PlayerHandler.resume();
                 break;
             }
             case "pause": {
-                player.pause();
+                PlayerHandler.pause();
                 break;
             }
             case "stop": {
-                player.stop();
+                PlayerHandler.stop();
                 break;
             }
             case "release": {
-                player.release();
+                PlayerHandler.release();
                 break;
             }
             case "seek": {
-                final Integer position = call.argument("position");
-                player.seek(position);
+                PlayerHandler.seek(call.argument("position"));
                 break;
             }
             case "setVolume": {
-                final double volume = call.argument("volume");
-                player.setVolume(volume);
+                PlayerHandler.setVolume(call.argument("volume"));
                 break;
             }
             case "setUrl": {
-                final String url = call.argument("url");
-                final boolean isLocal = call.argument("isLocal");
-                player.setUrl(url, isLocal);
+                PlayerHandler.setUrl(call.argument("url"), call.argument("isLocal"));
                 break;
             }
             case "getDuration": {
-
-                response.success(player.getDuration());
+                response.success(PlayerHandler.getDuration());
                 return;
             }
             case "getCurrentPosition": {
-                response.success(player.getCurrentPosition());
+                response.success(PlayerHandler.getCurrentPosition());
                 return;
             }
             case "setReleaseMode": {
                 final String releaseModeName = call.argument("releaseMode");
                 final ReleaseMode releaseMode = ReleaseMode.valueOf(releaseModeName.substring("ReleaseMode.".length()));
-                player.setReleaseMode(releaseMode);
+                PlayerHandler.setReleaseMode(releaseMode);
                 break;
             }
             default: {
@@ -114,7 +102,6 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
         }
         response.success(1);
     }
-
 
 
 }

@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-   <color name="splash_background">#212121</color>
-   
-   <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
-      <item name="android:navigationBarColor">#000</item>
-      <!-- <item name="android:windowFullscreen">true</item> 
-      <item name="android:windowNoTitle">true</item>
-    <item name="android:windowActionBar">false</item> -->
-      <!-- Show a splash screen on the activity. Automatically removed when
-             Flutter draws its first frame -->
-      <item name="android:windowBackground">@drawable/launch_background</item>
-   </style>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="LaunchThemeSystemUILight" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:navigationBarColor">@color/main_light</item>
+        <item name="android:windowBackground">@drawable/launch_background_light</item>
+    </style>
+
+    <style name="LaunchThemeSystemUIDark" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:navigationBarColor">@color/main_dark</item>
+        <!-- Show a splash screen on the activity. Automatically removed when
+               Flutter draws its first frame -->
+        <!--        TODO:make theme respectful splash screen -->
+        <item name="android:windowBackground">@drawable/launch_background_light</item>
+    </style>
+
+
+    <color name="main_light">#eee</color>
+
+    <color name="main_dark">#262626</color>
+
 </resources>

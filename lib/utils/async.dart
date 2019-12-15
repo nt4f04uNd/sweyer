@@ -6,16 +6,16 @@
 import 'dart:async';
 
 /// Class to create, change and control stream
-class ManualStreamController {
+class ManualStreamController<T> {
   /// Stream controller used to create stream of changes on track list (just to notify)
-  StreamController<void> _controller = StreamController<void>.broadcast();
+  StreamController<T> _controller = StreamController<T>.broadcast();
 
   /// Get stream of notifier events about changes on track list
-  Stream<void> get stream => _controller.stream;
+  Stream<T> get stream => _controller.stream;
 
   /// Emit change event
-  void emitEvent() {
-    _controller.add(null);
+  void emitEvent(T value) {
+    _controller.add(value);
   }
 }
 

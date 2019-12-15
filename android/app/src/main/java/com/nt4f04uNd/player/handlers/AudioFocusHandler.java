@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.handlers;
 
 import android.content.Context;
@@ -7,22 +12,22 @@ import android.os.Build;
 import android.util.Log;
 
 import com.nt4f04uNd.player.Constants;
+import com.nt4f04uNd.player.channels.AudioFocusChannel;
 
 public abstract class AudioFocusHandler {
 
     /**
      * @param appContext should be from `getApplicationContext()`
-     * @param listener   instance of implemented listener
      */
-    public static void init(Context appContext, OnAudioFocusChangeListener listener) {
+    public static void init(Context appContext) {
         if(audioManager == null) {
             audioManager = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
 
             if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
                 focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAcceptsDelayedFocusGain(true)
-                        .setOnAudioFocusChangeListener(listener).build();
+                        .setOnAudioFocusChangeListener(new ImplementedOnAudioFocusListener()).build();
             } else {
-                afChangeListener = listener;
+                afChangeListener = new ImplementedOnAudioFocusListener();
             }
         }
     }
@@ -36,6 +41,8 @@ public abstract class AudioFocusHandler {
      * Focus request for audio manager
      */
     private static AudioFocusRequest focusRequest;
+
+    public static int focusState;
 
 
     /**
@@ -80,5 +87,46 @@ public abstract class AudioFocusHandler {
 
         Log.w(Constants.LogTag, "ABANDON FOCUS " + res);
         return res;
+    }
+
+    static public class ImplementedOnAudioFocusListener implements AudioManager.OnAudioFocusChangeListener {
+        @Override
+        final public void onAudioFocusChange(int focusChange) {
+            Log.w(Constants.LogTag, "ONFOCUSCHANGE: " + focusChange);
+
+            focusState = focusChange;
+
+            switch (focusChange) {
+                case AudioManager.AUDIOFOCUS_GAIN:
+                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
+                    AudioFocusChannel.invokeMethod(
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN
+                    );
+                    break;
+                case AudioManager.AUDIOFOCUS_LOSS:
+                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
+                    AudioFocusChannel.invokeMethod(
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS
+                    );
+                    break;
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
+                    AudioFocusChannel.invokeMethod(
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT
+                    );
+                    break;
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
+                    AudioFocusChannel.invokeMethod(
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
+                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+                    );
+                    break;
+            }
+        }
+
     }
 }

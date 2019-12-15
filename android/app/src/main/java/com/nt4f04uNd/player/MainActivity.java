@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player;
 
 import com.nt4f04uNd.player.channels.AudioFocusChannel;
@@ -15,6 +20,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -26,11 +33,15 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.IBinder;
+import android.view.View;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
 // Method channel
 
@@ -49,22 +60,58 @@ public class MainActivity extends FlutterActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        int nightModeFlags = getApplicationContext().getResources().getConfiguration().uiMode &
+                Configuration.UI_MODE_NIGHT_MASK;
+
+        switch (nightModeFlags) {
+            case Configuration.UI_MODE_NIGHT_YES:
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                setTheme(R.style.LaunchThemeSystemUIDark);
+                break;
+
+            case Configuration.UI_MODE_NIGHT_NO:
+                setTheme(R.style.LaunchThemeSystemUILight);
+                break;
+        }
+
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
 
-        // Setup channels
+
+        // Service
         // ----------------------------------------------------------------------------------
-        AudioFocusChannel.init(getFlutterView(), getApplicationContext());
-        GeneralChannel.init(getFlutterView(), this);
-        MediaButtonChannel.init(getFlutterView(), getApplicationContext());
-        SongChannel.init(getFlutterView(), getApplicationContext());
-        NotificationChannel.init(getFlutterView(), getApplicationContext());
-        PlayerChannel.init(getFlutterView(), getApplicationContext());
-        // ----------------------------------------------------------------------------------
+        Intent forService = new Intent(getApplicationContext(), PlayerForegroundService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(forService);
+        } else {
+            startService(forService);
+        }
+
+//        bindService(
+//                new Intent(this, PlayerForegroundService.class),
+//                serviceConnection,
+//                Context.BIND_AUTO_CREATE
+//        );
+
+
 
         // Setup handlers
         // ----------------------------------------------------------------------------------
-        SerializationHandler.init(getApplicationContext());
+//        PlayerHandler.init(getApplicationContext());
+//        AudioFocusHandler.init(getApplicationContext());
+//        MediaButtonHandler.init(getApplicationContext());
+//        NotificationHandler.init(getApplicationContext());
+        // ----------------------------------------------------------------------------------
+
+        // Setup channels
+        // ----------------------------------------------------------------------------------
+        AudioFocusChannel.init(getFlutterView());
+        MediaButtonChannel.init(getFlutterView());
+
+        GeneralChannel.init(getFlutterView(), this);
+        SongChannel.init(getFlutterView(), getApplicationContext());
+        NotificationChannel.init(getFlutterView(), getApplicationContext());
+        PlayerChannel.init(getFlutterView(), getApplicationContext());
         // ----------------------------------------------------------------------------------
 
 
@@ -90,21 +137,6 @@ public class MainActivity extends FlutterActivity {
         });
         // ----------------------------------------------------------------------------------
 
-
-        // Service
-        // ----------------------------------------------------------------------------------
-//        Intent forService = new Intent(getApplicationContext(), PlayerForegroundService.class);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForegroundService(forService);
-//        } else {
-//            startService(forService);
-//        }
-//
-//        bindService(
-//                new Intent(this, PlayerForegroundService.class),
-//                serviceConnection,
-//                Context.BIND_AUTO_CREATE
-//        );
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +158,6 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AudioFocusChannel.kill();
         MediaButtonChannel.kill();
         NotificationChannel.kill();
         unregisterReceiver(notificationReceiver);

@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player.channels;
 
 import android.content.Context;
@@ -24,7 +29,7 @@ public class SongChannel implements MethodChannel.MethodCallHandler {
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
         // Note: this method is invoked on the main thread.
         final String method = call.method;
-        if (method.equals(Constants.SONGS_METHOD_METHOD_RETRIEVE_SONGS)) {
+        if (method.equals(Constants.SONGS_METHOD_RETRIEVE_SONGS)) {
             // Run method on another thread
             new SongHandler.TaskSearchSongs(appContext).execute();
             result.success("");

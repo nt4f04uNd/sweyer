@@ -3,13 +3,16 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/logic/catcher.dart';
+import 'package:app/logic/errors.dart';
+import 'package:app/logic/launch.dart';
 import 'package:app/logic/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:catcher/catcher_plugin.dart';
 import 'constants/constants.dart';
+import 'logic/player/player.dart';
+import 'logic/player/playlist.dart';
 import 'routes/route_control.dart';
 
 void main() {
@@ -24,38 +27,54 @@ void main() {
   Catcher(App(), debugConfig: debugOptions, releaseConfig: releaseOptions);
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  @override
+  void initState() {
+    super.initState();
+    LaunchControl.init();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: ThemeControl.onThemeChange,
+    return StreamBuilder<bool>(
+        stream: LaunchControl.onLaunch,
         builder: (context, snapshot) {
-          final themeMode =
-              ThemeControl.isDark ? ThemeMode.dark : ThemeMode.light;
-          return MaterialApp(
-            title: 'Музыка',
-            navigatorKey: Catcher.navigatorKey,
-            // Uncomment to replace red screen of death
-            builder: (BuildContext context, Widget widget) {
-              // Catcher.addDefaultErrorWidget(
-              //     showStacktrace: true,
-              //     customTitle: "Custom error title",
-              //     customDescription: "Custom error description",
-              //     );
-              return widget;
-            },
-            supportedLocales: [const Locale('ru')],
-            locale: const Locale('ru'),
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            themeMode: themeMode,
-            theme: AppTheme.materialApp.light,
-            darkTheme: AppTheme.materialApp.dark,
-            initialRoute: Routes.main.value,
-            onGenerateRoute: RouteControl.handleOnGenerateRoute,
-          );
+          if (!snapshot.hasData || !snapshot.data) return SizedBox.shrink();
+            return StreamBuilder(
+                stream: ThemeControl.onThemeChange,
+                builder: (context, snapshot) {
+                  if (!ThemeControl.isReady) return SizedBox.shrink();
+                  return MaterialApp(
+                    title: 'Музыка',
+                    navigatorKey: Catcher.navigatorKey,
+                    // Uncomment to replace red screen of death
+                    builder: (BuildContext context, Widget widget) {
+                      // Catcher.addDefaultErrorWidget(
+                      //     showStacktrace: true,
+                      //     customTitle: "Custom error title",
+                      //     customDescription: "Custom error description",
+                      //     );
+                      return widget;
+                    },
+                    supportedLocales: [const Locale('ru')],
+                    locale: const Locale('ru'),
+                    localizationsDelegates: const [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                    ],
+                    themeMode:
+                        ThemeControl.isDark ? ThemeMode.dark : ThemeMode.light,
+                    theme: AppTheme.materialApp.light,
+                    darkTheme: AppTheme.materialApp.dark,
+                    initialRoute: Routes.main.value,
+                    onGenerateRoute: RouteControl.handleOnGenerateRoute,
+                  );
+                });
         });
   }
 }

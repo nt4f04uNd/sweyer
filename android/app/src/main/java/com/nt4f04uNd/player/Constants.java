@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) nt4f04und. All rights reserved.
+ *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.nt4f04uNd.player;
 
 public class Constants {
@@ -65,6 +70,6 @@ public class Constants {
    // TODO: move player methods to constants too
 
    // Songs methods
-   public static final String SONGS_METHOD_METHOD_RETRIEVE_SONGS = "SONGS_METHOD_METHOD_RETRIEVE_SONGS";
-   public static final String SONGS_METHOD_METHOD_SEND_SONGS = "SONGS_METHOD_METHOD_SEND_SONGS";
+   public static final String SONGS_METHOD_RETRIEVE_SONGS = "SONGS_METHOD_RETRIEVE_SONGS";
+   public static final String SONGS_METHOD_SEND_SONGS = "SONGS_METHOD_SEND_SONGS";
 }
