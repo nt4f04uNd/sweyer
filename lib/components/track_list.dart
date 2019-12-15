@@ -3,8 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/albumArt.dart';
-import 'package:app/components/bottomTrackPanel.dart';
+import 'package:app/components/album_art.dart';
+import 'package:app/components/bottom_track_panel.dart';
 import 'package:app/components/buttons.dart';
 import 'package:app/components/custom_refresh_indicator.dart';
 import 'package:app/components/drawer.dart';
@@ -151,6 +151,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
         child: DrawerWidget(),
       ),
       appBar: AppBar(
+        titleSpacing: 0.0,
         leading: AnimatedSwitcher(
           duration: Duration(milliseconds: 300),
           child: selectionMode
@@ -192,7 +193,6 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
             ),
           ),
         ],
-        titleSpacing: 0.0,
         title: AnimatedOpacity(
           duration: Duration(milliseconds: 300),
           opacity: selectionMode ? 0 : 1,
@@ -317,28 +317,28 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
 
     return Container(
       child: SingleTouchRecognizerWidget(
-        child:Scrollbar(
-                      child:  ScrollablePositionedList.builder(
-          physics: BouncingScrollPhysics(),
-          frontScrollController: frontScrollController,
-          itemScrollController: itemScrollController,
-          itemCount: length,
-          padding: EdgeInsets.only(bottom: 10, top: 5),
-          initialScrollIndex: initialScrollIndex,
-          itemBuilder: (context, index) {
-            return StreamBuilder(
-                stream: PlaylistControl.onSongChange,
-                builder: (context, snapshot) {
-                  return TrackTile(
-                    index,
-                    key: UniqueKey(),
-                    playing: index == currentSongIndex,
-                    song: PlaylistControl.getSongByIndex(index),
-                    pushToPlayerRouteOnClick: false,
-                  );
-                });
-          },
-        ),
+        child: Scrollbar(
+          child: ScrollablePositionedList.builder(
+            physics: BouncingScrollPhysics(),
+            frontScrollController: frontScrollController,
+            itemScrollController: itemScrollController,
+            itemCount: length,
+            padding: EdgeInsets.only(bottom: 10, top: 5),
+            initialScrollIndex: initialScrollIndex,
+            itemBuilder: (context, index) {
+              return StreamBuilder(
+                  stream: PlaylistControl.onSongChange,
+                  builder: (context, snapshot) {
+                    return TrackTile(
+                      index,
+                      key: UniqueKey(),
+                      playing: index == currentSongIndex,
+                      song: PlaylistControl.getSongByIndex(index),
+                      pushToPlayerRouteOnClick: false,
+                    );
+                  });
+            },
+          ),
         ),
       ),
     );

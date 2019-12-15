@@ -297,7 +297,7 @@ abstract class PlaylistControl {
       await _restorePlaylist();
 
       // Init player state
-      await MusicPlayer.nativePlayerInstance.pause();
+      await MusicPlayer.pause();
 
       // Emit event to track change stream
       emitPlaylistChange();
@@ -526,7 +526,7 @@ abstract class PlaylistControl {
 
       try {
         // Set url of first track in player instance
-        await MusicPlayer.nativePlayerInstance.setUrl(currentSong.trackUri);
+        await MusicPlayer.setUrl(currentSong.trackUri);
       } catch (e) {
         debugPrint('Wasn\'t able to set url of saved song id');
       }

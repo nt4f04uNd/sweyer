@@ -8,6 +8,8 @@ package com.nt4f04uNd.player.player;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import androidx.annotation.Nullable;
+
 /**
  * Class representing a song
  */
@@ -15,6 +17,7 @@ public class Song {
     public final int id;
     public final String artist;
     public final String album;
+    @Nullable
     public final String albumArtUri;
     public final String title;
     public final String trackUri;

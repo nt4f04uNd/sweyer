@@ -7,63 +7,89 @@ package com.nt4f04uNd.player.player;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.IBinder;
 
 import com.nt4f04uNd.player.Constants;
-import com.nt4f04uNd.player.channels.MediaButtonChannel;
 import com.nt4f04uNd.player.handlers.AudioFocusHandler;
 import com.nt4f04uNd.player.handlers.MediaButtonHandler;
 import com.nt4f04uNd.player.handlers.NotificationHandler;
 import com.nt4f04uNd.player.handlers.PlayerHandler;
-import com.nt4f04uNd.player.handlers.SerializationHandler;
-
-import java.util.ArrayList;
+import com.nt4f04uNd.player.receivers.BecomingNoisyReceiver;
+import com.nt4f04uNd.player.receivers.NotificationReceiver;
 
 import androidx.annotation.Nullable;
 import io.flutter.Log;
 
 public class PlayerForegroundService extends Service {
 
-    ArrayList<Song> songs;
-    int playingSongIdx = 0;
+    public NotificationReceiver notificationReceiver;
+    public BecomingNoisyReceiver noisyAudioStreamReceiver;
+    private final IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        SerializationHandler.init(getApplicationContext());
-        songs = SerializationHandler.getPlaylistSongs();
+        AudioFocusHandler.init();
+        NotificationHandler.init();
 
-        PlayerHandler.init(getApplicationContext());
+        // Registering receivers
+        notificationReceiver = new NotificationReceiver();
+        noisyAudioStreamReceiver = new BecomingNoisyReceiver();
+        registerReceiver(notificationReceiver, NotificationHandler.intentFilter);
+        registerReceiver(noisyAudioStreamReceiver, noisyIntentFilter);
 
-        AudioFocusHandler.init(getApplicationContext()); // TODO: handle audio focus this
 
-        MediaButtonHandler.init(getApplicationContext());
-        MediaButtonHandler.addListener(new ImplementedOnMediaButtonListener());
+        // Initializing handlers
+        //GeneralHandler.init(getApplicationContext(), null);
 
-        NotificationHandler.init(getApplicationContext());
+        //Song currentSong = PlaylistHandler.getCurrentSong();
+        // Cancel
+//        if (currentSong == null) {
+//            stopSelf();
+//        }
+        Log.w(Constants.LogTag, "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        // TODO: album update notification
+        startForeground(
+                100,
+                NotificationHandler.getNotification(new Song(
+                        0,
+                        "t",
+                        "f",
+                        "f",
+                        "f",
+                        "f",
+                        100,
+                        100
+                ), PlayerHandler.player.isActuallyPlaying()));
 
-        String title;
-        String artist;
-
-        if (songs.size() > 0) {
-            title = songs.get(playingSongIdx).title;
-            artist = songs.get(playingSongIdx).artist;
-        } else {
-            title = "Empty";
-            artist = "Empty";
-        }
-
-        // TODO: album art
-        startForeground(100, NotificationHandler.getForegroundNotification(title, artist, new byte[0], PlayerHandler.isPlaying()));
     }
+
 
     @Override
     public void onDestroy() {
+        Log.w(Constants.LogTag, "DESTROYDESTROYDESTROYDESTROYDESTROYDESTROYDESTROYDESTROYDESTROYDESTROY");
+
+        // Handlers
+        // These two one may affect user interaction with other apps if I won't destroy them
+        // Other handlers seem to be not necessary to clear them
+        MediaButtonHandler.release();
+        AudioFocusHandler.abandonFocus();
+
+        // Receivers
+        unregisterReceiver(notificationReceiver);
+        unregisterReceiver(noisyAudioStreamReceiver);
         super.onDestroy();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.w(Constants.LogTag, "START COMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMAND");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Nullable
@@ -76,70 +102,6 @@ public class PlayerForegroundService extends Service {
         public PlayerForegroundService getService() {
             // Return this instance of LocalService so clients can call public methods
             return PlayerForegroundService.this;
-        }
-    }
-
-
-    private int getNextSongIdx() {
-        return playingSongIdx + 1 > songs.size() - 1 ? 0 : playingSongIdx + 1;
-    }
-
-    private int getPrevSongIdx() {
-        return playingSongIdx - 1 < 0 ? songs.size() - 1 : playingSongIdx - 1;
-    }
-
-
-    private class ImplementedOnMediaButtonListener extends com.nt4f04uNd.player.handlers.OnMediaButtonListener {
-
-        @Override
-        protected void onAudioTrack() {
-            playingSongIdx = getNextSongIdx();
-            PlayerHandler.play(songs.get(playingSongIdx).trackUri, PlayerHandler.getVolume(), 0, false, true, true);
-        }
-
-        @Override
-        protected void onFastForward() {
-            PlayerHandler.seek(PlayerHandler.getCurrentPosition() + 3000);
-        }
-
-        @Override
-        protected void onRewind() {
-            PlayerHandler.seek(PlayerHandler.getCurrentPosition() - 3000);
-        }
-
-        @Override
-        protected void onNext() {
-            playingSongIdx = getNextSongIdx();
-            PlayerHandler.play(songs.get(playingSongIdx).trackUri, PlayerHandler.getVolume(), 0, false, true, true);
-        }
-
-        @Override
-        protected void onPrevious() {
-            playingSongIdx = getPrevSongIdx();
-            PlayerHandler.play(songs.get(playingSongIdx).trackUri, PlayerHandler.getVolume(), 0, false, true, true);
-        }
-
-        @Override
-        protected void onPlayPause() {
-            if (PlayerHandler.isPlaying())
-                PlayerHandler.pause();
-            else PlayerHandler.resume();
-        }
-
-        @Override
-        protected void onPlay() {
-            PlayerHandler.resume();
-        }
-
-        @Override
-        protected void onStop() {
-            PlayerHandler.pause();
-        }
-
-        @Override
-        protected void onHook() {
-            // TODO: implement
-            Log.w(Constants.LogTag, "HOOK PRESS");
         }
     }
 }

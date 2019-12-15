@@ -70,4 +70,5 @@ dependencies {
     implementation 'androidx.media:media:1.2.0-alpha01'
     // https://mvnrepository.com/artifact/com.mpatric/mp3agic
     implementation group: 'com.mpatric', name: 'mp3agic', version: '0.9.1'
+    implementation 'org.jetbrains:annotations:15.0'
 }

@@ -11,22 +11,18 @@ import android.content.Intent;
 import android.media.AudioManager;
 
 import com.nt4f04uNd.player.Constants;
+import com.nt4f04uNd.player.channels.NativeEventsChannel;
 
+import io.flutter.Log;
 import io.flutter.plugin.common.EventChannel;
 
 /** Broadcast receiver for become noisy intent */
 public class BecomingNoisyReceiver extends BroadcastReceiver {
-    final EventChannel.EventSink eventSink;
-
-    public BecomingNoisyReceiver(EventChannel.EventSink eventSink) {
-        super();
-        this.eventSink = eventSink;
-    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-            eventSink.success(Constants.EVENT_BECOME_NOISY);
+            NativeEventsChannel.success(Constants.channels.EVENT_BECOME_NOISY);
         }
     }
 }

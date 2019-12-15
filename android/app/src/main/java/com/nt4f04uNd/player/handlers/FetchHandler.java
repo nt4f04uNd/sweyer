@@ -21,24 +21,21 @@ import java.util.List;
 
 import io.flutter.Log;
 
-public class SongHandler {
+public class FetchHandler {
     public static class TaskSearchSongs extends AsyncTask<Void, Void, List<String>> {
-        private WeakReference<Context> appReference;
-
-        // only retain a weak reference to the activity
-        // see https://stackoverflow.com/a/46166223/9710294
-        public TaskSearchSongs(Context context) {
-            appReference = new WeakReference<>(context);
+        @Override
+        protected void onPreExecute() {
+      Log.w(Constants.LogTag, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWDDDD");
         }
 
         @Override
         protected List<String> doInBackground(Void... params) {
-            return retrieveSongs(appReference.get());
+            return retrieveSongs();
         }
 
         @Override
         protected void onPostExecute(List<String> result) {
-            SongChannel.channel.invokeMethod(Constants.SONGS_METHOD_SEND_SONGS, result);
+            SongChannel.channel.invokeMethod(Constants.channels.SONGS_METHOD_SEND_SONGS, result);
         }
     }
 
@@ -55,15 +52,13 @@ public class SongHandler {
 
     /**
      * Retrieve a list of music files currently listed in the Media store DB via URI
-     *
-     * @param appContext should be from `getApplicationContext()`
      */
-    public static List<String> retrieveSongs(Context appContext) {
+    public static List<String> retrieveSongs() {
         List<String> songs = new ArrayList<>();
         // Some audio may be explicitly marked as not being music
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
 
-        Cursor cursor = appContext.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        Cursor cursor = GeneralHandler.getAppContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 defaultProjection, selection, null, "DATE_MODIFIED DESC");
 
         if (cursor == null) {
@@ -76,7 +71,7 @@ public class SongHandler {
                             cursor.getInt(0),
                             cursor.getString(1),
                             cursor.getString(2),
-                            getAlbumArt(appContext.getContentResolver(),
+                            getAlbumArt(GeneralHandler.getAppContext().getContentResolver(),
                                     cursor.getInt(3)),
                             cursor.getString(4),
                             cursor.getString(5),

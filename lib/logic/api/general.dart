@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'package:app/constants/constants.dart' as Constants;
 
-abstract class GeneralChannel {
+abstract class GeneralHandler {
   static MethodChannel _generalChannel =
       const MethodChannel(Constants.GeneralChannel.CHANNEL_NAME);
 

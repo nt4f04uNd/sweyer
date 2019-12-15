@@ -5,6 +5,8 @@ import 'package:app/utils/async.dart';
 import 'package:app/logic/error_bridge.dart';
 import 'package:catcher/core/catcher.dart';
 
+import 'package:app/logic/api/api.dart' as API;
+
 abstract class LaunchControl {
   static final ManualStreamController<bool> _streamController =
       ManualStreamController<bool>();
@@ -12,6 +14,9 @@ abstract class LaunchControl {
   static Stream<bool> get onLaunch => _streamController.stream;
 
   static Future<void> init() async {
+
+    API.EventsHandler.start();
+    
     try {
       // Init playlist control
       // we don't want to wait it

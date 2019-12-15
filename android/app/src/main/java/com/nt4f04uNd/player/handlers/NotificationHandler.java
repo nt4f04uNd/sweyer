@@ -20,6 +20,9 @@ import android.util.Log;
 import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.MainActivity;
 import com.nt4f04uNd.player.R;
+import com.nt4f04uNd.player.player.Song;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 
@@ -30,50 +33,47 @@ import androidx.core.app.NotificationManagerCompat;
  * Handler for notifications
  */
 public class NotificationHandler {
-    /**
-     * @param appContext should be from `getApplicationContext()`
-     */
-    public static void init(Context appContext) {
-        if(NotificationHandler.appContext == null) {
-            NotificationHandler.appContext = appContext;
+
+    public static final int NOTIFICATION_ID = 100;
+
+    public static void init() {
+        if (NotificationHandler.pendingNotificationIntent == null) {
 
             // Create notifications channel
             createNotificationChannel();
 
             // Init intent filters
-            intentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_PLAY);
-            intentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_PAUSE);
-            intentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_PREV);
-            intentFilter.addAction(Constants.EVENT_NOTIFICATION_INTENT_NEXT);
+            intentFilter.addAction(Constants.channels.EVENT_NOTIFICATION_INTENT_PLAY);
+            intentFilter.addAction(Constants.channels.EVENT_NOTIFICATION_INTENT_PAUSE);
+            intentFilter.addAction(Constants.channels.EVENT_NOTIFICATION_INTENT_PREV);
+            intentFilter.addAction(Constants.channels.EVENT_NOTIFICATION_INTENT_NEXT);
 
             // Intent for switching to activity instead of opening a new one
-            final Intent notificationIntent = new Intent(appContext, MainActivity.class);
+            final Intent notificationIntent = new Intent(GeneralHandler.getAppContext(), MainActivity.class);
             notificationIntent.setAction(Intent.ACTION_MAIN);
             notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            pendingNotificationIntent = PendingIntent.getActivity(appContext, 0, notificationIntent, 0);
+            pendingNotificationIntent = PendingIntent.getActivity(GeneralHandler.getAppContext(), 0, notificationIntent, 0);
 
             // Init intents
-            Intent playIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_PLAY);
-            Intent pauseIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_PAUSE);
-            Intent prevIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_PREV);
-            Intent nextIntent = new Intent().setAction(Constants.EVENT_NOTIFICATION_INTENT_NEXT);
+            Intent playIntent = new Intent().setAction(Constants.channels.EVENT_NOTIFICATION_INTENT_PLAY);
+            Intent pauseIntent = new Intent().setAction(Constants.channels.EVENT_NOTIFICATION_INTENT_PAUSE);
+            Intent prevIntent = new Intent().setAction(Constants.channels.EVENT_NOTIFICATION_INTENT_PREV);
+            Intent nextIntent = new Intent().setAction(Constants.channels.EVENT_NOTIFICATION_INTENT_NEXT);
 
             // Make them pending
-            playPendingIntent = PendingIntent.getBroadcast(appContext, 1, playIntent,
+            playPendingIntent = PendingIntent.getBroadcast(GeneralHandler.getAppContext(), 1, playIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
-            pausePendingIntent = PendingIntent.getBroadcast(appContext, 2, pauseIntent,
+            pausePendingIntent = PendingIntent.getBroadcast(GeneralHandler.getAppContext(), 2, pauseIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
-            prevPendingIntent = PendingIntent.getBroadcast(appContext, 3, prevIntent,
+            prevPendingIntent = PendingIntent.getBroadcast(GeneralHandler.getAppContext(), 3, prevIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
-            nextPendingIntent = PendingIntent.getBroadcast(appContext, 4, nextIntent,
+            nextPendingIntent = PendingIntent.getBroadcast(GeneralHandler.getAppContext(), 4, nextIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
-            notificationManager = NotificationManagerCompat.from(appContext);
+            notificationManager = NotificationManagerCompat.from(GeneralHandler.getAppContext());
         }
     }
-
-    private static Context appContext;
 
     /**
      * A notification intent filter
@@ -99,12 +99,12 @@ public class NotificationHandler {
             String description = "Канал уведомлений для управления фоновым воспроизведением музыки";
             int importance = NotificationManager.IMPORTANCE_LOW;
 
-            NotificationChannel channel = new NotificationChannel(Constants.EVENT_NOTIFICATION_CHANNEL_ID, name, importance);
+            NotificationChannel channel = new NotificationChannel(Constants.channels.EVENT_NOTIFICATION_CHANNEL_ID, name, importance);
             channel.setDescription(description);
 
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
-            NotificationManager notificationManager = appContext.getSystemService(NotificationManager.class);
+            NotificationManager notificationManager = GeneralHandler.getAppContext().getSystemService(NotificationManager.class);
             if (notificationManager != null)
                 notificationManager.createNotificationChannel(channel);
             else Log.e(Constants.LogTag, "Notification manager is not created");
@@ -112,44 +112,20 @@ public class NotificationHandler {
         }
     }
 
-    /**
-     * Creates media notification with buttons
-     * When notification is clicked, the app will be opened
-     */
-    public static void buildNotification(String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext,
-                Constants.EVENT_NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
-                .setSmallIcon(R.drawable.round_music_note_white_48)
-                .setLargeIcon(BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.length)).setOngoing(true) // Persistent
-                // setting
-                .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
-                // notification
-                .setContentTitle(title).setContentText(artist)
-                .addAction(R.drawable.round_skip_previous_black_36, "Previous", prevPendingIntent)
-                .addAction(isPlaying ? R.drawable.round_pause_black_36 : R.drawable.round_play_arrow_black_36,
-                        isPlaying ? "Pause" : "Play", isPlaying ? pausePendingIntent : playPendingIntent)
-                .addAction(R.drawable.round_skip_next_black_36, "Next", nextPendingIntent);
-
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(0, builder.build());
-    }
 
     /**
      * Creates media notification with buttons
      * When notification is clicked, the app will be opened
      */
-    public static Notification getForegroundNotification(String title, String artist, byte[] albumArtBytes, boolean isPlaying) {
+    public static Notification getNotification(@NotNull Song song, boolean isPlaying) {
 
-        Bitmap bitmap = BitmapFactory.decodeResource(appContext.getResources(), R.drawable.placeholder_thumb);
+        Bitmap bitmap = BitmapFactory.decodeResource(GeneralHandler.getAppContext().getResources(), R.drawable.placeholder_thumb);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] bitMapData = stream.toByteArray();
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext,
-                Constants.EVENT_NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(GeneralHandler.getAppContext(),
+                Constants.channels.EVENT_NOTIFICATION_CHANNEL_ID).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle())
                 .setSmallIcon(R.drawable.round_music_note_white_48)
@@ -158,7 +134,7 @@ public class NotificationHandler {
                 // setting
                 .setContentIntent(pendingNotificationIntent) // Set the intent that will fire when the user taps the
                 // notification
-                .setContentTitle(title).setContentText(artist)
+                .setContentTitle(song.title).setContentText(song.artist)
                 .addAction(R.drawable.round_skip_previous_black_36, "Previous", prevPendingIntent)
                 .addAction(isPlaying ? R.drawable.round_pause_black_36 : R.drawable.round_play_arrow_black_36,
                         isPlaying ? "Pause" : "Play", isPlaying ? pausePendingIntent : playPendingIntent)
@@ -168,7 +144,15 @@ public class NotificationHandler {
         return builder.build();
     }
 
+    /**
+     * This is the method that can be called to update the Notification
+     */
+    private void updateNotification(@NotNull Song song, boolean isPlaying) {
+        NotificationManager mNotificationManager = (NotificationManager) GeneralHandler.getAppContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(100, getNotification(song, isPlaying));
+    }
+
     public static void closeNotification() {
-        notificationManager.cancel(0);
+        notificationManager.cancel(100);
     }
 }

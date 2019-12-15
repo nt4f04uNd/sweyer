@@ -5,45 +5,47 @@
 
 // This is a file to all event and method channel constants
 
-abstract class AudioFocusChannel {
-  static const String CHANNEL_NAME = 'AUDIO_FOCUS_CHANNEL';
-
-  static const String METHOD_REQUEST_FOCUS = "AUDIOFOCUS_METHOD_REQUEST_FOCUS";
-  static const String METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED =
-      "AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED";
-  static const String METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED =
-      "AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED";
-  static const String METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED =
-      "AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED";
-  static const String METHOD_FOCUS_CHANGE = "AUDIOFOCUS_METHOD_FOCUS_CHANGE";
-  static const String METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN =
-      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN";
-  static const String METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS =
-      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS";
-  static const String METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT =
-      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT";
-  static const String
-      METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK =
-      "AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
-
-  static const String METHOD_ABANDON_FOCUS = "AUDIOFOCUS_METHOD_ABANDON_FOCUS";
+abstract class PlayerChannel {
+  static const String CHANNEL_NAME = 'PLAYER_CHANNEL_STREAM';
 }
 
 abstract class EventChannel {
   static const String CHANNEL_NAME = 'EVENT_CHANNEL_STREAM';
 
   /// Event when user disconnects headset
-  static const String eventBecomeNoisy =
+  static const String BECOME_NOISY =
       'com.nt4f04uNd.player.EVENT_BECAME_NOISY';
   // Events for notification clicks
-  static const String eventPlay =
+  static const String NOTIFICATION_PLAY =
       'com.nt4f04uNd.player.EVENT_NOTIFICATION_PLAY';
-  static const String eventPause =
+  static const String NOTIFICATION_PAUSE =
       'com.nt4f04uNd.player.EVENT_NOTIFICATION_PAUSE';
-  static const String eventNext =
+  static const String NOTIFICATION_NEXT =
       'com.nt4f04uNd.player.EVENT_NOTIFICATION_NEXT';
-  static const String eventPrev =
+  static const String NOTIFICATION_PREV =
       'com.nt4f04uNd.player.EVENT_NOTIFICATION_PREV';
+
+  static const String AUDIOFOCUS_GAIN = "EVENT_AUDIOFOCUS_GAIN";
+  static const String AUDIOFOCUS_LOSS = "EVENT_AUDIOFOCUS_LOSS";
+  static const String AUDIOFOCUS_LOSS_TRANSIENT =
+      "EVENT_AUDIOFOCUS_LOSS_TRANSIENT";
+  static const String AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK =
+      "EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
+
+  static const String MEDIABUTTON_AUDIO_TRACK =
+      "EVENT_MEDIABUTTON_AUDIO_TRACK";
+  static const String MEDIABUTTON_FAST_FORWARD =
+      "EVENT_MEDIABUTTON_FAST_FORWARD";
+  static const String MEDIABUTTON_REWIND = "EVENT_MEDIABUTTON_REWIND";
+  static const String MEDIABUTTON_NEXT = "EVENT_MEDIABUTTON_NEXT";
+  static const String MEDIABUTTON_PREVIOUS = "EVENT_MEDIABUTTON_PREVIOUS";
+  static const String MEDIABUTTON_PLAY_PAUSE =
+      "EVENT_MEDIABUTTON_PLAY_PAUSE";
+  static const String MEDIABUTTON_PLAY =
+      "EVENT_MEDIABUTTON_PLAY";
+  static const String MEDIABUTTON_STOP =
+      "EVENT_MEDIABUTTON_STOP";
+  static const String MEDIABUTTON_HOOK = "EVENT_MEDIABUTTON_HOOK";
 }
 
 abstract class GeneralChannel {
@@ -52,57 +54,23 @@ abstract class GeneralChannel {
   static const String METHOD_INTENT_ACTION_VIEW =
       "GENERAL_METHOD_INTENT_ACTION_VIEW";
 
-  static const String KILL_ACTIVITY =
-      "GENERAL_METHOD_KILL_ACTIVITY";
+  static const String KILL_ACTIVITY = "GENERAL_METHOD_KILL_ACTIVITY";
+
+  static const String METHOD_START_SERVICE = "GENERAL_METHOD_START_SERVICE";
+  static const String METHOD_STOP_SERVICE = "GENERAL_METHOD_STOP_SERVICE";
 }
 
-abstract class MediaButtonChannel {
-  static const String CHANNEL_NAME = 'MEDIABUTTON_CHANNEL_STREAM';
 
-  static const String MEDIABUTTON_METHOD_CLICK = "MEDIABUTTON_METHOD_CLICK";
-  // see
-  // https://developer.android.com/reference/android/view/KeyEvent.html#KEYCODE_MEDIA_AUDIO_TRACK
-  // for keycodes docs
-  static const String METHOD_CLICK_ARG_AUDIO_TRACK =
-      "MEDIABUTTON_METHOD_CLICK_ARG_AUDIO_TRACK";
-  static const String METHOD_CLICK_ARG_FAST_FORWARD =
-      "MEDIABUTTON_METHOD_CLICK_ARG_FAST_FORWARD";
-  static const String METHOD_CLICK_ARG_REWIND =
-      "MEDIABUTTON_METHOD_CLICK_ARG_REWIND";
-  static const String METHOD_CLICK_ARG_NEXT =
-      "MEDIABUTTON_METHOD_CLICK_ARG_NEXT";
-  static const String METHOD_CLICK_ARG_PREVIOUS =
-      "MEDIABUTTON_METHOD_CLICK_ARG_PREVIOUS";
-  static const String METHOD_CLICK_ARG_PLAY_PAUSE =
-      "MEDIABUTTON_METHOD_CLICK_ARG_PLAY_PAUSE";
-  static const String METHOD_CLICK_ARG_PLAY =
-      "MEDIABUTTON_METHOD_CLICK_ARG_PLAY";
-  static const String METHOD_CLICK_ARG_STOP =
-      "MEDIABUTTON_METHOD_CLICK_ARG_STOP";
-  static const String METHOD_CLICK_ARG_HOOK =
-      "MEDIABUTTON_METHOD_CLICK_ARG_HOOK";
+abstract class ServiceChannel {
+  static const String CHANNEL_NAME = 'SERVICE_CHANNEL_STREAM';
+
+  static const String METHOD_START_SERVICE =
+      "SERVICE_METHOD_START_SERVICE";
+  static const String METHOD_STOP_SERVICE =
+      "SERVICE_METHOD_STOP_SERVICE";
 }
 
-abstract class NotificationChannel {
-  static const String CHANNEL_NAME = 'NOTIFICATION_CHANNEL_STREAM';
 
-  static final String METHOD_SHOW = "NOTIFICATION_METHOD_SHOW";
-  static final String METHOD_SHOW_ARG_TITLE =
-      "NOTIFICATION_METHOD_SHOW_ARG_TITLE";
-  static final String METHOD_SHOW_ARG_ARTIST =
-      "NOTIFICATION_METHOD_SHOW_ARG_ARTIST";
-  static final String METHOD_SHOW_ARG_ALBUM_ART_BYTES =
-      "NOTIFICATION_METHOD_SHOW_ARG_ALBUM_ART_BYTES";
-  static final String METHOD_SHOW_ARG_IS_PLAYING =
-      "NOTIFICATION_METHOD_SHOW_ARG_IS_PLAYING";
-
-  static final String NOTIFICATION_METHOD_CLOSE = "NOTIFICATION_METHOD_CLOSE";
-}
-
-abstract class PlayerChannel {
-  static const String CHANNEL_NAME = 'PLAYER_CHANNEL_STREAM';
-
-}
 
 abstract class SongsChannel {
   static const String channelName = 'SONGS_CHANNEL_STREAM';
@@ -112,6 +80,5 @@ abstract class SongsChannel {
       "SONGS_METHOD_RETRIEVE_SONGS";
 
   /// Method that sends found songs from native code to flutter code
-   static const String SONGS_METHOD_SEND_SONGS =
-      "SONGS_METHOD_SEND_SONGS";
+  static const String SONGS_METHOD_SEND_SONGS = "SONGS_METHOD_SEND_SONGS";
 }

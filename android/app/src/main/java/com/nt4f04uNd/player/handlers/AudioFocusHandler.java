@@ -12,16 +12,17 @@ import android.os.Build;
 import android.util.Log;
 
 import com.nt4f04uNd.player.Constants;
-import com.nt4f04uNd.player.channels.AudioFocusChannel;
+import com.nt4f04uNd.player.channels.NativeEventsChannel;
+import com.nt4f04uNd.player.player.PlayerState;
+
+import androidx.annotation.Nullable;
+import io.flutter.plugin.common.EventChannel;
 
 public abstract class AudioFocusHandler {
 
-    /**
-     * @param appContext should be from `getApplicationContext()`
-     */
-    public static void init(Context appContext) {
-        if(audioManager == null) {
-            audioManager = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
+    public static void init() {
+        if (audioManager == null) {
+            audioManager = (AudioManager) GeneralHandler.getAppContext().getSystemService(Context.AUDIO_SERVICE);
 
             if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
                 focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAcceptsDelayedFocusGain(true)
@@ -42,51 +43,65 @@ public abstract class AudioFocusHandler {
      */
     private static AudioFocusRequest focusRequest;
 
-    public static int focusState;
+    public static int focusState = AudioManager.AUDIOFOCUS_LOSS;
 
 
     /**
      * Request audio manager focus for app
      */
-    public static String requestFocus() {
-        int res;
-        if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
-            res = audioManager.requestAudioFocus(focusRequest);
-        } else {
-            // NOTE This causes message "uses or overrides a deprecated API."
-            res = audioManager.requestAudioFocus(afChangeListener,
-                    // Use the music stream.
-                    AudioManager.STREAM_MUSIC,
-                    // Request permanent focus.
-                    AudioManager.AUDIOFOCUS_GAIN);
-        }
+    public static void requestFocus() {
+        if(audioManager != null) {
+            int res;
+            if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+                res = audioManager.requestAudioFocus(focusRequest);
+            } else {
+                // NOTE This causes message "uses or overrides a deprecated API."
+                res = audioManager.requestAudioFocus(afChangeListener,
+                        // Use the music stream.
+                        AudioManager.STREAM_MUSIC,
+                        // Request permanent focus.
+                        AudioManager.AUDIOFOCUS_GAIN);
+            }
 
-        Log.w(Constants.LogTag, "REQUEST FOCUS " + res);
-        if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-            return Constants.AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED;
-        } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            return Constants.AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED;
-        } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
-            return Constants.AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED;
+            Log.w(Constants.LogTag, "REQUEST FOCUS " + res);
+
+//        return res;
+//        if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+//            return Constants.channels.AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_FAILED;
+//        } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+//            return Constants.channels.AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_GRANTED;
+//        } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
+//            return Constants.channels.AUDIOFOCUS_METHOD_REQUEST_FOCUS_RETURN_AUDIOFOCUS_REQUEST_DELAYED;
+//        }
+
+            if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+                focusState = AudioManager.AUDIOFOCUS_LOSS;
+            } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                focusState = AudioManager.AUDIOFOCUS_GAIN;
+            } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
+                focusState = AudioManager.AUDIOFOCUS_LOSS;
+            }
+
+//        return null;
         }
-        Log.w(Constants.LogTag, "WRONG_EVENT");
-        return "WRONG_EVENT";
     }
 
     /**
      * Abandon audio manager focus for app
      */
-    public static int abandonFocus() {
-        int res;
+    public static void abandonFocus() {
+        if(audioManager != null) {
+            int res;
+            if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+                res = audioManager.abandonAudioFocusRequest(focusRequest);
+            } else {
+                res = audioManager.abandonAudioFocus(afChangeListener);
+            }
 
-        if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
-            res = audioManager.abandonAudioFocusRequest(focusRequest);
-        } else {
-            res = audioManager.abandonAudioFocus(afChangeListener);
+            Log.w(Constants.LogTag, "ABANDON FOCUS " + res);
+
+            focusState = AudioManager.AUDIOFOCUS_LOSS;
         }
-
-        Log.w(Constants.LogTag, "ABANDON FOCUS " + res);
-        return res;
     }
 
     static public class ImplementedOnAudioFocusListener implements AudioManager.OnAudioFocusChangeListener {
@@ -97,34 +112,45 @@ public abstract class AudioFocusHandler {
             focusState = focusChange;
 
             switch (focusChange) {
-                case AudioManager.AUDIOFOCUS_GAIN:
-                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN);
-                    AudioFocusChannel.invokeMethod(
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_GAIN
-                    );
+                // NOTE THAT WE CALL HERE BARE PLAYER FUNCTIONS
+                // THIS IS BECAUSE IN PLAYER HANDLER `pause` AND `resume` FUNCTIONS CALL request AND abandon FOCUS METHODS
+                case AudioManager.AUDIOFOCUS_GAIN: {
+                    io.flutter.Log.w(Constants.LogTag, Constants.channels.EVENT_AUDIOFOCUS_GAIN);
+
+                    PlayerHandler.player.play();
+                    PlayerHandler.callSetState(PlayerState.PLAYING);
+
+                    NativeEventsChannel.success(Constants.channels.EVENT_AUDIOFOCUS_GAIN);
                     break;
-                case AudioManager.AUDIOFOCUS_LOSS:
-                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS);
-                    AudioFocusChannel.invokeMethod(
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS
-                    );
+                }
+                case AudioManager.AUDIOFOCUS_LOSS: {
+                    io.flutter.Log.w(Constants.LogTag, Constants.channels.EVENT_AUDIOFOCUS_LOSS);
+
+                    PlayerHandler.player.pause();
+                    PlayerHandler.callSetState(PlayerState.PAUSED);
+
+                    NativeEventsChannel.success(Constants.channels.EVENT_AUDIOFOCUS_LOSS);
                     break;
-                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT);
-                    AudioFocusChannel.invokeMethod(
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT
-                    );
+                }
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: {
+                    io.flutter.Log.w(Constants.LogTag, Constants.channels.EVENT_AUDIOFOCUS_LOSS_TRANSIENT);
+
+                    PlayerHandler.player.pause();
+                    PlayerHandler.callSetState(PlayerState.PAUSED);
+
+                    NativeEventsChannel.success(Constants.channels.EVENT_AUDIOFOCUS_LOSS_TRANSIENT);
                     break;
-                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                    io.flutter.Log.w(Constants.LogTag, Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
-                    AudioFocusChannel.invokeMethod(
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE,
-                            Constants.AUDIOFOCUS_METHOD_FOCUS_CHANGE_ARG_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
-                    );
+                }
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: {
+                    io.flutter.Log.w(Constants.LogTag, Constants.channels.EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
+                    // TODO: implement volume change
+
+                    PlayerHandler.player.pause();
+                    PlayerHandler.callSetState(PlayerState.PAUSED);
+
+                    NativeEventsChannel.success(Constants.channels.EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
                     break;
+                }
             }
         }
 

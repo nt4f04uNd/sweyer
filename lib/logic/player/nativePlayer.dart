@@ -7,10 +7,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:app/constants/constants.dart' as Constants;
 
@@ -52,73 +49,46 @@ enum AudioPlayerState {
   COMPLETED,
 }
 
-/// This enum is meant to be used as a parameter of the [AudioPlayer]'s
-/// constructor. It represents the general mode of the [AudioPlayer].
-///
-// In iOS, both modes have the same backend implementation.
-enum PlayerMode {
-  /// Ideal for long media files or streams.
-  MEDIA_PLAYER,
-
-  /// Ideal for short audio files, since it reduces the impacts on visuals or
-  /// UI performance.
-  ///
-  /// In this mode the backend won't fire any duration or position updates.
-  /// Also, it is not possible to use the seek method to set the audio a
-  /// specific position.
-  LOW_LATENCY
-}
-
 /// This represents a single AudioPlayer, which can play one audio at a time.
 /// To play several audios at the same time, you must create several instances
 /// of this class.
 ///
 /// It holds methods to play, loop, pause, stop, seek the audio, and some useful
 /// hooks for handlers and callbacks.
-class AudioPlayer {
+abstract class NativeAudioPlayer {
   static final MethodChannel _channel =
       const MethodChannel(Constants.PlayerChannel.CHANNEL_NAME)
         ..setMethodCallHandler(platformCallHandler);
 
-  static final _uuid = Uuid();
-
-  final StreamController<AudioPlayerState> _playerStateController =
+  static final StreamController<AudioPlayerState> _playerStateController =
       StreamController<AudioPlayerState>.broadcast();
 
-  final StreamController<Duration> _positionController =
+  static final StreamController<Duration> _positionController =
       StreamController<Duration>.broadcast();
 
-  final StreamController<Duration> _durationController =
+  static final StreamController<Duration> _durationController =
       StreamController<Duration>.broadcast();
 
-  final StreamController<void> _completionController =
+  static final StreamController<void> _completionController =
       StreamController<void>.broadcast();
 
-  final StreamController<String> _errorController =
+  static final StreamController<String> _errorController =
       StreamController<String>.broadcast();
-
-  /// Reference [Map] with all the players created by the application.
-  ///
-  /// This is used to exchange messages with the [MethodChannel]
-  /// (there is only one).
-  static final players = Map<String, AudioPlayer>();
 
   /// Enables more verbose logging.
   static bool logEnabled = false;
 
-  AudioPlayerState _audioPlayerState;
+  static AudioPlayerState _audioPlayerState;
 
-  AudioPlayerState get state => _audioPlayerState;
+  static AudioPlayerState get state => _audioPlayerState;
 
-  set state(AudioPlayerState state) {
+  static set state(AudioPlayerState state) {
     _playerStateController.add(state);
-    // ignore: deprecated_member_use_from_same_package
-    audioPlayerStateChangeHandler?.call(state);
     _audioPlayerState = state;
   }
 
   /// Stream of changes on player state.
-  Stream<AudioPlayerState> get onPlayerStateChanged =>
+  static Stream<AudioPlayerState> get onPlayerStateChanged =>
       _playerStateController.stream;
 
   /// Stream of changes on audio position.
@@ -127,13 +97,14 @@ class AudioPlayer {
   /// position of the playback if the status is [AudioPlayerState.PLAYING].
   ///
   /// You can use it on a progress bar, for instance.
-  Stream<Duration> get onAudioPositionChanged => _positionController.stream;
+  static Stream<Duration> get onAudioPositionChanged =>
+      _positionController.stream;
 
   /// Stream of changes on audio duration.
   ///
   /// An event is going to be sent as soon as the audio duration is available
   /// (it might take a while to download or buffer it).
-  Stream<Duration> get onDurationChanged => _durationController.stream;
+  static Stream<Duration> get onDurationChanged => _durationController.stream;
 
   /// Stream of player completions.
   ///
@@ -141,82 +112,20 @@ class AudioPlayer {
   /// sent when an audio is paused or stopped.
   ///
   /// [ReleaseMode.LOOP] also sends events to this stream.
-  Stream<void> get onPlayerCompletion => _completionController.stream;
+  static Stream<void> get onPlayerCompletion => _completionController.stream;
 
   /// Stream of player errors.
   ///
   /// Events are sent when an unexpected error is thrown in the native code.
-  Stream<String> get onPlayerError => _errorController.stream;
+  static Stream<String> get onPlayerError => _errorController.stream;
 
-  /// Handler of changes on player state.
-  @deprecated
-  AudioPlayerStateChangeHandler audioPlayerStateChangeHandler;
-
-  /// Handler of changes on player position.
-  ///
-  /// Will continuously update the position of the playback if the status is
-  /// [AudioPlayerState.PLAYING].
-  ///
-  /// You can use it on a progress bar, for instance.
-  ///
-  /// This is deprecated. Use [onAudioPositionChanged] instead.
-  @deprecated
-  TimeChangeHandler positionHandler;
-
-  /// Handler of changes on audio duration.
-  ///
-  /// An event is going to be sent as soon as the audio duration is available
-  /// (it might take a while to download or buffer it).
-  ///
-  /// This is deprecated. Use [onDurationChanged] instead.
-  @deprecated
-  TimeChangeHandler durationHandler;
-
-  /// Handler of player completions.
-  ///
-  /// Events are sent every time an audio is finished, therefore no event is
-  /// sent when an audio is paused or stopped.
-  ///
-  /// [ReleaseMode.LOOP] also sends events to this stream.
-  ///
-  /// This is deprecated. Use [onPlayerCompletion] instead.
-  @deprecated
-  VoidCallback completionHandler;
-
-  /// Handler of player errors.
-  ///
-  /// Events are sent when an unexpected error is thrown in the native code.
-  ///
-  /// This is deprecated. Use [onPlayerError] instead.
-  @deprecated
-  ErrorHandler errorHandler;
-
-  /// An unique ID generated for this instance of [AudioPlayer].
-  ///
-  /// This is used to properly exchange messages with the [MethodChannel].
-  String playerId;
-
-  /// Current mode of the audio player. Can be updated at any time, but is going
-  /// to take effect only at the next time you play the audio.
-  PlayerMode mode;
-
-  /// Creates a new instance and assigns an unique id to it.
-  AudioPlayer({this.mode = PlayerMode.MEDIA_PLAYER}) {
-    this.mode ??= PlayerMode.MEDIA_PLAYER;
-    // playerId = _uuid.v4();
-    playerId = "0";
-    players[playerId] = this;
-  }
-
-  Future<int> _invokeMethod(
+  static Future<int> _invokeMethod(
     String method, [
     Map<String, dynamic> arguments,
   ]) {
     arguments ??= const {};
 
-    final Map<String, dynamic> withPlayerId = Map.of(arguments)
-      ..['playerId'] = playerId
-      ..['mode'] = mode.toString();
+    final Map<String, dynamic> withPlayerId = Map.of(arguments);
 
     return _channel
         .invokeMethod(method, withPlayerId)
@@ -227,7 +136,7 @@ class AudioPlayer {
   ///
   /// If [isLocal] is true, [url] must be a local file system path.
   /// If [isLocal] is false, [url] must be a remote URL.
-  Future<int> play(
+  static Future<int> play(
     String url, {
     bool isLocal = false,
     double volume = 1.0,
@@ -261,7 +170,7 @@ class AudioPlayer {
   ///
   /// If you call [resume] later, the audio will resume from the point that it
   /// has been paused.
-  Future<int> pause() async {
+  static Future<int> pause() async {
     final int result = await _invokeMethod('pause');
 
     if (result == 1) {
@@ -275,7 +184,7 @@ class AudioPlayer {
   ///
   /// The position is going to be reset and you will no longer be able to resume
   /// from the last point.
-  Future<int> stop() async {
+  static Future<int> stop() async {
     final int result = await _invokeMethod('stop');
 
     if (result == 1) {
@@ -287,7 +196,7 @@ class AudioPlayer {
 
   /// Resumes the audio that has been paused or stopped, just like calling
   /// [play], but without changing the parameters.
-  Future<int> resume() async {
+  static Future<int> resume() async {
     final int result = await _invokeMethod('resume');
 
     if (result == 1) {
@@ -301,7 +210,7 @@ class AudioPlayer {
   ///
   /// The resources are going to be fetched or buffered again as soon as you
   /// call [play] or [setUrl].
-  Future<int> release() async {
+  static Future<int> release() async {
     final int result = await _invokeMethod('release');
 
     if (result == 1) {
@@ -312,7 +221,7 @@ class AudioPlayer {
   }
 
   /// Moves the cursor to the desired position.
-  Future<int> seek(Duration position) {
+  static Future<int> seek(Duration position) {
     _positionController.add(position);
     return _invokeMethod('seek', {'position': position.inMilliseconds});
   }
@@ -321,14 +230,14 @@ class AudioPlayer {
   ///
   /// 0 is mute and 1 is the max volume. The values between 0 and 1 are linearly
   /// interpolated.
-  Future<int> setVolume(double volume) {
+  static Future<int> setVolume(double volume) {
     return _invokeMethod('setVolume', {'volume': volume});
   }
 
   /// Sets the release mode.
   ///
   /// Check [ReleaseMode]'s doc to understand the difference between the modes.
-  Future<int> setReleaseMode(ReleaseMode releaseMode) {
+  static Future<int> setReleaseMode(ReleaseMode releaseMode) {
     return _invokeMethod(
       'setReleaseMode',
       {'releaseMode': releaseMode.toString()},
@@ -341,7 +250,7 @@ class AudioPlayer {
   ///
   /// The resources will start being fetched or buffered as soon as you call
   /// this method.
-  Future<int> setUrl(String url, {bool isLocal: false}) {
+  static Future<int> setUrl(String url, {bool isLocal: false}) {
     return _invokeMethod('setUrl', {'url': url, 'isLocal': isLocal});
   }
 
@@ -350,12 +259,12 @@ class AudioPlayer {
   ///
   /// It will be available as soon as the audio duration is available
   /// (it might take a while to download or buffer it if file is not local).
-  Future<int> getDuration() {
+  static Future<int> getDuration() {
     return _invokeMethod('getDuration');
   }
 
   // Gets audio current playing position
-  Future<int> getCurrentPosition() async {
+  static Future<int> getCurrentPosition() async {
     return _invokeMethod('getCurrentPosition');
   }
 
@@ -371,34 +280,36 @@ class AudioPlayer {
     final Map<dynamic, dynamic> callArgs = call.arguments as Map;
     _log('_platformCallHandler call ${call.method} $callArgs');
 
-    final playerId = callArgs['playerId'] as String;
-    final AudioPlayer player = players[playerId];
     final value = callArgs['value'];
 
     switch (call.method) {
       case 'audio.onDuration':
         Duration newDuration = Duration(milliseconds: value);
-        player._durationController.add(newDuration);
-        // ignore: deprecated_member_use_from_same_package
-        player.durationHandler?.call(newDuration);
+        _durationController.add(newDuration);
         break;
       case 'audio.onCurrentPosition':
         Duration newDuration = Duration(milliseconds: value);
-        player._positionController.add(newDuration);
-        // ignore: deprecated_member_use_from_same_package
-        player.positionHandler?.call(newDuration);
+        _positionController.add(newDuration);
         break;
       case 'audio.onComplete':
-        player.state = AudioPlayerState.COMPLETED;
-        player._completionController.add(null);
-        // ignore: deprecated_member_use_from_same_package
-        player.completionHandler?.call();
+        state = AudioPlayerState.COMPLETED;
+        _completionController.add(null);
         break;
       case 'audio.onError':
-        player.state = AudioPlayerState.STOPPED;
-        player._errorController.add(value);
-        // ignore: deprecated_member_use_from_same_package
-        player.errorHandler?.call(value);
+        state = AudioPlayerState.STOPPED;
+        _errorController.add(value);
+        break;
+      case 'audio.state.set':
+        switch (value) {
+          case 'PLAYING':
+            state = AudioPlayerState.PLAYING;
+            break;
+          case 'PAUSED':
+            state = AudioPlayerState.PAUSED;
+            break;
+          case 'STOPPED':
+            state = AudioPlayerState.STOPPED;
+        }
         break;
       default:
         _log('Unknown method ${call.method} ');
@@ -415,7 +326,7 @@ class AudioPlayer {
   ///
   /// You must call this method when your [AudioPlayer] instance is not going to
   /// be used anymore.
-  Future<void> dispose() async {
+  static Future<void> dispose() async {
     List<Future> futures = [];
 
     if (!_playerStateController.isClosed)

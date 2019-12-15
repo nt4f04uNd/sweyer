@@ -5,56 +5,33 @@
 
 package com.nt4f04uNd.player;
 
-import com.nt4f04uNd.player.channels.AudioFocusChannel;
 import com.nt4f04uNd.player.channels.GeneralChannel;
-import com.nt4f04uNd.player.channels.MediaButtonChannel;
-import com.nt4f04uNd.player.channels.NotificationChannel;
+import com.nt4f04uNd.player.channels.NativeEventsChannel;
 import com.nt4f04uNd.player.channels.PlayerChannel;
+import com.nt4f04uNd.player.channels.ServiceChannel;
 import com.nt4f04uNd.player.channels.SongChannel;
-import com.nt4f04uNd.player.handlers.*;
+import com.nt4f04uNd.player.handlers.AudioFocusHandler;
+import com.nt4f04uNd.player.handlers.GeneralHandler;
+import com.nt4f04uNd.player.handlers.MediaButtonHandler;
+import com.nt4f04uNd.player.handlers.PlayerHandler;
+import com.nt4f04uNd.player.handlers.PlaylistHandler;
+import com.nt4f04uNd.player.handlers.ServiceHandler;
 import com.nt4f04uNd.player.player.PlayerForegroundService;
-import com.nt4f04uNd.player.player.Song;
-import com.nt4f04uNd.player.receivers.*;
 
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 
-import io.flutter.Log;
 import io.flutter.app.FlutterActivity;
-import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
-import android.content.IntentFilter;
-import android.media.AudioManager;
 import android.os.IBinder;
-import android.view.View;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-
-import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
 // Method channel
 
 
 public class MainActivity extends FlutterActivity {
-
-    private IntentFilter noisyIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-
-    private NotificationReceiver notificationReceiver = null;
-    private BecomingNoisyReceiver noisyAudioStreamReceiver = null;
-
-    private EventChannel eventChannel;
-    // Other channels are wrapped into classes, so they are initialized in on create
 
     private PlayerForegroundService service;
 
@@ -80,19 +57,11 @@ public class MainActivity extends FlutterActivity {
 
         // Service
         // ----------------------------------------------------------------------------------
-        Intent forService = new Intent(getApplicationContext(), PlayerForegroundService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(forService);
-        } else {
-            startService(forService);
-        }
-
 //        bindService(
 //                new Intent(this, PlayerForegroundService.class),
 //                serviceConnection,
 //                Context.BIND_AUTO_CREATE
 //        );
-
 
 
         // Setup handlers
@@ -101,41 +70,25 @@ public class MainActivity extends FlutterActivity {
 //        AudioFocusHandler.init(getApplicationContext());
 //        MediaButtonHandler.init(getApplicationContext());
 //        NotificationHandler.init(getApplicationContext());
+        GeneralHandler.init(getApplicationContext(), this); // The most important, as it contains app context
         // ----------------------------------------------------------------------------------
 
         // Setup channels
         // ----------------------------------------------------------------------------------
-        AudioFocusChannel.init(getFlutterView());
-        MediaButtonChannel.init(getFlutterView());
+        GeneralChannel.init(getFlutterView(), this); // Inits general channel
+        PlaylistHandler.init(); // TODO: remove
 
-        GeneralChannel.init(getFlutterView(), this);
-        SongChannel.init(getFlutterView(), getApplicationContext());
-        NotificationChannel.init(getFlutterView(), getApplicationContext());
-        PlayerChannel.init(getFlutterView(), getApplicationContext());
+        AudioFocusHandler.init();
+        NativeEventsChannel.init(getFlutterView()); // Inits event channel
+        PlayerHandler.init(); // Inits player instance
+        PlayerChannel.init(getFlutterView()); // Inits player channel
+        MediaButtonHandler.init();
+        ServiceHandler.init(); // Contains intent to start service
+       // ServiceHandler.startService();
+        ServiceChannel.init(getFlutterView());
+        SongChannel.init(getFlutterView());
         // ----------------------------------------------------------------------------------
 
-
-        // Setup event channels
-        // ----------------------------------------------------------------------------------
-        eventChannel = new EventChannel(getFlutterView(), Constants.EVENT_CHANNEL_STREAM);
-        eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
-            @Override
-            public void onListen(Object args, final EventChannel.EventSink events) {
-                notificationReceiver = new NotificationReceiver(events);
-                noisyAudioStreamReceiver = new BecomingNoisyReceiver(events);
-                registerReceiver(notificationReceiver, NotificationHandler.intentFilter);
-                registerReceiver(noisyAudioStreamReceiver, noisyIntentFilter);
-
-                MediaButtonHandler.turnActive();
-            }
-
-            @Override
-            public void onCancel(Object args) {
-                unregisterReceiver(notificationReceiver);
-                unregisterReceiver(noisyAudioStreamReceiver);
-            }
-        });
-        // ----------------------------------------------------------------------------------
 
     }
 
@@ -158,10 +111,11 @@ public class MainActivity extends FlutterActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MediaButtonChannel.kill();
-        NotificationChannel.kill();
-        unregisterReceiver(notificationReceiver);
-        unregisterReceiver(noisyAudioStreamReceiver);
+        NativeEventsChannel.kill();
+        GeneralChannel.kill();
+        PlayerChannel.kill();
+        SongChannel.kill();
+        ServiceChannel.kill();
     }
 }
 

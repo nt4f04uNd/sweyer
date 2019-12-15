@@ -4,8 +4,8 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'package:app/components/albumArt.dart';
-import 'package:app/components/animatedPlayPauseButton.dart';
+import 'package:app/components/album_art.dart';
+import 'package:app/components/play_pause_button.dart';
 import 'package:app/components/custom_icon_button.dart';
 import 'package:app/components/popup_menu.dart' as customPopup;
 import 'package:app/components/track_list.dart';
@@ -585,6 +585,7 @@ class _TrackSliderState extends State<TrackSlider> {
     // Handle track position movement
     _changePositionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
+        print("POSITION CHANGE ${event.inSeconds}");
       if (event.inSeconds - 0.9 > _value.inSeconds && !_isDragging) {
         // Prevent waste updates
         setState(() {

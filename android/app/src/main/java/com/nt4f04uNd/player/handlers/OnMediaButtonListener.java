@@ -8,7 +8,7 @@ package com.nt4f04uNd.player.handlers;
 /** Class similar to an `OnAudioFocusChangeListener`
  *  Needed to use in `MediaButtonHandler` and call implemented callbacks
  * */
-public class OnMediaButtonListener {
+public abstract class OnMediaButtonListener {
     public OnMediaButtonListener(){}
     /**
      * From docs: "Switches the audio tracks."

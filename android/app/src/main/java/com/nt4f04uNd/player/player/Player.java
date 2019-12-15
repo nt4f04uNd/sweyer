@@ -15,10 +15,13 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.PowerManager;
 
+import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.handlers.PlayerHandler;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import io.flutter.Log;
 
 /** Basic wrapper over media player, very raw */
 public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
@@ -98,10 +101,10 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         }
     }
 
+
     /**
      * Getter methods
      */
-
 
     @Override
     public double getVolume() {
@@ -119,9 +122,16 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     }
 
     @Override
+    public ReleaseMode getReleaseMode(){
+        return this.releaseMode;
+    }
+
+    @Override
     public boolean isActuallyPlaying() {
         return this.playing && this.prepared;
     }
+
+
 
     /**
      * Playback handling methods
@@ -138,7 +148,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.player.prepareAsync();
             } else if (this.prepared) {
                 this.player.start();
-                PlayerHandler.handleIsPlaying();
+                PlayerHandler.handleStartPlaying();
             }
         }
     }
@@ -149,6 +159,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
             return;
         }
 
+        PlayerHandler.handleStopPlaying();
         if (releaseMode != ReleaseMode.RELEASE) {
             if (this.playing) {
                 this.playing = false;
@@ -181,6 +192,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     @Override
     public void pause() {
         if (this.playing) {
+            PlayerHandler.handleStopPlaying();
             this.playing = false;
             this.player.pause();
         }
@@ -196,6 +208,8 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
             this.shouldSeekTo = position;
     }
 
+
+
     /**
      * MediaPlayer callbacks
      */
@@ -206,7 +220,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         PlayerHandler.handleDuration(this);
         if (this.playing) {
             this.player.start();
-            PlayerHandler.handleIsPlaying();
+            PlayerHandler.handleStartPlaying();
         }
         if (this.shouldSeekTo >= 0) {
             this.player.seekTo(this.shouldSeekTo);
@@ -219,8 +233,10 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         if (releaseMode != ReleaseMode.LOOP) {
             this.stop();
         }
-        PlayerHandler.handleCompletion(this);
+        PlayerHandler.handleCompletion();
     }
+
+
 
     /**
      * Internal logic. Private methods

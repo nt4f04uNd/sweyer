@@ -8,13 +8,14 @@
 
 package com.nt4f04uNd.player.channels;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.handlers.PlayerHandler;
+import com.nt4f04uNd.player.player.Player;
 import com.nt4f04uNd.player.player.ReleaseMode;
 
+import androidx.annotation.Nullable;
 import io.flutter.Log;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -22,12 +23,23 @@ import io.flutter.view.FlutterView;
 
 public class PlayerChannel implements MethodChannel.MethodCallHandler {
 
-    public static void init(FlutterView view, Context appContext) {
-        channel = new MethodChannel(view, Constants.PLAYER_CHANNEL_STREAM);
-        channel.setMethodCallHandler(new PlayerChannel());
+    public static void init(FlutterView view) {
+        if(channel == null) {
+            channel = new MethodChannel(view, Constants.channels.PLAYER_CHANNEL_STREAM);
+            channel.setMethodCallHandler(new PlayerChannel());
+        }
     }
 
+    public static void kill() {
+        channel = null;
+    }
+
+    @Nullable
     public static MethodChannel channel;
+
+    public static void invokeMethod(String method, Object arguments) {
+        if (channel != null) channel.invokeMethod(method, arguments);
+    }
 
     @Override
     public void onMethodCall(final MethodCall call, final MethodChannel.Result response) {
@@ -35,6 +47,7 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
             handleMethodCall(call, response);
         } catch (Exception e) {
             Log.e(Constants.LogTag, "Unexpected error!", e);
+            PlayerHandler.handleError(e);
             response.error("Unexpected error!", e.getMessage(), e);
         }
     }

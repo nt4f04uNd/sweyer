@@ -38,6 +38,8 @@ abstract class PlayerAbstract {
 
     abstract int getCurrentPosition();
 
+    abstract ReleaseMode getReleaseMode();
+
     abstract boolean isActuallyPlaying();
 
     /**

@@ -5,7 +5,6 @@
 
 package com.nt4f04uNd.player.handlers;
 
-import android.content.Context;
 import android.content.pm.PackageManager;
 
 import com.nt4f04uNd.player.Constants;
@@ -17,24 +16,19 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import io.flutter.Log;
 
+
+
+/***CURRENTLY OUT OF USE*******************************************************************************************/
 public class SerializationHandler {
-
-    public static void init(Context appContext) {
-        SerializationHandler.appContext = appContext;
-    }
-
-    private static Context appContext;
 
     public static String getFlutterAppPath() {
         try {
-            String directory = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), 0).applicationInfo.dataDir;
+            String directory = GeneralHandler.getAppContext().getPackageManager().getPackageInfo(GeneralHandler.getAppContext().getPackageName(), 0).applicationInfo.dataDir;
             return directory + "/app_flutter/";
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(Constants.LogTag, "Error Package name not found", e);
@@ -61,7 +55,9 @@ public class SerializationHandler {
         return json;
     }
 
-    /** Reads playlist and songs jsons and gets needed songs **/
+    /**
+     * Reads playlist and songs jsons and gets needed songs
+     **/
     public static ArrayList<Song> getPlaylistSongs() {
         JSONArray jsonPlaylist;
         JSONArray jsonSongs;
@@ -69,6 +65,8 @@ public class SerializationHandler {
         try {
             jsonPlaylist = new JSONArray(SerializationHandler.loadJSON(SerializationHandler.getFlutterAppPath() + "playlist.json"));
             jsonSongs = new JSONArray(SerializationHandler.loadJSON(SerializationHandler.getFlutterAppPath() + "songs.json"));
+
+            Log.w(Constants.LogTag, jsonSongs.toString());
 
             for (int i = 0; i < jsonPlaylist.length(); i++) {
                 for (int j = 0; j < jsonSongs.length(); j++) {
@@ -81,7 +79,7 @@ public class SerializationHandler {
         } catch (JSONException e) {
             e.printStackTrace();
         } finally {
-            Log.w(Constants.LogTag,songs.toString());
+            Log.w(Constants.LogTag, songs.toString());
             return songs;
         }
     }
