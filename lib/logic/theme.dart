@@ -3,12 +3,12 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/utils/async.dart';
-import 'package:app/logic/prefs.dart';
-import 'package:app/constants/themes.dart';
+import 'package:flutter_music_player/utils/async.dart';
+import 'package:flutter_music_player/logic/prefs.dart';
+import 'package:flutter_music_player/constants/themes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:app/logic/error_bridge.dart';
+import 'package:flutter_music_player/logic/error_bridge.dart';
 
 abstract class ThemeControl {
   static Brightness _brightness;

@@ -3,18 +3,18 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/route_transitions.dart';
-import 'package:app/components/show_functions.dart';
-import 'package:app/constants/constants.dart';
-import 'package:app/logic/player/player.dart';
-import 'package:app/logic/theme.dart';
+import 'package:flutter_music_player/components/route_transitions.dart';
+import 'package:flutter_music_player/components/show_functions.dart';
+import 'package:flutter_music_player/constants/constants.dart';
+import 'package:flutter_music_player/logic/player/player.dart';
+import 'package:flutter_music_player/logic/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:app/routes/exif_route.dart';
-import 'package:app/routes/extendedSettings.dart';
-import 'package:app/routes/main_route.dart';
-import 'package:app/routes/player_route.dart';
-import 'package:app/routes/settings_route.dart';
+import 'package:flutter_music_player/routes/exif_route.dart';
+import 'package:flutter_music_player/routes/extendedSettings.dart';
+import 'package:flutter_music_player/routes/main_route.dart';
+import 'package:flutter_music_player/routes/player_route.dart';
+import 'package:flutter_music_player/routes/settings_route.dart';
 import 'package:flutter/services.dart';
 
 /// Class to control how routes are created
@@ -57,13 +57,12 @@ abstract class RouteControl {
       return createRouteTransition(
         checkExitAnimationEnabled: () =>
             _currentRouteEquals(Routes.settings.value) ||
-                _currentRouteEquals(Routes.extendedSettings.value),
+            _currentRouteEquals(Routes.extendedSettings.value),
         checkEntAnimationEnabled: () => false,
         maintainState: true,
-        
         routeSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
-        enterSystemUI:
+        checkEnterSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         exitIgnoreEventsForward: false,
         route: WillPopScope(
@@ -81,29 +80,27 @@ abstract class RouteControl {
         playMaterial: true,
         materialAnimationStyle: MaterialRouteTransitionStyle.expand,
         entCurve: Curves.fastOutSlowIn,
-        exitCurve: Curves.linearToEaseOut,
-        exitReverseCurve: Curves.fastOutSlowIn,
         entBegin: Offset(0.0, 1.0),
         checkExitAnimationEnabled: () => _currentRouteEquals(Routes.exif.value),
-        enterSystemUI:
+        checkEnterSystemUI: () =>
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
-        exitSystemUI: () =>
+        checkExitSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         route: PlayerRoute(),
       );
     } else if (settings.name == Routes.settings.value)
       return createRouteTransition(
-        enterSystemUI:
+        checkEnterSystemUI: () =>
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
-        exitSystemUI: () =>
+        checkExitSystemUI: () =>
             AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         route: SettingsRoute(),
       );
     else if (settings.name == Routes.extendedSettings.value)
       return createRouteTransition(
-        enterSystemUI:
+        checkEnterSystemUI: () =>
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
-        exitSystemUI: () =>
+        checkExitSystemUI: () =>
             AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         route: ExtendedSettingsRoute(),
       );

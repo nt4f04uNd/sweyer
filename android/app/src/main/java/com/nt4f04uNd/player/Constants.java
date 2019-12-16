@@ -58,6 +58,7 @@ public class Constants {
         // Service methods
         public static final String SERVICE_METHOD_START_SERVICE = "SERVICE_METHOD_START_SERVICE";
         public static final String SERVICE_METHOD_STOP_SERVICE = "SERVICE_METHOD_STOP_SERVICE";
+        public static final String SERVICE_METHOD_IS_SERVICE_RUNNING = "SERVICE_METHOD_IS_SERVICE_RUNNING";
 
 
         // Songs methods

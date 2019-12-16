@@ -3,9 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/buttons.dart';
-import 'package:app/constants/routes.dart';
-import 'package:app/logic/theme.dart';
+import 'package:flutter_music_player/components/buttons.dart';
+import 'package:flutter_music_player/constants/routes.dart';
+import 'package:flutter_music_player/logic/theme.dart';
 import 'package:flutter/material.dart';
 
 class SettingsRoute extends StatefulWidget {
@@ -40,7 +40,10 @@ class _SettingsRouteState extends State<SettingsRoute> {
           titleSpacing: 0.0,
           backgroundColor: Colors.transparent,
           title: Text("Настройки",
-              style: TextStyle(color: Theme.of(context).textTheme.title.color)),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.title.color,
+                // fontWeight: FontWE
+              )),
           leading: CustomBackButton(),
           automaticallyImplyLeading: false,
         ),
@@ -50,24 +53,11 @@ class _SettingsRouteState extends State<SettingsRoute> {
           physics: NeverScrollableScrollPhysics(),
           children: <Widget>[
             ListTile(
-              title: Text("Расширенные настройки"),
+              title: Text('Расширенные настройки'),
               onTap: () {
                 Navigator.of(context).pushNamed(Routes.extendedSettings.value);
               },
             ),
-            // GestureDetector(
-            //   onTap: _switchTheme,
-            //   child: ListTile(
-            //     title: Text("Темная тема"),
-            //     trailing: Switch(
-            //       activeColor: Theme.of(context).primaryColor,
-            //       value: _switched,
-            //       onChanged: (value) {
-            //         _switchTheme();
-            //       },
-            //     ),
-            //   ),
-            // ),
             SwitchListTile(
               title: Text("Темная тема"),
               activeColor: Theme.of(context).primaryColor,

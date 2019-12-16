@@ -8,7 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:app/constants/themes.dart';
+import 'package:flutter_music_player/constants/themes.dart';
 
 /// Album art general widget
 /// Shows placeholder or art, depending on provided path
@@ -116,9 +116,9 @@ class AlbumArtPlaceholder extends StatelessWidget {
         child: LayoutBuilder(builder: (context, constraint) {
           return isLarge
               ? SvgPicture.asset(
-                  'images/icons/note_rounded.svg',
+                  'assets/images/icons/note_rounded.svg',
                 )
-              : Image.asset('images/placeholder_thumb.png');
+              : Image.asset('assets/images/placeholder_thumb.png');
         }),
       );
     });

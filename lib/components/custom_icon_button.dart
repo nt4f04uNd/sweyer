@@ -8,7 +8,7 @@
 
 import 'dart:math' as math;
 
-import 'package:app/components/icon_button_splash.dart';
+import 'package:flutter_music_player/components/icon_button_splash.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

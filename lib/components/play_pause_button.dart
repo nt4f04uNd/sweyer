@@ -4,15 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'package:app/logic/player/player.dart';
-
+import 'package:flutter_music_player/logic/player/player.dart';
 
 // import 'package:audioplayers/audioplayers.dart';
-import 'package:app/logic/player/nativePlayer.dart';
-
+import 'package:flutter_music_player/logic/player/nativePlayer.dart';
 
 import 'package:flutter/material.dart';
-import 'package:app/constants/themes.dart';
+import 'package:flutter_music_player/constants/themes.dart';
 
 import 'custom_icon_button.dart';
 

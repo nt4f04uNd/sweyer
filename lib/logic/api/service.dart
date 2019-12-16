@@ -1,6 +1,11 @@
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+
 import 'package:flutter/services.dart';
 
-import 'package:app/constants/constants.dart' as Constants;
+import 'package:flutter_music_player/constants/constants.dart' as Constants;
 
 class ServiceHandler {
   static MethodChannel _serviceChannel =
@@ -22,5 +27,10 @@ class ServiceHandler {
       _serviceChannel
           .invokeMethod(Constants.ServiceChannel.METHOD_STOP_SERVICE);
     }
+  }
+
+
+  static void isServiceRunning(){
+    
   }
 }

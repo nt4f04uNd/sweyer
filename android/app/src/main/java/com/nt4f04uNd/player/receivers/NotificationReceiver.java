@@ -12,10 +12,14 @@ import android.util.Log;
 
 import com.nt4f04uNd.player.Constants;
 import com.nt4f04uNd.player.channels.NativeEventsChannel;
+import com.nt4f04uNd.player.handlers.GeneralHandler;
+import com.nt4f04uNd.player.handlers.PlayerHandler;
 
 import io.flutter.plugin.common.EventChannel;
 
-/** Broadcast receiver for notifications intents */
+/**
+ * Broadcast receiver for notifications intents
+ */
 public class NotificationReceiver extends BroadcastReceiver {
 
     @Override

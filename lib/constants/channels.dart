@@ -13,8 +13,7 @@ abstract class EventChannel {
   static const String CHANNEL_NAME = 'EVENT_CHANNEL_STREAM';
 
   /// Event when user disconnects headset
-  static const String BECOME_NOISY =
-      'com.nt4f04uNd.player.EVENT_BECAME_NOISY';
+  static const String BECOME_NOISY = 'com.nt4f04uNd.player.EVENT_BECAME_NOISY';
   // Events for notification clicks
   static const String NOTIFICATION_PLAY =
       'com.nt4f04uNd.player.EVENT_NOTIFICATION_PLAY';
@@ -32,19 +31,15 @@ abstract class EventChannel {
   static const String AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK =
       "EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
 
-  static const String MEDIABUTTON_AUDIO_TRACK =
-      "EVENT_MEDIABUTTON_AUDIO_TRACK";
+  static const String MEDIABUTTON_AUDIO_TRACK = "EVENT_MEDIABUTTON_AUDIO_TRACK";
   static const String MEDIABUTTON_FAST_FORWARD =
       "EVENT_MEDIABUTTON_FAST_FORWARD";
   static const String MEDIABUTTON_REWIND = "EVENT_MEDIABUTTON_REWIND";
   static const String MEDIABUTTON_NEXT = "EVENT_MEDIABUTTON_NEXT";
   static const String MEDIABUTTON_PREVIOUS = "EVENT_MEDIABUTTON_PREVIOUS";
-  static const String MEDIABUTTON_PLAY_PAUSE =
-      "EVENT_MEDIABUTTON_PLAY_PAUSE";
-  static const String MEDIABUTTON_PLAY =
-      "EVENT_MEDIABUTTON_PLAY";
-  static const String MEDIABUTTON_STOP =
-      "EVENT_MEDIABUTTON_STOP";
+  static const String MEDIABUTTON_PLAY_PAUSE = "EVENT_MEDIABUTTON_PLAY_PAUSE";
+  static const String MEDIABUTTON_PLAY = "EVENT_MEDIABUTTON_PLAY";
+  static const String MEDIABUTTON_STOP = "EVENT_MEDIABUTTON_STOP";
   static const String MEDIABUTTON_HOOK = "EVENT_MEDIABUTTON_HOOK";
 }
 
@@ -60,17 +55,14 @@ abstract class GeneralChannel {
   static const String METHOD_STOP_SERVICE = "GENERAL_METHOD_STOP_SERVICE";
 }
 
-
 abstract class ServiceChannel {
   static const String CHANNEL_NAME = 'SERVICE_CHANNEL_STREAM';
 
-  static const String METHOD_START_SERVICE =
-      "SERVICE_METHOD_START_SERVICE";
-  static const String METHOD_STOP_SERVICE =
-      "SERVICE_METHOD_STOP_SERVICE";
+  static const String METHOD_START_SERVICE = "SERVICE_METHOD_START_SERVICE";
+  static const String METHOD_STOP_SERVICE = "SERVICE_METHOD_STOP_SERVICE";
+  static const String METHOD_IS_SERVICE_RUNNING =
+      "SERVICE_METHOD_IS_SERVICE_RUNNING";
 }
-
-
 
 abstract class SongsChannel {
   static const String channelName = 'SONGS_CHANNEL_STREAM';

@@ -3,8 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:flutter_music_player/components/route.dart';
 import 'package:flutter/material.dart';
-
 
 class ExifRoute extends StatefulWidget {
   const ExifRoute({Key key}) : super(key: key);
@@ -24,26 +24,9 @@ class _ExifRouteState extends State<ExifRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(63.0), // here the desired height
-        child: AppBar(
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back,
-                color: Theme.of(context).iconTheme.color),
-            onPressed: () => Navigator.pop(context),
-          ),
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: Icon(Icons.more_vert),
-          //     onPressed: () => Navigator.pop(context),
-          //   ),
-          // ],
-          automaticallyImplyLeading: false,
-        ),
-      ),
-      body: Container(
+    return RouteBase(
+      name: "Редактировать",
+      child: Container(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: <Widget>[

@@ -3,17 +3,17 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/bottom_track_panel.dart';
-import 'package:app/components/buttons.dart';
-import 'package:app/components/custom_icon_button.dart';
-import 'package:app/components/show_functions.dart';
-import 'package:app/components/track_list.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/logic/player/playlist.dart';
-import 'package:app/logic/prefs.dart';
-import 'package:app/logic/player/song.dart';
+import 'package:flutter_music_player/components/bottom_track_panel.dart';
+import 'package:flutter_music_player/components/buttons.dart';
+import 'package:flutter_music_player/components/custom_icon_button.dart';
+import 'package:flutter_music_player/components/show_functions.dart';
+import 'package:flutter_music_player/components/track_list.dart';
+import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
+import 'package:flutter_music_player/logic/prefs.dart';
+import 'package:flutter_music_player/logic/player/song.dart';
 import 'package:flutter/material.dart';
-import 'package:app/components/custom_search.dart' as custom_search;
+import 'package:flutter_music_player/components/custom_search.dart' as custom_search;
 
 class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   SongsSearchDelegate();
@@ -250,12 +250,14 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text("История поиска",
-              style: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 16,
-                color: Theme.of(context).hintColor,
-              )),
+          Text(
+            "История поиска",
+            style: TextStyle(
+              // fontWeight: FontWeight.w400,
+              fontSize: 16,
+              color: Theme.of(context).hintColor,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: Padding(
@@ -297,8 +299,12 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
   Widget _buildSuggestionTile(BuildContext context, int index) {
     return ListTile(
-      title: Text(_suggestions[index]),
-      leading: const Icon(Icons.history),
+      title: Text(_suggestions[index], style: TextStyle(fontSize: 15.5)),
+      dense: true,
+      leading: Padding(
+        padding: const EdgeInsets.only(left:2.0),
+        child:  Icon(Icons.history ,color: AppTheme.menuItemIcon.auto(context)),
+      ),
       onLongPress: () {
         ShowFunctions.showDialog(
           context,

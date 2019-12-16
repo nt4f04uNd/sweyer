@@ -3,16 +3,16 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/custom_icon_button.dart';
-import 'package:app/logic/player/player_widgets.dart';
-import 'package:app/constants/constants.dart';
-import 'package:app/logic/player/playlist.dart';
+import 'package:flutter_music_player/components/custom_icon_button.dart';
+import 'package:flutter_music_player/logic/player/player_widgets.dart';
+import 'package:flutter_music_player/constants/constants.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
 
 // import 'package:audioplayers/audioplayers.dart';
-import 'package:app/logic/player/nativePlayer.dart';
+import 'package:flutter_music_player/logic/player/nativePlayer.dart';
 
 import 'package:flutter/material.dart';
-import 'package:app/logic/player/player.dart';
+import 'package:flutter_music_player/logic/player/player.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'album_art.dart';
 import 'play_pause_button.dart';
@@ -60,12 +60,14 @@ class BottomTrackPanel extends StatelessWidget {
                           Text(
                             PlaylistControl.currentSong?.title,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16.5),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 1),
                             child: Artist(
-                                artist: PlaylistControl.currentSong?.artist),
+                                artist: PlaylistControl.currentSong?.artist,
+                                // textStyle: TextStyle(fontWeight: ThemeControl.isDark ? FontWeight.w400 : FontWeight.w500),
+                                ),
                           ),
                         ],
                       ),

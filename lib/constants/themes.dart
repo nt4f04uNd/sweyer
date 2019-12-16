@@ -62,23 +62,41 @@ abstract class AppTheme {
       light: Colors.black.withOpacity(0.2),
       dark: Colors.white.withOpacity(0.2));
 
-/// Main colors - `whiteDarkened` and `greyLight`
+  /// Main colors - `whiteDarkened` and `greyLight`
   static final ThemeContainer<Color> main =
       ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
   static final ThemeContainer<Color> drawer =
       ThemeContainer(light: Colors.white, dark: AppColors.grey);
 
-  static final ThemeContainer<Color> drawerListItem = ThemeContainer(
-      light: Colors.deepPurple.shade500, dark: Colors.deepPurple.shade300);
+  static final ThemeContainer<Color> menuItem = ThemeContainer(
+      light: Color(0xff3d3e42), dark:Color(0xffe7e8ec));
+  static final ThemeContainer<Color> menuItemIcon = ThemeContainer(
+      light: Color(0xff616266), dark:Color(0xfff1f2f4));
 
   static final ThemeContainer<Color> refreshIndicatorArrow =
       ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
   static final ThemeContainer<Color> refreshIndicatorBackground =
       ThemeContainer(light: Colors.deepPurple, dark: AppColors.greyLight);
 
-  static final ThemeContainer<ThemeData> materialApp = ThemeContainer(
+  static ThemeContainer<ThemeData> materialApp = ThemeContainer(
     light: ThemeData(
+      fontFamily: 'Manrope',
+      textTheme: TextTheme(
+        title: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        subtitle: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        body2: TextStyle(fontWeight: FontWeight.w600),
+        button: TextStyle(fontWeight: FontWeight.w600),
+        display1: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        display2: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        display3: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        display4: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        headline: TextStyle(fontWeight: FontWeight.w600),
+        overline: TextStyle(fontWeight: FontWeight.w600),
+        body1: TextStyle(fontWeight: FontWeight.w600),
+        caption: TextStyle(fontWeight: FontWeight.w600),
+        subhead: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+      ),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
@@ -110,6 +128,22 @@ abstract class AppTheme {
       cursorColor: Colors.deepPurple,
     ),
     dark: ThemeData(
+      fontFamily: 'Manrope',
+      textTheme: TextTheme(
+        title: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        subtitle: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        body2: TextStyle(fontWeight: FontWeight.w600),
+        button: TextStyle(fontWeight: FontWeight.w600),
+        display1: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        display2: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        display3: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        display4: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        headline: TextStyle(fontWeight: FontWeight.w600),
+        overline: TextStyle(fontWeight: FontWeight.w600),
+        body1: TextStyle(fontWeight: FontWeight.w600),
+        caption: TextStyle(fontWeight: FontWeight.w600),
+        subhead: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+      ),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
@@ -168,8 +202,18 @@ abstract class AppSystemUIThemes {
   static final ThemeContainer<SystemUiOverlayStyle> mainScreen = ThemeContainer(
     light: allScreens.light
         .copyWith(systemNavigationBarColor: AppColors.whiteDarkened),
+    // light: allScreens.light
+    //     .copyWith(systemNavigationBarColor: AppColors.whiteDarkened, statusBarColor: AppColors.whiteDarkened),
     dark:
         allScreens.dark.copyWith(systemNavigationBarColor: AppColors.greyLight),
+  );
+
+  /// Theme for the drawer screen
+  static final ThemeContainer<SystemUiOverlayStyle> drawerScreen = ThemeContainer(
+    light: allScreens.light
+        .copyWith(statusBarColor: AppColors.whiteDarkened),
+    dark:
+        allScreens.dark.copyWith(statusBarColor: AppColors.grey),
   );
 
   /// Theme for dialog screen
@@ -197,6 +241,10 @@ class ThemeContainer<T> {
   T auto(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? dark : light;
 
+  /// Inverses brightness
+  T autoInverse(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light ? dark : light;
+
   /// Copy `auto`, but accepts brightness instead of context
   ///
   /// Also checks theme and automatically returns corresponding ui style
@@ -206,4 +254,8 @@ class ThemeContainer<T> {
   /// @return `light` or `dark`, depending on current brightness
   T autoBr(Brightness brightness) =>
       brightness == Brightness.dark ? dark : light;
+
+  /// Inverses brightnes
+  T autoBrInverse(Brightness brightness) =>
+      brightness == Brightness.light ? dark : light;
 }

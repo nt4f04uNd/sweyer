@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 /// Component to show artist, or automatically show "Неизвестный исполнитель" instead of "<unknown>"
 class Artist extends StatelessWidget {
   final String artist;
-  const Artist({Key key, @required this.artist}) : super(key: key);
+  final TextStyle textStyle;
+  const Artist({Key key, @required this.artist, this.textStyle}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +18,14 @@ class Artist extends StatelessWidget {
       child: Text(
         artistString(artist),
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
+        style:  TextStyle(
           //Default flutter subtitle font size (not densed)
-          fontSize: 14,
+          fontSize: 13.5,
           // This is used in ListTile elements
           color: Theme.of(context).textTheme.caption.color,
-        ),
+          // fontWeight: ThemeControl.isDark ? FontWeight.w300 : FontWeight.w600,
+          height: 0.9
+        ).merge(textStyle),
       ),
     );
   }

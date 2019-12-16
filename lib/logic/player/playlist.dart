@@ -6,12 +6,12 @@
 import 'dart:async';
 import 'dart:io';
 import 'fetcher.dart';
-import 'package:app/logic/permissions.dart';
+import 'package:flutter_music_player/logic/permissions.dart';
 import 'player.dart';
-import 'package:app/logic/prefs.dart';
+import 'package:flutter_music_player/logic/prefs.dart';
 import 'serialization.dart';
 import 'song.dart';
-import 'package:app/utils/async.dart';
+import 'package:flutter_music_player/utils/async.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -277,6 +277,7 @@ abstract class PlaylistControl {
   }
 
   static Future<void> init() async {
+
     // Init permission
     await Permissions.requestPermission(PermissionGroup.storage);
 

@@ -6,7 +6,7 @@
 *  See ThirdPartyNotices.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/constants/routes.dart';
+import 'package:flutter_music_player/constants/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // A file for custom `showSearch`, because I need search to be named route

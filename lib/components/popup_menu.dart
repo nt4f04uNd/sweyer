@@ -8,8 +8,8 @@
 
 import 'dart:async';
 
-import 'package:app/components/custom_icon_button.dart';
-import 'package:app/constants/themes.dart';
+import 'package:flutter_music_player/components/custom_icon_button.dart';
+import 'package:flutter_music_player/constants/themes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -28,9 +28,9 @@ const double _kMenuItemHeight = 48.0;
 const double _kMenuDividerHeight = 16.0;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
-const double _kMenuVerticalPadding = 6.5;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
+const double _kMenuVerticalPadding = 6.5;
 
 /// A base class for entries in a material design popup menu.
 ///
@@ -266,8 +266,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       onTap: widget.enabled ? handleTap : null,
       child: Container(
         height: widget.height,
-        padding:
-            const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        padding: EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
         child: item,
       ),
     );
@@ -476,8 +475,7 @@ class _PopupMenu<T> extends StatelessWidget {
           explicitChildNodes: true,
           label: semanticLabel,
           child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
+            padding: route.menuPadding,
             child: ListBody(children: children),
           ),
         ),
@@ -490,9 +488,7 @@ class _PopupMenu<T> extends StatelessWidget {
         return Opacity(
           opacity: opacity.evaluate(route.animation),
           child: ClipRRect(
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
-            ),
+            borderRadius: route.menuBorderRadius,
             child: Material(
               type: MaterialType.card,
               elevation: route.elevation,
@@ -596,15 +592,16 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 }
 
 class _PopupMenuRoute<T> extends PopupRoute<T> {
-  _PopupMenuRoute({
-    this.position,
-    this.items,
-    this.initialValue,
-    this.elevation,
-    this.theme,
-    this.barrierLabel,
-    this.semanticLabel,
-  });
+  _PopupMenuRoute(
+      {this.position,
+      this.items,
+      this.initialValue,
+      this.elevation,
+      this.theme,
+      this.barrierLabel,
+      this.semanticLabel,
+      this.menuBorderRadius,
+      this.menuPadding});
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
@@ -612,6 +609,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ThemeData theme;
   final String semanticLabel;
+  final BorderRadius menuBorderRadius;
+  final EdgeInsets menuPadding;
 
   @override
   Animation<double> createAnimation() {
@@ -639,7 +638,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       Animation<double> secondaryAnimation) {
     double selectedItemOffset;
     if (initialValue != null) {
-      double y = _kMenuVerticalPadding;
+      double y = menuPadding.vertical;
       for (PopupMenuEntry<T> entry in items) {
         if (entry.represents(initialValue)) {
           selectedItemOffset = y + entry.height / 2.0;
@@ -716,6 +715,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
+/// The `menuBorderRadius` sets specific border radius to context menu card
+/// Defaults to `const BorderRadius.all(Radius.circular(10))`
+///
+/// The `menuPadding` sets menu card vertical padding
+/// Defaults to `const EdgeInsets.symmetric(vertical: 6.5)`
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -729,6 +734,10 @@ Future<T> showCustomMenu<T>({
   @required BuildContext context,
   @required RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
+  BorderRadius menuBorderRadius = const BorderRadius.all(
+    Radius.circular(10),
+  ),
+  EdgeInsets menuPadding = const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
   T initialValue,
   double elevation = 8.0,
   String semanticLabel,
@@ -757,7 +766,9 @@ Future<T> showCustomMenu<T>({
         initialValue: initialValue,
         elevation: elevation,
         semanticLabel: label,
+        menuBorderRadius: menuBorderRadius,
         theme: Theme.of(context, shadowThemeOnly: true),
+        menuPadding: menuPadding,
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
       ));
@@ -853,6 +864,10 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
     this.buttonIconSize = 24.0,
     this.offset = Offset.zero,
     this.enabled = true,
+    this.menuBorderRadius = const BorderRadius.all(
+      Radius.circular(10),
+    ),
+    this.menuPadding = const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
   })  : assert(itemBuilder != null),
         assert(offset != null),
         assert(enabled != null),
@@ -912,6 +927,12 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
   /// the button that was used to create it.
   final Offset offset;
 
+  /// Sets specific border radius to context menu card
+  final BorderRadius menuBorderRadius;
+
+  /// Sets menu card padding
+  final EdgeInsets menuPadding;
+
   /// Whether this popup menu button is interactive.
   ///
   /// Must be non-null, defaults to `true`
@@ -946,12 +967,14 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       showCustomMenu<T>(
-        context: context,
-        elevation: widget.elevation,
-        items: items,
-        initialValue: widget.initialValue,
-        position: position,
-      ).then<void>((T newValue) {
+              context: context,
+              elevation: widget.elevation,
+              items: items,
+              initialValue: widget.initialValue,
+              position: position,
+              menuBorderRadius: widget.menuBorderRadius,
+              menuPadding: widget.menuPadding)
+          .then<void>((T newValue) {
         if (!mounted) return null;
         if (newValue == null) {
           if (widget.onCanceled != null) widget.onCanceled();

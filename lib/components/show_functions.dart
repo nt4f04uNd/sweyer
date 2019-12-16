@@ -3,12 +3,12 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/buttons.dart';
-import 'package:app/components/custom_search.dart';
-import 'package:app/components/search.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/logic/player/playlist.dart';
-import 'package:app/logic/player/song.dart';
+import 'package:flutter_music_player/components/buttons.dart';
+import 'package:flutter_music_player/components/custom_search.dart';
+import 'package:flutter_music_player/components/search.dart';
+import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
+import 'package:flutter_music_player/logic/player/song.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 // This is a workaround to rename show functions

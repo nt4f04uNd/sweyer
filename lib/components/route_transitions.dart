@@ -46,119 +46,123 @@ enum MaterialRouteTransitionStyle {
 }
 
 /// Returns `PageRouteBuilder` that performs slide to right animation
-PageRouteBuilder<T> createRouteTransition<T extends Widget>(
-    {@required final T route,
+PageRouteBuilder<T> createRouteTransition<T extends Widget>({
+  @required final T route,
 
-    /// Function that checks whether to play enter animation or not
-    ///
-    /// E.G disable enter animation for main route
-    BoolFunction checkEntAnimationEnabled,
+  /// Function that checks whether to play enter animation or not
+  ///
+  /// E.G disable enter animation for main route
+  BoolFunction checkEntAnimationEnabled,
 
-    /// Function that checks whether to play exit animation or not
-    ///
-    /// E.G disable exit animation for particular route pushes
-    BoolFunction checkExitAnimationEnabled,
+  /// Function that checks whether to play exit animation or not
+  ///
+  /// E.G disable exit animation for particular route pushes
+  BoolFunction checkExitAnimationEnabled,
 
-    /// Begin offset for enter animation
-    ///
-    /// Defaults to `const Offset(1.0, 0.0)`
-    final Offset entBegin = const Offset(1.0, 0.0),
+  /// Begin offset for enter animation
+  ///
+  /// Defaults to `const Offset(1.0, 0.0)`
+  final Offset entBegin = const Offset(1.0, 0.0),
 
-    /// End offset for enter animation
-    ///
-    /// Defaults to `Offset.zero`
-    final Offset entEnd = Offset.zero,
+  /// End offset for enter animation
+  ///
+  /// Defaults to `Offset.zero`
+  final Offset entEnd = Offset.zero,
 
-    /// Begin offset for exit animation
-    ///
-    /// Defaults to `Offset.zero`
-    final Offset exitBegin = Offset.zero,
+  /// Begin offset for exit animation
+  ///
+  /// Defaults to `Offset.zero`
+  final Offset exitBegin = Offset.zero,
 
-    /// End offset for exit animation
-    ///
-    /// Defaults to `const Offset(-0.3, 0.0)`
-    final Offset exitEnd = const Offset(-0.3, 0.0),
+  /// End offset for exit animation
+  ///
+  /// Defaults to `const Offset(-0.3, 0.0)`
+  final Offset exitEnd = const Offset(-0.2, 0.0),
 
-    /// A curve for enter animation
-    ///
-    /// Defaults to `Curves.linearToEaseOut`
-    final Curve entCurve = Curves.linearToEaseOut,
+  /// A curve for enter animation
+  ///
+  /// Defaults to `Curves.linearToEaseOut`
+  final Curve entCurve = Curves.linearToEaseOut,
 
-    /// A curve for reverse enter animation
-    ///
-    /// Defaults to `Curves.easeInToLinear`
-    final Curve entReverseCurve = Curves.easeInToLinear,
+  /// A curve for reverse enter animation
+  ///
+  /// Defaults to `Curves.easeInToLinear`
+  final Curve entReverseCurve = Curves.easeInToLinear,
 
-    /// A curve for exit animation
-    ///
-    /// Defaults to `Curves.linearToEaseOut`
-    final Curve exitCurve = Curves.linearToEaseOut,
+  /// A curve for exit animation
+  ///
+  /// Defaults to `Curves.linearToEaseOut`
+  final Curve exitCurve = Curves.linearToEaseOut,
 
-    /// A curve for reverse exit animation
-    ///
-    /// Defaults to `Curves.easeInToLinear`
-    final Curve exitReverseCurve = Curves.easeInToLinear,
+  /// A curve for reverse exit animation
+  ///
+  /// Defaults to `Curves.easeInToLinear`
+  final Curve exitReverseCurve = Curves.easeInToLinear,
 
-    /// `SystemUiOverlayStyle` applied on route enter (when `animation`)
-    final SystemUiOverlayStyle enterSystemUI,
+  /// `SystemUiOverlayStyle` applied on route enter (when `animation`)
+  final UIFunction checkEnterSystemUI,
 
-    /// `SystemUiOverlayStyle` applied on route exit (when `animation`)
-    final UIFunction exitSystemUI,
+  /// `SystemUiOverlayStyle` applied on route exit (when `animation`)
+  final UIFunction checkExitSystemUI,
 
-    /// Function, that returns `SystemUiOverlayStyle`, that will be applied for a static route
-    final UIFunction routeSystemUI,
+  /// Function, that returns `SystemUiOverlayStyle`, that will be applied for a static route
+  final UIFunction routeSystemUI,
 
-    /// A duration of transition
-    ///
-    /// Defaults to `const Duration(milliseconds: 400)`
-    final Duration transitionDuration = const Duration(milliseconds: 400),
+  /// A duration of transition
+  ///
+  /// Defaults to `const Duration(milliseconds: 400)`
+  final Duration transitionDuration = const Duration(milliseconds: 400),
 
-    /// Field to pass `RouteSettings`
-    final RouteSettings settings,
+  /// Field to pass `RouteSettings`
+  final RouteSettings settings,
 
-    ///Whether the route obscures previous routes when the transition is complete.
-    ///
-    /// When an opaque route's entrance transition is complete, the routes behind the opaque route will not be built to save resources.
-    ///
-    /// Copied from `TransitionRoute`.
-    ///
-    /// Defaults to true
-    final bool opaque = true,
+  ///Whether the route obscures previous routes when the transition is complete.
+  ///
+  /// When an opaque route's entrance transition is complete, the routes behind the opaque route will not be built to save resources.
+  ///
+  /// Copied from `TransitionRoute`.
+  ///
+  /// Defaults to true
+  final bool opaque = true,
 
-    /// Whether the route should remain in memory when it is inactive.
-    ///
-    /// If this is true, then the route is maintained, so that any futures it is holding from the next route will properly resolve when the next route pops. If this is not necessary, this can be set to false to allow the framework to entirely discard the route's widget hierarchy when it is not visible.
-    ///
-    /// The value of this getter should not change during the lifetime of the object. It is used by [createOverlayEntries], which is called by [install] near the beginning of the route lifecycle.
-    ///
-    /// Copied from `ModalRoute`.
-    ///
-    /// Defaults to false
-    final bool maintainState = false,
+  /// Whether the route should remain in memory when it is inactive.
+  ///
+  /// If this is true, then the route is maintained, so that any futures it is holding from the next route will properly resolve when the next route pops. If this is not necessary, this can be set to false to allow the framework to entirely discard the route's widget hierarchy when it is not visible.
+  ///
+  /// The value of this getter should not change during the lifetime of the object. It is used by [createOverlayEntries], which is called by [install] near the beginning of the route lifecycle.
+  ///
+  /// Copied from `ModalRoute`.
+  ///
+  /// Defaults to false
+  final bool maintainState = false,
 
-    /// Whether to ignore touch events while enter forward animation
-    ///
-    /// Defaults to false
-    final bool entIgnoreEventsForward = false,
+  /// Whether to ignore touch events while enter forward animation
+  ///
+  /// Defaults to false
+  final bool entIgnoreEventsForward = false,
 
-    /// Whether to ignore touch events while exit forward animation
-    ///
-    /// Defaults to false
-    final bool exitIgnoreEventsForward = false,
+  /// Whether to ignore touch events while exit forward animation
+  ///
+  /// Defaults to false
+  final bool exitIgnoreEventsForward = false,
 
-    /// Whether to ignore touch events while exit reverse animation
-    ///
-    /// Defaults to false
-    final bool exitIgnoreEventsReverse = false,
+  /// Whether to ignore touch events while exit reverse animation
+  ///
+  /// Defaults to false
+  final bool exitIgnoreEventsReverse = false,
 
-    /// If true, default material animation will be played
-    final bool playMaterial = false,
+  /// If true, default material animation will be played
+  final bool playMaterial = false,
 
-    /// Animation style
-    ///
-    /// See here https://flutter.dev/docs/resources/platform-adaptations
-    final MaterialRouteTransitionStyle materialAnimationStyle =
-        MaterialRouteTransitionStyle.fade}) {
+  /// If true, default material exit animation will be played (only for `expand` variant)
+  final bool playMaterialExit = false,
+
+  /// Animation style
+  ///
+  /// See here https://flutter.dev/docs/resources/platform-adaptations
+  final MaterialRouteTransitionStyle materialAnimationStyle =
+      MaterialRouteTransitionStyle.fade,
+}) {
   checkEntAnimationEnabled ??= () => true;
   checkExitAnimationEnabled ??= () => true;
   return PageRouteBuilder<T>(
@@ -205,16 +209,16 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>(
               child: IgnorePointer(
                 // Disable any touch events on exit while in transition
                 ignoring: secondaryIgnore,
-                child: enterSystemUI != null &&
+                child: checkEnterSystemUI != null &&
                         (animation.status == AnimationStatus.forward ||
                             animation.status == AnimationStatus.completed)
                     ? AnnotatedRegion<SystemUiOverlayStyle>(
-                        value: enterSystemUI, child: child)
-                    : exitSystemUI != null &&
+                        value: checkEnterSystemUI(), child: child)
+                    : checkExitSystemUI != null &&
                             (animation.status == AnimationStatus.reverse ||
                                 animation.status == AnimationStatus.completed)
                         ? AnnotatedRegion<SystemUiOverlayStyle>(
-                            value: exitSystemUI(), child: child)
+                            value: checkExitSystemUI(), child: child)
                         : routeSystemUI != null
                             ? AnnotatedRegion<SystemUiOverlayStyle>(
                                 value: routeSystemUI(), child: child)
@@ -239,10 +243,12 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>(
                 child: TurnableSlideTransition(
                   enabled: exitEnabled,
                   position: Tween(begin: exitBegin, end: exitEnd).animate(
-                      CurvedAnimation(
-                          parent: secondaryAnimation,
-                          curve: exitCurve,
-                          reverseCurve: exitReverseCurve)),
+                    CurvedAnimation(
+                      parent: secondaryAnimation,
+                      curve: exitCurve,
+                      reverseCurve: exitReverseCurve,
+                    ),
+                  ),
                   child: materialWrappedChild,
                 ),
               ),
@@ -296,19 +302,29 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>(
                     ),
                   );
                 },
-                child: AnimatedBuilder(
-                  animation: secondaryAnimation,
-                  child: FractionalTranslation(
-                    translation: primaryTranslationAnimation.value,
-                    child: child,
-                  ),
-                  builder: (BuildContext context, Widget child) {
-                    return FractionalTranslation(
-                      translation: secondaryTranslationAnimation.value,
-                      child: materialWrappedChild,
-                    );
-                  },
-                ),
+                child: playMaterialExit
+                    ? AnimatedBuilder(
+                        animation: secondaryAnimation,
+                        child: FractionalTranslation(
+                          translation: primaryTranslationAnimation.value,
+                          child: child,
+                        ),
+                        builder: (BuildContext context, Widget child) {
+                          return FractionalTranslation(
+                            translation: secondaryTranslationAnimation.value,
+                            child: materialWrappedChild,
+                          );
+                        },
+                      )
+                    : TurnableSlideTransition(
+                        enabled: exitEnabled,
+                        position: Tween(begin: exitBegin, end: exitEnd).animate(
+                            CurvedAnimation(
+                                parent: secondaryAnimation,
+                                curve: exitCurve,
+                                reverseCurve: exitReverseCurve)),
+                        child: materialWrappedChild,
+                      ),
               );
             },
           );
@@ -342,14 +358,14 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>(
                 child: IgnorePointer(
                   // Disable any touch events on exit while in transition
                   ignoring: secondaryIgnore,
-                  child: enterSystemUI != null &&
+                  child: checkEnterSystemUI != null &&
                           (animation.status == AnimationStatus.forward)
                       ? AnnotatedRegion<SystemUiOverlayStyle>(
-                          value: enterSystemUI, child: child)
-                      : exitSystemUI != null &&
+                          value: checkEnterSystemUI(), child: child)
+                      : checkExitSystemUI != null &&
                               (animation.status == AnimationStatus.reverse)
                           ? AnnotatedRegion<SystemUiOverlayStyle>(
-                              value: exitSystemUI(), child: child)
+                              value: checkExitSystemUI(), child: child)
                           : routeSystemUI != null
                               ? AnnotatedRegion<SystemUiOverlayStyle>(
                                   value: routeSystemUI(), child: child)

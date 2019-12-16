@@ -1,7 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+
+
 import 'dart:async';
 
-import 'package:app/constants/constants.dart' as Constants;
-import 'package:app/logic/player/player.dart';
+import 'package:flutter_music_player/constants/constants.dart' as Constants;
+import 'package:flutter_music_player/logic/player/player.dart';
 import 'package:flutter/services.dart';
 
 /// Type for audio manager focus

@@ -3,11 +3,12 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/buttons.dart';
-import 'package:app/components/show_functions.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/logic/player/playlist.dart';
-import 'package:app/logic/prefs.dart';
+import 'package:flutter_music_player/components/buttons.dart';
+import 'package:flutter_music_player/components/route.dart';
+import 'package:flutter_music_player/components/show_functions.dart';
+import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
+import 'package:flutter_music_player/logic/prefs.dart';
 import 'package:flutter/material.dart';
 
 class ExtendedSettingsRoute extends StatefulWidget {
@@ -73,34 +74,23 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(63.0), // here the desired height
-        child: AppBar(
-          titleSpacing: 0.0,
-          backgroundColor: Colors.transparent,
-          title: Text("Расширенные",
-              style: TextStyle(color: Theme.of(context).textTheme.title.color)),
-          actions: <Widget>[
-            IgnorePointer(
-              ignoring: !isChanged,
-              child: AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
-                opacity: isChanged ? 1.0 : 0.0,
-                child: Padding(
-                  padding:
-                      EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
-                  child: PrimaryRaisedButton(
-                      text: "Сохранить", onPressed: _handleSave),
-                ),
-              ),
-            )
-          ],
-          leading: CustomBackButton(),
-          automaticallyImplyLeading: false,
-        ),
-      ),
-      body: Container(
+    return RouteBase(
+      name: "Расширенные",
+      actions: <Widget>[
+        IgnorePointer(
+          ignoring: !isChanged,
+          child: AnimatedOpacity(
+            duration: Duration(milliseconds: 500),
+            opacity: isChanged ? 1.0 : 0.0,
+            child: Padding(
+              padding: EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
+              child: PrimaryRaisedButton(
+                  text: "Сохранить", onPressed: _handleSave),
+            ),
+          ),
+        )
+      ],
+      child: Container(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           physics: NeverScrollableScrollPhysics(),

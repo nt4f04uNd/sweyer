@@ -4,18 +4,19 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'package:app/components/album_art.dart';
-import 'package:app/components/play_pause_button.dart';
-import 'package:app/components/custom_icon_button.dart';
-import 'package:app/components/popup_menu.dart' as customPopup;
-import 'package:app/components/track_list.dart';
-import 'package:app/components/marquee.dart';
-import 'package:app/constants/routes.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/logic/player/playlist.dart';
-import 'package:app/logic/prefs.dart';
+import 'package:flutter_music_player/components/album_art.dart';
+import 'package:flutter_music_player/components/play_pause_button.dart';
+import 'package:flutter_music_player/components/custom_icon_button.dart';
+import 'package:flutter_music_player/components/popup_menu.dart' as customPopup;
+import 'package:flutter_music_player/components/track_list.dart';
+import 'package:flutter_music_player/components/marquee.dart';
+import 'package:flutter_music_player/constants/routes.dart';
+import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/logic/player/player_widgets.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
+import 'package:flutter_music_player/logic/prefs.dart';
 import 'package:flutter/material.dart';
-import 'package:app/logic/player/player.dart';
+import 'package:flutter_music_player/logic/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayerRoute extends StatefulWidget {
@@ -87,10 +88,9 @@ class _PlaylistTab extends StatefulWidget {
   _PlaylistTabState createState() => _PlaylistTabState();
 }
 
-/// TODO: FIXME: add comments refactor add typedefs do renaming
-/// TODO: add animation to scroll button show/hide
 class _PlaylistTabState extends State<_PlaylistTab>
     with AutomaticKeepAliveClientMixin<_PlaylistTab> {
+  // This mixin doesn't allow widget to redraw
   @override
   bool get wantKeepAlive => true;
 
@@ -228,44 +228,34 @@ class _PlaylistTabState extends State<_PlaylistTab>
                             color: Theme.of(context).textTheme.title.color),
                       ),
                       PlaylistControl.playlistType == PlaylistType.global
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                'Основной плейлист',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .color),
+                          ? Text(
+                              'Основной плейлист',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color:
+                                    Theme.of(context).textTheme.caption.color,
                               ),
                             )
                           : PlaylistControl.playlistType ==
                                   PlaylistType.shuffled
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 5.0),
-                                  child: Text(
-                                    'Перемешанный плейлист',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .caption
-                                            .color),
-                                  ),
+                              ? Text(
+                                  'Перемешанный плейлист',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          .color),
                                 )
-                              : Padding(
-                                  padding: const EdgeInsets.only(top: 5.0),
-                                  child: Text(
-                                    'Найденный плейлист',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Theme.of(context)
-                                            .textTheme
-                                            .caption
-                                            .color),
-                                  ),
-                                )
+                              : Text(
+                                  'Найденный плейлист',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .caption
+                                          .color),
+                                ),
                     ],
                   ),
                   automaticallyImplyLeading: false,
@@ -347,40 +337,41 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
             actions: <Widget>[
               Theme(
                 data: Theme.of(context).copyWith(
-                    cardTheme: CardTheme(
-                        shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(100),
-                  ),
-                ))),
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    cardColor: AppTheme.popupMenu.auto(context),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 5.0),
-                    child: customPopup.CustomPopupMenuButton<void>(
-                      // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-                      onSelected: (_) {
-                        // Navigator.of(context).push(createExifRoute(widget));
-                        Navigator.of(context).pushNamed(Routes.exif.value);
-                      },
+                  cardColor: AppTheme.popupMenu.auto(context),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: customPopup.CustomPopupMenuButton<void>(
+                    // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
+                    onSelected: (_) {
+                      // Navigator.of(context).push(createExifRoute(widget));
+                      Navigator.of(context).pushNamed(Routes.exif.value);
+                    },
 
-                      tooltipEnabled: false,
-                      // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,
-                      buttonSize: 40.0,
-                      itemBuilder: (BuildContext context) =>
-                          <customPopup.PopupMenuEntry<void>>[
-                        customPopup.PopupMenuItem<void>(
-                          value: '',
-                          // height: 30.0,
-                          child: Text('Изменить информацию о треке'),
+                    tooltipEnabled: false,
+                    // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,
+                    buttonSize: 40.0,
+                    menuPadding:const EdgeInsets.symmetric(horizontal: 1.0),
+                    menuBorderRadius: const BorderRadius.all(
+    Radius.circular(15.0),
+  ),
+                    itemBuilder: (BuildContext context) =>
+                        <customPopup.PopupMenuEntry<void>>[
+                      customPopup.PopupMenuItem<void>(
+                        // padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                        value: '',
+                        // height: 30.0,
+                        child: Center(
+                          child: Text(
+                            'Изменить информацию',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              )
+              ),
             ],
             automaticallyImplyLeading: false,
           ),
@@ -405,14 +396,17 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
                           text: Text(
                             PlaylistControl.currentSong?.title,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 21),
+                            style: TextStyle(
+                                fontSize: 21, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 5, bottom: 30),
-                        child: Text(
-                          artistString(PlaylistControl.currentSong?.artist),
+                        child: Artist(
+                          artist: PlaylistControl.currentSong.artist,
+                          textStyle: TextStyle(
+                              fontSize: 15.5, fontWeight: FontWeight.w500),
                         ),
                       ),
                       Padding(
@@ -585,7 +579,7 @@ class _TrackSliderState extends State<TrackSlider> {
     // Handle track position movement
     _changePositionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
-        print("POSITION CHANGE ${event.inSeconds}");
+      print("POSITION CHANGE ${event.inSeconds}");
       if (event.inSeconds - 0.9 > _value.inSeconds && !_isDragging) {
         // Prevent waste updates
         setState(() {
@@ -685,6 +679,7 @@ class _TrackSliderState extends State<TrackSlider> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Container(
+          width: 35.0,
           transform: Matrix4.translationValues(5, 0, 0),
           child: Text(
             // TODO: move and refactor this code, and by the way split a whole page into separate widgets
@@ -706,10 +701,11 @@ class _TrackSliderState extends State<TrackSlider> {
           ),
         ),
         Container(
+          width: 35.0,
           transform: Matrix4.translationValues(-5, 0, 0),
           child: Text(
             _calculateDisplayedDurationTime(),
-            style: TextStyle(fontSize: 12),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
       ],

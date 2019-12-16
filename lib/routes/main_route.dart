@@ -3,16 +3,13 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/buttons.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/logic/error_bridge.dart';
-import 'package:app/logic/launch.dart';
-import 'package:app/logic/permissions.dart';
-import 'package:app/logic/player/playlist.dart';
-import 'package:catcher/core/catcher.dart';
+import 'package:flutter_music_player/components/buttons.dart';
+import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/logic/lifecycle.dart';
+import 'package:flutter_music_player/logic/permissions.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
 import 'package:flutter/material.dart';
-import 'package:app/components/track_list.dart';
-import 'package:app/logic/player/player.dart';
+import 'package:flutter_music_player/components/track_list.dart';
 
 class MainRoute extends StatefulWidget {
   @override

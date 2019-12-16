@@ -3,27 +3,29 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/components/album_art.dart';
-import 'package:app/components/bottom_track_panel.dart';
-import 'package:app/components/buttons.dart';
-import 'package:app/components/custom_refresh_indicator.dart';
-import 'package:app/components/drawer.dart';
-import 'package:app/components/gestures.dart';
-import 'package:app/components/show_functions.dart';
-import 'package:app/constants/routes.dart';
-import 'package:app/constants/themes.dart';
-import 'package:app/logic/player/player_widgets.dart';
-import 'package:app/logic/player/playlist.dart';
-import 'package:app/logic/player/song.dart';
-import 'package:app/utils/switcher.dart';
+import 'package:flutter_music_player/components/album_art.dart';
+import 'package:flutter_music_player/components/bottom_track_panel.dart';
+import 'package:flutter_music_player/components/buttons.dart';
+import 'package:flutter_music_player/components/custom_refresh_indicator.dart';
+import 'package:flutter_music_player/components/gestures.dart';
+import 'package:flutter_music_player/components/show_functions.dart';
+import 'package:flutter_music_player/constants/colors.dart';
+import 'package:flutter_music_player/constants/routes.dart';
+import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/logic/player/player_widgets.dart';
+import 'package:flutter_music_player/logic/player/playlist.dart';
+import 'package:flutter_music_player/logic/player/song.dart';
+import 'package:flutter_music_player/logic/theme.dart';
+import 'package:flutter_music_player/utils/switcher.dart';
 
 // import 'package:audioplayers/audioplayers.dart';
-import 'package:app/logic/player/nativePlayer.dart';
+import 'package:flutter_music_player/logic/player/nativePlayer.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:app/logic/player/player.dart';
+import 'package:flutter_music_player/logic/player/player.dart';
 import 'custom_icon_button.dart';
+import 'menu.dart';
 import 'scrollable_positioned_list/scrollable_positioned_list.dart';
 
 /// List of fetched tracks
@@ -143,13 +145,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: //This will change the drawer background
-              AppTheme.drawer.auto(context),
-        ),
-        child: DrawerWidget(),
-      ),
+      drawer:  DrawerWidget(),
       appBar: AppBar(
         titleSpacing: 0.0,
         leading: AnimatedSwitcher(
@@ -508,7 +504,11 @@ class _TrackTileState extends State<TrackTile>
             _song.title,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                fontSize: 16 /* Default flutter title font size (not dense) */),
+              // fontSize: 16 /* Default flutter title font size (not dense) */),
+              fontSize: 15 /* Default flutter title font size (not dense) */,
+
+              // fontWeight: ThemeControl.isDark ?FontWeight.w500 : FontWeight.w600,
+            ),
           ),
           subtitle: Artist(artist: _song.artist),
           selected: _selected,

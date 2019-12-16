@@ -3,18 +3,18 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:app/logic/api/api.dart' as API;
+import 'package:flutter_music_player/logic/api/api.dart' as API;
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:app/components/show_functions.dart';
-import 'package:app/constants/constants.dart' as Constants;
-import 'package:app/logic/logger.dart';
+import 'package:flutter_music_player/components/show_functions.dart';
+import 'package:flutter_music_player/constants/constants.dart' as Constants;
+import 'package:flutter_music_player/logic/logger.dart';
 import 'playlist.dart';
-import 'package:app/logic/prefs.dart';
+import 'package:flutter_music_player/logic/prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -147,7 +147,7 @@ abstract class MusicPlayer {
     }
 
     _placeholderImgBytes =
-        (await rootBundle.load('images/placeholder_thumb.png'))
+        (await rootBundle.load('assets/images/placeholder_thumb.png'))
             .buffer
             .asUint8List();
   }
