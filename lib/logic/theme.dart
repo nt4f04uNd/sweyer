@@ -3,12 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/utils/async.dart';
-import 'package:flutter_music_player/logic/prefs.dart';
-import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_music_player/logic/error_bridge.dart';
 
 abstract class ThemeControl {
   static Brightness _brightness;
@@ -32,7 +30,7 @@ abstract class ThemeControl {
     emitThemeChange();
     if (delayed) await Future.delayed(Duration(milliseconds: 200));
     SystemChrome.setSystemUIOverlayStyle(
-        AppSystemUIThemes.allScreens.autoBr(_brightness));
+        Constants.AppSystemUIThemes.allScreens.autoBr(_brightness));
   }
 
   /// Inits theme, fetches brightness from `PrefKeys`
@@ -47,7 +45,7 @@ abstract class ThemeControl {
       CatcherErrorBridge.add(CaughtError(e, stackTrace));
     } finally {
       SystemChrome.setSystemUIOverlayStyle(
-          AppSystemUIThemes.mainScreen.autoBr(_brightness));
+          Constants.AppSystemUIThemes.mainScreen.autoBr(_brightness));
       emitThemeChange();
     }
   }

@@ -3,9 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// You should import this module `as Constants`
+/// Module for not essential to user UI widgets, like scroll or gesture behaviors
 
-export 'channels.dart';
-export 'colors.dart';
-export 'themes.dart';
-export 'routes.dart';
+export 'gestures.dart';
+export 'route_transitions.dart';
+export 'scroll_physics.dart';
+export 'show_functions.dart';

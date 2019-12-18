@@ -3,20 +3,13 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/custom_icon_button.dart';
-import 'package:flutter_music_player/logic/player/player_widgets.dart';
-import 'package:flutter_music_player/constants/constants.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-
-// import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_music_player/logic/player/nativePlayer.dart';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/logic/player/player.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'album_art.dart';
-import 'play_pause_button.dart';
-import 'dart:async';
+import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:flutter_music_player/flutter_music_player.dart';
+
 
 const double progressLineHeight = 3.0;
 
@@ -43,10 +36,10 @@ class BottomTrackPanel extends StatelessWidget {
               stream: MusicPlayer.onPlayerStateChanged,
               builder: (context, snapshot) {
                 return Material(
-                  color: AppTheme.bottomTrackPanel.auto(context),
+                  color: Constants.AppTheme.bottomTrackPanel.auto(context),
                   child: GestureDetector(
                     onTap: () async {
-                      Navigator.of(context).pushNamed(Routes.player.value);
+                      Navigator.of(context).pushNamed(Constants.Routes.player.value);
                     },
                     child: ListTile(
                       dense: true,
@@ -83,10 +76,10 @@ class BottomTrackPanel extends StatelessWidget {
                           ),
                           CustomIconButton(
                             iconSize: 32,
-                            splashColor: AppTheme.splash.auto(context),
+                            splashColor: Constants.AppTheme.splash.auto(context),
                             size: 56,
                             icon: Icon(Icons.skip_next),
-                            color: AppTheme.playPauseIcon.auto(context),
+                            color: Constants.AppTheme.playPauseIcon.auto(context),
                             onPressed: MusicPlayer.playNext,
                           ),
                         ],

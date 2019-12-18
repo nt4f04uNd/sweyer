@@ -7,7 +7,7 @@
 import 'dart:async';
 
 import 'package:flutter_music_player/constants/constants.dart' as Constants;
-import 'package:flutter_music_player/logic/player/player.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:flutter/services.dart';
 
 /// Type for audio manager focus

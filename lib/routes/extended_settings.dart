@@ -3,12 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/buttons.dart';
-import 'package:flutter_music_player/components/route.dart';
-import 'package:flutter_music_player/components/show_functions.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/prefs.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 
 class ExtendedSettingsRoute extends StatefulWidget {
@@ -179,7 +175,7 @@ class _MinFileDurationSliderState extends State<MinFileDurationSlider> {
             Expanded(
               child: Slider(
                 activeColor: Colors.deepPurple,
-                inactiveColor: AppTheme.sliderInactive.auto(context),
+                inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
                 min: 0,
                 value: _value,
                 max: 60 * 5.0,

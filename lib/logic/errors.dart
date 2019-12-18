@@ -3,8 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/buttons.dart';
-import 'package:flutter_music_player/components/show_functions.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:catcher/mode/dialog_report_mode.dart';
 import 'package:catcher/model/report.dart';
 import 'package:flutter/material.dart';

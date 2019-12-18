@@ -7,11 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/logic/player/player.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/theme.dart';
-import 'package:flutter_music_player/utils/async.dart';
-import 'package:flutter_music_player/logic/error_bridge.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:catcher/core/catcher.dart';
 
 import 'package:flutter_music_player/logic/api/api.dart' as API;

@@ -7,15 +7,11 @@ import 'package:flutter_music_player/logic/errors.dart';
 import 'package:flutter_music_player/logic/lifecycle.dart';
 import 'package:flutter_music_player/logic/theme.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:catcher/catcher_plugin.dart';
 import 'constants/constants.dart';
-import 'logic/player/player.dart';
-import 'logic/player/playlist.dart';
-import 'routes/route_control.dart';
+import 'routes/routes.dart';
 
 void main() {
   final CatcherOptions debugOptions = CatcherOptions(CustomDialogReportMode(), [

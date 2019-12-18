@@ -3,30 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/album_art.dart';
-import 'package:flutter_music_player/components/bottom_track_panel.dart';
-import 'package:flutter_music_player/components/buttons.dart';
-import 'package:flutter_music_player/components/custom_refresh_indicator.dart';
-import 'package:flutter_music_player/components/gestures.dart';
-import 'package:flutter_music_player/components/show_functions.dart';
-import 'package:flutter_music_player/constants/colors.dart';
-import 'package:flutter_music_player/constants/routes.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/player/player_widgets.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/player/song.dart';
-import 'package:flutter_music_player/logic/theme.dart';
-import 'package:flutter_music_player/utils/switcher.dart';
-
-// import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_music_player/logic/player/nativePlayer.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/logic/player/player.dart';
-import 'custom_icon_button.dart';
-import 'menu.dart';
-import 'scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 /// List of fetched tracks
 class MainRouteTrackList extends StatefulWidget {
@@ -121,7 +101,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
           "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо"),
       acceptButton: DialogFlatButton(
         child: Text('Удалить'),
-        textColor: AppTheme.redFlatButton.auto(context),
+        textColor: Constants.AppTheme.redFlatButton.auto(context),
         onPressed: () {
           Navigator.of(context).pop();
           PlaylistControl.deleteSongs(selectionSet);
@@ -134,7 +114,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
       ),
       declineButton: DialogFlatButton(
         child: Text('Отмена'),
-        textColor: AppTheme.declineButton.auto(context),
+        textColor: Constants.AppTheme.declineButton.auto(context),
         onPressed: () {
           Navigator.of(context).pop();
         },
@@ -154,7 +134,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
               ? IgnorePointer(
                   ignoring: unselecting,
                   child: CustomIconButton(
-                    splashColor: AppTheme.splash.auto(context),
+                    splashColor: Constants.AppTheme.splash.auto(context),
                     icon: Icon(Icons.close,
                         color: Theme.of(context).iconTheme.color),
                     color: Theme.of(context).iconTheme.color,
@@ -172,7 +152,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                   ? IgnorePointer(
                       ignoring: unselecting,
                       child: CustomIconButton(
-                        splashColor: AppTheme.splash.auto(context),
+                        splashColor: Constants.AppTheme.splash.auto(context),
                         key: UniqueKey(),
                         color: Theme.of(context).iconTheme.color,
                         icon: Icon(Icons.delete),
@@ -180,7 +160,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                       ),
                     )
                   : CustomIconButton(
-                      splashColor: AppTheme.splash.auto(context),
+                      splashColor: Constants.AppTheme.splash.auto(context),
                       icon: Icon(Icons.sort),
                       color: Theme.of(context).iconTheme.color,
                       onPressed: () =>
@@ -206,7 +186,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                       padding: const EdgeInsets.only(
                           left: 12.0, top: 7.0, bottom: 7.0, right: 12.0),
                       decoration: BoxDecoration(
-                        color: AppTheme.searchFakeInput.auto(context),
+                        color: Constants.AppTheme.searchFakeInput.auto(context),
                       ),
                       child: Align(
                         alignment: Alignment.centerRight,
@@ -229,9 +209,9 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
             padding: widget.bottomPadding,
             child: Container(
               child: CustomRefreshIndicator(
-                color: AppTheme.refreshIndicatorArrow.auto(context),
+                color: Constants.AppTheme.refreshIndicatorArrow.auto(context),
                 backgroundColor:
-                    AppTheme.refreshIndicatorBackground.auto(context),
+                    Constants.AppTheme.refreshIndicatorBackground.auto(context),
                 strokeWidth: 2.5,
                 key: _refreshIndicatorKey,
                 onRefresh: _refreshHandler,
@@ -239,7 +219,8 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                   child: Container(
                     child: Scrollbar(
                       child: ListView.builder(
-                        physics: BouncingScrollPhysics(),
+                        // physics: FMMBouncingScrollPhysics(),
+                        physics: FMMBouncingScrollPhysics(),
                         itemCount: PlaylistControl.length(PlaylistType.global),
                         padding: EdgeInsets.only(bottom: 65, top: 0),
                         itemBuilder: (context, index) {
@@ -315,7 +296,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
       child: SingleTouchRecognizerWidget(
         child: Scrollbar(
           child: ScrollablePositionedList.builder(
-            physics: BouncingScrollPhysics(),
+            physics: FMMBouncingScrollPhysics(),
             frontScrollController: frontScrollController,
             itemScrollController: itemScrollController,
             itemCount: length,
@@ -468,7 +449,7 @@ class _TrackTileState extends State<TrackTile>
     // Playing because clickTrackTile changes any other type to it
     if (widget.pushToPlayerRouteOnClick &&
         MusicPlayer.playState == AudioPlayerState.PLAYING)
-      Navigator.of(context).pushNamed(Routes.player.value);
+      Navigator.of(context).pushNamed(Constants.Routes.player.value);
   }
 
   // Performs unselect animation and calls `onSelected` and `notifyUnselection`

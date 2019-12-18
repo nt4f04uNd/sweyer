@@ -4,15 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'package:flutter_music_player/logic/player/player.dart';
 
 // import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_music_player/logic/player/nativePlayer.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-
-import 'custom_icon_button.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 class AnimatedPlayPauseButton extends StatefulWidget {
   AnimatedPlayPauseButton({Key key, this.isLarge = false}) : super(key: key);
@@ -61,11 +58,11 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     return Container(
         child: CustomIconButton(
       iconSize: 32,
-      splashColor: AppTheme.splash.auto(context),
+      splashColor: Constants.AppTheme.splash.auto(context),
       size: 56,
       icon: AnimatedIcon(
         icon: AnimatedIcons.play_pause,
-        color: AppTheme.playPauseIcon.auto(context),
+        color: Constants.AppTheme.playPauseIcon.auto(context),
         progress: _animationController,
       ),
       onPressed: _handlePress,

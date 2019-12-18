@@ -3,13 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/buttons.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/lifecycle.dart';
-import 'package:flutter_music_player/logic/permissions.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/components/track_list.dart';
 
 class MainRoute extends StatefulWidget {
   @override
@@ -49,7 +45,7 @@ class SearchingSongsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.main.auto(context),
+      backgroundColor: Constants.AppTheme.main.auto(context),
       body: Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
           Padding(
@@ -82,7 +78,7 @@ class _SongsEmptyScreenState extends State<SongsEmptyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.main.auto(context),
+      backgroundColor: Constants.AppTheme.main.auto(context),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -149,7 +145,7 @@ class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
   Widget build(BuildContext context) {
     print(Theme.of(context).brightness);
     return Scaffold(
-      backgroundColor: AppTheme.main.auto(context),
+      backgroundColor: Constants.AppTheme.main.auto(context),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

@@ -3,13 +3,12 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// TODO: CONVERT IMPORTS
+
 import 'dart:async';
-import 'package:flutter_music_player/components/album_art.dart';
-import 'package:flutter_music_player/components/play_pause_button.dart';
-import 'package:flutter_music_player/components/custom_icon_button.dart';
-import 'package:flutter_music_player/components/popup_menu.dart' as customPopup;
-import 'package:flutter_music_player/components/track_list.dart';
-import 'package:flutter_music_player/components/marquee.dart';
+import 'package:flutter_music_player/components/ui/ui.dart';
+import 'package:flutter_music_player/components/custom/custom.dart';
+import 'package:flutter_music_player/components/custom/custom.dart' as customPopup;
 import 'package:flutter_music_player/constants/routes.dart';
 import 'package:flutter_music_player/constants/themes.dart';
 import 'package:flutter_music_player/logic/player/player_widgets.dart';

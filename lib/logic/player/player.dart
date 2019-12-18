@@ -3,28 +3,32 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/logic/api/api.dart' as API;
+export 'fetcher.dart';
+export 'native_player.dart';
+export 'player_widgets.dart';
+export 'playlist.dart';
+export 'serialization.dart';
+export 'song.dart';
+
+import 'package:flutter_music_player/api.dart' as API;
+import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter_music_player/components/show_functions.dart';
-import 'package:flutter_music_player/constants/constants.dart' as Constants;
-import 'package:flutter_music_player/logic/logger.dart';
 import 'playlist.dart';
-import 'package:flutter_music_player/logic/prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'nativePlayer.dart';
+import 'native_player.dart';
 // import 'package:audioplayers/audioplayers.dart';
 
 import 'package:flutter/services.dart';
 
 /// SEE https://medium.com/@wangdazhitech/flutter-read-asset-file-and-write-to-app-path-42115d4ec1b6
 import 'package:flutter/services.dart' show rootBundle;
+
 
 /// Function for call player functions from AudioPlayers package until they will be completed, or until recursive callstack will exceed 10
 ///

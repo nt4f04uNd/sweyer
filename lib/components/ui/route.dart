@@ -3,8 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/buttons.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 
 /// Creates `Scaffold` with preferred size `AppBar`
 class RouteBase extends StatelessWidget {

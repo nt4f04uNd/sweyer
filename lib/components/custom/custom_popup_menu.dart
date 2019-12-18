@@ -8,8 +8,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_music_player/components/custom_icon_button.dart';
-import 'package:flutter_music_player/constants/themes.dart';
+
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -1007,7 +1008,7 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
             child: widget.child,
           )
         : CustomIconButton(
-            splashColor: AppTheme.splash.auto(context),
+            splashColor: Constants.AppTheme.splash.auto(context),
             icon: widget.icon ?? _getIcon(Theme.of(context).platform),
             size: widget.buttonSize,
             iconSize: widget.buttonIconSize,

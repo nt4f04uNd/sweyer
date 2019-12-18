@@ -3,14 +3,11 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/custom_icon_button.dart';
-import 'package:flutter_music_player/constants/colors.dart';
-import 'package:flutter_music_player/constants/routes.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 /// Drawer icon button to place in `AppBar`
 class DrawerButton extends StatelessWidget {
@@ -20,7 +17,7 @@ class DrawerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomIconButton(
       icon: Icon(Icons.menu),
-      splashColor: AppTheme.splash.auto(context),
+      splashColor: Constants.AppTheme.splash.auto(context),
       color: Theme.of(context).iconTheme.color,
       onPressed: Scaffold.of(context).openDrawer,
     );
@@ -37,18 +34,21 @@ class DrawerWidget extends StatefulWidget {
 
 class _DrawerWidgetState extends State<DrawerWidget> {
   Future<void> _handleClickSettings() async =>
-      await Navigator.of(context).popAndPushNamed(Routes.settings.value);
+      await Navigator.of(context).popAndPushNamed(Constants.Routes.settings.value);
 
   void _handleClickSendLog() => Logger.send();
+
+  void _handleClickDebug() async =>
+      await Navigator.of(context).popAndPushNamed(Constants.Routes.debug.value);
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppSystemUIThemes.allScreens.auto(context),
+      value: Constants.AppSystemUIThemes.allScreens.auto(context),
       child: Theme(
         data: Theme.of(context).copyWith(
           canvasColor: //This will change the drawer background
-              AppTheme.drawer.auto(context),
+              Constants.AppTheme.drawer.auto(context),
         ),
         child: Drawer(
           child: ListView(
@@ -71,7 +71,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
-                          color: AppTheme.main.autoInverse(context),
+                          color: Constants.AppTheme.main.autoInverse(context),
                         ),
                       ),
                     ),
@@ -92,6 +92,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 'Отправить лог',
                 icon: Icons.assignment,
                 onTap: _handleClickSendLog,
+              ),
+              MenuItem(
+                'Дебаг',
+                icon: Icons.adb,
+                onTap: _handleClickDebug,
               ),
             ],
           ),
@@ -123,14 +128,14 @@ class MenuItem extends StatelessWidget {
             ? Padding(
                 padding: const EdgeInsets.only(left: 15.0),
                 child: Icon(icon,
-                    size: 22.0, color: AppTheme.menuItemIcon.auto(context)),
+                    size: 22.0, color: Constants.AppTheme.menuItemIcon.auto(context)),
               )
             : null,
         title: Text(
           title,
           style: TextStyle(
             fontSize: 15.0,
-            color: AppTheme.menuItem.auto(context),
+            color: Constants.AppTheme.menuItem.auto(context),
           ),
         ),
         onTap: onTap,

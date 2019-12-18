@@ -3,9 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// You should import this module `as Constants`
+/// Module for system API calls
+/// You should use `as API` to import this
 
-export 'channels.dart';
-export 'colors.dart';
-export 'themes.dart';
-export 'routes.dart';
+export 'package:flutter_music_player/logic/api/api.dart';

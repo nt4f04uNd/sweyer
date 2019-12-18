@@ -3,9 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// You should import this module `as Constants`
+/// Module for coped and modified files from flutter framework
 
-export 'channels.dart';
-export 'colors.dart';
-export 'themes.dart';
-export 'routes.dart';
+export 'custom_icon_button.dart';
+export 'custom_icon_button_splash.dart';
+export 'custom_popup_menu.dart';
+export 'custom_refresh_indicator.dart';
+export 'custom_search.dart';

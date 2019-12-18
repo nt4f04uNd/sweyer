@@ -6,6 +6,7 @@
 import 'player.dart';
 import 'package:flutter/material.dart';
 
+// TODO: MOVE THIS TO COMPONENTS
 /// Component to show artist, or automatically show "Неизвестный исполнитель" instead of "<unknown>"
 class Artist extends StatelessWidget {
   final String artist;

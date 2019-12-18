@@ -8,9 +8,10 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter_music_player/components/icon_button_splash.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 
 /// A material design icon button.
 ///
@@ -131,7 +132,7 @@ class CustomIconButton extends StatelessWidget {
   const CustomIconButton({
     Key key,
     this.iconSize = 24.0,
-    this.size = 36.0,
+    this.size = 30.0,
     @required this.icon,
     this.color,
     this.focusColor,

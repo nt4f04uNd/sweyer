@@ -8,7 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_music_player/constants/themes.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 /// Album art general widget
 /// Shows placeholder or art, depending on provided path
@@ -106,10 +106,10 @@ class AlbumArtPlaceholder extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           color: isLarge
-              ? AppTheme.albumArtLarge.auto(context)
+              ? Constants.AppTheme.albumArtLarge.auto(context)
               : round
-                  ? AppTheme.albumArtSmallRound.auto(context)
-                  : AppTheme.albumArtSmall.auto(context),
+                  ? Constants.AppTheme.albumArtSmallRound.auto(context)
+                  : Constants.AppTheme.albumArtSmall.auto(context),
           borderRadius: BorderRadius.all(Radius.circular(round ? 500 : 10)),
         ),
         padding: isLarge ? EdgeInsets.all(70) : EdgeInsets.all(round ? 8 : 10),

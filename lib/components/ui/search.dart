@@ -3,17 +3,17 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/bottom_track_panel.dart';
-import 'package:flutter_music_player/components/buttons.dart';
-import 'package:flutter_music_player/components/custom_icon_button.dart';
-import 'package:flutter_music_player/components/show_functions.dart';
-import 'package:flutter_music_player/components/track_list.dart';
+import 'package:flutter_music_player/components/ui/ui.dart';
+import 'package:flutter_music_player/components/ui/ui.dart';
+import 'package:flutter_music_player/components/custom/custom.dart';
+import 'package:flutter_music_player/components/util/util.dart';
+import 'package:flutter_music_player/components/ui/ui.dart';
 import 'package:flutter_music_player/constants/themes.dart';
 import 'package:flutter_music_player/logic/player/playlist.dart';
 import 'package:flutter_music_player/logic/prefs.dart';
 import 'package:flutter_music_player/logic/player/song.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/components/custom_search.dart' as custom_search;
+import 'package:flutter_music_player/components/custom/custom.dart' as custom_search;
 
 class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   SongsSearchDelegate();
@@ -149,7 +149,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       children: <Widget>[
         Scrollbar(
           child: ListView.builder(
-              physics: const BouncingScrollPhysics(),
+              physics: const FMMBouncingScrollPhysics(),
               // FIXME add gesture detector that closes keyboard on scroll
               padding: EdgeInsets.only(bottom: 65, top: 0),
               itemCount: searched.length,

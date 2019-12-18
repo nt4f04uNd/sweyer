@@ -3,9 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// You should import this module `as Constants`
+/// This module contains all application widgets and also flutter specific classes
 
-export 'channels.dart';
-export 'colors.dart';
-export 'themes.dart';
-export 'routes.dart';
+
+export 'custom/custom.dart';
+export 'ui/ui.dart';
+export 'util/util.dart';

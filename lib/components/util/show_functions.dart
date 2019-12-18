@@ -3,12 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/buttons.dart';
-import 'package:flutter_music_player/components/custom_search.dart';
-import 'package:flutter_music_player/components/search.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/player/song.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:fluttertoast/fluttertoast.dart';
 
 // This is a workaround to rename show functions
@@ -59,7 +55,7 @@ abstract class ShowFunctions {
     // TODO: add indicator for a current sort feature
     showModalBottomSheet<void>(
         context: context,
-        backgroundColor: AppTheme.main.auto(context),
+        backgroundColor: Constants.AppTheme.main.auto(context),
         builder: (BuildContext context) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,12 +91,12 @@ abstract class ShowFunctions {
   }) async {
     acceptButton ??= DialogFlatButton(
       child: Text('Принять'),
-      textColor: AppTheme.redFlatButton.auto(context),
+      textColor: Constants.AppTheme.redFlatButton.auto(context),
       onPressed: () => Navigator.of(context).pop(),
     );
     declineButton ??= DialogFlatButton(
       child: Text('Отмена'),
-      textColor: AppTheme.declineButton.auto(context),
+      textColor: Constants.AppTheme.declineButton.auto(context),
       onPressed: () => Navigator.of(context).pop(),
     );
 

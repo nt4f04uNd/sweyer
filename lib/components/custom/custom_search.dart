@@ -6,9 +6,10 @@
 *  See ThirdPartyNotices.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/constants/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
+
 // A file for custom `showSearch`, because I need search to be named route
 
 /// Shows a full screen search page and returns the search result selected by
@@ -97,7 +98,7 @@ Future<T> showCustomSearch<T>({
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
   // Pass delegate through route options
-  return Navigator.of(context).pushNamed(Routes.search.value, arguments: <String, Route>{
+  return Navigator.of(context).pushNamed(Constants.Routes.search.value, arguments: <String, Route>{
     "route": SearchPageRoute<T>(
       delegate: delegate,
     )

@@ -4,13 +4,11 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/services.dart';
-
-import 'package:flutter_music_player/constants/constants.dart' as Constants;
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 class ServiceHandler {
   static MethodChannel _serviceChannel =
       const MethodChannel(Constants.ServiceChannel.CHANNEL_NAME);
-
   static bool _started = false;
 
   static void startService() {

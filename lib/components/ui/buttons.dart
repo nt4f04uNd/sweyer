@@ -3,9 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/custom_icon_button.dart';
-import 'package:flutter_music_player/constants/themes.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 /// Button to go back from page
 class CustomBackButton extends StatelessWidget {
@@ -15,7 +16,7 @@ class CustomBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomIconButton(
       icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
-      splashColor: AppTheme.splash.auto(context),
+      splashColor: Constants.AppTheme.splash.auto(context),
       onPressed: () => Navigator.of(context).pop(),
     );
   }

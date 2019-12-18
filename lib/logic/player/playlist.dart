@@ -6,12 +6,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'fetcher.dart';
-import 'package:flutter_music_player/logic/permissions.dart';
 import 'player.dart';
-import 'package:flutter_music_player/logic/prefs.dart';
 import 'serialization.dart';
 import 'song.dart';
-import 'package:flutter_music_player/utils/async.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';

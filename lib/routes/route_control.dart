@@ -3,18 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/route_transitions.dart';
-import 'package:flutter_music_player/components/show_functions.dart';
-import 'package:flutter_music_player/constants/constants.dart';
-import 'package:flutter_music_player/logic/player/player.dart';
-import 'package:flutter_music_player/logic/theme.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/routes/exif_route.dart';
-import 'package:flutter_music_player/routes/extendedSettings.dart';
-import 'package:flutter_music_player/routes/main_route.dart';
-import 'package:flutter_music_player/routes/player_route.dart';
-import 'package:flutter_music_player/routes/settings_route.dart';
 import 'package:flutter/services.dart';
 
 /// Class to control how routes are created
@@ -23,7 +15,7 @@ abstract class RouteControl {
   static DateTime _currentBackPressTime;
 
   /// Needed to disable animations on some routes
-  static String _currentRoute = Routes.main.value;
+  static String _currentRoute = Constants.Routes.main.value;
 
   /// Changes the value of `_currentRoute`
   static void _setCurrentRoute(String newValue) {
@@ -56,14 +48,14 @@ abstract class RouteControl {
     if (settings.isInitialRoute)
       return createRouteTransition(
         checkExitAnimationEnabled: () =>
-            _currentRouteEquals(Routes.settings.value) ||
-            _currentRouteEquals(Routes.extendedSettings.value),
+            _currentRouteEquals(Constants.Routes.settings.value) ||
+            _currentRouteEquals(Constants.Routes.extendedSettings.value),
         checkEntAnimationEnabled: () => false,
         maintainState: true,
         routeSystemUI: () =>
-            AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         checkEnterSystemUI: () =>
-            AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         exitIgnoreEventsForward: false,
         route: WillPopScope(
             child:
@@ -75,43 +67,51 @@ abstract class RouteControl {
             // ),
             onWillPop: _handleHomePop),
       );
-    else if (settings.name == Routes.player.value) {
+    else if (settings.name == Constants.Routes.player.value) {
       return createRouteTransition(
         playMaterial: true,
         materialAnimationStyle: MaterialRouteTransitionStyle.expand,
         entCurve: Curves.fastOutSlowIn,
         entBegin: Offset(0.0, 1.0),
-        checkExitAnimationEnabled: () => _currentRouteEquals(Routes.exif.value),
+        checkExitAnimationEnabled: () => _currentRouteEquals(Constants.Routes.exif.value),
         checkEnterSystemUI: () =>
-            AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         checkExitSystemUI: () =>
-            AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         route: PlayerRoute(),
       );
-    } else if (settings.name == Routes.settings.value)
+    } else if (settings.name == Constants.Routes.settings.value)
       return createRouteTransition(
         checkEnterSystemUI: () =>
-            AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         checkExitSystemUI: () =>
-            AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
         route: SettingsRoute(),
       );
-    else if (settings.name == Routes.extendedSettings.value)
+    else if (settings.name == Constants.Routes.extendedSettings.value)
       return createRouteTransition(
         checkEnterSystemUI: () =>
-            AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         checkExitSystemUI: () =>
-            AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
+            Constants.AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
         route: ExtendedSettingsRoute(),
       );
-    else if (settings.name == Routes.exif.value)
+    else if (settings.name == Constants.Routes.exif.value)
       return createRouteTransition(
         route: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
+          value: Constants.AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
           child: ExifRoute(),
         ),
       );
-    else if (settings.name == Routes.search.value)
+    else if (settings.name == Constants.Routes.debug.value)
+      return createRouteTransition(
+        checkEnterSystemUI: () =>
+            Constants.AppSystemUIThemes.allScreens.autoBr(ThemeControl.brightness),
+        checkExitSystemUI: () =>
+            Constants.AppSystemUIThemes.mainScreen.autoBr(ThemeControl.brightness),
+        route:  DebugRoute(),
+      );
+    else if (settings.name == Constants.Routes.search.value)
       return (settings.arguments as Map<String, Route>)["route"];
 
     // FIXME: add unknown route

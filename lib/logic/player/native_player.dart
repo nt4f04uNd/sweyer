@@ -8,8 +8,7 @@
 
 import 'dart:async';
 import 'package:flutter/services.dart';
-
-import 'package:flutter_music_player/constants/constants.dart' as Constants;
+import 'package:flutter_music_player/constants.dart' as Constants;
 
 typedef StreamController CreateStreamController();
 typedef void TimeChangeHandler(Duration duration);

@@ -3,9 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/show_functions.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/theme.dart';
+import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
