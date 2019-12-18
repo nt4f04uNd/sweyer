@@ -17,7 +17,6 @@ class FMMBouncingScrollPhysics extends BouncingScrollPhysics {
 
 @override
   double carriedMomentum(double existingVelocity) {
-    print(existingVelocity);
     return existingVelocity.sign *
         math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 20000.0);
   }

@@ -125,7 +125,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer:  DrawerWidget(),
+      drawer: DrawerWidget(),
       appBar: AppBar(
         titleSpacing: 0.0,
         leading: AnimatedSwitcher(
@@ -133,7 +133,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
           child: selectionMode
               ? IgnorePointer(
                   ignoring: unselecting,
-                  child: CustomIconButton(
+                  child: FMMIconButton(
                     splashColor: Constants.AppTheme.splash.auto(context),
                     icon: Icon(Icons.close,
                         color: Theme.of(context).iconTheme.color),
@@ -147,26 +147,27 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
           Padding(
             padding: const EdgeInsets.only(left: 5.0, right: 5.0),
             child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 300),
-              child: selectionMode
-                  ? IgnorePointer(
-                      ignoring: unselecting,
-                      child: CustomIconButton(
+                duration: Duration(milliseconds: 300),
+                child: selectionMode
+                    ? IgnorePointer(
+                        ignoring: unselecting,
+                        child: FMMIconButton(
+                          splashColor: Constants.AppTheme.splash.auto(context),
+                          key: UniqueKey(),
+                          color: Theme.of(context).iconTheme.color,
+                          icon: Icon(Icons.delete),
+                          onPressed: _handleDelete,
+                        ),
+                      )
+                    : FMMIconButton(
                         splashColor: Constants.AppTheme.splash.auto(context),
-                        key: UniqueKey(),
+                        icon: Icon(Icons.sort),
                         color: Theme.of(context).iconTheme.color,
-                        icon: Icon(Icons.delete),
-                        onPressed: _handleDelete,
+                        onPressed: () =>
+                            ShowFunctions.showSongsSortModal(context),
                       ),
-                    )
-                  : CustomIconButton(
-                      splashColor: Constants.AppTheme.splash.auto(context),
-                      icon: Icon(Icons.sort),
-                      color: Theme.of(context).iconTheme.color,
-                      onPressed: () =>
-                          ShowFunctions.showSongsSortModal(context),
-                    ),
-            ),
+              ),
+      
           ),
         ],
         title: AnimatedOpacity(

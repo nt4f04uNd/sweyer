@@ -13,6 +13,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_music_player/flutter_music_player.dart';
 
+
+const double kIconButtonSize = 36.0;
+const double kIconButtonIconSize = 24.0;
+
+
 /// A material design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
@@ -116,7 +121,7 @@ import 'package:flutter_music_player/flutter_music_player.dart';
 ///  * [AppBar], to show a toolbar at the top of an application.
 ///  * [RaisedButton] and [FlatButton], for buttons with text in them.
 ///  * [InkResponse] and [InkWell], for the ink splash effect itself.
-class CustomIconButton extends StatelessWidget {
+class FMMIconButton extends StatelessWidget {
   /// Creates an icon button.
   ///
   /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
@@ -129,11 +134,11 @@ class CustomIconButton extends StatelessWidget {
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
-  const CustomIconButton({
+  const FMMIconButton({
     Key key,
-    this.iconSize = 24.0,
-    this.size = 30.0,
     @required this.icon,
+    this.size = kIconButtonSize,
+    this.iconSize = kIconButtonIconSize,
     this.color,
     this.focusColor,
     this.hoverColor,

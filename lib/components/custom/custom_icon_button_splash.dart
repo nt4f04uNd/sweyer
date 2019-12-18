@@ -162,7 +162,7 @@ class IconButtonInkRipple extends InteractiveInkFeature {
     _radius = _radiusController.drive(
       Tween<double>(
         begin: _targetRadius * 0.30,
-        end: _targetRadius + 5,
+        end: _targetRadius, 
       ).chain(_easeCurveTween),
     );
 

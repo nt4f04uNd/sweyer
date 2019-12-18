@@ -70,7 +70,7 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return RouteBase(
+    return PageBase(
       name: "Расширенные",
       actions: <Widget>[
         IgnorePointer(

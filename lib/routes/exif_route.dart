@@ -24,7 +24,7 @@ class _ExifRouteState extends State<ExifRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return RouteBase(
+    return PageBase(
       name: "Редактировать",
       child: Container(
         padding: const EdgeInsets.all(8.0),

@@ -3,19 +3,27 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:flutter_music_player/constants.dart' as Constants;
 
 /// Button to go back from page
-class CustomBackButton extends StatelessWidget {
-  const CustomBackButton({Key key}) : super(key: key);
+class FMMBackButton extends StatelessWidget {
+  /// A custom icon for back button
+  final IconData icon;
+
+  /// Custom button size
+  final double size;
+  const FMMBackButton({Key key, this.icon, this.size = kIconButtonSize}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return CustomIconButton(
-      icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+    return FMMIconButton(
+      icon: Icon(
+        icon ?? Icons.arrow_back,
+        color: Theme.of(context).iconTheme.color,
+      ),
+      size: size,
       splashColor: Constants.AppTheme.splash.auto(context),
       onPressed: () => Navigator.of(context).pop(),
     );

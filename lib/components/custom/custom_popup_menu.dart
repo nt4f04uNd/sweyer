@@ -44,20 +44,20 @@ const double _kMenuVerticalPadding = 6.5;
 ///
 /// A [PopupMenuEntry] may represent multiple values, for example a row with
 /// several icons, or a single entry, for example a menu item with an icon (see
-/// [PopupMenuItem]), or no value at all (for example, [PopupMenuDivider]).
+/// [FMMPopupMenuItem]), or no value at all (for example, [FMMPopupMenuDivider]).
 ///
 /// See also:
 ///
-///  * [PopupMenuItem], a popup menu entry for a single value.
-///  * [PopupMenuDivider], a popup menu entry that is just a horizontal line.
-///  * [CheckedPopupMenuItem], a popup menu item with a checkmark.
+///  * [FMMPopupMenuItem], a popup menu entry for a single value.
+///  * [FMMPopupMenuDivider], a popup menu entry that is just a horizontal line.
+///  * [FMMCheckedPopupMenuItem], a popup menu item with a checkmark.
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
-abstract class PopupMenuEntry<T> extends StatefulWidget {
+abstract class FMMPopupMenuEntry<T> extends StatefulWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const PopupMenuEntry({Key key}) : super(key: key);
+  const FMMPopupMenuEntry({Key key}) : super(key: key);
 
   /// The amount of vertical space occupied by this entry.
   ///
@@ -88,16 +88,16 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 ///
 /// See also:
 ///
-///  * [PopupMenuItem], for the kinds of items that this widget divides.
+///  * [FMMPopupMenuItem], for the kinds of items that this widget divides.
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
 // ignore: prefer_void_to_null, https://github.com/dart-lang/sdk/issues/34416
-class PopupMenuDivider extends PopupMenuEntry<Null> {
+class FMMPopupMenuDivider extends FMMPopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({Key key, this.height = _kMenuDividerHeight})
+  const FMMPopupMenuDivider({Key key, this.height = _kMenuDividerHeight})
       : super(key: key);
 
   /// The height of the divider entry.
@@ -113,7 +113,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   _PopupMenuDividerState createState() => _PopupMenuDividerState();
 }
 
-class _PopupMenuDividerState extends State<PopupMenuDivider> {
+class _PopupMenuDividerState extends State<FMMPopupMenuDivider> {
   @override
   Widget build(BuildContext context) => Divider(height: widget.height);
 }
@@ -124,11 +124,11 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 /// shows a popup menu, consider using [PopupMenuButton].
 ///
 /// To show a checkmark next to a popup menu item, consider using
-/// [CheckedPopupMenuItem].
+/// [FMMCheckedPopupMenuItem].
 ///
-/// Typically the [child] of a [PopupMenuItem] is a [Text] widget. More
+/// Typically the [child] of a [FMMPopupMenuItem] is a [Text] widget. More
 /// elaborate menus with icons can use a [ListTile]. By default, a
-/// [PopupMenuItem] is 48 pixels high. If you use a widget with a different
+/// [FMMPopupMenuItem] is 48 pixels high. If you use a widget with a different
 /// height, it must be specified in the [height] property.
 ///
 /// {@tool sample}
@@ -145,25 +145,25 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 /// {@end-tool}
 ///
 /// See the example at [PopupMenuButton] for how this example could be used in a
-/// complete menu, and see the example at [CheckedPopupMenuItem] for one way to
-/// keep the text of [PopupMenuItem]s that use [Text] widgets in their [child]
-/// slot aligned with the text of [CheckedPopupMenuItem]s or of [PopupMenuItem]
+/// complete menu, and see the example at [FMMCheckedPopupMenuItem] for one way to
+/// keep the text of [FMMPopupMenuItem]s that use [Text] widgets in their [child]
+/// slot aligned with the text of [FMMCheckedPopupMenuItem]s or of [FMMPopupMenuItem]
 /// that use a [ListTile] in their [child] slot.
 ///
 /// See also:
 ///
-///  * [PopupMenuDivider], which can be used to divide items from each other.
-///  * [CheckedPopupMenuItem], a variant of [PopupMenuItem] with a checkmark.
+///  * [FMMPopupMenuDivider], which can be used to divide items from each other.
+///  * [FMMCheckedPopupMenuItem], a variant of [FMMPopupMenuItem] with a checkmark.
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
-class PopupMenuItem<T> extends PopupMenuEntry<T> {
+class FMMPopupMenuItem<T> extends FMMPopupMenuEntry<T> {
   /// Creates an item for a popup menu.
   ///
   /// By default, the item is [enabled].
   ///
   /// The `height` and `enabled` arguments must not be null.
-  const PopupMenuItem({
+  const FMMPopupMenuItem({
     Key key,
     this.value,
     this.enabled = true,
@@ -199,32 +199,32 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   bool represents(T value) => value == this.value;
 
   @override
-  PopupMenuItemState<T, PopupMenuItem<T>> createState() =>
-      PopupMenuItemState<T, PopupMenuItem<T>>();
+  FMMPopupMenuItemState<T, FMMPopupMenuItem<T>> createState() =>
+      FMMPopupMenuItemState<T, FMMPopupMenuItem<T>>();
 }
 
-/// The [State] for [PopupMenuItem] subclasses.
+/// The [State] for [FMMPopupMenuItem] subclasses.
 ///
 /// By default this implements the basic styling and layout of Material Design
 /// popup menu items.
 ///
 /// The [buildChild] method can be overridden to adjust exactly what gets placed
-/// in the menu. By default it returns [PopupMenuItem.child].
+/// in the menu. By default it returns [FMMPopupMenuItem.child].
 ///
 /// The [handleTap] method can be overridden to adjust exactly what happens when
 /// the item is tapped. By default, it uses [Navigator.pop] to return the
-/// [PopupMenuItem.value] from the menu route.
+/// [FMMPopupMenuItem.value] from the menu route.
 ///
 /// This class takes two type arguments. The second, `W`, is the exact type of
 /// the [Widget] that is using this [State]. It must be a subclass of
-/// [PopupMenuItem]. The first, `T`, must match the type argument of that widget
+/// [FMMPopupMenuItem]. The first, `T`, must match the type argument of that widget
 /// class, and is the type of values returned from this menu.
-class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
+class FMMPopupMenuItemState<T, W extends FMMPopupMenuItem<T>> extends State<W> {
   /// The menu item contents.
   ///
   /// Used by the [build] method.
   ///
-  /// By default, this returns [PopupMenuItem.child]. Override this to put
+  /// By default, this returns [FMMPopupMenuItem.child]. Override this to put
   /// something else in the menu entry.
   @protected
   Widget buildChild() => widget.child;
@@ -233,7 +233,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   ///
   /// Used by the [InkWell] inserted by the [build] method.
   ///
-  /// By default, uses [Navigator.pop] to return the [PopupMenuItem.value] from
+  /// By default, uses [Navigator.pop] to return the [FMMPopupMenuItem.value] from
   /// the menu route.
   @protected
   void handleTap() {
@@ -279,8 +279,8 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
 ///
-/// A [CheckedPopupMenuItem] is 48 pixels high, which matches the default height
-/// of a [PopupMenuItem]. The horizontal layout uses a [ListTile]; the checkmark
+/// A [FMMCheckedPopupMenuItem] is 48 pixels high, which matches the default height
+/// of a [FMMPopupMenuItem]. The horizontal layout uses a [ListTile]; the checkmark
 /// is an [Icons.done] icon, shown in the [ListTile.leading] position.
 ///
 /// {@tool sample}
@@ -329,20 +329,20 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 ///
 /// See also:
 ///
-///  * [PopupMenuItem], a popup menu entry for picking a command (as opposed to
+///  * [FMMPopupMenuItem], a popup menu entry for picking a command (as opposed to
 ///    toggling a value).
-///  * [PopupMenuDivider], a popup menu entry that is just a horizontal line.
+///  * [FMMPopupMenuDivider], a popup menu entry that is just a horizontal line.
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 ///  * [PopupMenuButton], an [IconButton] that automatically shows a menu when
 ///    it is tapped.
-class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
+class FMMCheckedPopupMenuItem<T> extends FMMPopupMenuItem<T> {
   /// Creates a popup menu item with a checkmark.
   ///
   /// By default, the menu item is [enabled] but unchecked. To mark the item as
   /// checked, set [checked] to true.
   ///
   /// The `checked` and `enabled` arguments must not be null.
-  const CheckedPopupMenuItem({
+  const FMMCheckedPopupMenuItem({
     Key key,
     T value,
     this.checked = false,
@@ -382,7 +382,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
 }
 
 class _CheckedPopupMenuItemState<T>
-    extends PopupMenuItemState<T, CheckedPopupMenuItem<T>>
+    extends FMMPopupMenuItemState<T, FMMCheckedPopupMenuItem<T>>
     with SingleTickerProviderStateMixin {
   static const Duration _fadeDuration = Duration(milliseconds: 150);
   AnimationController _controller;
@@ -605,7 +605,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       this.menuPadding});
 
   final RelativeRect position;
-  final List<PopupMenuEntry<T>> items;
+  final List<FMMPopupMenuEntry<T>> items;
   final dynamic initialValue;
   final double elevation;
   final ThemeData theme;
@@ -640,7 +640,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     double selectedItemOffset;
     if (initialValue != null) {
       double y = menuPadding.vertical;
-      for (PopupMenuEntry<T> entry in items) {
+      for (FMMPopupMenuEntry<T> entry in items) {
         if (entry.represents(initialValue)) {
           selectedItemOffset = y + entry.height / 2.0;
           break;
@@ -724,17 +724,17 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
-///  * [PopupMenuItem], a popup menu entry for a single value.
-///  * [PopupMenuDivider], a popup menu entry that is just a horizontal line.
-///  * [CheckedPopupMenuItem], a popup menu item with a checkmark.
+///  * [FMMPopupMenuItem], a popup menu entry for a single value.
+///  * [FMMPopupMenuDivider], a popup menu entry that is just a horizontal line.
+///  * [FMMCheckedPopupMenuItem], a popup menu item with a checkmark.
 ///  * [PopupMenuButton], which provides an [IconButton] that shows a menu by
 ///    calling this method automatically.
 ///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
 ///    semantics.
-Future<T> showCustomMenu<T>({
+Future<T> showFMMMenu<T>({
   @required BuildContext context,
   @required RelativeRect position,
-  @required List<PopupMenuEntry<T>> items,
+  @required List<FMMPopupMenuEntry<T>> items,
   BorderRadius menuBorderRadius = const BorderRadius.all(
     Radius.circular(10),
   ),
@@ -776,7 +776,7 @@ Future<T> showCustomMenu<T>({
 }
 
 /// Signature for the callback invoked when a menu item is selected. The
-/// argument is the value of the [PopupMenuItem] that caused its menu to be
+/// argument is the value of the [FMMPopupMenuItem] that caused its menu to be
 /// dismissed.
 ///
 /// Used by [PopupMenuButton.onSelected].
@@ -792,7 +792,7 @@ typedef PopupMenuCanceled = void Function();
 /// the button is pressed.
 ///
 /// Used by [PopupMenuButton.itemBuilder].
-typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(
+typedef PopupMenuItemBuilder<T> = List<FMMPopupMenuEntry<T>> Function(
     BuildContext context);
 
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
@@ -842,15 +842,15 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(
 ///
 /// See also:
 ///
-///  * [PopupMenuItem], a popup menu entry for a single value.
-///  * [PopupMenuDivider], a popup menu entry that is just a horizontal line.
-///  * [CheckedPopupMenuItem], a popup menu item with a checkmark.
+///  * [FMMPopupMenuItem], a popup menu entry for a single value.
+///  * [FMMPopupMenuDivider], a popup menu entry that is just a horizontal line.
+///  * [FMMCheckedPopupMenuItem], a popup menu item with a checkmark.
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
-class CustomPopupMenuButton<T> extends StatefulWidget {
+class FMMPopupMenuButton<T> extends StatefulWidget {
   /// Creates a button that shows a popup menu.
   ///
   /// The [itemBuilder] argument must not be null.
-  const CustomPopupMenuButton({
+  const FMMPopupMenuButton({
     Key key,
     @required this.itemBuilder,
     this.initialValue,
@@ -861,8 +861,8 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
     this.elevation = 8.0,
     this.child,
     this.icon,
-    this.buttonSize = 40.0,
-    this.buttonIconSize = 24.0,
+    this.buttonSize = kIconButtonSize,
+    this.buttonIconSize = kIconButtonIconSize,
     this.offset = Offset.zero,
     this.enabled = true,
     this.menuBorderRadius = const BorderRadius.all(
@@ -916,10 +916,10 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
   /// If provided, the icon used for this button.
   final Icon icon;
 
-  /// Size of `CustomIconButton`
+  /// Size of `FMMIconButton`
   final double buttonSize;
 
-  /// Size of icon in `CustomIconButton`
+  /// Size of icon in `FMMIconButton`
   final double buttonIconSize;
 
   /// The offset applied to the Popup Menu Button.
@@ -952,7 +952,7 @@ class CustomPopupMenuButton<T> extends StatefulWidget {
   _PopupMenuButtonState<T> createState() => _PopupMenuButtonState<T>();
 }
 
-class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
+class _PopupMenuButtonState<T> extends State<FMMPopupMenuButton<T>> {
   void showButtonMenu() {
     final RenderBox button = context.findRenderObject();
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
@@ -964,10 +964,10 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
       ),
       Offset.zero & overlay.size,
     );
-    final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
+    final List<FMMPopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
-      showCustomMenu<T>(
+      showFMMMenu<T>(
               context: context,
               elevation: widget.elevation,
               items: items,
@@ -1007,7 +1007,7 @@ class _PopupMenuButtonState<T> extends State<CustomPopupMenuButton<T>> {
             onTap: widget.enabled ? showButtonMenu : null,
             child: widget.child,
           )
-        : CustomIconButton(
+        : FMMIconButton(
             splashColor: Constants.AppTheme.splash.auto(context),
             icon: widget.icon ?? _getIcon(Theme.of(context).platform),
             size: widget.buttonSize,

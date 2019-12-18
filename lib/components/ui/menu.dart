@@ -15,7 +15,7 @@ class DrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomIconButton(
+    return FMMIconButton(
       icon: Icon(Icons.menu),
       splashColor: Constants.AppTheme.splash.auto(context),
       color: Theme.of(context).iconTheme.color,

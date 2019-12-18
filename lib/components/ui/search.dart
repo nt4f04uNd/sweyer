@@ -36,7 +36,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return CustomIconButton(
+    return FMMIconButton(
       splashColor: AppTheme.splash.auto(context),
       icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
       onPressed: () {
@@ -64,7 +64,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
           ? SizedBox.shrink()
           : Padding(
               padding: const EdgeInsets.only(right: 8.0),
-              child: CustomIconButton(
+              child: FMMIconButton(
                 splashColor: AppTheme.splash.auto(context),
                 icon: const Icon(Icons.clear),
                 color: Theme.of(context).iconTheme.color,
@@ -262,7 +262,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
             padding: const EdgeInsets.only(right: 4.0),
             child: Padding(
               padding: const EdgeInsets.only(right: 3.0, top: 5.0),
-              child: CustomIconButton(
+              child: FMMIconButton(
                   splashColor: AppTheme.splash.auto(context),
                   icon: Icon(Icons.delete),
                   // size: 45.0,

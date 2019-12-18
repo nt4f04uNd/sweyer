@@ -11,11 +11,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_music_player/flutter_music_player.dart';
 import 'package:flutter_music_player/constants.dart' as Constants;
 
-class AnimatedPlayPauseButton extends StatefulWidget {
-  AnimatedPlayPauseButton({Key key, this.isLarge = false}) : super(key: key);
+const double _kIconSize = 32;
+const double _kButtonSize = 66;
 
-  /// Creates button of big size
-  final bool isLarge;
+class AnimatedPlayPauseButton extends StatefulWidget {
+  AnimatedPlayPauseButton({Key key, this.iconSize, this.size})
+      : super(key: key);
+
+  final double iconSize;
+  final double size;
 
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
@@ -56,17 +60,18 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: CustomIconButton(
-      iconSize: 32,
-      splashColor: Constants.AppTheme.splash.auto(context),
-      size: 56,
-      icon: AnimatedIcon(
-        icon: AnimatedIcons.play_pause,
-        color: Constants.AppTheme.playPauseIcon.auto(context),
-        progress: _animationController,
+      child: FMMIconButton(
+        size: widget.size ?? _kButtonSize,
+        iconSize: widget.iconSize ?? _kIconSize,
+        splashColor: Constants.AppTheme.splash.auto(context),
+        onPressed: _handlePress,
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.play_pause,
+          color: Constants.AppTheme.playPauseIcon.auto(context),
+          progress: _animationController,
+        ),
       ),
-      onPressed: _handlePress,
-    ));
+    );
   }
 
   @override

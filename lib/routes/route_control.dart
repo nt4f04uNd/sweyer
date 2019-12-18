@@ -71,6 +71,7 @@ abstract class RouteControl {
       return createRouteTransition(
         playMaterial: true,
         materialAnimationStyle: MaterialRouteTransitionStyle.expand,
+        entIgnoreEventsForward: true,
         entCurve: Curves.fastOutSlowIn,
         entBegin: Offset(0.0, 1.0),
         checkExitAnimationEnabled: () => _currentRouteEquals(Constants.Routes.exif.value),

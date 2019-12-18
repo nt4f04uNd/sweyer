@@ -3,24 +3,29 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_music_player/flutter_music_player.dart';
 
+const double _kPreferredSize = 63.0;
+
 /// Creates `Scaffold` with preferred size `AppBar`
-class RouteBase extends StatelessWidget {
+class PageBase extends StatelessWidget {
   final Widget child;
+
+  /// Overrides default `FMMBackButton` widget
+  final Widget backButton;
 
   /// Text that will be dispalyed in app bar title
   final String name;
 
   /// Actions in `AppBar`
   final List<Widget> actions;
-  const RouteBase({
+  const PageBase({
     Key key,
     @required this.child,
     this.name = "",
     this.actions = const [],
+    this.backButton = const FMMBackButton(),
   })  : assert(child != null),
         super(key: key);
 
@@ -29,12 +34,13 @@ class RouteBase extends StatelessWidget {
     return Container(
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(63.0), // here the desired height
+          preferredSize:
+              Size.fromHeight(_kPreferredSize), // here the desired height
           child: AppBar(
             titleSpacing: 0.0,
             backgroundColor: Colors.transparent,
             automaticallyImplyLeading: false,
-            leading: CustomBackButton(),
+            leading: backButton,
             actions: actions,
             title: Text(
               name,

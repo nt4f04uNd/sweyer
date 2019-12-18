@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/api.dart' as API;
 import 'package:flutter/material.dart';
 
 class DebugRoute extends StatelessWidget {
@@ -11,16 +12,16 @@ class DebugRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RouteBase(
+    return PageBase(
       name: "Дебаг",
       child: Container(
         child: ListView(
           physics: NeverScrollableScrollPhysics(),
           children: <Widget>[
             ListTile(
-              title: Text('Дебаг'),
+              title: Text('Остановить сервис'),
               onTap: () {
-                // Navigator.of(context).pushNamed(Routes.extendedSettings.value);
+                API.ServiceHandler.stopService();
               },
             ),
           ],

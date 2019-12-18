@@ -10,7 +10,6 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter_music_player/flutter_music_player.dart';
 
-
 const double progressLineHeight = 3.0;
 
 /// FIXME: art rotating on main and search routes are distinct
@@ -39,13 +38,14 @@ class BottomTrackPanel extends StatelessWidget {
                   color: Constants.AppTheme.bottomTrackPanel.auto(context),
                   child: GestureDetector(
                     onTap: () async {
-                      Navigator.of(context).pushNamed(Constants.Routes.player.value);
+                      Navigator.of(context)
+                          .pushNamed(Constants.Routes.player.value);
                     },
                     child: ListTile(
                       dense: true,
                       isThreeLine: false,
                       contentPadding: EdgeInsets.only(
-                          top: 5.0, bottom: 5.0, left: 10.0, right: 10.0),
+                          top: 5.0, bottom: 5.0, left: 12.0, right: 10.0),
                       title: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,31 +58,42 @@ class BottomTrackPanel extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: 1),
                             child: Artist(
-                                artist: PlaylistControl.currentSong?.artist,
-                                // textStyle: TextStyle(fontWeight: ThemeControl.isDark ? FontWeight.w400 : FontWeight.w500),
-                                ),
+                              artist: PlaylistControl.currentSong?.artist,
+                              // textStyle: TextStyle(fontWeight: ThemeControl.isDark ? FontWeight.w400 : FontWeight.w500),
+                            ),
                           ),
                         ],
                       ),
                       leading: RotatingAlbumArtWithProgress(),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Transform.translate(
-                            offset: Offset(10, 0),
-                            child: AnimatedPlayPauseButton(
-                              isLarge: true,
-                            ),
+                      trailing: Transform.translate(
+                        offset: Offset(-5, 0),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 70.0),
+                          child: Stack(
+                            children: <Widget>[
+                              Transform.translate(
+                                offset: Offset(-14, 0),
+                                child: AnimatedPlayPauseButton(
+                                  size: 40.0,
+                                  iconSize: 30.0,
+                                ),
+                              ),
+                              Transform.translate(
+                                offset: Offset(20, 0),
+                                child: FMMIconButton(
+                                  icon: Icon(Icons.skip_next),
+                                  onPressed: MusicPlayer.playNext,
+                                  size: 40.0,
+                                  iconSize: 30.0,
+                                  splashColor:
+                                      Constants.AppTheme.splash.auto(context),
+                                  color: Constants.AppTheme.playPauseIcon
+                                      .auto(context),
+                                ),
+                              ),
+                            ],
                           ),
-                          CustomIconButton(
-                            iconSize: 32,
-                            splashColor: Constants.AppTheme.splash.auto(context),
-                            size: 56,
-                            icon: Icon(Icons.skip_next),
-                            color: Constants.AppTheme.playPauseIcon.auto(context),
-                            onPressed: MusicPlayer.playNext,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

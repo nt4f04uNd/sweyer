@@ -32,29 +32,17 @@ class _SettingsRouteState extends State<SettingsRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(63.0), // here the desired height
-        child: AppBar(
-          titleSpacing: 0.0,
-          backgroundColor: Colors.transparent,
-          title: Text("Настройки",
-              style: TextStyle(
-                color: Theme.of(context).textTheme.title.color,
-                // fontWeight: FontWE
-              )),
-          leading: CustomBackButton(),
-          automaticallyImplyLeading: false,
-        ),
-      ),
-      body: Container(
+    return PageBase(
+      name: "Настройки",
+      child: Container(
         child: ListView(
           physics: NeverScrollableScrollPhysics(),
           children: <Widget>[
             ListTile(
               title: Text('Расширенные настройки'),
               onTap: () {
-                Navigator.of(context).pushNamed(Constants.Routes.extendedSettings.value);
+                Navigator.of(context)
+                    .pushNamed(Constants.Routes.extendedSettings.value);
               },
             ),
             SwitchListTile(

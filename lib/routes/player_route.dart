@@ -6,16 +6,10 @@
 // TODO: CONVERT IMPORTS
 
 import 'dart:async';
-import 'package:flutter_music_player/components/ui/ui.dart';
-import 'package:flutter_music_player/components/custom/custom.dart';
-import 'package:flutter_music_player/components/custom/custom.dart' as customPopup;
-import 'package:flutter_music_player/constants/routes.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/player/player_widgets.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/prefs.dart';
+
+import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:flutter_music_player/constants.dart' as Constants;
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/logic/player/player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayerRoute extends StatefulWidget {
@@ -23,52 +17,41 @@ class PlayerRoute extends StatefulWidget {
   _PlayerRouteState createState() => _PlayerRouteState();
 }
 
-class _PlayerRouteState extends State<PlayerRoute>
-    with SingleTickerProviderStateMixin {
-  TabController _tabController;
+class _PlayerRouteState extends State<PlayerRoute> {
+  PageController _pageController = PageController();
+  int openedTabIndex = 0;
+  bool initialRender = true;
+  double prevPage = 0.0;
   final GlobalKey<_PlaylistTabState> _playlistTabKey =
       GlobalKey<_PlaylistTabState>();
-  final int _tabsLength = 2;
-  int openedTabIndex = 0;
-  int prevTabIndex = 0;
-  bool isChangingTabIndex = false;
-  bool initialRender = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(vsync: this, length: _tabsLength);
-    _tabController.addListener(() {
-      setState(() {
-        if (openedTabIndex != _tabController.index)
-          openedTabIndex = _tabController.index;
-        if (isChangingTabIndex != _tabController.indexIsChanging)
-          isChangingTabIndex = _tabController.indexIsChanging;
-        if (openedTabIndex == 0 && initialRender ||
-            _tabController.previousIndex == 1) {
-          if (initialRender) initialRender = false;
+    _pageController.addListener(() {
+      if (_pageController.page == 0.0) {
+        openedTabIndex = 0;
+        print(openedTabIndex);
+        if (initialRender)
+          initialRender = false;
+        else
           _playlistTabKey.currentState.jumpOnTabChange();
-        }
-      });
+      } else if (_pageController.page == 1.0) {
+        openedTabIndex = 1;
+      }
     });
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return TabBarView(
-      controller: _tabController,
+    return PageView(
+      controller: _pageController,
       children: [
         MainPlayerTab(),
         _PlaylistTab(
-            key: _playlistTabKey,
-            openedTabIndex: openedTabIndex,
-            isChangingTabIndex: isChangingTabIndex)
+          key: _playlistTabKey,
+          openedTabIndex: openedTabIndex,
+        )
       ],
     );
   }
@@ -76,12 +59,7 @@ class _PlayerRouteState extends State<PlayerRoute>
 
 class _PlaylistTab extends StatefulWidget {
   final int openedTabIndex;
-  final bool isChangingTabIndex;
-  _PlaylistTab(
-      {Key key,
-      @required this.openedTabIndex,
-      @required this.isChangingTabIndex})
-      : super(key: key);
+  _PlaylistTab({Key key, @required this.openedTabIndex}) : super(key: key);
 
   @override
   _PlaylistTabState createState() => _PlaylistTabState();
@@ -211,9 +189,9 @@ class _PlaylistTabState extends State<_PlaylistTab>
         builder: (context, snapshot) {
           return Scaffold(
             appBar: PreferredSize(
-              preferredSize: Size.fromHeight(80.0), // here the desired height
+              preferredSize: Size.fromHeight(80.0),
               child: Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+                padding: const EdgeInsets.only(top: 22.0),
                 child: AppBar(
                   title: Column(
                     mainAxisSize: MainAxisSize.max,
@@ -223,38 +201,23 @@ class _PlaylistTabState extends State<_PlaylistTab>
                       Text(
                         'Далее',
                         style: TextStyle(
-                            fontSize: 24,
-                            color: Theme.of(context).textTheme.title.color),
+                          fontSize: 24,
+                          height: 1,
+                          color: Theme.of(context).textTheme.title.color,
+                        ),
                       ),
-                      PlaylistControl.playlistType == PlaylistType.global
-                          ? Text(
-                              'Основной плейлист',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color:
-                                    Theme.of(context).textTheme.caption.color,
-                              ),
-                            )
-                          : PlaylistControl.playlistType ==
-                                  PlaylistType.shuffled
-                              ? Text(
-                                  'Перемешанный плейлист',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .caption
-                                          .color),
-                                )
-                              : Text(
-                                  'Найденный плейлист',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .caption
-                                          .color),
-                                ),
+                      Text(
+                        PlaylistControl.playlistType == PlaylistType.global
+                            ? 'Основной плейлист'
+                            : PlaylistControl.playlistType ==
+                                    PlaylistType.shuffled
+                                ? 'Перемешанный плейлист'
+                                : 'Найденный плейлист',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).textTheme.caption.color,
+                        ),
+                      )
                     ],
                   ),
                   automaticallyImplyLeading: false,
@@ -272,34 +235,233 @@ class _PlaylistTabState extends State<_PlaylistTab>
   }
 }
 
-class MainPlayerTab extends StatefulWidget {
-  MainPlayerTab({Key key}) : super(key: key);
-
-  _MainPlayerTabState createState() => _MainPlayerTabState();
+class MainPlayerTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return PageBase(
+      backButton: FMMBackButton(
+        icon: Icons.keyboard_arrow_down,
+        size: 40.0,
+      ),
+      actions: <Widget>[
+        SingleAppBarAction(
+          child: MoreButton(),
+        )
+      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          TrackShowcase(),
+          Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  child: TrackSlider(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    bottom: 40, top: 10, left: 20, right: 20),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    ShuffleButton(),
+                    PlaybackButtons(),
+                    LoopButton(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _MainPlayerTabState extends State<MainPlayerTab> {
-  // Duration of playing track
-  Duration _duration = Duration(seconds: 0);
+/// Button to switch toggle mode
+class LoopButton extends StatefulWidget {
+  LoopButton({Key key}) : super(key: key);
 
+  @override
+  _LoopButtonState createState() => _LoopButtonState();
+}
+
+class _LoopButtonState extends State<LoopButton> {
+  @override
+  Widget build(BuildContext context) {
+    return FMMIconButton(
+      splashColor: Constants.AppTheme.splash.auto(context),
+      icon: Icon(Icons.loop),
+      size: 40.0,
+      color: MusicPlayer.loopModeState
+          ? Constants.AppTheme.activeIcon.auto(context)
+          : Constants.AppTheme.disabledIcon.auto(context),
+      onPressed: () {
+        setState(() {
+          MusicPlayer.switchLoopMode();
+        });
+      },
+    );
+  }
+}
+
+class ShuffleButton extends StatefulWidget {
+  ShuffleButton({Key key}) : super(key: key);
+
+  @override
+  _ShuffleButtonState createState() => _ShuffleButtonState();
+}
+
+class _ShuffleButtonState extends State<ShuffleButton> {
+  @override
+  Widget build(BuildContext context) {
+    return FMMIconButton(
+      splashColor: Constants.AppTheme.splash.auto(context),
+      icon: Icon(Icons.shuffle),
+      color: PlaylistControl.playlistType == PlaylistType.shuffled
+          ? Constants.AppTheme.activeIcon.auto(context)
+          : Constants.AppTheme.disabledIcon.auto(context),
+      onPressed: () {
+        setState(() {
+          if (PlaylistControl.playlistType == PlaylistType.shuffled)
+            PlaylistControl.returnFromShuffledPlaylist();
+          else
+            PlaylistControl.setShuffledPlaylist();
+        });
+      },
+    );
+  }
+}
+
+class PlaybackButtons extends StatelessWidget {
+  const PlaybackButtons({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  width: 1,
+                  color: Constants.AppTheme.prevNextBorder.auto(context),
+                ),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: FMMIconButton(
+                size: 44,
+                icon: Icon(
+                  Icons.skip_previous,
+                  color: Constants.AppTheme.prevNextIcons.auto(context),
+                ),
+                onPressed: MusicPlayer.playPrev,
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  width: 1,
+                  color: Constants.AppTheme.playPauseBorder.auto(context),
+                ),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: AnimatedPlayPauseButton(),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                    width: 1,
+                    color: Constants.AppTheme.prevNextBorder.auto(context)),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: FMMIconButton(
+                size: 44,
+                icon: Icon(
+                  Icons.skip_next,
+                  color: Constants.AppTheme.prevNextIcons.auto(context),
+                ),
+                onPressed: MusicPlayer.playNext,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MoreButton extends StatelessWidget {
+  const MoreButton({Key key}) : super(key: key);
+
+  List<FMMPopupMenuEntry<void>> _itemBuilder(BuildContext context) => [
+        FMMPopupMenuItem<void>(
+          value: '',
+          child: Center(
+            child: Text(
+              'Изменить информацию',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ),
+      ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        cardColor: Constants.AppTheme.popupMenu.auto(context),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 5.0),
+        child: FMMPopupMenuButton<void>(
+          itemBuilder: _itemBuilder,
+          tooltipEnabled: false,
+          buttonSize: 40.0,
+          menuPadding: const EdgeInsets.symmetric(horizontal: 1.0),
+          menuBorderRadius: const BorderRadius.all(
+            Radius.circular(15.0),
+          ),
+          onSelected: (_) {
+            // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
+            Navigator.of(context).pushNamed(Constants.Routes.exif.value);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// A widget that displays all information about current song
+class TrackShowcase extends StatefulWidget {
+  TrackShowcase({Key key}) : super(key: key);
+
+  @override
+  _TrackShowcaseState createState() => _TrackShowcaseState();
+}
+
+class _TrackShowcaseState extends State<TrackShowcase> {
   /// Key for `MarqueeWidget` to reset its scroll on song change
   UniqueKey marqueeKey = UniqueKey();
-
   StreamSubscription<void> _changeSongSubscription;
 
   @override
   void initState() {
     super.initState();
-
-    _setInitialCurrentPosition();
-
     // Handle track switch
     _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
       // Create new key for marque widget to reset scroll
-      marqueeKey = UniqueKey();
       setState(() {
-        _duration =
-            Duration(milliseconds: PlaylistControl.currentSong?.duration);
+        marqueeKey = UniqueKey();
       });
     });
   }
@@ -310,232 +472,43 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
     super.dispose();
   }
 
-  Future<void> _setInitialCurrentPosition() async {
-    setState(() {
-      _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(63.0), // here the desired height
-          child: AppBar(
-            backgroundColor: Colors.transparent,
-            leading: CustomIconButton(
-              splashColor: AppTheme.splash.auto(context),
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                color: Theme.of(context).iconTheme.color,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: MarqueeWidget(
+                key: marqueeKey,
+                text: Text(
+                  PlaylistControl.currentSong?.title,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w500),
+                ),
               ),
-              size: 40.0,
-              onPressed: () => Navigator.pop(context),
             ),
-            actions: <Widget>[
-              Theme(
-                data: Theme.of(context).copyWith(
-                  cardColor: AppTheme.popupMenu.auto(context),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 5.0),
-                  child: customPopup.CustomPopupMenuButton<void>(
-                    // NOTE https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-                    onSelected: (_) {
-                      // Navigator.of(context).push(createExifRoute(widget));
-                      Navigator.of(context).pushNamed(Routes.exif.value);
-                    },
-
-                    tooltipEnabled: false,
-                    // icon: CustomIconButton(icon: Icon(Icons.more_vert),) as Icon,
-                    buttonSize: 40.0,
-                    menuPadding:const EdgeInsets.symmetric(horizontal: 1.0),
-                    menuBorderRadius: const BorderRadius.all(
-    Radius.circular(15.0),
-  ),
-                    itemBuilder: (BuildContext context) =>
-                        <customPopup.PopupMenuEntry<void>>[
-                      customPopup.PopupMenuItem<void>(
-                        // padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                        value: '',
-                        // height: 30.0,
-                        child: Center(
-                          child: Text(
-                            'Изменить информацию',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 30),
+              child: Artist(
+                artist: PlaylistControl.currentSong.artist,
+                textStyle:
+                    TextStyle(fontSize: 15.5, fontWeight: FontWeight.w500),
               ),
-            ],
-            automaticallyImplyLeading: false,
-          ),
-        ),
-        body: Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 0),
-                child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        child: MarqueeWidget(
-                          key: marqueeKey,
-                          text: Text(
-                            PlaylistControl.currentSong?.title,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 21, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5, bottom: 30),
-                        child: Artist(
-                          artist: PlaylistControl.currentSong.artist,
-                          textStyle: TextStyle(
-                              fontSize: 15.5, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: AlbumArt(
-                          path: PlaylistControl.currentSong?.albumArtUri,
-                          isLarge: true,
-                        ),
-                      ),
-                    ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+              child: AlbumArt(
+                path: PlaylistControl.currentSong?.albumArtUri,
+                isLarge: true,
               ),
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      child: TrackSlider(
-                        duration: _duration,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        bottom: 40, top: 10, left: 20, right: 20),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        CustomIconButton(
-                          splashColor: AppTheme.splash.auto(context),
-                          icon: Icon(Icons.shuffle),
-                          color: PlaylistControl.playlistType ==
-                                  PlaylistType.shuffled
-                              ? AppTheme.activeIcon.auto(context)
-                              : AppTheme.disabledIcon.auto(context),
-                          onPressed: () {
-                            setState(() {
-                              if (PlaylistControl.playlistType ==
-                                  PlaylistType.shuffled)
-                                PlaylistControl.returnFromShuffledPlaylist();
-                              else
-                                PlaylistControl.setShuffledPlaylist();
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Container(
-                            // padding: const EdgeInsets.symmetric(horizontal: 50),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      width: 1,
-                                      color:
-                                          AppTheme.prevNextBorder.auto(context),
-                                    ),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: CustomIconButton(
-                                    size: 34,
-                                    icon: Icon(
-                                      Icons.skip_previous,
-                                      color:
-                                          AppTheme.prevNextIcons.auto(context),
-                                    ),
-                                    onPressed: MusicPlayer.playPrev,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: AppTheme.playPauseBorder
-                                            .auto(context)),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: AnimatedPlayPauseButton(isLarge: true),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1,
-                                        color: AppTheme.prevNextBorder
-                                            .auto(context)),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: CustomIconButton(
-                                    size: 34,
-                                    icon: Icon(
-                                      Icons.skip_next,
-                                      color:
-                                          AppTheme.prevNextIcons.auto(context),
-                                    ),
-                                    onPressed: MusicPlayer.playNext,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        // SizedBox.fromSize(
-                        //   size: Size.square(48),
-                        // )
-                        CustomIconButton(
-                          splashColor: AppTheme.splash.auto(context),
-                          icon: Icon(Icons.loop),
-                          color: MusicPlayer.loopModeState
-                              ? AppTheme.activeIcon.auto(context)
-                              : AppTheme.disabledIcon.auto(context),
-                          onPressed: () {
-                            setState(() {
-                              MusicPlayer.switchLoopMode();
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -543,10 +516,7 @@ class _MainPlayerTabState extends State<MainPlayerTab> {
 }
 
 class TrackSlider extends StatefulWidget {
-  final Duration duration;
-  TrackSlider({Key key, @required this.duration})
-      : assert(duration != null),
-        super(key: key);
+  TrackSlider({Key key}) : super(key: key);
 
   _TrackSliderState createState() => _TrackSliderState();
 }
@@ -554,6 +524,8 @@ class TrackSlider extends StatefulWidget {
 class _TrackSliderState extends State<TrackSlider> {
   /// Actual track position value
   Duration _value = Duration(seconds: 0);
+  // Duration of playing track
+  Duration _duration = Duration(seconds: 0);
 
   /// Value to perform drag
   double _localValue;
@@ -601,6 +573,8 @@ class _TrackSliderState extends State<TrackSlider> {
         _isDragging = false;
         _localValue = 0.0;
         _value = Duration(seconds: 0);
+        _duration =
+            Duration(milliseconds: PlaylistControl.currentSong?.duration);
       });
     });
   }
@@ -615,6 +589,7 @@ class _TrackSliderState extends State<TrackSlider> {
   Future<void> _setInitialCurrentPosition() async {
     var currentPosition = await MusicPlayer.currentPosition;
     setState(() {
+      _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
       _value = currentPosition;
     });
   }
@@ -664,9 +639,9 @@ class _TrackSliderState extends State<TrackSlider> {
   }
 
   String _calculateDisplayedDurationTime() {
-    int minutes = widget.duration.inMinutes;
+    int minutes = _duration.inMinutes;
     // Seconds in 0-59 format
-    int seconds = widget.duration.inSeconds % 60;
+    int seconds = _duration.inSeconds % 60;
     return '${minutes.toString().length < 2 ? 0 : ''}$minutes:${seconds.toString().length < 2 ? 0 : ''}$seconds';
   }
 
@@ -689,10 +664,10 @@ class _TrackSliderState extends State<TrackSlider> {
         Expanded(
           child: Slider(
             activeColor: Colors.deepPurple,
-            inactiveColor: AppTheme.sliderInactive.auto(context),
+            inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
             value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
             // value: _value.inSeconds.toDouble(),
-            max: widget.duration.inSeconds.toDouble(),
+            max: _duration.inSeconds.toDouble(),
             min: 0,
             onChangeStart: _handleChangeStart,
             onChanged: _handleChanged,
