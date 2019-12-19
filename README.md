@@ -7,6 +7,13 @@ Some conventions that I use whe I write my application can be found in [README_C
 
 You can pull it if you want, run `flutter build apk` and start testing it on your device (Android only)
 
+# Demos
+
+<img alt="App start up" src="https://i.imgur.com/nF6Q5S1.gif" width="24.5%">
+<img alt="Player" src="https://i.imgur.com/aTTUnje.gif" width="24.5%" />
+<img alt="Dark mode" src="https://i.imgur.com/0N8TqRD.gif" width="24.5%" />
+<img alt="Search" src="https://i.imgur.com/MbY4aFi.gif" width="24.5%" />
+
 ## In plans
 
 * Albums and artists grouping support
