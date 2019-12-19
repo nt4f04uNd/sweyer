@@ -9,10 +9,7 @@ You can pull it if you want, run `flutter build apk` and start testing it on you
 
 # Demos
 
-<img alt="App start up" src="demos/start.gif" width="24.5%">
-<img alt="Player" src="demos/player.gif" width="24.5%" />
-<img alt="Dark mode" src="demos/dark.gif" width="24.5%" />
-<img alt="Search" src="demos/search.gif" width="24.5%" />
+<img alt="App start up" src="demos/start.gif" width="25%"><img alt="Player" src="demos/player.gif" width="25%" /><img alt="Dark mode" src="demos/dark.gif" width="25%" /><img alt="Search" src="demos/search.gif" width="25%" />
 
 ## In plans
 
