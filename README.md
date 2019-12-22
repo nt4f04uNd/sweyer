@@ -1,5 +1,4 @@
-
-<h1><div style="display: flex; align-items:center; "><img alt="Logo" src="assets/images/icons/note_rounded.svg" width="80px"/><div>Sweyer</div></div></h1>
+# Sweyer
 
 This is an open-source non-commercial repo of music player that is built with flutter
 This app is just my vision of how UI/UX in music apps should be
