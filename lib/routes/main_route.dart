@@ -3,8 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 
 class MainRoute extends StatefulWidget {
@@ -13,28 +13,48 @@ class MainRoute extends StatefulWidget {
 }
 
 class MainRouteState extends State<MainRoute> {
+  // Var to show toast in `_handleHomePop`
+  static DateTime _currentBackPressTime;
+
   @override
   void initState() {
     super.initState();
     LaunchControl.afterAppMount();
   }
 
+  /// Handles route pop and shows user toast
+  static Future<bool> _handleHomePop() async {
+    DateTime now = DateTime.now();
+    // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
+    if (_currentBackPressTime == null ||
+        now.difference(_currentBackPressTime) > Duration(seconds: 2)) {
+      _currentBackPressTime = now;
+      ShowFunctions.showToast(msg: 'Нажмите еще раз для выхода');
+      return Future.value(false);
+    }
+    // Stop player before exiting app
+    await MusicPlayer.stop();
+    return Future.value(true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: PlaylistControl.onPlaylistListChange,
-        builder: (context, snapshot) {
-          return PlaylistControl.playReady
-              ? Permissions.permissionStorageStatus !=
-                      MyPermissionStatus.granted
-                  ? NoPermissionsScreen()
-                  : PlaylistControl.songsEmpty(PlaylistType.global)
-                      ? PlaylistControl.initFetching
-                          ? SearchingSongsScreen()
-                          : SongsEmptyScreen()
-                      : MainRouteTrackList()
-              : SizedBox.shrink();
-        });
+    return WillPopScope(
+      onWillPop: _handleHomePop,
+      child: StreamBuilder(
+          stream: PlaylistControl.onPlaylistListChange,
+          builder: (context, snapshot) {
+            return PlaylistControl.playReady
+                ? Permissions.permissionStorageStatus != PermissionState.granted
+                    ? NoPermissionsScreen()
+                    : PlaylistControl.songsEmpty(PlaylistType.global)
+                        ? PlaylistControl.initFetching
+                            ? SearchingSongsScreen()
+                            : SongsEmptyScreen()
+                        : MainRouteTrackList()
+                : EmptyScreen(); // TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
+          }),
+    );
   }
 }
 
@@ -131,7 +151,7 @@ class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
     else
       _fetching = true;
 
-    await Permissions.requestStorage();
+    await Permissions.requestClick();
 
     if (mounted)
       setState(() {
@@ -168,5 +188,14 @@ class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
         ],
       ),
     );
+  }
+}
+
+class EmptyScreen extends StatelessWidget {
+  const EmptyScreen({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(backgroundColor: Constants.AppTheme.main.auto(context));
   }
 }

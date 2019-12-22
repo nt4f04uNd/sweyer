@@ -1,13 +1,12 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nt4f04uNd.player">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nt4f04uNd.sweyer">
 
-   <!-- Allow read stoarage -->
+   <!-- Allow read storage -->
    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
    <!-- Allow media notification -->
    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
-   <!-- Needed to stay awake feature in audioplayrs -->
+   <!-- Needed to stay awake feature in mediaplayer -->
    <uses-permission android:name="android.permission.WAKE_LOCK" />
-   <!-- <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/> -->
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
 
@@ -19,7 +18,7 @@
 
    <!-- TODO: Mipmap currently unused, probably should delete in the future -->
    <application android:name="io.flutter.app.FlutterApplication" android:label="Музыка" android:icon="@mipmap/ic_launcher" android:resizeableActivity="false">
-      <activity android:name=".MainActivity"
+      <activity android:name="com.nt4f04uNd.sweyer.MainActivity"
           android:launchMode="singleTop"
           android:theme="@style/LaunchThemeSystemUILight"
           android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -41,14 +40,14 @@
          </intent-filter>
 
          <!-- Intent filter for opening audio files -->
-         <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:mimeType="audio/*" />
-            <category android:name="android.intent.category.DEFAULT" />
-         </intent-filter>
+<!--          <intent-filter>-->
+<!--            <action android:name="android.intent.action.VIEW" />-->
+<!--            <data android:mimeType="audio/*" />-->
+<!--            <category android:name="android.intent.category.DEFAULT" />-->
+<!--         </intent-filter>-->
       </activity>
 
-      <service android:name="com.nt4f04uNd.player.player.PlayerForegroundService" android:enabled="true">
+      <service android:name="com.nt4f04uNd.sweyer.player.PlayerForegroundService" android:enabled="true" android:foregroundServiceType="mediaPlayback">
 
       </service>
 

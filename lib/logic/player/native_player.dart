@@ -8,12 +8,8 @@
 
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
-
-typedef StreamController CreateStreamController();
-typedef void TimeChangeHandler(Duration duration);
-typedef void ErrorHandler(String message);
-typedef void AudioPlayerStateChangeHandler(AudioPlayerState state);
+import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 
 /// This enum is meant to be used as a parameter of [setReleaseMode] method.
 ///
@@ -42,18 +38,18 @@ enum ReleaseMode {
 
 /// Self explanatory. Indicates the state of the audio player.
 enum AudioPlayerState {
-  STOPPED,
   PLAYING,
   PAUSED,
+  STOPPED,
   COMPLETED,
 }
 
-/// This represents a single AudioPlayer, which can play one audio at a time.
-/// To play several audios at the same time, you must create several instances
-/// of this class.
+/// This represents an interface to communicate with native player methods
 ///
 /// It holds methods to play, loop, pause, stop, seek the audio, and some useful
 /// hooks for handlers and callbacks.
+///
+/// NOTE that initialization part is located at native side
 abstract class NativeAudioPlayer {
   static final MethodChannel _channel =
       const MethodChannel(Constants.PlayerChannel.CHANNEL_NAME)
@@ -77,10 +73,11 @@ abstract class NativeAudioPlayer {
   /// Enables more verbose logging.
   static bool logEnabled = false;
 
-  static AudioPlayerState _audioPlayerState;
+  static AudioPlayerState _audioPlayerState = AudioPlayerState.PAUSED;
 
   static AudioPlayerState get state => _audioPlayerState;
 
+  /// It is observable, that means on every set we emit event to `onPlayerStateChanged` stream
   static set state(AudioPlayerState state) {
     _playerStateController.add(state);
     _audioPlayerState = state;
@@ -118,17 +115,11 @@ abstract class NativeAudioPlayer {
   /// Events are sent when an unexpected error is thrown in the native code.
   static Stream<String> get onPlayerError => _errorController.stream;
 
-  static Future<int> _invokeMethod(
-    String method, [
-    Map<String, dynamic> arguments,
-  ]) {
-    arguments ??= const {};
-
-    final Map<String, dynamic> withPlayerId = Map.of(arguments);
-
-    return _channel
-        .invokeMethod(method, withPlayerId)
-        .then((result) => (result as int));
+  /// Checks if player playing and if so, changes state to playing appropriately
+  /// Also sets release mode to be `ReleaseMode.STOP`
+  static Future<void> init() async {
+    if (await isPlaying()) state = AudioPlayerState.PLAYING;
+    NativeAudioPlayer.setReleaseMode(ReleaseMode.STOP);
   }
 
   /// Plays an audio.
@@ -136,7 +127,7 @@ abstract class NativeAudioPlayer {
   /// If [isLocal] is true, [url] must be a local file system path.
   /// If [isLocal] is false, [url] must be a remote URL.
   static Future<int> play(
-    String url, {
+    Song song, {
     bool isLocal = false,
     double volume = 1.0,
     // position must be null by default to be compatible with radio streams
@@ -149,18 +140,14 @@ abstract class NativeAudioPlayer {
     respectSilence ??= false;
     stayAwake ??= false;
 
-    final int result = await _invokeMethod('play', {
-      'url': url,
+    final int result = await _channel.invokeMethod('play', {
+      'song': song.toJson(),
       'isLocal': isLocal,
       'volume': volume,
       'position': position?.inMilliseconds,
       'respectSilence': respectSilence,
       'stayAwake': stayAwake,
     });
-
-    if (result == 1) {
-      state = AudioPlayerState.PLAYING;
-    }
 
     return result;
   }
@@ -170,12 +157,7 @@ abstract class NativeAudioPlayer {
   /// If you call [resume] later, the audio will resume from the point that it
   /// has been paused.
   static Future<int> pause() async {
-    final int result = await _invokeMethod('pause');
-
-    if (result == 1) {
-      state = AudioPlayerState.PAUSED;
-    }
-
+    final int result = await _channel.invokeMethod('pause');
     return result;
   }
 
@@ -184,24 +166,14 @@ abstract class NativeAudioPlayer {
   /// The position is going to be reset and you will no longer be able to resume
   /// from the last point.
   static Future<int> stop() async {
-    final int result = await _invokeMethod('stop');
-
-    if (result == 1) {
-      state = AudioPlayerState.STOPPED;
-    }
-
+    final int result = await _channel.invokeMethod('stop');
     return result;
   }
 
   /// Resumes the audio that has been paused or stopped, just like calling
   /// [play], but without changing the parameters.
   static Future<int> resume() async {
-    final int result = await _invokeMethod('resume');
-
-    if (result == 1) {
-      state = AudioPlayerState.PLAYING;
-    }
-
+    final int result = await _channel.invokeMethod('resume');
     return result;
   }
 
@@ -210,19 +182,14 @@ abstract class NativeAudioPlayer {
   /// The resources are going to be fetched or buffered again as soon as you
   /// call [play] or [setUrl].
   static Future<int> release() async {
-    final int result = await _invokeMethod('release');
-
-    if (result == 1) {
-      state = AudioPlayerState.STOPPED;
-    }
-
+    final int result = await _channel.invokeMethod('release');
     return result;
   }
 
   /// Moves the cursor to the desired position.
   static Future<int> seek(Duration position) {
     _positionController.add(position);
-    return _invokeMethod('seek', {'position': position.inMilliseconds});
+    return _channel.invokeMethod('seek', {'position': position.inMilliseconds});
   }
 
   /// Sets the volume (amplitude).
@@ -230,14 +197,14 @@ abstract class NativeAudioPlayer {
   /// 0 is mute and 1 is the max volume. The values between 0 and 1 are linearly
   /// interpolated.
   static Future<int> setVolume(double volume) {
-    return _invokeMethod('setVolume', {'volume': volume});
+    return _channel.invokeMethod('setVolume', {'volume': volume});
   }
 
   /// Sets the release mode.
   ///
   /// Check [ReleaseMode]'s doc to understand the difference between the modes.
   static Future<int> setReleaseMode(ReleaseMode releaseMode) {
-    return _invokeMethod(
+    return _channel.invokeMethod(
       'setReleaseMode',
       {'releaseMode': releaseMode.toString()},
     );
@@ -250,7 +217,13 @@ abstract class NativeAudioPlayer {
   /// The resources will start being fetched or buffered as soon as you call
   /// this method.
   static Future<int> setUrl(String url, {bool isLocal: false}) {
-    return _invokeMethod('setUrl', {'url': url, 'isLocal': isLocal});
+    return _channel.invokeMethod('setUrl', {'url': url, 'isLocal': isLocal});
+  }
+
+  /// Checks is the actual player is playing
+  /// Needed on the app start, to check if service is running and playing the m
+  static Future<bool> isPlaying() {
+    return _channel.invokeMethod('isPlaying');
   }
 
   /// Get audio duration after setting url.
@@ -259,12 +232,12 @@ abstract class NativeAudioPlayer {
   /// It will be available as soon as the audio duration is available
   /// (it might take a while to download or buffer it if file is not local).
   static Future<int> getDuration() {
-    return _invokeMethod('getDuration');
+    return _channel.invokeMethod('getDuration');
   }
 
   // Gets audio current playing position
   static Future<int> getCurrentPosition() async {
-    return _invokeMethod('getCurrentPosition');
+    return _channel.invokeMethod('getCurrentPosition');
   }
 
   static Future<void> platformCallHandler(MethodCall call) async {
@@ -326,16 +299,12 @@ abstract class NativeAudioPlayer {
   /// You must call this method when your [AudioPlayer] instance is not going to
   /// be used anymore.
   static Future<void> dispose() async {
-    List<Future> futures = [];
-
-    if (!_playerStateController.isClosed)
-      futures.add(_playerStateController.close());
-    if (!_positionController.isClosed) futures.add(_positionController.close());
-    if (!_durationController.isClosed) futures.add(_durationController.close());
-    if (!_completionController.isClosed)
-      futures.add(_completionController.close());
-    if (!_errorController.isClosed) futures.add(_errorController.close());
-
-    await Future.wait(futures);
+    await Future.wait([
+      _playerStateController.close(),
+      _positionController.close(),
+      _durationController.close(),
+      _completionController.close(),
+      _errorController.close()
+    ]);
   }
 }

@@ -6,8 +6,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_music_player/constants/constants.dart' as Constants;
-import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:sweyer/constants/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 import 'package:flutter/services.dart';
 
 /// Type for audio manager focus
@@ -22,18 +22,18 @@ abstract class EventsHandler {
 
   static void start() {
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
-      print("EVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVENT $event");
+      print("RECEIVED EVENT IN DART SIDE: $event");
       switch (event) {
         case Constants
             .EventChannel.BECOME_NOISY: // handle headphones disconnect
-          MusicPlayer.pause();
+          // MusicPlayer.pause();
           break;
         //**************NOTIFICATION*********************************************************
         case Constants.EventChannel.NOTIFICATION_PLAY:
-          MusicPlayer.playPause();
+          // MusicPlayer.playPause();
           break;
         case Constants.EventChannel.NOTIFICATION_PAUSE:
-          MusicPlayer.playPause();
+          // MusicPlayer.playPause();
           break;
         case Constants.EventChannel.NOTIFICATION_NEXT:
           MusicPlayer.playNext();
@@ -53,28 +53,28 @@ abstract class EventsHandler {
 
         //**************MEDIABUTTONS*********************************************************
         case Constants.EventChannel.MEDIABUTTON_AUDIO_TRACK:
-          MusicPlayer.playNext();
+          // MusicPlayer.playNext();
           break;
         case Constants.EventChannel.MEDIABUTTON_FAST_FORWARD:
-          MusicPlayer.fastForward();
+          // MusicPlayer.fastForward();
           break;
         case Constants.EventChannel.MEDIABUTTON_REWIND:
-          MusicPlayer.rewind();
+          // MusicPlayer.rewind();
           break;
         case Constants.EventChannel.MEDIABUTTON_NEXT:
-          MusicPlayer.playNext();
+          // MusicPlayer.playNext();
           break;
         case Constants.EventChannel.MEDIABUTTON_PREVIOUS:
-          MusicPlayer.playPrev();
+          // MusicPlayer.playPrev();
           break;
         case Constants.EventChannel.MEDIABUTTON_PLAY_PAUSE:
-          MusicPlayer.playPause();
+          // MusicPlayer.playPause();
           break;
         case Constants.EventChannel.MEDIABUTTON_PLAY:
-          MusicPlayer.resume();
+          // MusicPlayer.resume();
           break;
         case Constants.EventChannel.MEDIABUTTON_STOP:
-          MusicPlayer.pause();
+          // MusicPlayer.pause();
           break;
         case Constants.EventChannel.MEDIABUTTON_HOOK:
           MusicPlayer.hookPress();

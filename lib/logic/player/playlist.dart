@@ -5,14 +5,10 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'fetcher.dart';
-import 'player.dart';
-import 'serialization.dart';
-import 'song.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter/material.dart';
+import 'package:sweyer/sweyer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sweyer/api.dart' as API;
 
 /// Features to sort by
 enum SortFeature { date, title }
@@ -147,12 +143,12 @@ abstract class PlaylistControl {
   static int _playingSongIdState;
 
   /// Controller for stream of playlist changes
-  static ManualStreamController<void> _songsListChangeStreamController =
-      ManualStreamController<void>();
+  static StreamController<void> _songsListChangeStreamController =
+      StreamController<void>.broadcast();
 
   /// Controller for stream of current song changes
-  static ManualStreamController<void> _songChangeStreamController =
-      ManualStreamController<void>();
+  static StreamController<void> _songChangeStreamController =
+      StreamController<void>.broadcast();
 
   /// Represents songs fetch on app start
   static bool initFetching = true;
@@ -240,12 +236,12 @@ abstract class PlaylistControl {
 
   /// Emit event to `onPlaylistListChange`
   static void emitPlaylistChange() {
-    _songsListChangeStreamController.emitEvent(null);
+    _songsListChangeStreamController.add(null);
   }
 
   /// Emit event to `onSongChange`
   static void emitSongChange() {
-    _songChangeStreamController.emitEvent(null);
+    _songChangeStreamController.add(null);
   }
 
   // Methods from playlist class
@@ -274,29 +270,27 @@ abstract class PlaylistControl {
     return _selectPlaylist(argPlaylistType).getPrevSongId(id);
   }
 
+  /// The main data app initialization function
+  /// Inits all playlists
+  /// Also handles no-permissions situations
   static Future<void> init() async {
-
-    // Init permission
-    await Permissions.requestPermission(PermissionGroup.storage);
-
-    if (Permissions.permissionStorageStatus == MyPermissionStatus.granted) {
+    if (Permissions.permissionStorageStatus == PermissionState.granted) {
       _globalPlaylist = null; // Reset `playReady`
       emitPlaylistChange();
 
       initFetching = true;
-      await songsSerializer.initJson(); // Init songs json
-      await playlistSerializer.initJson(); // Init playlist json
+      await Future.wait([
+        songsSerializer.initJson(), // Init songs json
+        playlistSerializer.initJson() // Init playlist json
+      ]);
       // Get songs from json and create global playlist
       _globalPlaylist = Playlist(await songsSerializer.readJson());
-      await _getSavedSortFeature();
+      await _restoreSortFeature();
       await filterSongs();
       sortSongs();
 
-      await _restorePlayer();
+      await _restoreLastSong();
       await _restorePlaylist();
-
-      // Init player state
-      await MusicPlayer.pause();
 
       // Emit event to track change stream
       emitPlaylistChange();
@@ -308,7 +302,7 @@ abstract class PlaylistControl {
 
       // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (_playingSongIdState == null)
       if (_playingSongIdState == null) {
-        await _restorePlayer();
+        await _restoreLastSong();
       }
     } else {
       // Init empty playlist if no permission granted
@@ -318,6 +312,12 @@ abstract class PlaylistControl {
     initFetching = false;
     // Emit event to track change stream
     emitPlaylistChange();
+  }
+
+  /// TODO: add usage for this method
+  static void dispose() {
+    _songsListChangeStreamController.close();
+    _songChangeStreamController.close();
   }
 
   /// Refetch songs and update playlist
@@ -441,20 +441,19 @@ abstract class PlaylistControl {
 
   /// Deletes song from device by id
   static Future<void> deleteSongFromDevice(int id) async {
-    final File file = File(getSongById(id).trackUri);
-    await file.delete();
-    print('fqwf');
+    // final File file = File(getSongById(id).trackUri);
+    // await file.delete();
   }
 
   /// Deletes songs by specified id set
   static Future<void> deleteSongs(Set<int> idSet) async {
     // List<Future<void>> futures = [];
     // for (var id in idSet) {
-      // Switch playing track in silent mode if it is playing now
-      // if (_playingSongIdState == id) MusicPlayer.playNext(silent: true);
+    // Switch playing track in silent mode if it is playing now
+    // if (_playingSongIdState == id) MusicPlayer.playNext(silent: true);
     // print(getSongById(id).title);
-      // futures.add(deleteSongFromDevice(id));
-      // _globalPlaylist.removeSongById(id);
+    // futures.add(deleteSongFromDevice(id));
+    // _globalPlaylist.removeSongById(id);
     // }
     // emitPlaylistChange();
     // try {
@@ -468,7 +467,7 @@ abstract class PlaylistControl {
   /// Gets saved sort feature from `SharedPreferences`
   ///
   /// Default value is `SortFeature.date`
-  static Future<void> _getSavedSortFeature() async {
+  static Future<void> _restoreSortFeature() async {
     int savedSortFeature = await Prefs.byKey.sortFeatureInt.getPref() ?? 0;
     if (savedSortFeature == 0) {
       sortSongs(SortFeature.date);
@@ -476,7 +475,7 @@ abstract class PlaylistControl {
       sortSongs(SortFeature.title);
     } else
       throw Exception(
-          "_getSavedSortFeature: wrong saved sortFeatureInt: $savedSortFeature");
+          "_restoreSortFeature: wrong saved sortFeatureInt: $savedSortFeature");
   }
 
   /// Restores saved playlist from json if `playlistTypeInt` (saved `playlistType`) is not global
@@ -511,32 +510,20 @@ abstract class PlaylistControl {
   /// Function that fires right after json has fetched and when initial songs fetch has done
   ///
   /// Its main purpose to setup player to work with playlists
-  static Future<void> _restorePlayer() async {
+  static Future<void> _restoreLastSong() async {
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (!songsEmpty()) {
       // Get saved data
-      SharedPreferences prefs = await Prefs.sharedInstance;
+      SharedPreferences prefs = await Prefs.getSharedInstance();
+
       int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs) ??
           currentPlaylist().getSongIdByIndex(0);
-      int savedSongPos = await Prefs.byKey.songPositionInt.getPref(prefs);
 
       // Setup initial playing state index from prefs
       _playingSongIdState = savedSongId;
-
-      try {
-        // Set url of first track in player instance
-        await MusicPlayer.setUrl(currentSong.trackUri);
-      } catch (e) {
-        debugPrint('Wasn\'t able to set url of saved song id');
-      }
-
-      try {
-        // Seek to saved position
-        if (savedSongPos != null)
-          await MusicPlayer.seek(Duration(seconds: savedSongPos));
-      } catch (e) {
-        debugPrint('Wasn\'t able to seek to saved position');
-      }
+      await API.ServiceHandler.sendSong(PlaylistControl.currentSong);
+      // Set url of first track in player instance
+      await MusicPlayer.setUrl(currentSong.trackUri);
 
       emitSongChange();
     }

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:sweyer/sweyer.dart';
 
 const double _kPreferredSize = 63.0;
 
@@ -12,7 +12,7 @@ const double _kPreferredSize = 63.0;
 class PageBase extends StatelessWidget {
   final Widget child;
 
-  /// Overrides default `FMMBackButton` widget
+  /// Overrides default `SMMBackButton` widget
   final Widget backButton;
 
   /// Text that will be dispalyed in app bar title
@@ -25,7 +25,7 @@ class PageBase extends StatelessWidget {
     @required this.child,
     this.name = "",
     this.actions = const [],
-    this.backButton = const FMMBackButton(),
+    this.backButton = const SMMBackButton(),
   })  : assert(child != null),
         super(key: key);
 

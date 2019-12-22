@@ -8,7 +8,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as Constants;
 
 // A file for custom `showSearch`, because I need search to be named route
 

@@ -6,9 +6,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_music_player/utils/async.dart';
+import 'package:sweyer/utils/async.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as Constants;
 
 import 'song.dart';
 

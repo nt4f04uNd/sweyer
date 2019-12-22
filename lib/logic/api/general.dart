@@ -5,7 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as Constants;
 
 abstract class GeneralHandler {
   static MethodChannel _generalChannel =

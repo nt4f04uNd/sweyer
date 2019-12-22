@@ -3,23 +3,24 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 // This is a workaround to rename show functions
 import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart' hide showDialog;
+import 'package:fluttertoast/fluttertoast.dart';
+
 const flutterShowDialog = material.showDialog;
 
-/// Class that contains 'show' functions, like `showDialog` and others
+/// Class that contains composed 'show' functions, like `showDialog` and others
 abstract class ShowFunctions {
   /// Shows toast from `Fluttertoast` with already set `backgroundColor` to `Color.fromRGBO(18, 18, 18, 1)`
   static Future<bool> showToast({
     @required String msg,
     Toast toastLength,
     int timeInSecForIos = 1,
-    double fontSize = 16.0,
+    double fontSize = 14.0,
     ToastGravity gravity,
     Color textColor,
     Color backgroundColor,
@@ -27,13 +28,14 @@ abstract class ShowFunctions {
     backgroundColor ??= Color.fromRGBO(18, 18, 18, 1);
 
     return await Fluttertoast.showToast(
-        msg: msg,
-        toastLength: toastLength,
-        timeInSecForIos: timeInSecForIos,
-        fontSize: fontSize,
-        gravity: gravity,
-        textColor: textColor,
-        backgroundColor: backgroundColor);
+      msg: msg,
+      toastLength: toastLength,
+      timeInSecForIos: timeInSecForIos,
+      fontSize: fontSize,
+      gravity: gravity,
+      textColor: textColor,
+      backgroundColor: backgroundColor,
+    );
   }
 
   /// Function that calls `showCustomSearch` and opens `SongsSearchDelegate` to search songs
@@ -52,7 +54,8 @@ abstract class ShowFunctions {
 
   /// Function that calls `showModalBottomSheet` and allows user to sort songs
   static void showSongsSortModal(BuildContext context) {
-    // TODO: add indicator for a current sort feature
+    // TODO: add indicator for a current sort feature    
+    var sortFeature =PlaylistControl.sortFeature;
     showModalBottomSheet<void>(
         context: context,
         backgroundColor: Constants.AppTheme.main.auto(context),
@@ -62,12 +65,15 @@ abstract class ShowFunctions {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                  padding: EdgeInsets.only(top: 15, bottom: 15, left: 12),
-                  child: Text("Сортировать",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).textTheme.caption.color,
-                      ))),
+                padding: EdgeInsets.only(top: 15, bottom: 15, left: 12),
+                child: Text(
+                  "Сортировать — ${sortFeature == SortFeature.title ? "по названию" : "по дате"}",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.caption.color,
+                  ),
+                ),
+              ),
               ListTile(
                 title: Text("По названию"),
                 onTap: () => _handleSortClick(context, SortFeature.title),
@@ -101,31 +107,32 @@ abstract class ShowFunctions {
     );
 
     return await flutterShowDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: title,
-              content:
-                  // AnnotatedRegion<
-                  // SystemUiOverlayStyle>(
-                  // value: AppSystemUIThemes.dialogScreen.auto(context),
-                  // child:
-                  content,
-              // ),
-              contentPadding:
-                  EdgeInsets.only(top: 24.0, left: 27.0, right: 27.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-              actions: <Widget>[
-                ButtonBar(
-                  children: <Widget>[
-                    acceptButton,
-                    declineButton,
-                  ],
-                ),
-              ],
-            ));
+      context: context,
+      builder: (context) => AlertDialog(
+        title: title,
+        content:
+            // AnnotatedRegion<
+            // SystemUiOverlayStyle>(
+            // value: AppSystemUIThemes.dialogScreen.auto(context),
+            // child:
+            content,
+        // ),
+        contentPadding: EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
+        contentTextStyle: material.TextStyle(color: Constants.AppTheme.menuItemIcon.auto(context),fontSize: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(10),
+          ),
+        ),
+        actions: <Widget>[
+          ButtonBar(
+            children: <Widget>[
+              acceptButton,
+              declineButton,
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

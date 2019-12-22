@@ -6,4 +6,4 @@
 /// Module for more convenient import of constants
 /// You should import this module `as Constants`
 
-export 'package:flutter_music_player/constants/constants.dart';
+export 'package:sweyer/constants/constants.dart';

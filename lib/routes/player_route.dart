@@ -3,12 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// TODO: CONVERT IMPORTS
-
 import 'dart:async';
 
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -239,7 +237,7 @@ class MainPlayerTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageBase(
-      backButton: FMMBackButton(
+      backButton: SMMBackButton(
         icon: Icons.keyboard_arrow_down,
         size: 40.0,
       ),
@@ -296,12 +294,12 @@ class LoopButton extends StatefulWidget {
 class _LoopButtonState extends State<LoopButton> {
   @override
   Widget build(BuildContext context) {
-    return FMMIconButton(
+    return SMMIconButton(
       splashColor: Constants.AppTheme.splash.auto(context),
       icon: Icon(Icons.loop),
       size: 40.0,
       color: MusicPlayer.loopModeState
-          ? Constants.AppTheme.activeIcon.auto(context)
+          ? Constants.AppTheme.menuItemIcon.auto(context)
           : Constants.AppTheme.disabledIcon.auto(context),
       onPressed: () {
         setState(() {
@@ -322,11 +320,11 @@ class ShuffleButton extends StatefulWidget {
 class _ShuffleButtonState extends State<ShuffleButton> {
   @override
   Widget build(BuildContext context) {
-    return FMMIconButton(
+    return SMMIconButton(
       splashColor: Constants.AppTheme.splash.auto(context),
       icon: Icon(Icons.shuffle),
       color: PlaylistControl.playlistType == PlaylistType.shuffled
-          ? Constants.AppTheme.activeIcon.auto(context)
+          ? Constants.AppTheme.menuItemIcon.auto(context)
           : Constants.AppTheme.disabledIcon.auto(context),
       onPressed: () {
         setState(() {
@@ -358,11 +356,11 @@ class PlaybackButtons extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(100),
               ),
-              child: FMMIconButton(
+              child: SMMIconButton(
                 size: 44,
                 icon: Icon(
                   Icons.skip_previous,
-                  color: Constants.AppTheme.prevNextIcons.auto(context),
+                  color: Constants.AppTheme.menuItemIcon.auto(context),
                 ),
                 onPressed: MusicPlayer.playPrev,
               ),
@@ -384,11 +382,11 @@ class PlaybackButtons extends StatelessWidget {
                     color: Constants.AppTheme.prevNextBorder.auto(context)),
                 borderRadius: BorderRadius.circular(100),
               ),
-              child: FMMIconButton(
+              child: SMMIconButton(
                 size: 44,
                 icon: Icon(
                   Icons.skip_next,
-                  color: Constants.AppTheme.prevNextIcons.auto(context),
+                  color: Constants.AppTheme.menuItemIcon.auto(context),
                 ),
                 onPressed: MusicPlayer.playNext,
               ),
@@ -403,8 +401,8 @@ class PlaybackButtons extends StatelessWidget {
 class MoreButton extends StatelessWidget {
   const MoreButton({Key key}) : super(key: key);
 
-  List<FMMPopupMenuEntry<void>> _itemBuilder(BuildContext context) => [
-        FMMPopupMenuItem<void>(
+  List<SMMPopupMenuEntry<void>> _itemBuilder(BuildContext context) => [
+        SMMPopupMenuItem<void>(
           value: '',
           child: Center(
             child: Text(
@@ -423,11 +421,11 @@ class MoreButton extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.only(right: 5.0),
-        child: FMMPopupMenuButton<void>(
+        child: SMMPopupMenuButton<void>(
           itemBuilder: _itemBuilder,
           tooltipEnabled: false,
           buttonSize: 40.0,
-          menuPadding: const EdgeInsets.symmetric(horizontal: 1.0),
+          menuPadding: const EdgeInsets.all(0.0),
           menuBorderRadius: const BorderRadius.all(
             Radius.circular(15.0),
           ),
@@ -533,7 +531,6 @@ class _TrackSliderState extends State<TrackSlider> {
   SharedPreferences prefs;
 
   /// Subscription for audio position change stream
-  /// TODO: move all this stuff into separate class (e.g. inherited widget) as it is also used in bottom track panel
   StreamSubscription<Duration> _changePositionSubscription;
   StreamSubscription<void> _changeSongSubscription;
 
@@ -550,13 +547,13 @@ class _TrackSliderState extends State<TrackSlider> {
     // Handle track position movement
     _changePositionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
-      print("POSITION CHANGE ${event.inSeconds}");
+      // print("POSITION CHANGE ${event.inSeconds}");
       if (event.inSeconds - 0.9 > _value.inSeconds && !_isDragging) {
         // Prevent waste updates
         setState(() {
           _value = event;
-          if (prefs != null)
-            Prefs.byKey.songPositionInt.setPref(_value.inSeconds, prefs);
+          // if (prefs != null)
+            // Prefs.byKey.songPositionInt.setPref(_value.inSeconds, prefs);
         });
       } else if (event.inMilliseconds < 200) {
         setState(() {
@@ -595,7 +592,7 @@ class _TrackSliderState extends State<TrackSlider> {
   }
 
   void _getPrefsInstance() async {
-    prefs = await Prefs.sharedInstance;
+    prefs = await Prefs.getSharedInstance();
   }
 
   // Drag functions
@@ -656,7 +653,6 @@ class _TrackSliderState extends State<TrackSlider> {
           width: 35.0,
           transform: Matrix4.translationValues(5, 0, 0),
           child: Text(
-            // TODO: move and refactor this code, and by the way split a whole page into separate widgets
             _calculateDisplayedPositionTime(),
             style: TextStyle(fontSize: 12),
           ),
@@ -666,7 +662,6 @@ class _TrackSliderState extends State<TrackSlider> {
             activeColor: Colors.deepPurple,
             inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
             value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
-            // value: _value.inSeconds.toDouble(),
             max: _duration.inSeconds.toDouble(),
             min: 0,
             onChangeStart: _handleChangeStart,

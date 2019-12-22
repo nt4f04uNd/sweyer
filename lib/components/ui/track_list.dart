@@ -3,10 +3,46 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
+
+class FakeInputBox extends StatelessWidget {
+  const FakeInputBox({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 0.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: GestureDetector(
+          onTap: () => ShowFunctions.showSongsSearch(context),
+          child: FractionallySizedBox(
+            widthFactor: 1,
+            child: Container(
+              padding: const EdgeInsets.only(
+                  left: 12.0, top: 7.0, bottom: 7.0, right: 12.0),
+              decoration: BoxDecoration(
+                color: Constants.AppTheme.searchFakeInput.auto(context),
+              ),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Icon(
+                  Icons.search,
+                  color: Theme.of(context).textTheme.caption.color,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// List of fetched tracks
 class MainRouteTrackList extends StatefulWidget {
@@ -32,15 +68,33 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
   /// Switcher to control track tiles selection re-render
   IntSwitcher _switcher = IntSwitcher();
 
+  bool refreshing = false;
+
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
-  bool refreshing = false;
+  StreamSubscription<void> _playlistChangeSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _playlistChangeSubscription =
+        PlaylistControl.onPlaylistListChange.listen((event) {
+      // Update list on playlist changes
+      _switcher.change();
+    });
+  }
+
+  @override
+  void dispose() {
+    _playlistChangeSubscription.cancel();
+    super.dispose();
+  }
 
   /// Performs tracks refetch
   Future<void> _refreshHandler() async {
     await PlaylistControl.refetchSongs();
-    _switcher.change();
+
     return Future.value();
   }
 
@@ -51,10 +105,12 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
       setState(() {
         selectionMode = true;
       });
+    else
+      setState(() {});
   }
 
   /// Removes item index from set and disables selection mode if set is empty
-  void _handleUnselect(int id) {
+  void _handleUnselect(int id, bool onMount) {
     selectionSet.remove(id);
     if (selectionSet.isEmpty) {
       // If none elements are selected - trigger unselecting animation and disable selection mode
@@ -65,6 +121,8 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
         });
       } else
         selectionMode = false;
+    } else {
+      if (!onMount) setState(() {});
     }
   }
 
@@ -86,11 +144,12 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
     // Needed to release clear set fully when animation is ended, cause some tiles may be out of scope
     await Future.delayed(Duration(milliseconds: 300));
     _switcher.change();
-    setState(() {
-      selectionSet = {};
-      selectionMode = false;
-      unselecting = false;
-    });
+    if (mounted)
+      setState(() {
+        selectionSet = {};
+        selectionMode = false;
+        unselecting = false;
+      });
   }
 
   void _handleDelete() {
@@ -133,10 +192,12 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
           child: selectionMode
               ? IgnorePointer(
                   ignoring: unselecting,
-                  child: FMMIconButton(
+                  child: SMMIconButton(
                     splashColor: Constants.AppTheme.splash.auto(context),
-                    icon: Icon(Icons.close,
-                        color: Theme.of(context).iconTheme.color),
+                    icon: Icon(
+                      Icons.close,
+                      color: Constants.AppTheme.menuItemIcon.auto(context),
+                    ),
                     color: Theme.of(context).iconTheme.color,
                     onPressed: _handleCloseSelection,
                   ),
@@ -147,61 +208,45 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
           Padding(
             padding: const EdgeInsets.only(left: 5.0, right: 5.0),
             child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 300),
-                child: selectionMode
-                    ? IgnorePointer(
-                        ignoring: unselecting,
-                        child: FMMIconButton(
-                          splashColor: Constants.AppTheme.splash.auto(context),
-                          key: UniqueKey(),
-                          color: Theme.of(context).iconTheme.color,
-                          icon: Icon(Icons.delete),
-                          onPressed: _handleDelete,
-                        ),
-                      )
-                    : FMMIconButton(
+              duration: Duration(milliseconds: 300),
+              child: selectionMode
+                  ? IgnorePointer(
+                      ignoring: unselecting,
+                      child: SMMIconButton(
                         splashColor: Constants.AppTheme.splash.auto(context),
-                        icon: Icon(Icons.sort),
-                        color: Theme.of(context).iconTheme.color,
-                        onPressed: () =>
-                            ShowFunctions.showSongsSortModal(context),
+                        key: UniqueKey(),
+                        color: Constants.AppTheme.menuItemIcon.auto(context),
+                        icon: Icon(Icons.delete),
+                        onPressed: _handleDelete,
                       ),
-              ),
-      
-          ),
-        ],
-        title: AnimatedOpacity(
-          duration: Duration(milliseconds: 300),
-          opacity: selectionMode ? 0 : 1,
-          child: IgnorePointer(
-            ignoring: selectionMode,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 0.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: GestureDetector(
-                  onTap: () => ShowFunctions.showSongsSearch(context),
-                  child: FractionallySizedBox(
-                    widthFactor: 1,
-                    child: Container(
-                      padding: const EdgeInsets.only(
-                          left: 12.0, top: 7.0, bottom: 7.0, right: 12.0),
-                      decoration: BoxDecoration(
-                        color: Constants.AppTheme.searchFakeInput.auto(context),
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(
-                          Icons.search,
-                          color: Theme.of(context).textTheme.caption.color,
-                        ),
-                      ),
+                    )
+                  : SMMIconButton(
+                      splashColor: Constants.AppTheme.splash.auto(context),
+                      icon: Icon(Icons.sort),
+                      color: Constants.AppTheme.menuItemIcon.auto(context),
+                      onPressed: () =>
+                          ShowFunctions.showSongsSortModal(context),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
+        ],
+        title: AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: selectionMode
+              ? Row(
+                  children: <Widget>[
+                    Text("Выбрано "),
+                    AnimatedSwitcher(
+                      duration: Duration(milliseconds: 160),
+                      child: Text(
+                        selectionSet.length.toString(),
+                        key:UniqueKey(),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                )
+              : FakeInputBox(),
         ),
       ),
       body: Stack(
@@ -211,8 +256,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
             child: Container(
               child: CustomRefreshIndicator(
                 color: Constants.AppTheme.refreshIndicatorArrow.auto(context),
-                backgroundColor:
-                    Constants.AppTheme.refreshIndicatorBackground.auto(context),
+                backgroundColor: Colors.deepPurple,
                 strokeWidth: 2.5,
                 key: _refreshIndicatorKey,
                 onRefresh: _refreshHandler,
@@ -220,8 +264,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                   child: Container(
                     child: Scrollbar(
                       child: ListView.builder(
-                        // physics: FMMBouncingScrollPhysics(),
-                        physics: FMMBouncingScrollPhysics(),
+                        physics: SMMBouncingScrollPhysics(),
                         itemCount: PlaylistControl.length(PlaylistType.global),
                         padding: EdgeInsets.only(bottom: 65, top: 0),
                         itemBuilder: (context, index) {
@@ -234,8 +277,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                                 return TrackTile(
                                   index,
                                   // Specify object key that can be changed to re-render song tile
-                                  key: ObjectKey(
-                                      index + _switcher.value * 10000),
+                                  key: ObjectKey(index + _switcher.value),
                                   selectable: true,
                                   selected: selectionSet.contains(id),
                                   someSelected: selectionMode,
@@ -245,7 +287,8 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                                     PlaylistControl.resetPlaylists();
                                   },
                                   onSelected: () => _handleSelect(id),
-                                  onUnselected: () => _handleUnselect(id),
+                                  onUnselected: (bool onMount) =>
+                                      _handleUnselect(id, onMount),
                                   notifyUnselection: () =>
                                       _handleNotifyUnselection(),
                                 );
@@ -297,7 +340,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
       child: SingleTouchRecognizerWidget(
         child: Scrollbar(
           child: ScrollablePositionedList.builder(
-            physics: FMMBouncingScrollPhysics(),
+            physics: SMMBouncingScrollPhysics(),
             frontScrollController: frontScrollController,
             itemScrollController: itemScrollController,
             itemCount: length,
@@ -425,7 +468,7 @@ class _TrackTileState extends State<TrackTile>
         // Perform unselection animation
         if (_selected) {
           _animationController.value = 1;
-          _unselect();
+          _unselect(true);
           _selected = false;
         }
       } else {
@@ -454,8 +497,8 @@ class _TrackTileState extends State<TrackTile>
   }
 
   // Performs unselect animation and calls `onSelected` and `notifyUnselection`
-  void _unselect() async {
-    widget.onUnselected();
+  void _unselect([bool onMount = false]) async {
+    widget.onUnselected(onMount);
     await _animationController.reverse();
     widget.notifyUnselection();
   }

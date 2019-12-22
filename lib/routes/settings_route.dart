@@ -3,8 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 
 class SettingsRoute extends StatefulWidget {

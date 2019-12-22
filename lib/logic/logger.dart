@@ -44,7 +44,7 @@ abstract class Logger {
   static Future<void> send() async {
     final MailOptions mailOptions = MailOptions(
       recipients: <String>["nt4f04und@gmail.com"],
-      subject: "flutter_music_player log",
+      subject: "sweyer log",
       body: _stringList.join("\n"),
       isHTML: false,
     );

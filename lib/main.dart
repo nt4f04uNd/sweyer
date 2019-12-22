@@ -3,9 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/logic/errors.dart';
-import 'package:flutter_music_player/logic/lifecycle.dart';
-import 'package:flutter_music_player/logic/theme.dart';
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,7 +18,7 @@ void main() {
   ]);
   final CatcherOptions releaseOptions =
       CatcherOptions(CustomDialogReportMode(), [
-    EmailManualHandler(["nt4f04uNd@gmail.com"]),
+    EmailManualHandler([Constants.Config.REPORT_EMAIL]),
   ]);
 
   Catcher(App(), debugConfig: debugOptions, releaseConfig: releaseOptions);
@@ -48,17 +47,8 @@ class _AppState extends State<App> {
               builder: (context, snapshot) {
                 if (!ThemeControl.isReady) return SizedBox.shrink();
                 return MaterialApp(
-                  title: 'Музыка',
+                  title: Constants.Config.APPLICATION_TITLE,
                   navigatorKey: Catcher.navigatorKey,
-                  // Uncomment to replace red screen of death
-                  builder: (BuildContext context, Widget widget) {
-                    // Catcher.addDefaultErrorWidget(
-                    //     showStacktrace: true,
-                    //     customTitle: "Custom error title",
-                    //     customDescription: "Custom error description",
-                    //     );
-                    return widget;
-                  },
                   supportedLocales: [const Locale('ru')],
                   locale: const Locale('ru'),
                   localizationsDelegates: const [
@@ -71,6 +61,15 @@ class _AppState extends State<App> {
                   darkTheme: AppTheme.materialApp.dark,
                   initialRoute: Routes.main.value,
                   onGenerateRoute: RouteControl.handleOnGenerateRoute,
+                  // Uncomment to replace red screen of death
+                  builder: (BuildContext context, Widget widget) {
+                    // Catcher.addDefaultErrorWidget(
+                    //     showStacktrace: true,
+                    //     customTitle: "Custom error title",
+                    //     customDescription: "Custom error description",
+                    //     );
+                    return widget;
+                  },
                 );
               });
         });

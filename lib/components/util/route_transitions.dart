@@ -220,7 +220,7 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
                         ? AnnotatedRegion<SystemUiOverlayStyle>(
                             value: checkExitSystemUI(), child: child)
                         : routeSystemUI != null
-                            ? AnnotatedRegion<SystemUiOverlayStyle>(
+                            ?AnnotatedRegion<SystemUiOverlayStyle>(
                                 value: routeSystemUI(), child: child)
                             : child,
               ),

@@ -12,10 +12,16 @@ class _PrefKeys {
       const Pref<List<String>>(key: 'search_history');
 
   /// Track position
+  /// NOTE IN SECONDS
   final Pref<int> songPositionInt = const Pref<int>(key: 'song_position');
 
   /// Last playing track id
   final Pref<int> songIdInt = const Pref<int>(key: 'song_id');
+
+  /// Last playing track id
+  /// 
+  /// NOTE Used on native side only to allow service be sticky
+  final Pref<int> songIsPlayingBool = const Pref<int>(key: 'song_is_playing');
 
   /// Loop mode
   final Pref<bool> loopModeBool = const Pref<bool>(key: 'loop_mode');
@@ -34,7 +40,7 @@ class _PrefKeys {
   /// `1` represents `searched`
   ///
   /// `2` represents `shuffled`
-  final Pref<int> playlistTypeInt = const Pref<int>(key: 'playlist');
+  final Pref<int> playlistTypeInt = const Pref<int>(key: 'playlist_type');
 
   /// Minimal file duration to be considered as a song
   /// 
@@ -47,8 +53,8 @@ class _PrefKeys {
   /// `false` means light
   /// 
   /// `true` means dark
-  final Pref<bool> themeBrightnessBool =
-      const Pref<bool>(key: 'theme_brightness');
+  final Pref<bool> settingThemeBrightnessBool =
+      const Pref<bool>(key: 'setting_theme_brightness');
 
   const _PrefKeys();
 }
@@ -59,7 +65,7 @@ abstract class Prefs {
   static const _PrefKeys byKey = _PrefKeys();
 
   /// Returns `SharedPreferences` instance
-  static Future<SharedPreferences> get sharedInstance async {
+  static Future<SharedPreferences> getSharedInstance() async {
     return await SharedPreferences.getInstance();
   }
 }

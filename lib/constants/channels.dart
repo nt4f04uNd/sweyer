@@ -48,20 +48,13 @@ abstract class GeneralChannel {
 
   static const String METHOD_INTENT_ACTION_VIEW =
       "GENERAL_METHOD_INTENT_ACTION_VIEW";
-
-  static const String KILL_ACTIVITY = "GENERAL_METHOD_KILL_ACTIVITY";
-
-  static const String METHOD_START_SERVICE = "GENERAL_METHOD_START_SERVICE";
-  static const String METHOD_STOP_SERVICE = "GENERAL_METHOD_STOP_SERVICE";
 }
 
 abstract class ServiceChannel {
   static const String CHANNEL_NAME = 'SERVICE_CHANNEL_STREAM';
 
-  static const String METHOD_START_SERVICE = "SERVICE_METHOD_START_SERVICE";
   static const String METHOD_STOP_SERVICE = "SERVICE_METHOD_STOP_SERVICE";
-  static const String METHOD_IS_SERVICE_RUNNING =
-      "SERVICE_METHOD_IS_SERVICE_RUNNING";
+  static const String METHOD_SEND_SONG = "SERVICE_METHOD_SEND_SONG";
 }
 
 abstract class SongsChannel {

@@ -4,21 +4,21 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Button to go back from page
-class FMMBackButton extends StatelessWidget {
+class SMMBackButton extends StatelessWidget {
   /// A custom icon for back button
   final IconData icon;
 
   /// Custom button size
   final double size;
-  const FMMBackButton({Key key, this.icon, this.size = kIconButtonSize}) : super(key: key);
+  const SMMBackButton({Key key, this.icon, this.size = kIconButtonSize}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FMMIconButton(
+    return SMMIconButton(
       icon: Icon(
         icon ?? Icons.arrow_back,
         color: Theme.of(context).iconTheme.color,

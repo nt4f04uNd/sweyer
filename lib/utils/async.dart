@@ -5,25 +5,12 @@
 
 import 'dart:async';
 
-/// Class to create, change and control stream
-class ManualStreamController<T> {
-  /// Stream controller used to create stream of changes on track list (just to notify)
-  StreamController<T> _controller = StreamController<T>.broadcast();
-
-  /// Get stream of notifier events about changes on track list
-  Stream<T> get stream => _controller.stream;
-
-  /// Emit change event
-  void emitEvent(T value) {
-    _controller.add(value);
-  }
-}
-
 /// A class that represents some async operation
 ///
 /// Can add to queue calls if it is still in work
 class AsyncOperation {
   final Completer _completer = Completer();
+
   /// Async callback
   final Function _callback;
   AsyncOperation(Function callback) : this._callback = callback;

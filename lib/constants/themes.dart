@@ -10,10 +10,10 @@ import 'colors.dart';
 
 abstract class AppTheme {
   static final ThemeContainer<Color> albumArtLarge =
-      ThemeContainer(light: Color(0xFFe7e7e7), dark: Color(0xFF333333));
+      ThemeContainer(light: Color(0xFFe8e8e8), dark: Color(0xFF333333));
 
   static final ThemeContainer<Color> albumArtSmall =
-      ThemeContainer(light: Color(0xFFf0f0f0), dark: Color(0xFF313131));
+      ThemeContainer(light: Color(0xfff1f2f4), dark: Color(0xFF313131));
 
   static final ThemeContainer<Color> albumArtSmallRound =
       ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
@@ -22,7 +22,8 @@ abstract class AppTheme {
       ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
   static final ThemeContainer<Color> searchFakeInput = ThemeContainer(
-      light: Colors.black.withOpacity(0.05),
+      // light: Colors.black.withOpacity(0.05),
+      light: AppColors.whiteDarkened,
       dark: Colors.white.withOpacity(0.05));
 
   static final ThemeContainer<Color> popupMenu =
@@ -37,22 +38,15 @@ abstract class AppTheme {
   static final ThemeContainer<Color> splash =
       ThemeContainer(light: Color(0x90bbbbbb), dark: Color(0x44c8c8c8));
 
-  static final ThemeContainer<Color> activeIcon =
-      ThemeContainer(light: Colors.grey.shade900, dark: null);
-
   static final ThemeContainer<Color> disabledIcon =
-      ThemeContainer(light: Colors.grey.shade500, dark: Colors.grey.shade800);
+      ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
 
-  static final ThemeContainer<Color> prevNextIcons = ThemeContainer(
-      light: Colors.grey.shade800.withOpacity(0.9),
-      dark: Colors.white.withOpacity(0.9));
+  static final ThemeContainer<Color> playPauseIcon =
+      ThemeContainer(light: Color(0xff555659), dark: Color(0xfff1f2f4));
 
   static final ThemeContainer<Color> prevNextBorder = ThemeContainer(
       light: Colors.black.withOpacity(0.1),
       dark: Colors.white.withOpacity(0.1));
-
-  static final ThemeContainer<Color> playPauseIcon =
-      ThemeContainer(light: Colors.grey.shade800, dark: Colors.white);
 
   static final ThemeContainer<Color> playPauseBorder = ThemeContainer(
       light: Colors.black.withOpacity(0.15),
@@ -69,33 +63,38 @@ abstract class AppTheme {
   static final ThemeContainer<Color> drawer =
       ThemeContainer(light: Colors.white, dark: AppColors.grey);
 
-  static final ThemeContainer<Color> menuItem = ThemeContainer(
-      light: Color(0xff3d3e42), dark:Color(0xffe7e8ec));
-  static final ThemeContainer<Color> menuItemIcon = ThemeContainer(
-      light: Color(0xff616266), dark:Color(0xfff1f2f4));
+  static final ThemeContainer<Color> menuItem =
+      ThemeContainer(light: Color(0xff3d3e42), dark: Color(0xffe7e8ec));
+  static final ThemeContainer<Color> menuItemIcon =
+      ThemeContainer(light: Color(0xff616266), dark: Color(0xfff1f2f4));
 
   static final ThemeContainer<Color> refreshIndicatorArrow =
       ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
-  static final ThemeContainer<Color> refreshIndicatorBackground =
-      ThemeContainer(light: Colors.deepPurple, dark: AppColors.greyLight);
 
   static ThemeContainer<ThemeData> materialApp = ThemeContainer(
     light: ThemeData(
       fontFamily: 'Manrope',
       textTheme: TextTheme(
-        title: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
-        subtitle: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        title:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        subtitle:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
         body2: TextStyle(fontWeight: FontWeight.w600),
         button: TextStyle(fontWeight: FontWeight.w600),
-        display1: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
-        display2: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
-        display3: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
-        display4: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        display1:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        display2:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        display3:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        display4:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
         headline: TextStyle(fontWeight: FontWeight.w600),
         overline: TextStyle(fontWeight: FontWeight.w600),
         body1: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
-        subhead: TextStyle(fontWeight: FontWeight.w600,color: AppColors.greyLight),
+        subhead:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
       ),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
@@ -109,6 +108,7 @@ abstract class AppTheme {
         color: Colors.white,
         elevation: 0,
       ),
+      // iconTheme: ,
       scaffoldBackgroundColor: Colors.white,
       brightness: Brightness.light,
       accentColor: Colors.white,
@@ -130,19 +130,26 @@ abstract class AppTheme {
     dark: ThemeData(
       fontFamily: 'Manrope',
       textTheme: TextTheme(
-        title: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
-        subtitle: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        title: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        subtitle: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
         body2: TextStyle(fontWeight: FontWeight.w600),
         button: TextStyle(fontWeight: FontWeight.w600),
-        display1: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
-        display2: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
-        display3: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
-        display4: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        display1: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        display2: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        display3: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        display4: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
         headline: TextStyle(fontWeight: FontWeight.w600),
         overline: TextStyle(fontWeight: FontWeight.w600),
         body1: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
-        subhead: TextStyle(fontWeight: FontWeight.w600,color: AppColors.whiteDarkened),
+        subhead: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
       ),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
@@ -209,11 +216,10 @@ abstract class AppSystemUIThemes {
   );
 
   /// Theme for the drawer screen
-  static final ThemeContainer<SystemUiOverlayStyle> drawerScreen = ThemeContainer(
-    light: allScreens.light
-        .copyWith(statusBarColor: AppColors.whiteDarkened),
-    dark:
-        allScreens.dark.copyWith(statusBarColor: AppColors.grey),
+  static final ThemeContainer<SystemUiOverlayStyle> drawerScreen =
+      ThemeContainer(
+    light: allScreens.light.copyWith(statusBarColor: AppColors.whiteDarkened),
+    dark: allScreens.dark.copyWith(statusBarColor: AppColors.grey),
   );
 
   /// Theme for dialog screen
@@ -255,7 +261,7 @@ class ThemeContainer<T> {
   T autoBr(Brightness brightness) =>
       brightness == Brightness.dark ? dark : light;
 
-  /// Inverses brightnes
+  /// Inverses brightness
   T autoBrInverse(Brightness brightness) =>
       brightness == Brightness.light ? dark : light;
 }

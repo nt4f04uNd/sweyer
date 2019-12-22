@@ -11,7 +11,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:sweyer/sweyer.dart';
 
 
 const double kIconButtonSize = 36.0;
@@ -121,7 +121,7 @@ const double kIconButtonIconSize = 24.0;
 ///  * [AppBar], to show a toolbar at the top of an application.
 ///  * [RaisedButton] and [FlatButton], for buttons with text in them.
 ///  * [InkResponse] and [InkWell], for the ink splash effect itself.
-class FMMIconButton extends StatelessWidget {
+class SMMIconButton extends StatelessWidget {
   /// Creates an icon button.
   ///
   /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
@@ -134,7 +134,7 @@ class FMMIconButton extends StatelessWidget {
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
-  const FMMIconButton({
+  const SMMIconButton({
     Key key,
     @required this.icon,
     this.size = kIconButtonSize,

@@ -3,11 +3,14 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'dart:async';
+
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+// TODO: add system theme setting
 abstract class ThemeControl {
   static Brightness _brightness;
 
@@ -26,7 +29,7 @@ abstract class ThemeControl {
   static void switchTheme([bool delayed = false]) async {
     _brightness =
         _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
-    Prefs.byKey.themeBrightnessBool.setPref(_brightness == Brightness.dark);
+    Prefs.byKey.settingThemeBrightnessBool.setPref(_brightness == Brightness.dark);
     emitThemeChange();
     if (delayed) await Future.delayed(Duration(milliseconds: 200));
     SystemChrome.setSystemUIOverlayStyle(
@@ -36,7 +39,7 @@ abstract class ThemeControl {
   /// Inits theme, fetches brightness from `PrefKeys`
   static Future<void> init() async {
     try {
-      final savedBrightness = await Prefs.byKey.themeBrightnessBool.getPref();
+      final savedBrightness = await Prefs.byKey.settingThemeBrightnessBool.getPref();
       if (savedBrightness == null)
         _brightness = Brightness.light;
       else
@@ -50,14 +53,14 @@ abstract class ThemeControl {
     }
   }
 
-  static final ManualStreamController<void> _controller =
-      ManualStreamController<void>();
+  static final StreamController<void> _controller =
+      StreamController<void>.broadcast();
 
   /// Gets stream of changes on theme
   static Stream<void> get onThemeChange => _controller.stream;
 
   /// Emit theme change into stream
   static void emitThemeChange() {
-    _controller.emitEvent(null);
+    _controller.add(null);
   }
 }

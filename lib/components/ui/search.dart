@@ -3,17 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/components/ui/ui.dart';
-import 'package:flutter_music_player/components/ui/ui.dart';
-import 'package:flutter_music_player/components/custom/custom.dart';
-import 'package:flutter_music_player/components/util/util.dart';
-import 'package:flutter_music_player/components/ui/ui.dart';
-import 'package:flutter_music_player/constants/themes.dart';
-import 'package:flutter_music_player/logic/player/playlist.dart';
-import 'package:flutter_music_player/logic/prefs.dart';
-import 'package:flutter_music_player/logic/player/song.dart';
+import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/components/custom/custom.dart' as custom_search;
+import 'package:sweyer/components/custom/custom.dart' as custom_search;
 
 class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   SongsSearchDelegate();
@@ -29,20 +22,48 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       primaryColor: Theme.of(context).appBarTheme.color,
       primaryColorBrightness: Theme.of(context).appBarTheme.brightness,
       textTheme: TextTheme(
-        title: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+        title: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+          // color: Constants.AppTheme.menuItemIcon.auto(context),
+        ),
       ),
     );
   }
 
   @override
   Widget buildLeading(BuildContext context) {
-    return FMMIconButton(
-      splashColor: AppTheme.splash.auto(context),
-      icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+    return SMMIconButton(
+      splashColor: Constants.AppTheme.splash.auto(context),
+      icon: Icon(
+        Icons.arrow_back,
+        color: Constants.AppTheme.menuItemIcon.auto(context),
+      ),
       onPressed: () {
         close(context, null);
       },
     );
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return <Widget>[
+      query.isEmpty
+          ? SizedBox.shrink()
+          : Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: SMMIconButton(
+                splashColor: Constants.AppTheme.splash.auto(context),
+                icon: const Icon(Icons.clear),
+                // color: Theme.of(context).iconTheme.color,
+                color: Constants.AppTheme.menuItemIcon.auto(context),
+                onPressed: () {
+                  query = '';
+                  showSuggestions(context);
+                },
+              ),
+            ),
+    ];
   }
 
   @override
@@ -57,26 +78,6 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     return _buildResultsAndSuggestions(context);
   }
 
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return <Widget>[
-      query.isEmpty
-          ? SizedBox.shrink()
-          : Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: FMMIconButton(
-                splashColor: AppTheme.splash.auto(context),
-                icon: const Icon(Icons.clear),
-                color: Theme.of(context).iconTheme.color,
-                onPressed: () {
-                  query = '';
-                  showSuggestions(context);
-                },
-              ),
-            ),
-    ];
-  }
-
   /// Function to fetch user search from shared preferences
   Future<void> _fetchSearchHistory() async {
     var searchHistoryList = await Prefs.byKey.searchHistoryStringList.getPref();
@@ -88,7 +89,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
   /// Delete item from search history by its index
   Future<void> _deleteItemFromHistory(BuildContext context, int index) async {
-    var prefs = await Prefs.sharedInstance;
+    var prefs = await Prefs.getSharedInstance();
     var searchHistoryList =
         await Prefs.byKey.searchHistoryStringList.getPref(prefs);
     searchHistoryList.removeAt(index);
@@ -101,7 +102,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
   Future<void> _writeInputToSearchHistory(String input) async {
     input = input.trim(); // Remove any whitespaces
     if (input.isNotEmpty) {
-      final prefs = await Prefs.sharedInstance;
+      final prefs = await Prefs.getSharedInstance();
       var searchHistoryList =
           await Prefs.byKey.searchHistoryStringList.getPref(prefs);
       if (searchHistoryList == null) {
@@ -149,7 +150,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       children: <Widget>[
         Scrollbar(
           child: ListView.builder(
-              physics: const FMMBouncingScrollPhysics(),
+              physics: const SMMBouncingScrollPhysics(),
               // FIXME add gesture detector that closes keyboard on scroll
               padding: EdgeInsets.only(bottom: 65, top: 0),
               itemCount: searched.length,
@@ -201,11 +202,19 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                           return _buildSuggestionTile(context, index);
                         },
                       )
-                    : Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Text(
-                              'Здесь будет отображаться история вашего поиска'),
+                    : Padding(
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height / 3 - 50.0,
+                          left: 50.0,
+                          right: 50.0,
+                        ),
+                        child: Text(
+                          'Здесь будет отображаться история вашего поиска',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color:
+                                Constants.AppTheme.menuItemIcon.auto(context).withOpacity(0.7),
+                          ),
                         ),
                       ),
               ),
@@ -262,10 +271,9 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
             padding: const EdgeInsets.only(right: 4.0),
             child: Padding(
               padding: const EdgeInsets.only(right: 3.0, top: 5.0),
-              child: FMMIconButton(
-                  splashColor: AppTheme.splash.auto(context),
+              child: SMMIconButton(
+                  splashColor: Constants.AppTheme.splash.auto(context),
                   icon: Icon(Icons.delete),
-                  // size: 45.0,
                   color: Theme.of(context).hintColor,
                   onPressed: () {
                     ShowFunctions.showDialog(
@@ -275,7 +283,8 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                           Text("Вы действительно хотите очистить историю?"),
                       acceptButton: DialogFlatButton(
                         child: Text('Удалить'),
-                        textColor: AppTheme.redFlatButton.auto(context),
+                        textColor:
+                            Constants.AppTheme.redFlatButton.auto(context),
                         onPressed: () async {
                           Navigator.of(context).pop();
                           await _resetSearchHistory(context);
@@ -283,7 +292,8 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                       ),
                       declineButton: DialogFlatButton(
                         child: Text('Отмена'),
-                        textColor: AppTheme.declineButton.auto(context),
+                        textColor:
+                            Constants.AppTheme.declineButton.auto(context),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
@@ -302,8 +312,9 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       title: Text(_suggestions[index], style: TextStyle(fontSize: 15.5)),
       dense: true,
       leading: Padding(
-        padding: const EdgeInsets.only(left:2.0),
-        child:  Icon(Icons.history ,color: AppTheme.menuItemIcon.auto(context)),
+        padding: const EdgeInsets.only(left: 2.0),
+        child: Icon(Icons.history,
+            color: Constants.AppTheme.menuItemIcon.auto(context)),
       ),
       onLongPress: () {
         ShowFunctions.showDialog(
@@ -313,7 +324,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
               Text("Вы действительно хотите удалить этот запрос из истории?"),
           acceptButton: DialogFlatButton(
             child: Text('Удалить'),
-            textColor: AppTheme.redFlatButton.auto(context),
+            textColor: Constants.AppTheme.redFlatButton.auto(context),
             onPressed: () async {
               Navigator.of(context).pop();
               await _deleteItemFromHistory(context, index);
@@ -321,7 +332,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
           ),
           declineButton: DialogFlatButton(
             child: Text('Отмена'),
-            textColor: AppTheme.declineButton.auto(context),
+            textColor: Constants.AppTheme.declineButton.auto(context),
             onPressed: () {
               Navigator.of(context).pop();
             },

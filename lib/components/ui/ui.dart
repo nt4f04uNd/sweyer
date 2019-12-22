@@ -7,6 +7,7 @@
 
 export 'scrollable_positioned_list/scrollable_positioned_list.dart'; 
 export 'album_art.dart';
+export 'artist.dart';
 export 'bottom_track_panel.dart';
 export 'buttons.dart';
 export 'marquee.dart';

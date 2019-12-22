@@ -7,7 +7,7 @@
 /// 
 /// API is not exported as you should use `as API`
 
-export 'player/player.dart';
+export 'player/music_player.dart';
 
 export 'error_bridge.dart';
 export 'errors.dart';

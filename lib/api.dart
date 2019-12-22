@@ -6,4 +6,4 @@
 /// Module for system API calls
 /// You should use `as API` to import this
 
-export 'package:flutter_music_player/logic/api/api.dart';
+export 'package:sweyer/logic/api/api.dart';

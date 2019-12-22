@@ -4,11 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
-import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 
 const double progressLineHeight = 3.0;
 
@@ -72,22 +73,26 @@ class BottomTrackPanel extends StatelessWidget {
                           child: Stack(
                             children: <Widget>[
                               Transform.translate(
-                                offset: Offset(-14, 0),
+                                offset: Offset(-16, 0),
                                 child: AnimatedPlayPauseButton(
                                   size: 40.0,
-                                  iconSize: 30.0,
+                                  iconSize: 28.0,
+                                  iconColor: Constants.AppTheme.menuItemIcon
+                                      .auto(context),
                                 ),
                               ),
                               Transform.translate(
-                                offset: Offset(20, 0),
-                                child: FMMIconButton(
+                                offset: Offset(18, 0),
+                                child: SMMIconButton(
                                   icon: Icon(Icons.skip_next),
                                   onPressed: MusicPlayer.playNext,
                                   size: 40.0,
-                                  iconSize: 30.0,
+                                  iconSize: 28.0,
                                   splashColor:
                                       Constants.AppTheme.splash.auto(context),
-                                  color: Constants.AppTheme.playPauseIcon
+                                  // color: Constants.AppTheme.playPauseIcon
+                                  //     .auto(context),
+                                  color: Constants.AppTheme.menuItemIcon
                                       .auto(context),
                                 ),
                               ),
@@ -186,11 +191,17 @@ class _RotatingAlbumArtWithProgressState
     });
   }
 
+  double _calcProgress() {
+    if (_value.inMilliseconds == 0.0 || _duration.inMilliseconds == 0.0)
+      return 0.001;
+    return _value.inMilliseconds / _duration.inMilliseconds;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: CircularPercentIndicator(
-        percent: _value.inMilliseconds / _duration.inMilliseconds,
+        percent: _calcProgress(),
         radius: 48.0 -
             progressLineHeight, // 48.0 is `constraints.maxHeight` if we see it in `LayoutBuilder`
         lineWidth: progressLineHeight,
@@ -200,6 +211,7 @@ class _RotatingAlbumArtWithProgressState
         center: RotatingAlbumArt(
           key: _rotatingArtGlobalKey,
           path: PlaylistControl.currentSong?.albumArtUri,
+          initRotation: math.Random(DateTime.now().second).nextDouble(),
           initIsRotating: MusicPlayer.playState == AudioPlayerState.PLAYING,
         ),
       ),

@@ -7,12 +7,12 @@
 import 'package:flutter/cupertino.dart';
 import 'dart:math' as math;
 
-class FMMBouncingScrollPhysics extends BouncingScrollPhysics {
+class SMMBouncingScrollPhysics extends BouncingScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
-  const FMMBouncingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const SMMBouncingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
  @override
-  FMMBouncingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return FMMBouncingScrollPhysics(parent: buildParent(ancestor));
+  SMMBouncingScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return SMMBouncingScrollPhysics(parent: buildParent(ancestor));
   }
 
 @override

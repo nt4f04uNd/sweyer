@@ -8,7 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Album art general widget
 /// Shows placeholder or art, depending on provided path

@@ -3,67 +3,77 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:sweyer/sweyer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum MyPermissionStatus { granted, notGranted, doNotAskAgain }
+enum PermissionState { granted, notGranted, doNotAskAgain }
 
 abstract class Permissions {
   /// Whether storage permission is granted
-  static MyPermissionStatus permissionStorageStatus =
-      MyPermissionStatus.notGranted;
+  static PermissionState permissionStorageStatus = PermissionState.notGranted;
 
-  static Future<void> requestStorage() async {
+  static Future<void> init() async {
+    permissionStorageStatus =
+        await checkPermissionStatus(PermissionGroup.storage) ==
+                PermissionStatus.granted
+            ? PermissionState.granted
+            : PermissionState.notGranted;
+  }
+
+  static Future<void> requestClick() async {
     bool canOpen = false;
-    if (Permissions.permissionStorageStatus ==
-        MyPermissionStatus.doNotAskAgain) {
+    if (Permissions.permissionStorageStatus == PermissionState.doNotAskAgain) {
       await ShowFunctions.showToast(msg: 'Предоставьте доступ вручную');
       canOpen = await PermissionHandler().openAppSettings();
-      Permissions.permissionStorageStatus = MyPermissionStatus.notGranted;
+      Permissions.permissionStorageStatus = PermissionState.notGranted;
     }
     if (!canOpen) {
       await Permissions.requestPermission(PermissionGroup.storage);
-      if (Permissions.permissionStorageStatus == MyPermissionStatus.granted) {
+      if (Permissions.permissionStorageStatus == PermissionState.granted) {
         await PlaylistControl.init();
-        await ThemeControl.init();
       }
     }
   }
 
+  static Future<PermissionStatus> checkPermissionStatus(
+      PermissionGroup permissionGroup) async {
+    return await PermissionHandler().checkPermissionStatus(permissionGroup);
+  }
+
   /// See https://github.com/BaseflowIT/flutter-permission-handler/issues/96#issuecomment-526617086
   static Future<void> requestPermission(PermissionGroup permissionGroup) async {
-    MyPermissionStatus status;
+    PermissionState status;
     Map<PermissionGroup, PermissionStatus> permissionsGranted =
         await PermissionHandler()
             .requestPermissions(<PermissionGroup>[permissionGroup]);
     PermissionStatus permissionStatus = permissionsGranted[permissionGroup];
 
     if (permissionStatus == PermissionStatus.granted) {
-      status = MyPermissionStatus.granted;
+      status = PermissionState.granted;
     } else {
-      bool beenAsked = await hasPermissionBeenAsked(permissionGroup);
+      bool beenAsked = await checkPermissionBeenAsked(permissionGroup);
       bool rationale = await PermissionHandler()
           .shouldShowRequestPermissionRationale(permissionGroup);
       if (beenAsked && !rationale) {
-        status = MyPermissionStatus.doNotAskAgain;
+        status = PermissionState.doNotAskAgain;
       } else {
-        status = MyPermissionStatus.notGranted;
+        status = PermissionState.notGranted;
       }
     }
 
-    setPermissionHasBeenAsked(permissionGroup);
+    setPermissionAsked(permissionGroup);
     permissionStorageStatus = status;
   }
 
-  static Future<void> setPermissionHasBeenAsked(
+  static Future<void> setPermissionAsked(
       PermissionGroup permissionGroup) async {
     // TODO: move this to prefs
     (await SharedPreferences.getInstance())
         .setBool('permission_asked_${permissionGroup.value}', true);
   }
 
-  static Future<bool> hasPermissionBeenAsked(
+  static Future<bool> checkPermissionBeenAsked(
       PermissionGroup permissionGroup) async {
     // TODO: move this to prefs
     return (await SharedPreferences.getInstance())

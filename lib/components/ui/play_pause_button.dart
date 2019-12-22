@@ -8,18 +8,19 @@ import 'dart:async';
 // import 'package:audioplayers/audioplayers.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 const double _kIconSize = 32;
 const double _kButtonSize = 66;
 
 class AnimatedPlayPauseButton extends StatefulWidget {
-  AnimatedPlayPauseButton({Key key, this.iconSize, this.size})
+  AnimatedPlayPauseButton({Key key, this.iconSize, this.size, this.iconColor})
       : super(key: key);
 
   final double iconSize;
   final double size;
+  final Color iconColor;
 
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
@@ -60,14 +61,14 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: FMMIconButton(
+      child: SMMIconButton(
         size: widget.size ?? _kButtonSize,
         iconSize: widget.iconSize ?? _kIconSize,
         splashColor: Constants.AppTheme.splash.auto(context),
         onPressed: _handlePress,
         icon: AnimatedIcon(
           icon: AnimatedIcons.play_pause,
-          color: Constants.AppTheme.playPauseIcon.auto(context),
+          color: widget.iconColor?? Constants.AppTheme.playPauseIcon.auto(context),
           progress: _animationController,
         ),
       ),

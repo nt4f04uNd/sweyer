@@ -1,5 +1,8 @@
-name: flutter_music_player
-description: Open source flutter music player
+name: sweyer
+description: Open source music player built with Flutter
+homepage: https://github.com/nt4f04uNd/sweyer
+repository: https://github.com/nt4f04uNd/sweyer
+issue_tracker: https://github.com/nt4f04uNd/sweyer/issues
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -12,13 +15,15 @@ description: Open source flutter music player
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
+ 
 
 environment:
   sdk: ">=2.6.0<3.0.0"
 
 dependencies:
-  audioplayers: ^0.13.2
-  fluttertoast: ^3.1.0
+  # audioplayers: ^0.13.2
+  flutter_styled_toast: ^1.2.1
+  fluttertoast: ^3.1.3
   permission_handler: '^3.2.0'
   shared_preferences: ^0.5.3+4
   path_provider: ^1.3.0

@@ -6,8 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Drawer icon button to place in `AppBar`
 class DrawerButton extends StatelessWidget {
@@ -15,10 +15,10 @@ class DrawerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FMMIconButton(
+    return SMMIconButton(
       icon: Icon(Icons.menu),
       splashColor: Constants.AppTheme.splash.auto(context),
-      color: Theme.of(context).iconTheme.color,
+      color: Constants.AppTheme.menuItemIcon.auto(context),
       onPressed: Scaffold.of(context).openDrawer,
     );
   }
@@ -33,8 +33,8 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-  Future<void> _handleClickSettings() async =>
-      await Navigator.of(context).popAndPushNamed(Constants.Routes.settings.value);
+  Future<void> _handleClickSettings() async => await Navigator.of(context)
+      .popAndPushNamed(Constants.Routes.settings.value);
 
   void _handleClickSendLog() => Logger.send();
 
@@ -127,8 +127,12 @@ class MenuItem extends StatelessWidget {
         leading: icon != null
             ? Padding(
                 padding: const EdgeInsets.only(left: 15.0),
-                child: Icon(icon,
-                    size: 22.0, color: Constants.AppTheme.menuItemIcon.auto(context)),
+                child: Icon(
+                  icon,
+                  size: 22.0,
+                  color: Constants.AppTheme.menuItemIcon.auto(context),
+                  // color: Constants.AppTheme,
+                ),
               )
             : null,
         title: Text(

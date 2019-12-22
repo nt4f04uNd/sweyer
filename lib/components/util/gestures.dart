@@ -42,13 +42,10 @@ class _SingleTouchRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  // TODO: implement debugDescription
-  String get debugDescription => null;
+  String get debugDescription => "single pointer";
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
-    // TODO: implement didStopTrackingLastPointer
-  }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {

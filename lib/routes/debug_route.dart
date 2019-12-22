@@ -3,8 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter_music_player/flutter_music_player.dart';
-import 'package:flutter_music_player/api.dart' as API;
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/api.dart' as API;
 import 'package:flutter/material.dart';
 
 class DebugRoute extends StatelessWidget {
@@ -22,6 +22,12 @@ class DebugRoute extends StatelessWidget {
               title: Text('Остановить сервис'),
               onTap: () {
                 API.ServiceHandler.stopService();
+              },
+            ),
+            ListTile(
+              title: Text('Тестовый тост'),
+              onTap: () {
+                ShowFunctions.showToast(msg: "Тест");
               },
             ),
           ],

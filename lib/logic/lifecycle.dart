@@ -3,14 +3,15 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_music_player/flutter_music_player.dart';
+import 'package:sweyer/sweyer.dart';
 import 'package:catcher/core/catcher.dart';
 
-import 'package:flutter_music_player/logic/api/api.dart' as API;
+import 'package:sweyer/logic/api/api.dart' as API;
 
 class LifecycleEventHandler extends WidgetsBindingObserver {
   LifecycleEventHandler({@required this.detachedCallback})
@@ -35,8 +36,8 @@ class LifecycleEventHandler extends WidgetsBindingObserver {
 }
 
 abstract class LaunchControl {
-  static final ManualStreamController<bool> _streamController =
-      ManualStreamController<bool>();
+  static final StreamController<bool> _streamController =
+      StreamController<bool>.broadcast();
 
   static Stream<bool> get onLaunch => _streamController.stream;
 
@@ -44,26 +45,27 @@ abstract class LaunchControl {
     API.EventsHandler.start();
 
     // Add callback to stop service when app is destroyed, temporary
-    WidgetsBinding.instance
-        .addObserver(LifecycleEventHandler(detachedCallback: () async {
-      API.ServiceHandler.stopService();
-    }));
+    // WidgetsBinding.instance
+    //     .addObserver(LifecycleEventHandler(detachedCallback: () async {
+    //   await API.ServiceHandler.stopService();
+    // }));
 
     try {
       // Init playlist control
       // we don't want to wait it
+      await Permissions.init();
       PlaylistControl.init();
       await Future.wait([
+        // Init theme control
+        ThemeControl.init(),
         // Init music player
         // It is not in main function, because we need catcher to catch errors
         MusicPlayer.init(),
-        // Init theme control
-        ThemeControl.init()
       ]);
     } catch (exception, stacktrace) {
       CatcherErrorBridge.add(CaughtError(exception, stacktrace));
     } finally {
-      _streamController.emitEvent(true);
+      _streamController.add(true);
     }
   }
 

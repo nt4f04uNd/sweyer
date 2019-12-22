@@ -30,7 +30,7 @@ abstract class Serialization<TRead, TSave> {
   }
 
   /// Reads json and returns decoded data
-  Future<List<TRead>> readJson() async {}
+  Future<List<TRead>> readJson();
 
   /// Serializes provided data
   Future<void> saveJson(List<TSave> data) async {}
