@@ -1,14 +1,5 @@
 
-<div style="display: flex; align-items:center; ">
-   <img alt="Logo" src="assets\images\icons\note_rounded.svg" width="80px"/> 
-   <div style="display: flex;flex-direction:column; justify-content:center; ">
-      <div style="font-size:36px; line-height:1.2">Sweyer</div>
-      <div style="font-size:16px">Sweden music player</div>
-   </div>
-</div>
-
-
-<hr>
+<h1><div style="display: flex; align-items:center; "><img alt="Logo" src="assets/images/icons/note_rounded.svg" width="80px"/><div>Sweyer</div></div></h1>
 
 This is an open-source non-commercial repo of music player that is built with flutter
 This app is just my vision of how UI/UX in music apps should be
