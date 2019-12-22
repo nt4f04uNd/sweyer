@@ -25,7 +25,7 @@ public class BecomingNoisyReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
             PlayerHandler.pause();
-            NativeEventsChannel.success(Constants.channels.EVENT_BECOME_NOISY);
+            NativeEventsChannel.success(Constants.channels.events.BECOME_NOISY);
         }
     }
 }

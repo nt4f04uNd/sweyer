@@ -18,8 +18,6 @@ class SMMBouncingScrollPhysics extends BouncingScrollPhysics {
 @override
   double carriedMomentum(double existingVelocity) {
     return existingVelocity.sign *
-        math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 20000.0);
+        math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 14000.0);
   }
-
-
 }

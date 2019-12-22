@@ -47,6 +47,13 @@ class AlbumArtPic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var file = File(path);
+    if (!file.existsSync()) {
+      return AlbumArtPlaceholder(
+        isLarge: isLarge,
+        round: round,
+      );
+    }
     return LayoutBuilder(builder: (context, constraint) {
       double size = isLarge
           ? constraint.maxWidth - 80
@@ -61,7 +68,7 @@ class AlbumArtPic extends StatelessWidget {
         borderRadius: BorderRadius.all(
             Radius.circular(round ? constraint.maxHeight : 10)),
         child: Image.file(
-          File(path),
+          file,
           width: size,
           height: size,
           fit: BoxFit.fill,
@@ -119,6 +126,7 @@ class AlbumArtPlaceholder extends StatelessWidget {
                   'assets/images/icons/note_rounded.svg',
                 )
               : Image.asset('assets/images/placeholder_thumb.png');
+          // : Image.asset('assets/images/placeholder_thumb_old.png');
         }),
       );
     });

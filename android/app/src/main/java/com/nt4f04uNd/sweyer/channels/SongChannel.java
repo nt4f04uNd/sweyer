@@ -19,7 +19,7 @@ import io.flutter.view.FlutterView;
 public class SongChannel implements MethodChannel.MethodCallHandler {
     public static void init(FlutterView view) {
         if (channel == null) {
-            channel = new MethodChannel(view, Constants.channels.SONGS_CHANNEL_STREAM);
+            channel = new MethodChannel(view, Constants.channels.songs.CHANNEL_NAME);
             channel.setMethodCallHandler(new SongChannel());
         }
     }
@@ -35,7 +35,7 @@ public class SongChannel implements MethodChannel.MethodCallHandler {
     public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
         // Note: this method is invoked on the main thread.
         final String method = call.method;
-        if (method.equals(Constants.channels.SONGS_METHOD_RETRIEVE_SONGS)) {
+        if (method.equals(Constants.channels.songs.METHOD_RETRIEVE_SONGS)) {
             // Run method on another thread
             new FetchHandler.TaskSearchSongs(channel).execute();
             result.success("");

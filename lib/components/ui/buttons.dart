@@ -14,7 +14,8 @@ class SMMBackButton extends StatelessWidget {
 
   /// Custom button size
   final double size;
-  const SMMBackButton({Key key, this.icon, this.size = kIconButtonSize}) : super(key: key);
+  const SMMBackButton({Key key, this.icon, this.size = kIconButtonSize})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -85,4 +86,59 @@ class DialogFlatButton extends FlatButton {
             ),
           ),
         );
+}
+
+/// Button to switch toggle mode
+class LoopButton extends StatefulWidget {
+  LoopButton({Key key}) : super(key: key);
+
+  @override
+  _LoopButtonState createState() => _LoopButtonState();
+}
+
+class _LoopButtonState extends State<LoopButton> {
+  @override
+  Widget build(BuildContext context) {
+    return SMMIconButton(
+      splashColor: Constants.AppTheme.splash.auto(context),
+      icon: Icon(Icons.loop),
+      size: 40.0,
+      color: MusicPlayer.loopModeState
+          ? Constants.AppTheme.mainContrast.auto(context)
+          : Constants.AppTheme.disabledIcon.auto(context),
+      onPressed: () {
+        setState(() {
+          MusicPlayer.switchLoopMode();
+        });
+      },
+    );
+  }
+}
+
+class ShuffleButton extends StatefulWidget {
+  ShuffleButton({Key key}) : super(key: key);
+
+  @override
+  _ShuffleButtonState createState() => _ShuffleButtonState();
+}
+
+class _ShuffleButtonState extends State<ShuffleButton> {
+  @override
+  Widget build(BuildContext context) {
+    return SMMIconButton(
+      splashColor: Constants.AppTheme.splash.auto(context),
+      icon: Icon(Icons.shuffle),
+      color: PlaylistControl.playlistType == PlaylistType.shuffled
+          ? Constants.AppTheme.mainContrast.auto(context)
+          : Constants.AppTheme.disabledIcon.auto(context),
+      onPressed: () {
+        setState(() {
+          if (PlaylistControl.playlistType == PlaylistType.shuffled)
+            PlaylistControl.returnFromShuffledPlaylist();
+          else
+            PlaylistControl.setShuffledPlaylist();
+        });
+      },
+    );
+  }
 }

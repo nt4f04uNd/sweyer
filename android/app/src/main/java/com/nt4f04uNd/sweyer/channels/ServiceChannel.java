@@ -25,7 +25,7 @@ public class ServiceChannel implements MethodChannel.MethodCallHandler {
 
     public static void init(FlutterView view) {
         if (channel == null) {
-            channel = new MethodChannel(view, Constants.channels.SERVICE_CHANNEL_STREAM);
+            channel = new MethodChannel(view, Constants.channels.service.CHANNEL_NAME);
             channel.setMethodCallHandler(new ServiceChannel());
         }
     }
@@ -41,10 +41,10 @@ public class ServiceChannel implements MethodChannel.MethodCallHandler {
     public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
         final String method = call.method;
         switch (method) {
-            case Constants.channels.SERVICE_METHOD_STOP_SERVICE:
+            case Constants.channels.service.METHOD_STOP_SERVICE:
                 ServiceHandler.stopService();
                 break;
-            case Constants.channels.SERVICE_METHOD_SEND_SONG:
+            case Constants.channels.service.METHOD_SEND_SONG:
                 PlaylistHandler.playingSong = Song.fromJson(new JSONObject((HashMap) call.argument("song")));
                 break;
             default:

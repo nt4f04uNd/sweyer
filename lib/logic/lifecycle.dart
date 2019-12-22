@@ -51,17 +51,13 @@ abstract class LaunchControl {
     // }));
 
     try {
-      // Init playlist control
-      // we don't want to wait it
-      await Permissions.init();
-      PlaylistControl.init();
       await Future.wait([
-        // Init theme control
+        Permissions.init(),
         ThemeControl.init(),
-        // Init music player
-        // It is not in main function, because we need catcher to catch errors
         MusicPlayer.init(),
       ]);
+      // Init playlist control, we don't want to wait it
+      PlaylistControl.init();
     } catch (exception, stacktrace) {
       CatcherErrorBridge.add(CaughtError(exception, stacktrace));
     } finally {

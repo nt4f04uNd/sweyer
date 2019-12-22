@@ -20,18 +20,23 @@ import com.nt4f04uNd.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.flutter.Log;
 import io.flutter.plugin.common.MethodChannel;
 
+/**
+ * NOTE Every time you use this class, don't forget to try...catch its method calls
+ */
 public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static Player player = new Player();
     private static final Handler handler = new Handler();
     private static Runnable positionUpdates;
-    private static Integer lastSavedPosition;
 
     // HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,14 +65,24 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void handleError(Exception e) {
-        PlayerChannel.invokeMethod("audio.onError", buildArguments(e));
+        Map<String, Object> arguments = new HashMap<>();
+        Map<String, Object> exception = new HashMap<>();
+
+        exception.put("message", e.getMessage());
+        arguments.put("value", exception);
+
+        PlayerChannel.invokeMethod("audio.onError", arguments);
     }
 
     public static void handleHookButton() {
 //        long msTimestamp = System.currentTimeMillis()/1000;
 //
+        try {
         // TODO: implement
-        io.flutter.Log.w(Constants.LogTag, "HOOK PRESS");
+            io.flutter.Log.w(Constants.LogTag, "HOOK PRESS");
+        } catch (IllegalStateException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        }
     }
 
     public static void callSetState(PlayerState state) {
@@ -92,7 +107,8 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     // END OF HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    // COMPOSED METHODS (wrappers over default player methods) /////////////////////////////////////////////////////////////// // TODO: remove respect silence islocal and stayawake
+    // COMPOSED METHODS (wrappers over default player methods) ///////////////////////////////////////////////////////////////
+    // TODO: remove respect silence islocal and stayawake
     public static void play(@NotNull Song song, double volume, Integer position, boolean respectSilence, boolean isLocal, boolean stayAwake) {
         ServiceHandler.startService();
         player.configAttributes(respectSilence, stayAwake, GeneralHandler.getAppContext());
@@ -141,14 +157,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         PlayerHandler.player.seek(position);
     }
 
-    public static void rewind() {
-        PlayerHandler.player.seek(PlayerHandler.getCurrentPosition() - 3000);
-    }
-
-    public static void fastForward() {
-        PlayerHandler.player.seek(PlayerHandler.getCurrentPosition() + 3000);
-    }
-
     public static void setVolume(double volume) {
         player.setVolume(volume);
     }
@@ -175,10 +183,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static boolean isPlaying() {
         return player.isActuallyPlaying();
-    }
-
-    public static boolean isLooping() {
-        return player.getReleaseMode().equals(ReleaseMode.LOOP);
     }
     // END OF COMPOSED METHODS ///////////////////////////////////////////////////////////////////////////////////
 
@@ -220,34 +224,66 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     /// END OF BARE METHODS ////////////////////////////////////////////////////////////////////////
 
 
-    // SONG METHODS (add more extended playback handling) //////////////////////////////////////////////
+    // ONLY NATIVE PART METHODS (add more extended playback handling and are called only on native part) //////////////////////////////////////////////
 
     public static void playPause() {
-        if (PlayerHandler.isPlaying())
-            PlayerHandler.pause();
-        else PlayerHandler.resume();
-        PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, false, true, true);
+        try {
+            if (PlayerHandler.isPlaying())
+                PlayerHandler.pause();
+            else PlayerHandler.resume();
+            PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, false, true, true);
+        } catch (IllegalStateException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        }
     }
 
     public static void playNext() {
-        if (!GeneralHandler.activityExists()) {
-            PlaylistHandler.getLastPlaylist();
-            PlayerHandler.play(PlaylistHandler.getNextSong(), PlayerHandler.getVolume(), 0, false, true, true);
+        try {
+            if (!GeneralHandler.activityExists()) {
+                PlaylistHandler.getLastPlaylist();
+                PlayerHandler.play(PlaylistHandler.getNextSong(), PlayerHandler.getVolume(), 0, false, true, true);
+            }
+        } catch (IllegalStateException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
         }
     }
 
     public static void playPrev() {
-        if (!GeneralHandler.activityExists()) {
-            PlaylistHandler.getLastPlaylist();
-            PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, false, true, true);
+        try {
+            if (!GeneralHandler.activityExists()) {
+                PlaylistHandler.getLastPlaylist();
+                PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, false, true, true);
+            }
+        } catch (IllegalStateException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
         }
     }
 
-    // END OF SONG METHODS ///////////////////////////////////////////////////////////////////////////////////
+    public static void rewind() {
+        try {
+            PlayerHandler.player.seek(PlayerHandler.getCurrentPosition() - 3000);
+        } catch (IllegalStateException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        }
+    }
+
+    public static void fastForward() {
+        try {
+            PlayerHandler.player.seek(PlayerHandler.getCurrentPosition() + 3000);
+        } catch (IllegalStateException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        }
+    }
+
+    public static boolean isLooping() {
+        return player.getReleaseMode().equals(ReleaseMode.LOOP);
+    }
+
+
+    // END OF NATIVE PART METHODS ///////////////////////////////////////////////////////////////////////////////////
 
 
     // HANDLER METHODS /////////////////////////////////////////////////////////////////////////////////////////////
-
 
     /**
      * Starts handler
@@ -270,7 +306,9 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         handler.removeCallbacksAndMessages(null);
     }
 
-    /** Callback that is passed to handler to have a stream of position updates */
+    /**
+     * Callback that is passed to handler to have a stream of position updates
+     */
     private static final class UpdateCallback implements Runnable {
         private final WeakReference<Handler> handlerRef;
 

@@ -5,8 +5,6 @@
 
 import 'dart:async';
 
-// import 'package:audioplayers/audioplayers.dart';
-
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -54,6 +52,14 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     });
   }
 
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _playerChangeSubscription.cancel();
+    super.dispose();
+  }
+
   void _handlePress() async {
     await MusicPlayer.playPause();
   }
@@ -73,12 +79,5 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _playerChangeSubscription.cancel();
-    super.dispose();
   }
 }

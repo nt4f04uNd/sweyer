@@ -10,13 +10,11 @@ export 'serialization.dart';
 export 'song.dart';
 
 import 'dart:async';
-import 'dart:developer';
 import 'playlist.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 abstract class MusicPlayer {
   /// A subscription to song change
@@ -25,9 +23,10 @@ abstract class MusicPlayer {
   // Native player subscriptions
   static StreamSubscription<AudioPlayerState> _stateChangeSubscription;
   static StreamSubscription<void> _completionSubscription;
+
   /// TODO: implement this instead of on song change
   static StreamSubscription<Duration> _durationSubscription;
-  static StreamSubscription<String> _errorSubscription;
+  static StreamSubscription<PlatformException> _errorSubscription;
 
   /// Audio manager focus state
   // static AudioFocusType focusState = AudioFocusType.no_focus;
@@ -64,7 +63,8 @@ abstract class MusicPlayer {
       NativeAudioPlayer.onPlayerCompletion;
 
   /// Get stream of player errors
-  static Stream<String> get onPlayerError => NativeAudioPlayer.onPlayerError;
+  static Stream<PlatformException> get onPlayerError =>
+      NativeAudioPlayer.onPlayerError;
 
   static AudioPlayerState get playState => NativeAudioPlayer.state;
 
@@ -81,22 +81,16 @@ abstract class MusicPlayer {
   /// Init whole music instance
   ///
   static Future<void> init() async {
-
     NativeAudioPlayer.init();
 
-    _songChangeListenerSubscription =
-        PlaylistControl.onSongChange.listen((event) async {
-      // Prefs.byKey.songIdInt.setPref(PlaylistControl.currentSong?.id);
-
-      await setUrl(PlaylistControl.currentSong.trackUri);
-    });
-
-    _durationSubscription = NativeAudioPlayer.onDurationChanged.listen((event) {
-      print("DURATION CHANGE ${event.inSeconds}");
+    _durationSubscription =
+        NativeAudioPlayer.onDurationChanged.listen((event) async {
+      // await setUrl(PlaylistControl.currentSong.trackUri);
+      // TODO: ????
     });
 
     _errorSubscription = NativeAudioPlayer.onPlayerError.listen((event) {
-      debugger();
+      // debugger();
     });
 
     _completionSubscription = onPlayerCompletion.listen((event) {
@@ -118,7 +112,7 @@ abstract class MusicPlayer {
     // Set loop mode to true if it is true in prefs
     if (savedLoopMode != null && savedLoopMode) {
       loopModeState = savedLoopMode;
-      NativeAudioPlayer.setReleaseMode(ReleaseMode.LOOP);
+      await NativeAudioPlayer.setReleaseMode(ReleaseMode.LOOP);
     }
     // Seek to saved position
     if (savedSongPos != null)
@@ -188,65 +182,60 @@ abstract class MusicPlayer {
   }
 
   /// Play track
-  /// TODO: rewrite this completely and test with deleted songs
-  /// `songId` argument denotes an id track to play
   ///
-  /// If `silent` is true, won't play track, but just switch to it
+  /// @param `songId` argument denotes an id track to play
+  ///
+  /// @param `silent` - if it is true, won't play track, but just switch to it
   /// (the difference with the `setUrl` with this parameter is that this function will also update current playing song respectively)
   static Future<void> play(int songId, {bool silent = false}) async {
-    // await _requestFocus();
-    int res = 1;
+    final song = PlaylistControl.getSongById(songId);
+    bool success = true;
     try {
-      final song = PlaylistControl.getSongById(songId);
-      // if (focusState == AudioFocusType.focus && !silent)
-      if (!silent)
-        await NativeAudioPlayer.play(
-          song,
-          stayAwake:
-              true, // This is very important for player to stay play even in background
-          isLocal: true,
-        );
-      // else if (focusState == AudioFocusType.focus_delayed && silent)
-      else if (silent)
-        // Set url if no focus has been granted
+      if (!silent) // `stayAwake` is very important for player to stay play even in background
+        await NativeAudioPlayer.play(song, stayAwake: true, isLocal: true);
+      else
         await setUrl(song.trackUri);
     } on PlatformException catch (e) {
-      /// `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
-      /// `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
-      debugPrint(
-          'Error thrown in my player class play method - {code: ${e.code} --- details: ${e.details} --- message:${e.message}}');
-
-      Logger.log('Play error', e.toString());
-
+      success = false;
       if (e.code == "error") {
-        if (e.message ==
-            "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
+        if (e.message == Constants.Errors.UNABLE_ACCESS_RESOURCE) {
           ShowFunctions.showToast(
-              msg: 'Произошла ошибка при воспроизведении,\n удаление трека');
-
+            msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
+          );
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
           await play(PlaylistControl.getNextSongId(songId), silent: silent);
-          PlaylistControl.songs(PlaylistType.global).removeAt(
-              PlaylistControl.getSongIndexById(songId)); //Remove broken track
+          PlaylistControl.removeSongAt(
+            PlaylistControl.getSongIndexById(songId),
+            PlaylistType.global,
+          ); //Remove broken track
           PlaylistControl.emitPlaylistChange();
           PlaylistControl.refetchSongs(); // perform fetching
-        } else if (e.message ==
-            "Unsupported value: java.lang.IllegalStateException") {
-          // TODO: maybe add handler here
-          res = 0;
+        } else if (e.message == Constants.Errors.NATIVE_PLAYER_ILLEGAL_STATE) {
+          // ...
         }
       }
     } catch (e) {
-      debugPrint(
-          'Unexpected error thrown in my player class play method - error: $e');
+      success = false;
+      // Do not handle this, because other exceptions are not expected
+      rethrow;
     } finally {
       // Change playing track id
-      // TODO: check for deleted track error case;
-      if (res == 1)
+      if (success)
         PlaylistControl.changeSong(songId);
       else
         play(PlaylistControl.currentSongId, silent: silent);
+    }
+  }
+
+  /// Resume player
+  static Future<void> resume([int songId]) async {
+    // If `songId` hasn't been provided then use playing id state
+    if (songId == null) songId = PlaylistControl.currentSongId;
+    try {
+      return NativeAudioPlayer.resume();
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -255,68 +244,25 @@ abstract class MusicPlayer {
   /// Unlike [play], the playback will not resume, but song will be switched if it player is playing
   static Future<void> setUrl(String url) async {
     try {
-      await NativeAudioPlayer.setUrl(url);
+      return NativeAudioPlayer.setUrl(url);
     } catch (e) {
-      debugPrint("Error in `setUrl` method: $e");
-    }
-  }
-
-  /// Resume player
-  ///
-  /// TODO: rewrite this completely
-  ///
-  /// It handles errors the same way as play method above
-  /// Positional optional argument `songId` is needed to jump to next track when handling error
-  static Future<void> resume([int songId]) async {
-    // If `songId` hasn't been provided then use playing id state
-    if (songId == null) songId = PlaylistControl.currentSongId;
-    try {
-      await NativeAudioPlayer.resume();
-    } on PlatformException catch (e) {
-      /// `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
-      /// `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
-      debugPrint(
-          'Error thrown in my player class play method - {code: ${e.code} --- details: ${e.details} --- message:${e.message}}');
-
-      if (e.code == "error") {
-        if (e.message ==
-            "Unsupported value: java.lang.RuntimeException: Unable to access resource") {
-          ShowFunctions.showToast(
-              msg: 'Произошла ошибка при воспроизведении,\n удаление трека');
-
-          Logger.log('Resume error', e.toString());
-
-          // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
-          // Play next track after broken one
-          await play(PlaylistControl.getNextSongId(songId));
-          PlaylistControl.songs(PlaylistType.global).removeAt(
-              PlaylistControl.getSongIndexById(songId)); //Remove broken track
-          PlaylistControl.emitPlaylistChange();
-          PlaylistControl.refetchSongs(); // Perform fetching
-        } else if (e.message ==
-            "Unsupported value: java.lang.IllegalStateException") {
-          // TODO: maybe add handler here
-        }
-      }
-    } catch (e) {
-      debugPrint(
-          'Unexpected error thrown in my player class play method - error: $e');
+      rethrow;
     }
   }
 
   /// Pause player
   static Future<void> pause() async {
-    await NativeAudioPlayer.pause();
+    return NativeAudioPlayer.pause();
   }
 
   /// Stop player
   static Future<void> stop() async {
-    await NativeAudioPlayer.stop();
+    return NativeAudioPlayer.stop();
   }
 
   /// Seek
   static Future<void> seek(Duration timing) async {
-    await NativeAudioPlayer.seek(timing);
+    return NativeAudioPlayer.seek(timing);
   }
 
   /// Seek 3 seconds forward
@@ -324,7 +270,7 @@ abstract class MusicPlayer {
   /// @param (optional) interval makes it possible to seek for specified interval
   static Future<void> fastForward([Duration interval]) async {
     if (interval == null) interval = Duration(seconds: 3);
-    await NativeAudioPlayer.seek(((await currentPosition) + interval));
+    return NativeAudioPlayer.seek(((await currentPosition) + interval));
   }
 
   /// Seek 3 seconds backwards
@@ -332,7 +278,7 @@ abstract class MusicPlayer {
   /// @param (optional) interval makes it possible to seek for specified interval
   static Future<void> rewind([Duration interval]) async {
     if (interval == null) interval = Duration(seconds: 3);
-    await NativeAudioPlayer.seek(((await currentPosition) - interval));
+    return NativeAudioPlayer.seek(((await currentPosition) - interval));
   }
 
   /// Function that fires when pause/play button got clicked
@@ -361,7 +307,7 @@ abstract class MusicPlayer {
   /// If provided `songId` - plays next from this id
   static Future<void> playNext({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getNextSongId(PlaylistControl.currentSongId);
-    await play(songId, silent: silent);
+    return play(songId, silent: silent);
   }
 
   /// Function that fires when prev track button got clicked
@@ -369,7 +315,7 @@ abstract class MusicPlayer {
   /// If provided `songId` - plays prev from this id
   static Future<void> playPrev({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPrevSongId(PlaylistControl.currentSongId);
-    await play(songId, silent: silent);
+    return play(songId, silent: silent);
   }
 
   /// Function that handles click on track tile
@@ -380,28 +326,28 @@ abstract class MusicPlayer {
       case AudioPlayerState.PLAYING:
         // If user clicked the same track
         if (PlaylistControl.currentSongId == clickedSongId)
-          await pause();
+          return pause();
         // If user decided to click a new track
         else
-          await play(clickedSongId);
+          return play(clickedSongId);
         break;
       case AudioPlayerState.PAUSED:
         // If user clicked the same track
         if (PlaylistControl.currentSongId == clickedSongId)
-          await resume(clickedSongId);
+          return resume(clickedSongId);
         // If user decided to click a new track
         else
-          await play(clickedSongId);
+          return play(clickedSongId);
         break;
       case AudioPlayerState.STOPPED:
         // Currently unused and shouldn't
-        await play(clickedSongId);
+        return play(clickedSongId);
         break;
       case AudioPlayerState.COMPLETED:
-        await play(clickedSongId);
+        return play(clickedSongId);
         break;
       default: // Can be null, so don't throw, just play
-        await play(clickedSongId);
+        return play(clickedSongId);
         break;
     }
   }

@@ -27,7 +27,7 @@ abstract class ShowFunctions {
   }) async {
     backgroundColor ??= Color.fromRGBO(18, 18, 18, 1);
 
-    return await Fluttertoast.showToast(
+    return Fluttertoast.showToast(
       msg: msg,
       toastLength: toastLength,
       timeInSecForIos: timeInSecForIos,
@@ -54,8 +54,8 @@ abstract class ShowFunctions {
 
   /// Function that calls `showModalBottomSheet` and allows user to sort songs
   static void showSongsSortModal(BuildContext context) {
-    // TODO: add indicator for a current sort feature    
-    var sortFeature =PlaylistControl.sortFeature;
+    // TODO: add indicator for a current sort feature
+    var sortFeature = PlaylistControl.sortFeature;
     showModalBottomSheet<void>(
         context: context,
         backgroundColor: Constants.AppTheme.main.auto(context),
@@ -118,7 +118,10 @@ abstract class ShowFunctions {
             content,
         // ),
         contentPadding: EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
-        contentTextStyle: material.TextStyle(color: Constants.AppTheme.menuItemIcon.auto(context),fontSize: 16),
+        contentTextStyle: Theme.of(context).textTheme.subhead.copyWith(
+              fontWeight:FontWeight.w500,
+              fontSize: 15,
+            ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(10),

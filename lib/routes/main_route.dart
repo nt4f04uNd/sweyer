@@ -44,52 +44,55 @@ class MainRouteState extends State<MainRoute> {
       child: StreamBuilder(
           stream: PlaylistControl.onPlaylistListChange,
           builder: (context, snapshot) {
-            return PlaylistControl.playReady
-                ? Permissions.permissionStorageStatus != PermissionState.granted
-                    ? NoPermissionsScreen()
+            return !PlaylistControl.playReady
+                ? _EmptyScreen() // TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
+                : Permissions.notGranted
+                    ? _NoPermissionsScreen()
                     : PlaylistControl.songsEmpty(PlaylistType.global)
                         ? PlaylistControl.initFetching
-                            ? SearchingSongsScreen()
-                            : SongsEmptyScreen()
-                        : MainRouteTrackList()
-                : EmptyScreen(); // TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
+                            ? _SearchingSongsScreen()
+                            : _SongsEmptyScreen()
+                        : MainRouteTrackList();
           }),
     );
   }
 }
 
 /// Screen displayed when songs array is empty and searching is being performed
-class SearchingSongsScreen extends StatelessWidget {
-  const SearchingSongsScreen({Key key}) : super(key: key);
+class _SearchingSongsScreen extends StatelessWidget {
+  const _SearchingSongsScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Constants.AppTheme.main.auto(context),
       body: Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Text('Ищем треки...'),
-          ),
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
-          ),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Text('Ищем треки...'),
+            ),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 /// Screen displayed when no songs had been found
-class SongsEmptyScreen extends StatefulWidget {
-  const SongsEmptyScreen({Key key}) : super(key: key);
+class _SongsEmptyScreen extends StatefulWidget {
+  const _SongsEmptyScreen({Key key}) : super(key: key);
 
   @override
   _SongsEmptyScreenState createState() => _SongsEmptyScreenState();
 }
 
-class _SongsEmptyScreenState extends State<SongsEmptyScreen> {
+class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
   bool _fetching = false;
   Future<void> _refetchHandler() async {
     return await PlaylistControl.refetchSongs();
@@ -103,9 +106,11 @@ class _SongsEmptyScreenState extends State<SongsEmptyScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Center(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Text('На вашем устройстве нету музыки :( '))),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Text('На вашем устройстве нету музыки :( '),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 15.0),
             child: ButtonTheme(
@@ -133,14 +138,14 @@ class _SongsEmptyScreenState extends State<SongsEmptyScreen> {
 }
 
 /// Screen displayed when there are not permissions
-class NoPermissionsScreen extends StatefulWidget {
-  const NoPermissionsScreen({Key key}) : super(key: key);
+class _NoPermissionsScreen extends StatefulWidget {
+  const _NoPermissionsScreen({Key key}) : super(key: key);
 
   @override
   _NoPermissionsScreenState createState() => _NoPermissionsScreenState();
 }
 
-class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
+class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
   bool _fetching = false;
 
   Future<void> _handlePermissionRequest() async {
@@ -163,16 +168,17 @@ class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(Theme.of(context).brightness);
     return Scaffold(
       backgroundColor: Constants.AppTheme.main.auto(context),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Center(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Text('Пожалуйста, предоставьте доступ к хранилищу'))),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Text('Пожалуйста, предоставьте доступ к хранилищу'),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 15.0),
             child: ButtonTheme(
@@ -191,8 +197,8 @@ class _NoPermissionsScreenState extends State<NoPermissionsScreen> {
   }
 }
 
-class EmptyScreen extends StatelessWidget {
-  const EmptyScreen({Key key}) : super(key: key);
+class _EmptyScreen extends StatelessWidget {
+  const _EmptyScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

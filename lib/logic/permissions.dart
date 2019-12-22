@@ -11,26 +11,32 @@ enum PermissionState { granted, notGranted, doNotAskAgain }
 
 abstract class Permissions {
   /// Whether storage permission is granted
-  static PermissionState permissionStorageStatus = PermissionState.notGranted;
+  static PermissionState _permissionStorageStatus = PermissionState.notGranted;
+
+  /// Returns true if permissions were granted
+  static bool get granted =>
+      _permissionStorageStatus == PermissionState.granted;
+
+  /// Returns true if permissions were not granted
+  static bool get notGranted =>
+      _permissionStorageStatus != PermissionState.granted;
 
   static Future<void> init() async {
-    permissionStorageStatus =
-        await checkPermissionStatus(PermissionGroup.storage) ==
-                PermissionStatus.granted
-            ? PermissionState.granted
-            : PermissionState.notGranted;
+    if ((await checkPermissionStatus(PermissionGroup.storage)) ==
+        PermissionStatus.granted)
+      _permissionStorageStatus = PermissionState.granted;
   }
 
   static Future<void> requestClick() async {
     bool canOpen = false;
-    if (Permissions.permissionStorageStatus == PermissionState.doNotAskAgain) {
+    if (_permissionStorageStatus == PermissionState.doNotAskAgain) {
       await ShowFunctions.showToast(msg: 'Предоставьте доступ вручную');
       canOpen = await PermissionHandler().openAppSettings();
-      Permissions.permissionStorageStatus = PermissionState.notGranted;
+      _permissionStorageStatus = PermissionState.notGranted;
     }
     if (!canOpen) {
       await Permissions.requestPermission(PermissionGroup.storage);
-      if (Permissions.permissionStorageStatus == PermissionState.granted) {
+      if (_permissionStorageStatus == PermissionState.granted) {
         await PlaylistControl.init();
       }
     }
@@ -63,7 +69,7 @@ abstract class Permissions {
     }
 
     setPermissionAsked(permissionGroup);
-    permissionStorageStatus = status;
+    _permissionStorageStatus = status;
   }
 
   static Future<void> setPermissionAsked(

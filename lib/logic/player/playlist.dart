@@ -4,9 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'dart:io';
 import 'package:sweyer/sweyer.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweyer/api.dart' as API;
 
@@ -19,74 +17,106 @@ enum FilterFeature { duration, fileSize }
 /// What playlist is now playing? type
 enum PlaylistType { global, searched, shuffled }
 
+/// Class, representing a single playlist in application
+///
+/// It is more array-like, as it has shuffle methods and explicit indexing
+/// Though it doesn't allow to have two songs with a unique id (it is possible only via constructor, but e.g. `add` method will do a check)
+///
 class Playlist {
   List<Song> _songs;
+
+  // Constructors
+
   Playlist(List<Song> songs) : this._songs = songs;
 
   /// Creates playlist and shuffles specified songs array
   Playlist.shuffled(List<Song> songs)
       : this._songs = Playlist.shuffleSongs(songs);
 
-  List<Song> get songs => _songs;
+  // Statics
 
   /// Returns a shuffled copy of songs
-  static List<Song> shuffleSongs(List<Song> songs) {
-    List<Song> shuffledSongs = List.from(songs);
+  /// It is static because we don't want accidentally shuffle the original playlist
+  /// Rather we want to make a copy and save it somewhere
+  static List<Song> shuffleSongs(List<Song> songsToShuffle) {
+    List<Song> shuffledSongs = List.from(songsToShuffle);
     shuffledSongs.shuffle();
     return shuffledSongs;
   }
 
-  /// Getters
-  ///
-  /// Get playlist length
-  int get length => songs.length;
+  // Getters
 
-  bool get isEmpty => songs.isEmpty;
+  List<Song> get songs => _songs;
+
+  /// Get playlist length
+  int get length => _songs.length;
+
+  bool get isEmpty => _songs.isEmpty;
+  bool get isNotEmpty => _songs.isNotEmpty;
+
+  // Methods
+
+  /// Checks if playlist contains song
+  bool contains(Song song) {
+    for (var _song in _songs) {
+      if (_song.id == song.id) return true;
+    }
+    return false;
+  }
+
+  /// Adds song to a playlist
+  /// Returns a boolean result of the operation
+  bool add(Song song) {
+    var success = !contains(song);
+    if (success) _songs.add(song);
+    return success;
+  }
 
   void removeSongById(int id) {
     _songs.removeWhere((el) => el.id == id);
   }
 
-  void removeSongByIndex(int index) {
-    _songs.removeAt(index);
+  /// Returns the removed object
+  Song removeSongAt(int index) {
+    return _songs.removeAt(index);
   }
 
   /// Returns song object by index in songs array
-  Song getSongByIndex(int index) {
-    return length > 0 ? songs[index] : null;
+  Song getSongAt(int index) {
+    return length > 0 ? _songs[index] : null;
   }
 
   /// Returns song object by song id
   Song getSongById(int id) {
-    return songs.firstWhere((el) => el.id == id, orElse: () => null);
+    return _songs.firstWhere((el) => el.id == id, orElse: () => null);
   }
 
   /// Returns song id in by its index in songs array
-  int getSongIdByIndex(int index) {
-    return songs[index].id;
+  int getSongIdAt(int index) {
+    return _songs[index].id;
   }
 
   /// Returns song index in array by its id
   int getSongIndexById(int id) {
-    return songs.indexWhere((el) => el.id == id);
+    return _songs.indexWhere((el) => el.id == id);
   }
 
   /// Returns next song id
   int getNextSongId(int id) {
     final int nextSongIndex = getSongIndexById(id) + 1;
     if (nextSongIndex >= length) {
-      return getSongIdByIndex(0);
+      return getSongIdAt(0);
     }
-    return getSongIdByIndex(nextSongIndex);
+    return getSongIdAt(nextSongIndex);
   }
 
   /// Returns prev song id
   int getPrevSongId(int id) {
     final int prevSongIndex = getSongIndexById(id) - 1;
     if (prevSongIndex < 0) {
-      return getSongIdByIndex(length - 1);
+      return getSongIdAt(length - 1);
     }
-    return getSongIdByIndex(prevSongIndex);
+    return getSongIdAt(prevSongIndex);
   }
 
   // TODO: implement file size filter
@@ -105,8 +135,11 @@ class Playlist {
 /// 2. Control playlist json
 /// 3. Manage playlists
 /// 4. Search in playlists
-///
+/// 
 /// etc.
+/// 
+/// This class consciously doesn't expose playlists and songs themselves.
+/// This is done for sake of optimization and avoiding mistakes, e.g. `getSongById` should always be searched in `_globalPlaylist` 
 abstract class PlaylistControl {
   /// Playlist for songs
   static Playlist _globalPlaylist;
@@ -146,18 +179,30 @@ abstract class PlaylistControl {
   static StreamController<void> _songsListChangeStreamController =
       StreamController<void>.broadcast();
 
-  /// Controller for stream of current song changes
-  static StreamController<void> _songChangeStreamController =
-      StreamController<void>.broadcast();
-
   /// Represents songs fetch on app start
   static bool initFetching = true;
 
-  /// Returns current playlist (by default)
+  /// Get current playing song (always being searched in _globalPlaylist)
+  static Song get currentSong {
+    return _globalPlaylist.getSongById(_playingSongIdState) ??
+        _globalPlaylist.getSongAt(0);
+  }
+
+  /// Get current playing id
+  static int get currentSongId {
+    return _playingSongIdState;
+  }
+
+  /// Changes current songs id and emits song change event
+  static void changeSong(int songId) {
+    _playingSongIdState = songId;
+  }
+
+  /// Util function to select playlist by `argPlaylistType`
   ///
-  /// If optional `argPlaylistType` is specified, then returns playlist respectively to it
-  static Playlist currentPlaylist([PlaylistType argPlaylistType]) {
-    if (argPlaylistType == null) argPlaylistType = playlistType;
+  /// Returns current playlist if `argPlaylistType` is `null`
+  static Playlist _selectPlaylist([PlaylistType argPlaylistType]) {
+      if (argPlaylistType == null) argPlaylistType = playlistType;
     switch (argPlaylistType) {
       case PlaylistType.global:
         return _globalPlaylist;
@@ -170,44 +215,12 @@ abstract class PlaylistControl {
     }
   }
 
-  /// Get current playing song (always being searched in _globalPlaylist)
-  static Song get currentSong {
-    return _globalPlaylist.getSongById(_playingSongIdState) ??
-        _globalPlaylist.getSongByIndex(0);
-  }
-
-  /// Get current playing id
-  static int get currentSongId {
-    return _playingSongIdState;
-  }
-
-  /// Changes current songs id and emits song change event
-  static void changeSong(int songId) {
-    _playingSongIdState = songId;
-    emitSongChange();
-  }
-
-  /// Util function to select playlist by `argPlaylistType`
-  ///
-  /// Returns current playlist if `argPlaylistType` is `null`
-  static Playlist _selectPlaylist([PlaylistType argPlaylistType]) {
-    if (argPlaylistType == null) return currentPlaylist();
-    return currentPlaylist(argPlaylistType);
-  }
-
   /// Returns a `currentSong` index in current playlist (by default)
   ///
   /// If optional `playlistType` is specified, then returns index in selected playlist type
   static int currentSongIndex([PlaylistType argPlaylistType]) {
     return _selectPlaylist(argPlaylistType)
         .getSongIndexById(_playingSongIdState);
-  }
-
-  /// Returns `songs` of current playlist (by default)
-  ///
-  /// If optional `playlistType` is specified, then returns `songs` of selected playlist type
-  static List<Song> songs([PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).songs;
   }
 
   /// Returns `length` of current playlist (by default)
@@ -231,31 +244,24 @@ abstract class PlaylistControl {
   static Stream<void> get onPlaylistListChange =>
       _songsListChangeStreamController.stream;
 
-  /// A stream of changes on playlist
-  static Stream<void> get onSongChange => _songChangeStreamController.stream;
-
   /// Emit event to `onPlaylistListChange`
   static void emitPlaylistChange() {
     _songsListChangeStreamController.add(null);
   }
 
-  /// Emit event to `onSongChange`
-  static void emitSongChange() {
-    _songChangeStreamController.add(null);
-  }
-
   // Methods from playlist class
+
   /// Searches always on `_globalPlaylist`
   static Song getSongById(int id) {
     return _globalPlaylist.getSongById(id);
   }
 
-  static Song getSongByIndex(int index, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getSongByIndex(index);
+  static Song getSongAt(int index, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getSongAt(index);
   }
 
-  static int getSongIdByIndex(int index, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getSongIdByIndex(index);
+  static int getSongIdAt(int index, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).getSongIdAt(index);
   }
 
   static int getSongIndexById(int id, [PlaylistType argPlaylistType]) {
@@ -270,11 +276,15 @@ abstract class PlaylistControl {
     return _selectPlaylist(argPlaylistType).getPrevSongId(id);
   }
 
+  static Song removeSongAt(int index, [PlaylistType argPlaylistType]) {
+    return _selectPlaylist(argPlaylistType).removeSongAt(index);
+  }
+
   /// The main data app initialization function
   /// Inits all playlists
   /// Also handles no-permissions situations
   static Future<void> init() async {
-    if (Permissions.permissionStorageStatus == PermissionState.granted) {
+    if (Permissions.granted) {
       _globalPlaylist = null; // Reset `playReady`
       emitPlaylistChange();
 
@@ -287,6 +297,11 @@ abstract class PlaylistControl {
       _globalPlaylist = Playlist(await songsSerializer.readJson());
       await _restoreSortFeature();
       await filterSongs();
+
+      // print(Song.test().toJson());
+      // print(
+      //     "1111111111111111111111111111111111111111111111111111111111 ${_globalPlaylist.add(Song.test())}");
+
       sortSongs();
 
       await _restoreLastSong();
@@ -317,7 +332,6 @@ abstract class PlaylistControl {
   /// TODO: add usage for this method
   static void dispose() {
     _songsListChangeStreamController.close();
-    _songChangeStreamController.close();
   }
 
   /// Refetch songs and update playlist
@@ -356,7 +370,7 @@ abstract class PlaylistControl {
 
     if (songs == null)
       _shuffledPlaylist =
-          Playlist.shuffled(PlaylistControl.songs(argPlaylistType));
+          Playlist.shuffled(_selectPlaylist(argPlaylistType).songs);
     else
       _shuffledPlaylist = Playlist(songs);
     playlistSerializer.saveJson(_shuffledPlaylist.songs);
@@ -517,15 +531,13 @@ abstract class PlaylistControl {
       SharedPreferences prefs = await Prefs.getSharedInstance();
 
       int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs) ??
-          currentPlaylist().getSongIdByIndex(0);
+          _selectPlaylist().getSongIdAt(0);
 
       // Setup initial playing state index from prefs
       _playingSongIdState = savedSongId;
       await API.ServiceHandler.sendSong(PlaylistControl.currentSong);
       // Set url of first track in player instance
       await MusicPlayer.setUrl(currentSong.trackUri);
-
-      emitSongChange();
     }
   }
 }

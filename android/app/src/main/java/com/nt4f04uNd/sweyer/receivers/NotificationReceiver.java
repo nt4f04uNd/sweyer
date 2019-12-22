@@ -20,19 +20,19 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Constants.channels.EVENT_NOTIFICATION_INTENT_PLAY.equals(intent.getAction())) {
+        if (Constants.channels.events.NOTIFICATION_INTENT_PLAY.equals(intent.getAction())) {
             PlayerHandler.resume();
-            NativeEventsChannel.success(Constants.channels.EVENT_NOTIFICATION_INTENT_PLAY);
-        } else if (Constants.channels.EVENT_NOTIFICATION_INTENT_PAUSE.equals(intent.getAction())) {
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_PLAY);
+        } else if (Constants.channels.events.NOTIFICATION_INTENT_PAUSE.equals(intent.getAction())) {
             PlayerHandler.pause();
-            NativeEventsChannel.success(Constants.channels.EVENT_NOTIFICATION_INTENT_PAUSE);
-        } else if (Constants.channels.EVENT_NOTIFICATION_INTENT_NEXT.equals(intent.getAction())) {
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_PAUSE);
+        } else if (Constants.channels.events.NOTIFICATION_INTENT_NEXT.equals(intent.getAction())) {
             // Inside this function, as well as `playPrev` there's a handler for the case when activity is not alive
             PlayerHandler.playNext();
-            NativeEventsChannel.success(Constants.channels.EVENT_NOTIFICATION_INTENT_NEXT);
-        } else if (Constants.channels.EVENT_NOTIFICATION_INTENT_PREV.equals(intent.getAction())) {
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_NEXT);
+        } else if (Constants.channels.events.NOTIFICATION_INTENT_PREV.equals(intent.getAction())) {
             PlayerHandler.playPrev();
-            NativeEventsChannel.success(Constants.channels.EVENT_NOTIFICATION_INTENT_PREV);
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_PREV);
         }
     }
 }

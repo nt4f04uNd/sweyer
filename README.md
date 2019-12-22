@@ -2,12 +2,11 @@
 
 This is an open-source non-commercial repo of music player that is built with flutter
 This app is just my vision of how UI/UX in music apps should be
+Currently I am building it only for Android
 
-Some conventions that I use whe I write my application can be found in [README_CONVENTIONS.md](https://github.com/nt4f04uNd/sweyer/blob/master/README_CONVENTIONS.md) file
+Some conventions that I use when I write my application can be found in [README_CONVENTIONS.md](https://github.com/nt4f04uNd/sweyer/blob/master/README_CONVENTIONS.md) file
 
-You can pull it if you want, run `flutter build apk` and start testing it on your device (Android only)
-
-# Demos
+## Demos
 
 <img alt="App start up" src="demos/start.gif" width="25%"><img alt="Player" src="demos/player.gif" width="25%" /><img alt="Dark mode" src="demos/dark.gif" width="25%" /><img alt="Search" src="demos/search.gif" width="25%" />
 

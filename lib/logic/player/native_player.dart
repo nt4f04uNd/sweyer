@@ -67,8 +67,8 @@ abstract class NativeAudioPlayer {
   static final StreamController<void> _completionController =
       StreamController<void>.broadcast();
 
-  static final StreamController<String> _errorController =
-      StreamController<String>.broadcast();
+  static final StreamController<PlatformException> _errorController =
+      StreamController<PlatformException>.broadcast();
 
   /// Enables more verbose logging.
   static bool logEnabled = false;
@@ -113,7 +113,7 @@ abstract class NativeAudioPlayer {
   /// Stream of player errors.
   ///
   /// Events are sent when an unexpected error is thrown in the native code.
-  static Stream<String> get onPlayerError => _errorController.stream;
+  static Stream<PlatformException> get onPlayerError => _errorController.stream;
 
   /// Checks if player playing and if so, changes state to playing appropriately
   /// Also sets release mode to be `ReleaseMode.STOP`
@@ -126,7 +126,11 @@ abstract class NativeAudioPlayer {
   ///
   /// If [isLocal] is true, [url] must be a local file system path.
   /// If [isLocal] is false, [url] must be a remote URL.
-  static Future<int> play(
+  ///
+  /// Throws `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
+  ///
+  /// Throws `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
+  static Future<void> play(
     Song song, {
     bool isLocal = false,
     double volume = 1.0,
@@ -140,7 +144,7 @@ abstract class NativeAudioPlayer {
     respectSilence ??= false;
     stayAwake ??= false;
 
-    final int result = await _channel.invokeMethod('play', {
+    return _channel.invokeMethod('play', {
       'song': song.toJson(),
       'isLocal': isLocal,
       'volume': volume,
@@ -148,46 +152,40 @@ abstract class NativeAudioPlayer {
       'respectSilence': respectSilence,
       'stayAwake': stayAwake,
     });
-
-    return result;
   }
 
   /// Pauses the audio that is currently playing.
   ///
   /// If you call [resume] later, the audio will resume from the point that it
   /// has been paused.
-  static Future<int> pause() async {
-    final int result = await _channel.invokeMethod('pause');
-    return result;
+  static Future<void> pause() async {
+    return _channel.invokeMethod('pause');
   }
 
   /// Stops the audio that is currently playing.
   ///
   /// The position is going to be reset and you will no longer be able to resume
   /// from the last point.
-  static Future<int> stop() async {
-    final int result = await _channel.invokeMethod('stop');
-    return result;
+  static Future<void> stop() async {
+    return _channel.invokeMethod('stop');
   }
 
   /// Resumes the audio that has been paused or stopped, just like calling
   /// [play], but without changing the parameters.
-  static Future<int> resume() async {
-    final int result = await _channel.invokeMethod('resume');
-    return result;
+  static Future<void> resume() async {
+    return _channel.invokeMethod('resume');
   }
 
   /// Releases the resources associated with this media player.
   ///
   /// The resources are going to be fetched or buffered again as soon as you
   /// call [play] or [setUrl].
-  static Future<int> release() async {
-    final int result = await _channel.invokeMethod('release');
-    return result;
+  static Future<void> release() async {
+    return _channel.invokeMethod('release');
   }
 
   /// Moves the cursor to the desired position.
-  static Future<int> seek(Duration position) {
+  static Future<void> seek(Duration position) async {
     _positionController.add(position);
     return _channel.invokeMethod('seek', {'position': position.inMilliseconds});
   }
@@ -196,15 +194,15 @@ abstract class NativeAudioPlayer {
   ///
   /// 0 is mute and 1 is the max volume. The values between 0 and 1 are linearly
   /// interpolated.
-  static Future<int> setVolume(double volume) {
+  static Future<void> setVolume(double volume) async {
     return _channel.invokeMethod('setVolume', {'volume': volume});
   }
 
   /// Sets the release mode.
   ///
   /// Check [ReleaseMode]'s doc to understand the difference between the modes.
-  static Future<int> setReleaseMode(ReleaseMode releaseMode) {
-    return _channel.invokeMethod(
+  static Future<void> setReleaseMode(ReleaseMode releaseMode) async {
+   return _channel.invokeMethod(
       'setReleaseMode',
       {'releaseMode': releaseMode.toString()},
     );
@@ -216,13 +214,13 @@ abstract class NativeAudioPlayer {
   ///
   /// The resources will start being fetched or buffered as soon as you call
   /// this method.
-  static Future<int> setUrl(String url, {bool isLocal: false}) {
+  static Future<void> setUrl(String url, {bool isLocal: false}) async {
     return _channel.invokeMethod('setUrl', {'url': url, 'isLocal': isLocal});
   }
 
   /// Checks is the actual player is playing
   /// Needed on the app start, to check if service is running and playing the m
-  static Future<bool> isPlaying() {
+  static Future<bool> isPlaying() async {
     return _channel.invokeMethod('isPlaying');
   }
 
@@ -231,7 +229,7 @@ abstract class NativeAudioPlayer {
   ///
   /// It will be available as soon as the audio duration is available
   /// (it might take a while to download or buffer it if file is not local).
-  static Future<int> getDuration() {
+  static Future<int> getDuration() async {
     return _channel.invokeMethod('getDuration');
   }
 
@@ -240,7 +238,7 @@ abstract class NativeAudioPlayer {
     return _channel.invokeMethod('getCurrentPosition');
   }
 
-  static Future<void> platformCallHandler(MethodCall call) async {
+  static Future<void> platformCallHandler(MethodCall call)async  {
     try {
       _doHandlePlatformCall(call);
     } catch (ex) {
@@ -248,7 +246,7 @@ abstract class NativeAudioPlayer {
     }
   }
 
-  static Future<void> _doHandlePlatformCall(MethodCall call) async {
+  static void _doHandlePlatformCall(MethodCall call) {
     final Map<dynamic, dynamic> callArgs = call.arguments as Map;
     _log('_platformCallHandler call ${call.method} $callArgs');
 
@@ -269,7 +267,9 @@ abstract class NativeAudioPlayer {
         break;
       case 'audio.onError':
         state = AudioPlayerState.STOPPED;
-        _errorController.add(value);
+        // TODO : add exception various codes
+        _errorController
+            .add(PlatformException(code: "0", message: value["message"]));
         break;
       case 'audio.state.set':
         switch (value) {

@@ -47,6 +47,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
      * Setter methods
      */
 
+    /** NOTE THAT THIS CAN THROW ILLEGAL STATE EXCEPTION */
     @Override
     public void setUrl(String url, boolean isLocal) {
         if (!objectEquals(this.url, url)) {
@@ -59,14 +60,11 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.prepared = false;
             }
 
-            try {
                 this.setSource(url);
                 this.player.setVolume((float) volume, (float) volume);
                 this.player.setLooping(this.releaseMode == ReleaseMode.LOOP);
                 this.player.prepareAsync();
-            } catch (IllegalStateException e) {
-                Log.e(Constants.LogTag, e.toString());
-            }
+
         }
     }
 

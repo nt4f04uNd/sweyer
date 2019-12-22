@@ -101,55 +101,63 @@ public class MediaButtonHandler {
         @Override
         protected void onAudioTrack() {
             PlayerHandler.playNext();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_AUDIO_TRACK);
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_AUDIO_TRACK);
         }
 
         @Override
         protected void onFastForward() {
             PlayerHandler.fastForward();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_FAST_FORWARD);
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_FAST_FORWARD);
         }
 
         @Override
         protected void onRewind() {
             PlayerHandler.rewind();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_REWIND);
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_REWIND);
         }
 
         @Override
         protected void onNext() {
             PlayerHandler.playNext();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_NEXT);
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_NEXT);
         }
 
         @Override
         protected void onPrevious() {
             PlayerHandler.playPrev();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_PREVIOUS);
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PREVIOUS);
         }
 
         @Override
         protected void onPlayPause() {
-         PlayerHandler.playPause();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_PLAY_PAUSE);
+            PlayerHandler.playPause();
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PLAY_PAUSE);
         }
 
         @Override
         protected void onPlay() {
-            PlayerHandler.resume();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_PLAY);
+            try {
+                PlayerHandler.resume();
+            } catch (IllegalStateException e) {
+                Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+            }
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PLAY);
         }
 
         @Override
         protected void onStop() {
-            PlayerHandler.pause();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_STOP);
+            try {
+                PlayerHandler.pause();
+            } catch (IllegalStateException e) {
+                Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+            }
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_STOP);
         }
 
         @Override
         protected void onHook() {
-           PlayerHandler.handleHookButton();
-            NativeEventsChannel.success(Constants.channels.EVENT_MEDIABUTTON_HOOK);
+            PlayerHandler.handleHookButton();
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_HOOK);
         }
 
     }

@@ -10,6 +10,34 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
+/// This widget is needed because I need to call `Scaffold.of(context).openDrawer()`
+/// which requires context to have scaffold in it
+/// separating widget allows to to that
+class _MainRouteAppBarLeading extends StatelessWidget {
+  const _MainRouteAppBarLeading({
+    Key key,
+    @required this.selectionMode,
+    @required this.onCloseClick,
+  }) : super(key: key);
+
+  /// NOTE This has to be a raw value, can null, to display that main route is mounted first time
+  /// And we don't need to play animation
+  final bool selectionMode;
+  final Function onCloseClick;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedMenuCloseButton(
+      key: ValueKey(selectionMode),
+      animateDirection: selectionMode,
+      onCloseClick: onCloseClick,
+      onMenuClick: () {
+        Scaffold.of(context).openDrawer();
+      },
+    );
+  }
+}
+
 class FakeInputBox extends StatelessWidget {
   const FakeInputBox({Key key}) : super(key: key);
 
@@ -59,8 +87,11 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
   /// Contains selected song ids
   Set<int> selectionSet = {};
 
+  /// Value used to animate selection count number
+  int prevSetLength = 0;
+
   /// Enables selection mode
-  bool selectionMode = false;
+  bool _selectionMode;
 
   /// Denotes state of unselection animation
   bool unselecting = false;
@@ -92,18 +123,23 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
   }
 
   /// Performs tracks refetch
-  Future<void> _refreshHandler() async {
+  Future<void> _handleRefresh() async {
     await PlaylistControl.refetchSongs();
-
     return Future.value();
+  }
+
+  /// Check if user selecting tracks
+  bool isSelection() {
+    return _selectionMode != null && _selectionMode;
   }
 
   /// Adds item index to set and enables selection mode if needed
   void _handleSelect(int id) {
+    prevSetLength = selectionSet.length;
     selectionSet.add(id);
-    if (!selectionMode)
+    if (!isSelection())
       setState(() {
-        selectionMode = true;
+        _selectionMode = true;
       });
     else
       setState(() {});
@@ -111,16 +147,17 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
 
   /// Removes item index from set and disables selection mode if set is empty
   void _handleUnselect(int id, bool onMount) {
+    prevSetLength = selectionSet.length;
     selectionSet.remove(id);
     if (selectionSet.isEmpty) {
       // If none elements are selected - trigger unselecting animation and disable selection mode
       if (!unselecting) {
         setState(() {
           unselecting = true;
-          selectionMode = false;
+          _selectionMode = false;
         });
       } else
-        selectionMode = false;
+        _selectionMode = false;
     } else {
       if (!onMount) setState(() {});
     }
@@ -147,7 +184,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
     if (mounted)
       setState(() {
         selectionSet = {};
-        selectionMode = false;
+        _selectionMode = false;
         unselecting = false;
       });
   }
@@ -157,7 +194,8 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
       context,
       title: Text("Удаление"),
       content: Text(
-          "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо"),
+        "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо",
+      ),
       acceptButton: DialogFlatButton(
         child: Text('Удалить'),
         textColor: Constants.AppTheme.redFlatButton.auto(context),
@@ -167,7 +205,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
           setState(() {
             selectionSet = {};
             unselecting = false;
-            selectionMode = false;
+            _selectionMode = false;
           });
         },
       ),
@@ -181,73 +219,165 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
     );
   }
 
+  //***************ACTIONS*******************************************************
+  List<Widget> _renderAppBarActions() {
+    return <Widget>[
+      Padding(
+        padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: !isSelection()
+              ? SMMIconButton(
+                  splashColor: Constants.AppTheme.splash.auto(context),
+                  icon: Icon(Icons.sort),
+                  color: Constants.AppTheme.mainContrast.auto(context),
+                  onPressed: () => ShowFunctions.showSongsSortModal(context),
+                )
+              : IgnorePointer(
+                  ignoring: unselecting,
+                  child: SMMIconButton(
+                    splashColor: Constants.AppTheme.splash.auto(context),
+                    key: UniqueKey(),
+                    color: Constants.AppTheme.mainContrast.auto(context),
+                    icon: Icon(Icons.delete_outline),
+                    onPressed: _handleDelete,
+                  ),
+                ),
+        ),
+      ),
+    ];
+  }
+
+//***************TITLE*******************************************************
+  Widget _renderAppBarTitle() {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: !isSelection()
+          ? FakeInputBox()
+          : Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text(
+                  "Выбрано",
+                  style: TextStyle(
+                    color: Constants.AppTheme.mainContrast.auto(context),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: 20.0),
+                    child: AnimatedSwitcher(
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        final inForwardAnimation = Tween<Offset>(
+                          begin: Offset(0.0, -0.7),
+                          end: Offset(0.0, 0.0),
+                        ).animate(
+                          CurvedAnimation(
+                            curve: Curves.easeOut,
+                            parent: animation,
+                          ),
+                        );
+                        final inBackAnimation = Tween<Offset>(
+                          begin: Offset(0.0, 0.7),
+                          end: Offset(0.0, 0.0),
+                        ).animate(
+                          CurvedAnimation(
+                            curve: Curves.easeOut,
+                            parent: animation,
+                          ),
+                        );
+                        final outForwardAnimation = Tween<Offset>(
+                          begin: Offset(0.0, 0.7),
+                          end: Offset(0.0, 0.0),
+                        ).animate(
+                          CurvedAnimation(
+                            curve: Curves.easeIn,
+                            parent: animation,
+                          ),
+                        );
+                        final outBackAnimation = Tween<Offset>(
+                          begin: Offset(0.0, -0.7),
+                          end: Offset(0.0, 0.0),
+                        ).animate(
+                          CurvedAnimation(
+                            curve: Curves.easeIn,
+                            parent: animation,
+                          ),
+                        );
+
+                        //* For entering widget
+                        if (child.key == ValueKey(selectionSet.length)) {
+                          if (selectionSet.length >= prevSetLength)
+                            return SlideTransition(
+                              position: inForwardAnimation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          else
+                            return SlideTransition(
+                              position: inBackAnimation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                        }
+                        //* For exiting widget
+                        else {
+                          if (selectionSet.length >= prevSetLength) {
+                            return SlideTransition(
+                              position: outForwardAnimation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          } else
+                            return SlideTransition(
+                              position: outBackAnimation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                        }
+                      },
+                      duration: Duration(milliseconds: 160),
+                      child: Padding(
+                        key: ValueKey(selectionSet.length),
+                        padding: const EdgeInsets.only(left: 5.0),
+                        child: Text(
+                          selectionSet.length.toString(),
+                          style: TextStyle(
+                            color:
+                                Constants.AppTheme.mainContrast.auto(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: DrawerWidget(),
       appBar: AppBar(
         titleSpacing: 0.0,
-        leading: AnimatedSwitcher(
-          duration: Duration(milliseconds: 300),
-          child: selectionMode
-              ? IgnorePointer(
-                  ignoring: unselecting,
-                  child: SMMIconButton(
-                    splashColor: Constants.AppTheme.splash.auto(context),
-                    icon: Icon(
-                      Icons.close,
-                      color: Constants.AppTheme.menuItemIcon.auto(context),
-                    ),
-                    color: Theme.of(context).iconTheme.color,
-                    onPressed: _handleCloseSelection,
-                  ),
-                )
-              : DrawerButton(),
+        leading: _MainRouteAppBarLeading(
+          selectionMode: _selectionMode,
+          onCloseClick: _handleCloseSelection,
         ),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-            child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 300),
-              child: selectionMode
-                  ? IgnorePointer(
-                      ignoring: unselecting,
-                      child: SMMIconButton(
-                        splashColor: Constants.AppTheme.splash.auto(context),
-                        key: UniqueKey(),
-                        color: Constants.AppTheme.menuItemIcon.auto(context),
-                        icon: Icon(Icons.delete),
-                        onPressed: _handleDelete,
-                      ),
-                    )
-                  : SMMIconButton(
-                      splashColor: Constants.AppTheme.splash.auto(context),
-                      icon: Icon(Icons.sort),
-                      color: Constants.AppTheme.menuItemIcon.auto(context),
-                      onPressed: () =>
-                          ShowFunctions.showSongsSortModal(context),
-                    ),
-            ),
-          ),
-        ],
-        title: AnimatedSwitcher(
-          duration: Duration(milliseconds: 300),
-          child: selectionMode
-              ? Row(
-                  children: <Widget>[
-                    Text("Выбрано "),
-                    AnimatedSwitcher(
-                      duration: Duration(milliseconds: 160),
-                      child: Text(
-                        selectionSet.length.toString(),
-                        key:UniqueKey(),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                )
-              : FakeInputBox(),
-        ),
+        actions: _renderAppBarActions(),
+        title: _renderAppBarTitle(),
       ),
       body: Stack(
         children: <Widget>[
@@ -259,7 +389,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                 backgroundColor: Colors.deepPurple,
                 strokeWidth: 2.5,
                 key: _refreshIndicatorKey,
-                onRefresh: _refreshHandler,
+                onRefresh: _handleRefresh,
                 child: SingleTouchRecognizerWidget(
                   child: Container(
                     child: Scrollbar(
@@ -269,18 +399,18 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                         padding: EdgeInsets.only(bottom: 65, top: 0),
                         itemBuilder: (context, index) {
                           return StreamBuilder(
-                              stream: PlaylistControl.onSongChange,
+                              stream: MusicPlayer.onDurationChanged,
                               builder: (context, snapshot) {
-                                final int id = PlaylistControl.getSongByIndex(
+                                final int id = PlaylistControl.getSongAt(
                                         index, PlaylistType.global)
                                     .id;
                                 return TrackTile(
                                   index,
                                   // Specify object key that can be changed to re-render song tile
-                                  key: ObjectKey(index + _switcher.value),
+                                  key: ValueKey(index + _switcher.value),
                                   selectable: true,
                                   selected: selectionSet.contains(id),
-                                  someSelected: selectionMode,
+                                  someSelected: isSelection(),
                                   unselecting: unselecting,
                                   playing: id == PlaylistControl.currentSongId,
                                   additionalClickCallback: () {
@@ -348,13 +478,13 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
             initialScrollIndex: initialScrollIndex,
             itemBuilder: (context, index) {
               return StreamBuilder(
-                  stream: PlaylistControl.onSongChange,
+                  stream: MusicPlayer.onDurationChanged,
                   builder: (context, snapshot) {
                     return TrackTile(
                       index,
                       key: UniqueKey(),
                       playing: index == currentSongIndex,
-                      song: PlaylistControl.getSongByIndex(index),
+                      song: PlaylistControl.getSongAt(index),
                       pushToPlayerRouteOnClick: false,
                     );
                   });
@@ -434,9 +564,12 @@ class _TrackTileState extends State<TrackTile>
   /// Is track tile selected
   bool _selected;
 
-  Animation<double> _animationOpacity;
-  Animation<double> _animationBorderRadius;
   AnimationController _animationController;
+  Animation<double> _animationOpacity;
+  Animation<double> _animationOpacityInverse;
+  Animation<double> _animationBorderRadius;
+  Animation<double> _animationScale;
+  Animation<double> _animationScaleInverse;
 
   @override
   void initState() {
@@ -444,18 +577,34 @@ class _TrackTileState extends State<TrackTile>
 
     /// If song data is not provided, then find it by index of row in current row
     _song = widget.song ??
-        PlaylistControl.getSongByIndex(
-            widget.trackTileIndex, PlaylistType.global);
+        PlaylistControl.getSongAt(widget.trackTileIndex, PlaylistType.global);
 
     _selected = widget.selected ?? false;
     if (widget.selectable) {
       _animationController = AnimationController(
-          vsync: this, duration: Duration(milliseconds: 300));
-      _animationOpacity = Tween<double>(begin: 0, end: 1).animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-      // 0.4 because we need border radius to be not bigger than 10. 10 to 20(max needed value) is 0.5
-      _animationBorderRadius = Tween<double>(begin: 0.5, end: 1).animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+        vsync: this,
+        duration: Duration(milliseconds: 300),
+      );
+
+      final CurvedAnimation animationBase = CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+        reverseCurve: Curves.easeIn,
+      );
+
+      _animationOpacity =
+          Tween<double>(begin: 0, end: 1).animate(animationBase);
+      _animationOpacityInverse =
+          Tween<double>(begin: 1.0, end: 0.0).animate(animationBase);
+
+      _animationBorderRadius =
+          Tween<double>(begin: 10, end: 20).animate(animationBase);
+
+      _animationScale =
+          Tween<double>(begin: 1.0, end: 1.2).animate(animationBase);
+
+      _animationScaleInverse =
+          Tween<double>(begin: 1.17, end: 1.0).animate(animationBase);
 
       _animationController
         ..addListener(() {
@@ -542,26 +691,37 @@ class _TrackTileState extends State<TrackTile>
           leading: widget.selectable
               ? ClipRRect(
                   borderRadius:
-                      BorderRadius.circular(_animationBorderRadius.value * 20),
-                  child: Stack(children: <Widget>[
-                    AlbumArt(path: _song.albumArtUri),
-                    if (_animationController.value != 0)
-                      Opacity(
-                        opacity: _animationOpacity.value,
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          color: Colors.deepPurple,
-                          // color: Colors.deepPurple,
-                          child: Container(
-                            child: Icon(
-                              Icons.check,
-                              color: Colors.white,
-                            ),
+                      BorderRadius.circular(_animationBorderRadius.value),
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        color: Constants.AppTheme.albumArtSmall.auto(context),
+                        child: FadeTransition(
+                          opacity: _animationOpacityInverse, // Inverse values
+                          child: ScaleTransition(
+                            scale: _animationScale,
+                            child: AlbumArt(path: _song.albumArtUri),
                           ),
                         ),
                       ),
-                  ]),
+                      if (_animationController.value != 0)
+                        FadeTransition(
+                          opacity: _animationOpacity,
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            color: Colors.deepPurple,
+                            child: ScaleTransition(
+                              scale: _animationScaleInverse,
+                              child: Icon(
+                                Icons.check,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 )
               : AlbumArt(path: _song.albumArtUri),
           trailing: widget.playing
@@ -571,8 +731,9 @@ class _TrackTileState extends State<TrackTile>
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                        color: Colors.deepPurple,
-                        borderRadius: BorderRadius.circular(10)),
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 )
               : null,

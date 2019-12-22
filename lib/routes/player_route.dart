@@ -45,7 +45,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
     return PageView(
       controller: _pageController,
       children: [
-        MainPlayerTab(),
+        _MainPlayerTab(),
         _PlaylistTab(
           key: _playlistTabKey,
           openedTabIndex: openedTabIndex,
@@ -78,7 +78,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// A bool var to disable show/hide in tracklist controller listener when manual `scrollToSong` is performing
   bool scrolling = false;
-  StreamSubscription<void> _songChangeSubscription;
+  StreamSubscription<void> _durationSubscription;
   StreamSubscription<void> _playlistChangeSubscription;
 
   int prevPlayingIndex = PlaylistControl.currentSongIndex();
@@ -93,8 +93,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
       // Jump when tracklist changes (e.g. shuffle happened)
       jumpToSong();
     });
-    _songChangeSubscription =
-        PlaylistControl.onSongChange.listen((event) async {
+    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) async {
       // Scroll when track changes
       if (widget.openedTabIndex == 0) {
         setState(() {});
@@ -107,7 +106,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   void dispose() {
     super.dispose();
     _playlistChangeSubscription.cancel();
-    _songChangeSubscription.cancel();
+    _durationSubscription.cancel();
   }
 
   /// Scrolls to current song
@@ -233,7 +232,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   }
 }
 
-class MainPlayerTab extends StatelessWidget {
+class _MainPlayerTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageBase(
@@ -241,17 +240,17 @@ class MainPlayerTab extends StatelessWidget {
         icon: Icons.keyboard_arrow_down,
         size: 40.0,
       ),
-      actions: <Widget>[
-        SingleAppBarAction(
-          child: MoreButton(),
-        )
-      ],
+      // actions: <Widget>[
+      //   SingleAppBarAction(
+      //     child: _MoreButton(),
+      //   )
+      // ],
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          TrackShowcase(),
+          _TrackShowcase(),
           Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -260,7 +259,7 @@ class MainPlayerTab extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
-                  child: TrackSlider(),
+                  child: _TrackSlider(),
                 ),
               ),
               Padding(
@@ -270,7 +269,7 @@ class MainPlayerTab extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     ShuffleButton(),
-                    PlaybackButtons(),
+                    _PlaybackButtons(),
                     LoopButton(),
                   ],
                 ),
@@ -283,63 +282,8 @@ class MainPlayerTab extends StatelessWidget {
   }
 }
 
-/// Button to switch toggle mode
-class LoopButton extends StatefulWidget {
-  LoopButton({Key key}) : super(key: key);
-
-  @override
-  _LoopButtonState createState() => _LoopButtonState();
-}
-
-class _LoopButtonState extends State<LoopButton> {
-  @override
-  Widget build(BuildContext context) {
-    return SMMIconButton(
-      splashColor: Constants.AppTheme.splash.auto(context),
-      icon: Icon(Icons.loop),
-      size: 40.0,
-      color: MusicPlayer.loopModeState
-          ? Constants.AppTheme.menuItemIcon.auto(context)
-          : Constants.AppTheme.disabledIcon.auto(context),
-      onPressed: () {
-        setState(() {
-          MusicPlayer.switchLoopMode();
-        });
-      },
-    );
-  }
-}
-
-class ShuffleButton extends StatefulWidget {
-  ShuffleButton({Key key}) : super(key: key);
-
-  @override
-  _ShuffleButtonState createState() => _ShuffleButtonState();
-}
-
-class _ShuffleButtonState extends State<ShuffleButton> {
-  @override
-  Widget build(BuildContext context) {
-    return SMMIconButton(
-      splashColor: Constants.AppTheme.splash.auto(context),
-      icon: Icon(Icons.shuffle),
-      color: PlaylistControl.playlistType == PlaylistType.shuffled
-          ? Constants.AppTheme.menuItemIcon.auto(context)
-          : Constants.AppTheme.disabledIcon.auto(context),
-      onPressed: () {
-        setState(() {
-          if (PlaylistControl.playlistType == PlaylistType.shuffled)
-            PlaylistControl.returnFromShuffledPlaylist();
-          else
-            PlaylistControl.setShuffledPlaylist();
-        });
-      },
-    );
-  }
-}
-
-class PlaybackButtons extends StatelessWidget {
-  const PlaybackButtons({Key key}) : super(key: key);
+class _PlaybackButtons extends StatelessWidget {
+  const _PlaybackButtons({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +304,7 @@ class PlaybackButtons extends StatelessWidget {
                 size: 44,
                 icon: Icon(
                   Icons.skip_previous,
-                  color: Constants.AppTheme.menuItemIcon.auto(context),
+                  color: Constants.AppTheme.mainContrast.auto(context),
                 ),
                 onPressed: MusicPlayer.playPrev,
               ),
@@ -386,7 +330,7 @@ class PlaybackButtons extends StatelessWidget {
                 size: 44,
                 icon: Icon(
                   Icons.skip_next,
-                  color: Constants.AppTheme.menuItemIcon.auto(context),
+                  color: Constants.AppTheme.mainContrast.auto(context),
                 ),
                 onPressed: MusicPlayer.playNext,
               ),
@@ -398,8 +342,8 @@ class PlaybackButtons extends StatelessWidget {
   }
 }
 
-class MoreButton extends StatelessWidget {
-  const MoreButton({Key key}) : super(key: key);
+class _MoreButton extends StatelessWidget {
+  const _MoreButton({Key key}) : super(key: key);
 
   List<SMMPopupMenuEntry<void>> _itemBuilder(BuildContext context) => [
         SMMPopupMenuItem<void>(
@@ -440,23 +384,23 @@ class MoreButton extends StatelessWidget {
 }
 
 /// A widget that displays all information about current song
-class TrackShowcase extends StatefulWidget {
-  TrackShowcase({Key key}) : super(key: key);
+class _TrackShowcase extends StatefulWidget {
+  _TrackShowcase({Key key}) : super(key: key);
 
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }
 
-class _TrackShowcaseState extends State<TrackShowcase> {
+class _TrackShowcaseState extends State<_TrackShowcase> {
   /// Key for `MarqueeWidget` to reset its scroll on song change
   UniqueKey marqueeKey = UniqueKey();
-  StreamSubscription<void> _changeSongSubscription;
+  StreamSubscription<void> _durationSubscription;
 
   @override
   void initState() {
     super.initState();
     // Handle track switch
-    _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
+    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) {
       // Create new key for marque widget to reset scroll
       setState(() {
         marqueeKey = UniqueKey();
@@ -466,7 +410,7 @@ class _TrackShowcaseState extends State<TrackShowcase> {
 
   @override
   void dispose() {
-    _changeSongSubscription.cancel();
+    _durationSubscription.cancel();
     super.dispose();
   }
 
@@ -513,13 +457,13 @@ class _TrackShowcaseState extends State<TrackShowcase> {
   }
 }
 
-class TrackSlider extends StatefulWidget {
-  TrackSlider({Key key}) : super(key: key);
+class _TrackSlider extends StatefulWidget {
+  _TrackSlider({Key key}) : super(key: key);
 
   _TrackSliderState createState() => _TrackSliderState();
 }
 
-class _TrackSliderState extends State<TrackSlider> {
+class _TrackSliderState extends State<_TrackSlider> {
   /// Actual track position value
   Duration _value = Duration(seconds: 0);
   // Duration of playing track
@@ -531,8 +475,8 @@ class _TrackSliderState extends State<TrackSlider> {
   SharedPreferences prefs;
 
   /// Subscription for audio position change stream
-  StreamSubscription<Duration> _changePositionSubscription;
-  StreamSubscription<void> _changeSongSubscription;
+  StreamSubscription<Duration> _positionSubscription;
+  StreamSubscription<void> _durationSubscription;
 
   /// Is user dragging slider right now
   bool _isDragging = false;
@@ -545,7 +489,7 @@ class _TrackSliderState extends State<TrackSlider> {
     _getPrefsInstance();
 
     // Handle track position movement
-    _changePositionSubscription =
+    _positionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
       // print("POSITION CHANGE ${event.inSeconds}");
       if (event.inSeconds - 0.9 > _value.inSeconds && !_isDragging) {
@@ -553,7 +497,7 @@ class _TrackSliderState extends State<TrackSlider> {
         setState(() {
           _value = event;
           // if (prefs != null)
-            // Prefs.byKey.songPositionInt.setPref(_value.inSeconds, prefs);
+          // Prefs.byKey.songPositionInt.setPref(_value.inSeconds, prefs);
         });
       } else if (event.inMilliseconds < 200) {
         setState(() {
@@ -565,21 +509,20 @@ class _TrackSliderState extends State<TrackSlider> {
     });
 
     // Handle track switch
-    _changeSongSubscription = PlaylistControl.onSongChange.listen((event) {
+    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) {
       setState(() {
         _isDragging = false;
         _localValue = 0.0;
         _value = Duration(seconds: 0);
-        _duration =
-            Duration(milliseconds: PlaylistControl.currentSong?.duration);
+        _duration = event;
       });
     });
   }
 
   @override
   void dispose() {
-    _changePositionSubscription.cancel();
-    _changeSongSubscription.cancel();
+    _positionSubscription.cancel();
+    _durationSubscription.cancel();
     super.dispose();
   }
 

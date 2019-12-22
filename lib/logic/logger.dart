@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter_mailer/flutter_mailer.dart';
 
 /// Class to create and send log to me
@@ -11,7 +12,7 @@ abstract class Logger {
   static List<String> _stringList = [];
 
   /// Max length of string list (max count of strings in log)
-  static int _maxStrings = 100;
+  static const int _maxStrings = 100;
 
   /// Adds string to `_stringList`
   ///
@@ -43,7 +44,7 @@ abstract class Logger {
   /// Sends email with log to me
   static Future<void> send() async {
     final MailOptions mailOptions = MailOptions(
-      recipients: <String>["nt4f04und@gmail.com"],
+      recipients: <String>[Constants.Config.REPORT_EMAIL],
       subject: "sweyer log",
       body: _stringList.join("\n"),
       isHTML: false,

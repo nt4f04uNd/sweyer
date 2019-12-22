@@ -67,35 +67,36 @@ class BottomTrackPanel extends StatelessWidget {
                       ),
                       leading: RotatingAlbumArtWithProgress(),
                       trailing: Transform.translate(
-                        offset: Offset(-5, 0),
+                        offset: Offset(0, 0),
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 70.0),
+                          constraints: BoxConstraints(maxWidth: 50.0),
                           child: Stack(
                             children: <Widget>[
                               Transform.translate(
-                                offset: Offset(-16, 0),
+                                // offset: Offset(-16, 0),
+                                offset: Offset(0, 0),
                                 child: AnimatedPlayPauseButton(
                                   size: 40.0,
                                   iconSize: 28.0,
-                                  iconColor: Constants.AppTheme.menuItemIcon
+                                  iconColor: Constants.AppTheme.mainContrast
                                       .auto(context),
                                 ),
                               ),
-                              Transform.translate(
-                                offset: Offset(18, 0),
-                                child: SMMIconButton(
-                                  icon: Icon(Icons.skip_next),
-                                  onPressed: MusicPlayer.playNext,
-                                  size: 40.0,
-                                  iconSize: 28.0,
-                                  splashColor:
-                                      Constants.AppTheme.splash.auto(context),
-                                  // color: Constants.AppTheme.playPauseIcon
-                                  //     .auto(context),
-                                  color: Constants.AppTheme.menuItemIcon
-                                      .auto(context),
-                                ),
-                              ),
+                              // Transform.translate(
+                              //   offset: Offset(18, 0),
+                              //   child: SMMIconButton(
+                              //     icon: Icon(Icons.skip_next),
+                              //     onPressed: MusicPlayer.playNext,
+                              //     size: 40.0,
+                              //     iconSize: 28.0,
+                              //     splashColor:
+                              //         Constants.AppTheme.splash.auto(context),
+                              //     // color: Constants.AppTheme.playPauseIcon
+                              //     //     .auto(context),
+                              //     color: Constants.AppTheme.mainContrast
+                              //         .auto(context),
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -125,8 +126,8 @@ class _RotatingAlbumArtWithProgressState
   // Duration of playing track
   Duration _duration = Duration(seconds: 0);
 
-  StreamSubscription<Duration> _changePositionSubscription;
-  StreamSubscription<void> _changeSongSubscription;
+  StreamSubscription<Duration> _positionSubscription;
+  StreamSubscription<Duration> _durationSubscription;
   StreamSubscription<AudioPlayerState> _playerStateChangeSubscription;
 
   GlobalKey<RotatingAlbumArtState> _rotatingArtGlobalKey =
@@ -154,7 +155,7 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle track position movement
-    _changePositionSubscription =
+    _positionSubscription =
         MusicPlayer.onAudioPositionChanged.listen((event) {
       if (event.inSeconds != _value.inSeconds) {
         // Prevent waste updates
@@ -165,12 +166,11 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle song change
-    _changeSongSubscription =
-        PlaylistControl.onSongChange.listen((event) async {
+    _durationSubscription =
+        MusicPlayer.onDurationChanged.listen((event) async {
       _value = await MusicPlayer.currentPosition;
       setState(() {
-        _duration =
-            Duration(milliseconds: PlaylistControl.currentSong?.duration);
+        _duration = event;
       });
     });
   }
@@ -178,8 +178,8 @@ class _RotatingAlbumArtWithProgressState
   @override
   void dispose() {
     _playerStateChangeSubscription.cancel();
-    _changePositionSubscription.cancel();
-    _changeSongSubscription.cancel();
+    _positionSubscription.cancel();
+    _durationSubscription.cancel();
     super.dispose();
   }
 
@@ -194,7 +194,12 @@ class _RotatingAlbumArtWithProgressState
   double _calcProgress() {
     if (_value.inMilliseconds == 0.0 || _duration.inMilliseconds == 0.0)
       return 0.001;
-    return _value.inMilliseconds / _duration.inMilliseconds;
+    // Additional safety checkS
+    var result = _value.inMilliseconds / _duration.inMilliseconds;
+    if (result < 0)
+      result = 0;
+    else if (result > 1) result = 0;
+    return result;
   }
 
   @override

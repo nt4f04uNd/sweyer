@@ -14,7 +14,7 @@ import io.flutter.view.FlutterView;
 public class NativeEventsChannel implements StreamHandler {
     public static void init(FlutterView view) {
         if (channel == null) {
-            channel = new EventChannel(view, Constants.channels.EVENT_CHANNEL_STREAM);
+            channel = new EventChannel(view, Constants.channels.events.CHANNEL_NAME);
             channel.setStreamHandler(new NativeEventsChannel());
         }
     }

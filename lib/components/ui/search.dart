@@ -25,7 +25,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
         title: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w500,
-          // color: Constants.AppTheme.menuItemIcon.auto(context),
+          // color: Constants.AppTheme.mainContrast.auto(context),
         ),
       ),
     );
@@ -37,7 +37,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       splashColor: Constants.AppTheme.splash.auto(context),
       icon: Icon(
         Icons.arrow_back,
-        color: Constants.AppTheme.menuItemIcon.auto(context),
+        color: Constants.AppTheme.mainContrast.auto(context),
       ),
       onPressed: () {
         close(context, null);
@@ -56,7 +56,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                 splashColor: Constants.AppTheme.splash.auto(context),
                 icon: const Icon(Icons.clear),
                 // color: Theme.of(context).iconTheme.color,
-                color: Constants.AppTheme.menuItemIcon.auto(context),
+                color: Constants.AppTheme.mainContrast.auto(context),
                 onPressed: () {
                   query = '';
                   showSuggestions(context);
@@ -156,7 +156,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
               itemCount: searched.length,
               itemBuilder: (context, index) {
                 return StreamBuilder(
-                    stream: PlaylistControl.onSongChange,
+                    stream: MusicPlayer.onDurationChanged,
                     builder: (context, snapshot) {
                       return TrackTile(
                         index,
@@ -213,7 +213,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color:
-                                Constants.AppTheme.menuItemIcon.auto(context).withOpacity(0.7),
+                                Constants.AppTheme.mainContrast.auto(context).withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -273,7 +273,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
               padding: const EdgeInsets.only(right: 3.0, top: 5.0),
               child: SMMIconButton(
                   splashColor: Constants.AppTheme.splash.auto(context),
-                  icon: Icon(Icons.delete),
+                  icon: Icon(Icons.delete_sweep),
                   color: Theme.of(context).hintColor,
                   onPressed: () {
                     ShowFunctions.showDialog(
@@ -314,7 +314,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       leading: Padding(
         padding: const EdgeInsets.only(left: 2.0),
         child: Icon(Icons.history,
-            color: Constants.AppTheme.menuItemIcon.auto(context)),
+            color: Constants.AppTheme.mainContrast.auto(context)),
       ),
       onLongPress: () {
         ShowFunctions.showDialog(

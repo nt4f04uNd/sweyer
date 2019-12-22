@@ -9,69 +9,76 @@ import 'package:flutter/services.dart';
 import 'colors.dart';
 
 abstract class AppTheme {
-  static final ThemeContainer<Color> albumArtLarge =
-      ThemeContainer(light: Color(0xFFe8e8e8), dark: Color(0xFF333333));
+  //******************************************** GENERIC COLORS ********************************************
+  /// Main colors - `whiteDarkened` and `greyLight`
+  static final _ThemeContainer<Color> main =
+      _ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
-  static final ThemeContainer<Color> albumArtSmall =
-      ThemeContainer(light: Color(0xfff1f2f4), dark: Color(0xFF313131));
+  /// Colors that are in contrast with `main`, so they can be use for text and icons
+  ///
+  /// Alternatively `main.autoInverse` can be used
+  static final _ThemeContainer<Color> mainContrast =
+      _ThemeContainer(light: Color(0xff616266), dark: Color(0xfff1f2f4));
 
-  static final ThemeContainer<Color> albumArtSmallRound =
-      ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
+  //************************************** WIDGET SPECIFIC COLORS ******************************************
 
-  static final ThemeContainer<Color> bottomTrackPanel =
-      ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
+  static final _ThemeContainer<Color> albumArtLarge =
+      _ThemeContainer(light: Color(0xFFe8e8e8), dark: Color(0xFF333333));
 
-  static final ThemeContainer<Color> searchFakeInput = ThemeContainer(
+  static final _ThemeContainer<Color> albumArtSmall =
+      _ThemeContainer(light: Color(0xfff1f2f4), dark: Color(0xFF313131));
+
+  static final _ThemeContainer<Color> albumArtSmallRound =
+      _ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
+
+  static final _ThemeContainer<Color> bottomTrackPanel =
+      _ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
+
+  static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
       // light: Colors.black.withOpacity(0.05),
       light: AppColors.whiteDarkened,
       dark: Colors.white.withOpacity(0.05));
 
-  static final ThemeContainer<Color> popupMenu =
-      ThemeContainer(light: Color(0xFFeeeeee), dark: Color(0xFF333333));
+  static final _ThemeContainer<Color> popupMenu =
+      _ThemeContainer(light: Color(0xFFeeeeee), dark: Color(0xFF333333));
 
-  static final ThemeContainer<Color> declineButton =
-      ThemeContainer(light: Color(0xFF606060), dark: null);
+  static final _ThemeContainer<Color> declineButton =
+      _ThemeContainer(light: Color(0xFF606060), dark: null);
 
-  static final ThemeContainer<Color> redFlatButton =
-      ThemeContainer(light: Colors.red.shade300, dark: Colors.red.shade200);
+  static final _ThemeContainer<Color> redFlatButton =
+      _ThemeContainer(light: Colors.red.shade300, dark: Colors.red.shade200);
 
-  static final ThemeContainer<Color> splash =
-      ThemeContainer(light: Color(0x90bbbbbb), dark: Color(0x44c8c8c8));
+  static final _ThemeContainer<Color> splash =
+      _ThemeContainer(light: Color(0x90bbbbbb), dark: Color(0x44c8c8c8));
 
-  static final ThemeContainer<Color> disabledIcon =
-      ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
+  static final _ThemeContainer<Color> disabledIcon =
+      _ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
 
-  static final ThemeContainer<Color> playPauseIcon =
-      ThemeContainer(light: Color(0xff555659), dark: Color(0xfff1f2f4));
+  static final _ThemeContainer<Color> playPauseIcon =
+      _ThemeContainer(light: Color(0xff555659), dark: Color(0xfff1f2f4));
 
-  static final ThemeContainer<Color> prevNextBorder = ThemeContainer(
+  static final _ThemeContainer<Color> prevNextBorder = _ThemeContainer(
       light: Colors.black.withOpacity(0.1),
       dark: Colors.white.withOpacity(0.1));
 
-  static final ThemeContainer<Color> playPauseBorder = ThemeContainer(
+  static final _ThemeContainer<Color> playPauseBorder = _ThemeContainer(
       light: Colors.black.withOpacity(0.15),
       dark: Colors.white.withOpacity(0.15));
 
-  static final ThemeContainer<Color> sliderInactive = ThemeContainer(
+  static final _ThemeContainer<Color> sliderInactive = _ThemeContainer(
       light: Colors.black.withOpacity(0.2),
       dark: Colors.white.withOpacity(0.2));
 
-  /// Main colors - `whiteDarkened` and `greyLight`
-  static final ThemeContainer<Color> main =
-      ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
+  static final _ThemeContainer<Color> drawer =
+      _ThemeContainer(light: Colors.white, dark: AppColors.grey);
 
-  static final ThemeContainer<Color> drawer =
-      ThemeContainer(light: Colors.white, dark: AppColors.grey);
+  static final _ThemeContainer<Color> menuItem =
+      _ThemeContainer(light: Color(0xff3d3e42), dark: Color(0xffe7e8ec));
 
-  static final ThemeContainer<Color> menuItem =
-      ThemeContainer(light: Color(0xff3d3e42), dark: Color(0xffe7e8ec));
-  static final ThemeContainer<Color> menuItemIcon =
-      ThemeContainer(light: Color(0xff616266), dark: Color(0xfff1f2f4));
+  static final _ThemeContainer<Color> refreshIndicatorArrow =
+      _ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
 
-  static final ThemeContainer<Color> refreshIndicatorArrow =
-      ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
-
-  static ThemeContainer<ThemeData> materialApp = ThemeContainer(
+  static _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
     light: ThemeData(
       fontFamily: 'Manrope',
       textTheme: TextTheme(
@@ -186,7 +193,7 @@ abstract class AppTheme {
 
 abstract class AppSystemUIThemes {
   /// Generic theme for all screens
-  static final ThemeContainer<SystemUiOverlayStyle> allScreens = ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> allScreens = _ThemeContainer(
     light: SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,
@@ -206,7 +213,7 @@ abstract class AppSystemUIThemes {
   );
 
   /// Theme for the main screen
-  static final ThemeContainer<SystemUiOverlayStyle> mainScreen = ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> mainScreen = _ThemeContainer(
     light: allScreens.light
         .copyWith(systemNavigationBarColor: AppColors.whiteDarkened),
     // light: allScreens.light
@@ -216,8 +223,8 @@ abstract class AppSystemUIThemes {
   );
 
   /// Theme for the drawer screen
-  static final ThemeContainer<SystemUiOverlayStyle> drawerScreen =
-      ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen =
+      _ThemeContainer(
     light: allScreens.light.copyWith(statusBarColor: AppColors.whiteDarkened),
     dark: allScreens.dark.copyWith(statusBarColor: AppColors.grey),
   );
@@ -225,8 +232,8 @@ abstract class AppSystemUIThemes {
   /// Theme for dialog screen
   ///
   /// TODO: implement this with dialogs
-  static final ThemeContainer<SystemUiOverlayStyle> dialogScreen =
-      ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> dialogScreen =
+      _ThemeContainer(
     light:
         allScreens.light.copyWith(systemNavigationBarColor: Color(0xffaaaaaa)),
     dark: allScreens.dark.copyWith(systemNavigationBarColor: Color(0xff111111)),
@@ -234,10 +241,10 @@ abstract class AppSystemUIThemes {
 }
 
 /// Class to wrap some values, so they will have `light` and `dark` variants
-class ThemeContainer<T> {
+class _ThemeContainer<T> {
   final T light;
   final T dark;
-  ThemeContainer({@required this.light, @required this.dark});
+  _ThemeContainer({@required this.light, @required this.dark});
 
   /// Checks theme and automatically returns corresponding ui style
   ///

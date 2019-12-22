@@ -15,7 +15,7 @@ import 'song.dart';
 class SongsFetcher {
   /// Channel for handling audio focus
   MethodChannel _songsChannel =
-      const MethodChannel(Constants.SongsChannel.channelName);
+      const MethodChannel(Constants.SongsChannel.CHANNEL_NAME);
 
   // /// An instance of `AsyncOperation` to track if tracks are fetching
   // AsyncOperation fetchingOperation = AsyncOperation();

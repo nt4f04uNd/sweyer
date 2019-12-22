@@ -22,7 +22,7 @@ public class GeneralChannel implements MethodChannel.MethodCallHandler {
     public static void init(FlutterView view, Activity activity) {
         if(channel == null) {
             GeneralChannel.activity = activity;
-            channel = new MethodChannel(view, Constants.channels.GENERAL_CHANNEL_STREAM);
+            channel = new MethodChannel(view, Constants.channels.general.CHANNEL_NAME);
             channel.setMethodCallHandler(new GeneralChannel());
         }
     }
@@ -43,7 +43,7 @@ public class GeneralChannel implements MethodChannel.MethodCallHandler {
         // NOTE: this method is invoked on the main thread.
         final String method = call.method;
         switch (method) {
-            case Constants.channels.GENERAL_METHOD_INTENT_ACTION_VIEW:
+            case Constants.channels.general.METHOD_INTENT_ACTION_VIEW:
                 result.success(GeneralHandler.isIntentActionView(activity));
                 break;
             default:

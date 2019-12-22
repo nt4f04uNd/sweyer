@@ -9,21 +9,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-/// Drawer icon button to place in `AppBar`
-class DrawerButton extends StatelessWidget {
-  const DrawerButton({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SMMIconButton(
-      icon: Icon(Icons.menu),
-      splashColor: Constants.AppTheme.splash.auto(context),
-      color: Constants.AppTheme.menuItemIcon.auto(context),
-      onPressed: Scaffold.of(context).openDrawer,
-    );
-  }
-}
-
 /// Widget that builds drawer
 class DrawerWidget extends StatefulWidget {
   const DrawerWidget({Key key}) : super(key: key);
@@ -130,7 +115,7 @@ class MenuItem extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 22.0,
-                  color: Constants.AppTheme.menuItemIcon.auto(context),
+                  color: Constants.AppTheme.mainContrast.auto(context),
                   // color: Constants.AppTheme,
                 ),
               )
@@ -144,6 +129,84 @@ class MenuItem extends StatelessWidget {
         ),
         onTap: onTap,
         onLongPress: onLongPress,
+      ),
+    );
+  }
+}
+
+
+
+class AnimatedMenuCloseButton extends StatefulWidget {
+  AnimatedMenuCloseButton({
+    Key key,
+    this.animateDirection,
+    this.iconSize,
+    this.size,
+    this.iconColor,
+    this.onMenuClick,
+    this.onCloseClick,
+  }) : super(key: key);
+
+  /// If true, on mount will animate to close icon
+  /// Else will animate backwards
+  /// If omitted - menu icon will be shown on mount without any animation
+  final bool animateDirection;
+  final double iconSize;
+  final double size;
+  final Color iconColor;
+
+  /// Handle click when menu is shown
+  final Function onMenuClick;
+
+  /// Handle click when close icon is shown
+  final Function onCloseClick;
+
+  AnimatedMenuCloseButtonState createState() => AnimatedMenuCloseButtonState();
+}
+
+class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
+    with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+
+    if (widget.animateDirection != null) {
+      if (widget.animateDirection) {
+        _animationController.forward();
+      } else {
+        _animationController.value = 1.0;
+        _animationController.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: SMMIconButton(
+        size: widget.size ?? kIconButtonSize,
+        iconSize: widget.iconSize ?? kIconButtonIconSize,
+        splashColor: Constants.AppTheme.splash.auto(context),
+        color: Constants.AppTheme.mainContrast.auto(context),
+        onPressed: widget.animateDirection != null && widget.animateDirection
+            ? widget.onCloseClick
+            : widget.onMenuClick,
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.menu_close,
+          color: widget.iconColor ??
+              Constants.AppTheme.playPauseIcon.auto(context),
+          progress: _animationController,
+        ),
       ),
     );
   }

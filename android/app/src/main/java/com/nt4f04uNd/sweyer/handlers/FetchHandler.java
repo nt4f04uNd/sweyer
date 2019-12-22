@@ -35,7 +35,7 @@ public class FetchHandler {
 
         @Override
         protected void onPostExecute(List<String> result) {
-            songChannel.get().invokeMethod(Constants.channels.SONGS_METHOD_SEND_SONGS, result);
+            songChannel.get().invokeMethod(Constants.channels.songs.METHOD_SEND_SONGS, result);
         }
     }
 

@@ -31,28 +31,26 @@ class PageBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize:
-              Size.fromHeight(_kPreferredSize), // here the desired height
-          child: AppBar(
-            titleSpacing: 0.0,
-            backgroundColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            leading: backButton,
-            actions: actions,
-            title: Text(
-              name,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.title.color,
-                // fontWeight: FontWE
-              ),
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize:
+            Size.fromHeight(_kPreferredSize), // here the desired height
+        child: AppBar(
+          titleSpacing: 0.0,
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          leading: backButton,
+          actions: actions,
+          title: Text(
+            name,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.title.color,
+              // fontWeight: FontWE
             ),
           ),
         ),
-        body: child,
       ),
+      body: child,
     );
   }
 }

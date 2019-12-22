@@ -10,3 +10,4 @@ export 'colors.dart';
 export 'themes.dart';
 export 'routes.dart';
 export 'config.dart';
+export 'errors.dart';

@@ -14,7 +14,6 @@ part 'song.g.dart';
 /// An annotation for the code generator to know that this class needs the
 /// JSON serialization logic to be generated.
 @JsonSerializable()
-
 class Song {
   final int id;
   final String artist;
@@ -22,7 +21,9 @@ class Song {
   final String albumArtUri;
   final String title;
   final String trackUri;
+  /// Duration in milliseconds
   final int duration;
+  /// Timestamp of when song was last modified
   final int dateModified;
 
   Song({
@@ -36,7 +37,17 @@ class Song {
     @required this.dateModified,
   });
 
-   /// A necessary factory constructor for creating a new User instance
+  Song.test()
+      : id = 0,
+        artist = "TEST",
+        album = "TEST",
+        albumArtUri = "TEST",
+        title = "TEST",
+        trackUri = "TEST",
+        duration = 300000,
+        dateModified = 100000000000000900;
+
+  /// A necessary factory constructor for creating a new User instance
   /// from a map. Pass the map to the generated `_$UserFromJson()` constructor.
   /// The constructor is named after the source class, in this case, User.
   factory Song.fromJson(Map<String, dynamic> json) => _$SongFromJson(json);

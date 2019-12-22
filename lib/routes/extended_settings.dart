@@ -93,7 +93,7 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
-              child: MinFileDurationSlider(
+              child: _MinFileDurationSlider(
                 key: sliderKey,
                 parentHandleChange: handleSliderChange,
                 initValue: settingMinFileDuration,
@@ -106,10 +106,10 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
   }
 }
 
-class MinFileDurationSlider extends StatefulWidget {
+class _MinFileDurationSlider extends StatefulWidget {
   final Function parentHandleChange;
   final int initValue;
-  MinFileDurationSlider(
+  _MinFileDurationSlider(
       {Key key, @required this.initValue, @required this.parentHandleChange})
       : assert(initValue != null),
         assert(parentHandleChange != null),
@@ -118,7 +118,7 @@ class MinFileDurationSlider extends StatefulWidget {
   _MinFileDurationSliderState createState() => _MinFileDurationSliderState();
 }
 
-class _MinFileDurationSliderState extends State<MinFileDurationSlider> {
+class _MinFileDurationSliderState extends State<_MinFileDurationSlider> {
   double _value;
 
   @override

@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import androidx.annotation.Nullable;
 import io.flutter.Log;
@@ -28,7 +29,7 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
 
     public static void init(FlutterView view) {
         if (channel == null) {
-            channel = new MethodChannel(view, Constants.channels.PLAYER_CHANNEL_STREAM);
+            channel = new MethodChannel(view, Constants.channels.player.CHANNEL_NAME);
             channel.setMethodCallHandler(new PlayerChannel());
         }
     }
@@ -41,11 +42,12 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
     public static MethodChannel channel;
 
 
-    /** NOTE that this might be called when flutter view is detached
-     *  Normally, `kill` method will set channel to null
-     *  But `onDestroy` method is not guaranteed to be called, so sometimes it won't happen
-     *
-     *  AFAIK this isn't something bad and not an error, but warning
+    /**
+     * NOTE that this might be called when flutter view is detached
+     * Normally, `kill` method will set channel to null
+     * But `onDestroy` method is not guaranteed to be called, so sometimes it won't happen
+     * <p>
+     * AFAIK this isn't something bad and not an error, but warning
      */
     public static void invokeMethod(String method, Object arguments) {
         if (channel != null) {
@@ -58,9 +60,8 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
         try {
             handleMethodCall(call, response);
         } catch (Exception e) {
-            Log.e(Constants.LogTag, "Unexpected error!", e);
             PlayerHandler.handleError(e);
-            response.error("Unexpected error!", e.getMessage(), e);
+            response.error("NATIVE_PLAYER_ERROR", e.getMessage(), e);
         }
     }
 
