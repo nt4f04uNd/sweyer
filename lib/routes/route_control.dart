@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 
 /// Class to control how routes are created
 abstract class RouteControl {
-
   /// Needed to disable animations on some routes
   static String _currentRoute = Constants.Routes.main.value;
 
@@ -24,7 +23,6 @@ abstract class RouteControl {
   static bool _currentRouteEquals(String value) {
     return _currentRoute == value;
   }
-
 
   static Route<dynamic> handleOnGenerateRoute(RouteSettings settings) {
     _setCurrentRoute(settings.name);
@@ -50,7 +48,8 @@ abstract class RouteControl {
         materialAnimationStyle: MaterialRouteTransitionStyle.expand,
         entIgnoreEventsForward: true,
         entCurve: Curves.fastOutSlowIn,
-        entBegin: Offset(0.0, 1.0),
+        entBegin: const Offset(0.0, 1.0),
+        transitionDuration: const Duration(milliseconds: 400),
         checkExitAnimationEnabled: () =>
             _currentRouteEquals(Constants.Routes.exif.value),
         checkEnterSystemUI: () => Constants.AppSystemUIThemes.allScreens

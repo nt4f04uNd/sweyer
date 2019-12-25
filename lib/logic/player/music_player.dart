@@ -37,13 +37,6 @@ abstract class MusicPlayer {
   /// Is notification visible
   static bool loopModeState = false;
 
-  /// Hook handle
-  /// Variable to save latest hook press time
-  static DateTime _latestHookPressTime;
-
-  /// How much times hook has been pressed during handle multiple presses time (e.g. 700ms)
-  static int _hookPressStack = 0;
-
   // Getters
 
   /// Get stream of changes on audio position.
@@ -126,48 +119,6 @@ abstract class MusicPlayer {
     _durationSubscription.cancel();
     _errorSubscription.cancel();
     _completionSubscription.cancel();
-  }
-
-  static void hookPress() {
-    // Avoid errors when app is loading
-    if (PlaylistControl.playReady) {
-      DateTime now = DateTime.now();
-      if (_latestHookPressTime == null ||
-          now.difference(_latestHookPressTime) >
-              // TODO: extract delays to constant
-              // TODO: move this to native side
-              // `_handleHookDelayedPress` delay + safe delay (trying to fix hook button press bug)
-              Duration(milliseconds: 600 + 50)) {
-        // If hook is pressed first time or last press were more than 0.5s ago
-        _latestHookPressTime = now;
-        _hookPressStack = 1;
-        _handleHookDelayedPress();
-      } else if (_hookPressStack == 1 || _hookPressStack == 2) {
-        // This condition ensures that nothing more than 3 will not be assigned to _hookPressStack
-        _hookPressStack++;
-      }
-    }
-  }
-
-  /// Play/pause, next or prev function depending on `_hookPressStack`
-  static Future<void> _handleHookDelayedPress() async {
-    // Wait 0.6s
-    await Future.delayed(Duration(milliseconds: 600));
-    switch (_hookPressStack) {
-      case 1:
-        Logger.log('hookPressRes', 'play/pause');
-        await playPause();
-        break;
-      case 2:
-        Logger.log('hookPressRes', 'next');
-        await playNext();
-        break;
-      case 3:
-        await playPrev();
-        Logger.log('hookPressRes', 'prev');
-        break;
-    }
-    _hookPressStack = 0;
   }
 
   static Future<void> switchLoopMode() async {
@@ -321,7 +272,7 @@ abstract class MusicPlayer {
   /// Function that handles click on track tile
   ///
   /// `clickedSongId` argument denotes an id of clicked track `MainRouteTrackList`
-  static Future<void> clickTrackTile(int clickedSongId) async {
+  static Future<void> clickSongTile(int clickedSongId) async {
     switch (playState) {
       case AudioPlayerState.PLAYING:
         // If user clicked the same track

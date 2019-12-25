@@ -155,8 +155,7 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle track position movement
-    _positionSubscription =
-        MusicPlayer.onAudioPositionChanged.listen((event) {
+    _positionSubscription = MusicPlayer.onAudioPositionChanged.listen((event) {
       if (event.inSeconds != _value.inSeconds) {
         // Prevent waste updates
         setState(() {
@@ -166,11 +165,12 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle song change
-    _durationSubscription =
-        MusicPlayer.onDurationChanged.listen((event) async {
+    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) async {
       _value = await MusicPlayer.currentPosition;
       setState(() {
         _duration = event;
+        // Update art
+        _rotatingArtGlobalKey.currentState.loadArt(PlaylistControl.currentSong?.albumArtUri);
       });
     });
   }

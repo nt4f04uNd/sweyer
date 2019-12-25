@@ -12,6 +12,7 @@ import android.media.AudioManager;
 import android.os.Handler;
 
 import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 import com.nt4f04uNd.sweyer.channels.PlayerChannel;
 import com.nt4f04uNd.sweyer.player.Player;
 import com.nt4f04uNd.sweyer.player.PlayerState;
@@ -35,8 +36,17 @@ import io.flutter.plugin.common.MethodChannel;
 public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static Player player = new Player();
-    private static final Handler handler = new Handler();
+    /**
+     * For position updates
+     */
+    private static final Handler positionHandler = new Handler();
     private static Runnable positionUpdates;
+    /**
+     * For hook button handling
+     */
+    private static final Handler hookButtonHandler = new Handler();
+    private static int hookButtonPressCount = 0;
+
 
     // HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,13 +85,31 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void handleHookButton() {
-//        long msTimestamp = System.currentTimeMillis()/1000;
-//
-        try {
-        // TODO: implement
-            io.flutter.Log.w(Constants.LogTag, "HOOK PRESS");
-        } catch (IllegalStateException e) {
-            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        hookButtonPressCount++;
+        if (hookButtonPressCount == 1) {
+            hookButtonHandler.postDelayed(new HookDelayedRunnable(), 500);
+        }
+    }
+
+    private static final class HookDelayedRunnable implements Runnable {
+        @Override
+        public void run() {
+            try {
+                if (hookButtonPressCount == 1) {
+                    NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PAUSE);
+                    playPause();
+                } else if (hookButtonPressCount == 2) {
+                    NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_NEXT);
+                    playNext();
+                } else {
+                    NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PREV);
+                    playPrev();
+                }
+            } catch (IllegalStateException e) {
+                Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+            } finally {
+                hookButtonPressCount = 0;
+            }
         }
     }
 
@@ -108,7 +136,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
 
     // COMPOSED METHODS (wrappers over default player methods) ///////////////////////////////////////////////////////////////
-    // TODO: remove respect silence islocal and stayawake
+    // TODO: remove respect silence, isLocal and stayAwake
     public static void play(@NotNull Song song, double volume, Integer position, boolean respectSilence, boolean isLocal, boolean stayAwake) {
         ServiceHandler.startService();
         player.configAttributes(respectSilence, stayAwake, GeneralHandler.getAppContext());
@@ -120,12 +148,20 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         if (AudioFocusHandler.focusState != AudioManager.AUDIOFOCUS_GAIN)
             AudioFocusHandler.requestFocus();
         if (AudioFocusHandler.focusState == AudioManager.AUDIOFOCUS_GAIN) {
-            player.play();
-            PlayerHandler.callSetState(PlayerState.PLAYING);
-            NotificationHandler.updateNotification(song, true);
-            PlaylistHandler.playingSong = song;
-            PrefsHandler.setSongId(song.id);
-            GeneralHandler.print(String.valueOf(PrefsHandler.getSongId()));
+            boolean success = true;
+            try {
+                player.play();
+            } catch (Exception e) {
+                success = false;
+                throw e;
+            } finally {
+                if (success) {
+                    PlayerHandler.callSetState(PlayerState.PLAYING);
+                    PlaylistHandler.setCurrentSong(song);
+                    PrefsHandler.setSongId(song.id);
+                    NotificationHandler.updateNotification(true);
+                }
+            }
         }
     }
 
@@ -196,14 +232,14 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         player.play();
         PrefsHandler.setSongIsPlaying(true);
         PlayerHandler.callSetState(PlayerState.PLAYING);
-        NotificationHandler.updateNotification(PlaylistHandler.playingSong, true);
+        NotificationHandler.updateNotification(true);
     }
 
     public static void barePause() {
         player.pause();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.PAUSED);
-        NotificationHandler.updateNotification(PlaylistHandler.playingSong, false);
+        NotificationHandler.updateNotification(false);
     }
 
     public static void bareStop() {
@@ -211,7 +247,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
         // TODO: maybe remove notification at all?
-        NotificationHandler.updateNotification(PlaylistHandler.playingSong, false);
+        NotificationHandler.updateNotification(false);
     }
 
     public static void bareRelease() {
@@ -219,7 +255,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
         // TODO: maybe remove notification at all?
-        NotificationHandler.updateNotification(PlaylistHandler.playingSong, false);
+        NotificationHandler.updateNotification(false);
     }
     /// END OF BARE METHODS ////////////////////////////////////////////////////////////////////////
 
@@ -228,10 +264,20 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void playPause() {
         try {
+            if (player.isUrlNull())
+                if (GeneralHandler.activityExists()) {
+                    // Do nothing if activity exists, but url is null
+                    return;
+                } else {
+                    // Fetch current song if activity does not exists
+                    PlaylistHandler.initCurrentSong();
+                }
+
+
             if (PlayerHandler.isPlaying())
                 PlayerHandler.pause();
             else PlayerHandler.resume();
-            PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, false, true, true);
+
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
         }
@@ -292,8 +338,8 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     public static void startPositionUpdates() {
         if (positionUpdates != null)
             return;
-        positionUpdates = new UpdateCallback(PlayerChannel.channel, handler);
-        handler.post(positionUpdates);
+        positionUpdates = new UpdatePositionRunnable(positionHandler);
+        positionHandler.post(positionUpdates);
     }
 
 
@@ -303,16 +349,16 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      */
     public static void stopPositionUpdates() {
         positionUpdates = null;
-        handler.removeCallbacksAndMessages(null);
+        positionHandler.removeCallbacksAndMessages(null);
     }
 
     /**
      * Callback that is passed to handler to have a stream of position updates
      */
-    private static final class UpdateCallback implements Runnable {
+    private static final class UpdatePositionRunnable implements Runnable {
         private final WeakReference<Handler> handlerRef;
 
-        private UpdateCallback(final MethodChannel channel, final Handler handler) {
+        private UpdatePositionRunnable(final Handler handler) {
             this.handlerRef = new WeakReference<>(handler);
         }
 

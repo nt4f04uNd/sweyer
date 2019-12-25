@@ -135,11 +135,11 @@ class Playlist {
 /// 2. Control playlist json
 /// 3. Manage playlists
 /// 4. Search in playlists
-/// 
+///
 /// etc.
-/// 
+///
 /// This class consciously doesn't expose playlists and songs themselves.
-/// This is done for sake of optimization and avoiding mistakes, e.g. `getSongById` should always be searched in `_globalPlaylist` 
+/// This is done for sake of optimization and avoiding mistakes, e.g. `getSongById` should always be searched in `_globalPlaylist`
 abstract class PlaylistControl {
   /// Playlist for songs
   static Playlist _globalPlaylist;
@@ -202,7 +202,7 @@ abstract class PlaylistControl {
   ///
   /// Returns current playlist if `argPlaylistType` is `null`
   static Playlist _selectPlaylist([PlaylistType argPlaylistType]) {
-      if (argPlaylistType == null) argPlaylistType = playlistType;
+    if (argPlaylistType == null) argPlaylistType = playlistType;
     switch (argPlaylistType) {
       case PlaylistType.global:
         return _globalPlaylist;
@@ -390,12 +390,14 @@ abstract class PlaylistControl {
 
   /// Switches tp global Resets all playlists except it
   static void resetPlaylists() {
-    Prefs.byKey.playlistTypeInt.setPref(0); // Save to prefs
-    playlistSerializer.saveJson([]);
-    playlistType = PlaylistType.global;
-    _searchedPlaylist = Playlist([]);
-    _shuffledPlaylist = Playlist([]);
-    emitPlaylistChange();
+    if (playlistType != PlaylistType.global) {
+      Prefs.byKey.playlistTypeInt.setPref(0); // Save to prefs
+      playlistSerializer.saveJson([]);
+      playlistType = PlaylistType.global;
+      _searchedPlaylist = Playlist([]);
+      _shuffledPlaylist = Playlist([]);
+      emitPlaylistChange();
+    }
   }
 
   /// Search in playlist song array by query

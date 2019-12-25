@@ -46,18 +46,12 @@ public class PlayerForegroundService extends Service {
         registerReceiver(notificationReceiver, NotificationHandler.intentFilter);
         registerReceiver(noisyAudioStreamReceiver, noisyIntentFilter);
 
-        // Handle case when playingSong is null
-        // This can be considered as case when activity did not start (or didn't call send song method for some reason, e.g. songs list is empty)
-        //
-        if (PlaylistHandler.playingSong == null) {
-            PlaylistHandler.getLastPlaylist();
-            PlaylistHandler.playingSong = PlaylistHandler.searchById((int)PrefsHandler.getSongId());
-        }
+        PlaylistHandler.initCurrentSong();
 
-        if (PlaylistHandler.playingSong != null)
+        if (PlaylistHandler.getCurrentSong() != null)
             startForeground(
                     NotificationHandler.NOTIFICATION_ID,
-                    NotificationHandler.getNotification(PlaylistHandler.playingSong, PlayerHandler.isPlaying())
+                    NotificationHandler.getNotification(PlayerHandler.isPlaying())
             );
         else stopSelf();
     }

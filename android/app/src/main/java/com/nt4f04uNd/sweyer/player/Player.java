@@ -134,6 +134,10 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         return this.playing && this.prepared;
     }
 
+    /** Used to check cases when url is null (e.g. flutter hasn't setup it up for some reason) */
+    @Override
+    public boolean isUrlNull(){return url == null;}
+
 
     /**
      * Playback handling methods

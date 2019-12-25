@@ -42,6 +42,8 @@ abstract class PlayerAbstract {
 
     abstract boolean isActuallyPlaying();
 
+    abstract boolean isUrlNull();
+
     /**
      * Seek operations cannot be called until after the player is ready.
      */

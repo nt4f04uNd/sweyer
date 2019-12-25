@@ -11,8 +11,8 @@ import 'colors.dart';
 abstract class AppTheme {
   //******************************************** GENERIC COLORS ********************************************
   /// Main colors - `whiteDarkened` and `greyLight`
-  static final _ThemeContainer<Color> main =
-      _ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
+  static final _ThemeContainer<Color> main = _ThemeContainer(
+      light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
   /// Colors that are in contrast with `main`, so they can be use for text and icons
   ///
@@ -31,8 +31,8 @@ abstract class AppTheme {
   static final _ThemeContainer<Color> albumArtSmallRound =
       _ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
 
-  static final _ThemeContainer<Color> bottomTrackPanel =
-      _ThemeContainer(light: AppColors.whiteDarkened, dark: AppColors.greyLight);
+  static final _ThemeContainer<Color> bottomTrackPanel = _ThemeContainer(
+      light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
   static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
       // light: Colors.black.withOpacity(0.05),
@@ -45,8 +45,11 @@ abstract class AppTheme {
   static final _ThemeContainer<Color> declineButton =
       _ThemeContainer(light: Color(0xFF606060), dark: null);
 
-  static final _ThemeContainer<Color> redFlatButton =
-      _ThemeContainer(light: Colors.red.shade300, dark: Colors.red.shade200);
+  // static final _ThemeContainer<Color> redFlatButton =
+  //     _ThemeContainer(light: Colors.red.shade300, dark: Colors.red.shade200);
+
+  static final _ThemeContainer<Color> acceptButton = _ThemeContainer(
+      light: Colors.deepPurple.shade300, dark: Colors.deepPurple.shade200);
 
   static final _ThemeContainer<Color> splash =
       _ThemeContainer(light: Color(0x90bbbbbb), dark: Color(0x44c8c8c8));
@@ -193,7 +196,8 @@ abstract class AppTheme {
 
 abstract class AppSystemUIThemes {
   /// Generic theme for all screens
-  static final _ThemeContainer<SystemUiOverlayStyle> allScreens = _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> allScreens =
+      _ThemeContainer(
     light: SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,
@@ -213,7 +217,8 @@ abstract class AppSystemUIThemes {
   );
 
   /// Theme for the main screen
-  static final _ThemeContainer<SystemUiOverlayStyle> mainScreen = _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> mainScreen =
+      _ThemeContainer(
     light: allScreens.light
         .copyWith(systemNavigationBarColor: AppColors.whiteDarkened),
     // light: allScreens.light

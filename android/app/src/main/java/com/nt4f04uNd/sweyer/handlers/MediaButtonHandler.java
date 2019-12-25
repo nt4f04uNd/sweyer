@@ -43,9 +43,9 @@ public class MediaButtonHandler {
             });
 
             audioSession.setActive(true);
-        }
 
-        MediaButtonHandler.addListener(new ImplementedOnMediaButtonListener());
+            addListener(new ImplementedOnMediaButtonListener());
+        }
     }
 
     private static MediaSession audioSession;

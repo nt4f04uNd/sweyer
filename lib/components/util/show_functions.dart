@@ -65,7 +65,7 @@ abstract class ShowFunctions {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(top: 15, bottom: 15, left: 12),
+                padding: const EdgeInsets.only(top: 15, bottom: 15, left: 12),
                 child: Text(
                   "Сортировать — ${sortFeature == SortFeature.title ? "по названию" : "по дате"}",
                   style: TextStyle(
@@ -97,7 +97,7 @@ abstract class ShowFunctions {
   }) async {
     acceptButton ??= DialogFlatButton(
       child: Text('Принять'),
-      textColor: Constants.AppTheme.redFlatButton.auto(context),
+      textColor: Constants.AppTheme.acceptButton.auto(context),
       onPressed: () => Navigator.of(context).pop(),
     );
     declineButton ??= DialogFlatButton(
@@ -117,7 +117,7 @@ abstract class ShowFunctions {
             // child:
             content,
         // ),
-        contentPadding: EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
+        contentPadding:const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
         contentTextStyle: Theme.of(context).textTheme.subhead.copyWith(
               fontWeight:FontWeight.w500,
               fontSize: 15,

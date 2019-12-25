@@ -54,7 +54,16 @@ public class Constants {
             public static final String MEDIABUTTON_PLAY_PAUSE = PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY_PAUSE";
             public static final String MEDIABUTTON_PLAY = PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY";
             public static final String MEDIABUTTON_STOP = PACKAGE_NAME + "EVENT_MEDIABUTTON_STOP";
+            // Bare hook event
             public static final String MEDIABUTTON_HOOK = PACKAGE_NAME + "EVENT_MEDIABUTTON_HOOK";
+
+            // Composed hook events
+            /** When pressed hook once */
+            public static final String HOOK_PLAY_PAUSE = PACKAGE_NAME + "EVENT_HOOK_PLAY_PAUSE";
+            /** When pressed hook twice */
+            public static final String HOOK_PLAY_NEXT = PACKAGE_NAME + "EVENT_HOOK_PLAY_NEXT";
+            /** When pressed hook thrice */
+            public static final String HOOK_PLAY_PREV = PACKAGE_NAME + "EVENT_HOOK_PLAY_PREV";
         }
 
 

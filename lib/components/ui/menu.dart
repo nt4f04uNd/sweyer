@@ -52,7 +52,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10.0),
                       child: Text(
-                        'Музыка',
+                        'Sweyer',
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
@@ -172,7 +172,7 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
   void initState() {
     super.initState();
     _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+        AnimationController(vsync: this, duration:const Duration(milliseconds: 300));
 
     if (widget.animateDirection != null) {
       if (widget.animateDirection) {

@@ -76,6 +76,7 @@ public class NotificationHandler {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             defaultArtBitmapBytes = stream.toByteArray();
+
         }
     }
 
@@ -118,26 +119,17 @@ public class NotificationHandler {
 
     /**
      * Creates media notification with buttons
+     * Displays current song
      * When notification is clicked, the app will be opened
      */
-    public static Notification getNotification(@NotNull Song song, boolean isPlaying) {
+    public static Notification getNotification(boolean isPlaying) {
 
-        byte[] artBytes = null;
+        Song song = PlaylistHandler.getCurrentSong();
+
+        byte[] artBytes = PlaylistHandler.getArt();
+        if(artBytes == null) artBytes = defaultArtBitmapBytes;
+
         String artist = song.artist;
-
-        // Album uri check
-        if (song.albumArtUri != null) {
-            File imgFile = new File(song.albumArtUri);
-            if (imgFile.exists()) {
-                Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                artBytes = stream.toByteArray();
-            }
-        }
-        if (artBytes == null) {
-            artBytes = defaultArtBitmapBytes;
-        }
 
         // Artist check
         if (artist.equals("<unknown>"))
@@ -167,8 +159,8 @@ public class NotificationHandler {
     /**
      * This is the method that can be called to update the Notification
      */
-    public static void updateNotification(@NotNull Song song, boolean isPlaying) {
+    public static void updateNotification(boolean isPlaying) {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(GeneralHandler.getAppContext());
-        notificationManager.notify(NOTIFICATION_ID, getNotification(song, isPlaying));
+        notificationManager.notify(NOTIFICATION_ID, getNotification(isPlaying));
     }
 }

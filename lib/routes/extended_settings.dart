@@ -76,10 +76,10 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
         IgnorePointer(
           ignoring: !isChanged,
           child: AnimatedOpacity(
-            duration: Duration(milliseconds: 500),
+            duration:const Duration(milliseconds: 500),
             opacity: isChanged ? 1.0 : 0.0,
             child: Padding(
-              padding: EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
+              padding: const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
               child: PrimaryRaisedButton(
                   text: "Сохранить", onPressed: _handleSave),
             ),

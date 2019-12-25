@@ -98,7 +98,8 @@ Future<T> showCustomSearch<T>({
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
   // Pass delegate through route options
-  return Navigator.of(context).pushNamed(Constants.Routes.search.value, arguments: <String, Route>{
+  return Navigator.of(context)
+      .pushNamed(Constants.Routes.search.value, arguments: <String, Route>{
     "route": SearchPageRoute<T>(
       delegate: delegate,
     )
@@ -276,6 +277,16 @@ abstract class SearchDelegate<T> {
   /// page.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
+  /// Override this property to change route property `maintainState`
+  ///
+  /// Copied from route docs:
+  ///
+  /// Whether the route should remain in memory when it is inactive.
+  /// If this is true, then the route is maintained, so that any futures it is holding from the next route will properly resolve when the next route pops.
+  /// If this is not necessary this can be set to false to allow the framework to entirely discard the route's widget hierarchy when it is not visible.
+  /// The value of this getter should not change during the lifetime of the object. It is used by [createOverlayEntries], which is called by [install] near the beginning of the route lifecycle.
+  bool get maintainState => false;
+
   // The focus node to use for manipulating focus on the search page. This is
   // managed, owned, and set by the SearchPageRoute using this delegate.
   FocusNode _focusNode;
@@ -335,7 +346,7 @@ class SearchPageRoute<T> extends PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  bool get maintainState => false;
+  bool get maintainState => delegate.maintainState;
 
   @override
   Widget buildTransitions(

@@ -44,7 +44,19 @@ abstract class EventChannel {
       _prefix + "EVENT_MEDIABUTTON_PLAY_PAUSE";
   static const String MEDIABUTTON_PLAY = _prefix + "EVENT_MEDIABUTTON_PLAY";
   static const String MEDIABUTTON_STOP = _prefix + "EVENT_MEDIABUTTON_STOP";
+
+  /// Bare button hook event
   static const String MEDIABUTTON_HOOK = _prefix + "EVENT_MEDIABUTTON_HOOK";
+
+// Composed hook events
+  /// When pressed hook once
+  static const String HOOK_PLAY_PAUSE = _prefix + "EVENT_HOOK_PLAY_PAUSE";
+
+  /// When pressed hook twice
+  static const String HOOK_PLAY_NEXT = _prefix + "EVENT_HOOK_PLAY_NEXT";
+
+  /// When pressed hook thrice
+  static const String HOOK_PLAY_PREV = _prefix + "EVENT_HOOK_PLAY_PREV";
 }
 
 //****************GENERAL***************************************************************************************

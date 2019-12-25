@@ -104,9 +104,9 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   @override
   void dispose() {
-    super.dispose();
     _playlistChangeSubscription.cancel();
     _durationSubscription.cancel();
+    super.dispose();
   }
 
   /// Scrolls to current song
@@ -115,7 +115,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   Future<void> scrollToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
 
-    await globalKeyPlayerRoutePlaylist.currentState.itemScrollController
+    return globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .scrollTo(
             index: index, duration: scrollDuration, curve: Curves.easeInOut);
   }
@@ -125,7 +125,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   /// If optional `index` is provided - jumps to it
   void jumpToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
-
+    print('JUMP!');
     globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .jumpTo(index: index);
   }
@@ -144,20 +144,25 @@ class _PlaylistTabState extends State<_PlaylistTab>
       if (prevPlayingIndex >= maxScrollIndex && playingIndex == 0) {
         // When prev track was last in playlist
         jumpToSong();
+        prevPlayingIndex = playingIndex;
       } else if (playingIndex < maxScrollIndex) {
+        prevPlayingIndex = playingIndex;
         // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
         await scrollToSong();
       } else if (prevPlayingIndex > maxScrollIndex) {
         // Do nothing when it is already scrolled to `maxScrollIndex`
         return;
       } else if (playingIndex >= maxScrollIndex) {
-        if (prevPlayingIndex == 0)
+        if (prevPlayingIndex == 0) {
           jumpToSong(maxScrollIndex);
+          prevPlayingIndex = playingIndex;
+        }
         // If at the end of the list
-        else
+        else {
+          prevPlayingIndex = playingIndex;
           await scrollToSong(maxScrollIndex);
+        }
       }
-      prevPlayingIndex = playingIndex;
     }
   }
 
@@ -190,6 +195,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
               child: Padding(
                 padding: const EdgeInsets.only(top: 22.0),
                 child: AppBar(
+                  automaticallyImplyLeading: false,
                   title: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +223,6 @@ class _PlaylistTabState extends State<_PlaylistTab>
                       )
                     ],
                   ),
-                  automaticallyImplyLeading: false,
                 ),
               ),
             ),
@@ -232,19 +237,30 @@ class _PlaylistTabState extends State<_PlaylistTab>
   }
 }
 
-class _MainPlayerTab extends StatelessWidget {
+class _MainPlayerTab extends StatefulWidget {
+  @override
+  _MainPlayerTabState createState() => _MainPlayerTabState();
+}
+
+class _MainPlayerTabState extends State<_MainPlayerTab>
+    with AutomaticKeepAliveClientMixin<_MainPlayerTab> {
+  // This mixin doesn't allow widget to redraw
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return PageBase(
       backButton: SMMBackButton(
         icon: Icons.keyboard_arrow_down,
         size: 40.0,
       ),
-      // actions: <Widget>[
-      //   SingleAppBarAction(
-      //     child: _MoreButton(),
-      //   )
-      // ],
+      actions: <Widget>[
+        SingleAppBarAction(
+          child: _MoreButton(),
+        )
+      ],
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -445,10 +461,8 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-              child: AlbumArt(
-                path: PlaylistControl.currentSong?.albumArtUri,
-                isLarge: true,
-              ),
+              child:
+                  AlbumArtLarge(path: PlaylistControl.currentSong?.albumArtUri),
             ),
           ],
         ),
@@ -489,20 +503,9 @@ class _TrackSliderState extends State<_TrackSlider> {
     _getPrefsInstance();
 
     // Handle track position movement
-    _positionSubscription =
-        MusicPlayer.onAudioPositionChanged.listen((event) {
-      // print("POSITION CHANGE ${event.inSeconds}");
-      if (event.inSeconds - 0.9 > _value.inSeconds && !_isDragging) {
-        // Prevent waste updates
+    _positionSubscription = MusicPlayer.onAudioPositionChanged.listen((event) {
+      if (!_isDragging) {
         setState(() {
-          _value = event;
-          // if (prefs != null)
-          // Prefs.byKey.songPositionInt.setPref(_value.inSeconds, prefs);
-        });
-      } else if (event.inMilliseconds < 200) {
-        setState(() {
-          _isDragging = false;
-          _localValue = event.inSeconds.toDouble();
           _value = event;
         });
       }
@@ -513,7 +516,7 @@ class _TrackSliderState extends State<_TrackSlider> {
       setState(() {
         _isDragging = false;
         _localValue = 0.0;
-        _value = Duration(seconds: 0);
+        _value =const Duration(seconds: 0);
         _duration = event;
       });
     });

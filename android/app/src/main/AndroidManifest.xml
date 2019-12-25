@@ -17,7 +17,7 @@
          FlutterApplication and put your custom class here. -->
 
    <!-- TODO: Mipmap currently unused, probably should delete in the future -->
-   <application android:name="io.flutter.app.FlutterApplication" android:label="Музыка" android:icon="@mipmap/ic_launcher" android:resizeableActivity="false">
+   <application android:name="io.flutter.app.FlutterApplication" android:label="Sweyer" android:icon="@mipmap/ic_launcher" android:resizeableActivity="false">
       <activity android:name="com.nt4f04uNd.sweyer.MainActivity"
           android:launchMode="singleTop"
           android:theme="@style/LaunchThemeSystemUILight"

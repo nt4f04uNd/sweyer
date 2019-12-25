@@ -45,7 +45,7 @@ public class ServiceChannel implements MethodChannel.MethodCallHandler {
                 ServiceHandler.stopService();
                 break;
             case Constants.channels.service.METHOD_SEND_SONG:
-                PlaylistHandler.playingSong = Song.fromJson(new JSONObject((HashMap) call.argument("song")));
+                PlaylistHandler.setCurrentSong(Song.fromJson(new JSONObject((HashMap) call.argument("song"))));
                 break;
             default:
                 result.notImplemented();

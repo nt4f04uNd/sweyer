@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-
 import 'dart:async';
 
 import 'package:sweyer/constants/constants.dart' as Constants;
@@ -28,7 +27,7 @@ abstract class EventsHandler {
             .EventChannel.BECOME_NOISY: // handle headphones disconnect
           // MusicPlayer.pause();
           break;
-        //**************NOTIFICATION*********************************************************
+        //************** NOTIFICATION *********************************************************
         case Constants.EventChannel.NOTIFICATION_PLAY:
           // MusicPlayer.playPause();
           break;
@@ -41,7 +40,7 @@ abstract class EventsHandler {
         case Constants.EventChannel.NOTIFICATION_PREV:
           MusicPlayer.playPrev();
           break;
-        //**************AUDIOFOCUS*********************************************************
+        //************** AUDIO FOCUS *********************************************************
         case Constants.EventChannel.AUDIOFOCUS_GAIN:
           break;
         case Constants.EventChannel.AUDIOFOCUS_LOSS:
@@ -51,7 +50,7 @@ abstract class EventsHandler {
         case Constants.EventChannel.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
           break;
 
-        //**************MEDIABUTTONS*********************************************************
+        //************** MEDIA BUTTONS *********************************************************
         case Constants.EventChannel.MEDIABUTTON_AUDIO_TRACK:
           // MusicPlayer.playNext();
           break;
@@ -77,7 +76,19 @@ abstract class EventsHandler {
           // MusicPlayer.pause();
           break;
         case Constants.EventChannel.MEDIABUTTON_HOOK:
-          MusicPlayer.hookPress();
+          // MusicPlayer.hookPress();
+          break;
+
+        //****************** HOOK BUTTONS *****************************************************
+
+        case Constants.EventChannel.HOOK_PLAY_PAUSE:
+          // ...
+          break;
+        case Constants.EventChannel.HOOK_PLAY_NEXT:
+         MusicPlayer.playNext();
+          break;
+        case Constants.EventChannel.HOOK_PLAY_PREV:
+         MusicPlayer.playPrev();
           break;
 
         default:

@@ -32,8 +32,6 @@ class MainRouteState extends State<MainRoute> {
       ShowFunctions.showToast(msg: 'Нажмите еще раз для выхода');
       return Future.value(false);
     }
-    // Stop player before exiting app
-    await MusicPlayer.stop();
     return Future.value(true);
   }
 

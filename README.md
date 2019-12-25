@@ -1,7 +1,7 @@
 # Sweyer
 
-This is an open-source non-commercial repo of music player that is built with flutter
-This app is just my vision of how UI/UX in music apps should be
+This is an open-source non-commercial repo of music player that is built with flutter.
+This app is just my sight on how UI/UX in music apps should be.
 Currently I am building it only for Android
 
 Some conventions that I use when I write my application can be found in [README_CONVENTIONS.md](https://github.com/nt4f04uNd/sweyer/blob/master/README_CONVENTIONS.md) file

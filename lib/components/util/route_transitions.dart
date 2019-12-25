@@ -111,7 +111,8 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
   /// A duration of transition
   ///
   /// Defaults to `const Duration(milliseconds: 400)`
-  final Duration transitionDuration = const Duration(milliseconds: 400),
+  // final Duration transitionDuration = const Duration(milliseconds: 400),
+  final Duration transitionDuration = const Duration(milliseconds: 700),
 
   /// Field to pass `RouteSettings`
   final RouteSettings settings,
@@ -213,15 +214,21 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
                         (animation.status == AnimationStatus.forward ||
                             animation.status == AnimationStatus.completed)
                     ? AnnotatedRegion<SystemUiOverlayStyle>(
-                        value: checkEnterSystemUI(), child: child)
+                        value: checkEnterSystemUI(),
+                        child: child,
+                      )
                     : checkExitSystemUI != null &&
                             (animation.status == AnimationStatus.reverse ||
                                 animation.status == AnimationStatus.completed)
                         ? AnnotatedRegion<SystemUiOverlayStyle>(
-                            value: checkExitSystemUI(), child: child)
+                            value: checkExitSystemUI(),
+                            child: child,
+                          )
                         : routeSystemUI != null
-                            ?AnnotatedRegion<SystemUiOverlayStyle>(
-                                value: routeSystemUI(), child: child)
+                            ? AnnotatedRegion<SystemUiOverlayStyle>(
+                                value: routeSystemUI(),
+                                child: child,
+                              )
                             : child,
               ),
             ),
@@ -361,14 +368,20 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
                   child: checkEnterSystemUI != null &&
                           (animation.status == AnimationStatus.forward)
                       ? AnnotatedRegion<SystemUiOverlayStyle>(
-                          value: checkEnterSystemUI(), child: child)
+                          value: checkEnterSystemUI(),
+                          child: child,
+                        )
                       : checkExitSystemUI != null &&
                               (animation.status == AnimationStatus.reverse)
                           ? AnnotatedRegion<SystemUiOverlayStyle>(
-                              value: checkExitSystemUI(), child: child)
+                              value: checkExitSystemUI(),
+                              child: child,
+                            )
                           : routeSystemUI != null
                               ? AnnotatedRegion<SystemUiOverlayStyle>(
-                                  value: routeSystemUI(), child: child)
+                                  value: routeSystemUI(),
+                                  child: child,
+                                )
                               : child,
                 ),
               ),

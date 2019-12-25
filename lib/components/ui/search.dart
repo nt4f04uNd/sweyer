@@ -3,14 +3,23 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/components/custom/custom.dart' as custom_search;
 
 class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
-  SongsSearchDelegate();
+  SongsSearchDelegate() {
+    _fetchingHistory = _fetchSearchHistory();
+  }
   List<String> _suggestions = [];
+  Future<void> _fetchingHistory;
+
+  // Maintain search state
+  // That is needed we want to preserve state when user navigates to player route
+  @override
+  bool get maintainState => true;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -137,52 +146,71 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     final Iterable<Song> searched =
         PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/);
 
-    // Display suggestions on start screen
-    if (searched == null) return _buildSuggestions();
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      onVerticalDragStart: (_) => FocusScope.of(context).unfocus(),
+      onVerticalDragCancel: () => FocusScope.of(context).unfocus(),
+      onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
+      onVerticalDragEnd: (_) => FocusScope.of(context).unfocus(),
+      onVerticalDragUpdate: (_) => FocusScope.of(context).unfocus(),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
 
-    // Display when nothing has been found
-    if (searched != null && searched.length == 0) return _buildEmptyResults();
+          /// Show theme on some widget, to system ui could be consistent
+          value: Constants.AppSystemUIThemes.mainScreen.auto(context),
+          child: (() {
+            // return
+            // Display suggestions on start screen
+            if (searched == null) return _buildSuggestions();
 
-    // Display results if something had been found
-    final List<Song> searchedList = searched.toList();
+            // Display when nothing has been found
+            if (searched != null && searched.length == 0)
+              return _buildEmptyResults();
 
-    return Stack(
-      children: <Widget>[
-        Scrollbar(
-          child: ListView.builder(
-              physics: const SMMBouncingScrollPhysics(),
-              // FIXME add gesture detector that closes keyboard on scroll
-              padding: EdgeInsets.only(bottom: 65, top: 0),
-              itemCount: searched.length,
-              itemBuilder: (context, index) {
-                return StreamBuilder(
-                    stream: MusicPlayer.onDurationChanged,
-                    builder: (context, snapshot) {
-                      return TrackTile(
-                        index,
-                        key: UniqueKey(),
-                        song: searchedList[index],
-                        playing: searchedList[index].id ==
-                            PlaylistControl.currentSong?.id,
-                        additionalClickCallback: () {
-                          _writeInputToSearchHistory(query);
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          PlaylistControl.setSearchedPlaylist(
-                              searched.toList());
-                        },
-                      );
-                    });
-              }),
-        ),
-        BottomTrackPanel(),
-      ],
+            // Display results if something had been found
+            final List<Song> searchedList = searched.toList();
+
+            return Stack(
+              children: <Widget>[
+                Scrollbar(
+                  child: StreamBuilder(
+                      stream: MusicPlayer.onDurationChanged,
+                      builder: (context, snapshot) {
+                        return ListView.builder(
+                            physics: const SMMBouncingScrollPhysics(),
+                            padding: const EdgeInsets.only(bottom: 65, top: 0),
+                            itemCount: searched.length,
+                            itemBuilder: (context, index) {
+                              return SongTile(
+                                song: searchedList[index],
+                                playing: searchedList[index].id ==
+                                    PlaylistControl.currentSong?.id,
+                                additionalClickCallback: () {
+                                  _writeInputToSearchHistory(query);
+                                  FocusScope.of(context)
+                                      .requestFocus(FocusNode());
+                                  // TODO: maybe save last search query and update only if it has changed?
+                                  // NOTE that it might cause bugs if playlist will accidentally update (e.g. fetch process will end)
+                                  // So I maybe need to think about this a lil bit
+                                  PlaylistControl.setSearchedPlaylist(
+                                    searched.toList(),
+                                  );
+                                },
+                              );
+                            });
+                      }),
+                ),
+                BottomTrackPanel(),
+              ],
+            );
+          })()),
     );
   }
 
   /// Method that builds suggestions list
   Widget _buildSuggestions() {
     return FutureBuilder<void>(
-        future: _fetchSearchHistory(),
+        future:
+            _fetchingHistory, // use pre-obtained future, see https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
         builder: (context, snapshot) {
           // I could use snapshot from builder to display returned suggestions from `_fetchSearchHistory`, but if I would do, the search would blink on mount, so I user `_suggestions` array that is set in `_fetchSearchHistory`
           return Stack(
@@ -212,8 +240,9 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                           'Здесь будет отображаться история вашего поиска',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color:
-                                Constants.AppTheme.mainContrast.auto(context).withOpacity(0.7),
+                            color: Constants.AppTheme.mainContrast
+                                .auto(context)
+                                .withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -284,7 +313,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                       acceptButton: DialogFlatButton(
                         child: Text('Удалить'),
                         textColor:
-                            Constants.AppTheme.redFlatButton.auto(context),
+                            Constants.AppTheme.acceptButton.auto(context),
                         onPressed: () async {
                           Navigator.of(context).pop();
                           await _resetSearchHistory(context);
@@ -324,7 +353,7 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
               Text("Вы действительно хотите удалить этот запрос из истории?"),
           acceptButton: DialogFlatButton(
             child: Text('Удалить'),
-            textColor: Constants.AppTheme.redFlatButton.auto(context),
+            textColor: Constants.AppTheme.acceptButton.auto(context),
             onPressed: () async {
               Navigator.of(context).pop();
               await _deleteItemFromHistory(context, index);

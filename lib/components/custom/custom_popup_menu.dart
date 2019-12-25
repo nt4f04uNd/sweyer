@@ -267,7 +267,7 @@ class SMMPopupMenuItemState<T, W extends SMMPopupMenuItem<T>> extends State<W> {
       onTap: widget.enabled ? handleTap : null,
       child: Container(
         height: widget.height,
-        padding: EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        padding:const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
         child: item,
       ),
     );
