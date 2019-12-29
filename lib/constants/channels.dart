@@ -24,6 +24,9 @@ abstract class EventChannel {
   static const String NOTIFICATION_PAUSE = _prefix + 'EVENT_NOTIFICATION_PAUSE';
   static const String NOTIFICATION_NEXT = _prefix + 'EVENT_NOTIFICATION_NEXT';
   static const String NOTIFICATION_PREV = _prefix + 'EVENT_NOTIFICATION_PREV';
+  static const String NOTIFICATION_KILL_SERVICE = _prefix + 'EVENT_NOTIFICATION_KILL_SERVICE';
+  static const String NOTIFICATION_LOOP = _prefix + 'EVENT_NOTIFICATION_LOOP';
+  static const String NOTIFICATION_LOOP_ON = _prefix + "EVENT_NOTIFICATION_LOOP_ON";
 
   static const String AUDIOFOCUS_GAIN = _prefix + "EVENT_AUDIOFOCUS_GAIN";
   static const String AUDIOFOCUS_LOSS = _prefix + "EVENT_AUDIOFOCUS_LOSS";

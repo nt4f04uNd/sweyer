@@ -70,17 +70,28 @@ abstract class NativeAudioPlayer {
   static final StreamController<PlatformException> _errorController =
       StreamController<PlatformException>.broadcast();
 
+  static final StreamController<bool> _loopController =
+      StreamController<bool>.broadcast();
+
   /// Enables more verbose logging.
   static bool logEnabled = false;
 
-  static AudioPlayerState _audioPlayerState = AudioPlayerState.PAUSED;
+  static AudioPlayerState _internalState = AudioPlayerState.PAUSED;
+  static bool _internalLoopMode = false;
 
-  static AudioPlayerState get state => _audioPlayerState;
+  static AudioPlayerState get state => _internalState;
+  static bool get loopMode => _internalLoopMode;
 
   /// It is observable, that means on every set we emit event to `onPlayerStateChanged` stream
-  static set state(AudioPlayerState state) {
-    _playerStateController.add(state);
-    _audioPlayerState = state;
+  static set state(AudioPlayerState value) {
+    _playerStateController.add(value);
+    _internalState = value;
+  }
+
+  /// It is observable, that means on every set we emit event to `onPlayerStateChanged` stream
+  static set loopMode(bool value) {
+    _loopController.add(value);
+    _internalLoopMode = value;
   }
 
   /// Stream of changes on player state.
@@ -110,6 +121,9 @@ abstract class NativeAudioPlayer {
   /// [ReleaseMode.LOOP] also sends events to this stream.
   static Stream<void> get onPlayerCompletion => _completionController.stream;
 
+  /// Stream of loop mode changes.
+  static Stream<void> get onLoopSwitch => _loopController.stream;
+
   /// Stream of player errors.
   ///
   /// Events are sent when an unexpected error is thrown in the native code.
@@ -119,7 +133,7 @@ abstract class NativeAudioPlayer {
   /// Also sets release mode to be `ReleaseMode.STOP`
   static Future<void> init() async {
     if (await isPlaying()) state = AudioPlayerState.PLAYING;
-    NativeAudioPlayer.setReleaseMode(ReleaseMode.STOP);
+    loopMode = await isLooping();
   }
 
   /// Plays an audio.
@@ -202,7 +216,7 @@ abstract class NativeAudioPlayer {
   ///
   /// Check [ReleaseMode]'s doc to understand the difference between the modes.
   static Future<void> setReleaseMode(ReleaseMode releaseMode) async {
-   return _channel.invokeMethod(
+    return _channel.invokeMethod(
       'setReleaseMode',
       {'releaseMode': releaseMode.toString()},
     );
@@ -219,9 +233,19 @@ abstract class NativeAudioPlayer {
   }
 
   /// Checks is the actual player is playing
-  /// Needed on the app start, to check if service is running and playing the m
+  /// Needed on the app start, to check if service is running and playing music
   static Future<bool> isPlaying() async {
     return _channel.invokeMethod('isPlaying');
+  }
+
+  /// Checks is the actual player has release mode [ReleaseMode.LOOP]
+  static Future<bool> isLooping() async {
+    return _channel.invokeMethod('isLooping');
+  }
+
+  /// Switches loop mode
+  static Future<void> switchLoopMode() async {
+    return _channel.invokeMethod('switchLoopMode');
   }
 
   /// Get audio duration after setting url.
@@ -238,7 +262,7 @@ abstract class NativeAudioPlayer {
     return _channel.invokeMethod('getCurrentPosition');
   }
 
-  static Future<void> platformCallHandler(MethodCall call)async  {
+  static Future<void> platformCallHandler(MethodCall call) async {
     try {
       _doHandlePlatformCall(call);
     } catch (ex) {
@@ -254,35 +278,50 @@ abstract class NativeAudioPlayer {
 
     switch (call.method) {
       case 'audio.onDuration':
-        Duration newDuration = Duration(milliseconds: value);
-        _durationController.add(newDuration);
-        break;
-      case 'audio.onCurrentPosition':
-        Duration newDuration = Duration(milliseconds: value);
-        _positionController.add(newDuration);
-        break;
-      case 'audio.onComplete':
-        state = AudioPlayerState.COMPLETED;
-        _completionController.add(null);
-        break;
-      case 'audio.onError':
-        state = AudioPlayerState.STOPPED;
-        // TODO : add exception various codes
-        _errorController
-            .add(PlatformException(code: "0", message: value["message"]));
-        break;
-      case 'audio.state.set':
-        switch (value) {
-          case 'PLAYING':
-            state = AudioPlayerState.PLAYING;
-            break;
-          case 'PAUSED':
-            state = AudioPlayerState.PAUSED;
-            break;
-          case 'STOPPED':
-            state = AudioPlayerState.STOPPED;
+        {
+          Duration newDuration = Duration(milliseconds: value);
+          _durationController.add(newDuration);
+          break;
         }
-        break;
+      case 'audio.onCurrentPosition':
+        {
+          Duration newDuration = Duration(milliseconds: value);
+          _positionController.add(newDuration);
+          break;
+        }
+      case 'audio.onComplete':
+        {
+          state = AudioPlayerState.COMPLETED;
+          _completionController.add(null);
+          break;
+        }
+      case 'audio.onError':
+        {
+          state = AudioPlayerState.STOPPED;
+          // TODO : add exception various codes
+          _errorController
+              .add(PlatformException(code: "0", message: value["message"]));
+          break;
+        }
+      case 'audio.onLoopModeSwitch':
+        {
+          loopMode = value;
+          break;
+        }
+      case 'audio.state.set':
+        {
+          switch (value) {
+            case 'PLAYING':
+              state = AudioPlayerState.PLAYING;
+              break;
+            case 'PAUSED':
+              state = AudioPlayerState.PAUSED;
+              break;
+            case 'STOPPED':
+              state = AudioPlayerState.STOPPED;
+          }
+          break;
+        }
       default:
         _log('Unknown method ${call.method} ');
     }

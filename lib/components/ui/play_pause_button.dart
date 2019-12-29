@@ -34,7 +34,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     _animationController =
         AnimationController(vsync: this, duration:const Duration(milliseconds: 300));
 
-    if (MusicPlayer.playState == AudioPlayerState.PLAYING) {
+    if (MusicPlayer.playerState == AudioPlayerState.PLAYING) {
       _animationController.value = 1;
     } else {
       _animationController.value = 0;

@@ -35,7 +35,7 @@ import io.flutter.plugin.common.MethodChannel;
  */
 public abstract class PlayerHandler { // TODO: add error handling and logging
 
-    public static Player player = new Player();
+    public static Player player;
     /**
      * For position updates
      */
@@ -47,6 +47,17 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     private static final Handler hookButtonHandler = new Handler();
     private static int hookButtonPressCount = 0;
 
+
+    public static void init() {
+        if (player == null) {
+            player = new Player();
+            if (PrefsHandler.getLoopMode()) { // I don't call handleLoopModeSwitch(true) 'cause a the moment of execution of this code dart code hasn't been initiated yet
+                setReleaseMode(ReleaseMode.LOOP);
+            } else {
+                setReleaseMode(ReleaseMode.STOP);
+            }
+        }
+    }
 
     // HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -113,6 +124,11 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         }
     }
 
+    /// Notifies channel about loop mode switch
+    public static void handleLoopModeSwitch(boolean value) {
+        PlayerChannel.invokeMethod("audio.onLoopModeSwitch", buildArguments(value));
+    }
+
     public static void callSetState(PlayerState state) {
         switch (state) {
             case PLAYING:
@@ -138,7 +154,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     // COMPOSED METHODS (wrappers over default player methods) ///////////////////////////////////////////////////////////////
     // TODO: remove respect silence, isLocal and stayAwake
     public static void play(@NotNull Song song, double volume, Integer position, boolean respectSilence, boolean isLocal, boolean stayAwake) {
-        ServiceHandler.startService();
+        ServiceHandler.startService(true);
         player.configAttributes(respectSilence, stayAwake, GeneralHandler.getAppContext());
         player.setVolume(volume);
         player.setUrl(song.trackUri, isLocal);
@@ -159,14 +175,14 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
                     PlayerHandler.callSetState(PlayerState.PLAYING);
                     PlaylistHandler.setCurrentSong(song);
                     PrefsHandler.setSongId(song.id);
-                    NotificationHandler.updateNotification(true);
+                    NotificationHandler.updateNotification(true, isLooping());
                 }
             }
         }
     }
 
     public static void resume() {
-        ServiceHandler.startService();
+        ServiceHandler.startService(true);
         if (AudioFocusHandler.focusState != AudioManager.AUDIOFOCUS_GAIN)
             AudioFocusHandler.requestFocus();
         if (AudioFocusHandler.focusState == AudioManager.AUDIOFOCUS_GAIN) {
@@ -175,16 +191,25 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void pause() {
+        ServiceHandler.startService(false);
         barePause();
         AudioFocusHandler.abandonFocus();
     }
 
+    /**
+     * Discouraged to use
+     */
     public static void stop() {
+        ServiceHandler.stopService();
         bareStop();
         AudioFocusHandler.abandonFocus();
     }
 
+    /**
+     * Discouraged to use
+     */
     public static void release() {
+        ServiceHandler.stopService();
         bareRelease();
         AudioFocusHandler.abandonFocus();
     }
@@ -232,14 +257,14 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         player.play();
         PrefsHandler.setSongIsPlaying(true);
         PlayerHandler.callSetState(PlayerState.PLAYING);
-        NotificationHandler.updateNotification(true);
+        NotificationHandler.updateNotification(true, isLooping());
     }
 
     public static void barePause() {
         player.pause();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.PAUSED);
-        NotificationHandler.updateNotification(false);
+        NotificationHandler.updateNotification(false, isLooping());
     }
 
     public static void bareStop() {
@@ -247,7 +272,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
         // TODO: maybe remove notification at all?
-        NotificationHandler.updateNotification(false);
+        NotificationHandler.updateNotification(false, isLooping());
     }
 
     public static void bareRelease() {
@@ -255,7 +280,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
         // TODO: maybe remove notification at all?
-        NotificationHandler.updateNotification(false);
+        NotificationHandler.updateNotification(false, isLooping());
     }
     /// END OF BARE METHODS ////////////////////////////////////////////////////////////////////////
 
@@ -325,6 +350,19 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         return player.getReleaseMode().equals(ReleaseMode.LOOP);
     }
 
+    public static void switchLoopMode() {
+        if (isLooping()) {
+            setReleaseMode(ReleaseMode.STOP);
+            PrefsHandler.setLoopMode(false);
+            handleLoopModeSwitch(false);
+            NotificationHandler.updateNotification(isPlaying(), false);
+        } else {
+            setReleaseMode(ReleaseMode.LOOP);
+            PrefsHandler.setLoopMode(true);
+            handleLoopModeSwitch(true);
+            NotificationHandler.updateNotification(isPlaying(), true);
+        }
+    }
 
     // END OF NATIVE PART METHODS ///////////////////////////////////////////////////////////////////////////////////
 

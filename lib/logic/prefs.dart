@@ -6,12 +6,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// It is a unite container for all the shared preferences of the application.
+/// It contains even ones that aren't used in dart side directly, but only on native
 class _PrefKeys {
   /// Search history list
   final Pref<List<String>> searchHistoryStringList =
       const Pref<List<String>>(key: 'search_history');
 
   /// Track position
+  /// 
   /// NOTE IN SECONDS
   final Pref<int> songPositionInt = const Pref<int>(key: 'song_position');
 
@@ -24,6 +27,8 @@ class _PrefKeys {
   final Pref<int> songIsPlayingBool = const Pref<int>(key: 'song_is_playing');
 
   /// Loop mode
+  /// 
+  /// NOTE Used on native
   final Pref<bool> loopModeBool = const Pref<bool>(key: 'loop_mode');
 
   /// Sort feature

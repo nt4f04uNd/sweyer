@@ -15,7 +15,16 @@ enum SortFeature { date, title }
 enum FilterFeature { duration, fileSize }
 
 /// What playlist is now playing? type
-enum PlaylistType { global, searched, shuffled }
+enum PlaylistType {
+  /// Playlist for songs
+  global,
+
+  /// Playlist used to save searched tracks
+  searched,
+
+  /// Shuffled version of any other playlist
+  shuffled
+}
 
 /// Class, representing a single playlist in application
 ///
@@ -45,12 +54,10 @@ class Playlist {
   }
 
   // Getters
-
   List<Song> get songs => _songs;
 
   /// Get playlist length
   int get length => _songs.length;
-
   bool get isEmpty => _songs.isEmpty;
   bool get isNotEmpty => _songs.isNotEmpty;
 
@@ -81,19 +88,9 @@ class Playlist {
     return _songs.removeAt(index);
   }
 
-  /// Returns song object by index in songs array
-  Song getSongAt(int index) {
-    return length > 0 ? _songs[index] : null;
-  }
-
   /// Returns song object by song id
   Song getSongById(int id) {
     return _songs.firstWhere((el) => el.id == id, orElse: () => null);
-  }
-
-  /// Returns song id in by its index in songs array
-  int getSongIdAt(int index) {
-    return _songs[index].id;
   }
 
   /// Returns song index in array by its id
@@ -105,18 +102,18 @@ class Playlist {
   int getNextSongId(int id) {
     final int nextSongIndex = getSongIndexById(id) + 1;
     if (nextSongIndex >= length) {
-      return getSongIdAt(0);
+      return _songs[0].id;
     }
-    return getSongIdAt(nextSongIndex);
+    return _songs[nextSongIndex].id;
   }
 
   /// Returns prev song id
   int getPrevSongId(int id) {
     final int prevSongIndex = getSongIndexById(id) - 1;
     if (prevSongIndex < 0) {
-      return getSongIdAt(length - 1);
+      return _songs[length - 1].id;
     }
-    return getSongIdAt(prevSongIndex);
+    return _songs[prevSongIndex].id;
   }
 
   // TODO: implement file size filter
@@ -137,18 +134,8 @@ class Playlist {
 /// 4. Search in playlists
 ///
 /// etc.
-///
-/// This class consciously doesn't expose playlists and songs themselves.
-/// This is done for sake of optimization and avoiding mistakes, e.g. `getSongById` should always be searched in `_globalPlaylist`
 abstract class PlaylistControl {
-  /// Playlist for songs
-  static Playlist _globalPlaylist;
-
-  /// Playlist used to save searched tracks
-  static Playlist _searchedPlaylist;
-
-  /// Shuffled version of global playlist
-  static Playlist _shuffledPlaylist;
+  static Map<PlaylistType, Playlist> playlists = {};
 
   /// What playlist is now playing?
   static PlaylistType playlistType = PlaylistType.global;
@@ -182,10 +169,10 @@ abstract class PlaylistControl {
   /// Represents songs fetch on app start
   static bool initFetching = true;
 
-  /// Get current playing song (always being searched in _globalPlaylist)
+  /// Get current playing song (always being searched in globalPlaylist)
   static Song get currentSong {
-    return _globalPlaylist.getSongById(_playingSongIdState) ??
-        _globalPlaylist.getSongAt(0);
+    return playlists[PlaylistType.global].getSongById(_playingSongIdState) ??
+        playlists[PlaylistType.global].songs[0];
   }
 
   /// Get current playing id
@@ -201,15 +188,15 @@ abstract class PlaylistControl {
   /// Util function to select playlist by `argPlaylistType`
   ///
   /// Returns current playlist if `argPlaylistType` is `null`
-  static Playlist _selectPlaylist([PlaylistType argPlaylistType]) {
+  static Playlist getPlaylist([PlaylistType argPlaylistType]) {
     if (argPlaylistType == null) argPlaylistType = playlistType;
     switch (argPlaylistType) {
       case PlaylistType.global:
-        return _globalPlaylist;
+        return playlists[PlaylistType.global];
       case PlaylistType.searched:
-        return _searchedPlaylist;
+        return playlists[PlaylistType.searched];
       case PlaylistType.shuffled:
-        return _shuffledPlaylist;
+        return playlists[PlaylistType.shuffled];
       default:
         throw Exception('Invalid playlist type');
     }
@@ -219,26 +206,12 @@ abstract class PlaylistControl {
   ///
   /// If optional `playlistType` is specified, then returns index in selected playlist type
   static int currentSongIndex([PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType)
+    return getPlaylist(argPlaylistType)
         .getSongIndexById(_playingSongIdState);
   }
 
-  /// Returns `length` of current playlist (by default)
-  ///
-  /// If optional `playlistType` is specified, then returns `length` of selected playlist type
-  static int length([PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).length;
-  }
-
-  /// Returns `isEmpty` of current playlist (by default)
-  ///
-  /// If optional `playlistType` is specified, then returns `isEmpty` of selected playlist type
-  static bool songsEmpty([PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).isEmpty;
-  }
-
   /// Whether playlist control is ready to provide player instance sources to play tracks
-  static bool get playReady => _globalPlaylist != null;
+  static bool get playReady => playlists[PlaylistType.global] != null;
 
   /// A stream of changes on playlist
   static Stream<void> get onPlaylistListChange =>
@@ -249,43 +222,12 @@ abstract class PlaylistControl {
     _songsListChangeStreamController.add(null);
   }
 
-  // Methods from playlist class
-
-  /// Searches always on `_globalPlaylist`
-  static Song getSongById(int id) {
-    return _globalPlaylist.getSongById(id);
-  }
-
-  static Song getSongAt(int index, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getSongAt(index);
-  }
-
-  static int getSongIdAt(int index, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getSongIdAt(index);
-  }
-
-  static int getSongIndexById(int id, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getSongIndexById(id);
-  }
-
-  static int getNextSongId(int id, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getNextSongId(id);
-  }
-
-  static int getPrevSongId(int id, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).getPrevSongId(id);
-  }
-
-  static Song removeSongAt(int index, [PlaylistType argPlaylistType]) {
-    return _selectPlaylist(argPlaylistType).removeSongAt(index);
-  }
-
   /// The main data app initialization function
   /// Inits all playlists
   /// Also handles no-permissions situations
   static Future<void> init() async {
     if (Permissions.granted) {
-      _globalPlaylist = null; // Reset `playReady`
+      playlists[PlaylistType.global] = null; // Reset `playReady`
       emitPlaylistChange();
 
       initFetching = true;
@@ -294,13 +236,13 @@ abstract class PlaylistControl {
         playlistSerializer.initJson() // Init playlist json
       ]);
       // Get songs from json and create global playlist
-      _globalPlaylist = Playlist(await songsSerializer.readJson());
+      playlists[PlaylistType.global] = Playlist(await songsSerializer.readJson());
       await _restoreSortFeature();
       await filterSongs();
 
       // print(Song.test().toJson());
       // print(
-      //     "1111111111111111111111111111111111111111111111111111111111 ${_globalPlaylist.add(Song.test())}");
+      //     "1111111111111111111111111111111111111111111111111111111111 ${globalPlaylist.add(Song.test())}");
 
       sortSongs();
 
@@ -310,8 +252,7 @@ abstract class PlaylistControl {
       // Emit event to track change stream
       emitPlaylistChange();
 
-      _globalPlaylist =
-          Playlist(await songsFetcher.fetchSongs()); // Fetch songs
+      playlists[PlaylistType.global] = Playlist(await songsFetcher.fetchSongs()); // Fetch songs
       await filterSongs();
       sortSongs();
 
@@ -321,7 +262,7 @@ abstract class PlaylistControl {
       }
     } else {
       // Init empty playlist if no permission granted
-      if (!playReady) _globalPlaylist = Playlist([]);
+      if (!playReady) playlists[PlaylistType.global] = Playlist([]);
     }
 
     initFetching = false;
@@ -336,7 +277,7 @@ abstract class PlaylistControl {
 
   /// Refetch songs and update playlist
   static Future<void> refetchSongs() async {
-    _globalPlaylist = Playlist(await songsFetcher.fetchSongs());
+    playlists[PlaylistType.global] = Playlist(await songsFetcher.fetchSongs());
     await filterSongs();
     sortSongs();
     emitPlaylistChange();
@@ -345,9 +286,9 @@ abstract class PlaylistControl {
   /// Sets searched playlist
   ///
   /// @param `songs` — can be omitted and if so, then playlist is not changed, only switched to it
-  static void setSearchedPlaylist([List<Song> songs]) {
+  static Future<void> setSearchedPlaylist([List<Song> songs])async {
     if (songs != null) {
-      _searchedPlaylist = Playlist(songs);
+      playlists[PlaylistType.searched] = Playlist(songs);
       playlistSerializer.saveJson(songs);
     }
     playlistType = PlaylistType.searched;
@@ -369,11 +310,11 @@ abstract class PlaylistControl {
     Prefs.byKey.playlistTypeInt.setPref(2);
 
     if (songs == null)
-      _shuffledPlaylist =
-          Playlist.shuffled(_selectPlaylist(argPlaylistType).songs);
+      playlists[PlaylistType.shuffled] =
+          Playlist.shuffled(getPlaylist(argPlaylistType).songs);
     else
-      _shuffledPlaylist = Playlist(songs);
-    playlistSerializer.saveJson(_shuffledPlaylist.songs);
+      playlists[PlaylistType.shuffled] = Playlist(songs);
+    playlistSerializer.saveJson(playlists[PlaylistType.shuffled].songs);
     emitPlaylistChange();
   }
 
@@ -385,7 +326,7 @@ abstract class PlaylistControl {
     if (argPlaylistType == PlaylistType.global)
       resetPlaylists();
     else if (argPlaylistType == PlaylistType.searched) setSearchedPlaylist();
-    _shuffledPlaylist = Playlist([]);
+    playlists[PlaylistType.shuffled] = Playlist([]);
   }
 
   /// Switches tp global Resets all playlists except it
@@ -394,8 +335,8 @@ abstract class PlaylistControl {
       Prefs.byKey.playlistTypeInt.setPref(0); // Save to prefs
       playlistSerializer.saveJson([]);
       playlistType = PlaylistType.global;
-      _searchedPlaylist = Playlist([]);
-      _shuffledPlaylist = Playlist([]);
+      playlists[PlaylistType.searched] = Playlist([]);
+      playlists[PlaylistType.shuffled] = Playlist([]);
       emitPlaylistChange();
     }
   }
@@ -405,7 +346,7 @@ abstract class PlaylistControl {
     if (query != '') {
       // Lowercase to bring strings to one format
       query = query.toLowerCase();
-      return _globalPlaylist.songs.where((el) {
+      return playlists[PlaylistType.global].songs.where((el) {
         return el.title.toLowerCase().contains(query) ||
             el.artist.toLowerCase().contains(query) ||
             el.album.toLowerCase().contains(query) ||
@@ -426,13 +367,13 @@ abstract class PlaylistControl {
     feature ??= sortFeature;
     switch (feature) {
       case SortFeature.date:
-        _globalPlaylist.songs
+        playlists[PlaylistType.global].songs
             .sort((b, a) => a.dateModified.compareTo(b.dateModified));
         sortFeature = feature;
         Prefs.byKey.sortFeatureInt.setPref(0);
         break;
       case SortFeature.title:
-        _globalPlaylist.songs.sort((a, b) => a.title.compareTo(b.title));
+        playlists[PlaylistType.global].songs.sort((a, b) => a.title.compareTo(b.title));
         sortFeature = feature;
         Prefs.byKey.sortFeatureInt.setPref(1);
         break;
@@ -447,7 +388,7 @@ abstract class PlaylistControl {
 
   /// Filter songs by min duration (for now, in future by size will be implemented)
   static Future<void> filterSongs() async {
-    _globalPlaylist.filter(FilterFeature.duration,
+    playlists[PlaylistType.global].filter(FilterFeature.duration,
         duration: Duration(
             seconds:
                 await Prefs.byKey.settingMinFileDurationInt.getPref() ?? 30));
@@ -469,7 +410,7 @@ abstract class PlaylistControl {
     // if (_playingSongIdState == id) MusicPlayer.playNext(silent: true);
     // print(getSongById(id).title);
     // futures.add(deleteSongFromDevice(id));
-    // _globalPlaylist.removeSongById(id);
+    // globalPlaylist.removeSongById(id);
     // }
     // emitPlaylistChange();
     // try {
@@ -513,7 +454,7 @@ abstract class PlaylistControl {
       List<int> songIds = await playlistSerializer.readJson();
       List<Song> restoredSongs = [];
       songIds.forEach((id) {
-        final Song songEl = _globalPlaylist.getSongById(id);
+        final Song songEl = playlists[PlaylistType.global].getSongById(id);
         if (songEl != null) restoredSongs.add(songEl);
       });
       if (playlistType == PlaylistType.searched)
@@ -528,12 +469,12 @@ abstract class PlaylistControl {
   /// Its main purpose to setup player to work with playlists
   static Future<void> _restoreLastSong() async {
     // songsEmpty condition is here to avoid errors when trying to get first song index
-    if (!songsEmpty()) {
+    if (getPlaylist().isNotEmpty) {
       // Get saved data
       SharedPreferences prefs = await Prefs.getSharedInstance();
 
       int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs) ??
-          _selectPlaylist().getSongIdAt(0);
+          getPlaylist().songs[0];
 
       // Setup initial playing state index from prefs
       _playingSongIdState = savedSongId;

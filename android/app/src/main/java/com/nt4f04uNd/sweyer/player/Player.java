@@ -47,7 +47,9 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
      * Setter methods
      */
 
-    /** NOTE THAT THIS CAN THROW ILLEGAL STATE EXCEPTION */
+    /**
+     * NOTE THAT THIS CAN THROW ILLEGAL STATE EXCEPTION
+     */
     @Override
     public void setUrl(String url, boolean isLocal) {
         if (!objectEquals(this.url, url)) {
@@ -60,10 +62,10 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.prepared = false;
             }
 
-                this.setSource(url);
-                this.player.setVolume((float) volume, (float) volume);
-                this.player.setLooping(this.releaseMode == ReleaseMode.LOOP);
-                this.player.prepareAsync();
+            this.setSource(url);
+            this.player.setVolume((float) volume, (float) volume);
+            this.player.setLooping(this.releaseMode == ReleaseMode.LOOP);
+            this.player.prepareAsync();
 
         }
     }
@@ -134,9 +136,13 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         return this.playing && this.prepared;
     }
 
-    /** Used to check cases when url is null (e.g. flutter hasn't setup it up for some reason) */
+    /**
+     * Used to check cases when url is null (e.g. flutter hasn't setup it up for some reason)
+     */
     @Override
-    public boolean isUrlNull(){return url == null;}
+    public boolean isUrlNull() {
+        return url == null;
+    }
 
 
     /**

@@ -6,7 +6,8 @@
 package com.nt4f04uNd.sweyer;
 
 public class Constants {
-    public static final String PACKAGE_NAME = "com.nt4f04und.sweyer.";
+    public static final String PACKAGE_NAME = "com.nt4f04und.sweyer";
+    public static final String DOTTED_PACKAGE_NAME = "com.nt4f04und.sweyer.";
     public static final String LogTag = PACKAGE_NAME;
 
     public static final class player {
@@ -18,77 +19,80 @@ public class Constants {
 
         //****************PLAYER***************************************************************************************
         public static final class player {
-            public static final String CHANNEL_NAME = PACKAGE_NAME + "PLAYER_CHANNEL";
+            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "PLAYER_CHANNEL";
         }
 
 
         //****************EVENTS***************************************************************************************
         public static final class events {
-            public static final String CHANNEL_NAME = PACKAGE_NAME + "EVENT_CHANNEL";
+            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "EVENT_CHANNEL";
 
-            public static final String BECOME_NOISY = PACKAGE_NAME + "EVENT_BECAME_NOISY";
+            public static final String BECOME_NOISY = DOTTED_PACKAGE_NAME + "EVENT_BECAME_NOISY";
 
             // Notification
-            public static final String NOTIFICATION_CHANNEL_ID = PACKAGE_NAME + "EVENT_NOTIFICATION_CHANNEL";
-            public static final String NOTIFICATION_INTENT_PLAY = PACKAGE_NAME + "EVENT_NOTIFICATION_PLAY";
-            public static final String NOTIFICATION_INTENT_PAUSE = PACKAGE_NAME + "EVENT_NOTIFICATION_PAUSE";
-            public static final String NOTIFICATION_INTENT_NEXT = PACKAGE_NAME + "EVENT_NOTIFICATION_NEXT";
-            public static final String NOTIFICATION_INTENT_PREV = PACKAGE_NAME + "EVENT_NOTIFICATION_PREV";
+            public static final String NOTIFICATION_CHANNEL_ID = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_CHANNEL";
+            public static final String NOTIFICATION_INTENT_PLAY = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_PLAY";
+            public static final String NOTIFICATION_INTENT_PAUSE = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_PAUSE";
+            public static final String NOTIFICATION_INTENT_NEXT = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_NEXT";
+            public static final String NOTIFICATION_INTENT_PREV = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_PREV";
+            public static final String NOTIFICATION_INTENT_KILL_SERVICE = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_KILL_SERVICE";
+            public static final String NOTIFICATION_INTENT_LOOP = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_LOOP";
+            public static final String NOTIFICATION_INTENT_LOOP_ON = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_LOOP_ON";
 
 
             // Audio focus
-            public static final String AUDIOFOCUS_GAIN = PACKAGE_NAME + "EVENT_AUDIOFOCUS_GAIN";
-            public static final String AUDIOFOCUS_LOSS = PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS";
-            public static final String AUDIOFOCUS_LOSS_TRANSIENT = PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT";
-            public static final String AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK = PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
+            public static final String AUDIOFOCUS_GAIN = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_GAIN";
+            public static final String AUDIOFOCUS_LOSS = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS";
+            public static final String AUDIOFOCUS_LOSS_TRANSIENT = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT";
+            public static final String AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
 
             // Media button events
             // see
             // https://developer.android.com/reference/android/view/KeyEvent.html#KEYCODE_MEDIA_AUDIO_TRACK
             // for key codes docs
-            public static final String MEDIABUTTON_AUDIO_TRACK = PACKAGE_NAME + "EVENT_MEDIABUTTON_AUDIO_TRACK";
-            public static final String MEDIABUTTON_FAST_FORWARD = PACKAGE_NAME + "EVENT_MEDIABUTTON_FAST_FORWARD";
-            public static final String MEDIABUTTON_REWIND = PACKAGE_NAME + "EVENT_MEDIABUTTON_REWIND";
-            public static final String MEDIABUTTON_NEXT = PACKAGE_NAME + "EVENT_MEDIABUTTON_NEXT";
-            public static final String MEDIABUTTON_PREVIOUS = PACKAGE_NAME + "EVENT_MEDIABUTTON_PREVIOUS";
-            public static final String MEDIABUTTON_PLAY_PAUSE = PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY_PAUSE";
-            public static final String MEDIABUTTON_PLAY = PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY";
-            public static final String MEDIABUTTON_STOP = PACKAGE_NAME + "EVENT_MEDIABUTTON_STOP";
+            public static final String MEDIABUTTON_AUDIO_TRACK = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_AUDIO_TRACK";
+            public static final String MEDIABUTTON_FAST_FORWARD = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_FAST_FORWARD";
+            public static final String MEDIABUTTON_REWIND = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_REWIND";
+            public static final String MEDIABUTTON_NEXT = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_NEXT";
+            public static final String MEDIABUTTON_PREVIOUS = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PREVIOUS";
+            public static final String MEDIABUTTON_PLAY_PAUSE = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY_PAUSE";
+            public static final String MEDIABUTTON_PLAY = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY";
+            public static final String MEDIABUTTON_STOP = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_STOP";
             // Bare hook event
-            public static final String MEDIABUTTON_HOOK = PACKAGE_NAME + "EVENT_MEDIABUTTON_HOOK";
+            public static final String MEDIABUTTON_HOOK = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_HOOK";
 
             // Composed hook events
             /** When pressed hook once */
-            public static final String HOOK_PLAY_PAUSE = PACKAGE_NAME + "EVENT_HOOK_PLAY_PAUSE";
+            public static final String HOOK_PLAY_PAUSE = DOTTED_PACKAGE_NAME + "EVENT_HOOK_PLAY_PAUSE";
             /** When pressed hook twice */
-            public static final String HOOK_PLAY_NEXT = PACKAGE_NAME + "EVENT_HOOK_PLAY_NEXT";
+            public static final String HOOK_PLAY_NEXT = DOTTED_PACKAGE_NAME + "EVENT_HOOK_PLAY_NEXT";
             /** When pressed hook thrice */
-            public static final String HOOK_PLAY_PREV = PACKAGE_NAME + "EVENT_HOOK_PLAY_PREV";
+            public static final String HOOK_PLAY_PREV = DOTTED_PACKAGE_NAME + "EVENT_HOOK_PLAY_PREV";
         }
 
 
         //****************GENERAL***************************************************************************************
         public static final class general {
-            public static final String CHANNEL_NAME = PACKAGE_NAME + "GENERAL_CHANNEL";
+            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "GENERAL_CHANNEL";
 
-            public static final String METHOD_INTENT_ACTION_VIEW = PACKAGE_NAME + "GENERAL_METHOD_INTENT_ACTION_VIEW";
+            public static final String METHOD_INTENT_ACTION_VIEW = DOTTED_PACKAGE_NAME + "GENERAL_METHOD_INTENT_ACTION_VIEW";
         }
 
         //****************SERVICE***************************************************************************************
         public static final class service {
-            public static final String CHANNEL_NAME = PACKAGE_NAME + "SERVICE_CHANNEL";
+            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "SERVICE_CHANNEL";
 
-            public static final String METHOD_STOP_SERVICE = PACKAGE_NAME + "SERVICE_METHOD_STOP_SERVICE";
-            public static final String METHOD_SEND_SONG = PACKAGE_NAME + "SERVICE_METHOD_SEND_SONG";
+            public static final String METHOD_STOP_SERVICE = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_STOP_SERVICE";
+            public static final String METHOD_SEND_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_SONG";
 
         }
 
         //****************SONGS***************************************************************************************
         public static final class songs {
-            public static final String CHANNEL_NAME = PACKAGE_NAME + "SONGS_CHANNEL";
+            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "SONGS_CHANNEL";
 
-            public static final String METHOD_RETRIEVE_SONGS = PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
-            public static final String METHOD_SEND_SONGS = PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
+            public static final String METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
+            public static final String METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
         }
     }
 }

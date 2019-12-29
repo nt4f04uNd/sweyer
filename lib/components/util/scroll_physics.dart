@@ -28,4 +28,16 @@ class SMMBouncingScrollPhysics extends BouncingScrollPhysics {
           kMaxFlingVelocity,
         );
   }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) => true;
+}
+
+/// Default scroll behavior, but doesn't have glow effect on overscroll
+class SMMScrollBehaviorGlowless extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
 }

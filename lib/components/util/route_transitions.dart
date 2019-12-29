@@ -7,6 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 650);
+
 // Used by all of the transition animations.
 const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
 
@@ -112,7 +114,7 @@ PageRouteBuilder<T> createRouteTransition<T extends Widget>({
   ///
   /// Defaults to `const Duration(milliseconds: 400)`
   // final Duration transitionDuration = const Duration(milliseconds: 400),
-  final Duration transitionDuration = const Duration(milliseconds: 700),
+  final Duration transitionDuration = kSMMRouteTransitionDuration,
 
   /// Field to pass `RouteSettings`
   final RouteSettings settings,

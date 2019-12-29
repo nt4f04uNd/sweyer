@@ -111,6 +111,14 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
                 result.success(PlayerHandler.isPlaying());
                 return;
             }
+            case "isLooping": {
+                result.success(PlayerHandler.isLooping());
+                return;
+            }
+            case "switchLoopMode": {
+                PlayerHandler.switchLoopMode();
+                return;
+            }
             case "getDuration": {
                 result.success(PlayerHandler.getDuration());
                 return;

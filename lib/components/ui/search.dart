@@ -18,8 +18,8 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
 
   // Maintain search state
   // That is needed we want to preserve state when user navigates to player route
-  @override
-  bool get maintainState => true;
+  // @override
+  // bool get maintainState => true;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -119,8 +119,8 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
       } else {
         if (!searchHistoryList.contains(input))
           searchHistoryList.insert(0, input);
-        if (searchHistoryList.length > 6) {
-          // Remove last element from history if length is greater than 5
+        if (searchHistoryList.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+          // Remove last element from history if length is greater than constants constraint
           searchHistoryList.removeLast();
         }
       }
@@ -172,11 +172,13 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
             return Stack(
               children: <Widget>[
                 Scrollbar(
-                  child: StreamBuilder(
+                  child: 
+                  StreamBuilder(
                       stream: MusicPlayer.onDurationChanged,
                       builder: (context, snapshot) {
-                        return ListView.builder(
-                            physics: const SMMBouncingScrollPhysics(),
+                        return
+                        ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.only(bottom: 65, top: 0),
                             itemCount: searched.length,
                             itemBuilder: (context, index) {
@@ -184,11 +186,16 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                 song: searchedList[index],
                                 playing: searchedList[index].id ==
                                     PlaylistControl.currentSong?.id,
-                                additionalClickCallback: () {
+                                additionalClickCallback: () async {
                                   _writeInputToSearchHistory(query);
                                   FocusScope.of(context)
                                       .requestFocus(FocusNode());
-                                  // TODO: maybe save last search query and update only if it has changed?
+                                
+                                  // Wait before route animation completes
+                                  await Future.delayed(
+                                      Duration(milliseconds: 400));
+
+                                        // TODO: maybe save last search query and update only if it has changed?
                                   // NOTE that it might cause bugs if playlist will accidentally update (e.g. fetch process will end)
                                   // So I maybe need to think about this a lil bit
                                   PlaylistControl.setSearchedPlaylist(
@@ -217,18 +224,26 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
             children: <Widget>[
               Container(
                 child: _suggestions.length > 0
-                    ? ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: _suggestions.length +
-                            1, // Plus 1 'cause we need to render list header
-                        itemBuilder: (context, index) {
-                          if (index == 0)
-                            return _buildSuggestionsHeader(context);
-                          // Minus 1 'cause we need to render list header
-                          index -= 1;
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          _buildSuggestionsHeader(context),
+                          Expanded(
+                            child: ScrollConfiguration(
+                              behavior: SMMScrollBehaviorGlowless(),
+                              child: ListView.builder(
+                                // physics: SMMBouncingScrollPhysics(),
 
-                          return _buildSuggestionTile(context, index);
-                        },
+                                padding:
+                                    const EdgeInsets.only(bottom: 65, top: 0),
+                                itemCount: _suggestions.length,
+                                itemBuilder: (context, index) =>
+                                    _buildSuggestionTile(context, index),
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     : Padding(
                         padding: EdgeInsets.only(

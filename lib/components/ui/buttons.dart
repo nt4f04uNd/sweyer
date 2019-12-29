@@ -14,7 +14,7 @@ class SMMBackButton extends StatelessWidget {
 
   /// Custom button size
   final double size;
-  const SMMBackButton({Key key, this.icon, this.size = kIconButtonSize})
+  const SMMBackButton({Key key, this.icon, this.size = kSMMIconButtonSize})
       : super(key: key);
 
   @override
@@ -88,30 +88,27 @@ class DialogFlatButton extends FlatButton {
         );
 }
 
-/// Button to switch toggle mode
-class LoopButton extends StatefulWidget {
-  LoopButton({Key key}) : super(key: key);
+/// Button to switch loop mode
+class LoopButton extends StatelessWidget {
+  const LoopButton({Key key}) : super(key: key);
 
-  @override
-  _LoopButtonState createState() => _LoopButtonState();
-}
-
-class _LoopButtonState extends State<LoopButton> {
   @override
   Widget build(BuildContext context) {
-    return SMMIconButton(
-      splashColor: Constants.AppTheme.splash.auto(context),
-      icon: Icon(Icons.loop),
-      size: 40.0,
-      color: MusicPlayer.loopModeState
-          ? Constants.AppTheme.mainContrast.auto(context)
-          : Constants.AppTheme.disabledIcon.auto(context),
-      onPressed: () {
-        setState(() {
-          MusicPlayer.switchLoopMode();
+    return StreamBuilder<bool>(
+        stream: MusicPlayer.onLoopSwitch,
+        initialData: MusicPlayer.loopMode,
+        builder: (context, snapshot) {
+          print(snapshot.data);
+          return SMMIconButton(
+            splashColor: Constants.AppTheme.splash.auto(context),
+            icon: Icon(Icons.loop),
+            size: 40.0,
+            color: snapshot.data
+                ? Constants.AppTheme.mainContrast.auto(context)
+                : Constants.AppTheme.disabledIcon.auto(context),
+            onPressed: MusicPlayer.switchLoopMode,
+          );
         });
-      },
-    );
   }
 }
 

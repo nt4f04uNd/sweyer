@@ -11,16 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-const double kLargeAlbumArtMargins = 80.0;
-const double kSmallArtSize = 48.0;
-const Duration kLargeAlbumFadeDuration = Duration(milliseconds: 180);
-const Duration kSmallAlbumFadeDuration = Duration(milliseconds: 340);
-const Duration kRotatingAlbumFadeDuration = Duration(milliseconds: 100);
+const double kSMMLargeAlbumArtMargins = 80.0;
+const double kSMMSmallArtSize = 48.0;
+const Duration kSMMLargeAlbumFadeDuration = Duration(milliseconds: 180);
+const Duration kSMMSmallAlbumFadeDuration = Duration(milliseconds: 340);
+const Duration kSMMRotatingAlbumFadeDuration = Duration(milliseconds: 100);
 
 /// `3` is The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
 ///
 /// `2` is Border width
-const double kRotatingArtSize = kSmallArtSize - 6 - 3 - 2;
+const double kRotatingArtSize = kSMMSmallArtSize - 6 - 3 - 2;
 
 /// Abstract class widget every album art should extend instead of `StatefulWidget` to be able to use `_AlbumArtStateMixin`
 abstract class _AlbumArtWidget extends StatefulWidget {
@@ -56,7 +56,7 @@ mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
 
 /// Large album art to display in player route
 ///
-/// Has size `constraints - kLargeAlbumArtMargins`
+/// Has size `constraints - kSMMLargeAlbumArtMargins`
 ///
 /// Shows placeholder or art, depending on provided path
 class AlbumArtLarge extends _AlbumArtWidget {
@@ -74,34 +74,19 @@ class _AlbumArtLargeState extends State<AlbumArtLarge>
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
-      double size = constraint.maxWidth - kLargeAlbumArtMargins;
-
-      final placeholder = Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Constants.AppTheme.albumArtLarge.auto(context),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        padding: const EdgeInsets.all(70),
-        child: SvgPicture.asset(
-          // TODO: move all asset paths to constants
-          'assets/images/icons/note_rounded.svg',
-        ),
-      );
-
+      double size = constraint.maxWidth - kSMMLargeAlbumArtMargins;
       if (widget.path == null) {
-        return placeholder;
+        return AlbumPlaceholderLarge(size: size);
       } else {
         return FutureBuilder<Uint8List>(
             future: loading,
             builder: (context, snapshot) {
               return AnimatedSwitcher(
-                duration: kLargeAlbumFadeDuration,
+                duration: kSMMLargeAlbumFadeDuration,
                 child: snapshot.connectionState == ConnectionState.waiting ||
                         snapshot.connectionState == ConnectionState.done &&
                             !snapshot.hasData
-                    ? placeholder
+                    ? AlbumPlaceholderLarge(size: size)
                     : ClipRRect(
                         borderRadius: const BorderRadius.all(
                           Radius.circular(10),
@@ -120,59 +105,74 @@ class _AlbumArtLargeState extends State<AlbumArtLarge>
   }
 }
 
-class AlbumArtSmall extends _AlbumArtWidget {
-  AlbumArtSmall({Key key, @required this.path}) : super(key: key);
+// class AlbumArtSmall extends _AlbumArtWidget {
+//   AlbumArtSmall({Key key, @required this.path}) : super(key: key);
 
-  @override
+//   @override
+//   final String path;
+
+//   @override
+//   _AlbumArtSmallState createState() => _AlbumArtSmallState();
+// }
+
+class AlbumArtSmall extends StatelessWidget {
+  const AlbumArtSmall({Key key, @required this.path}) : super(key: key);
+
   final String path;
-
-  @override
-  _AlbumArtSmallState createState() => _AlbumArtSmallState();
-}
-
-class _AlbumArtSmallState extends State<AlbumArtSmall>
-    with _AlbumArtStateMixin {
   @override
   Widget build(BuildContext context) {
-    final placeholder = Container(
-      width: kSmallArtSize,
-      height: kSmallArtSize,
-      decoration: BoxDecoration(
-        color: Constants.AppTheme.albumArtSmall.auto(context),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-      ),
-      padding: EdgeInsets.all(10),
-      // TODO: path to const
-      child: Image.asset('assets/images/placeholder_thumb.png'),
-    );
-    if (widget.path == null) {
-      return placeholder;
+    if (path == null) {
+      return const AlbumPlaceholderSmall();
     } else {
-      return FutureBuilder<Uint8List>(
-          future: loading,
-          builder: (context, snapshot) {
-            return AnimatedSwitcher(
-              duration: kSmallAlbumFadeDuration,
-              child: snapshot.connectionState == ConnectionState.waiting ||
-                      snapshot.connectionState == ConnectionState.done &&
-                          !snapshot.hasData
-                  ? placeholder
-                  : ClipRRect(
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                      child: Image.memory(
-                        snapshot.data,
-                        width: kSmallArtSize,
-                        height: kSmallArtSize,
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-            );
-          });
+      return ClipRRect(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(10),
+        ),
+        child: Image.file(
+          File(path),
+          width: kSMMSmallArtSize,
+          height: kSMMSmallArtSize,
+          fit: BoxFit.fill,
+        ),
+      );
     }
   }
 }
+
+// class _AlbumArtSmallState extends State<AlbumArtSmall>
+//     // with _AlbumArtStateMixin
+//     {
+//   @override
+//   Widget build(BuildContext context) {
+//     if (widget.path == null) {
+//       return const AlbumPlaceholderSmall();
+//     } else {
+//       // return FutureBuilder<Uint8List>(
+//       //     future: loading,
+//       //     builder: (context, snapshot) {
+//       //       return AnimatedSwitcher(
+//       //         duration: kSMMSmallAlbumFadeDuration,
+//       //         child: snapshot.connectionState == ConnectionState.waiting ||
+//       //                 snapshot.connectionState == ConnectionState.done &&
+//       //                     !snapshot.hasData
+//       //             ? const AlbumPlaceholderSmall()
+//       //             :
+//            return       ClipRRect(
+//                       borderRadius: const BorderRadius.all(
+//                         Radius.circular(10),
+//                       ),
+//                       child: Image.memory(
+//                         snapshot.data,
+//                         width: kSMMSmallArtSize,
+//                         height: kSMMSmallArtSize,
+//                         fit: BoxFit.fill,
+//                       ),
+//                     );
+//     //         );
+//     //       });
+//     // }
+//   }
+// }
 
 /// Widget that shows rotating album art
 /// Used in bottom track panel and starts rotating when track starts playing
@@ -228,9 +228,10 @@ class RotatingAlbumArtState extends State<RotatingAlbumArt>
     super.dispose();
   }
 
-  @override
-  Future<Uint8List> loadArt(String path) async {
-    return super.loadArt(path);
+  Future<void> reloadArt(String path) async {
+    setState(() {
+      loading = loadArt(path);
+    });
   }
 
   /// Starts rotating, for use with global keys
@@ -248,30 +249,19 @@ class RotatingAlbumArtState extends State<RotatingAlbumArt>
     return Transform.rotate(
         angle: _controller.value * 2 * math.pi,
         child: (() {
-          final placeholder = Container(
-            width: kRotatingArtSize,
-            height: kRotatingArtSize,
-            decoration: BoxDecoration(
-              color: Constants.AppTheme.albumArtSmallRound.auto(context),
-              borderRadius: const BorderRadius.all(Radius.circular(100)),
-            ),
-            padding: EdgeInsets.all(8),
-            // TODO: path to const
-            child: Image.asset('assets/images/placeholder_thumb.png'),
-          );
           if (widget.path == null) {
-            return placeholder;
+            return const RotatingAlbumPlaceholder();
           } else {
             return FutureBuilder<Uint8List>(
                 future: loading,
                 builder: (context, snapshot) {
                   return AnimatedSwitcher(
-                    duration: kRotatingAlbumFadeDuration,
+                    duration: kSMMRotatingAlbumFadeDuration,
                     child: snapshot.connectionState ==
                                 ConnectionState.waiting ||
                             snapshot.connectionState == ConnectionState.done &&
                                 !snapshot.hasData
-                        ? placeholder
+                        ? const RotatingAlbumPlaceholder()
                         : ClipRRect(
                             borderRadius: const BorderRadius.all(
                               Radius.circular(kRotatingArtSize),
@@ -287,5 +277,68 @@ class RotatingAlbumArtState extends State<RotatingAlbumArt>
                 });
           }
         })());
+  }
+}
+
+class AlbumPlaceholderLarge extends StatelessWidget {
+  const AlbumPlaceholderLarge({Key key, @required this.size}) : super(key: key);
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Constants.AppTheme.albumArtLarge.auto(context),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.all(70),
+      child: SvgPicture.asset(
+        // TODO: move all asset paths to constants
+        'assets/images/icons/note_rounded.svg',
+      ),
+    );
+  }
+}
+
+class AlbumPlaceholderSmall extends StatelessWidget {
+  const AlbumPlaceholderSmall({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: kSMMSmallArtSize,
+      height: kSMMSmallArtSize,
+      decoration: BoxDecoration(
+        color: Constants.AppTheme.albumArtSmall.auto(context),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.all(10),
+      // TODO: path to const
+      child: Image.asset(
+        'assets/images/placeholder_thumb.png',
+      ),
+    );
+  }
+}
+
+class RotatingAlbumPlaceholder extends StatelessWidget {
+  const RotatingAlbumPlaceholder({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: kRotatingArtSize,
+      height: kRotatingArtSize,
+      decoration: BoxDecoration(
+        color: Constants.AppTheme.albumArtSmallRound.auto(context),
+        borderRadius: const BorderRadius.all(Radius.circular(100)),
+      ),
+      padding: const EdgeInsets.all(8),
+      // TODO: path to const
+      child: Image.asset('assets/images/placeholder_thumb.png'),
+    );
   }
 }

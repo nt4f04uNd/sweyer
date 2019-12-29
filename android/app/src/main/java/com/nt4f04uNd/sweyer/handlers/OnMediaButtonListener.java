@@ -6,7 +6,7 @@
 package com.nt4f04uNd.sweyer.handlers;
 
 /** Class similar to an `OnAudioFocusChangeListener`
- *  Needed to use in `MediaButtonHandler` and call implemented callbacks
+ *  Needed to use in `MediaSessionHandler` and call implemented callbacks
  * */
 public abstract class OnMediaButtonListener {
     public OnMediaButtonListener(){}

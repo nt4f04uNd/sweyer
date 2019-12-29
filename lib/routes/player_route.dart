@@ -17,9 +17,7 @@ class PlayerRoute extends StatefulWidget {
 
 class _PlayerRouteState extends State<PlayerRoute> {
   PageController _pageController = PageController();
-  int openedTabIndex = 0;
   bool initialRender = true;
-  double prevPage = 0.0;
   final GlobalKey<_PlaylistTabState> _playlistTabKey =
       GlobalKey<_PlaylistTabState>();
 
@@ -28,14 +26,13 @@ class _PlayerRouteState extends State<PlayerRoute> {
     super.initState();
     _pageController.addListener(() {
       if (_pageController.page == 0.0) {
-        openedTabIndex = 0;
-        print(openedTabIndex);
+        _playlistTabKey.currentState.opened = false;
         if (initialRender)
           initialRender = false;
         else
           _playlistTabKey.currentState.jumpOnTabChange();
       } else if (_pageController.page == 1.0) {
-        openedTabIndex = 1;
+        _playlistTabKey.currentState.opened= true;
       }
     });
   }
@@ -48,7 +45,6 @@ class _PlayerRouteState extends State<PlayerRoute> {
         _MainPlayerTab(),
         _PlaylistTab(
           key: _playlistTabKey,
-          openedTabIndex: openedTabIndex,
         )
       ],
     );
@@ -56,8 +52,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
 }
 
 class _PlaylistTab extends StatefulWidget {
-  final int openedTabIndex;
-  _PlaylistTab({Key key, @required this.openedTabIndex}) : super(key: key);
+  _PlaylistTab({Key key}) : super(key: key);
 
   @override
   _PlaylistTabState createState() => _PlaylistTabState();
@@ -72,6 +67,9 @@ class _PlaylistTabState extends State<_PlaylistTab>
   /// How much tracks to ignore scrolling
   static const int tracksScrollOffset = 6;
   static const Duration scrollDuration = const Duration(milliseconds: 600);
+
+// This is set in parent via global key
+  bool opened = false;
 
   GlobalKey<PlayerRoutePlaylistState> globalKeyPlayerRoutePlaylist =
       GlobalKey();
@@ -95,10 +93,13 @@ class _PlaylistTabState extends State<_PlaylistTab>
     });
     _durationSubscription = MusicPlayer.onDurationChanged.listen((event) async {
       // Scroll when track changes
-      if (widget.openedTabIndex == 0) {
+      if (opened) {
+        // Just update list if opened, this is needed to update current track indicator
         setState(() {});
+      } else {
         await performScrolling();
-      } else if (widget.openedTabIndex == 1) setState(() {});
+        setState(() {});
+      }
     });
   }
 
@@ -125,14 +126,13 @@ class _PlaylistTabState extends State<_PlaylistTab>
   /// If optional `index` is provided - jumps to it
   void jumpToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
-    print('JUMP!');
     globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .jumpTo(index: index);
   }
 
   /// A more complex function with additional checks
   Future<void> performScrolling() async {
-    final int playlistLength = PlaylistControl.length();
+    final int playlistLength = PlaylistControl.getPlaylist().length;
     final int playingIndex = PlaylistControl.currentSongIndex();
     final int maxScrollIndex = playlistLength - 1 - tracksScrollOffset;
 
@@ -168,7 +168,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// Jump to song when changing tab to `0`
   Future<void> jumpOnTabChange() async {
-    final int playlistLength = PlaylistControl.length();
+    final int playlistLength = PlaylistControl.getPlaylist().length;
     final int playingIndex = PlaylistControl.currentSongIndex();
     final int maxScrollIndex = playlistLength - 1 - tracksScrollOffset;
 
@@ -516,7 +516,7 @@ class _TrackSliderState extends State<_TrackSlider> {
       setState(() {
         _isDragging = false;
         _localValue = 0.0;
-        _value =const Duration(seconds: 0);
+        _value = const Duration(seconds: 0);
         _duration = event;
       });
     });

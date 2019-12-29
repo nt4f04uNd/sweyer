@@ -40,6 +40,15 @@ abstract class EventsHandler {
         case Constants.EventChannel.NOTIFICATION_PREV:
           MusicPlayer.playPrev();
           break;
+        case Constants.EventChannel.NOTIFICATION_KILL_SERVICE:
+          // MusicPlayer.playPrev();
+          break;
+        case Constants.EventChannel.NOTIFICATION_LOOP:
+          // MusicPlayer.playPrev();
+          break;
+        case Constants.EventChannel.NOTIFICATION_LOOP_ON:
+          // MusicPlayer.playPrev();
+          break;
         //************** AUDIO FOCUS *********************************************************
         case Constants.EventChannel.AUDIOFOCUS_GAIN:
           break;
@@ -52,31 +61,31 @@ abstract class EventsHandler {
 
         //************** MEDIA BUTTONS *********************************************************
         case Constants.EventChannel.MEDIABUTTON_AUDIO_TRACK:
-          // MusicPlayer.playNext();
+          // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_FAST_FORWARD:
-          // MusicPlayer.fastForward();
+         // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_REWIND:
           // MusicPlayer.rewind();
           break;
         case Constants.EventChannel.MEDIABUTTON_NEXT:
-          // MusicPlayer.playNext();
+         // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_PREVIOUS:
-          // MusicPlayer.playPrev();
+         // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_PLAY_PAUSE:
-          // MusicPlayer.playPause();
+         // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_PLAY:
-          // MusicPlayer.resume();
+         // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_STOP:
-          // MusicPlayer.pause();
+        // ...
           break;
         case Constants.EventChannel.MEDIABUTTON_HOOK:
-          // MusicPlayer.hookPress();
+         // ...
           break;
 
         //****************** HOOK BUTTONS *****************************************************
@@ -92,7 +101,7 @@ abstract class EventsHandler {
           break;
 
         default:
-          throw Exception('Invalid event');
+          throw Exception("Invalid event or case to it hasn't been added: $event");
       }
     });
   }

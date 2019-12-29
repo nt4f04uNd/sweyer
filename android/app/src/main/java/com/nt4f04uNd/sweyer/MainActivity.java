@@ -12,8 +12,9 @@ import com.nt4f04uNd.sweyer.channels.ServiceChannel;
 import com.nt4f04uNd.sweyer.channels.SongChannel;
 import com.nt4f04uNd.sweyer.handlers.AudioFocusHandler;
 import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
-import com.nt4f04uNd.sweyer.handlers.MediaButtonHandler;
+import com.nt4f04uNd.sweyer.handlers.MediaSessionHandler;
 import com.nt4f04uNd.sweyer.handlers.NotificationHandler;
+import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
 import com.nt4f04uNd.sweyer.handlers.PlaylistHandler;
 import com.nt4f04uNd.sweyer.handlers.ServiceHandler;
 
@@ -29,20 +30,22 @@ public class MainActivity extends FlutterActivity {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
 
-        // Setup handlers
+        // Setup handlers and channels
         // ----------------------------------------------------------------------------------
+        // Clear playlist kept in memory for background playing
+        // All the handling for playback now is delegated to a dart side
         PlaylistHandler.resetPlaylist();
         GeneralHandler.init(getApplicationContext()); // The most important, as it contains app context
+        PlayerHandler.init(); // Create player
         GeneralChannel.init(getFlutterView(), this); // Inits general channel
         NotificationHandler.init();
         AudioFocusHandler.init();
         NativeEventsChannel.init(getFlutterView()); // Inits event channel
         PlayerChannel.init(getFlutterView()); // Inits player channel
-        MediaButtonHandler.init();
+        MediaSessionHandler.init();
         ServiceHandler.init(); // Contains intent to start service
         ServiceChannel.init(getFlutterView());
         SongChannel.init(getFlutterView());
-        // ----------------------------------------------------------------------------------
     }
 
     @Override

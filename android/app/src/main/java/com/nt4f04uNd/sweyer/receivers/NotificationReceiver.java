@@ -12,6 +12,7 @@ import android.content.Intent;
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
+import com.nt4f04uNd.sweyer.handlers.ServiceHandler;
 
 /**
  * Broadcast receiver for media notification button intents
@@ -33,6 +34,16 @@ public class NotificationReceiver extends BroadcastReceiver {
         } else if (Constants.channels.events.NOTIFICATION_INTENT_PREV.equals(intent.getAction())) {
             PlayerHandler.playPrev();
             NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_PREV);
+        } else if (Constants.channels.events.NOTIFICATION_INTENT_LOOP.equals(intent.getAction())) {
+            PlayerHandler.switchLoopMode();
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_LOOP);
+        } else if (Constants.channels.events.NOTIFICATION_INTENT_LOOP_ON.equals(intent.getAction())) {
+            PlayerHandler.switchLoopMode();
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_LOOP_ON);
+        } else if (Constants.channels.events.NOTIFICATION_INTENT_KILL_SERVICE.equals(intent.getAction())) {
+            PlayerHandler.pause();
+            ServiceHandler.stopService();
+            NativeEventsChannel.success(Constants.channels.events.NOTIFICATION_INTENT_KILL_SERVICE);
         }
     }
 }

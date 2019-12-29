@@ -18,13 +18,19 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-  Future<void> _handleClickSettings() async => await Navigator.of(context)
-      .popAndPushNamed(Constants.Routes.settings.value);
+  Future<void> _handleClickSettings() async {
+    try {
+      return Navigator.of(context).popAndPushNamed(Constants.Routes.settings.value);
+    } catch (e) {}
+  }
 
   void _handleClickSendLog() => Logger.send();
 
-  void _handleClickDebug() async =>
-      await Navigator.of(context).popAndPushNamed(Constants.Routes.debug.value);
+  Future<void> _handleClickDebug() async {
+    try {
+      return Navigator.of(context).popAndPushNamed(Constants.Routes.debug.value);
+    } catch (e) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,8 +140,6 @@ class MenuItem extends StatelessWidget {
   }
 }
 
-
-
 class AnimatedMenuCloseButton extends StatefulWidget {
   AnimatedMenuCloseButton({
     Key key,
@@ -171,8 +175,8 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
   @override
   void initState() {
     super.initState();
-    _animationController =
-        AnimationController(vsync: this, duration:const Duration(milliseconds: 300));
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
 
     if (widget.animateDirection != null) {
       if (widget.animateDirection) {
@@ -194,8 +198,8 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
   Widget build(BuildContext context) {
     return Container(
       child: SMMIconButton(
-        size: widget.size ?? kIconButtonSize,
-        iconSize: widget.iconSize ?? kIconButtonIconSize,
+        size: widget.size ?? kSMMIconButtonSize,
+        iconSize: widget.iconSize ?? kSMMIconButtonIconSize,
         splashColor: Constants.AppTheme.splash.auto(context),
         color: Constants.AppTheme.mainContrast.auto(context),
         onPressed: widget.animateDirection != null && widget.animateDirection

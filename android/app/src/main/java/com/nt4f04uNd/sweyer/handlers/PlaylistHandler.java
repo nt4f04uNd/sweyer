@@ -5,6 +5,8 @@
 
 package com.nt4f04uNd.sweyer.handlers;
 
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -14,10 +16,13 @@ import com.nt4f04uNd.sweyer.player.Song;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import androidx.annotation.Nullable;
 import io.flutter.Log;
+import io.flutter.view.FlutterMain;
 
 
 /**
@@ -32,9 +37,26 @@ public class PlaylistHandler {
      * But in service a have added additional check for cases when android restarts it (cause service is sticky)
      */
     private static Song currentSong;
-    private static byte[] defaultArtBitmapBytes;
     private static byte[] currentSongArtBitmapBytes;
 
+
+    public static byte[] getArtPlaceholder() {
+        AssetManager assetManager = GeneralHandler.getAppContext().getAssets();
+        String key = GeneralHandler.isSystemThemeDark()
+                ? FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_old.png")
+                :FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb.png");
+
+        try {
+            InputStream istream = assetManager.open(key);
+            Bitmap bitmap = BitmapFactory.decodeStream(istream);
+            ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+            return ostream.toByteArray();
+        } catch (IOException e) {
+            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+            return new byte[0];
+        }
+    }
 
     /**
      * This method gets last played playlist when activity is destroyed
@@ -48,7 +70,7 @@ public class PlaylistHandler {
      * Handle case when playingSong is null
      * This can be considered as case when activity did not start (or didn't call send song method for some reason, e.g. songs list is empty)
      */
-    public static void initCurrentSong(){
+    public static void initCurrentSong() {
         if (PlaylistHandler.getCurrentSong() == null) {
             PlaylistHandler.getLastPlaylist();
             PlaylistHandler.setCurrentSong(PlaylistHandler.searchById((int) PrefsHandler.getSongId()));
@@ -90,7 +112,7 @@ public class PlaylistHandler {
      */
     @Nullable
     public static byte[] getArt() {
-            return currentSongArtBitmapBytes;
+        return currentSongArtBitmapBytes;
     }
 
 

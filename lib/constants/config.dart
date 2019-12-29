@@ -6,4 +6,6 @@
 abstract class Config {
   static const String APPLICATION_TITLE = "Sweyer";
   static const String REPORT_EMAIL = "nt4f04uNd@gmail.com";
+
+  static const int SEARCH_HISTORY_LENGTH = 30;
 }

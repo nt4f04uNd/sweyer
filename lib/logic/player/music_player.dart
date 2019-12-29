@@ -17,9 +17,6 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
 abstract class MusicPlayer {
-  /// A subscription to song change
-  static StreamSubscription<void> _songChangeListenerSubscription;
-
   // Native player subscriptions
   static StreamSubscription<AudioPlayerState> _stateChangeSubscription;
   static StreamSubscription<void> _completionSubscription;
@@ -27,15 +24,6 @@ abstract class MusicPlayer {
   /// TODO: implement this instead of on song change
   static StreamSubscription<Duration> _durationSubscription;
   static StreamSubscription<PlatformException> _errorSubscription;
-
-  /// Audio manager focus state
-  // static AudioFocusType focusState = AudioFocusType.no_focus;
-
-  /// Is notification visible
-  static bool notificationState = false;
-
-  /// Is notification visible
-  static bool loopModeState = false;
 
   // Getters
 
@@ -59,7 +47,12 @@ abstract class MusicPlayer {
   static Stream<PlatformException> get onPlayerError =>
       NativeAudioPlayer.onPlayerError;
 
-  static AudioPlayerState get playState => NativeAudioPlayer.state;
+  /// Get stream of loop mode changes
+  static Stream<bool> get onLoopSwitch => NativeAudioPlayer.onLoopSwitch;
+
+  static AudioPlayerState get playerState => NativeAudioPlayer.state;
+
+  static bool get loopMode => NativeAudioPlayer.loopMode;
 
   /// Get current position
   static Future<Duration> get currentPosition async {
@@ -94,19 +87,12 @@ abstract class MusicPlayer {
     //******** RESTORE BY PREFS ***************
 
     var prefs = await Prefs.getSharedInstance();
-    // Get saved data
-    bool savedLoopMode = await Prefs.byKey.loopModeBool.getPref(prefs);
 
     int savedSongPos;
     // Disable restoring position if native player is actually playing right now
     if (!(await NativeAudioPlayer.isPlaying()))
       savedSongPos = await Prefs.byKey.songPositionInt.getPref(prefs);
 
-    // Set loop mode to true if it is true in prefs
-    if (savedLoopMode != null && savedLoopMode) {
-      loopModeState = savedLoopMode;
-      await NativeAudioPlayer.setReleaseMode(ReleaseMode.LOOP);
-    }
     // Seek to saved position
     if (savedSongPos != null)
       await MusicPlayer.seek(Duration(seconds: savedSongPos));
@@ -114,7 +100,6 @@ abstract class MusicPlayer {
 
   // TODO: improve and add usage to this method
   static void dispose() {
-    _songChangeListenerSubscription.cancel();
     _stateChangeSubscription.cancel();
     _durationSubscription.cancel();
     _errorSubscription.cancel();
@@ -122,14 +107,7 @@ abstract class MusicPlayer {
   }
 
   static Future<void> switchLoopMode() async {
-    if (loopModeState) {
-      NativeAudioPlayer.setReleaseMode(ReleaseMode.STOP);
-      Prefs.byKey.loopModeBool.setPref(false);
-    } else {
-      NativeAudioPlayer.setReleaseMode(ReleaseMode.LOOP);
-      Prefs.byKey.loopModeBool.setPref(true);
-    }
-    loopModeState = !loopModeState;
+    return NativeAudioPlayer.switchLoopMode();
   }
 
   /// Play track
@@ -139,7 +117,7 @@ abstract class MusicPlayer {
   /// @param `silent` - if it is true, won't play track, but just switch to it
   /// (the difference with the `setUrl` with this parameter is that this function will also update current playing song respectively)
   static Future<void> play(int songId, {bool silent = false}) async {
-    final song = PlaylistControl.getSongById(songId);
+    final song = PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
     bool success = true;
     try {
       if (!silent) // `stayAwake` is very important for player to stay play even in background
@@ -155,10 +133,11 @@ abstract class MusicPlayer {
           );
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
-          await play(PlaylistControl.getNextSongId(songId), silent: silent);
-          PlaylistControl.removeSongAt(
-            PlaylistControl.getSongIndexById(songId),
-            PlaylistType.global,
+          await play(PlaylistControl.getPlaylist().getNextSongId(songId),
+              silent: silent);
+          PlaylistControl.getPlaylist(PlaylistType.global).removeSongAt(
+            PlaylistControl.getPlaylist(PlaylistType.global)
+                .getSongIndexById(songId),
           ); //Remove broken track
           PlaylistControl.emitPlaylistChange();
           PlaylistControl.refetchSongs(); // perform fetching
@@ -234,7 +213,7 @@ abstract class MusicPlayer {
 
   /// Function that fires when pause/play button got clicked
   static Future<void> playPause() async {
-    switch (playState) {
+    switch (playerState) {
       case AudioPlayerState.PLAYING:
         await pause();
         break;
@@ -257,7 +236,8 @@ abstract class MusicPlayer {
   ///
   /// If provided `songId` - plays next from this id
   static Future<void> playNext({int songId, bool silent = false}) async {
-    songId ??= PlaylistControl.getNextSongId(PlaylistControl.currentSongId);
+    songId ??= PlaylistControl.getPlaylist()
+        .getNextSongId(PlaylistControl.currentSongId);
     return play(songId, silent: silent);
   }
 
@@ -265,7 +245,8 @@ abstract class MusicPlayer {
   ///
   /// If provided `songId` - plays prev from this id
   static Future<void> playPrev({int songId, bool silent = false}) async {
-    songId ??= PlaylistControl.getPrevSongId(PlaylistControl.currentSongId);
+    songId ??= PlaylistControl.getPlaylist()
+        .getPrevSongId(PlaylistControl.currentSongId);
     return play(songId, silent: silent);
   }
 
@@ -273,23 +254,24 @@ abstract class MusicPlayer {
   ///
   /// `clickedSongId` argument denotes an id of clicked track `MainRouteTrackList`
   static Future<void> clickSongTile(int clickedSongId) async {
-    switch (playState) {
+    switch (playerState) {
       case AudioPlayerState.PLAYING:
-        // If user clicked the same track
-        if (PlaylistControl.currentSongId == clickedSongId)
-          return pause();
-        // If user decided to click a new track
-        else
+        {
+          // If user clicked the same track
+          if (PlaylistControl.currentSongId == clickedSongId) return pause();
+
+          // If user decided to click a new track
           return play(clickedSongId);
-        break;
+        }
       case AudioPlayerState.PAUSED:
-        // If user clicked the same track
-        if (PlaylistControl.currentSongId == clickedSongId)
-          return resume(clickedSongId);
-        // If user decided to click a new track
-        else
+        {
+          // If user clicked the same track
+          if (PlaylistControl.currentSongId == clickedSongId)
+            return resume(clickedSongId);
+
+          // If user decided to click a new track
           return play(clickedSongId);
-        break;
+        }
       case AudioPlayerState.STOPPED:
         // Currently unused and shouldn't
         return play(clickedSongId);

@@ -861,8 +861,8 @@ class SMMPopupMenuButton<T> extends StatefulWidget {
     this.elevation = 8.0,
     this.child,
     this.icon,
-    this.buttonSize = kIconButtonSize,
-    this.buttonIconSize = kIconButtonIconSize,
+    this.buttonSize = kSMMIconButtonSize,
+    this.buttonIconSize = kSMMIconButtonIconSize,
     this.offset = Offset.zero,
     this.enabled = true,
     this.menuBorderRadius = const BorderRadius.all(

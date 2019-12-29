@@ -14,8 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 
-const double kIconButtonSize = 36.0;
-const double kIconButtonIconSize = 24.0;
+const double kSMMIconButtonSize = 36.0;
+const double kSMMIconButtonIconSize = 24.0;
 
 
 /// A material design icon button.
@@ -137,8 +137,8 @@ class SMMIconButton extends StatelessWidget {
   const SMMIconButton({
     Key key,
     @required this.icon,
-    this.size = kIconButtonSize,
-    this.iconSize = kIconButtonIconSize,
+    this.size = kSMMIconButtonSize,
+    this.iconSize = kSMMIconButtonIconSize,
     this.color,
     this.focusColor,
     this.hoverColor,

@@ -21,7 +21,7 @@ class BottomTrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlaylistControl.songsEmpty(PlaylistType.global))
+    if (PlaylistControl.getPlaylist(PlaylistType.global).isEmpty)
       return SizedBox.shrink();
 
     return Align(
@@ -170,7 +170,7 @@ class _RotatingAlbumArtWithProgressState
       setState(() {
         _duration = event;
         // Update art
-        _rotatingArtGlobalKey.currentState.loadArt(PlaylistControl.currentSong?.albumArtUri);
+        _rotatingArtGlobalKey.currentState.reloadArt(PlaylistControl.currentSong?.albumArtUri);
       });
     });
   }
@@ -217,7 +217,7 @@ class _RotatingAlbumArtWithProgressState
           key: _rotatingArtGlobalKey,
           path: PlaylistControl.currentSong?.albumArtUri,
           initRotation: math.Random(DateTime.now().second).nextDouble(),
-          initIsRotating: MusicPlayer.playState == AudioPlayerState.PLAYING,
+          initIsRotating: MusicPlayer.playerState == AudioPlayerState.PLAYING,
         ),
       ),
     );

@@ -23,19 +23,27 @@ public class PrefsHandler { // TODO: maybe move strings to constants?
         getPrefs().edit().putLong(PREFIX + "song_position", value).apply();
     }
 
+    // **************** Song id *************************
     public static void setSongId(long value) {
         getPrefs().edit().putLong(PREFIX + "song_id", value).apply();
     }
-
     public static long getSongId() {
         return getPrefs().getLong(PREFIX + "song_id", 0);
     }
 
+    // **************** Is playing *************************
     public static void setSongIsPlaying(boolean value) {
         getPrefs().edit().putBoolean(PREFIX + "song_is_playing", value).apply();
     }
-
     public static boolean getSongIsPlaying() {
         return getPrefs().getBoolean(PREFIX + "song_is_playing", false);
+    }
+
+    // **************** Loop mode *************************
+    public static void setLoopMode(boolean value) {
+        getPrefs().edit().putBoolean(PREFIX + "loop_mode", value).apply();
+    }
+    public static boolean getLoopMode() {
+        return getPrefs().getBoolean(PREFIX + "loop_mode", false);
     }
 }

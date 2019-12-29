@@ -46,7 +46,7 @@ class MainRouteState extends State<MainRoute> {
                 ? _EmptyScreen() // TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
                 : Permissions.notGranted
                     ? _NoPermissionsScreen()
-                    : PlaylistControl.songsEmpty(PlaylistType.global)
+                    : PlaylistControl.getPlaylist(PlaylistType.global).isEmpty
                         ? PlaylistControl.initFetching
                             ? _SearchingSongsScreen()
                             : _SongsEmptyScreen()

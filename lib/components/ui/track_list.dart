@@ -10,10 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-
 const Duration kSelectionDuration = Duration(milliseconds: 450);
 
-/// This widget is needed because I need to call `Scaffold.of(context).openDrawer()`
+/// This widget is needed because I need to call `SMMScaffold.of(context).openDrawer()`
 /// which requires context to have scaffold in it
 /// separating widget allows to to that
 class _MainRouteAppBarLeading extends StatelessWidget {
@@ -108,6 +107,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
       GlobalKey<RefreshIndicatorState>();
 
   StreamSubscription<void> _playlistChangeSubscription;
+  StreamSubscription<Duration> _durationChangeSubscription;
 
   @override
   void initState() {
@@ -117,11 +117,17 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
       // Update list on playlist changes
       _switcher.change();
     });
+    _durationChangeSubscription = MusicPlayer.onDurationChanged.listen((event) {
+      // Needed to update current track indicator
+      _switcher.change();
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _playlistChangeSubscription.cancel();
+    _durationChangeSubscription.cancel();
     super.dispose();
   }
 
@@ -178,16 +184,15 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
 
   void _handleCloseSelection() async {
     setState(() {
+      _selectionMode = false;
       unselecting = true;
       _switcher.change();
     });
     // Needed to release clear set fully when animation is ended, cause some tiles may be out of scope
     await Future.delayed(kSelectionDuration);
-    _switcher.change();
     if (mounted)
       setState(() {
         selectionSet = {};
-        _selectionMode = false;
         unselecting = false;
       });
   }
@@ -371,6 +376,8 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
 
   @override
   Widget build(BuildContext context) {
+    final songs = PlaylistControl.getPlaylist(PlaylistType.global).songs;
+
     return Scaffold(
       drawer: DrawerWidget(),
       appBar: AppBar(
@@ -397,27 +404,26 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
                   child: Container(
                     child: Scrollbar(
                       child: ListView.builder(
-                        physics: SMMBouncingScrollPhysics(),
-                        itemCount: PlaylistControl.length(PlaylistType.global),
+                        physics: const SMMBouncingScrollPhysics(),
+                        itemCount:
+                            PlaylistControl.getPlaylist(PlaylistType.global)
+                                .length,
                         padding: const EdgeInsets.only(bottom: 65, top: 0),
                         itemBuilder: (context, index) {
-                          final int id = PlaylistControl.getSongAt(
-                                  index, PlaylistType.global)
-                              .id;
                           return SelectableSongTile(
-                            song: PlaylistControl.getSongAt(
-                                index, PlaylistType.global),
+                            song: songs[index],
                             // Specify object key that can be changed to re-render song tile
                             key: ValueKey(index + _switcher.value),
-                            selected: selectionSet.contains(id),
+                            selected: selectionSet.contains(songs[index].id),
                             someSelected: isSelection(),
                             unselecting: unselecting,
-                            playing: id == PlaylistControl.currentSongId,
+                            playing: songs[index].id ==
+                                PlaylistControl.currentSongId,
                             additionalClickCallback:
                                 PlaylistControl.resetPlaylists,
-                            onSelected: () => _handleSelect(id),
+                            onSelected: () => _handleSelect(songs[index].id),
                             onUnselected: (bool onMount) =>
-                                _handleUnselect(id, onMount),
+                                _handleUnselect(songs[index].id, onMount),
                             notifyUnselection: () => _handleNotifyUnselection(),
                           );
                         },
@@ -452,12 +458,10 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
 
   final ScrollController frontScrollController = ScrollController();
 
-  var key = UniqueKey();
-
   @override
   Widget build(BuildContext context) {
     int initialScrollIndex;
-    final int length = PlaylistControl.length();
+    final int length = PlaylistControl.getPlaylist().length;
     final int currentSongIndex = PlaylistControl.currentSongIndex();
     if (length > 11) {
       initialScrollIndex =
@@ -465,11 +469,13 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
     } else
       initialScrollIndex = 0;
 
+    final songs = PlaylistControl.getPlaylist().songs;
+
     return Container(
       child: SingleTouchRecognizerWidget(
         child: Scrollbar(
           child: ScrollablePositionedList.builder(
-              physics: SMMBouncingScrollPhysics(),
+              physics: const SMMBouncingScrollPhysics(),
               frontScrollController: frontScrollController,
               itemScrollController: itemScrollController,
               itemCount: length,
@@ -477,9 +483,8 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
               initialScrollIndex: initialScrollIndex,
               itemBuilder: (context, index) {
                 return SongTile(
-                  // key:key,
+                  song: songs[index],
                   playing: index == currentSongIndex,
-                  song: PlaylistControl.getSongAt(index),
                   pushToPlayerRouteOnClick: false,
                 );
               }),
@@ -528,7 +533,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
 
     // TODO: move out ot this widget pushing route
     if (pushToPlayerRouteOnClick &&
-        MusicPlayer.playState == AudioPlayerState.PLAYING)
+        MusicPlayer.playerState == AudioPlayerState.PLAYING)
       Navigator.of(context).pushNamed(Constants.Routes.player.value);
   }
 
@@ -538,6 +543,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
       selectedColor: Theme.of(context).textTheme.title.color,
       child: ListTile(
         subtitle: Artist(artist: song.artist),
+        // subtitle: Text(song.artist),
         dense: true,
         isThreeLine: false,
         contentPadding: const EdgeInsets.only(left: 10, top: 0),
@@ -546,7 +552,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
         title: Text(
           song.title,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 15 /* Default flutter title font size (not dense) */,
           ),
         ),
@@ -569,7 +575,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
 }
 
 /// `SongTile` that represents a single track in `TrackList`
-class SelectableSongTile extends StatefulWidget {
+class SelectableSongTile extends StatefulWidget implements SongTileInterface {
   SelectableSongTile({
     Key key,
     @required this.song,
@@ -698,7 +704,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
       widget.additionalClickCallback();
     // Playing because clickSongTile changes any other type to it
     if (widget.pushToPlayerRouteOnClick &&
-        MusicPlayer.playState == AudioPlayerState.PLAYING)
+        MusicPlayer.playerState == AudioPlayerState.PLAYING)
       Navigator.of(context).pushNamed(
           Constants.Routes.player.value); // TODO: move this out of here
   }
