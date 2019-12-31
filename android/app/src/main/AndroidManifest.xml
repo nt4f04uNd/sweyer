@@ -1,55 +1,65 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nt4f04uNd.sweyer">
-
-   <!-- Allow read storage -->
-   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-   <!-- Allow media notification -->
-   <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
-   <!-- Needed to stay awake feature in mediaplayer -->
-   <uses-permission android:name="android.permission.WAKE_LOCK" />
-   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.nt4f04uNd.sweyer">
 
 
-   <!-- io.flutter.app.FlutterApplication is an android.app.Application that
-         calls FlutterMain.startInitialization(this); in its onCreate method.
-         In most cases you can leave this as-is, but you if you want to provide
-         additional functionality it is fine to subclass or reimplement
-         FlutterApplication and put your custom class here. -->
+    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
+          calls FlutterMain.startInitialization(this); in its onCreate method.
+          In most cases you can leave this as-is, but you if you want to provide
+          additional functionality it is fine to subclass or reimplement
+          FlutterApplication and put your custom class here. -->
+    <application
+        android:name="io.flutter.app.FlutterApplication"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Sweyer"
+        android:resizeableActivity="false">
+        <activity
+            android:name="com.nt4f04uNd.sweyer.MainActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/LaunchThemeSystemUILight"
+            android:windowSoftInputMode="adjustNothing">
+            <!--         android:theme="@style/LaunchThemeSystemUILight"-->
 
-   <!-- TODO: Mipmap currently unused, probably should delete in the future -->
-   <application android:name="io.flutter.app.FlutterApplication" android:label="Sweyer" android:icon="@mipmap/ic_launcher" android:resizeableActivity="false">
-      <activity android:name="com.nt4f04uNd.sweyer.MainActivity"
-          android:launchMode="singleTop"
-          android:theme="@style/LaunchThemeSystemUILight"
-          android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-          android:hardwareAccelerated="true"
-          android:screenOrientation="portrait"
-          android:windowSoftInputMode="adjustNothing">
-<!--         android:theme="@style/LaunchThemeSystemUILight"-->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
-         <!-- This keeps the window background of the activity showing
-                 until Flutter renders its first frame. It can be removed if
-                 there is no splash screen (such as the default splash screen
-                 defined in @style/LaunchTheme). -->
-            <meta-data android:name="io.flutter.app.android.SplashScreenUntilFirstFrame" android:value="true" />
             <!-- NOTE see https://github.com/flutter/flutter/issues/20827 -->
+            <!-- This keeps the window background of the activity showing
+        until Flutter renders its first frame. It can be removed if
+        there is no splash screen (such as the default splash screen
+        defined in @style/LaunchTheme). -->
             <!-- <meta-data android:name="io.flutter.theme.android.SplashScreenUntilFirstFrame" android:value="true" /> -->
-         <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
-            <category android:name="android.intent.category.LAUNCHER"/>
-         </intent-filter>
+            <meta-data
+                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
+                android:value="true" />
 
-         <!-- Intent filter for opening audio files -->
-<!--          <intent-filter>-->
-<!--            <action android:name="android.intent.action.VIEW" />-->
-<!--            <data android:mimeType="audio/*" />-->
-<!--            <category android:name="android.intent.category.DEFAULT" />-->
-<!--         </intent-filter>-->
-      </activity>
+            <!-- Intent filter for opening audio files -->
+            <!--          <intent-filter>-->
+            <!--            <action android:name="android.intent.action.VIEW" />-->
+            <!--            <data android:mimeType="audio/*" />-->
+            <!--            <category android:name="android.intent.category.DEFAULT" />-->
+            <!--         </intent-filter>-->
+        </activity>
 
-      <service android:name="com.nt4f04uNd.sweyer.player.PlayerForegroundService" android:enabled="true" android:foregroundServiceType="mediaPlayback">
+        <service
+            android:name="com.nt4f04uNd.sweyer.player.PlayerForegroundService"
+            android:enabled="true"
+            android:foregroundServiceType="mediaPlayback">
 
-      </service>
+        </service>
 
-   </application>
+    </application>
+
+    <!-- Allow media notification -->
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Needed to stay awake feature in MediaPlayer -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 </manifest>

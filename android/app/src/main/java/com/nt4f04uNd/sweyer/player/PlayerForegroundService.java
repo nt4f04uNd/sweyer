@@ -43,6 +43,7 @@ public class PlayerForegroundService extends Service {
             // Start playing if flag is playing is set to true
             // This is just a handling for sticky service
             PlayerHandler.playPause();
+            GeneralHandler.print("wfqfwqkifjwqjfwq");
         }
 
         // Initializing handlers

@@ -9,6 +9,7 @@
 package com.nt4f04uNd.sweyer.player;
 
 import android.content.Context;
+import android.net.Uri;
 
 abstract class PlayerAbstract {
 
@@ -16,7 +17,7 @@ abstract class PlayerAbstract {
         return o1 == null && o2 == null || o1 != null && o1.equals(o2);
     }
 
-    abstract void play();
+    abstract void play(Context appContext);
 
     abstract void stop();
 
@@ -24,11 +25,11 @@ abstract class PlayerAbstract {
 
     abstract void pause();
 
-    abstract void setUrl(String url, boolean isLocal);
+    abstract void setUri(Uri uri);
 
     abstract void setVolume(double volume);
 
-    abstract void configAttributes(boolean respectSilence, boolean stayAwake, Context context);
+    abstract void setAwake(Context context, boolean stayAwake);
 
     abstract void setReleaseMode(ReleaseMode releaseMode);
 
@@ -42,7 +43,7 @@ abstract class PlayerAbstract {
 
     abstract boolean isActuallyPlaying();
 
-    abstract boolean isUrlNull();
+    abstract boolean isUriNull();
 
     /**
      * Seek operations cannot be called until after the player is ready.

@@ -44,7 +44,7 @@ public class PlaylistHandler {
         AssetManager assetManager = GeneralHandler.getAppContext().getAssets();
         String key = GeneralHandler.isSystemThemeDark()
                 ? FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_old.png")
-                :FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb.png");
+                : FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb.png");
 
         try {
             InputStream istream = assetManager.open(key);
@@ -62,8 +62,19 @@ public class PlaylistHandler {
      * This method gets last played playlist when activity is destroyed
      */
     public static void getLastPlaylist() {
-        if (songs == null) // Songs will be rested to null every time app activity starts
+        if (songs == null) { // Songs will be rested to null every time app activity starts
             songs = SerializationHandler.getPlaylistSongs();
+
+            Song song =  songs.get(7);
+            GeneralHandler.print("wfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwf, ID"
+                    + song.id + "  TITLE  "
+                    + song.title + " ALBUM  "
+                    + song.album + "  ALB_ID "
+                    + song.albumId + "  ALB_KEY  "
+                    + song.albumKey + "  ALB_URI  "
+                    + song.albumArtUri
+            );
+        }
     }
 
     /**

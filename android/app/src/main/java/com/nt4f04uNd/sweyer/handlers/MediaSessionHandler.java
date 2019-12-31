@@ -20,49 +20,50 @@ import androidx.annotation.NonNull;
 public class MediaSessionHandler {
     public static void init() {
         if (mediaSession == null) {
-            mediaSession = new MediaSession(GeneralHandler.getAppContext(), Constants.PACKAGE_NAME);
+            mediaSession = new MediaSession(GeneralHandler.getAppContext(), Constants.PACKAGE_NAME + ":mediaSessionTag");
             mediaSession.setCallback(new MediaSession.Callback() {
 
                 // TODO: implement remaining methods
                 final String prefix = "PREFIX PREFIX PREFIX PREFIX PREFIX";
+
                 @Override
                 public void onFastForward() {
-                    GeneralHandler.print(prefix+"FAST_FORWARD");
+                    GeneralHandler.print(prefix + "FAST_FORWARD");
                 }
 
                 @Override
                 public void onPause() {
-                    GeneralHandler.print(prefix+"PAUSE");
+                    GeneralHandler.print(prefix + "PAUSE");
                 }
 
                 @Override
                 public void onPlay() {
-                    GeneralHandler.print(prefix+"PLAY");
+                    GeneralHandler.print(prefix + "PLAY");
                 }
 
                 @Override
                 public void onRewind() {
-                    GeneralHandler.print(prefix+"REWIND");
+                    GeneralHandler.print(prefix + "REWIND");
                 }
 
                 @Override
                 public void onSeekTo(long pos) {
-                    GeneralHandler.print(prefix+"SEEK");
+                    GeneralHandler.print(prefix + "SEEK");
                 }
 
                 @Override
                 public void onSkipToNext() {
-                    GeneralHandler.print(prefix+"SKIP_NEXT");
+                    GeneralHandler.print(prefix + "SKIP_NEXT");
                 }
 
                 @Override
                 public void onSkipToPrevious() {
-                    GeneralHandler.print(prefix+"SKIP_PREV");
+                    GeneralHandler.print(prefix + "SKIP_PREV");
                 }
 
                 @Override
                 public void onStop() {
-                    GeneralHandler.print(prefix+"STOP");
+                    GeneralHandler.print(prefix + "STOP");
                 }
 
                 @Override

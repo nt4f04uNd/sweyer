@@ -6,7 +6,9 @@
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter_mailer/flutter_mailer.dart';
 
+
 /// Class to create and send log to me
+/// TODO: move to native side?
 abstract class Logger {
   /// A list to save separate log strings and then unite them into one final log
   static List<String> _stringList = [];

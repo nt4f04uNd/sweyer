@@ -119,7 +119,6 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
     });
     _durationChangeSubscription = MusicPlayer.onDurationChanged.listen((event) {
       // Needed to update current track indicator
-      _switcher.change();
       setState(() {});
     });
   }
@@ -526,15 +525,18 @@ class SongTile extends StatelessWidget implements SongTileInterface {
 
   final Function additionalClickCallback;
 
-  void _handleTap(BuildContext context) async {
-    await MusicPlayer.clickSongTile(song.id);
+  void _handleTap(BuildContext context) {
+    if (pushToPlayerRouteOnClick) {
+      if (song.id == PlaylistControl.currentSongId &&
+              MusicPlayer.playerState != AudioPlayerState.PLAYING ||
+          song.id != PlaylistControl.currentSongId)
+        Navigator.of(context).pushNamed(
+            Constants.Routes.player.value); // TODO: move this out of here
+    }
+
+    MusicPlayer.clickSongTile(song.id);
     if (additionalClickCallback != null) additionalClickCallback();
     // Playing because clickSongTile changes any other type to it
-
-    // TODO: move out ot this widget pushing route
-    if (pushToPlayerRouteOnClick &&
-        MusicPlayer.playerState == AudioPlayerState.PLAYING)
-      Navigator.of(context).pushNamed(Constants.Routes.player.value);
   }
 
   @override
@@ -698,15 +700,18 @@ class _SelectableSongTileState extends State<SelectableSongTile>
     super.dispose();
   }
 
-  void _handleTap() async {
-    await MusicPlayer.clickSongTile(widget.song.id);
+  void _handleTap() {
+    if (widget.pushToPlayerRouteOnClick) {
+      if (widget.song.id == PlaylistControl.currentSongId &&
+              MusicPlayer.playerState != AudioPlayerState.PLAYING ||
+          widget.song.id != PlaylistControl.currentSongId)
+        Navigator.of(context).pushNamed(
+            Constants.Routes.player.value); // TODO: move this out of here
+    }
+
+    MusicPlayer.clickSongTile(widget.song.id);
     if (widget.additionalClickCallback != null)
       widget.additionalClickCallback();
-    // Playing because clickSongTile changes any other type to it
-    if (widget.pushToPlayerRouteOnClick &&
-        MusicPlayer.playerState == AudioPlayerState.PLAYING)
-      Navigator.of(context).pushNamed(
-          Constants.Routes.player.value); // TODO: move this out of here
   }
 
   // Performs unselect animation and calls `onSelected` and `notifyUnselection`

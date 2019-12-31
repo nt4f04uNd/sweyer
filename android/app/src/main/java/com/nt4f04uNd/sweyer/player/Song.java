@@ -15,63 +15,94 @@ import androidx.annotation.Nullable;
  */
 public class Song {
     public final int id;
-    public final String artist;
     public final String album;
+    public final int albumId;
+    public final int albumKey;
+    public final String artist;
+    public final int artistId;
+    public final int artistKey;
+    public final String title;
+    public final int titleKey;
+    public final int dateAdded;
+    public final int dateModified;
+    public final int duration;
+    public final int size;
     @Nullable
     public final String albumArtUri;
-    public final String title;
-    public final String trackUri;
-    public final int duration;
-    public final int dateModified;
 
     public Song(
             final int id,
-            final String artist,
             final String album,
-            final String albumArtUri,
+            final int albumId,
+            final int albumKey,
+            final String artist,
+            final int artistId,
+            final int artistKey,
             final String title,
-            final String trackUri,
+            final int titleKey,
+            final int dateAdded,
+            final int dateModified,
             final int duration,
-            final int dateModified
+            final int size,
+            @Nullable final String albumArtUri
     ) {
         this.id = id;
-        this.artist = artist;
         this.album = album;
-        this.albumArtUri = albumArtUri;
+        this.albumId = albumId;
+        this.albumKey = albumKey;
+        this.artist = artist;
+        this.artistId = artistId;
+        this.artistKey = artistKey;
         this.title = title;
-        this.trackUri = trackUri;
-        this.duration = duration;
+        this.titleKey = titleKey;
+        this.dateAdded = dateAdded;
         this.dateModified = dateModified;
+        this.duration = duration;
+        this.size = size;
+        this.albumArtUri = albumArtUri;
     }
 
     public String toJson() {
         JSONObject json = new JSONObject();
         try {
             json.put("id", this.id);
-            json.put("artist", this.artist);
             json.put("album", this.album);
-            json.put("albumArtUri", this.albumArtUri);
+            json.put("albumId", this.albumId);
+            json.put("albumKey", this.albumKey);
+            json.put("artist", this.artist);
+            json.put("artistId", this.artistId);
+            json.put("artistKey", this.artistKey);
             json.put("title", this.title);
-            json.put("trackUri", this.trackUri);
-            json.put("duration", this.duration);
+            json.put("titleKey", this.titleKey);
+            json.put("dateAdded", this.dateAdded);
             json.put("dateModified", this.dateModified);
+            json.put("duration", this.duration);
+            json.put("size", this.size);
+            json.put("albumArtUri", this.albumArtUri);
+
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
         return json.toString();
     }
 
-    public static Song fromJson(JSONObject jsonObject) {
+    public static Song fromJson(JSONObject json) {
         try {
             return new Song(
-                    jsonObject.getInt("id"),
-                    jsonObject.getString("artist"),
-                    jsonObject.getString("album"),
-                    jsonObject.getString("albumArtUri"),
-                    jsonObject.getString("title"),
-                    jsonObject.getString("trackUri"),
-                    jsonObject.getInt("duration"),
-                    jsonObject.getInt("dateModified")
+                    json.getInt("id"),
+                    json.getString("album"),
+                    json.getInt("albumId"),
+                    json.getInt("albumKey"),
+                    json.getString("artist"),
+                    json.getInt("artistId"),
+                    json.getInt("artistKey"),
+                    json.getString("title"),
+                    json.getInt("titleKey"),
+                    json.getInt("dateAdded"),
+                    json.getInt("dateModified"),
+                    json.getInt("duration"),
+                    json.getInt("size"),
+                    json.getString("albumArtUri")
             );
         } catch (JSONException e) {
             e.printStackTrace();
@@ -81,24 +112,36 @@ public class Song {
 
     public static String jsonString(
             final int id,
-            final String artist,
             final String album,
-            final String albumArtUri,
+            final int albumId,
+            final int albumKey,
+            final String artist,
+            final int artistId,
+            final int artistKey,
             final String title,
-            final String trackUri,
+            final int titleKey,
+            final int dateAdded,
+            final int dateModified,
             final int duration,
-            final int dateModified
+            final int size,
+            @Nullable final String albumArtUri
     ) {
         JSONObject json = new JSONObject();
         try {
             json.put("id", id);
-            json.put("artist", artist);
             json.put("album", album);
-            json.put("albumArtUri", albumArtUri);
+            json.put("albumId", albumId);
+            json.put("albumKey", albumKey);
+            json.put("artist", artist);
+            json.put("artistId", artistId);
+            json.put("artistKey", artistKey);
             json.put("title", title);
-            json.put("trackUri", trackUri);
-            json.put("duration", duration);
+            json.put("titleKey", titleKey);
+            json.put("dateAdded", dateAdded);
             json.put("dateModified", dateModified);
+            json.put("duration", duration);
+            json.put("size", size);
+            json.put("albumArtUri", albumArtUri);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

@@ -146,24 +146,15 @@ abstract class NativeAudioPlayer {
   /// Throws `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
   static Future<void> play(
     Song song, {
-    bool isLocal = false,
     double volume = 1.0,
     // position must be null by default to be compatible with radio streams
     Duration position,
-    bool respectSilence = false,
-    bool stayAwake = false,
+    bool stayAwake = true,
   }) async {
-    isLocal ??= false;
-    volume ??= 1.0;
-    respectSilence ??= false;
-    stayAwake ??= false;
-
     return _channel.invokeMethod('play', {
       'song': song.toJson(),
-      'isLocal': isLocal,
       'volume': volume,
       'position': position?.inMilliseconds,
-      'respectSilence': respectSilence,
       'stayAwake': stayAwake,
     });
   }
@@ -193,7 +184,7 @@ abstract class NativeAudioPlayer {
   /// Releases the resources associated with this media player.
   ///
   /// The resources are going to be fetched or buffered again as soon as you
-  /// call [play] or [setUrl].
+  /// call [play] or [setUri].
   static Future<void> release() async {
     return _channel.invokeMethod('release');
   }
@@ -228,8 +219,10 @@ abstract class NativeAudioPlayer {
   ///
   /// The resources will start being fetched or buffered as soon as you call
   /// this method.
-  static Future<void> setUrl(String url, {bool isLocal: false}) async {
-    return _channel.invokeMethod('setUrl', {'url': url, 'isLocal': isLocal});
+  /// 
+  /// Uses id to get song path
+  static Future<void> setUri(int songId) async {
+    return _channel.invokeMethod('setUri', {'songId': songId});
   }
 
   /// Checks is the actual player is playing

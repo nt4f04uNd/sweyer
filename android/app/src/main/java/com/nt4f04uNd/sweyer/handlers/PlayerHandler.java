@@ -8,8 +8,10 @@
 
 package com.nt4f04uNd.sweyer.handlers;
 
+import android.content.ContentUris;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.provider.MediaStore;
 
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
@@ -153,11 +155,12 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     // COMPOSED METHODS (wrappers over default player methods) ///////////////////////////////////////////////////////////////
     // TODO: remove respect silence, isLocal and stayAwake
-    public static void play(@NotNull Song song, double volume, Integer position, boolean respectSilence, boolean isLocal, boolean stayAwake) {
+    public static void play(@NotNull Song song, double volume, Integer position, boolean stayAwake) {
         ServiceHandler.startService(true);
-        player.configAttributes(respectSilence, stayAwake, GeneralHandler.getAppContext());
+        player.setAwake(GeneralHandler.getAppContext(), stayAwake);
         player.setVolume(volume);
-        player.setUrl(song.trackUri, isLocal);
+        setUri(song.id);
+
         if (position != null)
             PlayerHandler.player.seek(position);
 
@@ -166,7 +169,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         if (AudioFocusHandler.focusState == AudioManager.AUDIOFOCUS_GAIN) {
             boolean success = true;
             try {
-                player.play();
+                player.play(GeneralHandler.getAppContext());
             } catch (Exception e) {
                 success = false;
                 throw e;
@@ -182,7 +185,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void resume() {
-        ServiceHandler.startService(true);
         if (AudioFocusHandler.focusState != AudioManager.AUDIOFOCUS_GAIN)
             AudioFocusHandler.requestFocus();
         if (AudioFocusHandler.focusState == AudioManager.AUDIOFOCUS_GAIN) {
@@ -191,7 +193,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void pause() {
-        ServiceHandler.startService(false);
         barePause();
         AudioFocusHandler.abandonFocus();
     }
@@ -200,7 +201,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      * Discouraged to use
      */
     public static void stop() {
-        ServiceHandler.stopService();
         bareStop();
         AudioFocusHandler.abandonFocus();
     }
@@ -209,7 +209,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      * Discouraged to use
      */
     public static void release() {
-        ServiceHandler.stopService();
         bareRelease();
         AudioFocusHandler.abandonFocus();
     }
@@ -222,8 +221,8 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         player.setVolume(volume);
     }
 
-    public static void setUrl(String url, boolean isLocal) {
-        player.setUrl(url, isLocal);
+    public static void setUri(int songId) {
+        player.setUri(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId));
     }
 
     public static double getVolume() {
@@ -254,13 +253,16 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      * Normal resume function, it just doesn't care about handling audio focus
      */
     public static void bareResume() {
-        player.play();
+        ServiceHandler.startService(true);
+        player.play(GeneralHandler.getAppContext());
         PrefsHandler.setSongIsPlaying(true);
         PlayerHandler.callSetState(PlayerState.PLAYING);
         NotificationHandler.updateNotification(true, isLooping());
+        player.setAwake(GeneralHandler.getAppContext(), true);
     }
 
     public static void barePause() {
+        ServiceHandler.startService(false);
         player.pause();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.PAUSED);
@@ -268,6 +270,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void bareStop() {
+        ServiceHandler.stopService();
         player.stop();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
@@ -276,6 +279,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void bareRelease() {
+        ServiceHandler.stopService();
         player.release();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
@@ -289,7 +293,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void playPause() {
         try {
-            if (player.isUrlNull())
+            if (player.isUriNull())
                 if (GeneralHandler.activityExists()) {
                     // Do nothing if activity exists, but url is null
                     return;
@@ -312,7 +316,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         try {
             if (!GeneralHandler.activityExists()) {
                 PlaylistHandler.getLastPlaylist();
-                PlayerHandler.play(PlaylistHandler.getNextSong(), PlayerHandler.getVolume(), 0, false, true, true);
+                PlayerHandler.play(PlaylistHandler.getNextSong(), PlayerHandler.getVolume(), 0, true);
             }
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
@@ -323,7 +327,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         try {
             if (!GeneralHandler.activityExists()) {
                 PlaylistHandler.getLastPlaylist();
-                PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, false, true, true);
+                PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0,  true);
             }
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));

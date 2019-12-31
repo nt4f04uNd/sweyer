@@ -64,14 +64,23 @@ abstract class MusicPlayer {
     }
   }
 
+  /// Get duration of current song
+  static Future<Duration> get currentDuration async {
+    try {
+      return Duration(
+          milliseconds: await NativeAudioPlayer.getDuration());
+    } catch (e) {
+      return Duration(seconds: 0);
+    }
+  }
+
   /// Init whole music instance
   ///
   static Future<void> init() async {
     NativeAudioPlayer.init();
 
     _durationSubscription =
-        NativeAudioPlayer.onDurationChanged.listen((event) async {
-      // await setUrl(PlaylistControl.currentSong.trackUri);
+        NativeAudioPlayer.onDurationChanged.listen((event) async { 
       // TODO: ????
     });
 
@@ -115,15 +124,15 @@ abstract class MusicPlayer {
   /// @param `songId` argument denotes an id track to play
   ///
   /// @param `silent` - if it is true, won't play track, but just switch to it
-  /// (the difference with the `setUrl` with this parameter is that this function will also update current playing song respectively)
+  /// (the difference with the `setUri` with this parameter is that this function will also update current playing song respectively)
   static Future<void> play(int songId, {bool silent = false}) async {
     final song = PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
     bool success = true;
     try {
       if (!silent) // `stayAwake` is very important for player to stay play even in background
-        await NativeAudioPlayer.play(song, stayAwake: true, isLocal: true);
+        await NativeAudioPlayer.play(song, stayAwake: true);
       else
-        await setUrl(song.trackUri);
+        await setUri(song.id);
     } on PlatformException catch (e) {
       success = false;
       if (e.code == "error") {
@@ -172,9 +181,9 @@ abstract class MusicPlayer {
   /// Sets track url
   ///
   /// Unlike [play], the playback will not resume, but song will be switched if it player is playing
-  static Future<void> setUrl(String url) async {
+  static Future<void> setUri(int songId) async {
     try {
-      return NativeAudioPlayer.setUrl(url);
+      return NativeAudioPlayer.setUri(songId);
     } catch (e) {
       rethrow;
     }

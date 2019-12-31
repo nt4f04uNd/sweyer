@@ -167,10 +167,12 @@ class _RotatingAlbumArtWithProgressState
     // Handle song change
     _durationSubscription = MusicPlayer.onDurationChanged.listen((event) async {
       _value = await MusicPlayer.currentPosition;
+      if(mounted)
       setState(() {
         _duration = event;
         // Update art
-        _rotatingArtGlobalKey.currentState.reloadArt(PlaylistControl.currentSong?.albumArtUri);
+        _rotatingArtGlobalKey.currentState
+            .reloadArt(PlaylistControl.currentSong?.albumArtUri);
       });
     });
   }

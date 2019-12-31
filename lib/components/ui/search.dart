@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:developer';
+
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -14,12 +16,18 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     _fetchingHistory = _fetchSearchHistory();
   }
   List<String> _suggestions = [];
+  Iterable<Song> searched = [];
+
+  String _prevQuery = "";
   Future<void> _fetchingHistory;
 
   // Maintain search state
   // That is needed we want to preserve state when user navigates to player route
-  // @override
+  @override
   // bool get maintainState => true;
+
+  @override
+  bool get shouldUpdateResults => false;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -136,17 +144,23 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
     showSuggestions(context); // Update suggestions ListView
   }
 
+final key = UniqueKey();
+
   /// This method called both for build suggestions and results
   ///
   /// This because we need user to see actual suggestions only when query is empty
   ///
   /// And when query is not empty - found songs will be displayed
   Widget _buildResultsAndSuggestions(BuildContext context) {
-    /// Search songs on every call
-    final Iterable<Song> searched =
-        PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/);
+    /// Search songs if previous query is distinct from current
+    if (_prevQuery == '' || _prevQuery != query)
+      searched =
+          PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/);
+
+    _prevQuery = query.trim();
 
     return GestureDetector(
+      key:key,
       onTap: () => FocusScope.of(context).unfocus(),
       onVerticalDragStart: (_) => FocusScope.of(context).unfocus(),
       onVerticalDragCancel: () => FocusScope.of(context).unfocus(),
@@ -172,13 +186,11 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
             return Stack(
               children: <Widget>[
                 Scrollbar(
-                  child: 
-                  StreamBuilder(
+                  child: StreamBuilder(
                       stream: MusicPlayer.onDurationChanged,
                       builder: (context, snapshot) {
-                        return
-                        ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
+                        return ListView.builder(
+                            physics: const SMMBouncingScrollPhysics(),
                             padding: const EdgeInsets.only(bottom: 65, top: 0),
                             itemCount: searched.length,
                             itemBuilder: (context, index) {
@@ -188,14 +200,15 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                                     PlaylistControl.currentSong?.id,
                                 additionalClickCallback: () async {
                                   _writeInputToSearchHistory(query);
+                                  // close(context, searchedList[index]);
                                   FocusScope.of(context)
                                       .requestFocus(FocusNode());
-                                
+
                                   // Wait before route animation completes
                                   await Future.delayed(
                                       Duration(milliseconds: 400));
 
-                                        // TODO: maybe save last search query and update only if it has changed?
+                                  // TODO: maybe save last search query and update only if it has changed?
                                   // NOTE that it might cause bugs if playlist will accidentally update (e.g. fetch process will end)
                                   // So I maybe need to think about this a lil bit
                                   PlaylistControl.setSearchedPlaylist(
@@ -233,8 +246,6 @@ class SongsSearchDelegate extends custom_search.SearchDelegate<Song> {
                             child: ScrollConfiguration(
                               behavior: SMMScrollBehaviorGlowless(),
                               child: ListView.builder(
-                                // physics: SMMBouncingScrollPhysics(),
-
                                 padding:
                                     const EdgeInsets.only(bottom: 65, top: 0),
                                 itemCount: _suggestions.length,

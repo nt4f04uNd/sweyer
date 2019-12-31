@@ -6,6 +6,7 @@
 package com.nt4f04uNd.sweyer.handlers;
 
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
@@ -21,8 +22,14 @@ public abstract class AudioFocusHandler {
             audioManager = (AudioManager) GeneralHandler.getAppContext().getSystemService(Context.AUDIO_SERVICE);
 
             if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
-                focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAcceptsDelayedFocusGain(true)
-                        .setOnAudioFocusChangeListener(new ImplementedOnAudioFocusListener()).build();
+                AudioAttributes attributes = new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build();
+                focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAcceptsDelayedFocusGain(true)
+                        .setOnAudioFocusChangeListener(new ImplementedOnAudioFocusListener())
+                        .setAudioAttributes(attributes)
+                        .build();
             } else {
                 afChangeListener = new ImplementedOnAudioFocusListener();
             }
@@ -56,7 +63,8 @@ public abstract class AudioFocusHandler {
                         // Use the music stream.
                         AudioManager.STREAM_MUSIC,
                         // Request permanent focus.
-                        AudioManager.AUDIOFOCUS_GAIN);
+                        AudioManager.AUDIOFOCUS_GAIN
+                );
             }
 
             Log.w(Constants.LogTag, "REQUEST FOCUS " + res);

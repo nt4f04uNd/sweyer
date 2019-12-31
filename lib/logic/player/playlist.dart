@@ -206,8 +206,7 @@ abstract class PlaylistControl {
   ///
   /// If optional `playlistType` is specified, then returns index in selected playlist type
   static int currentSongIndex([PlaylistType argPlaylistType]) {
-    return getPlaylist(argPlaylistType)
-        .getSongIndexById(_playingSongIdState);
+    return getPlaylist(argPlaylistType).getSongIndexById(_playingSongIdState);
   }
 
   /// Whether playlist control is ready to provide player instance sources to play tracks
@@ -218,6 +217,9 @@ abstract class PlaylistControl {
       _songsListChangeStreamController.stream;
 
   /// Emit event to `onPlaylistListChange`
+  /// 
+  /// Should be only called when user can see playlist change, i.e. songs sort. 
+  /// Shouldn't be called, e.g. on tile click, when playlist changes, but user can't actually see it
   static void emitPlaylistChange() {
     _songsListChangeStreamController.add(null);
   }
@@ -236,7 +238,8 @@ abstract class PlaylistControl {
         playlistSerializer.initJson() // Init playlist json
       ]);
       // Get songs from json and create global playlist
-      playlists[PlaylistType.global] = Playlist(await songsSerializer.readJson());
+      playlists[PlaylistType.global] =
+          Playlist(await songsSerializer.readJson());
       await _restoreSortFeature();
       await filterSongs();
 
@@ -252,7 +255,8 @@ abstract class PlaylistControl {
       // Emit event to track change stream
       emitPlaylistChange();
 
-      playlists[PlaylistType.global] = Playlist(await songsFetcher.fetchSongs()); // Fetch songs
+      playlists[PlaylistType.global] =
+          Playlist(await songsFetcher.fetchSongs()); // Fetch songs
       await filterSongs();
       sortSongs();
 
@@ -285,15 +289,16 @@ abstract class PlaylistControl {
 
   /// Sets searched playlist
   ///
+  /// This functions doesn't call [emitPlaylistChange()]
+  ///
   /// @param `songs` — can be omitted and if so, then playlist is not changed, only switched to it
-  static Future<void> setSearchedPlaylist([List<Song> songs])async {
+  static Future<void> setSearchedPlaylist([List<Song> songs]) async {
     if (songs != null) {
       playlists[PlaylistType.searched] = Playlist(songs);
       playlistSerializer.saveJson(songs);
     }
     playlistType = PlaylistType.searched;
     Prefs.byKey.playlistTypeInt.setPref(1);
-    emitPlaylistChange();
   }
 
   /// Shuffles from current playlist (by default)
@@ -306,7 +311,6 @@ abstract class PlaylistControl {
 
     playlistTypeBeforeShuffle = argPlaylistType;
     playlistType = PlaylistType.shuffled;
-
     Prefs.byKey.playlistTypeInt.setPref(2);
 
     if (songs == null)
@@ -330,6 +334,8 @@ abstract class PlaylistControl {
   }
 
   /// Switches tp global Resets all playlists except it
+  /// 
+  /// This functions doesn't call [emitPlaylistChange()]
   static void resetPlaylists() {
     if (playlistType != PlaylistType.global) {
       Prefs.byKey.playlistTypeInt.setPref(0); // Save to prefs
@@ -337,7 +343,6 @@ abstract class PlaylistControl {
       playlistType = PlaylistType.global;
       playlists[PlaylistType.searched] = Playlist([]);
       playlists[PlaylistType.shuffled] = Playlist([]);
-      emitPlaylistChange();
     }
   }
 
@@ -351,10 +356,11 @@ abstract class PlaylistControl {
             el.artist.toLowerCase().contains(query) ||
             el.album.toLowerCase().contains(query) ||
             RegExp('\\b\\w')
+                // Find abbreviations (big baby tape - bbt)
+                //TODO: this is not working as expected for cyrillic
                 .allMatches(el.title.toLowerCase())
                 .fold("", (a, b) => a += b.group(0))
-                .contains(
-                    query); // Find abbreviations (big baby tape - bbt) //TODO: this is not working as expected, probably delete
+                .contains(query);
       });
     }
     return null;
@@ -367,13 +373,16 @@ abstract class PlaylistControl {
     feature ??= sortFeature;
     switch (feature) {
       case SortFeature.date:
-        playlists[PlaylistType.global].songs
+        playlists[PlaylistType.global]
+            .songs
             .sort((b, a) => a.dateModified.compareTo(b.dateModified));
         sortFeature = feature;
         Prefs.byKey.sortFeatureInt.setPref(0);
         break;
       case SortFeature.title:
-        playlists[PlaylistType.global].songs.sort((a, b) => a.title.compareTo(b.title));
+        playlists[PlaylistType.global]
+            .songs
+            .sort((a, b) => a.title.compareTo(b.title));
         sortFeature = feature;
         Prefs.byKey.sortFeatureInt.setPref(1);
         break;
@@ -473,14 +482,14 @@ abstract class PlaylistControl {
       // Get saved data
       SharedPreferences prefs = await Prefs.getSharedInstance();
 
-      int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs) ??
-          getPlaylist().songs[0];
+      int savedSongId =
+          await Prefs.byKey.songIdInt.getPref(prefs) ?? getPlaylist().songs[0].id;
 
       // Setup initial playing state index from prefs
       _playingSongIdState = savedSongId;
       await API.ServiceHandler.sendSong(PlaylistControl.currentSong);
       // Set url of first track in player instance
-      await MusicPlayer.setUrl(currentSong.trackUri);
+      await MusicPlayer.setUri(currentSongId);
     }
   }
 }

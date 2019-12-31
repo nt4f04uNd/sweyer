@@ -46,7 +46,6 @@ abstract class RouteControl {
       return createRouteTransition(
         playMaterial: true,
         materialAnimationStyle: MaterialRouteTransitionStyle.expand,
-        entIgnoreEventsForward: true,
         entCurve: Curves.fastOutSlowIn,
         entBegin: const Offset(0.0, 1.0),
         transitionDuration: const Duration(milliseconds: 400),

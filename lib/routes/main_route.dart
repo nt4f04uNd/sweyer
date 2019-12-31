@@ -39,10 +39,11 @@ class MainRouteState extends State<MainRoute> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _handleHomePop,
-      child: StreamBuilder(
+      child:  StreamBuilder(
           stream: PlaylistControl.onPlaylistListChange,
           builder: (context, snapshot) {
-            return !PlaylistControl.playReady
+            return 
+            !PlaylistControl.playReady
                 ? _EmptyScreen() // TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
                 : Permissions.notGranted
                     ? _NoPermissionsScreen()

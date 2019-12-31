@@ -73,8 +73,6 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
                         Song.fromJson(new JSONObject((HashMap) call.argument("song"))),
                         call.argument("volume"),
                         call.argument("position"),
-                        call.argument("respectSilence"),
-                        call.argument("isLocal"),
                         call.argument("stayAwake")
                 );
                 break;
@@ -103,8 +101,8 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
                 PlayerHandler.setVolume(call.argument("volume"));
                 break;
             }
-            case "setUrl": {
-                PlayerHandler.setUrl(call.argument("url"), call.argument("isLocal"));
+            case "setUri": {
+                PlayerHandler.setUri(call.argument("songId"));
                 break;
             }
             case "isPlaying": {

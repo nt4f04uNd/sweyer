@@ -32,7 +32,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
         else
           _playlistTabKey.currentState.jumpOnTabChange();
       } else if (_pageController.page == 1.0) {
-        _playlistTabKey.currentState.opened= true;
+        _playlistTabKey.currentState.opened = true;
       }
     });
   }
@@ -531,6 +531,7 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   Future<void> _setInitialCurrentPosition() async {
     var currentPosition = await MusicPlayer.currentPosition;
+    var currentDuration = await MusicPlayer.currentDuration;
     setState(() {
       _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
       _value = currentPosition;

@@ -12,10 +12,12 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 
 import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
 
 import java.io.IOException;
@@ -29,12 +31,20 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     // TODO: logging
     //private Logger LOGGER = Logger.getLogger(Player.class.getCanonicalName());
 
-    private String url;
+//    public Player(Context appContext) {
+//        PowerManager powerManager = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
+//        PowerManager.WakeLock wl = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Constants.PACKAGE_NAME + ":wakeLockTag");
+//       // wl.acquire();
+//  // ..screen will stay on during this section..
+////     / /  wl.release();
+//
+//    }
+
+    private Uri uri;
     private double volume = 1.0;
     private boolean respectSilence;
     private boolean stayAwake;
     private ReleaseMode releaseMode = ReleaseMode.RELEASE;
-
     private boolean released = true;
     private boolean prepared = false;
     private boolean playing = false;
@@ -47,13 +57,13 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
      * Setter methods
      */
 
+
     /**
      * NOTE THAT THIS CAN THROW ILLEGAL STATE EXCEPTION
      */
-    @Override
-    public void setUrl(String url, boolean isLocal) {
-        if (!objectEquals(this.url, url)) {
-            this.url = url;
+    public void setUri(Uri uri) {
+        if (!objectEquals(this.uri, uri)) {
+            this.uri = uri;
             if (this.released) {
                 this.player = createPlayer();
                 this.released = false;
@@ -62,13 +72,14 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.prepared = false;
             }
 
-            this.setSource(url);
+            this.setSource(GeneralHandler.getAppContext(), uri);
             this.player.setVolume((float) volume, (float) volume);
             this.player.setLooping(this.releaseMode == ReleaseMode.LOOP);
             this.player.prepareAsync();
 
         }
     }
+
 
     @Override
     public void setVolume(double volume) {
@@ -81,13 +92,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     }
 
     @Override
-    public void configAttributes(boolean respectSilence, boolean stayAwake, Context context) {
-        if (this.respectSilence != respectSilence) {
-            this.respectSilence = respectSilence;
-            if (!this.released) {
-                setAttributes(player);
-            }
-        }
+    public void setAwake(Context context, boolean stayAwake) {
         if (this.stayAwake != stayAwake) {
             this.stayAwake = stayAwake;
             if (!this.released && this.stayAwake) {
@@ -140,8 +145,8 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
      * Used to check cases when url is null (e.g. flutter hasn't setup it up for some reason)
      */
     @Override
-    public boolean isUrlNull() {
-        return url == null;
+    public boolean isUriNull() {
+        return uri == null;
     }
 
 
@@ -150,13 +155,13 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
      */
 
     @Override
-    public void play() {
+    public void play(Context appContext) {
         if (!this.playing) {
             this.playing = true;
             if (this.released) {
                 this.released = false;
                 this.player = createPlayer();
-                this.setSource(url);
+                this.setSource(appContext, uri);
                 this.player.prepareAsync();
             } else if (this.prepared) {
                 this.player.start();
@@ -256,30 +261,28 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         MediaPlayer player = new MediaPlayer();
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
-        setAttributes(player);
-        player.setVolume((float) volume, (float) volume);
-        player.setLooping(this.releaseMode == ReleaseMode.LOOP);
-        return player;
-    }
 
-    private void setSource(String url) {
-        try {
-            this.player.setDataSource(url);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to access resource", e);
-        }
-    }
-
-    private void setAttributes(MediaPlayer player) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             player.setAudioAttributes(new AudioAttributes.Builder()
-                    .setUsage(respectSilence ? AudioAttributes.USAGE_NOTIFICATION_RINGTONE : AudioAttributes.USAGE_MEDIA)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
             );
         } else {
             // This method is deprecated but must be used on older devices
-            player.setAudioStreamType(respectSilence ? AudioManager.STREAM_RING : AudioManager.STREAM_MUSIC);
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        }
+
+        player.setVolume((float) volume, (float) volume);
+        player.setLooping(this.releaseMode == ReleaseMode.LOOP);
+        return player;
+    }
+
+    private void setSource(Context appContext, Uri uri) {
+        try {
+            this.player.setDataSource(appContext, uri);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to access resource", e);
         }
     }
 

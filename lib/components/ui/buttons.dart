@@ -98,7 +98,6 @@ class LoopButton extends StatelessWidget {
         stream: MusicPlayer.onLoopSwitch,
         initialData: MusicPlayer.loopMode,
         builder: (context, snapshot) {
-          print(snapshot.data);
           return SMMIconButton(
             splashColor: Constants.AppTheme.splash.auto(context),
             icon: Icon(Icons.loop),
