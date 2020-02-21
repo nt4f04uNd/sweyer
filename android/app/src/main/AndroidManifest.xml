@@ -18,9 +18,8 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/LaunchThemeSystemUILight"
+            android:theme="@style/LaunchThemeSystemUI"
             android:windowSoftInputMode="adjustNothing">
-            <!--         android:theme="@style/LaunchThemeSystemUILight"-->
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

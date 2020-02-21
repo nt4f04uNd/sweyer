@@ -60,6 +60,8 @@ abstract class LaunchControl {
       PlaylistControl.init();
     } catch (exception, stacktrace) {
       CatcherErrorBridge.add(CaughtError(exception, stacktrace));
+      print("ERROR ON STARTUP:  " + exception);
+      print(stacktrace);
     } finally {
       _streamController.add(true);
     }

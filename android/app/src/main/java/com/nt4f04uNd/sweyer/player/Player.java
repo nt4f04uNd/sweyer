@@ -27,18 +27,9 @@ import io.flutter.Log;
 /**
  * Basic wrapper over media player, very raw
  */
-public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnBufferingUpdateListener {
     // TODO: logging
     //private Logger LOGGER = Logger.getLogger(Player.class.getCanonicalName());
-
-//    public Player(Context appContext) {
-//        PowerManager powerManager = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
-//        PowerManager.WakeLock wl = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Constants.PACKAGE_NAME + ":wakeLockTag");
-//       // wl.acquire();
-//  // ..screen will stay on during this section..
-////     / /  wl.release();
-//
-//    }
 
     private Uri uri;
     private double volume = 1.0;
@@ -47,7 +38,9 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     private ReleaseMode releaseMode = ReleaseMode.RELEASE;
     private boolean released = true;
     private boolean prepared = false;
+    private boolean preparing = false;
     private boolean playing = false;
+    private Uri pendingUri = null;
 
     private int shouldSeekTo = -1;
 
@@ -70,12 +63,16 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
             } else if (this.prepared) {
                 this.player.reset();
                 this.prepared = false;
+            } else if (preparing) {
+                pendingUri = uri;
+                return;
             }
 
             this.setSource(GeneralHandler.getAppContext(), uri);
             this.player.setVolume((float) volume, (float) volume);
             this.player.setLooping(this.releaseMode == ReleaseMode.LOOP);
             this.player.prepareAsync();
+            this.preparing = true;
 
         }
     }
@@ -128,6 +125,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
 
     @Override
     public int getCurrentPosition() {
+        if (player == null) return 0;
         return this.player.getCurrentPosition();
     }
 
@@ -163,6 +161,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
                 this.player = createPlayer();
                 this.setSource(appContext, uri);
                 this.player.prepareAsync();
+                this.preparing = true;
             } else if (this.prepared) {
                 this.player.start();
                 PlayerHandler.startPositionUpdates();
@@ -233,6 +232,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
     @Override
     public void onPrepared(final MediaPlayer mediaPlayer) {
         this.prepared = true;
+        this.preparing = false;
         PlayerHandler.handleDuration(this);
         if (this.playing) {
             mediaPlayer.start();
@@ -244,12 +244,22 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         }
     }
 
+
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         if (releaseMode != ReleaseMode.LOOP) {
             this.stop();
         }
         PlayerHandler.handleCompletion();
+    }
+
+    @Override
+    public void onBufferingUpdate(MediaPlayer mediaPlayer, int percent) {
+        if (pendingUri != null) {
+            mediaPlayer.release();
+            setUri(pendingUri);
+            pendingUri = null;
+        }
     }
 
 
@@ -261,6 +271,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
         MediaPlayer player = new MediaPlayer();
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
+        player.setOnBufferingUpdateListener(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             player.setAudioAttributes(new AudioAttributes.Builder()

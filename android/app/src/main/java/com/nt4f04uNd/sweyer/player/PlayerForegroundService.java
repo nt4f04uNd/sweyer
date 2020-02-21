@@ -18,6 +18,7 @@ import com.nt4f04uNd.sweyer.handlers.NotificationHandler;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
 import com.nt4f04uNd.sweyer.handlers.PlaylistHandler;
 import com.nt4f04uNd.sweyer.handlers.PrefsHandler;
+import com.nt4f04uNd.sweyer.handlers.WakelockHandler;
 import com.nt4f04uNd.sweyer.receivers.BecomingNoisyReceiver;
 import com.nt4f04uNd.sweyer.receivers.NotificationReceiver;
 
@@ -39,15 +40,20 @@ public class PlayerForegroundService extends Service {
         isRunning = true;
 
         PlaylistHandler.initCurrentSong();
-        if(!GeneralHandler.activityExists() && PrefsHandler.getSongIsPlaying()){
-            // Start playing if flag is playing is set to true
-            // This is just a handling for sticky service
-            PlayerHandler.playPause();
-            GeneralHandler.print("wfqfwqkifjwqjfwq");
+
+        Boolean savedPlaying = null;
+        if (!GeneralHandler.activityExists()) {
+            savedPlaying = PrefsHandler.getSongIsPlaying();
+            if (savedPlaying) {
+                // Start playing if flag is playing is set to true
+                // This is just a handling for sticky service
+                PlayerHandler.playPause();
+            }
         }
 
         // Initializing handlers
         GeneralHandler.init(getApplicationContext());
+        WakelockHandler.acquire();
         PlayerHandler.init();
         AudioFocusHandler.init();
         NotificationHandler.init();
@@ -62,7 +68,12 @@ public class PlayerForegroundService extends Service {
         if (PlaylistHandler.getCurrentSong() != null)
             startForeground(
                     NotificationHandler.NOTIFICATION_ID,
-                    NotificationHandler.getNotification(PlayerHandler.isPlaying(), PlayerHandler.isLooping())
+                    NotificationHandler.getNotification(
+                            // If activity exists then set true as start playing button, as service is meant to start only together with playback
+                            // Else check saved playing
+                            savedPlaying == null ? true : savedPlaying,
+                            PlayerHandler.isLooping()
+                    )
             );
         else stopSelf();
     }
@@ -78,8 +89,9 @@ public class PlayerForegroundService extends Service {
         isRunning = false;
 
         // Handlers
-        // These two one may affect user interaction with other apps if I won't destroy them
+        // These may affect user interaction with other apps if I won't destroy them
         // Other handlers seem to be not necessary to clear them
+        WakelockHandler.release();
         AudioFocusHandler.abandonFocus();
         PlaylistHandler.resetPlaylist();
         MediaSessionHandler.release();

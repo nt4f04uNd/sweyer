@@ -24,7 +24,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     } catch (e) {}
   }
 
-  void _handleClickSendLog() => Logger.send();
+  // void _handleClickSendLog() => Logger.send();
 
   Future<void> _handleClickDebug() async {
     try {
@@ -79,11 +79,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 icon: Icons.settings,
                 onTap: _handleClickSettings,
               ),
-              MenuItem(
-                'Отправить лог',
-                icon: Icons.assignment,
-                onTap: _handleClickSendLog,
-              ),
+              // MenuItem(
+              //   'Отправить лог',
+              //   icon: Icons.assignment,
+              //   onTap: _handleClickSendLog,
+              // ),
               MenuItem(
                 'Дебаг',
                 icon: Icons.adb,

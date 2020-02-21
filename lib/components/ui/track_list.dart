@@ -199,7 +199,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
   void _handleDelete() {
     ShowFunctions.showDialog(
       context,
-      title: Text("Удаление"),
+      title: Text("Удаление (не имплементировано)"),
       content: Text(
         "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо",
       ),
@@ -209,11 +209,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
         onPressed: () {
           Navigator.of(context).pop();
           PlaylistControl.deleteSongs(selectionSet);
-          setState(() {
-            selectionSet = {};
-            unselecting = false;
-            _selectionMode = false;
-          });
+          _handleCloseSelection();
         },
       ),
       declineButton: DialogFlatButton(
@@ -525,18 +521,15 @@ class SongTile extends StatelessWidget implements SongTileInterface {
 
   final Function additionalClickCallback;
 
-  void _handleTap(BuildContext context) {
-    if (pushToPlayerRouteOnClick) {
-      if (song.id == PlaylistControl.currentSongId &&
-              MusicPlayer.playerState != AudioPlayerState.PLAYING ||
-          song.id != PlaylistControl.currentSongId)
-        Navigator.of(context).pushNamed(
-            Constants.Routes.player.value); // TODO: move this out of here
-    }
-
-    MusicPlayer.clickSongTile(song.id);
+  void _handleTap(BuildContext context) async {
+    await MusicPlayer.clickSongTile(song.id);
     if (additionalClickCallback != null) additionalClickCallback();
     // Playing because clickSongTile changes any other type to it
+
+    // TODO: move out ot this widget pushing route
+    if (pushToPlayerRouteOnClick &&
+        MusicPlayer.playerState == AudioPlayerState.PLAYING)
+      Navigator.of(context).pushNamed(Constants.Routes.player.value);
   }
 
   @override
@@ -615,7 +608,7 @@ class SelectableSongTile extends StatefulWidget implements SongTileInterface {
 
   /// Blocks tile events when true
   ///
-  /// Used to events when unselection animation is performed
+  /// Used to know when unselection animation is performed
   final bool unselecting;
 
   /// Callback that is fired when item gets selected (before animation)
@@ -700,18 +693,15 @@ class _SelectableSongTileState extends State<SelectableSongTile>
     super.dispose();
   }
 
-  void _handleTap() {
-    if (widget.pushToPlayerRouteOnClick) {
-      if (widget.song.id == PlaylistControl.currentSongId &&
-              MusicPlayer.playerState != AudioPlayerState.PLAYING ||
-          widget.song.id != PlaylistControl.currentSongId)
-        Navigator.of(context).pushNamed(
-            Constants.Routes.player.value); // TODO: move this out of here
-    }
-
-    MusicPlayer.clickSongTile(widget.song.id);
+  void _handleTap() async {
+    await MusicPlayer.clickSongTile(widget.song.id);
     if (widget.additionalClickCallback != null)
       widget.additionalClickCallback();
+    // Playing because clickSongTile changes any other type to it
+    if (widget.pushToPlayerRouteOnClick &&
+        MusicPlayer.playerState == AudioPlayerState.PLAYING)
+      Navigator.of(context).pushNamed(
+          Constants.Routes.player.value); // TODO: move this out of here
   }
 
   // Performs unselect animation and calls `onSelected` and `notifyUnselection`

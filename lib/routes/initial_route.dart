@@ -7,12 +7,12 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 
-class MainRoute extends StatefulWidget {
+class InitialRoute extends StatefulWidget {
   @override
-  MainRouteState createState() => MainRouteState();
+  InitialRouteState createState() => InitialRouteState();
 }
 
-class MainRouteState extends State<MainRoute> {
+class InitialRouteState extends State<InitialRoute> {
   // Var to show toast in `_handleHomePop`
   static DateTime _currentBackPressTime;
 

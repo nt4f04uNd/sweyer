@@ -64,16 +64,16 @@ public class PlaylistHandler {
     public static void getLastPlaylist() {
         if (songs == null) { // Songs will be rested to null every time app activity starts
             songs = SerializationHandler.getPlaylistSongs();
-
-            Song song =  songs.get(7);
-            GeneralHandler.print("wfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwf, ID"
-                    + song.id + "  TITLE  "
-                    + song.title + " ALBUM  "
-                    + song.album + "  ALB_ID "
-                    + song.albumId + "  ALB_KEY  "
-                    + song.albumKey + "  ALB_URI  "
-                    + song.albumArtUri
-            );
+//
+//           // Song song =  songs.get(7);
+//            GeneralHandler.print("wfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwf, ID"
+//                    + song.id + "  TITLE  "
+//                    + song.title + " ALBUM  "
+//                    + song.album + "  ALB_ID "
+//                    + song.albumId + "  ALB_KEY  "
+//                    + song.albumKey + "  ALB_URI  "
+//                    + song.albumArtUri
+//            );
         }
     }
 
@@ -144,13 +144,21 @@ public class PlaylistHandler {
     }
 
     public static Song getNextSong() {
-        int new_id = getCurrentSongIndex() + 1 > songs.size() - 1 ? 0 : getCurrentSongIndex() + 1;
-        return songs.get(new_id);
+        Integer new_idx = getCurrentSongIndex();
+        if (new_idx == null)
+            new_idx = 0;
+        else
+            new_idx = new_idx + 1 > songs.size() - 1 ? 0 : new_idx + 1;
+        return songs.get(new_idx);
     }
 
     public static Song getPrevSong() {
-        int new_id = getCurrentSongIndex() - 1 < 0 ? songs.size() - 1 : getCurrentSongIndex() - 1;
-        return songs.get(new_id);
+        Integer new_idx = getCurrentSongIndex();
+        if (new_idx == null)
+            new_idx = 0;
+        else
+            new_idx = new_idx - 1 < 0 ? songs.size() - 1 : new_idx - 1;
+        return songs.get(new_idx);
     }
 
     @Nullable

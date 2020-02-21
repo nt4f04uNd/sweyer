@@ -59,47 +59,37 @@ mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
 /// Has size `constraints - kSMMLargeAlbumArtMargins`
 ///
 /// Shows placeholder or art, depending on provided path
-class AlbumArtLarge extends _AlbumArtWidget {
+class AlbumArtLarge extends StatelessWidget {
   AlbumArtLarge({Key key, @required this.path}) : super(key: key);
 
-  @override
   final String path;
 
-  @override
-  _AlbumArtLargeState createState() => _AlbumArtLargeState();
-}
-
-class _AlbumArtLargeState extends State<AlbumArtLarge>
-    with _AlbumArtStateMixin {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
       double size = constraint.maxWidth - kSMMLargeAlbumArtMargins;
-      if (widget.path == null) {
+      if (path == null) {
         return AlbumPlaceholderLarge(size: size);
       } else {
-        return FutureBuilder<Uint8List>(
-            future: loading,
-            builder: (context, snapshot) {
-              return AnimatedSwitcher(
-                duration: kSMMLargeAlbumFadeDuration,
-                child: snapshot.connectionState == ConnectionState.waiting ||
-                        snapshot.connectionState == ConnectionState.done &&
-                            !snapshot.hasData
-                    ? AlbumPlaceholderLarge(size: size)
-                    : ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                        child: Image.memory(
-                          snapshot.data,
-                          width: size,
-                          height: size,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-              );
-            });
+        return ClipRRect(
+          borderRadius: const BorderRadius.all(
+            Radius.circular(10),
+          ),
+          child: Image.file(
+            File(path),
+            width: size,
+            height: size,
+            fit: BoxFit.fill,
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              if (frame == null) {
+                return AlbumArtErrorLarge(
+                  size: size,
+                );
+              }
+              return child;
+            },
+          ),
+        );
       }
     });
   }
@@ -133,6 +123,12 @@ class AlbumArtSmall extends StatelessWidget {
           width: kSMMSmallArtSize,
           height: kSMMSmallArtSize,
           fit: BoxFit.fill,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (frame == null) {
+              return AlbumArtErrorSmall();
+            }
+            return child;
+          },
         ),
       );
     }
@@ -294,7 +290,7 @@ class AlbumPlaceholderLarge extends StatelessWidget {
         color: Constants.AppTheme.albumArtLarge.auto(context),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
-      padding: const EdgeInsets.all(70),
+      padding: EdgeInsets.all(size / 4),
       child: SvgPicture.asset(
         // TODO: move all asset paths to constants
         'assets/images/icons/note_rounded.svg',
@@ -320,6 +316,46 @@ class AlbumPlaceholderSmall extends StatelessWidget {
       child: Image.asset(
         'assets/images/placeholder_thumb.png',
       ),
+    );
+  }
+}
+
+class AlbumArtErrorLarge extends StatelessWidget {
+  const AlbumArtErrorLarge({Key key, @required this.size}) : super(key: key);
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Constants.AppTheme.albumArtLarge.auto(context),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: EdgeInsets.all(size / 4),
+      child: Icon(
+        Icons.error_outline,
+        size: size / 4,
+      ),
+    );
+  }
+}
+
+class AlbumArtErrorSmall extends StatelessWidget {
+  const AlbumArtErrorSmall({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: kSMMSmallArtSize,
+      height: kSMMSmallArtSize,
+      decoration: BoxDecoration(
+        color: Constants.AppTheme.albumArtSmall.auto(context),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.all(10),
+      child: Icon(Icons.error_outline),
     );
   }
 }

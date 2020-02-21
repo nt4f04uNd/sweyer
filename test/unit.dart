@@ -3,13 +3,15 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// This module all routes and also their specific widgets, like loop button
+/// Unit testing
 
-export 'debug_route.dart';
-export 'exif_route.dart';
-export 'extended_settings.dart';
-export 'initial_route.dart';
-export 'player_route.dart';
-export 'route_control.dart';
-export 'search_route.dart';
-export 'settings_route.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+
+void main() {
+  test('Example test', () {
+    final str = "";
+
+    expect(str, "");
+  });
+}

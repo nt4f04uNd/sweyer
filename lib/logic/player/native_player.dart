@@ -339,4 +339,10 @@ abstract class NativeAudioPlayer {
       _errorController.close()
     ]);
   }
+
+
+  static void emitDurationChange(int value){
+    Duration newDuration = Duration(milliseconds: value);
+          _durationController.add(newDuration);
+  }
 }

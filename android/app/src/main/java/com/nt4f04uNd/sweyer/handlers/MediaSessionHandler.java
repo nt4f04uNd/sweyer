@@ -24,46 +24,45 @@ public class MediaSessionHandler {
             mediaSession.setCallback(new MediaSession.Callback() {
 
                 // TODO: implement remaining methods
-                final String prefix = "PREFIX PREFIX PREFIX PREFIX PREFIX";
 
                 @Override
                 public void onFastForward() {
-                    GeneralHandler.print(prefix + "FAST_FORWARD");
+                    PlayerHandler.fastForward();
                 }
 
                 @Override
                 public void onPause() {
-                    GeneralHandler.print(prefix + "PAUSE");
+                    PlayerHandler.pause();
                 }
 
                 @Override
                 public void onPlay() {
-                    GeneralHandler.print(prefix + "PLAY");
+                    PlayerHandler.resume();
                 }
 
                 @Override
                 public void onRewind() {
-                    GeneralHandler.print(prefix + "REWIND");
+                    PlayerHandler.rewind();
                 }
 
                 @Override
                 public void onSeekTo(long pos) {
-                    GeneralHandler.print(prefix + "SEEK");
+                    PlayerHandler.seek((int) pos);
                 }
 
                 @Override
                 public void onSkipToNext() {
-                    GeneralHandler.print(prefix + "SKIP_NEXT");
+                    PlayerHandler.playNext();
                 }
 
                 @Override
                 public void onSkipToPrevious() {
-                    GeneralHandler.print(prefix + "SKIP_PREV");
+                    PlayerHandler.playPrev();
                 }
 
                 @Override
                 public void onStop() {
-                    GeneralHandler.print(prefix + "STOP");
+                    PlayerHandler.pause();
                 }
 
                 @Override

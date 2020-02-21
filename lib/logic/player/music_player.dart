@@ -67,8 +67,7 @@ abstract class MusicPlayer {
   /// Get duration of current song
   static Future<Duration> get currentDuration async {
     try {
-      return Duration(
-          milliseconds: await NativeAudioPlayer.getDuration());
+      return Duration(milliseconds: await NativeAudioPlayer.getDuration());
     } catch (e) {
       return Duration(seconds: 0);
     }
@@ -80,7 +79,7 @@ abstract class MusicPlayer {
     NativeAudioPlayer.init();
 
     _durationSubscription =
-        NativeAudioPlayer.onDurationChanged.listen((event) async { 
+        NativeAudioPlayer.onDurationChanged.listen((event) async {
       // TODO: ????
     });
 
@@ -126,8 +125,11 @@ abstract class MusicPlayer {
   /// @param `silent` - if it is true, won't play track, but just switch to it
   /// (the difference with the `setUri` with this parameter is that this function will also update current playing song respectively)
   static Future<void> play(int songId, {bool silent = false}) async {
-    final song = PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
+    final song =
+        PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
     bool success = true;
+    PlaylistControl.changeSong(songId);
+    NativeAudioPlayer.emitDurationChange(song.duration);
     try {
       if (!silent) // `stayAwake` is very important for player to stay play even in background
         await NativeAudioPlayer.play(song, stayAwake: true);
@@ -160,8 +162,9 @@ abstract class MusicPlayer {
       rethrow;
     } finally {
       // Change playing track id
-      if (success)
-        PlaylistControl.changeSong(songId);
+      if (success) {
+      }
+      // PlaylistControl.changeSong(songId);
       else
         play(PlaylistControl.currentSongId, silent: silent);
     }

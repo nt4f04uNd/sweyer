@@ -63,6 +63,9 @@ class _AppState extends State<App> {
                   darkTheme: AppTheme.materialApp.dark,
                   initialRoute: Routes.main.value,
                   onGenerateRoute: RouteControl.handleOnGenerateRoute,
+                  onGenerateInitialRoutes:
+                      RouteControl.handleOnGenerateInitialRoutes,
+                  onUnknownRoute: RouteControl.handleOnUnknownRoute,
                   // Uncomment to replace red screen of death
                   builder: (BuildContext context, Widget widget) {
                     // Catcher.addDefaultErrorWidget(

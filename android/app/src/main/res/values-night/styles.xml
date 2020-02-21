@@ -2,15 +2,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="LaunchThemeSystemUI" parent="@android:style/Theme.Black.NoTitleBar">
-<!--        <item name="android:navigationBarColor">@color/main_light</item>-->
+<!--        <item name="android:navigationBarColor">@color/main_dark</item>-->
         <!-- Show a splash screen on the activity. Automatically removed when
-           Flutter draws its first frame -->
-        <item name="android:windowBackground">@drawable/launch_background_light</item>
+       Flutter draws its first frame -->
+        <item name="android:windowBackground">@drawable/launch_background_dark</item>
     </style>
+
 
     <color name="main_light">#fff</color>
 
     <color name="main_dark">#262626</color>
-    <color name="main_dark_">#000</color>
 
 </resources>

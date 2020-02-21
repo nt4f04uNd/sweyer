@@ -39,14 +39,16 @@ class _PlayerRouteState extends State<PlayerRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return PageView(
-      controller: _pageController,
-      children: [
-        _MainPlayerTab(),
-        _PlaylistTab(
-          key: _playlistTabKey,
-        )
-      ],
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        children: [
+          _MainPlayerTab(),
+          _PlaylistTab(
+            key: _playlistTabKey,
+          )
+        ],
+      ),
     );
   }
 }
