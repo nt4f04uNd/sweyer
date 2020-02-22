@@ -80,14 +80,6 @@ class AlbumArtLarge extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.fill,
-            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-              if (frame == null) {
-                return AlbumArtErrorLarge(
-                  size: size,
-                );
-              }
-              return child;
-            },
           ),
         );
       }
@@ -123,12 +115,6 @@ class AlbumArtSmall extends StatelessWidget {
           width: kSMMSmallArtSize,
           height: kSMMSmallArtSize,
           fit: BoxFit.fill,
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            if (frame == null) {
-              return AlbumArtErrorSmall();
-            }
-            return child;
-          },
         ),
       );
     }

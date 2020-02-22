@@ -40,7 +40,7 @@ abstract class ShowFunctions {
 
   /// Function that calls `showCustomSearch` and opens `SongsSearchDelegate` to search songs
   static Future<void> showSongsSearch(BuildContext context) async {
-    await showCustomSearch<Song>(
+    await showCustomSearch(
       context: context,
       delegate: SongsSearchDelegate(),
     );

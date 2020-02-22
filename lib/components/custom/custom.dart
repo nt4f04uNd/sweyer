@@ -9,6 +9,5 @@ export 'custom_icon_button.dart';
 export 'custom_icon_button_splash.dart';
 export 'custom_popup_menu.dart';
 export 'custom_refresh_indicator.dart';
-export 'custom_search.dart';
 export 'custom_scaffold.dart';
 export 'custom_drawer.dart';

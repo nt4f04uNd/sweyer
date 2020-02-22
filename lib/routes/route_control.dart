@@ -105,8 +105,9 @@ abstract class RouteControl {
         // entCurve: Curves.fastOutSlowIn,
         // entBegin: const Offset(0.0, 1.0),
         // transitionDuration: const Duration(milliseconds: 400),
-        checkExitAnimationEnabled: () =>
-            _currentRouteEquals(Constants.Routes.exif.value),
+        // checkExitAnimationEnabled: () =>
+        //     _currentRouteEquals(Constants.Routes.exif.value),
+        entIgnoreEventsForward: true,
         checkEnterSystemUI: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
         checkExitSystemUI: () => Constants.AppSystemUIThemes.mainScreen
@@ -116,7 +117,7 @@ abstract class RouteControl {
     }
     //******** Search ********
     else if (settings.name == Constants.Routes.search.value)
-      return (settings.arguments as Map<String, Route>)["route"];
+      return (settings.arguments as Route);
     //******** Settings ********
     else if (settings.name == Constants.Routes.settings.value)
       return RouteZoomTransition(

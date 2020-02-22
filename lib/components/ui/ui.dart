@@ -14,6 +14,5 @@ export 'marquee.dart';
 export 'menu.dart';
 export 'play_pause_button.dart';
 export 'route.dart';
-export 'search.dart';
 export 'track_list.dart';
 export 'wrappers.dart';

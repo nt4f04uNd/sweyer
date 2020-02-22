@@ -10,7 +10,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 650);
+// const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 650);
+const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 550);
 
 // Used by all of the transition animations.
 const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
@@ -717,16 +718,6 @@ class RouteFadeInTransition<T extends Widget> extends RouteTransition<T> {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
 /// Creates customizable fade in transition
 ///
 /// By default acts pretty same as [ZoomPageTransitionsBuilder]
@@ -814,16 +805,9 @@ class RouteZoomTransition<T extends Widget> extends RouteTransition<T> {
           exitIgnoreEventsReverse &&
               secondaryAnimation.status == AnimationStatus.reverse;
 
-      /// Wrap child for to use with material routes (difference from default child is that is has animation status completed check, that brakes theme ui switch)
-      final Container materialWrappedChild = Container(
-        foregroundDecoration: BoxDecoration(
-          color: // Dim exit page from 0 to 0.7
-              Colors.black.withOpacity(exitEnabled
-                  ? secondaryAnimation.status == AnimationStatus.forward
-                      ? secondaryAnimation.value / 1.3
-                      : secondaryAnimation.value / 2.9
-                  : 0),
-        ),
+      return _ZoomPageTransition(
+        animation: animation,
+        secondaryAnimation: secondaryAnimation,
         child: IgnorePointer(
           // Disable any touch events on enter while in transition
           ignoring: ignore,
@@ -853,21 +837,9 @@ class RouteZoomTransition<T extends Widget> extends RouteTransition<T> {
           ),
         ),
       );
-
-      return _ZoomPageTransition(
-        animation: animation,
-        secondaryAnimation: secondaryAnimation,
-        child: materialWrappedChild,
-      );
     };
   }
 }
-
-
-
-
-
-
 
 // COPIED FROM FLUTTER FRAMEWORK
 //

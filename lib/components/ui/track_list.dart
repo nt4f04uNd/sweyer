@@ -525,7 +525,6 @@ class SongTile extends StatelessWidget implements SongTileInterface {
     await MusicPlayer.clickSongTile(song.id);
     if (additionalClickCallback != null) additionalClickCallback();
     // Playing because clickSongTile changes any other type to it
-
     // TODO: move out ot this widget pushing route
     if (pushToPlayerRouteOnClick &&
         MusicPlayer.playerState == AudioPlayerState.PLAYING)
