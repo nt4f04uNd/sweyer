@@ -156,7 +156,9 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     // COMPOSED METHODS (wrappers over default player methods) ///////////////////////////////////////////////////////////////
     // TODO: remove respect silence, isLocal and stayAwake
     public static void play(@NotNull Song song, double volume, Integer position, boolean stayAwake) {
+        WakelockHandler.acquire();
         ServiceHandler.startService(true);
+
         player.setAwake(GeneralHandler.getAppContext(), stayAwake);
         player.setVolume(volume);
         setUri(song.id);
@@ -253,6 +255,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      * Normal resume function, it just doesn't care about handling audio focus
      */
     public static void bareResume() {
+        WakelockHandler.acquire();
         ServiceHandler.startService(true);
         player.play(GeneralHandler.getAppContext());
         PrefsHandler.setSongIsPlaying(true);
@@ -262,6 +265,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void barePause() {
+        WakelockHandler.acquireTimed();
         ServiceHandler.startService(false);
         player.pause();
         PrefsHandler.setSongIsPlaying(false);
@@ -270,6 +274,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void bareStop() {
+        WakelockHandler.acquireTimed();
         ServiceHandler.stopService();
         player.stop();
         PrefsHandler.setSongIsPlaying(false);
@@ -285,6 +290,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         PlayerHandler.callSetState(PlayerState.STOPPED);
         // TODO: maybe remove notification at all?
         NotificationHandler.updateNotification(false, isLooping());
+        WakelockHandler.release();
     }
     /// END OF BARE METHODS ////////////////////////////////////////////////////////////////////////
 
@@ -314,7 +320,9 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void playNext() {
         try {
-            if (!GeneralHandler.activityExists()) {
+            if (GeneralHandler.activityExists()) {
+                NativeEventsChannel.success(Constants.channels.events.GENERALIZED_PLAY_NEXT);
+            } else {
                 PlaylistHandler.getLastPlaylist();
                 PlayerHandler.play(PlaylistHandler.getNextSong(), PlayerHandler.getVolume(), 0, true);
             }
@@ -325,9 +333,11 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void playPrev() {
         try {
-            if (!GeneralHandler.activityExists()) {
+            if (GeneralHandler.activityExists()) {
+                NativeEventsChannel.success(Constants.channels.events.GENERALIZED_PLAY_PREV);
+            } else {
                 PlaylistHandler.getLastPlaylist();
-                PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0,  true);
+                PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, true);
             }
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));

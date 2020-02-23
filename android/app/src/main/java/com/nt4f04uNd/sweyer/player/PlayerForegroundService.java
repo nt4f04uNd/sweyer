@@ -53,7 +53,6 @@ public class PlayerForegroundService extends Service {
 
         // Initializing handlers
         GeneralHandler.init(getApplicationContext());
-        WakelockHandler.acquire();
         PlayerHandler.init();
         AudioFocusHandler.init();
         NotificationHandler.init();

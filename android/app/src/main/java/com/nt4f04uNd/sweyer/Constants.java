@@ -50,14 +50,15 @@ public class Constants {
             // see
             // https://developer.android.com/reference/android/view/KeyEvent.html#KEYCODE_MEDIA_AUDIO_TRACK
             // for key codes docs
-            public static final String MEDIABUTTON_AUDIO_TRACK = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_AUDIO_TRACK";
+            public static final String MEDIABUTTON_AUDIO_TRACK  = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_AUDIO_TRACK";
             public static final String MEDIABUTTON_FAST_FORWARD = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_FAST_FORWARD";
-            public static final String MEDIABUTTON_REWIND = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_REWIND";
-            public static final String MEDIABUTTON_NEXT = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_NEXT";
-            public static final String MEDIABUTTON_PREVIOUS = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PREVIOUS";
-            public static final String MEDIABUTTON_PLAY_PAUSE = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY_PAUSE";
-            public static final String MEDIABUTTON_PLAY = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY";
-            public static final String MEDIABUTTON_STOP = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_STOP";
+            public static final String MEDIABUTTON_REWIND       = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_REWIND";
+            public static final String MEDIABUTTON_NEXT         = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_NEXT";
+            public static final String MEDIABUTTON_PREVIOUS     = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PREVIOUS";
+            public static final String MEDIABUTTON_PLAY         = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY";
+            public static final String MEDIABUTTON_PAUSE        = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PAUSE";
+            public static final String MEDIABUTTON_PLAY_PAUSE   = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_PLAY_PAUSE";
+            public static final String MEDIABUTTON_STOP         = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_STOP";
             // Bare hook event
             public static final String MEDIABUTTON_HOOK = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_HOOK";
 
@@ -68,6 +69,12 @@ public class Constants {
             public static final String HOOK_PLAY_NEXT = DOTTED_PACKAGE_NAME + "EVENT_HOOK_PLAY_NEXT";
             /** When pressed hook thrice */
             public static final String HOOK_PLAY_PREV = DOTTED_PACKAGE_NAME + "EVENT_HOOK_PLAY_PREV";
+
+            // Generalized events - these are e.g. next, prev.
+            // They are needed because I can call them from different places, i.e. notification or media session events
+            // Though events for notification and media session still exist to have access to them directly in dart side
+            public static final String GENERALIZED_PLAY_NEXT = DOTTED_PACKAGE_NAME + "EVENT_GENERALIZED_PLAY_NEXT";
+            public static final String GENERALIZED_PLAY_PREV = DOTTED_PACKAGE_NAME + "EVENT_GENERALIZED_PLAY_PREV";
         }
 
 

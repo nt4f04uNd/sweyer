@@ -124,11 +124,14 @@ public class MediaSessionHandler {
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                     listener.onPrevious();
                     break;
-                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                    listener.onPlayPause();
-                    break;
                 case KeyEvent.KEYCODE_MEDIA_PLAY:
                     listener.onPlay();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                    listener.onPause();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    listener.onPlayPause();
                     break;
                 case KeyEvent.KEYCODE_MEDIA_STOP:
                     listener.onStop();
@@ -171,11 +174,6 @@ public class MediaSessionHandler {
             NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PREVIOUS);
         }
 
-        @Override
-        protected void onPlayPause() {
-            PlayerHandler.playPause();
-            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PLAY_PAUSE);
-        }
 
         @Override
         protected void onPlay() {
@@ -185,6 +183,22 @@ public class MediaSessionHandler {
                 Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
             }
             NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PLAY);
+        }
+
+        @Override
+        protected void onPause() {
+            try {
+                PlayerHandler.pause();
+            } catch (IllegalStateException e) {
+                Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+            }
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PAUSE);
+        }
+
+        @Override
+        protected void onPlayPause() {
+            PlayerHandler.playPause();
+            NativeEventsChannel.success(Constants.channels.events.MEDIABUTTON_PLAY_PAUSE);
         }
 
         @Override
