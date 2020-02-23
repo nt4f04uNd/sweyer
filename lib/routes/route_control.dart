@@ -7,19 +7,18 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// Class to control how routes are created
 abstract class RouteControl {
   /// Needed to disable animations on some routes
   static String _currentRoute = Constants.Routes.main.value;
 
-  /// Changes the value of `_currentRoute`
+  /// Changes the value of [_currentRoute]
   static void _setCurrentRoute(String newValue) {
     _currentRoute = newValue;
   }
 
-  /// Check the equality of `_currentRoute` to some value
+  /// Check the equality of [_currentRoute] to some value
   static bool _currentRouteEquals(String value) {
     return _currentRoute == value;
   }
@@ -33,11 +32,10 @@ abstract class RouteControl {
           _currentRouteEquals(Constants.Routes.debug.value),
       checkEntAnimationEnabled: () => false,
       maintainState: true,
-      routeSystemUI: () => Constants.AppSystemUIThemes.mainScreen
-          .autoBr(ThemeControl.brightness),
-      checkEnterSystemUI: () => Constants.AppSystemUIThemes.mainScreen
-          .autoBr(ThemeControl.brightness),
+      routeType: Constants.Routes.unknown,
       exitIgnoreEventsForward: false,
+      checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
+          .autoBr(ThemeControl.brightness),
       route: Scaffold(
         // TODO: move to separate file
         body: Center(
@@ -47,7 +45,14 @@ abstract class RouteControl {
     );
   }
 
-  static List<Route<dynamic>> handleOnGenerateInitialRoutes(String routeName) {
+  static List<Route<dynamic>> handleOnGenerateInitialRoutes(
+      String routeName, BuildContext context) {
+    var kek = MediaQuery.platformBrightnessOf(context);
+    // while (kek == Brightness.light) {
+    //   print("${MediaQuery.platformBrightnessOf(context)}");
+    //   kek = MediaQuery.platformBrightnessOf(context);
+    // }
+    print("${MediaQuery.platformBrightnessOf(context)}");
     // TODO: check out why this returns a list when docs release
     return [
       //******** Initial ********
@@ -57,10 +62,10 @@ abstract class RouteControl {
             _currentRouteEquals(Constants.Routes.extendedSettings.value) ||
             _currentRouteEquals(Constants.Routes.debug.value),
         checkEntAnimationEnabled: () => false,
+        shouldCheckSystemUiEnt: () =>
+            _currentRouteEquals(Constants.Routes.player.value),
         maintainState: true,
-        routeSystemUI: () => Constants.AppSystemUIThemes.mainScreen
-            .autoBr(ThemeControl.brightness),
-        checkEnterSystemUI: () => Constants.AppSystemUIThemes.mainScreen
+        checkSystemUi: () => Constants.AppSystemUIThemes.mainScreen
             .autoBr(ThemeControl.brightness),
         exitIgnoreEventsForward: false,
         route: InitialRoute(),
@@ -74,27 +79,24 @@ abstract class RouteControl {
     //******** Debug ********
     if (settings.name == Constants.Routes.debug.value)
       return RouteZoomTransition(
-        checkEnterSystemUI: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
-        checkExitSystemUI: () => Constants.AppSystemUIThemes.mainScreen
+        routeType: Constants.Routes.debug,
+        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
         route: DebugRoute(),
       );
     //******** Exif ********
     else if (settings.name == Constants.Routes.exif.value)
       return RouteZoomTransition(
-        route: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: Constants.AppSystemUIThemes.allScreens
-              .autoBr(ThemeControl.brightness),
-          child: ExifRoute(),
-        ),
+        routeType: Constants.Routes.exif,
+        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
+            .autoBr(ThemeControl.brightness),
+        route: ExifRoute(),
       );
     //******** Extended settings ********
     else if (settings.name == Constants.Routes.extendedSettings.value)
       return RouteZoomTransition(
-        checkEnterSystemUI: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
-        checkExitSystemUI: () => Constants.AppSystemUIThemes.allScreens
+        routeType: Constants.Routes.extendedSettings,
+        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
         route: ExtendedSettingsRoute(),
       );
@@ -102,15 +104,14 @@ abstract class RouteControl {
     else if (settings.name == Constants.Routes.player.value) {
       // return RouteExpandTransition(route: PlayerRoute());
       return RouteZoomTransition(
+        routeType: Constants.Routes.player,
         // entCurve: Curves.fastOutSlowIn,
         // entBegin: const Offset(0.0, 1.0),
         // transitionDuration: const Duration(milliseconds: 400),
         // checkExitAnimationEnabled: () =>
         //     _currentRouteEquals(Constants.Routes.exif.value),
         entIgnoreEventsForward: true,
-        checkEnterSystemUI: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
-        checkExitSystemUI: () => Constants.AppSystemUIThemes.mainScreen
+        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
         route: PlayerRoute(),
       );
@@ -121,9 +122,8 @@ abstract class RouteControl {
     //******** Settings ********
     else if (settings.name == Constants.Routes.settings.value)
       return RouteZoomTransition(
-        checkEnterSystemUI: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
-        checkExitSystemUI: () => Constants.AppSystemUIThemes.mainScreen
+        routeType: Constants.Routes.settings,
+        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
         route: SettingsRoute(),
       );

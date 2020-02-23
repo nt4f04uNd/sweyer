@@ -3,9 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// Module for not essential to user UI widgets, like scroll or gesture behaviors
+/// This module contains screens that can be used in multiple places
+/// 
+/// All others are located in files that are related to some specific logic (e.g. tracklist [TrackListScreen] in `tracklist.dart` or various screens in `initial_route.dart`)
 
-export 'route_transitions/route_transitions.dart';
-export 'gestures.dart';
-export 'scroll_physics.dart';
-export 'show_functions.dart';
+export 'loading_screen.dart';

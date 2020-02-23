@@ -13,9 +13,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 const flutterShowDialog = material.showDialog;
 
-/// Class that contains composed 'show' functions, like `showDialog` and others
+/// Class that contains composed 'show' functions, like [showDialog] and others
 abstract class ShowFunctions {
-  /// Shows toast from `Fluttertoast` with already set `backgroundColor` to `Color.fromRGBO(18, 18, 18, 1)`
+  /// Shows toast from [Fluttertoast] with already set [backgroundColor] to `Color.fromRGBO(18, 18, 18, 1)`
   static Future<bool> showToast({
     @required String msg,
     Toast toastLength,
@@ -38,7 +38,7 @@ abstract class ShowFunctions {
     );
   }
 
-  /// Function that calls `showCustomSearch` and opens `SongsSearchDelegate` to search songs
+  /// Function that calls [showCustomSearch] and opens [SongsSearchDelegate] to search songs
   static Future<void> showSongsSearch(BuildContext context) async {
     await showCustomSearch(
       context: context,
@@ -52,9 +52,8 @@ abstract class ShowFunctions {
     Navigator.pop(context);
   }
 
-  /// Function that calls `showModalBottomSheet` and allows user to sort songs
+  /// Function that calls [showModalBottomSheet] and allows user to sort songs
   static void showSongsSortModal(BuildContext context) {
-    // TODO: add indicator for a current sort feature
     var sortFeature = PlaylistControl.sortFeature;
     showModalBottomSheet<void>(
         context: context,
@@ -87,7 +86,7 @@ abstract class ShowFunctions {
         });
   }
 
-  /// Calls `showDialog` function from flutter material library
+  /// Calls [showDialog] function from flutter material library
   static Future<dynamic> showDialog(
     BuildContext context, {
     Widget title: const Text("Диалог"),
@@ -118,7 +117,7 @@ abstract class ShowFunctions {
             content,
         // ),
         contentPadding:const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
-        contentTextStyle: Theme.of(context).textTheme.subhead.copyWith(
+        contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
               fontWeight:FontWeight.w500,
               fontSize: 15,
             ),

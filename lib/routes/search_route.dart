@@ -19,8 +19,8 @@ import 'package:sweyer/sweyer.dart';
 /// can either show suggested search queries or the search results.
 ///
 /// The appearance of the search page is determined by the provided
-/// `delegate`. The initial query string is given by `query`, which defaults
-/// to the empty string. When `query` is set to null, `delegate.query` will
+/// [delegate]. The initial query string is given by [query], which defaults
+/// to the empty string. When [query] is set to null, [delegate.query] will
 /// be used as the initial query.
 ///
 /// This method returns the selected search result, which can be set in the
@@ -212,7 +212,7 @@ abstract class SearchDelegate {
 
   /// Closes the search page and returns to the underlying route.
   ///
-  /// The value provided for `result` is used as the return value of the call
+  /// The value provided for [result] is used as the return value of the call
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, dynamic result) {
     _currentBody = null;
@@ -230,7 +230,7 @@ abstract class SearchDelegate {
   /// page.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
-  /// Override this property to change route property `maintainState`
+  /// Override this property to change route property [maintainState]
   ///
   /// Copied from route docs:
   ///
@@ -282,6 +282,8 @@ enum _SearchBody {
 class SearchPageRoute extends RouteZoomTransition<_SearchPage> {
   SearchPageRoute({
     @required this.delegate,
+
+    /// Here it is allowed to omit `super` call with `@required` [route] parameter because we the method [buildPage] is overridden
   }) : assert(delegate != null) {
     assert(
       delegate._route == null,
@@ -300,8 +302,15 @@ class SearchPageRoute extends RouteZoomTransition<_SearchPage> {
   @override
   String get barrierLabel => null;
 
+  @override
+  Constants.Routes get routeType => Constants.Routes.search;
+
   // @override
   // Duration get transitionDuration => const Duration(milliseconds: 450);
+
+  @override
+  UIFunction checkSystemUi =
+      () => Constants.AppSystemUIThemes.mainScreen.autoWithoutContext;
 
   @override
   bool get maintainState => delegate.maintainState;
@@ -319,6 +328,7 @@ class SearchPageRoute extends RouteZoomTransition<_SearchPage> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
+    handleSystemUi(animation, secondaryAnimation);
     return _SearchPage(
       delegate: delegate,
       animation: animation,
@@ -462,7 +472,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           title: TextField(
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
-            style: theme.textTheme.title,
+            style: theme.textTheme.headline6,
             textInputAction: TextInputAction.search,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
@@ -483,7 +493,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     );
   }
 }
-
 
 class SongsSearchDelegate extends SearchDelegate {
   SongsSearchDelegate() {
@@ -521,7 +530,7 @@ class SongsSearchDelegate extends SearchDelegate {
       primaryColor: Theme.of(context).appBarTheme.color,
       primaryColorBrightness: Theme.of(context).appBarTheme.brightness,
       textTheme: TextTheme(
-        title: TextStyle(
+        headline6: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w500,
           // color: Constants.AppTheme.mainContrast.auto(context),
@@ -652,65 +661,65 @@ class SongsSearchDelegate extends SearchDelegate {
       onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
       onVerticalDragEnd: (_) => FocusScope.of(context).unfocus(),
       onVerticalDragUpdate: (_) => FocusScope.of(context).unfocus(),
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
+      child:
+          //  AnnotatedRegion<SystemUiOverlayStyle>(
 
-          /// Show theme on some widget, to system ui could be consistent
-          value: Constants.AppSystemUIThemes.mainScreen.auto(context),
-          child: (() {
-            // return
-            // Display suggestions on start screen
-            if (searched == null) return _buildSuggestions();
+          //     /// Show theme on some widget, to system ui could be consistent
+          //     value: Constants.AppSystemUIThemes.mainScreen.auto(context),
+          //     child:
+          (() {
+        // return
+        // Display suggestions on start screen
+        if (searched == null) return _buildSuggestions();
 
-            // Display when nothing has been found
-            if (searched != null && searched.length == 0)
-              return _buildEmptyResults();
+        // Display when nothing has been found
+        if (searched != null && searched.length == 0)
+          return _buildEmptyResults();
 
-            // Display results if something had been found
-            final List<Song> searchedList = searched.toList();
+        // Display results if something had been found
+        final List<Song> searchedList = searched.toList();
 
-            return Stack(
-              children: <Widget>[
-                Scrollbar(
-                  child: StreamBuilder(
-                      stream: MusicPlayer.onDurationChanged,
-                      builder: (context, snapshot) {
-                        return ListView.builder(
-                            physics: const SMMBouncingScrollPhysics(),
-                            padding: const EdgeInsets.only(bottom: 65, top: 0),
-                            itemCount: searched.length,
-                            itemBuilder: (context, index) {
-                              return SongTile(
-                                song: searchedList[index],
-                                playing: searchedList[index].id ==
-                                    PlaylistControl.currentSong?.id,
-                                additionalClickCallback: () async {
-                                  _writeInputToSearchHistory(query);
-                                  // close(context, searchedList[index]);
-                                  FocusScope.of(context)
-                                      .requestFocus(FocusNode());
+        return Stack(
+          children: <Widget>[
+            Scrollbar(
+              child: StreamBuilder(
+                  stream: MusicPlayer.onDurationChanged,
+                  builder: (context, snapshot) {
+                    return ListView.builder(
+                        physics: const SMMBouncingScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 65, top: 0),
+                        itemCount: searched.length,
+                        itemBuilder: (context, index) {
+                          return SongTile(
+                            song: searchedList[index],
+                            playing: searchedList[index].id ==
+                                PlaylistControl.currentSong?.id,
+                            additionalClickCallback: () async {
+                              _writeInputToSearchHistory(query);
+                              // close(context, searchedList[index]);
+                              FocusScope.of(context).requestFocus(FocusNode());
 
-                                  // Wait before route animation completes
-                                  await Future.delayed(
-                                      Duration(milliseconds: 650));
+                              // Wait before route animation completes
+                              await Future.delayed(Duration(milliseconds: 650));
 
-                                  // TODO: maybe save last search query and update only if it has changed?
-                                  // NOTE that it might cause bugs if playlist will accidentally update (e.g. fetch process will end)
-                                  // So I maybe need to think about this a lil bit
-                                  if (dirty) {
-                                    PlaylistControl.setSearchedPlaylist(
-                                      searched.toList(),
-                                    );
-                                    dirty = false;
-                                  }
-                                },
-                              );
-                            });
-                      }),
-                ),
-                BottomTrackPanel(),
-              ],
-            );
-          })()),
+                              // TODO: maybe save last search query and update only if it has changed?
+                              // NOTE that it might cause bugs if playlist will accidentally update (e.g. fetch process will end)
+                              // So I maybe need to think about this a lil bit
+                              if (dirty) {
+                                PlaylistControl.setSearchedPlaylist(
+                                  searched.toList(),
+                                );
+                                dirty = false;
+                              }
+                            },
+                          );
+                        });
+                  }),
+            ),
+            BottomTrackPanel(),
+          ],
+        );
+      })(),
     );
   }
 
@@ -720,7 +729,7 @@ class SongsSearchDelegate extends SearchDelegate {
         future:
             _fetchingHistory, // use pre-obtained future, see https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
         builder: (context, snapshot) {
-          // I could use snapshot from builder to display returned suggestions from `_fetchSearchHistory`, but if I would do, the search would blink on mount, so I user `_suggestions` array that is set in `_fetchSearchHistory`
+          /// I could use snapshot from builder to display returned suggestions from [_fetchSearchHistory], but if I would do, the search would blink on mount, so I user [_suggestions] array that is set in [_fetchSearchHistory]
           return Stack(
             children: <Widget>[
               Container(

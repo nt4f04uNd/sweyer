@@ -39,19 +39,18 @@ class InitialRouteState extends State<InitialRoute> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _handleHomePop,
-      child:  StreamBuilder(
+      child: StreamBuilder(
           stream: PlaylistControl.onPlaylistListChange,
           builder: (context, snapshot) {
-            return 
-            !PlaylistControl.playReady
-                ? _EmptyScreen() // TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
+            return !PlaylistControl.playReady
+                ? LoadingScreen()
                 : Permissions.notGranted
                     ? _NoPermissionsScreen()
                     : PlaylistControl.getPlaylist(PlaylistType.global).isEmpty
                         ? PlaylistControl.initFetching
                             ? _SearchingSongsScreen()
                             : _SongsEmptyScreen()
-                        : MainRouteTrackList();
+                        : TrackListScreen();
           }),
     );
   }
@@ -71,10 +70,13 @@ class _SearchingSongsScreen extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(bottom: 20.0),
-              child: Text('Ищем треки...'),
+              child: Text(
+                'Ищем треки...',
+                textAlign: TextAlign.center,
+              ),
             ),
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
+              valueColor: const AlwaysStoppedAnimation(Colors.deepPurple),
             ),
           ],
         ),
@@ -107,7 +109,10 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text('На вашем устройстве нету музыки :( '),
+              child: Text(
+                'На вашем устройстве нету музыки :( ',
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           Padding(
@@ -175,7 +180,10 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text('Пожалуйста, предоставьте доступ к хранилищу'),
+              child: Text(
+                'Пожалуйста, предоставьте доступ к хранилищу',
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           Padding(
@@ -193,14 +201,5 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
         ],
       ),
     );
-  }
-}
-
-class _EmptyScreen extends StatelessWidget {
-  const _EmptyScreen({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Constants.AppTheme.main.auto(context));
   }
 }

@@ -5,7 +5,7 @@
 
 
 abstract class Errors {
-   /// Thrown when `play` gets called in wrong state
+   /// Thrown when [play] gets called in wrong state
   static const String NATIVE_PLAYER_ILLEGAL_STATE = "Unsupported value: java.lang.IllegalStateException";
 
    /// Thrown when resource can't be played

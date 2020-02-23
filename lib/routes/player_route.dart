@@ -76,7 +76,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   GlobalKey<PlayerRoutePlaylistState> globalKeyPlayerRoutePlaylist =
       GlobalKey();
 
-  /// A bool var to disable show/hide in tracklist controller listener when manual `scrollToSong` is performing
+  /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
   bool scrolling = false;
   StreamSubscription<void> _durationSubscription;
   StreamSubscription<void> _playlistChangeSubscription;
@@ -114,7 +114,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// Scrolls to current song
   ///
-  /// If optional `index` is provided - scrolls to it
+  /// If optional [index] is provided - scrolls to it
   Future<void> scrollToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
 
@@ -125,7 +125,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// Jumps to current song
   ///
-  /// If optional `index` is provided - jumps to it
+  /// If optional [index] is provided - jumps to it
   void jumpToSong([int index]) async {
     if (index == null) index = PlaylistControl.currentSongIndex();
     globalKeyPlayerRoutePlaylist.currentState.itemScrollController
@@ -152,7 +152,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
         // Scroll to current song and tapped track is in between range [0:playlistLength - offset]
         await scrollToSong();
       } else if (prevPlayingIndex > maxScrollIndex) {
-        // Do nothing when it is already scrolled to `maxScrollIndex`
+        /// Do nothing when it is already scrolled to [maxScrollIndex]
         return;
       } else if (playingIndex >= maxScrollIndex) {
         if (prevPlayingIndex == 0) {
@@ -208,7 +208,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
                         style: TextStyle(
                           fontSize: 24,
                           height: 1,
-                          color: Theme.of(context).textTheme.title.color,
+                          color: Theme.of(context).textTheme.headline6.color,
                         ),
                       ),
                       Text(
@@ -410,7 +410,7 @@ class _TrackShowcase extends StatefulWidget {
 }
 
 class _TrackShowcaseState extends State<_TrackShowcase> {
-  /// Key for `MarqueeWidget` to reset its scroll on song change
+  /// Key for [MarqueeWidget] to reset its scroll on song change
   UniqueKey marqueeKey = UniqueKey();
   StreamSubscription<void> _durationSubscription;
 
@@ -559,7 +559,7 @@ class _TrackSliderState extends State<_TrackSlider> {
     });
   }
 
-  /// FIXME: this called multiple times since it is inside `TabBarView`, currently unable to fix, as this issue relies deeply to flutter architecture
+  /// FIXME: this called multiple times since it is inside [TabBarView], currently unable to fix, as this issue relies deeply to flutter architecture
   void _handleChangeEnd(double newValue) async {
     // if (_isDragging) {
     await MusicPlayer.seek(Duration(seconds: newValue.toInt()));
@@ -571,7 +571,7 @@ class _TrackSliderState extends State<_TrackSlider> {
   }
 
   String _calculateDisplayedPositionTime() {
-    /// Value to work with, depends on `_isDragging` state, either `_value` or `_localValue`
+    /// Value to work with, depends on [_isDragging] state, either [_value] or [_localValue]
     Duration workingValue;
     if (_isDragging) // Update time indicator when dragging
       workingValue = Duration(seconds: _localValue.toInt());

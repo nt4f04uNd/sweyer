@@ -120,10 +120,10 @@ abstract class MusicPlayer {
 
   /// Play track
   ///
-  /// @param `songId` argument denotes an id track to play
+  /// @param [songId] argument denotes an id track to play
   ///
-  /// @param `silent` - if it is true, won't play track, but just switch to it
-  /// (the difference with the `setUri` with this parameter is that this function will also update current playing song respectively)
+  /// @param [silent] - if it is true, won't play track, but just switch to it
+  /// (the difference with the [setUri] with this parameter is that this function will also update current playing song respectively)
   static Future<void> play(int songId, {bool silent = false}) async {
     final song =
         PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
@@ -131,7 +131,7 @@ abstract class MusicPlayer {
     PlaylistControl.changeSong(songId);
     NativeAudioPlayer.emitDurationChange(song.duration);
     try {
-      if (!silent) // `stayAwake` is very important for player to stay play even in background
+      if (!silent) // [stayAwake] is very important for player to stay play even in background
         await NativeAudioPlayer.play(song, stayAwake: true);
       else
         await setUri(song.id);
@@ -172,7 +172,7 @@ abstract class MusicPlayer {
 
   /// Resume player
   static Future<void> resume([int songId]) async {
-    // If `songId` hasn't been provided then use playing id state
+    // If [songId] hasn't been provided then use playing id state
     if (songId == null) songId = PlaylistControl.currentSongId;
     try {
       return NativeAudioPlayer.resume();
@@ -246,7 +246,7 @@ abstract class MusicPlayer {
 
   /// Function that fires when next track button got clicked
   ///
-  /// If provided `songId` - plays next from this id
+  /// If provided [songId] - plays next from this id
   static Future<void> playNext({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPlaylist()
         .getNextSongId(PlaylistControl.currentSongId);
@@ -255,7 +255,7 @@ abstract class MusicPlayer {
 
   /// Function that fires when prev track button got clicked
   ///
-  /// If provided `songId` - plays prev from this id
+  /// If provided [songId] - plays prev from this id
   static Future<void> playPrev({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPlaylist()
         .getPrevSongId(PlaylistControl.currentSongId);
@@ -264,7 +264,7 @@ abstract class MusicPlayer {
 
   /// Function that handles click on track tile
   ///
-  /// `clickedSongId` argument denotes an id of clicked track `MainRouteTrackList`
+  /// [clickedSongId] argument denotes an id of clicked track [MainRouteTrackList]
   static Future<void> clickSongTile(int clickedSongId) async {
     switch (playerState) {
       case AudioPlayerState.PLAYING:

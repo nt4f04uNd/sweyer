@@ -31,7 +31,7 @@ class SMMBackButton extends StatelessWidget {
   }
 }
 
-/// Creates `Raised` with border radius, by default colored into main app color - `Colors.deepPurple`
+/// Creates [Raised] with border radius, by default colored into main app color - `Colors.deepPurple`
 class PrimaryRaisedButton extends RaisedButton {
   PrimaryRaisedButton(
       {Key key,
@@ -55,7 +55,7 @@ class PrimaryRaisedButton extends RaisedButton {
                   height: 25.0,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                    valueColor:const AlwaysStoppedAnimation(Colors.white),
                   ),
                 )
               : Text(text, style: textStyle),
@@ -67,7 +67,7 @@ class PrimaryRaisedButton extends RaisedButton {
         );
 }
 
-/// Creates `FlatButton` with border radius, perfect for `showDialog`s accept and decline buttons
+/// Creates [FlatButton] with border radius, perfect for [showDialog]s accept and decline buttons
 class DialogFlatButton extends FlatButton {
   DialogFlatButton(
       {Key key,

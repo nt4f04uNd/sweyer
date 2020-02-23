@@ -17,12 +17,12 @@ const Duration kSMMLargeAlbumFadeDuration = Duration(milliseconds: 180);
 const Duration kSMMSmallAlbumFadeDuration = Duration(milliseconds: 340);
 const Duration kSMMRotatingAlbumFadeDuration = Duration(milliseconds: 100);
 
-/// `3` is The `CircularPercentIndicator` `lineWidth` doubled and additional 3 spacing
+/// `3` is The [CircularPercentIndicator.lineWidth] doubled and additional 3 spacing
 ///
 /// `2` is Border width
 const double kRotatingArtSize = kSMMSmallArtSize - 6 - 3 - 2;
 
-/// Abstract class widget every album art should extend instead of `StatefulWidget` to be able to use `_AlbumArtStateMixin`
+/// Abstract class widget every album art should extend instead of [StatefulWidget] to be able to use [_AlbumArtStateMixin]
 abstract class _AlbumArtWidget extends StatefulWidget {
   _AlbumArtWidget({Key key}) : super(key: key);
 
@@ -31,7 +31,7 @@ abstract class _AlbumArtWidget extends StatefulWidget {
   String get path;
 }
 
-/// Mixin that uses `initState` to check album art path and fetch it if needed
+/// Mixin that uses [StatefulWidget] [initState] to check album art path and fetch it if needed
 mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
   /// Loading future to use then in future builder
   Future<Uint8List> loading;
@@ -56,7 +56,7 @@ mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
 
 /// Large album art to display in player route
 ///
-/// Has size `constraints - kSMMLargeAlbumArtMargins`
+/// Has size [constraints] minus [kSMMLargeAlbumArtMargins]
 ///
 /// Shows placeholder or art, depending on provided path
 class AlbumArtLarge extends StatelessWidget {

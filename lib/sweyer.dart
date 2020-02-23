@@ -11,4 +11,5 @@
 export 'package:sweyer/components/components.dart';
 export 'package:sweyer/logic/logic.dart';
 export 'package:sweyer/routes/routes.dart';
+export 'package:sweyer/screens/screens.dart';
 export 'package:sweyer/utils/utils.dart';

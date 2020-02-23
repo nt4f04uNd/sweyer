@@ -39,7 +39,7 @@ const double kSMMIconButtonIconSize = 24.0;
 ///
 /// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
-/// This sample shows an `IconButton` that uses the Material icon "volume_up" to
+/// This sample shows an [IconButton] that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
@@ -293,7 +293,7 @@ class SMMIconButton extends StatelessWidget {
       );
     }
 
-    /// Max size of `size` and `iconSize`
+    /// Max size of [size] and [iconSize]
     final maxSize = math.max(size, iconSize);
 
     return Semantics(

@@ -29,7 +29,7 @@ enum PlaylistType {
 /// Class, representing a single playlist in application
 ///
 /// It is more array-like, as it has shuffle methods and explicit indexing
-/// Though it doesn't allow to have two songs with a unique id (it is possible only via constructor, but e.g. `add` method will do a check)
+/// Though it doesn't allow to have two songs with a unique id (it is possible only via constructor, but e.g. [add] method will do a check)
 ///
 class Playlist {
   List<Song> _songs;
@@ -185,9 +185,9 @@ abstract class PlaylistControl {
     _playingSongIdState = songId;
   }
 
-  /// Util function to select playlist by `argPlaylistType`
+  /// Util function to select playlist by [argPlaylistType]
   ///
-  /// Returns current playlist if `argPlaylistType` is `null`
+  /// Returns current playlist if [argPlaylistType] is [null]
   static Playlist getPlaylist([PlaylistType argPlaylistType]) {
     if (argPlaylistType == null) argPlaylistType = playlistType;
     switch (argPlaylistType) {
@@ -202,9 +202,9 @@ abstract class PlaylistControl {
     }
   }
 
-  /// Returns a `currentSong` index in current playlist (by default)
+  /// Returns a [currentSong] index in current playlist (by default)
   ///
-  /// If optional `playlistType` is specified, then returns index in selected playlist type
+  /// If optional [playlistType] is specified, then returns index in selected playlist type
   static int currentSongIndex([PlaylistType argPlaylistType]) {
     return getPlaylist(argPlaylistType).getSongIndexById(_playingSongIdState);
   }
@@ -216,9 +216,9 @@ abstract class PlaylistControl {
   static Stream<void> get onPlaylistListChange =>
       _songsListChangeStreamController.stream;
 
-  /// Emit event to `onPlaylistListChange`
-  /// 
-  /// Should be only called when user can see playlist change, i.e. songs sort. 
+  /// Emit event to [onPlaylistListChange]
+  ///
+  /// Should be only called when user can see playlist change, i.e. songs sort.
   /// Shouldn't be called, e.g. on tile click, when playlist changes, but user can't actually see it
   static void emitPlaylistChange() {
     _songsListChangeStreamController.add(null);
@@ -229,7 +229,9 @@ abstract class PlaylistControl {
   /// Also handles no-permissions situations
   static Future<void> init() async {
     if (Permissions.granted) {
-      playlists[PlaylistType.global] = null; // Reset `playReady`
+      // await Future.delayed(Duration(seconds: 2));
+
+      playlists[PlaylistType.global] = null; // Reset [playReady]
       emitPlaylistChange();
 
       initFetching = true;
@@ -252,18 +254,7 @@ abstract class PlaylistControl {
       await _restoreLastSong();
       await _restorePlaylist();
 
-      // Emit event to track change stream
-      emitPlaylistChange();
-
-      playlists[PlaylistType.global] =
-          Playlist(await songsFetcher.fetchSongs()); // Fetch songs
-      await filterSongs();
-      sortSongs();
-
-      // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (_playingSongIdState == null)
-      if (_playingSongIdState == null) {
-        await _restoreLastSong();
-      }
+      _initialSongsFetch();
     } else {
       // Init empty playlist if no permission granted
       if (!playReady) playlists[PlaylistType.global] = Playlist([]);
@@ -291,7 +282,7 @@ abstract class PlaylistControl {
   ///
   /// This functions doesn't call [emitPlaylistChange()]
   ///
-  /// @param `songs` — can be omitted and if so, then playlist is not changed, only switched to it
+  /// @param [songs] — can be omitted and if so, then playlist is not changed, only switched to it
   static Future<void> setSearchedPlaylist([List<Song> songs]) async {
     if (songs != null) {
       playlists[PlaylistType.searched] = Playlist(songs);
@@ -303,8 +294,8 @@ abstract class PlaylistControl {
 
   /// Shuffles from current playlist (by default)
   ///
-  /// @param `argPlaylistType` if specified - shuffles from it
-  /// @param `songs` if specified - sets them
+  /// @param [argPlaylistType] if specified - shuffles from it
+  /// @param [songs] if specified - sets them
   static void setShuffledPlaylist(
       [PlaylistType argPlaylistType, List<Song> songs]) {
     argPlaylistType ??= playlistType;
@@ -322,9 +313,9 @@ abstract class PlaylistControl {
     emitPlaylistChange();
   }
 
-  /// Returns playlist that was before shuffle and clears `shuffledPlaylist`
+  /// Returns playlist that was before shuffle and clears [shuffledPlaylist]
   ///
-  /// @param `argPlaylistType` if specified - returns to it
+  /// @param [argPlaylistType] if specified - returns to it
   static void returnFromShuffledPlaylist([PlaylistType argPlaylistType]) {
     argPlaylistType ??= playlistTypeBeforeShuffle;
     if (argPlaylistType == PlaylistType.global)
@@ -334,7 +325,7 @@ abstract class PlaylistControl {
   }
 
   /// Switches tp global Resets all playlists except it
-  /// 
+  ///
   /// This functions doesn't call [emitPlaylistChange()]
   static void resetPlaylists() {
     if (playlistType != PlaylistType.global) {
@@ -430,7 +421,7 @@ abstract class PlaylistControl {
     // }
   }
 
-  /// Gets saved sort feature from `SharedPreferences`
+  /// Gets saved sort feature from [SharedPreferences]
   ///
   /// Default value is `SortFeature.date`
   static Future<void> _restoreSortFeature() async {
@@ -444,7 +435,7 @@ abstract class PlaylistControl {
           "_restoreSortFeature: wrong saved sortFeatureInt: $savedSortFeature");
   }
 
-  /// Restores saved playlist from json if `playlistTypeInt` (saved `playlistType`) is not global
+  /// Restores saved playlist from json if [playlistTypeInt] (saved [playlistType]) is not global
   static Future<void> _restorePlaylist() async {
     int savedPlaylistType = await Prefs.byKey.playlistTypeInt.getPref() ?? 0;
 
@@ -482,14 +473,24 @@ abstract class PlaylistControl {
       // Get saved data
       SharedPreferences prefs = await Prefs.getSharedInstance();
 
-      int savedSongId =
-          await Prefs.byKey.songIdInt.getPref(prefs) ?? getPlaylist().songs[0].id;
+      int savedSongId = await Prefs.byKey.songIdInt.getPref(prefs) ??
+          getPlaylist().songs[0].id;
 
       // Setup initial playing state index from prefs
       _playingSongIdState = savedSongId;
       await API.ServiceHandler.sendSong(PlaylistControl.currentSong);
       // Set url of first track in player instance
       await MusicPlayer.setUri(currentSongId);
+    }
+  }
+
+  /// Function to fetch all songs from user devices
+  static Future<void> _initialSongsFetch() async {
+    await refetchSongs();
+
+    // Retry do all the same as before fetching songs (set duration, set track url) if it hadn't been performed before (_playingSongIdState == null)
+    if (_playingSongIdState == null) {
+      await _restoreLastSong();
     }
   }
 }

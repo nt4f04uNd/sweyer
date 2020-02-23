@@ -11,11 +11,11 @@ abstract class Switcher<T> {
   void change();
 }
 
-// Switches between `false` and `true`
+/// Switches between [false] and [true]
 class BoolSwitcher extends Switcher<bool> {
   BoolSwitcher([bool value = false]) : super(value);
 
-  /// Changes `value` to opposite
+  /// Changes [value] to opposite
   void change() {
     _value = !_value;
   }
@@ -25,7 +25,7 @@ class BoolSwitcher extends Switcher<bool> {
 class IntSwitcher extends Switcher<int> {
   IntSwitcher([int value = 0]) : super(value);
 
-  /// Changes `value` to opposite
+  /// Changes [value] to opposite
   void change() {
     if (_value < 1000)
       _value++;

@@ -56,7 +56,7 @@ enum _CustomRefreshIndicatorMode {
 /// indicator disappears after the callback's [Future] has completed.
 ///
 /// If the [Scrollable] might not have enough content to overscroll, consider
-/// settings its `physics` property to [AlwaysScrollableScrollPhysics]:
+/// settings its [physics] property to [AlwaysScrollableScrollPhysics]:
 ///
 /// ```dart
 /// ListView(
@@ -411,7 +411,7 @@ class CustomRefreshIndicatorState extends State<CustomRefreshIndicator>
   ///
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
-  /// show it at the bottom, set `atTop` to false.
+  /// show it at the bottom, set [atTop] to false.
   Future<void> show({bool atTop = true}) {
     if (_mode != _CustomRefreshIndicatorMode.refresh &&
         _mode != _CustomRefreshIndicatorMode.snap) {

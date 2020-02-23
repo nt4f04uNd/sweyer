@@ -38,13 +38,13 @@ class _PrefKeys {
   /// `1` represents title feature
   final Pref<int> sortFeatureInt = const Pref<int>(key: 'sort_feature');
 
-  /// Last played `playlistType`
+  /// Last played [playlistType]
   ///
-  /// `0` represents `global`
+  /// `0` represents [global]
   ///
-  /// `1` represents `searched`
+  /// `1` represents [searched]
   ///
-  /// `2` represents `shuffled`
+  /// `2` represents [shuffled]
   final Pref<int> playlistTypeInt = const Pref<int>(key: 'playlist_type');
 
   /// Minimal file duration to be considered as a song
@@ -55,21 +55,21 @@ class _PrefKeys {
 
   /// Stores theme brightness
   /// 
-  /// `false` means light
+  /// [false] means light
   /// 
-  /// `true` means dark
+  /// [true] means dark
   final Pref<bool> settingThemeBrightnessBool =
       const Pref<bool>(key: 'setting_theme_brightness');
 
   const _PrefKeys();
 }
 
-/// Class to save and get `SharedPreferences`
+/// Class to save and get [SharedPreferences]
 abstract class Prefs {
   /// Keys to save shared preferences
   static const _PrefKeys byKey = _PrefKeys();
 
-  /// Returns `SharedPreferences` instance
+  /// Returns [SharedPreferences] instance
   static Future<SharedPreferences> getSharedInstance() async {
     return await SharedPreferences.getInstance();
   }
@@ -83,7 +83,7 @@ class Pref<T> {
   /// Set pref value
   ///
   /// @param value new pref value to set
-  /// @param prefs optional `SharedPreferences` instance
+  /// @param prefs optional [SharedPreferences] instance
   Future<bool> setPref(T value, [SharedPreferences prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
     if (value is bool) {
@@ -102,10 +102,10 @@ class Pref<T> {
 
   /// Get pref value
   ///
-  /// @param prefs optional `SharedPreferences` instance
+  /// @param prefs optional [SharedPreferences] instance
   Future<T> getPref([SharedPreferences prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
-    // Convert type to string because `is` operator doesn't work
+    // Convert type to string because [is] operator doesn't work
     final String strT = T.toString();
     if (strT == "bool") {
       return prefs.getBool(key) as T;

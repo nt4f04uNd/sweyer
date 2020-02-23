@@ -62,18 +62,18 @@ abstract class SMMPopupMenuEntry<T> extends StatefulWidget {
   /// The amount of vertical space occupied by this entry.
   ///
   /// This value is used at the time the [showMenu] method is called, if the
-  /// `initialValue` argument is provided, to determine the position of this
-  /// entry when aligning the selected entry over the given `position`. It is
+  /// [initialValue] argument is provided, to determine the position of this
+  /// entry when aligning the selected entry over the given [position]. It is
   /// otherwise ignored.
   double get height;
 
   /// Whether this entry represents a particular value.
   ///
   /// This method is used by [showMenu], when it is called, to align the entry
-  /// representing the `initialValue`, if any, to the given `position`, and then
+  /// representing the [initialValue], if any, to the given [position], and then
   /// later is called on each entry to determine if it should be highlighted (if
   /// the method returns true, the entry will have its background color set to
-  /// the ambient [ThemeData.highlightColor]). If `initialValue` is null, then
+  /// the ambient [ThemeData.highlightColor]). If [initialValue] is null, then
   /// this method is not called.
   ///
   /// If the [PopupMenuEntry] represents a single value, this should return true
@@ -133,7 +133,7 @@ class _PopupMenuDividerState extends State<SMMPopupMenuDivider> {
 ///
 /// {@tool sample}
 ///
-/// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
+/// Here, a [Text] widget is used with a popup menu item. The [WhyFarther] type
 /// is an enum, not shown here.
 ///
 /// ```dart
@@ -162,7 +162,7 @@ class SMMPopupMenuItem<T> extends SMMPopupMenuEntry<T> {
   ///
   /// By default, the item is [enabled].
   ///
-  /// The `height` and `enabled` arguments must not be null.
+  /// The [height] and [enabled] arguments must not be null.
   const SMMPopupMenuItem({
     Key key,
     this.value,
@@ -285,7 +285,7 @@ class SMMPopupMenuItemState<T, W extends SMMPopupMenuItem<T>> extends State<W> {
 ///
 /// {@tool sample}
 ///
-/// Suppose a `Commands` enum exists that lists the possible commands from a
+/// Suppose a [Commands] enum exists that lists the possible commands from a
 /// particular popup menu, including `Commands.heroAndScholar` and
 /// `Commands.hurricaneCame`, and further suppose that there is a
 /// `_heroAndScholar` member field which is a boolean. The example below shows a
@@ -341,7 +341,7 @@ class SMMCheckedPopupMenuItem<T> extends SMMPopupMenuItem<T> {
   /// By default, the menu item is [enabled] but unchecked. To mark the item as
   /// checked, set [checked] to true.
   ///
-  /// The `checked` and `enabled` arguments must not be null.
+  /// The [checked] and [enabled] arguments must not be null.
   const SMMCheckedPopupMenuItem({
     Key key,
     T value,
@@ -674,52 +674,52 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// Show a popup menu that contains the `items` at `position`.
+/// Show a popup menu that contains the [items] at [position].
 ///
-/// `items` should be non-null and not empty.
+/// [items] should be non-null and not empty.
 ///
-/// If `initialValue` is specified then the first item with a matching value
-/// will be highlighted and the value of `position` gives the rectangle whose
+/// If [initialValue] is specified then the first item with a matching value
+/// will be highlighted and the value of [position] gives the rectangle whose
 /// vertical center will be aligned with the vertical center of the highlighted
 /// item (when possible).
 ///
-/// If `initialValue` is not specified then the top of the menu will be aligned
-/// with the top of the `position` rectangle.
+/// If [initialValue] is not specified then the top of the menu will be aligned
+/// with the top of the [position] rectangle.
 ///
 /// In both cases, the menu position will be adjusted if necessary to fit on the
 /// screen.
 ///
 /// Horizontally, the menu is positioned so that it grows in the direction that
-/// has the most room. For example, if the `position` describes a rectangle on
+/// has the most room. For example, if the [position] describes a rectangle on
 /// the left edge of the screen, then the left edge of the menu is aligned with
-/// the left edge of the `position`, and the menu grows to the right. If both
-/// edges of the `position` are equidistant from the opposite edge of the
+/// the left edge of the [position], and the menu grows to the right. If both
+/// edges of the [position] are equidistant from the opposite edge of the
 /// screen, then the ambient [Directionality] is used as a tie-breaker,
 /// preferring to grow in the reading direction.
 ///
-/// The positioning of the `initialValue` at the `position` is implemented by
-/// iterating over the `items` to find the first whose
-/// [PopupMenuEntry.represents] method returns true for `initialValue`, and then
+/// The positioning of the [initialValue] at the [position] is implemented by
+/// iterating over the [items] to find the first whose
+/// [PopupMenuEntry.represents] method returns true for [initialValue], and then
 /// summing the values of [PopupMenuEntry.height] for all the preceding widgets
 /// in the list.
 ///
-/// The `elevation` argument specifies the z-coordinate at which to place the
+/// The [elevation] argument specifies the z-coordinate at which to place the
 /// menu. The elevation defaults to 8, the appropriate elevation for popup
 /// menus.
 ///
-/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// The [context] argument is used to look up the [Navigator] and [Theme] for
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
 ///
-/// The `semanticLabel` argument is used by accessibility frameworks to
+/// The [semanticLabel] argument is used by accessibility frameworks to
 /// announce screen transitions when the menu is opened and closed. If this
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
-/// The `menuBorderRadius` sets specific border radius to context menu card
+/// The [menuBorderRadius] sets specific border radius to context menu card
 /// Defaults to `const BorderRadius.all(Radius.circular(10))`
 ///
-/// The `menuPadding` sets menu card vertical padding
+/// The [menuPadding] sets menu card vertical padding
 /// Defaults to `const EdgeInsets.symmetric(vertical: 6.5)`
 ///
 /// See also:
@@ -916,10 +916,10 @@ class SMMPopupMenuButton<T> extends StatefulWidget {
   /// If provided, the icon used for this button.
   final Icon icon;
 
-  /// Size of `SMMIconButton`
+  /// Size of [SMMIconButton]
   final double buttonSize;
 
-  /// Size of icon in `SMMIconButton`
+  /// Size of icon in [SMMIconButton]
   final double buttonIconSize;
 
   /// The offset applied to the Popup Menu Button.
@@ -936,11 +936,11 @@ class SMMPopupMenuButton<T> extends StatefulWidget {
 
   /// Whether this popup menu button is interactive.
   ///
-  /// Must be non-null, defaults to `true`
+  /// Must be non-null, defaults to [true]
   ///
-  /// If `true` the button will respond to presses by displaying the menu.
+  /// If [true] the button will respond to presses by displaying the menu.
   ///
-  /// If `false`, the button is styled with the disabled color from the
+  /// If [false], the button is styled with the disabled color from the
   /// current [Theme] and will not respond to presses or show the popup
   /// menu and [onSelected], [onCanceled] and [itemBuilder] will not be called.
   ///

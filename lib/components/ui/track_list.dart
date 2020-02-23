@@ -12,7 +12,7 @@ import 'package:sweyer/constants.dart' as Constants;
 
 const Duration kSelectionDuration = Duration(milliseconds: 450);
 
-/// This widget is needed because I need to call `SMMScaffold.of(context).openDrawer()`
+/// This widget is needed because I need to call `Scaffold.of(context).openDrawer()`
 /// which requires context to have scaffold in it
 /// separating widget allows to to that
 class _MainRouteAppBarLeading extends StatelessWidget {
@@ -75,17 +75,17 @@ class FakeInputBox extends StatelessWidget {
 }
 
 /// List of fetched tracks
-class MainRouteTrackList extends StatefulWidget {
+class TrackListScreen extends StatefulWidget {
   final EdgeInsets bottomPadding;
-  MainRouteTrackList(
+  TrackListScreen(
       {Key key, this.bottomPadding: const EdgeInsets.only(bottom: 0.0)})
       : super(key: key);
 
   @override
-  _MainRouteTrackListState createState() => _MainRouteTrackListState();
+  _TrackListScreenState createState() => _TrackListScreenState();
 }
 
-class _MainRouteTrackListState extends State<MainRouteTrackList> {
+class _TrackListScreenState extends State<TrackListScreen> {
   /// Contains selected song ids
   Set<int> selectionSet = {};
 
@@ -171,7 +171,7 @@ class _MainRouteTrackListState extends State<MainRouteTrackList> {
     }
   }
 
-  /// Sets `unselecting` to false when all items are removed (they are removed from `SongTile` widget itself, calling `onUnselect`)
+  /// Sets [unselecting] to false when all items are removed (they are removed from [SongTile] widget itself, calling [onUnselect])
   void _handleNotifyUnselection() {
     if (selectionSet.isEmpty) {
       setState(() {
@@ -499,7 +499,7 @@ abstract class SongTileInterface {
   final Song song;
 }
 
-/// `SongTile` that represents a single track in `TrackList`
+/// [SongTile] that represents a single track in [TrackList]
 class SongTile extends StatelessWidget implements SongTileInterface {
   SongTile({
     Key key,
@@ -534,7 +534,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
   @override
   Widget build(BuildContext context) {
     return ListTileTheme(
-      selectedColor: Theme.of(context).textTheme.title.color,
+      selectedColor: Theme.of(context).textTheme.headline6.color,
       child: ListTile(
         subtitle: Artist(artist: song.artist),
         // subtitle: Text(song.artist),
@@ -568,7 +568,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
   }
 }
 
-/// `SongTile` that represents a single track in `TrackList`
+/// [SongTile] that represents a single track in [TrackList]
 class SelectableSongTile extends StatefulWidget implements SongTileInterface {
   SelectableSongTile({
     Key key,
@@ -703,7 +703,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
           Constants.Routes.player.value); // TODO: move this out of here
   }
 
-  // Performs unselect animation and calls `onSelected` and `notifyUnselection`
+  // Performs unselect animation and calls [onSelected] and [notifyUnselection]
   void _unselect([bool onMount = false]) async {
     widget.onUnselected(onMount);
     await _animationController.reverse();
@@ -730,7 +730,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
     return IgnorePointer(
       ignoring: widget.unselecting,
       child: ListTileTheme(
-        selectedColor: Theme.of(context).textTheme.title.color,
+        selectedColor: Theme.of(context).textTheme.headline6.color,
         child: ListTile(
           subtitle: Artist(artist: widget.song.artist),
           selected: _selected,

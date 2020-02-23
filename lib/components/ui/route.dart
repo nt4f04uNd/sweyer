@@ -8,17 +8,17 @@ import 'package:sweyer/sweyer.dart';
 
 const double _kPreferredSize = 63.0;
 
-/// Creates `Scaffold` with preferred size `AppBar`
+/// Creates [Scaffold] with preferred size [AppBar]
 class PageBase extends StatelessWidget {
   final Widget child;
 
-  /// Overrides default `SMMBackButton` widget
+  /// Overrides default [SMMBackButton] widget
   final Widget backButton;
 
-  /// Text that will be dispalyed in app bar title
+  /// Text that will be displayed in app bar title
   final String name;
 
-  /// Actions in `AppBar`
+  /// Actions in [AppBar]
   final List<Widget> actions;
   const PageBase({
     Key key,
@@ -44,7 +44,7 @@ class PageBase extends StatelessWidget {
           title: Text(
             name,
             style: TextStyle(
-              color: Theme.of(context).textTheme.title.color,
+              color: Theme.of(context).textTheme.headline6.color,
               // fontWeight: FontWE
             ),
           ),

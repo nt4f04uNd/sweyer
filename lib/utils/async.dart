@@ -25,7 +25,7 @@ class AsyncOperation {
     return _completer.future;
   }
 
-  /// Calls `_callback`
+  /// Calls [_callback]
   void start() {
     _callback();
   }
@@ -35,28 +35,28 @@ class AsyncOperation {
     _completer.complete();
   }
 
-  /// Fill completer future that is returned from `wait` method with error
+  /// Fill completer future that is returned from [wait] method with error
   void errorFinish(error) {
     _completer.completeError(error);
   }
 }
 
-/// A queue of `AsyncOperation`s
+/// A queue of [AsyncOperation]s
 ///
-/// Adds new `AsyncOperation` to the end
+/// Adds new [AsyncOperation] to the end
 ///
 /// Completes from start of list to end
 class OperationsQueue {
   List<AsyncOperation> _queue = [];
 
-  /// first element of `_queue` is considered to be current
+  /// first element of [_queue] is considered to be current
   AsyncOperation get _currentOperation => _queue.first;
 
   /// Adds a function to queue
   ///
-  /// If `_queue` length equals 1 calls `_completeQueue` to start queue completion
+  /// If [_queue] length equals 1 calls [_completeQueue] to start queue completion
   ///
-  /// @return `AsyncOperation.wait` future
+  /// @return [AsyncOperation.wait] future
   Future<void> add(Function callback) {
     _queue.add(AsyncOperation(callback));
     if (_queue.length == 1) _completeQueue();
@@ -69,11 +69,11 @@ class OperationsQueue {
     _currentOperation.finish();
   }
 
-  /// Completes all operations in `_queue` from start to end
+  /// Completes all operations in [_queue] from start to end
   Future<void> _completeQueue() async {
     while (_queue.isNotEmpty) {
       _currentOperation.start();
-      await _currentOperation.wait(); // Wait before `finishCurrent` call
+      await _currentOperation.wait(); /// Wait before [finishCurrent] calls
       _queue.removeAt(0); // Remove completed operation
     }
   }

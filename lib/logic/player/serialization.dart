@@ -12,8 +12,8 @@ import 'package:path_provider/path_provider.dart';
 
 /// Class to create serialization objects
 ///
-/// @param TRead denotes type of list that is returned from `readJson` method
-/// @param TSave denotes type that has to be provided into `saveJson` method
+/// @param TRead denotes type of list that is returned from [readJson] method
+/// @param TSave denotes type that has to be provided into [saveJson] method
 abstract class Serialization<TRead, TSave> {
   final String fileName = "";
 
@@ -36,7 +36,7 @@ abstract class Serialization<TRead, TSave> {
   Future<void> saveJson(List<TSave> data) async {}
 }
 
-/// Implementation of `Serialization` to serialize songs
+/// Implementation of [Serialization] to serialize songs
 class SongsSerialization extends Serialization<Song, Song> {
   @override
   final String fileName = 'songs.json';
@@ -67,9 +67,9 @@ class SongsSerialization extends Serialization<Song, Song> {
   }
 }
 
-/// Implementation of `Serialization` to serialize playlists
+/// Implementation of [Serialization] to serialize playlists
 ///
-/// Saves only songs ids, so you have to search indexes in `globalPlaylist` to restore playlist
+/// Saves only songs ids, so you have to search indexes in [globalPlaylist] to restore playlist
 class PlaylistSerialization extends Serialization<int, Song> {
   @override
   final String fileName = 'playlist.json';

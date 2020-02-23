@@ -16,22 +16,20 @@ class SongsFetcher {
   /// Channel for handling audio focus
   MethodChannel _songsChannel =
       const MethodChannel(Constants.SongsChannel.CHANNEL_NAME);
-
-  // /// An instance of `AsyncOperation` to track if tracks are fetching
-  // AsyncOperation fetchingOperation = AsyncOperation();
+      
   OperationsQueue _fetchQueue = OperationsQueue();
 
   /// A temporary container for found songs
   List<Song> _foundSongsTemp;
 
-  /// Function from `SongsSerializer` to save songs after fetching
+  /// Function from [SongsSerializer] to save songs after fetching
   final Function saveJson;
 
   SongsFetcher(this.saveJson) {
     _songsChannel.setMethodCallHandler((MethodCall call) async {
       if (call.method == Constants.SongsChannel.SONGS_METHOD_SEND_SONGS) {
         // List to songs that come from channel
-        // NOTE: cast method is must be here, `as` crashes code execution
+        // NOTE: cast method is must be here, [as] crashes code execution
         _getSongsFromChannel(call.arguments.cast<String>());
       }
     });
@@ -53,7 +51,7 @@ class SongsFetcher {
 
   /// Method that is used to get songs from method channel
   ///
-  /// ATTENTION: IF YOU USE `call.arguments` WITH THIS FUNCTION, TYPE CAST IT THROUGH `List<T> List.cast<T>()`, because `call.arguments` `as` type cast will crash closure execution
+  /// ATTENTION: IF YOU USE `call.arguments` WITH THIS FUNCTION, TYPE CAST IT THROUGH `List<T> List.cast<T>()`, because `call.arguments` [as] type cast will crash closure execution
   void _getSongsFromChannel(List<String> songsJsons) {
     List<Song> foundSongs = [];
     for (String songJson in songsJsons) {
@@ -63,7 +61,7 @@ class SongsFetcher {
     _foundSongsTemp = foundSongs;
     // Serialize found songs
     saveJson(foundSongs);
-    // Say to `fetchSongs` that operation ended and it can continue its execution
+    // Say to [fetchSongs] that operation ended and it can continue its execution
     _fetchQueue.finishCurrent();
   }
 }

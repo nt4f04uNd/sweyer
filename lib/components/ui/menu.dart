@@ -18,79 +18,107 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-  Future<void> _handleClickSettings() async {
-    try {
-      return Navigator.of(context).popAndPushNamed(Constants.Routes.settings.value);
-    } catch (e) {}
+  bool _tappedList = false;
+
+  void _handleClickSettings() {
+    _tappedList = true;
+
+    // Set ui to all screens
+    SystemChrome.setSystemUIOverlayStyle(
+        Constants.AppSystemUIThemes.allScreens.auto(context));
+
+    Navigator.of(context).popAndPushNamed(Constants.Routes.settings.value);
   }
 
   // void _handleClickSendLog() => Logger.send();
 
   Future<void> _handleClickDebug() async {
+    _tappedList = true;
+
+    SystemChrome.setSystemUIOverlayStyle(
+        Constants.AppSystemUIThemes.allScreens.auto(context));
     try {
-      return Navigator.of(context).popAndPushNamed(Constants.Routes.debug.value);
+      return Navigator.of(context)
+          .popAndPushNamed(Constants.Routes.debug.value);
     } catch (e) {}
   }
 
   @override
+  void initState() {
+    super.initState();
+    (() async {
+      await Future.delayed(
+          Duration(microseconds: 1)); // Without delay this won't work
+      SystemChrome.setSystemUIOverlayStyle(
+          Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext);
+    })();
+  }
+
+  @override
+  void dispose() {
+    // Set ui to main screen on drawer close
+    if (!_tappedList)
+      SystemChrome.setSystemUIOverlayStyle(
+          Constants.AppSystemUIThemes.mainScreen.autoWithoutContext);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: Constants.AppSystemUIThemes.allScreens.auto(context),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: //This will change the drawer background
-              Constants.AppTheme.drawer.auto(context),
-        ),
-        child: Drawer(
-          child: ListView(
-            physics: NeverScrollableScrollPhysics(),
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              Container(
-                padding:
-                    const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    SvgPicture.asset('assets/images/icons/note_rounded.svg',
-                        width: 40.0, height: 40.0),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Text(
-                        'Sweyer',
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w800,
-                          color: Constants.AppTheme.main.autoInverse(context),
-                        ),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        canvasColor: //This will change the drawer background
+            Constants.AppTheme.drawer.auto(context),
+      ),
+      child: Drawer(
+        child: ListView(
+          physics: NeverScrollableScrollPhysics(),
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            Container(
+              padding:
+                  const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SvgPicture.asset('assets/images/icons/note_rounded.svg',
+                      width: 40.0, height: 40.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Sweyer',
+                      style: TextStyle(
+                        fontSize: 30.0,
+                        fontWeight: FontWeight.w800,
+                        color: Constants.AppTheme.main.autoInverse(context),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              // SizedBox(height: 45),
-              Divider(),
-              SizedBox(
-                height: 7.0,
-              ),
-              MenuItem(
-                'Настройки',
-                icon: Icons.settings,
-                onTap: _handleClickSettings,
-              ),
-              // MenuItem(
-              //   'Отправить лог',
-              //   icon: Icons.assignment,
-              //   onTap: _handleClickSendLog,
-              // ),
-              MenuItem(
-                'Дебаг',
-                icon: Icons.adb,
-                onTap: _handleClickDebug,
-              ),
-            ],
-          ),
+            ),
+            // SizedBox(height: 45),
+            Divider(),
+            SizedBox(
+              height: 7.0,
+            ),
+            MenuItem(
+              'Настройки',
+              icon: Icons.settings,
+              onTap: _handleClickSettings,
+            ),
+            // MenuItem(
+            //   'Отправить лог',
+            //   icon: Icons.assignment,
+            //   onTap: _handleClickSendLog,
+            // ),
+            MenuItem(
+              'Дебаг',
+              icon: Icons.adb,
+              onTap: _handleClickDebug,
+            ),
+          ],
         ),
       ),
     );

@@ -43,11 +43,9 @@ class _AppState extends State<App> {
     return StreamBuilder<bool>(
         stream: LaunchControl.onLaunch,
         builder: (context, snapshot) {
-          if (!snapshot.hasData || !snapshot.data) return SizedBox.shrink();
           return StreamBuilder(
               stream: ThemeControl.onThemeChange,
               builder: (context, snapshot) {
-                if (!ThemeControl.isReady) return SizedBox.shrink();
                 return MaterialApp(
                   title: Constants.Config.APPLICATION_TITLE,
                   navigatorKey: Catcher.navigatorKey,
@@ -57,14 +55,16 @@ class _AppState extends State<App> {
                     GlobalMaterialLocalizations.delegate,
                     GlobalWidgetsLocalizations.delegate,
                   ],
-                  themeMode:
-                      ThemeControl.isDark ? ThemeMode.dark : ThemeMode.light,
+                  themeMode: !ThemeControl.isReady
+                      ? ThemeMode.system
+                      : ThemeControl.isDark ? ThemeMode.dark : ThemeMode.light,
                   theme: AppTheme.materialApp.light,
                   darkTheme: AppTheme.materialApp.dark,
                   initialRoute: Routes.main.value,
                   onGenerateRoute: RouteControl.handleOnGenerateRoute,
-                  onGenerateInitialRoutes:
-                      RouteControl.handleOnGenerateInitialRoutes,
+                  onGenerateInitialRoutes: (route) =>
+                      RouteControl.handleOnGenerateInitialRoutes(
+                          route, context),
                   onUnknownRoute: RouteControl.handleOnUnknownRoute,
                   // Uncomment to replace red screen of death
                   builder: (BuildContext context, Widget widget) {
@@ -73,6 +73,7 @@ class _AppState extends State<App> {
                     //     customTitle: "Custom error title",
                     //     customDescription: "Custom error description",
                     //     );
+
                     return widget;
                   },
                 );

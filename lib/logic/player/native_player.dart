@@ -82,13 +82,13 @@ abstract class NativeAudioPlayer {
   static AudioPlayerState get state => _internalState;
   static bool get loopMode => _internalLoopMode;
 
-  /// It is observable, that means on every set we emit event to `onPlayerStateChanged` stream
+  /// It is observable, that means on every set we emit event to [onPlayerStateChanged] stream
   static set state(AudioPlayerState value) {
     _playerStateController.add(value);
     _internalState = value;
   }
 
-  /// It is observable, that means on every set we emit event to `onPlayerStateChanged` stream
+  /// It is observable, that means on every set we emit event to [onPlayerStateChanged] stream
   static set loopMode(bool value) {
     _loopController.add(value);
     _internalLoopMode = value;
@@ -141,7 +141,7 @@ abstract class NativeAudioPlayer {
   /// If [isLocal] is true, [url] must be a local file system path.
   /// If [isLocal] is false, [url] must be a remote URL.
   ///
-  /// Throws `Unsupported value: java.lang.IllegalStateException` message thrown when `play` gets called in wrong state
+  /// Throws `Unsupported value: java.lang.IllegalStateException` message thrown when [play] gets called in wrong state
   ///
   /// Throws `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
   static Future<void> play(

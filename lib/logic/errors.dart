@@ -8,7 +8,7 @@ import 'package:catcher/mode/dialog_report_mode.dart';
 import 'package:catcher/model/report.dart';
 import 'package:flutter/material.dart';
 
-/// My implementation of `ReportMode`, acts like `DialogReportMode`,
+/// My implementation of [ReportMode], acts like [DialogReportMode],
 /// but applies other dialog appearance
 class CustomDialogReportMode extends DialogReportMode {
   @override

@@ -1073,7 +1073,7 @@
 
 //   /// If true the [body] and the scaffold's floating widgets should size
 //   /// themselves to avoid the onscreen keyboard whose height is defined by the
-//   /// ambient [MediaQuery]'s [MediaQueryData.viewInsets] `bottom` property.
+//   /// ambient [MediaQuery]'s [MediaQueryData.viewInsets] [bottom] property.
 //   ///
 //   /// For example, if there is an onscreen keyboard displayed above the
 //   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
@@ -1108,7 +1108,7 @@
 //   ///
 //   /// {@tool snippet --template=freeform}
 //   /// Typical usage of the [SMMScaffold.of] function is to call it from within the
-//   /// `build` method of a child of a [SMMScaffold].
+//   /// [build] method of a child of a [SMMScaffold].
 //   ///
 //   /// ```dart imports
 //   /// import 'package:flutter/material.dart';
@@ -1160,8 +1160,8 @@
 //   /// {@end-tool}
 //   ///
 //   /// {@tool snippet --template=stateless_widget_material}
-//   /// When the [SMMScaffold] is actually created in the same `build` function, the
-//   /// `context` argument to the `build` function can't be used to find the
+//   /// When the [SMMScaffold] is actually created in the same [build] function, the
+//   /// [context] argument to the [build] function can't be used to find the
 //   /// [SMMScaffold] (since it's "above" the widget being returned in the widget
 //   /// tree). In such cases, the following technique with a [Builder] can be used
 //   /// to provide a new scope with a [BuildContext] that is "under" the
@@ -1292,7 +1292,7 @@
 //   /// drawer.
 //   ///
 //   /// If this is being used during a build (for example to decide whether to
-//   /// show an "open drawer" button), set the `registerForUpdates` argument to
+//   /// show an "open drawer" button), set the [registerForUpdates] argument to
 //   /// true. This will then set up an [InheritedWidget] relationship with the
 //   /// [SMMScaffold] so that the client widget gets rebuilt whenever the [hasDrawer]
 //   /// value changes.
@@ -1718,7 +1718,7 @@
 //   ///
 //   /// {@tool snippet --template=stateless_widget_scaffold}
 //   ///
-//   /// This example demonstrates how to use `showBottomSheet` to display a
+//   /// This example demonstrates how to use [showBottomSheet] to display a
 //   /// bottom sheet when a user taps a button. It also demonstrates how to
 //   /// close a bottom sheet using the Navigator.
 //   ///
@@ -1758,7 +1758,7 @@
 //   /// See also:
 //   ///
 //   ///  * [BottomSheet], which becomes the parent of the widget returned by the
-//   ///    `builder`.
+//   ///    [builder].
 //   ///  * [showBottomSheet], which calls this method given a [BuildContext].
 //   ///  * [showModalBottomSheet], which can be used to display a modal bottom
 //   ///    sheet.
@@ -2052,7 +2052,7 @@
 
 //   /// Whether to show a [ModalBarrier] over the body of the scaffold.
 //   ///
-//   /// The `value` parameter must not be null.
+//   /// The [value] parameter must not be null.
 //   void showBodyScrim(bool value, double opacity) {
 //     assert(value != null);
 //     if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {

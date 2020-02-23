@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:catcher/core/catcher.dart';
 
@@ -51,13 +52,13 @@ abstract class LaunchControl {
     // }));
 
     try {
+      await Permissions.init();
       await Future.wait([
-        Permissions.init(),
+        PlaylistControl.init(),
         ThemeControl.init(),
         MusicPlayer.init(),
       ]);
       // Init playlist control, we don't want to wait it
-      PlaylistControl.init();
     } catch (exception, stacktrace) {
       CatcherErrorBridge.add(CaughtError(exception, stacktrace));
       print("ERROR ON STARTUP:  " + exception);

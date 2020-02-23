@@ -210,7 +210,7 @@ class _RotatingAlbumArtWithProgressState
       child: CircularPercentIndicator(
         percent: _calcProgress(),
         radius: 48.0 -
-            progressLineHeight, // 48.0 is `constraints.maxHeight` if we see it in `LayoutBuilder`
+            progressLineHeight, /// 48.0 is `constraints.maxHeight` if we see it in [LayoutBuilder]
         lineWidth: progressLineHeight,
         circularStrokeCap: CircularStrokeCap.round,
         progressColor: Colors.deepPurple,

@@ -5,16 +5,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sweyer/sweyer.dart';
 
 import 'colors.dart';
 
 abstract class AppTheme {
   //******************************************** GENERIC COLORS ********************************************
-  /// Main colors - `whiteDarkened` and `greyLight`
+  /// Main colors - [whiteDarkened] and [greyLight]
   static final _ThemeContainer<Color> main = _ThemeContainer(
       light: AppColors.whiteDarkened, dark: AppColors.greyLight);
 
-  /// Colors that are in contrast with `main`, so they can be use for text and icons
+  /// Colors that are in contrast with [main], so they can be use for text and icons
   ///
   /// Alternatively `main.autoInverse` can be used
   static final _ThemeContainer<Color> mainContrast =
@@ -85,26 +86,27 @@ abstract class AppTheme {
     light: ThemeData(
       fontFamily: 'Manrope',
       textTheme: TextTheme(
-        title:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        subtitle:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        body2: TextStyle(fontWeight: FontWeight.w600),
+        /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
-        display1:
+        headline1:
             TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        display2:
+        headline2:
             TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        display3:
+        headline3:
             TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        display4:
+        headline4:
             TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        headline: TextStyle(fontWeight: FontWeight.w600),
+        headline5: TextStyle(fontWeight: FontWeight.w600),
+        headline6:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        subtitle1:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        subtitle2:
+            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+        bodyText1: TextStyle(fontWeight: FontWeight.w600),
+        bodyText2: TextStyle(fontWeight: FontWeight.w600),
         overline: TextStyle(fontWeight: FontWeight.w600),
-        body1: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
-        subhead:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
       ),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
@@ -140,26 +142,27 @@ abstract class AppTheme {
     dark: ThemeData(
       fontFamily: 'Manrope',
       textTheme: TextTheme(
-        title: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        subtitle: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        body2: TextStyle(fontWeight: FontWeight.w600),
+        /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
-        display1: TextStyle(
+        headline1: TextStyle(
             fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        display2: TextStyle(
+        headline2: TextStyle(
             fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        display3: TextStyle(
+        headline3: TextStyle(
             fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        display4: TextStyle(
+        headline4: TextStyle(
             fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        headline: TextStyle(fontWeight: FontWeight.w600),
+        headline5: TextStyle(fontWeight: FontWeight.w600),
+        headline6: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        subtitle1: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        subtitle2: TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
+        bodyText1: TextStyle(fontWeight: FontWeight.w600),
+        bodyText2: TextStyle(fontWeight: FontWeight.w600),
         overline: TextStyle(fontWeight: FontWeight.w600),
-        body1: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
-        subhead: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
       ),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
@@ -221,8 +224,6 @@ abstract class AppSystemUIThemes {
       _ThemeContainer(
     light: allScreens.light
         .copyWith(systemNavigationBarColor: AppColors.whiteDarkened),
-    // light: allScreens.light
-    //     .copyWith(systemNavigationBarColor: AppColors.whiteDarkened, statusBarColor: AppColors.whiteDarkened),
     dark:
         allScreens.dark.copyWith(systemNavigationBarColor: AppColors.greyLight),
   );
@@ -230,7 +231,7 @@ abstract class AppSystemUIThemes {
   /// Theme for the drawer screen
   static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen =
       _ThemeContainer(
-    light: allScreens.light.copyWith(statusBarColor: AppColors.whiteDarkened),
+    light: allScreens.light.copyWith(statusBarColor: Colors.white),
     dark: allScreens.dark.copyWith(statusBarColor: AppColors.grey),
   );
 
@@ -245,7 +246,7 @@ abstract class AppSystemUIThemes {
   );
 }
 
-/// Class to wrap some values, so they will have `light` and `dark` variants
+/// Class to wrap some values, so they will have [light] and [dark] variants
 class _ThemeContainer<T> {
   final T light;
   final T dark;
@@ -253,23 +254,28 @@ class _ThemeContainer<T> {
 
   /// Checks theme and automatically returns corresponding ui style
   ///
-  /// Requires `BuildContext`
+  /// Requires [BuildContext]
   ///
-  /// @return `light` or `dark`, depending on current brightness
+  /// @return [light] or [dark], depending on current brightness
   T auto(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? dark : light;
 
+  /// Checks theme and automatically returns corresponding ui style
+  ///
+  /// Unlike [auto] doesn't require context
+  T get autoWithoutContext => ThemeControl.isDark ? dark : light;
+
   /// Inverses brightness
   T autoInverse(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.light ? dark : light;
+      Theme.of(context).brightness != Brightness.dark ? dark : light;
 
-  /// Copy `auto`, but accepts brightness instead of context
+  /// Copy [auto], but accepts brightness instead of context
   ///
   /// Also checks theme and automatically returns corresponding ui style
   ///
-  /// Requires `Brightness`
+  /// Requires [Brightness]
   ///
-  /// @return `light` or `dark`, depending on current brightness
+  /// @return [light] or [dark], depending on current brightness
   T autoBr(Brightness brightness) =>
       brightness == Brightness.dark ? dark : light;
 
