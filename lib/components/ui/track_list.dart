@@ -403,6 +403,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
                     child: Scrollbar(
                       child: ListView.builder(
                         // physics: const SMMBouncingScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         itemCount:
                             PlaylistControl.getPlaylist(PlaylistType.global)
                                 .length,
@@ -474,6 +475,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
         child: Scrollbar(
           child: ScrollablePositionedList.builder(
               // physics: const SMMBouncingScrollPhysics(),
+                  physics: const AlwaysScrollableScrollPhysics(),
               frontScrollController: frontScrollController,
               itemScrollController: itemScrollController,
               itemCount: length,

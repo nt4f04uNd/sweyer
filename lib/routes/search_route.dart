@@ -687,6 +687,7 @@ class SongsSearchDelegate extends SearchDelegate {
                   builder: (context, snapshot) {
                     return ListView.builder(
                         // physics: const SMMBouncingScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.only(bottom: 65, top: 0),
                         itemCount: searched.length,
                         itemBuilder: (context, index) {

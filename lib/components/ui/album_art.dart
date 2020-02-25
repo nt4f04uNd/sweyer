@@ -70,11 +70,7 @@ class AlbumArtLarge extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraint) {
       double size = constraint.maxWidth - kSMMLargeAlbumArtMargins;
       if (path == null) {
-        return InkWell(
-          splashFactory: IconButtonInkRipple.splashFactory(radius: size / 2),
-          onTap:(){},
-          child: AlbumPlaceholderLarge(size: size),
-        );
+        return AlbumPlaceholderLarge(size: size);
       } else {
         return ClipRRect(
           borderRadius: const BorderRadius.all(
