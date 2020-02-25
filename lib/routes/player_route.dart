@@ -473,6 +473,9 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
   }
 }
 
+
+
+  /// TODO: convert this to use [LabelledSlider] widget
 class _TrackSlider extends StatefulWidget {
   _TrackSlider({Key key}) : super(key: key);
 

@@ -45,14 +45,7 @@ abstract class RouteControl {
     );
   }
 
-  static List<Route<dynamic>> handleOnGenerateInitialRoutes(
-      String routeName, BuildContext context) {
-    var kek = MediaQuery.platformBrightnessOf(context);
-    // while (kek == Brightness.light) {
-    //   print("${MediaQuery.platformBrightnessOf(context)}");
-    //   kek = MediaQuery.platformBrightnessOf(context);
-    // }
-    print("${MediaQuery.platformBrightnessOf(context)}");
+  static List<Route<dynamic>> handleOnGenerateInitialRoutes(String routeName) {
     // TODO: check out why this returns a list when docs release
     return [
       //******** Initial ********

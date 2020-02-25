@@ -16,11 +16,11 @@ class LoadingScreen extends StatelessWidget {
       color: Constants.AppTheme.main.auto(context),
       // backgroundColor: Constants.AppTheme.main.autoBr(Brightness.dark),
       // backgroundColor: Colors.red,
-      child: Center(
-        child: CircularProgressIndicator(
-          valueColor: const AlwaysStoppedAnimation(Colors.deepPurple),
-        ),
-      ),
+      // child: Center(
+      //   child: CircularProgressIndicator(
+      //     valueColor: const AlwaysStoppedAnimation(Colors.deepPurple),
+      //   ),
+      // ),
     );
   }
 }

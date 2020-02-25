@@ -8,7 +8,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:catcher/core/catcher.dart';
 
@@ -52,10 +51,10 @@ abstract class LaunchControl {
     // }));
 
     try {
+      await ThemeControl.init();
       await Permissions.init();
       await Future.wait([
         PlaylistControl.init(),
-        ThemeControl.init(),
         MusicPlayer.init(),
       ]);
       // Init playlist control, we don't want to wait it
@@ -64,11 +63,11 @@ abstract class LaunchControl {
       print("ERROR ON STARTUP:  " + exception);
       print(stacktrace);
     } finally {
-      _streamController.add(true);
+      // _streamController.add(true);
     }
   }
 
-  static void afterAppMount() {
+  static Future<void> afterAppMount() async {
     CatcherErrorBridge.report((e) {
       Catcher.reportCheckedError(e.exception, e.stackTrace);
     });

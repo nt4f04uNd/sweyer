@@ -232,7 +232,7 @@ abstract class PlaylistControl {
       // await Future.delayed(Duration(seconds: 2));
 
       playlists[PlaylistType.global] = null; // Reset [playReady]
-      emitPlaylistChange();
+     // emitPlaylistChange();
 
       initFetching = true;
       await Future.wait([
@@ -244,12 +244,7 @@ abstract class PlaylistControl {
           Playlist(await songsSerializer.readJson());
       await _restoreSortFeature();
       await filterSongs();
-
-      // print(Song.test().toJson());
-      // print(
-      //     "1111111111111111111111111111111111111111111111111111111111 ${globalPlaylist.add(Song.test())}");
-
-      sortSongs();
+      sortSongs(silent: true);
 
       await _restoreLastSong();
       await _restorePlaylist();
@@ -260,7 +255,6 @@ abstract class PlaylistControl {
       if (!playReady) playlists[PlaylistType.global] = Playlist([]);
     }
 
-    initFetching = false;
     // Emit event to track change stream
     emitPlaylistChange();
   }
@@ -273,8 +267,8 @@ abstract class PlaylistControl {
   /// Refetch songs and update playlist
   static Future<void> refetchSongs() async {
     playlists[PlaylistType.global] = Playlist(await songsFetcher.fetchSongs());
-    await filterSongs();
-    sortSongs();
+    await filterSongs(silent: true);
+    sortSongs(silent: true);
     emitPlaylistChange();
   }
 
@@ -359,8 +353,10 @@ abstract class PlaylistControl {
 
   /// Sort songs list by feature
   ///
-  /// If no argument has passed then will sort by current sort feature
-  static void sortSongs([SortFeature feature]) {
+  /// If no [feature] has passed then will sort by current sort feature
+  ///
+  /// If [silent] is true, [emitPlaylistChange] won't be called
+  static void sortSongs({SortFeature feature, bool silent = false}) {
     feature ??= sortFeature;
     switch (feature) {
       case SortFeature.date:
@@ -383,17 +379,19 @@ abstract class PlaylistControl {
     }
 
     // Emit event to track change stream
-    emitPlaylistChange();
+    if (!silent) emitPlaylistChange();
   }
 
   /// Filter songs by min duration (for now, in future by size will be implemented)
-  static Future<void> filterSongs() async {
+  ///
+  /// If [silent] is true, [emitPlaylistChange] won't be called
+  static Future<void> filterSongs({bool silent = false}) async {
     playlists[PlaylistType.global].filter(FilterFeature.duration,
         duration: Duration(
             seconds:
                 await Prefs.byKey.settingMinFileDurationInt.getPref() ?? 30));
     // Emit event to track change stream
-    emitPlaylistChange();
+    if (!silent) emitPlaylistChange();
   }
 
   /// Deletes song from device by id
@@ -427,9 +425,9 @@ abstract class PlaylistControl {
   static Future<void> _restoreSortFeature() async {
     int savedSortFeature = await Prefs.byKey.sortFeatureInt.getPref() ?? 0;
     if (savedSortFeature == 0) {
-      sortSongs(SortFeature.date);
+      sortSongs(feature: SortFeature.date, silent: true);
     } else if (savedSortFeature == 1) {
-      sortSongs(SortFeature.title);
+      sortSongs(feature: SortFeature.title, silent: true);
     } else
       throw Exception(
           "_restoreSortFeature: wrong saved sortFeatureInt: $savedSortFeature");
@@ -492,5 +490,6 @@ abstract class PlaylistControl {
     if (_playingSongIdState == null) {
       await _restoreLastSong();
     }
+    initFetching = false;
   }
 }

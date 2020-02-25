@@ -15,4 +15,6 @@ export 'menu.dart';
 export 'play_pause_button.dart';
 export 'route.dart';
 export 'track_list.dart';
+export 'settings_widgets.dart';
+export 'slider.dart';
 export 'wrappers.dart';

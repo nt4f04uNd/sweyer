@@ -48,7 +48,7 @@ abstract class ShowFunctions {
 
   /// Function that handles click in bottom modal and sorts tracks
   static void _handleSortClick(BuildContext context, SortFeature feature) {
-    PlaylistControl.sortSongs(feature);
+    PlaylistControl.sortSongs(feature: feature);
     Navigator.pop(context);
   }
 

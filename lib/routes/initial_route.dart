@@ -19,7 +19,8 @@ class InitialRouteState extends State<InitialRoute> {
   @override
   void initState() {
     super.initState();
-    LaunchControl.afterAppMount();
+    LaunchControl.init();
+    // LaunchControl.afterAppMount();
   }
 
   /// Handles route pop and shows user toast

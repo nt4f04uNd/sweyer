@@ -26,18 +26,7 @@ void main() {
   // runApp(App());
 }
 
-class App extends StatefulWidget {
-  @override
-  _AppState createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  @override
-  void initState() {
-    super.initState();
-    LaunchControl.init();
-  }
-
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<bool>(
@@ -62,9 +51,8 @@ class _AppState extends State<App> {
                   darkTheme: AppTheme.materialApp.dark,
                   initialRoute: Routes.main.value,
                   onGenerateRoute: RouteControl.handleOnGenerateRoute,
-                  onGenerateInitialRoutes: (route) =>
-                      RouteControl.handleOnGenerateInitialRoutes(
-                          route, context),
+                  onGenerateInitialRoutes: 
+                      RouteControl.handleOnGenerateInitialRoutes,
                   onUnknownRoute: RouteControl.handleOnUnknownRoute,
                   // Uncomment to replace red screen of death
                   builder: (BuildContext context, Widget widget) {

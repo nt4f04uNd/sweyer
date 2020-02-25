@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 
 const double kSMMLargeAlbumArtMargins = 80.0;
 const double kSMMSmallArtSize = 48.0;
@@ -69,7 +70,11 @@ class AlbumArtLarge extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraint) {
       double size = constraint.maxWidth - kSMMLargeAlbumArtMargins;
       if (path == null) {
-        return AlbumPlaceholderLarge(size: size);
+        return InkWell(
+          splashFactory: IconButtonInkRipple.splashFactory(radius: size / 2),
+          onTap:(){},
+          child: AlbumPlaceholderLarge(size: size),
+        );
       } else {
         return ClipRRect(
           borderRadius: const BorderRadius.all(

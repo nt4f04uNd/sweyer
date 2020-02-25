@@ -686,7 +686,7 @@ class SongsSearchDelegate extends SearchDelegate {
                   stream: MusicPlayer.onDurationChanged,
                   builder: (context, snapshot) {
                     return ListView.builder(
-                        physics: const SMMBouncingScrollPhysics(),
+                        // physics: const SMMBouncingScrollPhysics(),
                         padding: const EdgeInsets.only(bottom: 65, top: 0),
                         itemCount: searched.length,
                         itemBuilder: (context, index) {

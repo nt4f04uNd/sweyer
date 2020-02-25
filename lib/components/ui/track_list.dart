@@ -199,12 +199,12 @@ class _TrackListScreenState extends State<TrackListScreen> {
   void _handleDelete() {
     ShowFunctions.showDialog(
       context,
-      title: Text("Удаление (не имплементировано)"),
+      title: const Text("Удаление (не имплементировано)"),
       content: Text(
         "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо",
       ),
       acceptButton: DialogFlatButton(
-        child: Text('Удалить'),
+        child: const Text('Удалить'),
         textColor: Constants.AppTheme.acceptButton.auto(context),
         onPressed: () {
           Navigator.of(context).pop();
@@ -213,7 +213,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
         },
       ),
       declineButton: DialogFlatButton(
-        child: Text('Отмена'),
+        child: const Text('Отмена'),
         textColor: Constants.AppTheme.declineButton.auto(context),
         onPressed: () {
           Navigator.of(context).pop();
@@ -232,7 +232,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
           child: !isSelection()
               ? SMMIconButton(
                   splashColor: Constants.AppTheme.splash.auto(context),
-                  icon: Icon(Icons.sort),
+                  icon: const Icon(Icons.sort),
                   color: Constants.AppTheme.mainContrast.auto(context),
                   onPressed: () => ShowFunctions.showSongsSortModal(context),
                 )
@@ -242,7 +242,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
                     splashColor: Constants.AppTheme.splash.auto(context),
                     key: UniqueKey(),
                     color: Constants.AppTheme.mainContrast.auto(context),
-                    icon: Icon(Icons.delete_outline),
+                    icon: const Icon(Icons.delete_outline),
                     onPressed: _handleDelete,
                   ),
                 ),
@@ -256,7 +256,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
     return AnimatedSwitcher(
       duration: kSelectionDuration,
       child: !isSelection()
-          ? FakeInputBox()
+          ? const FakeInputBox()
           : Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -269,40 +269,43 @@ class _TrackListScreenState extends State<TrackListScreen> {
                 Padding(
                   padding: const EdgeInsets.only(left: 4.0),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: 20.0),
+                    constraints: const BoxConstraints(minWidth: 20.0),
                     child: AnimatedSwitcher(
                       transitionBuilder:
                           (Widget child, Animation<double> animation) {
                         final inForwardAnimation = Tween<Offset>(
-                          begin: Offset(0.0, -0.7),
-                          end: Offset(0.0, 0.0),
+                          begin: const Offset(0.0, -0.7),
+                          end: const Offset(0.0, 0.0),
                         ).animate(
                           CurvedAnimation(
                             curve: Curves.easeOut,
                             parent: animation,
                           ),
                         );
+
                         final inBackAnimation = Tween<Offset>(
-                          begin: Offset(0.0, 0.7),
-                          end: Offset(0.0, 0.0),
+                          begin: const Offset(0.0, 0.7),
+                          end: const Offset(0.0, 0.0),
                         ).animate(
                           CurvedAnimation(
                             curve: Curves.easeOut,
                             parent: animation,
                           ),
                         );
+
                         final outForwardAnimation = Tween<Offset>(
-                          begin: Offset(0.0, 0.7),
-                          end: Offset(0.0, 0.0),
+                          begin: const Offset(0.0, 0.7),
+                          end: const Offset(0.0, 0.0),
                         ).animate(
                           CurvedAnimation(
                             curve: Curves.easeIn,
                             parent: animation,
                           ),
                         );
+
                         final outBackAnimation = Tween<Offset>(
-                          begin: Offset(0.0, -0.7),
-                          end: Offset(0.0, 0.0),
+                          begin: const Offset(0.0, -0.7),
+                          end: const Offset(0.0, 0.0),
                         ).animate(
                           CurvedAnimation(
                             curve: Curves.easeIn,
@@ -374,7 +377,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
     final songs = PlaylistControl.getPlaylist(PlaylistType.global).songs;
 
     return Scaffold(
-      drawer: DrawerWidget(),
+      drawer: const DrawerWidget(),
       appBar: AppBar(
         titleSpacing: 0.0,
         leading: _MainRouteAppBarLeading(
@@ -399,7 +402,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
                   child: Container(
                     child: Scrollbar(
                       child: ListView.builder(
-                        physics: const SMMBouncingScrollPhysics(),
+                        // physics: const SMMBouncingScrollPhysics(),
                         itemCount:
                             PlaylistControl.getPlaylist(PlaylistType.global)
                                 .length,
@@ -470,7 +473,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
       child: SingleTouchRecognizerWidget(
         child: Scrollbar(
           child: ScrollablePositionedList.builder(
-              physics: const SMMBouncingScrollPhysics(),
+              // physics: const SMMBouncingScrollPhysics(),
               frontScrollController: frontScrollController,
               itemScrollController: itemScrollController,
               itemCount: length,

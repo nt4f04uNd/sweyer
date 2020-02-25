@@ -306,7 +306,6 @@ class SMMIconButton extends StatelessWidget {
           width: maxSize,
           height: maxSize,
           child: InkWell(
-            // splashFactory: CustomInkRipple.splashFactory,
             splashFactory: IconButtonInkRipple.splashFactory(radius: size / 2),
             focusNode: focusNode,
             autofocus: autofocus,

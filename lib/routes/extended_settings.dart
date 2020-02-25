@@ -76,31 +76,26 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
         IgnorePointer(
           ignoring: !isChanged,
           child: AnimatedOpacity(
-            duration:const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 500),
             opacity: isChanged ? 1.0 : 0.0,
             child: Padding(
-              padding: const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
+              padding:
+                  const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
               child: PrimaryRaisedButton(
                   text: "Сохранить", onPressed: _handleSave),
             ),
           ),
         )
       ],
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        child: ListView(
-          physics: NeverScrollableScrollPhysics(),
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 12.0),
-              child: _MinFileDurationSlider(
-                key: sliderKey,
-                parentHandleChange: handleSliderChange,
-                initValue: settingMinFileDuration,
-              ),
-            ),
-          ],
-        ),
+      child: ListView(
+        physics: NeverScrollableScrollPhysics(),
+        children: <Widget>[
+          _MinFileDurationSlider(
+            key: sliderKey,
+            parentHandleChange: handleSliderChange,
+            initValue: settingMinFileDuration,
+          ),
+        ],
       ),
     );
   }
@@ -149,52 +144,22 @@ class _MinFileDurationSliderState extends State<_MinFileDurationSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text('Минимальная длительность файла',
-            style: TextStyle(fontSize: 16.0)),
-        Padding(
-          padding: const EdgeInsets.only(top: 2.0),
-          child: Text(
-            'Скрыть файлы короче, чем ${_calcLabel()}',
-            style: TextStyle(color: Theme.of(context).textTheme.caption.color),
-          ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              transform: Matrix4.translationValues(0, 0, 0),
-              child: Text(
-                '0 c',
-                style: TextStyle(fontSize: 13),
-              ),
-            ),
-            Expanded(
-              child: Slider(
-                activeColor: Colors.deepPurple,
-                inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
-                min: 0,
-                value: _value,
-                max: 60 * 5.0,
-                divisions: 60,
-                label: _calcLabel(),
-                onChanged: _handleChange,
-                onChangeEnd: _handleChangeEnd,
-              ),
-            ),
-            Container(
-              transform: Matrix4.translationValues(-12, 0, 0),
-              child: Text(
-                '5 мин',
-                style: TextStyle(fontSize: 13),
-              ),
-            ),
-          ],
-        )
-      ],
+    return SettingItem(
+      title: "Минимальная длительность файла",
+      description: "Скрыть файлы короче, чем ${_calcLabel()}",
+      content: LabelledSlider(
+        activeColor: Colors.deepPurple,
+        inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
+        min: 0,
+        max: 60 * 5.0,
+        divisions: 60,
+        value: _value,
+        onChanged: _handleChange,
+        onChangeEnd: _handleChangeEnd,
+        label: _calcLabel(),
+        minLabel: '0 c',
+        maxLabel: '5 мин',
+      ),
     );
   }
 }

@@ -8,7 +8,6 @@
 
 import 'dart:async';
 
-
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/foundation.dart';
@@ -267,7 +266,8 @@ class SMMPopupMenuItemState<T, W extends SMMPopupMenuItem<T>> extends State<W> {
       onTap: widget.enabled ? handleTap : null,
       child: Container(
         height: widget.height,
-        padding:const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        padding:
+            const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
         child: item,
       ),
     );
@@ -488,17 +488,16 @@ class _PopupMenu<T> extends StatelessWidget {
       builder: (BuildContext context, Widget child) {
         return Opacity(
           opacity: opacity.evaluate(route.animation),
-          child: ClipRRect(
+          child: Material(
+            type: MaterialType.card,
+            elevation: route.elevation,
             borderRadius: route.menuBorderRadius,
-            child: Material(
-              type: MaterialType.card,
-              elevation: route.elevation,
-              child: Align(
-                alignment: AlignmentDirectional.topEnd,
-                widthFactor: width.evaluate(route.animation),
-                heightFactor: height.evaluate(route.animation),
-                child: child,
-              ),
+            clipBehavior: Clip.antiAlias,
+            child: Align(
+              alignment: AlignmentDirectional.topEnd,
+              widthFactor: width.evaluate(route.animation),
+              heightFactor: height.evaluate(route.animation),
+              child: child,
             ),
           ),
         );
@@ -738,7 +737,8 @@ Future<T> showSMMMenu<T>({
   BorderRadius menuBorderRadius = const BorderRadius.all(
     Radius.circular(10),
   ),
-  EdgeInsets menuPadding = const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
+  EdgeInsets menuPadding =
+      const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
   T initialValue,
   double elevation = 8.0,
   String semanticLabel,
@@ -868,7 +868,8 @@ class SMMPopupMenuButton<T> extends StatefulWidget {
     this.menuBorderRadius = const BorderRadius.all(
       Radius.circular(10),
     ),
-    this.menuPadding = const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
+    this.menuPadding =
+        const EdgeInsets.symmetric(vertical: _kMenuVerticalPadding),
   })  : assert(itemBuilder != null),
         assert(offset != null),
         assert(enabled != null),
