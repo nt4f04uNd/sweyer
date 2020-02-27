@@ -85,7 +85,7 @@ abstract class AppTheme {
   static _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
     light: ThemeData(
       fontFamily: 'Manrope',
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
         headline1:
@@ -108,14 +108,14 @@ abstract class AppTheme {
         overline: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
       ),
-      pageTransitionsTheme: PageTransitionsTheme(
+      pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
           TargetPlatform.fuchsia: OpenUpwardsPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
         },
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
         color: Colors.white,
         elevation: 0,
@@ -123,12 +123,12 @@ abstract class AppTheme {
       // iconTheme: ,
       scaffoldBackgroundColor: Colors.white,
       brightness: Brightness.light,
-      accentColor: Colors.white,
+      accentColor: Colors.grey,
       backgroundColor: Colors.white,
       primaryColor: Colors.deepPurple,
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(10),
             topRight: Radius.circular(10),
           ),
@@ -141,7 +141,7 @@ abstract class AppTheme {
     ),
     dark: ThemeData(
       fontFamily: 'Manrope',
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
         headline1: TextStyle(
@@ -164,7 +164,7 @@ abstract class AppTheme {
         overline: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
       ),
-      pageTransitionsTheme: PageTransitionsTheme(
+      pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
           TargetPlatform.fuchsia: OpenUpwardsPageTransitionsBuilder(),
@@ -178,10 +178,10 @@ abstract class AppTheme {
       ),
       scaffoldBackgroundColor: AppColors.grey,
       brightness: Brightness.dark,
-      accentColor: AppColors.grey,
+      accentColor:const Color(0xff131313),
       backgroundColor: AppColors.grey,
       primaryColor: Colors.deepPurple,
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10),
@@ -201,7 +201,7 @@ abstract class AppSystemUIThemes {
   /// Generic theme for all screens
   static final _ThemeContainer<SystemUiOverlayStyle> allScreens =
       _ThemeContainer(
-    light: SystemUiOverlayStyle(
+    light:const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,

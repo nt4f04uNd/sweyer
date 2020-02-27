@@ -104,6 +104,18 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
   double prevAnimationValue = 0.0;
   double prevSecondaryAnimationValue = 0.0;
 
+  /// Says when to disable [animation]
+  bool entAnimationEnabled = false;
+
+  /// Says when to disable [secondaryAnimation]
+  bool exitAnimationEnabled = false;
+
+  /// Says when to ignore widget in [animation]
+  bool ignore = false;
+
+  /// Says when to ignore widget in [secondaryAnimation]
+  bool secondaryIgnore = false;
+
   RouteTransition({
     @required this.route,
     this.routeType = Constants.Routes.main,
@@ -137,7 +149,15 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
             });
 
   /// MUST be called in page builder
-  void handleSystemUi(
+  void handleChecks(
+      Animation<double> animation, Animation<double> secondaryAnimation) {
+    handleSystemUiCheck(animation, secondaryAnimation);
+    handleEnabledCheck(animation, secondaryAnimation);
+    handleIgnoranceCheck(animation, secondaryAnimation);
+  }
+
+  /// Checks for provided system ui
+  void handleSystemUiCheck(
       Animation<double> animation, Animation<double> secondaryAnimation) {
     checkSystemUi ??=
         () => Constants.AppSystemUIThemes.allScreens.autoWithoutContext;
@@ -159,6 +179,31 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
         SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
 
       prevSecondaryAnimationValue = secondaryAnimation.value;
+    });
+  }
+
+  /// Checks if animation enabled must be
+  void handleEnabledCheck(
+      Animation<double> animation, Animation<double> secondaryAnimation) {
+    animation.addStatusListener((status) {
+      entAnimationEnabled = checkEntAnimationEnabled();
+    });
+    secondaryAnimation.addStatusListener((status) {
+      exitAnimationEnabled = checkExitAnimationEnabled();
+    });
+  }
+
+  /// Checks if route taps must be ignored
+  void handleIgnoranceCheck(
+      Animation<double> animation, Animation<double> secondaryAnimation) {
+    animation.addStatusListener((status) {
+      ignore = entIgnoreEventsForward && status == AnimationStatus.forward;
+    });
+
+    secondaryAnimation.addStatusListener((status) {
+      secondaryIgnore =
+          exitIgnoreEventsForward && status == AnimationStatus.forward ||
+              exitIgnoreEventsReverse && status == AnimationStatus.reverse;
     });
   }
 }

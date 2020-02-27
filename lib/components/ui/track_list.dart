@@ -418,8 +418,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
                             unselecting: unselecting,
                             playing: songs[index].id ==
                                 PlaylistControl.currentSongId,
-                            additionalClickCallback:
-                                PlaylistControl.resetPlaylists,
+                            onTap: PlaylistControl.resetPlaylists,
                             onSelected: () => _handleSelect(songs[index].id),
                             onUnselected: (bool onMount) =>
                                 _handleUnselect(songs[index].id, onMount),
@@ -475,7 +474,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
         child: Scrollbar(
           child: ScrollablePositionedList.builder(
               // physics: const SMMBouncingScrollPhysics(),
-                  physics: const AlwaysScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               frontScrollController: frontScrollController,
               itemScrollController: itemScrollController,
               itemCount: length,
@@ -511,7 +510,7 @@ class SongTile extends StatelessWidget implements SongTileInterface {
     @required this.song,
     this.pushToPlayerRouteOnClick: true,
     this.playing: false,
-    this.additionalClickCallback,
+    this.onTap,
   }) : super(key: key);
 
   /// Song data to display
@@ -524,11 +523,11 @@ class SongTile extends StatelessWidget implements SongTileInterface {
   /// Whether to push user to player route when tile got clicked
   final bool pushToPlayerRouteOnClick;
 
-  final Function additionalClickCallback;
+  final Function onTap;
 
   void _handleTap(BuildContext context) async {
     await MusicPlayer.clickSongTile(song.id);
-    if (additionalClickCallback != null) additionalClickCallback();
+    if (onTap != null) onTap();
     // Playing because clickSongTile changes any other type to it
     // TODO: move out ot this widget pushing route
     if (pushToPlayerRouteOnClick &&
@@ -580,7 +579,7 @@ class SelectableSongTile extends StatefulWidget implements SongTileInterface {
     @required this.song,
     this.pushToPlayerRouteOnClick: true,
     this.playing: false,
-    this.additionalClickCallback,
+    this.onTap,
     this.selected = false,
     this.someSelected = false,
     this.unselecting = false,
@@ -600,7 +599,7 @@ class SelectableSongTile extends StatefulWidget implements SongTileInterface {
   /// Whether to push user to player route when tile got clicked
   final bool pushToPlayerRouteOnClick;
 
-  final Function additionalClickCallback;
+  final Function onTap;
 
   // Selection props
 
@@ -698,14 +697,19 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   }
 
   void _handleTap() async {
-    await MusicPlayer.clickSongTile(widget.song.id);
-    if (widget.additionalClickCallback != null)
-      widget.additionalClickCallback();
+    if (widget.pushToPlayerRouteOnClick) {
+      if (widget.song.id != PlaylistControl.currentSongId ||
+          widget.song.id == PlaylistControl.currentSongId &&
+              MusicPlayer.playerState != AudioPlayerState.PLAYING)
+        Navigator.of(context).pushNamed(
+            Constants.Routes.player.value); // TODO: move this out of here
+    }
+
+    MusicPlayer.clickSongTile(widget.song.id);
+
+    if (widget.onTap != null) widget.onTap();
+
     // Playing because clickSongTile changes any other type to it
-    if (widget.pushToPlayerRouteOnClick &&
-        MusicPlayer.playerState == AudioPlayerState.PLAYING)
-      Navigator.of(context).pushNamed(
-          Constants.Routes.player.value); // TODO: move this out of here
   }
 
   // Performs unselect animation and calls [onSelected] and [notifyUnselection]
@@ -747,7 +751,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
           title: Text(
             widget.song.title,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15 /* Default flutter title font size (not dense) */,
             ),
           ),
@@ -774,7 +778,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
                       color: Colors.deepPurple,
                       child: ScaleTransition(
                         scale: _animationScaleInverse,
-                        child: Icon(
+                        child: const Icon(
                           Icons.check,
                           color: Colors.white,
                         ),

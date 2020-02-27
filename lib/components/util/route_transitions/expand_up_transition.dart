@@ -32,7 +32,7 @@ final Tween<double> _scrimOpacityTween = Tween<double>(
 /// Creates customizable expand up route transition
 ///
 /// By default acts pretty same as [OpenUpwardsPageTransitionsBuilder] - creates upwards expand in transition
-class RouteExpandUpwardsTransition<T extends Widget>
+class ExpandUpRouteTransition<T extends Widget>
     extends RouteTransition<T> {
   @override
   final T route;
@@ -76,7 +76,7 @@ class RouteExpandUpwardsTransition<T extends Widget>
   /// If true, default material exit animation will be played
   final bool playMaterialExit;
 
-  RouteExpandUpwardsTransition({
+  ExpandUpRouteTransition({
     @required this.route,
     this.routeType = Constants.Routes.main,
     this.checkEntAnimationEnabled = defBoolFunc,
@@ -110,7 +110,7 @@ class RouteExpandUpwardsTransition<T extends Widget>
       Animation<double> animation,
       Animation<double> secondaryAnimation,
     ) {
-      handleSystemUi(animation, secondaryAnimation);
+      handleChecks(animation, secondaryAnimation);
       return route;
     };
     transitionsBuilder = (

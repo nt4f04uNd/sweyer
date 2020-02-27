@@ -25,7 +25,7 @@ abstract class RouteControl {
 
   static Route<dynamic> handleOnUnknownRoute(RouteSettings settings) {
     //******** Unknown ********
-    return RouteStackTransition(
+    return StackRouteTransition(
       checkExitAnimationEnabled: () =>
           _currentRouteEquals(Constants.Routes.settings.value) ||
           _currentRouteEquals(Constants.Routes.extendedSettings.value) ||
@@ -49,7 +49,7 @@ abstract class RouteControl {
     // TODO: check out why this returns a list when docs release
     return [
       //******** Initial ********
-      RouteZoomTransition(
+      ZoomRouteTransition(
         checkExitAnimationEnabled: () =>
             _currentRouteEquals(Constants.Routes.settings.value) ||
             _currentRouteEquals(Constants.Routes.extendedSettings.value) ||
@@ -71,7 +71,7 @@ abstract class RouteControl {
 
     //******** Debug ********
     if (settings.name == Constants.Routes.debug.value)
-      return RouteZoomTransition(
+      return ZoomRouteTransition(
         routeType: Constants.Routes.debug,
         checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
@@ -79,7 +79,7 @@ abstract class RouteControl {
       );
     //******** Exif ********
     else if (settings.name == Constants.Routes.exif.value)
-      return RouteZoomTransition(
+      return ZoomRouteTransition(
         routeType: Constants.Routes.exif,
         checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
@@ -87,7 +87,7 @@ abstract class RouteControl {
       );
     //******** Extended settings ********
     else if (settings.name == Constants.Routes.extendedSettings.value)
-      return RouteZoomTransition(
+      return ZoomRouteTransition(
         routeType: Constants.Routes.extendedSettings,
         checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),
@@ -96,8 +96,9 @@ abstract class RouteControl {
     //******** Player ********
     else if (settings.name == Constants.Routes.player.value) {
       // return RouteExpandTransition(route: PlayerRoute());
-      return RouteZoomTransition(
+      return ZoomRouteTransition(
         routeType: Constants.Routes.player,
+        opaque: true,
         // entCurve: Curves.fastOutSlowIn,
         // entBegin: const Offset(0.0, 1.0),
         // transitionDuration: const Duration(milliseconds: 400),
@@ -114,7 +115,7 @@ abstract class RouteControl {
       return (settings.arguments as Route);
     //******** Settings ********
     else if (settings.name == Constants.Routes.settings.value)
-      return RouteZoomTransition(
+      return ZoomRouteTransition(
         routeType: Constants.Routes.settings,
         checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
             .autoBr(ThemeControl.brightness),

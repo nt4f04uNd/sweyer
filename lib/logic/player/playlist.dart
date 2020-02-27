@@ -220,8 +220,10 @@ abstract class PlaylistControl {
   ///
   /// Should be only called when user can see playlist change, i.e. songs sort.
   /// Shouldn't be called, e.g. on tile click, when playlist changes, but user can't actually see it
-  static void emitPlaylistChange() {
-    _songsListChangeStreamController.add(null);
+  /// 
+  /// Parameter [playlistType] denotes preferred update scope, this means e.g. that if [PlaylistType.searched] changes, [ListView] dependant on [PlaylistType.global] shouldn't get any updates
+  static void emitPlaylistChange([PlaylistType playlistType = PlaylistType.global]) {
+    _songsListChangeStreamController.add(playlistType);
   }
 
   /// The main data app initialization function
@@ -274,7 +276,7 @@ abstract class PlaylistControl {
 
   /// Sets searched playlist
   ///
-  /// This functions doesn't call [emitPlaylistChange()]
+  /// This function doesn't call [emitPlaylistChange()]
   ///
   /// @param [songs] — can be omitted and if so, then playlist is not changed, only switched to it
   static Future<void> setSearchedPlaylist([List<Song> songs]) async {
@@ -320,7 +322,7 @@ abstract class PlaylistControl {
 
   /// Switches tp global Resets all playlists except it
   ///
-  /// This functions doesn't call [emitPlaylistChange()]
+  /// This functions doesn't call [emitPlaylistChange]
   static void resetPlaylists() {
     if (playlistType != PlaylistType.global) {
       Prefs.byKey.playlistTypeInt.setPref(0); // Save to prefs

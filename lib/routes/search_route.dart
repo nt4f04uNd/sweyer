@@ -279,7 +279,7 @@ enum _SearchBody {
   results,
 }
 
-class SearchPageRoute extends RouteZoomTransition<_SearchPage> {
+class SearchPageRoute extends ZoomRouteTransition<_SearchPage> {
   SearchPageRoute({
     @required this.delegate,
 
@@ -328,7 +328,7 @@ class SearchPageRoute extends RouteZoomTransition<_SearchPage> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    handleSystemUi(animation, secondaryAnimation);
+    handleChecks(animation, secondaryAnimation);
     return _SearchPage(
       delegate: delegate,
       animation: animation,
@@ -502,7 +502,7 @@ class SongsSearchDelegate extends SearchDelegate {
   /// Needed to check if playlist has to be updated
   bool dirty = true;
   List<String> _suggestions = [];
-  Iterable<Song> searched = [];
+ List<Song> searched = [];
   String _prevQuery = "";
   Future<void> _fetchingHistory;
 
@@ -636,7 +636,7 @@ class SongsSearchDelegate extends SearchDelegate {
   }
 
   // TODO:?????
-  final key = UniqueKey();
+  // final key = UniqueKey();
 
   /// This method called both for build suggestions and results
   ///
@@ -644,30 +644,25 @@ class SongsSearchDelegate extends SearchDelegate {
   ///
   /// And when query is not empty - found songs will be displayed
   Widget _buildResultsAndSuggestions(BuildContext context) {
-    dirty = true;
 
     /// Search songs if previous query is distinct from current
-    if (_prevQuery == '' || _prevQuery != query)
+    if (_prevQuery == '' || _prevQuery != query){
       searched =
-          PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/);
+          PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/)?.toList();
+          dirty = true;
+    }
 
     _prevQuery = query.trim();
 
     return GestureDetector(
-      key: key,
+      // key: key,
       onTap: () => FocusScope.of(context).unfocus(),
       onVerticalDragStart: (_) => FocusScope.of(context).unfocus(),
       onVerticalDragCancel: () => FocusScope.of(context).unfocus(),
       onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
       onVerticalDragEnd: (_) => FocusScope.of(context).unfocus(),
       onVerticalDragUpdate: (_) => FocusScope.of(context).unfocus(),
-      child:
-          //  AnnotatedRegion<SystemUiOverlayStyle>(
-
-          //     /// Show theme on some widget, to system ui could be consistent
-          //     value: Constants.AppSystemUIThemes.mainScreen.auto(context),
-          //     child:
-          (() {
+      child: (() {
         // return
         // Display suggestions on start screen
         if (searched == null) return _buildSuggestions();
@@ -675,9 +670,6 @@ class SongsSearchDelegate extends SearchDelegate {
         // Display when nothing has been found
         if (searched != null && searched.length == 0)
           return _buildEmptyResults();
-
-        // Display results if something had been found
-        final List<Song> searchedList = searched.toList();
 
         return Stack(
           children: <Widget>[
@@ -692,10 +684,10 @@ class SongsSearchDelegate extends SearchDelegate {
                         itemCount: searched.length,
                         itemBuilder: (context, index) {
                           return SongTile(
-                            song: searchedList[index],
-                            playing: searchedList[index].id ==
+                            song: searched[index],
+                            playing: searched[index].id ==
                                 PlaylistControl.currentSong?.id,
-                            additionalClickCallback: () async {
+                            onTap: () async {
                               _writeInputToSearchHistory(query);
                               // close(context, searchedList[index]);
                               FocusScope.of(context).requestFocus(FocusNode());
@@ -703,12 +695,9 @@ class SongsSearchDelegate extends SearchDelegate {
                               // Wait before route animation completes
                               await Future.delayed(Duration(milliseconds: 650));
 
-                              // TODO: maybe save last search query and update only if it has changed?
-                              // NOTE that it might cause bugs if playlist will accidentally update (e.g. fetch process will end)
-                              // So I maybe need to think about this a lil bit
                               if (dirty) {
                                 PlaylistControl.setSearchedPlaylist(
-                                  searched.toList(),
+                                  searched,
                                 );
                                 dirty = false;
                               }

@@ -10,7 +10,7 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Creates customizable fade in transition
 ///
 /// By default acts pretty same as [FadeUpwardsPageTransitionsBuilder] - creates upwards fade in transition
-class RouteFadeInTransition<T extends Widget> extends RouteTransition<T> {
+class FadeInRouteTransition<T extends Widget> extends RouteTransition<T> {
   @override
   final T route;
   @override
@@ -62,7 +62,7 @@ class RouteFadeInTransition<T extends Widget> extends RouteTransition<T> {
   /// Defaults to [const Offset(-0.3, 0.0)]
   final Offset exitEnd;
 
-  RouteFadeInTransition({
+  FadeInRouteTransition({
     @required this.route,
     this.routeType = Constants.Routes.main,
     this.checkEntAnimationEnabled = defBoolFunc,
@@ -97,7 +97,7 @@ class RouteFadeInTransition<T extends Widget> extends RouteTransition<T> {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
     ) {
-      handleSystemUi(animation, secondaryAnimation);
+      handleChecks(animation, secondaryAnimation);
       return route;
     };
     transitionsBuilder = (

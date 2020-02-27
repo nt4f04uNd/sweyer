@@ -270,10 +270,10 @@ abstract class NativeAudioPlayer {
     final value = callArgs['value'];
 
     switch (call.method) {
-      case 'audio.onDuration':
+      case 'audio.onDuration': // Todo: remove this event, cause it should be triggered from the dart side
         {
-          Duration newDuration = Duration(milliseconds: value);
-          _durationController.add(newDuration);
+          // Duration newDuration = Duration(milliseconds: value);
+          // _durationController.add(newDuration);
           break;
         }
       case 'audio.onCurrentPosition':

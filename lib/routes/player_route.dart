@@ -40,14 +40,17 @@ class _PlayerRouteState extends State<PlayerRoute> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        children: [
-          _MainPlayerTab(),
-          _PlaylistTab(
-            key: _playlistTabKey,
-          )
-        ],
+      body: ScrollConfiguration(
+        behavior: SMMScrollBehaviorGlowless(),
+        child: PageView(
+          controller: _pageController,
+          children: [
+            _MainPlayerTab(),
+            _PlaylistTab(
+              key: _playlistTabKey,
+            )
+          ],
+        ),
       ),
     );
   }
@@ -473,9 +476,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
   }
 }
 
-
-
-  /// TODO: convert this to use [LabelledSlider] widget
+/// TODO: convert this to use [LabelledSlider] widget
 class _TrackSlider extends StatefulWidget {
   _TrackSlider({Key key}) : super(key: key);
 

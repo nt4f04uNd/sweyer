@@ -229,8 +229,8 @@ class RotatingAlbumArtState extends State<RotatingAlbumArt>
 
   @override
   Widget build(BuildContext context) {
-    return Transform.rotate(
-        angle: _controller.value * 2 * math.pi,
+    return RotationTransition(
+        turns: _controller,
         child: (() {
           if (widget.path == null) {
             return const RotatingAlbumPlaceholder();

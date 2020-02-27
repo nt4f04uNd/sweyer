@@ -51,9 +51,9 @@ abstract class LaunchControl {
     // }));
 
     try {
-      await ThemeControl.init();
       await Permissions.init();
       await Future.wait([
+     ThemeControl.init(),
         PlaylistControl.init(),
         MusicPlayer.init(),
       ]);
@@ -63,7 +63,7 @@ abstract class LaunchControl {
       print("ERROR ON STARTUP:  " + exception);
       print(stacktrace);
     } finally {
-      // _streamController.add(true);
+      _streamController.add(true);
     }
   }
 

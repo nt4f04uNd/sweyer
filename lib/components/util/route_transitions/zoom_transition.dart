@@ -13,7 +13,7 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Creates customizable fade in transition
 ///
 /// By default acts pretty same as [ZoomPageTransitionsBuilder]
-class RouteZoomTransition<T extends Widget> extends RouteTransition<T> {
+class ZoomRouteTransition<T extends Widget> extends RouteTransition<T> {
   @override
   final T route;
   @override
@@ -45,7 +45,7 @@ class RouteZoomTransition<T extends Widget> extends RouteTransition<T> {
   @override
   BoolFunction shouldCheckSystemUiExitRev;
 
-  RouteZoomTransition({
+  ZoomRouteTransition({
     @required this.route,
     this.routeType = Constants.Routes.main,
     this.checkEntAnimationEnabled = defBoolFunc,
@@ -76,7 +76,7 @@ class RouteZoomTransition<T extends Widget> extends RouteTransition<T> {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
     ) {
-      handleSystemUi(animation, secondaryAnimation);
+      handleChecks(animation, secondaryAnimation);
       return route;
     };
     transitionsBuilder = (
@@ -85,16 +85,6 @@ class RouteZoomTransition<T extends Widget> extends RouteTransition<T> {
       Animation<double> secondaryAnimation,
       Widget child,
     ) {
-      final bool entEnabled = checkEntAnimationEnabled();
-      final bool exitEnabled = checkExitAnimationEnabled();
-
-      final bool ignore =
-          entIgnoreEventsForward && animation.status == AnimationStatus.forward;
-      final bool secondaryIgnore = exitIgnoreEventsForward &&
-              secondaryAnimation.status == AnimationStatus.forward ||
-          exitIgnoreEventsReverse &&
-              secondaryAnimation.status == AnimationStatus.reverse;
-
       return _ZoomPageTransition(
         animation: animation,
         secondaryAnimation: secondaryAnimation,

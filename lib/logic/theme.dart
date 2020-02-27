@@ -38,6 +38,9 @@ abstract class ThemeControl {
   }
 
   /// Inits theme, fetches brightness from [PrefKeys]
+  /// 
+  /// NOTE that this does NOT call [emitThemeChange], cause it will trigger theme switch transition with low fps, 
+  /// but I rather want to have a call listen [LaunchControl.onLaunch] in `main.dart` to update the entire [MaterialApp] to have just a short blink 
   static Future<void> init() async {
     try {
       final savedBrightness = await Prefs.byKey.settingThemeBrightnessBool.getPref();
@@ -50,7 +53,7 @@ abstract class ThemeControl {
     } finally {
       SystemChrome.setSystemUIOverlayStyle(
           Constants.AppSystemUIThemes.mainScreen.autoBr(_brightness));
-      emitThemeChange();
+      // emitThemeChange();
     }
   }
 
