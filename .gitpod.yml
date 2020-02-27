@@ -1,0 +1,5 @@
+tasks:
+  - init: echo "lol"
+    command: flutter run --debug
+image:
+  file: .gitpod.Dockerfile

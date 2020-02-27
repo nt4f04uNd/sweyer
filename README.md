@@ -1,3 +1,5 @@
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/nt4f04uNd/sweyer) 
+
 # Sweyer
 
 This is an open-source non-commercial repo of music player that is built with flutter.
