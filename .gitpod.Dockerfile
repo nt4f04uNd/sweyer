@@ -4,8 +4,8 @@ FROM gitpod/workspace-full:latest
 # версиями платформы и инструментария
 ENV ANDROID_HOME=/home/gitpod/android-sdk \
     SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-6200805_latest.zip" \
-    ANDROID_VERSION=29 \
-    ANDROID_BUILD_TOOLS_VERSION=29.0.0 \
+    ANDROID_VERSION=28 \
+    ANDROID_BUILD_TOOLS_VERSION=28.0.3 \
     FLUTTER_HOME=/home/gitpod/flutter
 
 USER root
