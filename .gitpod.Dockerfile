@@ -3,9 +3,9 @@ FROM gitpod/workspace-full:latest
 # Задаем переменные с локальной папкой для Android SDK и 
 # версиями платформы и инструментария
 ENV ANDROID_HOME=/home/gitpod/android-sdk \
-    SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip" \
-    ANDROID_VERSION=28 \
-    ANDROID_BUILD_TOOLS_VERSION=28.0.3 \
+    SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-6200805_latest.zip" \
+    ANDROID_VERSION=29 \
+    ANDROID_BUILD_TOOLS_VERSION=29.0.0 \
     FLUTTER_HOME=/home/gitpod/flutter
 
 USER root
@@ -23,7 +23,7 @@ USER gitpod
 
 RUN cd /home/gitpod && \
     wget -qO flutter_sdk.tar.xz \
-    https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.9.1+hotfix.4-stable.tar.xz &&\
+    https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.12.13+hotfix.8-stable.tar.xz &&\
     tar -xvf flutter_sdk.tar.xz && \
     rm -f flutter_sdk.tar.xz
 
