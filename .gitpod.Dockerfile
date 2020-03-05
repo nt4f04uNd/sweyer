@@ -1,6 +1,11 @@
 FROM gitpod/workspace-full:latest
 
+# Задаем переменные с локальной папкой для Android SDK и 
+# версиями платформы и инструментария
 ENV ANDROID_HOME=/home/gitpod/android-sdk \
+    SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip" \
+    ANDROID_VERSION=28 \
+    ANDROID_BUILD_TOOLS_VERSION=28.0.3 \
     FLUTTER_HOME=/home/gitpod/flutter
 
 USER root
@@ -22,18 +27,19 @@ RUN cd /home/gitpod && \
     tar -xvf flutter_sdk.tar.xz && \
     rm -f flutter_sdk.tar.xz
 
-RUN cd /home/gitpod && \
-    wget -qO android_studio.zip \
-    https://dl.google.com/dl/android/studio/ide-zips/3.3.0.20/android-studio-ide-182.5199772-linux.zip && \
-    unzip android_studio.zip && \
-    rm -f android_studio.zip
+# Создаем папку, скачиваем туда SDK и распаковываем архив,
+# который после сборки удаляем
+RUN mkdir "$ANDROID_HOME" .android \
+    && cd "$ANDROID_HOME" \
+    && curl -o sdk.zip $SDK_URL \
+    && unzip sdk.zip \
+    && rm sdk.zip \  
 
-# TODO(tianhaoz95): make the name of the SDK file into an environment variable to avoid maintainance issue
-RUN mkdir -p /home/gitpod/android-sdk && \
-    cd /home/gitpod/android-sdk && \
-    wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip && \
-    unzip sdk-tools-linux-4333796.zip && \
-    rm -f sdk-tools-linux-4333796.zip
+# Запускаем обновление SDK и установку build-tools, platform-tools
+RUN $ANDROID_HOME/tools/bin/sdkmanager --update
+RUN $ANDROID_HOME/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+    "platforms;android-${ANDROID_VERSION}" \
+    "platform-tools"
 
 # Install custom tools, runtime, etc. using apt-get
 # For example, the command below would install "bastet" - a command line tetris clone:
