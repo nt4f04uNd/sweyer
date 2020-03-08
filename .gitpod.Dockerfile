@@ -1,16 +1,11 @@
 FROM gitpod/workspace-full:latest
 
-# ENV
+# ENVs
 ENV ANDROID_HOME=/home/gitpod/android-sdk \
     SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-6200805_latest.zip" \
     ANDROID_VERSION=R \
     ANDROID_BUILD_TOOLS_VERSION=30.0.0-rc1 \
-    FLUTTER_HOME=/home/gitpod/flutter \
-# PATH    
-    PATH="${FLUTTER_HOME}/bin:${PATH}" \
-    # path to sdkmanager
-    PATH="${ANDROID_HOME}/tools/bin:${PATH}" \ 
-    PATH="${ANDROID_HOME}/platform-tools:${PATH}"
+    FLUTTER_HOME=/home/gitpod/flutter
 
 USER root
 
@@ -25,6 +20,13 @@ RUN curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - &
     rm -rf /var/lib/apt/lists/*;
 
 USER gitpod
+
+# PATH   
+ENV 
+    PATH="${FLUTTER_HOME}/bin:${PATH}" \
+    # path to sdkmanager
+    PATH="${ANDROID_HOME}/tools/bin:${PATH}" \ 
+    PATH="${ANDROID_HOME}/platform-tools:${PATH}"
 
 # Flutter SDK
 RUN cd /home/gitpod \
@@ -41,7 +43,7 @@ RUN mkdir "$ANDROID_HOME" .android \
     && rm sdk.zip  
 
 # Start android SDK update and setup SDK tools
-RUN $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME --update \
-    && $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+RUN yes | $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME --update \
+    && yes | $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
     "platforms;android-${ANDROID_VERSION}" \
     "platform-tools"
