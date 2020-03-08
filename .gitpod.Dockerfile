@@ -22,10 +22,7 @@ RUN curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - &
 USER gitpod
 
 # PATH   
-ENV PATH="${FLUTTER_HOME}/bin\
-    :${ANDROID_HOME}/tools/bin\ 
-    :${ANDROID_HOME}/platform-tools\
-    :${PATH}"
+ENV PATH="${FLUTTER_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools:${PATH}"
 
 # Flutter SDK
 RUN cd /home/gitpod \
