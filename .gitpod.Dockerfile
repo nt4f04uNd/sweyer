@@ -22,8 +22,7 @@ RUN curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - &
 USER gitpod
 
 # PATH   
-ENV 
-    PATH="${FLUTTER_HOME}/bin:${PATH}" \
+ENV PATH="${FLUTTER_HOME}/bin:${PATH}" \
     # path to sdkmanager
     PATH="${ANDROID_HOME}/tools/bin:${PATH}" \ 
     PATH="${ANDROID_HOME}/platform-tools:${PATH}"
