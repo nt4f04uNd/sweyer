@@ -123,24 +123,22 @@ class AlbumArtSmall extends StatelessWidget {
 }
 
 // class _AlbumArtSmallState extends State<AlbumArtSmall>
-//     // with _AlbumArtStateMixin
-//     {
+//     with _AlbumArtStateMixin {
 //   @override
 //   Widget build(BuildContext context) {
 //     if (widget.path == null) {
 //       return const AlbumPlaceholderSmall();
 //     } else {
-//       // return FutureBuilder<Uint8List>(
-//       //     future: loading,
-//       //     builder: (context, snapshot) {
-//       //       return AnimatedSwitcher(
-//       //         duration: kSMMSmallAlbumFadeDuration,
-//       //         child: snapshot.connectionState == ConnectionState.waiting ||
-//       //                 snapshot.connectionState == ConnectionState.done &&
-//       //                     !snapshot.hasData
-//       //             ? const AlbumPlaceholderSmall()
-//       //             :
-//            return       ClipRRect(
+//       return FutureBuilder<Uint8List>(
+//           future: loading,
+//           builder: (context, snapshot) {
+//             return AnimatedSwitcher(
+              // duration: kSMMSmallAlbumFadeDuration,
+//               child: snapshot.connectionState == ConnectionState.waiting ||
+//                       snapshot.connectionState == ConnectionState.done &&
+//                           !snapshot.hasData
+//                   ? const AlbumPlaceholderSmall()
+//                   : ClipRRect(
 //                       borderRadius: const BorderRadius.all(
 //                         Radius.circular(10),
 //                       ),
@@ -150,10 +148,10 @@ class AlbumArtSmall extends StatelessWidget {
 //                         height: kSMMSmallArtSize,
 //                         fit: BoxFit.fill,
 //                       ),
-//                     );
-//     //         );
-//     //       });
-//     // }
+//                     ),
+//             );
+//           });
+//     }
 //   }
 // }
 

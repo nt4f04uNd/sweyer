@@ -40,7 +40,7 @@ abstract class ThemeControl {
   /// Inits theme, fetches brightness from [PrefKeys]
   /// 
   /// NOTE that this does NOT call [emitThemeChange], cause it will trigger theme switch transition with low fps, 
-  /// but I rather want to have a call listen [LaunchControl.onLaunch] in `main.dart` to update the entire [MaterialApp] to have just a short blink 
+  /// but I rather want to have a listener for [LaunchControl.onLaunch] in `main.dart` to update the entire [MaterialApp] to have just a short blink 
   /// FIXME even this way transition is triggered
   static Future<void> init() async {
     try {

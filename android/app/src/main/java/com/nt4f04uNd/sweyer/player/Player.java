@@ -195,7 +195,7 @@ public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedList
          return;
       }
 
-      if (this.playing) {
+      if (this.playing && !this.preparing) {
          this.player.stop();
       }
       this.player.reset();

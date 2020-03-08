@@ -81,8 +81,8 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
   bool scrolling = false;
-  StreamSubscription<void> _durationSubscription;
-  StreamSubscription<void> _playlistChangeSubscription;
+  StreamSubscription<Song> _songChangeSubscription;
+  StreamSubscription<PlaylistType> _playlistChangeSubscription;
 
   int prevPlayingIndex = PlaylistControl.currentSongIndex();
 
@@ -96,7 +96,8 @@ class _PlaylistTabState extends State<_PlaylistTab>
       // Jump when tracklist changes (e.g. shuffle happened)
       jumpToSong();
     });
-    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) async {
+    _songChangeSubscription =
+        PlaylistControl.onSongChange.listen((event) async {
       // Scroll when track changes
       if (opened) {
         // Just update list if opened, this is needed to update current track indicator
@@ -111,7 +112,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   @override
   void dispose() {
     _playlistChangeSubscription.cancel();
-    _durationSubscription.cancel();
+    _songChangeSubscription.cancel();
     super.dispose();
   }
 
@@ -262,9 +263,13 @@ class _MainPlayerTabState extends State<_MainPlayerTab>
         size: 40.0,
       ),
       actions: <Widget>[
-        SingleAppBarAction(
-          child: _MoreButton(),
-        )
+        // SingleAppBarAction(
+        //   child:
+
+        _InfoButton(),
+        _MoreButton(),
+
+        // )
       ],
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -363,6 +368,34 @@ class _PlaybackButtons extends StatelessWidget {
   }
 }
 
+class _InfoButton extends StatelessWidget {
+  const _InfoButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SMMIconButton(
+        icon: Icon(Icons.info_outline),
+        color: Theme.of(context).iconTheme.color,
+        onPressed: () {
+          ShowFunctions.showAlert(
+            context,
+            title: const Text("Информация о песне"),
+            content: Container(
+              child: Text(
+                PlaylistControl.currentSong
+                        ?.toJson()
+                        .toString()
+                        .toString()
+                        .replaceAll(r',', ',\n') ??
+                    "null",
+                style: const TextStyle(fontSize: 13),
+              ),
+            ),
+          );
+        });
+  }
+}
+
 class _MoreButton extends StatelessWidget {
   const _MoreButton({Key key}) : super(key: key);
 
@@ -415,13 +448,13 @@ class _TrackShowcase extends StatefulWidget {
 class _TrackShowcaseState extends State<_TrackShowcase> {
   /// Key for [MarqueeWidget] to reset its scroll on song change
   UniqueKey marqueeKey = UniqueKey();
-  StreamSubscription<void> _durationSubscription;
+  StreamSubscription<Song> _songChangeSubscription;
 
   @override
   void initState() {
     super.initState();
     // Handle track switch
-    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) {
+    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) {
       // Create new key for marque widget to reset scroll
       setState(() {
         marqueeKey = UniqueKey();
@@ -431,7 +464,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
 
   @override
   void dispose() {
-    _durationSubscription.cancel();
+    _songChangeSubscription.cancel();
     super.dispose();
   }
 
@@ -496,7 +529,7 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   /// Subscription for audio position change stream
   StreamSubscription<Duration> _positionSubscription;
-  StreamSubscription<void> _durationSubscription;
+  StreamSubscription<Song> _songChangeSubscription;
 
   /// Is user dragging slider right now
   bool _isDragging = false;
@@ -518,12 +551,12 @@ class _TrackSliderState extends State<_TrackSlider> {
     });
 
     // Handle track switch
-    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) {
+    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) {
       setState(() {
         _isDragging = false;
         _localValue = 0.0;
         _value = const Duration(seconds: 0);
-        _duration = event;
+        _duration = Duration(milliseconds: event.duration);
       });
     });
   }
@@ -531,7 +564,7 @@ class _TrackSliderState extends State<_TrackSlider> {
   @override
   void dispose() {
     _positionSubscription.cancel();
-    _durationSubscription.cancel();
+    _songChangeSubscription.cancel();
     super.dispose();
   }
 

@@ -127,7 +127,7 @@ class _RotatingAlbumArtWithProgressState
   Duration _duration = Duration(seconds: 0);
 
   StreamSubscription<Duration> _positionSubscription;
-  StreamSubscription<Duration> _durationSubscription;
+  StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<AudioPlayerState> _playerStateChangeSubscription;
 
   GlobalKey<RotatingAlbumArtState> _rotatingArtGlobalKey =
@@ -165,11 +165,11 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle song change
-    _durationSubscription = MusicPlayer.onDurationChanged.listen((event) async {
+    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) async {
       _value = await MusicPlayer.currentPosition;
       if(mounted)
       setState(() {
-        _duration = event;
+        _duration = Duration(milliseconds: event.duration);
         // Update art
         _rotatingArtGlobalKey.currentState
             .reloadArt(PlaylistControl.currentSong?.albumArtUri);
@@ -181,7 +181,7 @@ class _RotatingAlbumArtWithProgressState
   void dispose() {
     _playerStateChangeSubscription.cancel();
     _positionSubscription.cancel();
-    _durationSubscription.cancel();
+    _songChangeSubscription.cancel();
     super.dispose();
   }
 

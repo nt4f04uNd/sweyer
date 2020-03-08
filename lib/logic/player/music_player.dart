@@ -21,8 +21,7 @@ abstract class MusicPlayer {
   static StreamSubscription<AudioPlayerState> _stateChangeSubscription;
   static StreamSubscription<void> _completionSubscription;
 
-  /// TODO: implement this instead of on song change
-  static StreamSubscription<Duration> _durationSubscription;
+  // static StreamSubscription<Song> _songChangeSubscription;
   static StreamSubscription<PlatformException> _errorSubscription;
 
   // Getters
@@ -36,8 +35,8 @@ abstract class MusicPlayer {
       NativeAudioPlayer.onPlayerStateChanged;
 
   /// Get stream of changes on audio duration
-  static Stream<Duration> get onDurationChanged =>
-      NativeAudioPlayer.onDurationChanged;
+  // static Stream<Duration> get onDurationChanged =>
+  //     NativeAudioPlayer.onDurationChanged;
 
   /// Get stream of player completions
   static Stream<void> get onPlayerCompletion =>
@@ -78,10 +77,10 @@ abstract class MusicPlayer {
   static Future<void> init() async {
     NativeAudioPlayer.init();
 
-    _durationSubscription =
-        NativeAudioPlayer.onDurationChanged.listen((event) async {
-      // TODO: ????
-    });
+    // _songChangeSubscription =
+    //     NativeAudioPlayer.onDurationChanged.listen((event) async {
+    //   // TODO: ????
+    // });
 
     _errorSubscription = NativeAudioPlayer.onPlayerError.listen((event) {
       // debugger();
@@ -109,7 +108,7 @@ abstract class MusicPlayer {
   // TODO: improve and add usage to this method
   static void dispose() {
     _stateChangeSubscription.cancel();
-    _durationSubscription.cancel();
+    // _songChangeSubscription.cancel();
     _errorSubscription.cancel();
     _completionSubscription.cancel();
   }
@@ -124,12 +123,15 @@ abstract class MusicPlayer {
   ///
   /// @param [silent] - if it is true, won't play track, but just switch to it
   /// (the difference with the [setUri] with this parameter is that this function will also update current playing song respectively)
-  static Future<void> play(int songId, {bool silent = false}) async {
+  static Future<void> play(
+    int songId, {
+    bool silent = false,
+  }) async {
     final song =
         PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
     bool success = true;
     PlaylistControl.changeSong(songId);
-    NativeAudioPlayer.emitDurationChange(song.duration);
+PlaylistControl.emitSongChange(song);
     try {
       if (!silent) // [stayAwake] is very important for player to stay play even in background
         await NativeAudioPlayer.play(song, stayAwake: true);

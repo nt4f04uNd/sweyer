@@ -107,7 +107,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
       GlobalKey<RefreshIndicatorState>();
 
   StreamSubscription<void> _playlistChangeSubscription;
-  StreamSubscription<Duration> _durationChangeSubscription;
+  StreamSubscription<Song> _songChangeSubscription;
 
   @override
   void initState() {
@@ -117,7 +117,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
       // Update list on playlist changes
       _switcher.change();
     });
-    _durationChangeSubscription = MusicPlayer.onDurationChanged.listen((event) {
+    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) {
       // Needed to update current track indicator
       setState(() {});
     });
@@ -126,7 +126,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
   @override
   void dispose() {
     _playlistChangeSubscription.cancel();
-    _durationChangeSubscription.cancel();
+    _songChangeSubscription.cancel();
     super.dispose();
   }
 

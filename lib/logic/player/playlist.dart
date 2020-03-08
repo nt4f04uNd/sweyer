@@ -163,8 +163,12 @@ abstract class PlaylistControl {
   static int _playingSongIdState;
 
   /// Controller for stream of playlist changes
-  static StreamController<void> _songsListChangeStreamController =
-      StreamController<void>.broadcast();
+  static StreamController<PlaylistType> _playlistChangeStreamController =
+      StreamController<PlaylistType>.broadcast();
+
+  /// Controller for stream of song changes
+  static StreamController<Song> _songChangeStreamController =
+      StreamController<Song>.broadcast();
 
   /// Represents songs fetch on app start
   static bool initFetching = true;
@@ -213,17 +217,27 @@ abstract class PlaylistControl {
   static bool get playReady => playlists[PlaylistType.global] != null;
 
   /// A stream of changes on playlist
-  static Stream<void> get onPlaylistListChange =>
-      _songsListChangeStreamController.stream;
+  static Stream<PlaylistType> get onPlaylistListChange =>
+      _playlistChangeStreamController.stream;
+
+  /// A stream of changes on song
+  static Stream<Song> get onSongChange =>
+      _songChangeStreamController.stream;
 
   /// Emit event to [onPlaylistListChange]
   ///
   /// Should be only called when user can see playlist change, i.e. songs sort.
   /// Shouldn't be called, e.g. on tile click, when playlist changes, but user can't actually see it
-  /// 
+  ///
   /// Parameter [playlistType] denotes preferred update scope, this means e.g. that if [PlaylistType.searched] changes, [ListView] dependant on [PlaylistType.global] shouldn't get any updates
-  static void emitPlaylistChange([PlaylistType playlistType = PlaylistType.global]) {
-    _songsListChangeStreamController.add(playlistType);
+  static void emitPlaylistChange(
+      [PlaylistType playlistType = PlaylistType.global]) {
+    _playlistChangeStreamController.add(playlistType);
+  }
+
+  /// Emits song change event
+  static void emitSongChange(Song song) {
+    _songChangeStreamController.add(song);
   }
 
   /// The main data app initialization function
@@ -234,7 +248,7 @@ abstract class PlaylistControl {
       // await Future.delayed(Duration(seconds: 2));
 
       playlists[PlaylistType.global] = null; // Reset [playReady]
-     // emitPlaylistChange();
+      // emitPlaylistChange();
 
       initFetching = true;
       await Future.wait([
@@ -263,7 +277,7 @@ abstract class PlaylistControl {
 
   /// TODO: add usage for this method
   static void dispose() {
-    _songsListChangeStreamController.close();
+    _playlistChangeStreamController.close();
   }
 
   /// Refetch songs and update playlist

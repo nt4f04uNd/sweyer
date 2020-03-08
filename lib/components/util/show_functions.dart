@@ -86,7 +86,46 @@ abstract class ShowFunctions {
         });
   }
 
-  /// Calls [showDialog] function from flutter material library
+  /// Calls [showDialog] function from flutter material library to show a message to user (only accept button)
+  static Future<dynamic> showAlert(
+    BuildContext context, {
+    Widget title: const Text("Предупреждение"),
+    Widget content: const Text("Контент"),
+    DialogFlatButton acceptButton,
+  }) async {
+    acceptButton ??= DialogFlatButton(
+      child: Text('Принять'),
+      textColor: Constants.AppTheme.acceptButton.auto(context),
+      onPressed: () => Navigator.of(context).pop(),
+    );
+    return await flutterShowDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: title,
+        content: content,
+        contentPadding:
+            const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
+        contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 15,
+            ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(10),
+          ),
+        ),
+        actions: <Widget>[
+          ButtonBar(
+            children: <Widget>[
+              acceptButton,
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Calls [showDialog] function from flutter material library to show a dialog to user (accept and decline buttons)
   static Future<dynamic> showDialog(
     BuildContext context, {
     Widget title: const Text("Диалог"),
@@ -109,16 +148,11 @@ abstract class ShowFunctions {
       context: context,
       builder: (context) => AlertDialog(
         title: title,
-        content:
-            // AnnotatedRegion<
-            // SystemUiOverlayStyle>(
-            // value: AppSystemUIThemes.dialogScreen.auto(context),
-            // child:
-            content,
-        // ),
-        contentPadding:const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
+        content: content,
+        contentPadding:
+            const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
         contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
-              fontWeight:FontWeight.w500,
+              fontWeight: FontWeight.w500,
               fontSize: 15,
             ),
         shape: RoundedRectangleBorder(

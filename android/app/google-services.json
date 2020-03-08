@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "574502524315",
+    "firebase_url": "https://sweyer-def42.firebaseio.com",
+    "project_id": "sweyer-def42",
+    "storage_bucket": "sweyer-def42.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:574502524315:android:161117797368c80731fd3e",
+        "android_client_info": {
+          "package_name": "com.nt4f04und.sweyer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "574502524315-ghn04g86o781nl77kcrbbmul6cno0q9a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM1R_dcMdHDIbdJ0aRlNhSIzfN6DTYayg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "574502524315-ghn04g86o781nl77kcrbbmul6cno0q9a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

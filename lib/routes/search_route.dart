@@ -675,7 +675,7 @@ class SongsSearchDelegate extends SearchDelegate {
           children: <Widget>[
             Scrollbar(
               child: StreamBuilder(
-                  stream: MusicPlayer.onDurationChanged,
+                  stream: PlaylistControl.onSongChange,
                   builder: (context, snapshot) {
                     return ListView.builder(
                         // physics: const SMMBouncingScrollPhysics(),
