@@ -41,7 +41,7 @@ RUN mkdir "$ANDROID_HOME" .android \
     && rm sdk.zip  
 
 # Start android SDK update and setup SDK tools
-RUN sdkmanager --sdk_root=$ANDROID_HOME --update \
-    && sdkmanager --sdk_root=$ANDROID_HOME "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+RUN $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME --update \
+    && $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
     "platforms;android-${ANDROID_VERSION}" \
     "platform-tools"
