@@ -13,7 +13,7 @@ USER root
 RUN curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     curl https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list && \
     apt-get update && \
-    apt-get -y install build-essential dart libkrb5-dev gcc make gradle android-tools-fastboot openjdk-8-jdk && \
+    apt-get -y install build-essential dart libkrb5-dev gcc make gradle openjdk-8-jdk && \
     apt-get clean && \
     apt-get -y autoremove && \
     apt-get -y clean && \
@@ -22,10 +22,10 @@ RUN curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - &
 USER gitpod
 
 # PATH   
-ENV PATH="${FLUTTER_HOME}/bin:${PATH}" \
-    # path to sdkmanager
-    PATH="${ANDROID_HOME}/tools/bin:${PATH}" \ 
-    PATH="${ANDROID_HOME}/platform-tools:${PATH}"
+ENV PATH="${FLUTTER_HOME}/bin \
+    :${ANDROID_HOME}/tools/bin \ 
+    :${ANDROID_HOME}/platform-tools \
+    :${PATH}"
 
 # Flutter SDK
 RUN cd /home/gitpod \
