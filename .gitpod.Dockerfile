@@ -36,10 +36,10 @@ RUN mkdir "$ANDROID_HOME" .android \
     && rm sdk.zip \  
 
 # Запускаем обновление SDK и установку build-tools, platform-tools
-RUN $ANDROID_HOME/tools/bin/sdkmanager --update
-RUN $ANDROID_HOME/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
-    "platforms;android-${ANDROID_VERSION}" \
-    "platform-tools"
+# RUN $ANDROID_HOME/tools/bin/sdkmanager --update
+# RUN $ANDROID_HOME/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+  #  "platforms;android-${ANDROID_VERSION}" \
+  #  "platform-tools"
 
 # Install custom tools, runtime, etc. using apt-get
 # For example, the command below would install "bastet" - a command line tetris clone:
