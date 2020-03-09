@@ -1,5 +1,11 @@
 tasks:
   - init: echo "lol"
-    # command: flutter run --debug
+# command: flutter run --debug
 image:
   file: .gitpod.Dockerfile
+
+vscode:
+  extensions:
+    - Dart-Code.dart-code@3.8.1:+5Rq24Mq46eJa5w39WY0bA==
+    - Dart-Code.flutter@3.8.1:cytqQi/+kpu802ZOaJwayw==
+    - Nash.awesome-flutter-snippets@2.0.3:6jLJSOqEGV5k8R0xYG7Oqg==
