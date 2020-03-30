@@ -526,13 +526,19 @@ class SongTile extends StatelessWidget implements SongTileInterface {
   final Function onTap;
 
   void _handleTap(BuildContext context) async {
-    await MusicPlayer.clickSongTile(song.id);
+    // int prevCurrentSongId = PlaylistControl.currentSongId;
+
+    await MusicPlayer.handleClickSongTile(context, song,
+        pushToPlayerRoute: pushToPlayerRouteOnClick);
+
+    // if (pushToPlayerRouteOnClick &&
+    //     (song.id != prevCurrentSongId ||
+    //         song.id == prevCurrentSongId &&
+    //             MusicPlayer.playerState != AudioPlayerState.PLAYING)) {
+    //   Navigator.of(context).pushNamed(Constants.Routes.player.value);
+    // }
+
     if (onTap != null) onTap();
-    // Playing because clickSongTile changes any other type to it
-    // TODO: move out ot this widget pushing route
-    if (pushToPlayerRouteOnClick &&
-        MusicPlayer.playerState == AudioPlayerState.PLAYING)
-      Navigator.of(context).pushNamed(Constants.Routes.player.value);
   }
 
   @override
@@ -697,19 +703,10 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   }
 
   void _handleTap() async {
-    if (widget.pushToPlayerRouteOnClick) {
-      if (widget.song.id != PlaylistControl.currentSongId ||
-          widget.song.id == PlaylistControl.currentSongId &&
-              MusicPlayer.playerState != AudioPlayerState.PLAYING)
-        Navigator.of(context).pushNamed(
-            Constants.Routes.player.value); // TODO: move this out of here
-    }
-
-    MusicPlayer.clickSongTile(widget.song.id);
+   await MusicPlayer.handleClickSongTile(context, widget.song,
+        pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
 
     if (widget.onTap != null) widget.onTap();
-
-    // Playing because clickSongTile changes any other type to it
   }
 
   // Performs unselect animation and calls [onSelected] and [notifyUnselection]

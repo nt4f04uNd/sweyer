@@ -8,6 +8,7 @@
 
 package com.nt4f04uNd.sweyer.handlers;
 
+import android.app.Service;
 import android.content.ContentUris;
 import android.media.AudioManager;
 import android.os.Handler;
@@ -48,7 +49,10 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      */
     private static final Handler hookButtonHandler = new Handler();
     private static int hookButtonPressCount = 0;
-
+    /**
+     * To kill the service with timeout the service when player is paused
+     */
+    private static final Handler timeoutHandler = new Handler();
 
     public static void init() {
         if (player == null) {
@@ -100,29 +104,24 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     public static void handleHookButton() {
         hookButtonPressCount++;
         if (hookButtonPressCount == 1) {
-            hookButtonHandler.postDelayed(new HookDelayedRunnable(), 500);
-        }
-    }
-
-    private static final class HookDelayedRunnable implements Runnable {
-        @Override
-        public void run() {
-            try {
-                if (hookButtonPressCount == 1) {
-                    NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PAUSE);
-                    playPause();
-                } else if (hookButtonPressCount == 2) {
-                    NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_NEXT);
-                    playNext();
-                } else {
-                    NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PREV);
-                    playPrev();
+            hookButtonHandler.postDelayed(() -> {
+                try {
+                    if (hookButtonPressCount == 1) {
+                        NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PAUSE);
+                        playPause();
+                    } else if (hookButtonPressCount == 2) {
+                        NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_NEXT);
+                        playNext();
+                    } else {
+                        NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PREV);
+                        playPrev();
+                    }
+                } catch (IllegalStateException e) {
+                    Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+                } finally {
+                    hookButtonPressCount = 0;
                 }
-            } catch (IllegalStateException e) {
-                Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
-            } finally {
-                hookButtonPressCount = 0;
-            }
+            }, 500);
         }
     }
 
@@ -159,6 +158,10 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         WakelockHandler.acquire();
         ServiceHandler.startService(true);
 
+        PlaylistHandler.setCurrentSong(song);
+        NotificationHandler.updateNotification(true, isLooping());
+        PrefsHandler.setSongId(song.id);
+
         player.setAwake(GeneralHandler.getAppContext(), stayAwake);
         player.setVolume(volume);
         setUri(song.id);
@@ -178,9 +181,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
             } finally {
                 if (success) {
                     PlayerHandler.callSetState(PlayerState.PLAYING);
-                    PlaylistHandler.setCurrentSong(song);
-                    PrefsHandler.setSongId(song.id);
-                    NotificationHandler.updateNotification(true, isLooping());
                 }
             }
         }
@@ -256,6 +256,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
      */
     public static void bareResume() {
         WakelockHandler.acquire();
+        timeoutHandler.removeCallbacksAndMessages(null);
         ServiceHandler.startService(true);
         player.play(GeneralHandler.getAppContext());
         PrefsHandler.setSongIsPlaying(true);
@@ -267,6 +268,8 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     public static void barePause() {
         WakelockHandler.acquireTimed();
         ServiceHandler.startService(false);
+        // TODO: make this time out a customisable user setting, now it's static 10 minutes after the pause
+        timeoutHandler.postDelayed(ServiceHandler::stopService, 10 * 60 * 1000);
         player.pause();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.PAUSED);
@@ -276,6 +279,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     public static void bareStop() {
         WakelockHandler.acquireTimed();
         ServiceHandler.stopService();
+        timeoutHandler.removeCallbacksAndMessages(null);
         player.stop();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
@@ -285,6 +289,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void bareRelease() {
         ServiceHandler.stopService();
+        timeoutHandler.removeCallbacksAndMessages(null);
         player.release();
         PrefsHandler.setSongIsPlaying(false);
         PlayerHandler.callSetState(PlayerState.STOPPED);
@@ -427,6 +432,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
                 final int currentPosition = player.getCurrentPosition();
                 // convert to seconds
                 PrefsHandler.setSongPosition(currentPosition / 1000);
+
                 PlayerChannel.invokeMethod("audio.onCurrentPosition", buildArguments(currentPosition));
             } catch (UnsupportedOperationException e) {
                 handleError(e);

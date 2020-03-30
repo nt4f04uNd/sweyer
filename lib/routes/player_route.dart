@@ -9,6 +9,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 class PlayerRoute extends StatefulWidget {
   @override
@@ -16,8 +17,9 @@ class PlayerRoute extends StatefulWidget {
 }
 
 class _PlayerRouteState extends State<PlayerRoute> {
-  PageController _pageController = PageController();
   bool initialRender = true;
+  PageController _pageController = PageController();
+
   final GlobalKey<_PlaylistTabState> _playlistTabKey =
       GlobalKey<_PlaylistTabState>();
 
@@ -46,6 +48,9 @@ class _PlayerRouteState extends State<PlayerRoute> {
           controller: _pageController,
           children: [
             _MainPlayerTab(),
+            // Scaffold(
+            //   body: Container(),
+            // ),
             _PlaylistTab(
               key: _playlistTabKey,
             )
@@ -244,20 +249,67 @@ class _PlaylistTabState extends State<_PlaylistTab>
 }
 
 class _MainPlayerTab extends StatefulWidget {
+  final Color color;
+  _MainPlayerTab({this.color});
   @override
   _MainPlayerTabState createState() => _MainPlayerTabState();
 }
 
 class _MainPlayerTabState extends State<_MainPlayerTab>
-    with AutomaticKeepAliveClientMixin<_MainPlayerTab> {
+    with
+        AutomaticKeepAliveClientMixin<_MainPlayerTab>
+        // SingleTickerProviderStateMixin 
+        {
   // This mixin doesn't allow widget to redraw
   @override
   bool get wantKeepAlive => true;
+
+  // Color _prevColor = PlaylistControl.currentArtColor;
+  // StreamSubscription<Color> _artColorChangeSubscription;
+  // AnimationController _animationController;
+  // Animation<Color> _colorAnimation;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   _animationController = AnimationController(
+  //       vsync: this, duration: const Duration(milliseconds: 550));
+  //   _animationController.addListener(() {
+  //     setState(() {});
+  //   });
+  //   _colorAnimation = ColorTween(
+  //           begin: PlaylistControl.currentArtColor,
+  //           end: PlaylistControl.currentArtColor)
+  //       .animate(CurvedAnimation(
+  //           curve: Curves.easeOutCubic, parent: _animationController));
+
+  //   _artColorChangeSubscription =
+  //       PlaylistControl.onArtColorChange.listen((event) {
+  //     setState(() {
+  //       _animationController.value = 0;
+  //       _colorAnimation = ColorTween(begin: _prevColor, end: event).animate(
+  //           CurvedAnimation(
+  //               curve: Curves.easeOutCubic, parent: _animationController));
+  //       _prevColor = event;
+  //       _animationController.forward();
+  //     });
+  //   });
+  // }
+
+  // @override
+  // void dispose() {
+  //   _artColorChangeSubscription.cancel();
+  //   _animationController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return PageBase(
+      // animation: _colorAnimation,
+      backgroundColor: widget.color,
       backButton: SMMBackButton(
         icon: Icons.keyboard_arrow_down,
         size: 40.0,
@@ -454,7 +506,8 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
   void initState() {
     super.initState();
     // Handle track switch
-    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) {
+    _songChangeSubscription =
+        PlaylistControl.onSongChange.listen((event) async {
       // Create new key for marque widget to reset scroll
       setState(() {
         marqueeKey = UniqueKey();

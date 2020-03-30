@@ -118,21 +118,28 @@ class FadeInRouteTransition<T extends Widget> extends RouteTransition<T> {
 
       /// Wrap child for to use with material routes (difference from default child is that is has animation status completed check, that brakes theme ui switch)
       final Container materialWrappedChild = Container(
-        foregroundDecoration: BoxDecoration(
-          color: // Dim exit page from 0 to 0.7
-              Colors.black.withOpacity(exitEnabled
-                  ? secondaryAnimation.status == AnimationStatus.forward
-                      ? secondaryAnimation.value / 1.3
-                      : secondaryAnimation.value / 2.9
-                  : 0),
-        ),
-        child: IgnorePointer(
-          // Disable any touch events on enter while in transition
-          ignoring: ignore,
+        color: Colors.black,
+        child: FadeTransition(
+          opacity: secondaryAnimation.status == AnimationStatus.forward
+              // Dim route on exit
+              ? exitDimTween.animate(
+                  secondaryAnimation,
+                )
+              // Dim route on exit reverse, but less a little bit than on forward
+              : secondaryAnimation.status == AnimationStatus.reverse
+                  ? exitRevDimTween.animate(
+                      secondaryAnimation,
+                    )
+                  // Do not dim in other cases
+                  : constTween.animate(secondaryAnimation),
           child: IgnorePointer(
-            // Disable any touch events on exit while in transition
-            ignoring: secondaryIgnore,
-            child: child,
+            // Disable any touch events on enter while in transition
+            ignoring: ignore,
+            child: IgnorePointer(
+              // Disable any touch events on exit while in transition
+              ignoring: secondaryIgnore,
+              child: child,
+            ),
           ),
         ),
       );

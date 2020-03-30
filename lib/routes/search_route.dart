@@ -279,7 +279,7 @@ enum _SearchBody {
   results,
 }
 
-class SearchPageRoute extends ZoomRouteTransition<_SearchPage> {
+class SearchPageRoute extends RouteTransition<_SearchPage> {
   SearchPageRoute({
     @required this.delegate,
 
@@ -289,7 +289,7 @@ class SearchPageRoute extends ZoomRouteTransition<_SearchPage> {
       delegate._route == null,
       'The ${delegate.runtimeType} instance is currently used by another active '
       'search. Please close that search by calling close() on the SearchDelegate '
-      'before openening another search with the same delegate instance.',
+      'before opening another search with the same delegate instance.',
     );
     delegate._route = this;
   }
@@ -305,8 +305,8 @@ class SearchPageRoute extends ZoomRouteTransition<_SearchPage> {
   @override
   Constants.Routes get routeType => Constants.Routes.search;
 
-  // @override
-  // Duration get transitionDuration => const Duration(milliseconds: 450);
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 450);
 
   @override
   UIFunction checkSystemUi =
@@ -314,6 +314,19 @@ class SearchPageRoute extends ZoomRouteTransition<_SearchPage> {
 
   @override
   bool get maintainState => delegate.maintainState;
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: animation,
+      child: child,
+    );
+  }
 
   @override
   Animation<double> createAnimation() {
@@ -502,7 +515,7 @@ class SongsSearchDelegate extends SearchDelegate {
   /// Needed to check if playlist has to be updated
   bool dirty = true;
   List<String> _suggestions = [];
- List<Song> searched = [];
+  List<Song> searched = [];
   String _prevQuery = "";
   Future<void> _fetchingHistory;
 
@@ -644,12 +657,12 @@ class SongsSearchDelegate extends SearchDelegate {
   ///
   /// And when query is not empty - found songs will be displayed
   Widget _buildResultsAndSuggestions(BuildContext context) {
-
     /// Search songs if previous query is distinct from current
-    if (_prevQuery == '' || _prevQuery != query){
+    if (_prevQuery == '' || _prevQuery != query) {
       searched =
-          PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/)?.toList();
-          dirty = true;
+          PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/)
+              ?.toList();
+      dirty = true;
     }
 
     _prevQuery = query.trim();

@@ -10,6 +10,10 @@ export 'serialization.dart';
 export 'song.dart';
 
 import 'dart:async';
+import 'dart:io';
+import 'package:color_thief_flutter/color_thief_flutter.dart';
+import 'package:flutter/material.dart';
+
 import 'playlist.dart';
 import 'package:flutter/services.dart';
 
@@ -20,8 +24,6 @@ abstract class MusicPlayer {
   // Native player subscriptions
   static StreamSubscription<AudioPlayerState> _stateChangeSubscription;
   static StreamSubscription<void> _completionSubscription;
-
-  // static StreamSubscription<Song> _songChangeSubscription;
   static StreamSubscription<PlatformException> _errorSubscription;
 
   // Getters
@@ -77,11 +79,6 @@ abstract class MusicPlayer {
   static Future<void> init() async {
     NativeAudioPlayer.init();
 
-    // _songChangeSubscription =
-    //     NativeAudioPlayer.onDurationChanged.listen((event) async {
-    //   // TODO: ????
-    // });
-
     _errorSubscription = NativeAudioPlayer.onPlayerError.listen((event) {
       // debugger();
     });
@@ -130,8 +127,6 @@ abstract class MusicPlayer {
     final song =
         PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
     bool success = true;
-    PlaylistControl.changeSong(songId);
-PlaylistControl.emitSongChange(song);
     try {
       if (!silent) // [stayAwake] is very important for player to stay play even in background
         await NativeAudioPlayer.play(song, stayAwake: true);
@@ -165,9 +160,7 @@ PlaylistControl.emitSongChange(song);
     } finally {
       // Change playing track id
       if (success) {
-      }
-      // PlaylistControl.changeSong(songId);
-      else
+      } else
         play(PlaylistControl.currentSongId, silent: silent);
     }
   }
@@ -252,7 +245,9 @@ PlaylistControl.emitSongChange(song);
   static Future<void> playNext({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPlaylist()
         .getNextSongId(PlaylistControl.currentSongId);
-    return play(songId, silent: silent);
+    PlaylistControl.changeSong(songId);
+    PlaylistControl.emitSongChange(PlaylistControl.currentSong);
+    play(songId, silent: silent);
   }
 
   /// Function that fires when prev track button got clicked
@@ -261,41 +256,65 @@ PlaylistControl.emitSongChange(song);
   static Future<void> playPrev({int songId, bool silent = false}) async {
     songId ??= PlaylistControl.getPlaylist()
         .getPrevSongId(PlaylistControl.currentSongId);
-    return play(songId, silent: silent);
+    PlaylistControl.changeSong(songId);
+    PlaylistControl.emitSongChange(PlaylistControl.currentSong);
+    play(songId, silent: silent);
   }
 
   /// Function that handles click on track tile
   ///
   /// [clickedSongId] argument denotes an id of clicked track [MainRouteTrackList]
-  static Future<void> clickSongTile(int clickedSongId) async {
+  static Future<void> handleClickSongTile(
+      BuildContext context, Song clickedSong,
+      {bool pushToPlayerRoute = false}) async {
+    int prevCurrentSongId = PlaylistControl.currentSongId;
+
+    PlaylistControl.changeSong(clickedSong.id);
+    PlaylistControl.emitSongChange(clickedSong);
+
+    // print(
+    //     "$prevCurrentSongId   ${clickedSong.id}    ${MusicPlayer.playerState}");
+
     switch (playerState) {
       case AudioPlayerState.PLAYING:
         {
           // If user clicked the same track
-          if (PlaylistControl.currentSongId == clickedSongId) return pause();
+          if (prevCurrentSongId == clickedSong.id)
+            await pause();
 
           // If user decided to click a new track
-          return play(clickedSongId);
+          else
+            await play(clickedSong.id);
+          break;
         }
       case AudioPlayerState.PAUSED:
         {
           // If user clicked the same track
-          if (PlaylistControl.currentSongId == clickedSongId)
-            return resume(clickedSongId);
+          if (prevCurrentSongId == clickedSong.id)
+            await resume(clickedSong.id);
 
           // If user decided to click a new track
-          return play(clickedSongId);
+          else
+            await play(clickedSong.id);
+          break;
         }
       case AudioPlayerState.STOPPED:
         // Currently unused and shouldn't
-        return play(clickedSongId);
+        await play(clickedSong.id);
         break;
       case AudioPlayerState.COMPLETED:
-        return play(clickedSongId);
+        await play(clickedSong.id);
         break;
       default: // Can be null, so don't throw, just play
-        return play(clickedSongId);
+        await play(clickedSong.id);
         break;
+    }
+
+    if (pushToPlayerRoute &&
+        (clickedSong.id != prevCurrentSongId ||
+            clickedSong.id == prevCurrentSongId &&
+                MusicPlayer.playerState != AudioPlayerState.PLAYING)) {
+      Navigator.of(context).pushNamed(Constants.Routes.player.value);
     }
   }
 }

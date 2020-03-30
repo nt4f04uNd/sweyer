@@ -88,6 +88,7 @@ class ZoomRouteTransition<T extends Widget> extends RouteTransition<T> {
       return _ZoomPageTransition(
         animation: animation,
         secondaryAnimation: secondaryAnimation,
+        checkExitAnimationEnabled: checkExitAnimationEnabled,
         child: IgnorePointer(
           // Disable any touch events on enter while in transition
           ignoring: ignore,
@@ -111,6 +112,7 @@ class _ZoomPageTransition extends StatefulWidget {
     Key key,
     this.animation,
     this.secondaryAnimation,
+    this.checkExitAnimationEnabled,
     this.child,
   }) : super(key: key);
 
@@ -142,13 +144,14 @@ class _ZoomPageTransition extends StatefulWidget {
 
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
+  final BoolFunction checkExitAnimationEnabled;
   final Widget child;
 
   @override
-  __ZoomPageTransitionState createState() => __ZoomPageTransitionState();
+  _ZoomPageTransitionState createState() => _ZoomPageTransitionState();
 }
 
-class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
+class _ZoomPageTransitionState extends State<_ZoomPageTransition> {
   AnimationStatus _currentAnimationStatus;
   AnimationStatus _lastAnimationStatus;
 
@@ -252,13 +255,15 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
       child: AnimatedBuilder(
         animation: widget.secondaryAnimation,
         builder: (BuildContext context, Widget child) {
-          if (widget.secondaryAnimation.status == AnimationStatus.forward ||
+          final exitAnimationEnabled = widget.checkExitAnimationEnabled();
+
+          if (exitAnimationEnabled && widget.secondaryAnimation.status == AnimationStatus.forward ||
               _transitionWasInterrupted) {
             return ScaleTransition(
               scale: _forwardStartScreenScaleTransition,
               child: child,
             );
-          } else if (widget.secondaryAnimation.status ==
+          } else if (exitAnimationEnabled && widget.secondaryAnimation.status ==
               AnimationStatus.reverse) {
             return ScaleTransition(
               scale: _reverseEndScreenScaleTransition,

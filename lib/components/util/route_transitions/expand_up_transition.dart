@@ -32,8 +32,7 @@ final Tween<double> _scrimOpacityTween = Tween<double>(
 /// Creates customizable expand up route transition
 ///
 /// By default acts pretty same as [OpenUpwardsPageTransitionsBuilder] - creates upwards expand in transition
-class ExpandUpRouteTransition<T extends Widget>
-    extends RouteTransition<T> {
+class ExpandUpRouteTransition<T extends Widget> extends RouteTransition<T> {
   @override
   final T route;
   @override
@@ -131,21 +130,29 @@ class ExpandUpRouteTransition<T extends Widget>
 
       /// Wrap child for to use with material routes (difference from default child is that is has animation status completed check, that brakes theme ui switch)
       final Container materialWrappedChild = Container(
-        foregroundDecoration: BoxDecoration(
-          color: // Dim exit page from 0 to 0.7
-              Colors.black.withOpacity(exitEnabled
-                  ? secondaryAnimation.status == AnimationStatus.forward
-                      ? secondaryAnimation.value / 1.3
-                      : secondaryAnimation.value / 2.9
-                  : 0),
-        ),
-        child: IgnorePointer(
-          // Disable any touch events on enter while in transition
-          ignoring: ignore,
-          child: IgnorePointer(
-            // Disable any touch events on exit while in transition
-            ignoring: secondaryIgnore,
-            child: child,
+            color: Colors.black,
+            child: FadeTransition(
+              opacity: secondaryAnimation.status == AnimationStatus.forward
+                  // Dim route on exit
+                  ? exitDimTween.animate(
+                      secondaryAnimation,
+                    )
+                  // Dim route on exit reverse, but less a little bit than on forward
+                  : secondaryAnimation.status == AnimationStatus.reverse
+                      ? exitRevDimTween.animate(
+                          secondaryAnimation,
+                        )
+                      // Do not dim in other cases
+                      : constTween.animate(secondaryAnimation),
+              child:
+          IgnorePointer(
+            // Disable any touch events on enter while in transition
+            ignoring: ignore,
+            child: IgnorePointer(
+              // Disable any touch events on exit while in transition
+              ignoring: secondaryIgnore,
+              child: child,
+            ),
           ),
         ),
       );
@@ -166,8 +173,6 @@ class ExpandUpRouteTransition<T extends Widget>
             end: size.height,
           ).animate(primaryAnimation);
 
-          final Animation<double> opacityAnimation =
-              _scrimOpacityTween.animate(primaryAnimation);
           final Animation<Offset> primaryTranslationAnimation =
               _primaryTranslationTween.animate(primaryAnimation);
 
@@ -184,7 +189,7 @@ class ExpandUpRouteTransition<T extends Widget>
             animation: animation,
             builder: (BuildContext context, Widget child) {
               return Container(
-                color: Colors.black.withOpacity(opacityAnimation.value),
+         
                 alignment: Alignment.bottomLeft,
                 child: ClipRect(
                   child: SizedBox(

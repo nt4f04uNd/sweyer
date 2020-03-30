@@ -4,6 +4,10 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:io';
+import 'package:async/async.dart';
+import 'package:color_thief_flutter/color_thief_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweyer/api.dart' as API;
@@ -159,9 +163,6 @@ abstract class PlaylistControl {
   static final SongsFetcher songsFetcher =
       SongsFetcher(songsSerializer.saveJson);
 
-  /// Current id of playing song
-  static int _playingSongIdState;
-
   /// Controller for stream of playlist changes
   static StreamController<PlaylistType> _playlistChangeStreamController =
       StreamController<PlaylistType>.broadcast();
@@ -169,6 +170,22 @@ abstract class PlaylistControl {
   /// Controller for stream of song changes
   static StreamController<Song> _songChangeStreamController =
       StreamController<Song>.broadcast();
+
+  /// Controller for stream of song changes
+  static StreamController<Color> _artColorChangeStreamController =
+      StreamController<Color>.broadcast();
+
+  /// A subscription to song changes, needed to get current art color
+  static StreamSubscription<Song> _songChangeSubscription;
+
+  /// Current id of playing song
+  static int _playingSongIdState;
+
+  /// A general art color change the UI
+  static Color _artColor;
+
+  /// Cancelable operation for getting the art color
+  static CancelableOperation _thiefOperation;
 
   /// Represents songs fetch on app start
   static bool initFetching = true;
@@ -184,10 +201,14 @@ abstract class PlaylistControl {
     return _playingSongIdState;
   }
 
-  /// Changes current songs id and emits song change event
+  /// Changes current songs id
+  ///
+  /// NOTE doesn't emit song change event
   static void changeSong(int songId) {
     _playingSongIdState = songId;
   }
+
+  static Color get currentArtColor => _artColor;
 
   /// Util function to select playlist by [argPlaylistType]
   ///
@@ -221,8 +242,11 @@ abstract class PlaylistControl {
       _playlistChangeStreamController.stream;
 
   /// A stream of changes on song
-  static Stream<Song> get onSongChange =>
-      _songChangeStreamController.stream;
+  static Stream<Song> get onSongChange => _songChangeStreamController.stream;
+
+  /// A stream of changes on art color
+  static Stream<Color> get onArtColorChange =>
+      _artColorChangeStreamController.stream;
 
   /// Emit event to [onPlaylistListChange]
   ///
@@ -240,15 +264,17 @@ abstract class PlaylistControl {
     _songChangeStreamController.add(song);
   }
 
+  /// Emits art color change event
+  static void emitArtColorChange(Color color) {
+    _artColorChangeStreamController.add(color);
+  }
+
   /// The main data app initialization function
   /// Inits all playlists
   /// Also handles no-permissions situations
   static Future<void> init() async {
     if (Permissions.granted) {
-      // await Future.delayed(Duration(seconds: 2));
-
       playlists[PlaylistType.global] = null; // Reset [playReady]
-      // emitPlaylistChange();
 
       initFetching = true;
       await Future.wait([
@@ -263,6 +289,31 @@ abstract class PlaylistControl {
       sortSongs(silent: true);
 
       await _restoreLastSong();
+
+      // // Setting up the subscription to get the art color
+      // _songChangeSubscription = onSongChange.listen((event) async {
+      //   var prevArtColor = _artColor;
+      //   if (event.albumArtUri != null) {
+      //     // Cancel the operation if it didn't finish by that moment
+      //     if (_thiefOperation != null) _thiefOperation.cancel();
+
+      //     _thiefOperation = CancelableOperation.fromFuture(() async {
+      //       var prevArtColor = _artColor;
+      //       final image =
+      //           await getImageFromProvider(FileImage(File(event.albumArtUri)));
+      //       List<int> colorRGBList = await getColorFromImage(image, 1);
+      //       _artColor = Color.fromRGBO(
+      //           colorRGBList[0], colorRGBList[1], colorRGBList[2], 1.0);
+
+      //       if (prevArtColor != _artColor) emitArtColorChange(_artColor);
+      //       _thiefOperation = null;
+      //     }());
+      //   } else {
+      //     _artColor = null;
+      //     if (prevArtColor != _artColor) emitArtColorChange(_artColor);
+      //   }
+      // });
+
       await _restorePlaylist();
 
       _initialSongsFetch();

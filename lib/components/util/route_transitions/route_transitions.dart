@@ -8,6 +8,7 @@
 
 export 'expand_up_transition.dart';
 export 'fade_in_transition.dart';
+export 'stack_fade_transition.dart';
 export 'stack_transition.dart';
 export 'zoom_transition.dart';
 
@@ -16,7 +17,8 @@ import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
 // const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 650);
-const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 550);
+// const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 550);
+const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 240);
 
 /// Type for function that returns boolean
 typedef BoolFunction = bool Function();
@@ -31,6 +33,17 @@ const BoolFunction defBoolFunc = _trueFunc;
 
 /// Type for function that returns [SystemUiOverlayStyle]
 typedef UIFunction = SystemUiOverlayStyle Function();
+
+// Tweens for exit dim animations
+
+/// Tween for exit forward dim
+final Tween<double> exitDimTween = Tween<double>(begin: 1.0, end: 0.7);
+
+/// Tween for exit reverse dim
+final Tween<double> exitRevDimTween = Tween<double>(begin: 1.0, end: 0.93);
+
+/// Tween that always evaluates to one
+final Tween<double> constTween = Tween<double>(begin: 1.0, end: 1.0);
 
 /// Abstract class to create various route transitions
 abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {

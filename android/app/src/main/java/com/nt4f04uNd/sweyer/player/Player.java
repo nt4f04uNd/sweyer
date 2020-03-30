@@ -16,281 +16,261 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 
-import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
 
 import java.io.IOException;
 
-import io.flutter.Log;
-
 /**
  * Basic wrapper over media player, very raw
  */
-public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
-      MediaPlayer.OnBufferingUpdateListener {
-   // TODO: logging
-   // private Logger LOGGER = Logger.getLogger(Player.class.getCanonicalName());
+public class Player extends PlayerAbstract implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+    // TODO: logging
+    // private Logger LOGGER = Logger.getLogger(Player.class.getCanonicalName());
 
-   private Uri uri;
-   private double volume = 1.0;
-   private boolean respectSilence;
-   private boolean stayAwake;
-   private ReleaseMode releaseMode = ReleaseMode.RELEASE;
-   private boolean released = true;
-   private boolean prepared = false;
-   private boolean preparing = false;
-   private boolean playing = false;
-   private Uri pendingUri = null;
+    private Uri uri;
+    private double volume = 1.0;
+    private boolean stayAwake;
+    private ReleaseMode releaseMode = ReleaseMode.RELEASE;
+    private PlayerResourceState resourceState = PlayerResourceState.RELEASED;
+    private boolean playing = false;
+    private int shouldSeekTo = -1;
 
-   private int shouldSeekTo = -1;
+    private MediaPlayer player;
 
-   private MediaPlayer player;
+    /**
+     * Setter methods
+     */
 
-   /**
-    * Setter methods
-    */
+    /**
+     * NOTE THAT THIS CAN THROW ILLEGAL STATE EXCEPTION
+     */
+    public void setUri(Uri uri) {
+        if (!objectEquals(this.uri, uri)) {
+            this.uri = uri;
+            if (resourceState == PlayerResourceState.RELEASED) {
+                player = createPlayer();
+                resourceState = PlayerResourceState.IDLE;
+            } else if (resourceState == PlayerResourceState.PREPARED) {
+                player.reset();
+                resourceState = PlayerResourceState.IDLE;
+            } else if (resourceState == PlayerResourceState.PREPARING) {
+                // TODO: this is probably a bad idea to release it like that, because docs are silent about calling release during preparing stage
+                release();
+                setUri(uri);
+                return;
+            }
 
-   /**
-    * NOTE THAT THIS CAN THROW ILLEGAL STATE EXCEPTION
-    */
-   public void setUri(Uri uri) {
-      if (!objectEquals(this.uri, uri)) {
-         this.uri = uri;
-         if (this.released) {
-            this.player = createPlayer();
-            this.released = false;
-         } else if (this.prepared) {
-            this.player.reset();
-            this.prepared = false;
-         } else if (preparing) {
-            pendingUri = uri;
-            // TODO: this is probably a bad idea to release it like that, because docs are silent about calling release during preparing stage
-            release();
-            setUri(uri);
+            setSource(GeneralHandler.getAppContext(), uri);
+            player.setVolume((float) volume, (float) volume);
+            player.setLooping(releaseMode == ReleaseMode.LOOP);
+            player.prepareAsync();
+            resourceState = PlayerResourceState.PREPARING;
+
+        }
+    }
+
+    @Override
+    public void setVolume(double volume) {
+        if (this.volume != volume) {
+            this.volume = volume;
+            if (resourceState != PlayerResourceState.RELEASED) {
+                player.setVolume((float) volume, (float) volume);
+            }
+        }
+    }
+
+    @Override
+    public void setAwake(Context context, boolean stayAwake) {
+        if (this.stayAwake != stayAwake) {
+            this.stayAwake = stayAwake;
+            if (resourceState != PlayerResourceState.RELEASED && this.stayAwake) {
+                player.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
+            }
+        }
+    }
+
+    @Override
+    public void setReleaseMode(ReleaseMode releaseMode) {
+        if (this.releaseMode != releaseMode) {
+            this.releaseMode = releaseMode;
+            if (resourceState != PlayerResourceState.RELEASED) {
+               player.setLooping(releaseMode == ReleaseMode.LOOP);
+            }
+        }
+    }
+
+    /**
+     * Getter methods
+     */
+
+    @Override
+    public double getVolume() {
+        return volume;
+    }
+
+    @Override
+    public int getDuration() {
+        if (player == null || resourceState != PlayerResourceState.PREPARED)
+            return 0;
+        return player.getDuration();
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        if (player == null || resourceState != PlayerResourceState.PREPARED)
+            return 0;
+        return player.getCurrentPosition();
+    }
+
+    @Override
+    public ReleaseMode getReleaseMode() {
+        return releaseMode;
+    }
+
+    @Override
+    public boolean isActuallyPlaying() {
+        return playing && resourceState == PlayerResourceState.PREPARED;
+    }
+
+    /**
+     * Used to check cases when url is null (e.g. flutter hasn't setup it up for
+     * some reason)
+     */
+    @Override
+    public boolean isUriNull() {
+        return uri == null;
+    }
+
+    /**
+     * Playback handling methods
+     */
+
+    @Override
+    public void play(Context appContext) {
+        if (!playing) {
+            playing = true;
+            if (resourceState == PlayerResourceState.RELEASED) {
+                player = createPlayer();
+                setSource(appContext, uri);
+                player.prepareAsync();
+                resourceState = PlayerResourceState.PREPARING;
+            } else if (resourceState == PlayerResourceState.PREPARED) {
+                player.start();
+                PlayerHandler.startPositionUpdates();
+            }
+        }
+    }
+
+    @Override
+    public void stop() {
+        if (resourceState == PlayerResourceState.RELEASED) {
             return;
-         }
+        }
 
-         this.setSource(GeneralHandler.getAppContext(), uri);
-         this.player.setVolume((float) volume, (float) volume);
-         this.player.setLooping(this.releaseMode == ReleaseMode.LOOP);
-         this.player.prepareAsync();
-         this.preparing = true;
+        PlayerHandler.stopPositionUpdates();
+        if (releaseMode != ReleaseMode.RELEASE) {
+            if (playing) {
+                playing = false;
+                player.pause();
+                player.seekTo(0);
+            }
+        } else {
+            release();
+        }
+    }
 
-      }
-   }
+    @Override
+    public void release() {
+        if (resourceState == PlayerResourceState.RELEASED) {
+            return;
+        }
 
-   @Override
-   public void setVolume(double volume) {
-      if (this.volume != volume) {
-         this.volume = volume;
-         if (!this.released) {
-            this.player.setVolume((float) volume, (float) volume);
-         }
-      }
-   }
+        if (playing && resourceState != PlayerResourceState.PREPARING) {
+            player.stop();
+            PlayerHandler.stopPositionUpdates();
+        }
+        player.reset();
+        player.release();
+        player = null;
 
-   @Override
-   public void setAwake(Context context, boolean stayAwake) {
-      if (this.stayAwake != stayAwake) {
-         this.stayAwake = stayAwake;
-         if (!this.released && this.stayAwake) {
-            this.player.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
-         }
-      }
-   }
+        resourceState = PlayerResourceState.RELEASED;
+        playing = false;
+    }
 
-   @Override
-   public void setReleaseMode(ReleaseMode releaseMode) {
-      if (this.releaseMode != releaseMode) {
-         this.releaseMode = releaseMode;
-         if (!this.released) {
-            this.player.setLooping(releaseMode == ReleaseMode.LOOP);
-         }
-      }
-   }
+    @Override
+    public void pause() {
+        if (playing) {
+            PlayerHandler.stopPositionUpdates();
+            playing = false;
+            player.pause();
+        }
+    }
 
-   /**
-    * Getter methods
-    */
+    // Seek operations cannot be called until after
+    // the player is ready.
+    @Override
+    public void seek(int position) {
+        if (resourceState == PlayerResourceState.PREPARED)
+            player.seekTo(position);
+        else
+            shouldSeekTo = position;
+    }
 
-   @Override
-   public double getVolume() {
-      return volume;
-   }
+    /**
+     * MediaPlayer callbacks
+     */
 
-   @Override
-   public int getDuration() {
-      return this.player.getDuration();
-   }
-
-   @Override
-   public int getCurrentPosition() {
-      if (player == null)
-         return 0;
-      return this.player.getCurrentPosition();
-   }
-
-   @Override
-   public ReleaseMode getReleaseMode() {
-      return this.releaseMode;
-   }
-
-   @Override
-   public boolean isActuallyPlaying() {
-      return this.playing && this.prepared;
-   }
-
-   /**
-    * Used to check cases when url is null (e.g. flutter hasn't setup it up for
-    * some reason)
-    */
-   @Override
-   public boolean isUriNull() {
-      return uri == null;
-   }
-
-   /**
-    * Playback handling methods
-    */
-
-   @Override
-   public void play(Context appContext) {
-      if (!this.playing) {
-         this.playing = true;
-         if (this.released) {
-            this.released = false;
-            this.player = createPlayer();
-            this.setSource(appContext, uri);
-            this.player.prepareAsync();
-            this.preparing = true;
-         } else if (this.prepared) {
-            this.player.start();
+    @Override
+    public void onPrepared(final MediaPlayer mediaPlayer) {
+        resourceState = PlayerResourceState.PREPARED;
+        PlayerHandler.handleDuration(this);
+        if (playing) {
+            mediaPlayer.start();
             PlayerHandler.startPositionUpdates();
-         }
-      }
-   }
+        }
+        if (shouldSeekTo >= 0) {
+            mediaPlayer.seekTo(shouldSeekTo);
+            shouldSeekTo = -1;
+        }
+    }
 
-   @Override
-   public void stop() {
-      if (this.released) {
-         return;
-      }
+    @Override
+    public void onCompletion(final MediaPlayer mediaPlayer) {
+        if (releaseMode != ReleaseMode.LOOP) {
+            stop();
+        }
+        PlayerHandler.handleCompletion();
+    }
 
-      PlayerHandler.stopPositionUpdates();
-      if (releaseMode != ReleaseMode.RELEASE) {
-         if (this.playing) {
-            this.playing = false;
-            this.player.pause();
-            this.player.seekTo(0);
-         }
-      } else {
-         this.release();
-      }
-   }
+    /**
+     * Internal logic. Private methods
+     */
 
-   @Override
-   public void release() {
-      if (this.released) {
-         return;
-      }
+    private MediaPlayer createPlayer() {
+        MediaPlayer player = new MediaPlayer();
+        player.setOnPreparedListener(this);
+        player.setOnCompletionListener(this);
 
-      if (this.playing && !this.preparing) {
-         this.player.stop();
-      }
-      this.player.reset();
-      this.player.release();
-      this.player = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+        } else {
+            // This method is deprecated but must be used on older devices
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        }
 
-      this.prepared = false;
-      this.released = true;
-      this.playing = false;
-   }
+        player.setVolume((float) volume, (float) volume);
+        player.setLooping(this.releaseMode == ReleaseMode.LOOP);
+        return player;
+    }
 
-   @Override
-   public void pause() {
-      if (this.playing) {
-         PlayerHandler.stopPositionUpdates();
-         this.playing = false;
-         this.player.pause();
-      }
-   }
-
-   // seek operations cannot be called until after
-   // the player is ready.
-   @Override
-   public void seek(int position) {
-      if (this.prepared)
-         this.player.seekTo(position);
-      else
-         this.shouldSeekTo = position;
-   }
-
-   /**
-    * MediaPlayer callbacks
-    */
-
-   @Override
-   public void onPrepared(final MediaPlayer mediaPlayer) {
-      this.prepared = true;
-      this.preparing = false;
-      PlayerHandler.handleDuration(this);
-      if (this.playing) {
-         mediaPlayer.start();
-         PlayerHandler.startPositionUpdates();
-      }
-      if (this.shouldSeekTo >= 0) {
-         mediaPlayer.seekTo(this.shouldSeekTo);
-         this.shouldSeekTo = -1;
-      }
-   }
-
-   @Override
-   public void onCompletion(final MediaPlayer mediaPlayer) {
-      if (releaseMode != ReleaseMode.LOOP) {
-         this.stop();
-      }
-      PlayerHandler.handleCompletion();
-   }
-
-   @Override
-   public void onBufferingUpdate(MediaPlayer mediaPlayer, int percent) {
-      if (pendingUri != null) {
-         mediaPlayer.release();
-         setUri(pendingUri);
-         pendingUri = null;
-      }
-   }
-
-   /**
-    * Internal logic. Private methods
-    */
-
-   private MediaPlayer createPlayer() {
-      MediaPlayer player = new MediaPlayer();
-      player.setOnPreparedListener(this);
-      player.setOnCompletionListener(this);
-      player.setOnBufferingUpdateListener(this);
-
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-         player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
-               .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
-      } else {
-         // This method is deprecated but must be used on older devices
-         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      }
-
-      player.setVolume((float) volume, (float) volume);
-      player.setLooping(this.releaseMode == ReleaseMode.LOOP);
-      return player;
-   }
-
-   private void setSource(Context appContext, Uri uri) {
-      try {
-         this.player.setDataSource(appContext, uri);
-      } catch (IOException e) {
-         throw new RuntimeException("Unable to access resource", e);
-      }
-   }
+    private void setSource(Context appContext, Uri uri) {
+        try {
+            player.setDataSource(appContext, uri);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to access resource", e);
+        }
+    }
 
 }

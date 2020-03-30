@@ -116,23 +116,28 @@ class StackRouteTransition<T extends Widget> extends RouteTransition<T> {
                   curve: exitCurve,
                   reverseCurve: exitReverseCurve)),
           child: Container(
-            foregroundDecoration: BoxDecoration(
-              color: // Dim exit page from 0 to 0.9
-                  Colors.black.withOpacity(
-                exitAnimationEnabled
-                    ? secondaryAnimation.status == AnimationStatus.forward
-                        ? secondaryAnimation.value / 1.3
-                        : secondaryAnimation.value / 2.9
-                    : 0,
-              ),
-            ),
-            child: IgnorePointer(
-              // Disable any touch events on enter while in transition
-              ignoring: ignore,
+            color: Colors.black,
+            child: FadeTransition(
+              opacity: secondaryAnimation.status == AnimationStatus.forward
+                  // Dim route on exit
+                  ? exitDimTween.animate(
+                      secondaryAnimation,
+                    )
+                  // Dim route on exit reverse, but less a little bit than on forward
+                  : secondaryAnimation.status == AnimationStatus.reverse
+                      ? exitRevDimTween.animate(
+                          secondaryAnimation,
+                        )
+                      // Do not dim in other cases
+                      : constTween.animate(secondaryAnimation),
               child: IgnorePointer(
-                // Disable any touch events on exit while in transition
-                ignoring: secondaryIgnore,
-                child: child,
+                // Disable any touch events on enter while in transition
+                ignoring: ignore,
+                child: IgnorePointer(
+                  // Disable any touch events on exit while in transition
+                  ignoring: secondaryIgnore,
+                  child: child,
+                ),
               ),
             ),
           ),
