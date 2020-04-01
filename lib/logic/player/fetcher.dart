@@ -9,14 +9,11 @@ import 'dart:convert';
 import 'package:sweyer/utils/async.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/api.dart' as API;
 
 import 'song.dart';
 
 class SongsFetcher {
-  /// Channel for handling audio focus
-  MethodChannel _songsChannel =
-      const MethodChannel(Constants.SongsChannel.CHANNEL_NAME);
-      
   OperationsQueue _fetchQueue = OperationsQueue();
 
   /// A temporary container for found songs
@@ -26,12 +23,11 @@ class SongsFetcher {
   final Function saveJson;
 
   SongsFetcher(this.saveJson) {
-    _songsChannel.setMethodCallHandler((MethodCall call) async {
-      if (call.method == Constants.SongsChannel.SONGS_METHOD_SEND_SONGS) {
-        // List to songs that come from channel
-        // NOTE: cast method is must be here, [as] crashes code execution
-        _getSongsFromChannel(call.arguments.cast<String>());
-      }
+    API.SongsHandler.setOnGetSongsHandler((MethodCall call) {
+      // List to songs that come from channel
+      // NOTE: cast method is must be here, [as] crashes code execution
+      _getSongsFromChannel(call.arguments.cast<String>());
+      return;
     });
   }
 
@@ -40,8 +36,7 @@ class SongsFetcher {
   /// If gets invoked before previous fetch operation ended, then call will be added to a queue an completed after current operation ends
   Future<List<Song>> fetchSongs() async {
     await _fetchQueue.add(() {
-      _songsChannel
-          .invokeMethod<String>(Constants.SongsChannel.SONGS_METHOD_RETRIEVE_SONGS);
+      API.SongsHandler.retrieveSongs();
     });
     // Save it to local var to clear `_foundSongsTemp`
     List<Song> retSongs = _foundSongsTemp;

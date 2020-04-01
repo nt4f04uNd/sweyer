@@ -42,7 +42,8 @@ abstract class LaunchControl {
   static Stream<bool> get onLaunch => _streamController.stream;
 
   static Future<void> init() async {
-    API.EventsHandler.start();
+    API.EventsHandler.init();
+    API.SongsHandler.init();
 
     // Add callback to stop service when app is destroyed, temporary
     // WidgetsBinding.instance
@@ -54,7 +55,7 @@ abstract class LaunchControl {
       await Permissions.init();
       await Future.wait([
      ThemeControl.init(),
-        PlaylistControl.init(),
+        ContentControl.init(),
         MusicPlayer.init(),
       ]);
       // Init playlist control, we don't want to wait it

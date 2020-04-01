@@ -11,6 +11,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="Sweyer"
+        android:requestLegacyExternalStorage="true"
         android:resizeableActivity="false">
         <activity
             android:name="com.nt4f04uNd.sweyer.MainActivity"

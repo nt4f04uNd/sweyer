@@ -27,6 +27,7 @@ Song _$SongFromJson(Map<String, dynamic> json) {
     dateModified: json['dateModified'] as int,
     duration: json['duration'] as int,
     size: json['size'] as int,
+    data: json['data'] as String,
     albumArtUri: json['albumArtUri'] as String,
   );
 }
@@ -45,5 +46,6 @@ Map<String, dynamic> _$SongToJson(Song instance) => <String, dynamic>{
       'dateModified': instance.dateModified,
       'duration': instance.duration,
       'size': instance.size,
+      'data': instance.data,
       'albumArtUri': instance.albumArtUri,
     };

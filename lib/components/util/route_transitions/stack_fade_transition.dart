@@ -7,14 +7,6 @@ import 'package:flutter/material.dart';
 import 'route_transitions.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-// Tweens for enter animation dim animations
-final Tween<Offset> _entMoveTween =
-    Tween<Offset>(begin: const Offset(0.1, 0.0), end: Offset.zero);
-final _entRevMoveTween = Tween(begin: const Offset(0.2, 0.0), end: Offset.zero);
-final _standTween = Tween(begin: Offset.zero, end: Offset.zero);
-final _entFadeTween = Tween<double>(begin: 0.2, end: 1.0);
-final _entRevFadeTween = Tween<double>(begin: -0.5, end: 1.0);
-
 /// Creates customizable stack route transition with fade, very similar to Telegram app
 class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
   @override
@@ -77,36 +69,41 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
       Animation<double> secondaryAnimation,
       Widget child,
     ) {
+      final slideAnimation = animation.status == AnimationStatus.forward
+          // Move in on enter
+          ? Tween<Offset>(begin: const Offset(0.1, 0.0), end: Offset.zero)
+              .animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: entCurve,
+              ),
+            )
+          // Move out on enter reverse
+          : animation.status == AnimationStatus.reverse
+              ? Tween(begin: const Offset(0.2, 0.0), end: Offset.zero).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: entCurve,
+                    reverseCurve: entReverseCurve,
+                  ),
+                )
+              // Stand still in other cases
+              : Tween(begin: Offset.zero, end: Offset.zero).animate(animation);
+
+      final fadeAnimation = animation.status == AnimationStatus.forward
+          // Fade in on enter
+          ? Tween<double>(begin: 0.2, end: 1.0).animate(animation)
+          // Fade out on exit
+          : animation.status == AnimationStatus.reverse
+              ? Tween<double>(begin: -0.5, end: 1.0).animate(animation)
+              // Do not fade in other cases
+              : constTween.animate(animation);
+
       return TurnableSlideTransition(
         enabled: entAnimationEnabled,
-        position: animation.status == AnimationStatus.forward
-            // Move in on enter
-            ? _entMoveTween.animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: entCurve,
-                ),
-              )
-            // Move out on enter reverse
-            : animation.status == AnimationStatus.reverse
-                ? _entRevMoveTween.animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: entCurve,
-                      reverseCurve: entReverseCurve,
-                    ),
-                  )
-                // Stand still in other cases
-                : _standTween.animate(animation),
+        position: slideAnimation,
         child: FadeTransition(
-          opacity: animation.status == AnimationStatus.forward
-              // Fade in on enter
-              ? _entFadeTween.animate(animation)
-              // Fade out on exit
-              : animation.status == AnimationStatus.reverse
-                  ? _entRevFadeTween.animate(animation)
-                  // Do not fade in other cases
-                  : constTween.animate(animation),
+          opacity: fadeAnimation,
           child: IgnorePointer(
             // Disable any touch events on enter while in transition
             ignoring: ignore,

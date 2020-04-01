@@ -41,14 +41,14 @@ class InitialRouteState extends State<InitialRoute> {
     return WillPopScope(
       onWillPop: _handleHomePop,
       child: StreamBuilder(
-          stream: PlaylistControl.onPlaylistListChange,
+          stream: ContentControl.state.onPlaylistListChange,
           builder: (context, snapshot) {
-            return !PlaylistControl.playReady
+            return !ContentControl.playReady
                 ? LoadingScreen()
                 : Permissions.notGranted
                     ? _NoPermissionsScreen()
-                    : PlaylistControl.getPlaylist(PlaylistType.global).isEmpty
-                        ? PlaylistControl.initFetching
+                    : ContentControl.state.getPlaylist(PlaylistType.global).isEmpty
+                        ? ContentControl.initFetching
                             ? _SearchingSongsScreen()
                             : _SongsEmptyScreen()
                         : TrackListScreen();
@@ -97,7 +97,7 @@ class _SongsEmptyScreen extends StatefulWidget {
 class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
   bool _fetching = false;
   Future<void> _refetchHandler() async {
-    return await PlaylistControl.refetchSongs();
+    return await ContentControl.refetchSongs();
   }
 
   @override

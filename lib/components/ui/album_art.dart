@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -15,7 +16,7 @@ import 'package:sweyer/sweyer.dart';
 const double kSMMLargeAlbumArtMargins = 80.0;
 const double kSMMSmallArtSize = 48.0;
 const Duration kSMMLargeAlbumFadeDuration = Duration(milliseconds: 180);
-const Duration kSMMSmallAlbumFadeDuration = Duration(milliseconds: 340);
+const Duration kSMMSmallAlbumFadeDuration = Duration(milliseconds: 570);
 const Duration kSMMRotatingAlbumFadeDuration = Duration(milliseconds: 100);
 
 /// `3` is The [CircularPercentIndicator.lineWidth] doubled and additional 3 spacing
@@ -35,13 +36,21 @@ abstract class _AlbumArtWidget extends StatefulWidget {
 /// Mixin that uses [StatefulWidget] [initState] to check album art path and fetch it if needed
 mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
   /// Loading future to use then in future builder
-  Future<Uint8List> loading;
+  // Future<Uint8List> loading;
+  CancelableOperation<Uint8List> loadingOperation;
 
   @override
   @mustCallSuper
   void initState() {
     super.initState();
-    loading = loadArt(widget.path);
+    loadingOperation = CancelableOperation.fromFuture(loadArt(widget.path));
+  }
+
+  @override
+  @mustCallSuper
+  void dispose() {
+    super.dispose();
+    loadingOperation.cancel();
   }
 
   /// Fetches art by path
@@ -49,11 +58,13 @@ mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
     // Call loading promise if path is not null
     if (path != null) {
       File file = File(path);
-      if (await file.exists()) return file.readAsBytes();
+      // if (await file.exists()) return file.readAsBytes();
     }
     return null;
   }
 }
+
+//***************************************** Album arts (actual pictures) ******************************************
 
 /// Large album art to display in player route
 ///
@@ -69,7 +80,7 @@ class AlbumArtLarge extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
       double size = constraint.maxWidth - kSMMLargeAlbumArtMargins;
-      if (path == null) {
+      if (path == null || !File(path).existsSync()) {
         return AlbumPlaceholderLarge(size: size);
       } else {
         return ClipRRect(
@@ -88,178 +99,91 @@ class AlbumArtLarge extends StatelessWidget {
   }
 }
 
-// class AlbumArtSmall extends _AlbumArtWidget {
-//   AlbumArtSmall({Key key, @required this.path}) : super(key: key);
+// class AlbumArtSmall extends StatelessWidget {
+//   const AlbumArtSmall({Key key, @required this.path}) : super(key: key);
 
-//   @override
 //   final String path;
-
 //   @override
-//   _AlbumArtSmallState createState() => _AlbumArtSmallState();
+//   Widget build(BuildContext context) {
+//     if (path == null) {
+//       return const AlbumPlaceholderSmall();
+//     } else {
+//       return ClipRRect(
+//         borderRadius: const BorderRadius.all(
+//           Radius.circular(10),
+//         ),
+//         child: Image.file(
+//           File(path),
+//           width: kSMMSmallArtSize,
+//           height: kSMMSmallArtSize,
+//           fit: BoxFit.fill,
+//         ),
+//       );
+//     }
+//   }
 // }
 
-class AlbumArtSmall extends StatelessWidget {
-  const AlbumArtSmall({Key key, @required this.path}) : super(key: key);
+class AlbumArtSmall extends _AlbumArtWidget {
+  AlbumArtSmall({
+    Key key,
+    @required this.path,
+  }) : super(key: key);
 
+  @override
   final String path;
+
+  @override
+  _AlbumArtSmallState createState() => _AlbumArtSmallState();
+}
+
+class _AlbumArtSmallState extends State<AlbumArtSmall>
+// with _AlbumArtStateMixin
+{
   @override
   Widget build(BuildContext context) {
-    if (path == null) {
+    if (widget.path == null || !File(widget.path).existsSync()) {
       return const AlbumPlaceholderSmall();
     } else {
       return ClipRRect(
         borderRadius: const BorderRadius.all(
-          Radius.circular(10),
+          Radius.circular(10.0),
         ),
         child: Image.file(
-          File(path),
+          File(widget.path),
           width: kSMMSmallArtSize,
           height: kSMMSmallArtSize,
           fit: BoxFit.fill,
         ),
       );
+
+      // return FutureBuilder<bool>(
+      //     future: checkOperation.value,
+      //     builder: (context, snapshot) {
+      //       if (snapshot.hasError) {
+      //         return const AlbumPlaceholderSmall();
+      //       } else {
+      //         return snapshot.connectionState == ConnectionState.waiting ||
+      //                 snapshot.connectionState == ConnectionState.done &&
+      //                     (!snapshot.hasData || !snapshot.data)
+      //             ? const AlbumArtEmptySpace()
+      //             : ClipRRect(
+      //                 borderRadius: const BorderRadius.all(
+      //                   Radius.circular(10.0),
+      //                 ),
+      //                 child: Image.file(
+      //                   File(widget.path),
+      //                   width: kSMMSmallArtSize,
+      //                   height: kSMMSmallArtSize,
+      //                   fit: BoxFit.fill,
+      //                 ),
+      //               );
+      //       }
+      //     });
     }
   }
 }
 
-// class _AlbumArtSmallState extends State<AlbumArtSmall>
-//     with _AlbumArtStateMixin {
-//   @override
-//   Widget build(BuildContext context) {
-//     if (widget.path == null) {
-//       return const AlbumPlaceholderSmall();
-//     } else {
-//       return FutureBuilder<Uint8List>(
-//           future: loading,
-//           builder: (context, snapshot) {
-//             return AnimatedSwitcher(
-              // duration: kSMMSmallAlbumFadeDuration,
-//               child: snapshot.connectionState == ConnectionState.waiting ||
-//                       snapshot.connectionState == ConnectionState.done &&
-//                           !snapshot.hasData
-//                   ? const AlbumPlaceholderSmall()
-//                   : ClipRRect(
-//                       borderRadius: const BorderRadius.all(
-//                         Radius.circular(10),
-//                       ),
-//                       child: Image.memory(
-//                         snapshot.data,
-//                         width: kSMMSmallArtSize,
-//                         height: kSMMSmallArtSize,
-//                         fit: BoxFit.fill,
-//                       ),
-//                     ),
-//             );
-//           });
-//     }
-//   }
-// }
-
-/// Widget that shows rotating album art
-/// Used in bottom track panel and starts rotating when track starts playing
-class RotatingAlbumArt extends _AlbumArtWidget {
-  RotatingAlbumArt({
-    Key key,
-    @required this.path,
-    @required this.initIsRotating,
-    this.initRotation = 0.0,
-  })  : assert(initIsRotating != null),
-        assert(initRotation >= 0 && initRotation <= 1.0),
-        super(key: key);
-
-  @override
-  final String path;
-
-  /// Should widget start rotate on mount or not
-  final bool initIsRotating;
-
-  /// From 0.0 to 1.0
-  /// Will be set as animation controller initial value
-  final double initRotation;
-
-  @override
-  RotatingAlbumArtState createState() => RotatingAlbumArtState();
-}
-
-class RotatingAlbumArtState extends State<RotatingAlbumArt>
-    with SingleTickerProviderStateMixin, _AlbumArtStateMixin {
-  AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(duration: const Duration(seconds: 15), vsync: this);
-    _controller.value = widget.initRotation ?? 0;
-
-    _controller
-      ..addListener(() {
-        setState(() {});
-      });
-
-    if (widget.initIsRotating)
-      rotate();
-    else
-      stopRotating();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> reloadArt(String path) async {
-    setState(() {
-      loading = loadArt(path);
-    });
-  }
-
-  /// Starts rotating, for use with global keys
-  void rotate() {
-    _controller.repeat();
-  }
-
-  /// Stops rotating, for use with global keys
-  void stopRotating() {
-    _controller.stop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RotationTransition(
-        turns: _controller,
-        child: (() {
-          if (widget.path == null) {
-            return const RotatingAlbumPlaceholder();
-          } else {
-            return FutureBuilder<Uint8List>(
-                future: loading,
-                builder: (context, snapshot) {
-                  return AnimatedSwitcher(
-                    duration: kSMMRotatingAlbumFadeDuration,
-                    child: snapshot.connectionState ==
-                                ConnectionState.waiting ||
-                            snapshot.connectionState == ConnectionState.done &&
-                                !snapshot.hasData
-                        ? const RotatingAlbumPlaceholder()
-                        : ClipRRect(
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(kRotatingArtSize),
-                            ),
-                            child: Image.memory(
-                              snapshot.data,
-                              width: kRotatingArtSize,
-                              height: kRotatingArtSize,
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                  );
-                });
-          }
-        })());
-  }
-}
+//***************************************** Album placeholders and other fake images ******************************************
 
 class AlbumPlaceholderLarge extends StatelessWidget {
   const AlbumPlaceholderLarge({Key key, @required this.size}) : super(key: key);
@@ -284,8 +208,12 @@ class AlbumPlaceholderLarge extends StatelessWidget {
   }
 }
 
-class AlbumPlaceholderSmall extends StatelessWidget {
-  const AlbumPlaceholderSmall({Key key}) : super(key: key);
+/// Base container for album art.
+///
+/// Looks just like a box with rounded corners.
+class AlbumArtBaseSmall extends StatelessWidget {
+  const AlbumArtBaseSmall({Key key, this.child}) : super(key: key);
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +225,36 @@ class AlbumPlaceholderSmall extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       padding: const EdgeInsets.all(10),
-      // TODO: path to const
+      child: child,
+    );
+  }
+}
+
+/// An empty box that occupies the same space as the small album art
+class AlbumArtEmptySpace extends StatelessWidget {
+  const AlbumArtEmptySpace({Key key, this.child}) : super(key: key);
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: kSMMSmallArtSize,
+      height: kSMMSmallArtSize,
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.all(10),
+      child: child,
+    );
+  }
+}
+
+class AlbumPlaceholderSmall extends StatelessWidget {
+  const AlbumPlaceholderSmall({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlbumArtBaseSmall(
       child: Image.asset(
         'assets/images/placeholder_thumb.png',
       ),
@@ -332,16 +289,130 @@ class AlbumArtErrorSmall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: kSMMSmallArtSize,
-      height: kSMMSmallArtSize,
-      decoration: BoxDecoration(
-        color: Constants.AppTheme.albumArtSmall.auto(context),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-      ),
-      padding: const EdgeInsets.all(10),
+    return AlbumArtBaseSmall(
       child: Icon(Icons.error_outline),
     );
+  }
+}
+
+//***************************************** Rotating arts ******************************************
+
+/// Widget that shows rotating album art
+/// Used in bottom track panel and starts rotating when track starts playing
+class AlbumArtRotating extends _AlbumArtWidget {
+  AlbumArtRotating({
+    Key key,
+    @required this.path,
+    @required this.initIsRotating,
+    this.initRotation = 0.0,
+  })  : assert(initIsRotating != null),
+        assert(initRotation >= 0 && initRotation <= 1.0),
+        super(key: key);
+
+  @override
+  final String path;
+
+  /// Should widget start rotate on mount or not
+  final bool initIsRotating;
+
+  /// From 0.0 to 1.0
+  /// Will be set as animation controller initial value
+  final double initRotation;
+
+  @override
+  AlbumArtRotatingState createState() => AlbumArtRotatingState();
+}
+
+class AlbumArtRotatingState extends State<AlbumArtRotating>
+    with SingleTickerProviderStateMixin, _AlbumArtStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(duration: const Duration(seconds: 15), vsync: this);
+    _controller.value = widget.initRotation ?? 0;
+
+    _controller
+      ..addListener(() {
+        setState(() {});
+      });
+
+    if (widget.initIsRotating)
+      rotate();
+    else
+      stopRotating();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // Future<void> reloadArt(String path) async {
+  //   setState(() {
+  //     loadingOperation?.cancel();
+  //     loadingOperation = CancelableOperation.fromFuture(loadArt(path));
+  //   });
+  // }
+
+  /// Starts rotating, for use with global keys
+  void rotate() {
+    _controller.repeat();
+  }
+
+  /// Stops rotating, for use with global keys
+  void stopRotating() {
+    _controller.stop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+        turns: _controller,
+        child: (() {
+          if (widget.path == null || !File(widget.path).existsSync()) {
+            return const RotatingAlbumPlaceholder();
+          } else {
+            return ClipRRect(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(kRotatingArtSize),
+              ),
+              child: Image.file(
+                File(widget.path),
+                width: kRotatingArtSize,
+                height: kRotatingArtSize,
+                fit: BoxFit.fill,
+              ),
+            );
+
+            //   return FutureBuilder<Uint8List>(
+            //       future: loadingOperation.value,
+            //       builder: (context, snapshot) {
+            //         return AnimatedSwitcher(
+            //           duration: kSMMRotatingAlbumFadeDuration,
+            //           child: snapshot.connectionState ==
+            //                       ConnectionState.waiting ||
+            //                   snapshot.connectionState == ConnectionState.done &&
+            //                       !snapshot.hasData
+            //               ? const RotatingAlbumPlaceholder()
+            //               : ClipRRect(
+            //                   borderRadius: const BorderRadius.all(
+            //                     Radius.circular(kRotatingArtSize),
+            //                   ),
+            //                   child: Image.memory(
+            //                     snapshot.data,
+            //                     width: kRotatingArtSize,
+            //                     height: kRotatingArtSize,
+            //                     fit: BoxFit.fill,
+            //                   ),
+            //                 ),
+            //         );
+            //       });
+          }
+        })());
   }
 }
 

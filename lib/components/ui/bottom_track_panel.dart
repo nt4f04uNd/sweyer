@@ -21,7 +21,7 @@ class BottomTrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlaylistControl.getPlaylist(PlaylistType.global).isEmpty)
+    if (ContentControl.state.getPlaylist(PlaylistType.global).isEmpty)
       return SizedBox.shrink();
 
     return Align(
@@ -52,14 +52,14 @@ class BottomTrackPanel extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            PlaylistControl.currentSong?.title,
+                            ContentControl.state.currentSong.title,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontSize: 16.5),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 1),
                             child: Artist(
-                              artist: PlaylistControl.currentSong?.artist,
+                              artist: ContentControl.state.currentSong.artist,
                               // textStyle: TextStyle(fontWeight: ThemeControl.isDark ? FontWeight.w400 : FontWeight.w500),
                             ),
                           ),
@@ -130,8 +130,8 @@ class _RotatingAlbumArtWithProgressState
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<AudioPlayerState> _playerStateChangeSubscription;
 
-  GlobalKey<RotatingAlbumArtState> _rotatingArtGlobalKey =
-      GlobalKey<RotatingAlbumArtState>();
+  GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey =
+      GlobalKey<AlbumArtRotatingState>();
 
   @override
   void initState() {
@@ -165,14 +165,14 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle song change
-    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) async {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
       _value = await MusicPlayer.currentPosition;
       if(mounted)
       setState(() {
         _duration = Duration(milliseconds: event.duration);
         // Update art
-        _rotatingArtGlobalKey.currentState
-            .reloadArt(PlaylistControl.currentSong?.albumArtUri);
+        // _rotatingArtGlobalKey.currentState
+        //     .reloadArt(ContentControl.state.currentSong?.albumArtUri);
       });
     });
   }
@@ -189,7 +189,7 @@ class _RotatingAlbumArtWithProgressState
     var currentPosition = await MusicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
+      _duration = Duration(milliseconds: ContentControl.state.currentSong?.duration);
     });
   }
 
@@ -215,9 +215,9 @@ class _RotatingAlbumArtWithProgressState
         circularStrokeCap: CircularStrokeCap.round,
         progressColor: Colors.deepPurple,
         backgroundColor: Colors.transparent,
-        center: RotatingAlbumArt(
+        center: AlbumArtRotating(
           key: _rotatingArtGlobalKey,
-          path: PlaylistControl.currentSong?.albumArtUri,
+          path: ContentControl.state.currentSong?.albumArtUri,
           initRotation: math.Random(DateTime.now().second).nextDouble(),
           initIsRotating: MusicPlayer.playerState == AudioPlayerState.PLAYING,
         ),

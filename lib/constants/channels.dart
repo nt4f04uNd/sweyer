@@ -75,7 +75,7 @@ abstract class ServiceChannel {
   static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'SERVICE_CHANNEL';
 
   static const String METHOD_STOP_SERVICE = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_STOP_SERVICE";
-  static const String METHOD_SEND_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_SONG";
+  static const String METHOD_SEND_CURRENT_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_CURRENT_SONG";
 }
 
 //****************SONGS***************************************************************************************
@@ -83,8 +83,10 @@ abstract class SongsChannel {
   static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'SONGS_CHANNEL';
 
   /// Retrieve songs method
-  static const String SONGS_METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
+  static const String METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
 
   /// Method that sends found songs from native code to flutter code
-  static const String SONGS_METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
+  static const String METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
+
+  static const String METHOD_DELETE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_DELETE_SONGS";
 }

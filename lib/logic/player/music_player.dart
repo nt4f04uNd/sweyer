@@ -8,10 +8,9 @@ export 'native_player.dart';
 export 'playlist.dart';
 export 'serialization.dart';
 export 'song.dart';
+export 'content.dart';
 
 import 'dart:async';
-import 'dart:io';
-import 'package:color_thief_flutter/color_thief_flutter.dart';
 import 'package:flutter/material.dart';
 
 import 'playlist.dart';
@@ -124,8 +123,9 @@ abstract class MusicPlayer {
     int songId, {
     bool silent = false,
   }) async {
-    final song =
-        PlaylistControl.getPlaylist(PlaylistType.global).getSongById(songId);
+    final song = ContentControl.state
+        .getPlaylist(PlaylistType.global)
+        .getSongById(songId);
     bool success = true;
     try {
       if (!silent) // [stayAwake] is very important for player to stay play even in background
@@ -141,14 +141,14 @@ abstract class MusicPlayer {
           );
           // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
           // Play next track after broken one
-          await play(PlaylistControl.getPlaylist().getNextSongId(songId),
+          await play(ContentControl.state.currentPlaylist.getNextSongId(songId),
               silent: silent);
-          PlaylistControl.getPlaylist(PlaylistType.global).removeSongAt(
-            PlaylistControl.getPlaylist(PlaylistType.global)
+          ContentControl.state.getPlaylist(PlaylistType.global).removeSongAt(
+            ContentControl.state.getPlaylist(PlaylistType.global)
                 .getSongIndexById(songId),
           ); //Remove broken track
-          PlaylistControl.emitPlaylistChange();
-          PlaylistControl.refetchSongs(); // perform fetching
+          ContentControl.state.emitPlaylistChange();
+          ContentControl.refetchSongs(); // perform fetching
         } else if (e.message == Constants.Errors.NATIVE_PLAYER_ILLEGAL_STATE) {
           // ...
         }
@@ -161,14 +161,14 @@ abstract class MusicPlayer {
       // Change playing track id
       if (success) {
       } else
-        play(PlaylistControl.currentSongId, silent: silent);
+        play(ContentControl.state.currentSongId, silent: silent);
     }
   }
 
   /// Resume player
   static Future<void> resume([int songId]) async {
     // If [songId] hasn't been provided then use playing id state
-    if (songId == null) songId = PlaylistControl.currentSongId;
+    if (songId == null) songId = ContentControl.state.currentSongId;
     try {
       return NativeAudioPlayer.resume();
     } catch (e) {
@@ -229,10 +229,10 @@ abstract class MusicPlayer {
         break;
       case AudioPlayerState.STOPPED:
         // Currently unused and shouldn't
-        await play(PlaylistControl.currentSongId);
+        await play(ContentControl.state.currentSongId);
         break;
       case AudioPlayerState.COMPLETED:
-        await play(PlaylistControl.currentSongId);
+        await play(ContentControl.state.currentSongId);
         break;
       default: // Can be null, so don't throw
         break;
@@ -243,10 +243,9 @@ abstract class MusicPlayer {
   ///
   /// If provided [songId] - plays next from this id
   static Future<void> playNext({int songId, bool silent = false}) async {
-    songId ??= PlaylistControl.getPlaylist()
-        .getNextSongId(PlaylistControl.currentSongId);
-    PlaylistControl.changeSong(songId);
-    PlaylistControl.emitSongChange(PlaylistControl.currentSong);
+    songId ??= ContentControl.state.currentPlaylist
+        .getNextSongId(ContentControl.state.currentSongId);
+    ContentControl.state.changeSong(songId);
     play(songId, silent: silent);
   }
 
@@ -254,10 +253,8 @@ abstract class MusicPlayer {
   ///
   /// If provided [songId] - plays prev from this id
   static Future<void> playPrev({int songId, bool silent = false}) async {
-    songId ??= PlaylistControl.getPlaylist()
-        .getPrevSongId(PlaylistControl.currentSongId);
-    PlaylistControl.changeSong(songId);
-    PlaylistControl.emitSongChange(PlaylistControl.currentSong);
+    songId ??= ContentControl.state.currentPlaylist.getPrevSongId(ContentControl.state.currentSongId);
+    ContentControl.state.changeSong(songId);
     play(songId, silent: silent);
   }
 
@@ -267,10 +264,9 @@ abstract class MusicPlayer {
   static Future<void> handleClickSongTile(
       BuildContext context, Song clickedSong,
       {bool pushToPlayerRoute = false}) async {
-    int prevCurrentSongId = PlaylistControl.currentSongId;
+    int prevCurrentSongId = ContentControl.state.currentSongId;
 
-    PlaylistControl.changeSong(clickedSong.id);
-    PlaylistControl.emitSongChange(clickedSong);
+    ContentControl.state.changeSong(clickedSong.id);
 
     // print(
     //     "$prevCurrentSongId   ${clickedSong.id}    ${MusicPlayer.playerState}");
@@ -313,7 +309,7 @@ abstract class MusicPlayer {
     if (pushToPlayerRoute &&
         (clickedSong.id != prevCurrentSongId ||
             clickedSong.id == prevCurrentSongId &&
-                MusicPlayer.playerState != AudioPlayerState.PLAYING)) {
+                MusicPlayer.playerState == AudioPlayerState.PLAYING)) {
       Navigator.of(context).pushNamed(Constants.Routes.player.value);
     }
   }

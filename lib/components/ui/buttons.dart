@@ -124,15 +124,15 @@ class _ShuffleButtonState extends State<ShuffleButton> {
     return SMMIconButton(
       splashColor: Constants.AppTheme.splash.auto(context),
       icon: Icon(Icons.shuffle),
-      color: PlaylistControl.playlistType == PlaylistType.shuffled
+      color: ContentControl.state.currentPlaylistType == PlaylistType.shuffled
           ? Constants.AppTheme.mainContrast.auto(context)
           : Constants.AppTheme.disabledIcon.auto(context),
       onPressed: () {
         setState(() {
-          if (PlaylistControl.playlistType == PlaylistType.shuffled)
-            PlaylistControl.returnFromShuffledPlaylist();
+          if (ContentControl.state.currentPlaylistType == PlaylistType.shuffled)
+            ContentControl.returnFromShuffledPlaylist();
           else
-            PlaylistControl.setShuffledPlaylist();
+            ContentControl.setShuffledPlaylist();
         });
       },
     );

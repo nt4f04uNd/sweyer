@@ -38,7 +38,7 @@ class _PrefKeys {
   /// `1` represents title feature
   final Pref<int> sortFeatureInt = const Pref<int>(key: 'sort_feature');
 
-  /// Last played [playlistType]
+  /// Last played [_currentPlaylistType]
   ///
   /// `0` represents [global]
   ///

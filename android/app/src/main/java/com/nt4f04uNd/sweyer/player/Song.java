@@ -27,6 +27,7 @@ public class Song {
     public final int dateModified;
     public final int duration;
     public final int size;
+    public final String data;
     @Nullable
     public final String albumArtUri;
 
@@ -44,6 +45,7 @@ public class Song {
             final int dateModified,
             final int duration,
             final int size,
+            final String data,
             @Nullable final String albumArtUri
     ) {
         this.id = id;
@@ -59,6 +61,7 @@ public class Song {
         this.dateModified = dateModified;
         this.duration = duration;
         this.size = size;
+        this.data = data;
         this.albumArtUri = albumArtUri;
     }
 
@@ -78,6 +81,7 @@ public class Song {
             json.put("dateModified", this.dateModified);
             json.put("duration", this.duration);
             json.put("size", this.size);
+            json.put("data", this.data);
             json.put("albumArtUri", this.albumArtUri);
 
         } catch (JSONException e) {
@@ -102,6 +106,7 @@ public class Song {
                     json.getInt("dateModified"),
                     json.getInt("duration"),
                     json.getInt("size"),
+                    json.getString("data"),
                     json.getString("albumArtUri")
             );
         } catch (JSONException e) {
@@ -124,6 +129,7 @@ public class Song {
             final int dateModified,
             final int duration,
             final int size,
+            final String data,
             @Nullable final String albumArtUri
     ) {
         JSONObject json = new JSONObject();
@@ -141,6 +147,7 @@ public class Song {
             json.put("dateModified", dateModified);
             json.put("duration", duration);
             json.put("size", size);
+            json.put("data", data);
             json.put("albumArtUri", albumArtUri);
         } catch (JSONException e) {
             throw new RuntimeException(e);

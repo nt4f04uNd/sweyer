@@ -58,9 +58,9 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
   void _handleSave() async {
     Prefs.byKey.settingMinFileDurationInt.setPref(settingMinFileDuration);
     if (initSettingMinFileDuration <= settingMinFileDuration)
-      PlaylistControl.filterSongs();
+      ContentControl.filterSongs();
     else
-      PlaylistControl.refetchSongs();
+      ContentControl.refetchSongs();
     initSettingMinFileDuration = settingMinFileDuration;
     ShowFunctions.showToast(msg: "Настройки сохранены");
     setState(() {

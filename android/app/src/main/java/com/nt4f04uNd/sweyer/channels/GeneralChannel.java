@@ -41,8 +41,7 @@ public class GeneralChannel implements MethodChannel.MethodCallHandler {
     @Override
     public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
         // NOTE: this method is invoked on the main thread.
-        final String method = call.method;
-        switch (method) {
+        switch (call.method) {
             case Constants.channels.general.METHOD_INTENT_ACTION_VIEW:
                 result.success(GeneralHandler.isIntentActionView(activity));
                 break;

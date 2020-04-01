@@ -113,11 +113,11 @@ class _TrackListScreenState extends State<TrackListScreen> {
   void initState() {
     super.initState();
     _playlistChangeSubscription =
-        PlaylistControl.onPlaylistListChange.listen((event) {
+        ContentControl.state.onPlaylistListChange.listen((event) {
       // Update list on playlist changes
       _switcher.change();
     });
-    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
       // Needed to update current track indicator
       setState(() {});
     });
@@ -132,7 +132,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
 
   /// Performs tracks refetch
   Future<void> _handleRefresh() async {
-    await PlaylistControl.refetchSongs();
+    await ContentControl.refetchSongs();
     return Future.value();
   }
 
@@ -199,7 +199,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
   void _handleDelete() {
     ShowFunctions.showDialog(
       context,
-      title: const Text("Удаление (не имплементировано)"),
+      title: const Text("Удаление"),
       content: Text(
         "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо",
       ),
@@ -208,7 +208,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
         textColor: Constants.AppTheme.acceptButton.auto(context),
         onPressed: () {
           Navigator.of(context).pop();
-          PlaylistControl.deleteSongs(selectionSet);
+          ContentControl.deleteSongs(selectionSet);
           _handleCloseSelection();
         },
       ),
@@ -374,7 +374,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final songs = PlaylistControl.getPlaylist(PlaylistType.global).songs;
+    final songs = ContentControl.state.getPlaylist(PlaylistType.global).songs;
 
     return Scaffold(
       drawer: const DrawerWidget(),
@@ -404,9 +404,9 @@ class _TrackListScreenState extends State<TrackListScreen> {
                       child: ListView.builder(
                         // physics: const SMMBouncingScrollPhysics(),
                         physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount:
-                            PlaylistControl.getPlaylist(PlaylistType.global)
-                                .length,
+                        itemCount: ContentControl.state
+                            .getPlaylist(PlaylistType.global)
+                            .length,
                         padding: const EdgeInsets.only(bottom: 65, top: 0),
                         itemBuilder: (context, index) {
                           return SelectableSongTile(
@@ -417,8 +417,8 @@ class _TrackListScreenState extends State<TrackListScreen> {
                             someSelected: isSelection(),
                             unselecting: unselecting,
                             playing: songs[index].id ==
-                                PlaylistControl.currentSongId,
-                            onTap: PlaylistControl.resetPlaylists,
+                                ContentControl.state.currentSongId,
+                            onTap: ContentControl.resetPlaylists,
                             onSelected: () => _handleSelect(songs[index].id),
                             onUnselected: (bool onMount) =>
                                 _handleUnselect(songs[index].id, onMount),
@@ -459,15 +459,15 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
   @override
   Widget build(BuildContext context) {
     int initialScrollIndex;
-    final int length = PlaylistControl.getPlaylist().length;
-    final int currentSongIndex = PlaylistControl.currentSongIndex();
+    final int length = ContentControl.state.currentPlaylist.length;
+    final int currentSongIndex = ContentControl.state.currentSongIndex;
     if (length > 11) {
       initialScrollIndex =
           currentSongIndex > length - 6 ? length - 6 : currentSongIndex;
     } else
       initialScrollIndex = 0;
 
-    final songs = PlaylistControl.getPlaylist().songs;
+    final songs = ContentControl.state.currentPlaylist.songs;
 
     return Container(
       child: SingleTouchRecognizerWidget(
@@ -504,7 +504,7 @@ abstract class SongTileInterface {
 }
 
 /// [SongTile] that represents a single track in [TrackList]
-class SongTile extends StatelessWidget implements SongTileInterface {
+class SongTile extends StatefulWidget implements SongTileInterface {
   SongTile({
     Key key,
     @required this.song,
@@ -525,11 +525,16 @@ class SongTile extends StatelessWidget implements SongTileInterface {
 
   final Function onTap;
 
-  void _handleTap(BuildContext context) async {
-    // int prevCurrentSongId = PlaylistControl.currentSongId;
+  @override
+  _SongTileState createState() => _SongTileState();
+}
 
-    await MusicPlayer.handleClickSongTile(context, song,
-        pushToPlayerRoute: pushToPlayerRouteOnClick);
+class _SongTileState extends State<SongTile> {
+  void _handleTap(BuildContext context) async {
+    // int prevCurrentSongId = ContentControl.currentSongId;
+
+    await MusicPlayer.handleClickSongTile(context, widget.song,
+        pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
 
     // if (pushToPlayerRouteOnClick &&
     //     (song.id != prevCurrentSongId ||
@@ -538,41 +543,83 @@ class SongTile extends StatelessWidget implements SongTileInterface {
     //   Navigator.of(context).pushNamed(Constants.Routes.player.value);
     // }
 
-    if (onTap != null) onTap();
+    if (widget.onTap != null) widget.onTap();
+  }
+
+  final GlobalKey _key = GlobalKey();
+  Offset pos;
+  @override
+  void initState() {
+    super.initState();
+
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   RenderBox box = _key.currentContext.findRenderObject();
+    //   pos = box.localToGlobal(Offset.zero);
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListTileTheme(
-      selectedColor: Theme.of(context).textTheme.headline6.color,
-      child: ListTile(
-        subtitle: Artist(artist: song.artist),
-        // subtitle: Text(song.artist),
-        dense: true,
-        isThreeLine: false,
-        contentPadding: const EdgeInsets.only(left: 10, top: 0),
-        onTap: () => _handleTap(context),
-        leading: AlbumArtSmall(path: song.albumArtUri),
-        title: Text(
-          song.title,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 15 /* Default flutter title font size (not dense) */,
-          ),
-        ),
-        trailing: playing
-            ? Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+    return GestureDetector(
+      onLongPressStart: (_) {
+        var pos = _.globalPosition;
+        print(pos.dx);
+        showSMMMenu<dynamic>(
+          context: context,
+          elevation: 1,
+
+          items: <SMMPopupMenuEntry<dynamic>>[
+            SMMPopupMenuItem<void>(
+              value: '',
+              child: Center(
+                child: Text(
+                  'Флексануть,,,,,,,,,,,,,,,,,,,,,,,,',
+                  style: TextStyle(fontSize: 16),
                 ),
-              )
-            : null,
+              ),
+            ),
+          ],
+          initialValue: "kek",
+          // position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width/16, pos.dy + 8.0, 0, 0),
+
+          position: RelativeRect.fromLTRB(pos.dx, pos.dy, pos.dx, pos.dy),
+
+          // menuBorderRadius: widget.menuBorderRadius,
+          menuPadding: const EdgeInsets.all(0.0),
+        );
+      },
+      child: ListTileTheme(
+        key: _key,
+        selectedColor: Theme.of(context).textTheme.headline6.color,
+        child: ListTile(
+          subtitle: Artist(artist: widget.song.artist),
+          // subtitle: Text(song.artist),
+          dense: true,
+          isThreeLine: false,
+          contentPadding: const EdgeInsets.only(left: 10, top: 0),
+          onTap: () => _handleTap(context),
+          leading: AlbumArtSmall(path: widget.song.albumArtUri),
+          title: Text(
+            widget.song.title,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 15 /* Default flutter title font size (not dense) */,
+            ),
+          ),
+          trailing: widget.playing
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                )
+              : null,
+        ),
       ),
     );
   }
@@ -703,7 +750,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   }
 
   void _handleTap() async {
-   await MusicPlayer.handleClickSongTile(context, widget.song,
+    await MusicPlayer.handleClickSongTile(context, widget.song,
         pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
 
     if (widget.onTap != null) widget.onTap();
@@ -756,16 +803,17 @@ class _SelectableSongTileState extends State<SelectableSongTile>
             borderRadius: BorderRadius.circular(_animationBorderRadius.value),
             child: Stack(
               children: <Widget>[
-                Container(
-                  color: Constants.AppTheme.albumArtSmall.auto(context),
-                  child: FadeTransition(
-                    opacity: _animationOpacityInverse, // Inverse values
-                    child: ScaleTransition(
-                      scale: _animationScale,
-                      child: AlbumArtSmall(path: widget.song.albumArtUri),
-                    ),
+                // Container(
+                //   color: Constants.AppTheme.albumArtSmall.auto(context),
+                //   child:
+                FadeTransition(
+                  opacity: _animationOpacityInverse, // Inverse values
+                  child: ScaleTransition(
+                    scale: _animationScale,
+                    child: AlbumArtSmall(path: widget.song.albumArtUri),
                   ),
                 ),
+                // ),
                 if (_animationController.value != 0)
                   FadeTransition(
                     opacity: _animationOpacity,

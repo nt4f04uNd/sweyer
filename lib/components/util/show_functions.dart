@@ -48,13 +48,13 @@ abstract class ShowFunctions {
 
   /// Function that handles click in bottom modal and sorts tracks
   static void _handleSortClick(BuildContext context, SortFeature feature) {
-    PlaylistControl.sortSongs(feature: feature);
+    ContentControl.sortSongs(feature: feature);
     Navigator.pop(context);
   }
 
   /// Function that calls [showModalBottomSheet] and allows user to sort songs
   static void showSongsSortModal(BuildContext context) {
-    var sortFeature = PlaylistControl.sortFeature;
+    final sortFeature = ContentControl.state.currentSortFeature;
     showModalBottomSheet<void>(
         context: context,
         backgroundColor: Constants.AppTheme.main.auto(context),

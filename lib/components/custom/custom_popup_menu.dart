@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 // BuildContext context;
 // void setState(VoidCallback fn) { }
 
-const Duration _kMenuDuration = Duration(milliseconds: 300);
+const Duration _kMenuDuration = Duration(milliseconds: 240);
 const double _kBaselineOffsetFromBottom = 20.0;
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuHorizontalPadding = 16.0;
@@ -457,11 +457,21 @@ class _PopupMenu<T> extends StatelessWidget {
       ));
     }
 
-    final CurveTween opacity =
-        CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
-    final CurveTween width = CurveTween(curve: Interval(0.0, unit));
-    final CurveTween height =
-        CurveTween(curve: Interval(0.0, unit * route.items.length));
+    final Animation<Offset> translateOffsetAnimation =
+        Tween<Offset>(begin: const Offset(-3.0, -3.0), end: Offset.zero)
+            .animate(
+      CurvedAnimation(curve: Curves.easeOutCubic, parent: route.animation),
+    );
+    final Animation<double> fadeAnimation =
+        CurveTween(curve: Curves.easeOutCubic).animate(route.animation);
+    final Animation<double> widthAnimation =
+        Tween(begin: 0.95, end: 1.0).animate(
+      CurvedAnimation(curve: Curves.easeOutCubic, parent: route.animation),
+    );
+    final Animation<double> heightAnimation =
+        Tween(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(curve: Curves.easeOutCubic, parent: route.animation),
+    );
 
     final Widget child = ConstrainedBox(
       constraints: const BoxConstraints(
@@ -486,18 +496,21 @@ class _PopupMenu<T> extends StatelessWidget {
     return AnimatedBuilder(
       animation: route.animation,
       builder: (BuildContext context, Widget child) {
-        return Opacity(
-          opacity: opacity.evaluate(route.animation),
-          child: Material(
-            type: MaterialType.card,
-            elevation: route.elevation,
-            borderRadius: route.menuBorderRadius,
-            clipBehavior: Clip.antiAlias,
-            child: Align(
-              alignment: AlignmentDirectional.topEnd,
-              widthFactor: width.evaluate(route.animation),
-              heightFactor: height.evaluate(route.animation),
-              child: child,
+        return Transform.translate(
+          offset: translateOffsetAnimation.value,
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: Material(
+              type: MaterialType.card,
+              elevation: route.elevation,
+              borderRadius: route.menuBorderRadius,
+              clipBehavior: Clip.antiAlias,
+              child: Align(
+                alignment: AlignmentDirectional.topStart,
+                widthFactor: widthAnimation.value,
+                heightFactor: heightAnimation.value,
+                child: child,
+              ),
             ),
           ),
         );
@@ -748,6 +761,7 @@ Future<T> showSMMMenu<T>({
   assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
   String label = semanticLabel;
+
   switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -755,6 +769,8 @@ Future<T> showSMMMenu<T>({
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
       label =
           semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
@@ -992,6 +1008,8 @@ class _PopupMenuButtonState<T> extends State<SMMPopupMenuButton<T>> {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return const Icon(Icons.more_vert);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:

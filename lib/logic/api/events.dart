@@ -19,7 +19,8 @@ abstract class EventsHandler {
 
   static StreamSubscription<dynamic> _eventSubscription;
 
-  static void start() {
+  /// Starts listening to the events
+  static void init() {
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
       print("RECEIVED EVENT IN DART SIDE: $event");
       switch (event) {
@@ -96,7 +97,8 @@ abstract class EventsHandler {
     });
   }
 
-  static void stop() {
+  /// Kills the channel listener
+  static void kill() {
     _eventSubscription.cancel();
   }
 }

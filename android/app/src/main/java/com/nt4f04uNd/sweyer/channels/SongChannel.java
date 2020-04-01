@@ -7,8 +7,12 @@ package com.nt4f04uNd.sweyer.channels;
 
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.handlers.FetchHandler;
+import com.nt4f04uNd.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import androidx.annotation.Nullable;
 import io.flutter.Log;
@@ -34,13 +38,20 @@ public class SongChannel implements MethodChannel.MethodCallHandler {
     @Override
     public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
         // Note: this method is invoked on the main thread.
-        final String method = call.method;
-        if (method.equals(Constants.channels.songs.METHOD_RETRIEVE_SONGS)) {
-            // Run method on another thread
-            new FetchHandler.TaskSearchSongs(channel).execute();
-            result.success("");
-        } else {
-            Log.e(Constants.LogTag, "songsChannel: Invalid method name call from Dart code");
+        switch (call.method) {
+            case Constants.channels.songs.METHOD_RETRIEVE_SONGS: {
+                // Run method on another thread
+                new FetchHandler.TaskSearchSongs(channel).execute();
+                result.success("");
+                break;
+            }
+            case Constants.channels.songs.METHOD_DELETE_SONGS: {
+                FetchHandler.deleteSongs(call.argument("songDataList"));
+                break;
+            }
+            default:
+                Log.e(Constants.LogTag, "songsChannel: Invalid method name call from Dart code");
         }
     }
+
 }

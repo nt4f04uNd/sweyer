@@ -30,6 +30,7 @@ class Song {
   /// Duration in milliseconds
   final int duration;
   final int size;
+  final String data;
   final String albumArtUri;
 
   Song(
@@ -46,6 +47,7 @@ class Song {
       @required this.dateModified,
       @required this.duration,
       @required this.size,
+      @required this.data,
       @required this.albumArtUri});
 
   // Song.test()

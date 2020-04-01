@@ -37,7 +37,7 @@ abstract class Permissions {
     if (!canOpen) {
       await Permissions.requestPermission(PermissionGroup.storage);
       if (_permissionStorageStatus == PermissionState.granted) {
-        await PlaylistControl.init();
+        await ContentControl.init();
       }
     }
   }

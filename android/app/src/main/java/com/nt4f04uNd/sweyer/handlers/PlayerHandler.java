@@ -224,7 +224,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     }
 
     public static void setUri(int songId) {
-        player.setUri(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId));
+        player.setUri(FetchHandler.getSongUri(songId));
     }
 
     public static double getVolume() {

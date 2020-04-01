@@ -9,8 +9,15 @@
 /// Classes that use "pure" channels have name convention `...Handler` 
 /// Whereas others can be called with any name
 /// 
+/// If handlers have the [init] method inside them, they are set up in [logic/lifecycle.dart]
+/// 
 /// You should import this module `as API`
 
 export 'general.dart';
 export 'events.dart';
 export 'service.dart';
+export 'songs.dart';
+
+import 'package:flutter/services.dart';
+
+typedef MethodChannelHandler = Future<dynamic> Function(MethodCall call);

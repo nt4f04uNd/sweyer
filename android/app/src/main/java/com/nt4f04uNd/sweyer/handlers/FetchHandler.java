@@ -10,18 +10,23 @@ import android.content.ContentUris;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.player.Song;
 
 import java.io.File;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.Nullable;
+import io.flutter.Log;
 import io.flutter.plugin.common.MethodChannel;
 
 public class FetchHandler {
@@ -62,6 +67,7 @@ public class FetchHandler {
             MediaStore.Audio.Media.DATE_MODIFIED,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.SIZE,
+            MediaStore.Audio.Media.DATA,
     };
 
 // ** OLD
@@ -73,6 +79,59 @@ public class FetchHandler {
 //    MediaStore.Audio.Media.DATA,
 //    MediaStore.Audio.Media.DURATION,
 //    MediaStore.Audio.Media.DATE_MODIFIED
+
+
+    public static Uri getSongUri(int songId) {
+        return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
+    }
+
+    /// Produces the `where` parameter for deleting songs from the `MediaStore`
+    /// Creates the string like "_data IN (?, ?, ?, ...)"
+    private static String buildWhereClauseForDeletion(int count) {
+        StringBuilder builder = new StringBuilder(MediaStore.Audio.Media.DATA);
+        builder.append(" IN (");
+        for (int i = 0; i < count - 1; i++) {
+            builder.append("?, ");
+        }
+        builder.append("?)");
+        return builder.toString();
+    }
+
+    public static void deleteSongs(ArrayList<String> songDataList) {
+        // I'm setting `android:requestLegacyExternalStorage="true"`, because there's no consistent way
+        // to delete a bulk of music files in scoped storage in Android Q, or I didn't find it
+        //
+        // See https://stackoverflow.com/questions/58283850/scoped-storage-how-to-delete-multiple-audio-files-via-mediastore
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+
+            ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
+
+            ArrayList<String> songDataListSuccessful = new ArrayList<>();
+
+            for (String data : songDataList) {
+
+                File file = new File(data);
+
+                if (file.exists()) {
+                    // Delete the actual file
+                    if (file.delete()) {
+                        System.out.println("file Deleted :" + data);
+                        songDataListSuccessful.add(data);
+                    } else {
+                        System.out.println("file not Deleted :" + data);
+                    }
+                }
+            }
+
+
+            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            String where = buildWhereClauseForDeletion(songDataList.size());
+            String[] selectionArgs = songDataListSuccessful.toArray(new String[0]);
+            // Delete file from `MediaStore`
+            resolver.delete(uri, where, selectionArgs);
+
+        }
+    }
 
     /**
      * Retrieve a list of music files currently listed in the Media store DB via URI
@@ -112,6 +171,7 @@ public class FetchHandler {
                             cursor.getInt(10),
                             cursor.getInt(11),
                             cursor.getInt(12),
+                            cursor.getString(13),
                             getAlbumArt(GeneralHandler.getAppContext().getContentResolver(), cursor.getInt(2))
                     )
             );

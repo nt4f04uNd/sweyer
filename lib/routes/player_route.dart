@@ -89,20 +89,20 @@ class _PlaylistTabState extends State<_PlaylistTab>
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<PlaylistType> _playlistChangeSubscription;
 
-  int prevPlayingIndex = PlaylistControl.currentSongIndex();
+  int prevPlayingIndex = ContentControl.state.currentSongIndex;
 
   @override
   void initState() {
     super.initState();
     _playlistChangeSubscription =
-        PlaylistControl.onPlaylistListChange.listen((event) async {
+        ContentControl.state.onPlaylistListChange.listen((event) async {
       // Reset value when playlist changes
-      prevPlayingIndex = PlaylistControl.currentSongIndex();
+      prevPlayingIndex = ContentControl.state.currentSongIndex;
       // Jump when tracklist changes (e.g. shuffle happened)
       jumpToSong();
     });
     _songChangeSubscription =
-        PlaylistControl.onSongChange.listen((event) async {
+        ContentControl.state.onSongChange.listen((event) async {
       // Scroll when track changes
       if (opened) {
         // Just update list if opened, this is needed to update current track indicator
@@ -125,7 +125,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   ///
   /// If optional [index] is provided - scrolls to it
   Future<void> scrollToSong([int index]) async {
-    if (index == null) index = PlaylistControl.currentSongIndex();
+    if (index == null) index = ContentControl.state.currentSongIndex;
 
     return globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .scrollTo(
@@ -136,15 +136,15 @@ class _PlaylistTabState extends State<_PlaylistTab>
   ///
   /// If optional [index] is provided - jumps to it
   void jumpToSong([int index]) async {
-    if (index == null) index = PlaylistControl.currentSongIndex();
+    if (index == null) index = ContentControl.state.currentSongIndex;
     globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .jumpTo(index: index);
   }
 
   /// A more complex function with additional checks
   Future<void> performScrolling() async {
-    final int playlistLength = PlaylistControl.getPlaylist().length;
-    final int playingIndex = PlaylistControl.currentSongIndex();
+    final int playlistLength = ContentControl.state.currentPlaylist.length;
+    final int playingIndex = ContentControl.state.currentSongIndex;
     final int maxScrollIndex = playlistLength - 1 - tracksScrollOffset;
 
     // Exit immediately if index didn't change
@@ -179,8 +179,8 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// Jump to song when changing tab to `0`
   Future<void> jumpOnTabChange() async {
-    final int playlistLength = PlaylistControl.getPlaylist().length;
-    final int playingIndex = PlaylistControl.currentSongIndex();
+    final int playlistLength = ContentControl.state.currentPlaylist.length;
+    final int playingIndex = ContentControl.state.currentSongIndex;
     final int maxScrollIndex = playlistLength - 1 - tracksScrollOffset;
 
     // If playlist is longer than e.g. 6
@@ -198,7 +198,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   Widget build(BuildContext context) {
     super.build(context);
     return StreamBuilder(
-        stream: PlaylistControl.onPlaylistListChange,
+        stream: ContentControl.state.onPlaylistListChange,
         builder: (context, snapshot) {
           return Scaffold(
             appBar: PreferredSize(
@@ -221,9 +221,10 @@ class _PlaylistTabState extends State<_PlaylistTab>
                         ),
                       ),
                       Text(
-                        PlaylistControl.playlistType == PlaylistType.global
+                        ContentControl.state.currentPlaylistType ==
+                                PlaylistType.global
                             ? 'Основной плейлист'
-                            : PlaylistControl.playlistType ==
+                            : ContentControl.state.currentPlaylistType ==
                                     PlaylistType.shuffled
                                 ? 'Перемешанный плейлист'
                                 : 'Найденный плейлист',
@@ -256,15 +257,14 @@ class _MainPlayerTab extends StatefulWidget {
 }
 
 class _MainPlayerTabState extends State<_MainPlayerTab>
-    with
-        AutomaticKeepAliveClientMixin<_MainPlayerTab>
-        // SingleTickerProviderStateMixin 
-        {
+    with AutomaticKeepAliveClientMixin<_MainPlayerTab>
+// SingleTickerProviderStateMixin
+{
   // This mixin doesn't allow widget to redraw
   @override
   bool get wantKeepAlive => true;
 
-  // Color _prevColor = PlaylistControl.currentArtColor;
+  // Color _prevColor = ContentControl.currentArtColor;
   // StreamSubscription<Color> _artColorChangeSubscription;
   // AnimationController _animationController;
   // Animation<Color> _colorAnimation;
@@ -279,13 +279,13 @@ class _MainPlayerTabState extends State<_MainPlayerTab>
   //     setState(() {});
   //   });
   //   _colorAnimation = ColorTween(
-  //           begin: PlaylistControl.currentArtColor,
-  //           end: PlaylistControl.currentArtColor)
+  //           begin: ContentControl.currentArtColor,
+  //           end: ContentControl.currentArtColor)
   //       .animate(CurvedAnimation(
   //           curve: Curves.easeOutCubic, parent: _animationController));
 
   //   _artColorChangeSubscription =
-  //       PlaylistControl.onArtColorChange.listen((event) {
+  //       ContentControl.onArtColorChange.listen((event) {
   //     setState(() {
   //       _animationController.value = 0;
   //       _colorAnimation = ColorTween(begin: _prevColor, end: event).animate(
@@ -319,7 +319,7 @@ class _MainPlayerTabState extends State<_MainPlayerTab>
         //   child:
 
         _InfoButton(),
-        _MoreButton(),
+        // _MoreButton(),
 
         // )
       ],
@@ -425,26 +425,31 @@ class _InfoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SMMIconButton(
-        icon: Icon(Icons.info_outline),
-        color: Theme.of(context).iconTheme.color,
-        onPressed: () {
-          ShowFunctions.showAlert(
-            context,
-            title: const Text("Информация о песне"),
-            content: Container(
-              child: Text(
-                PlaylistControl.currentSong
-                        ?.toJson()
-                        .toString()
-                        .toString()
-                        .replaceAll(r',', ',\n') ??
-                    "null",
-                style: const TextStyle(fontSize: 13),
+    var songInfo = ContentControl.state.currentSong
+        ?.toJson()
+        .toString()
+        .replaceAll(r', ', ',\n');
+    songInfo = songInfo?.substring(1, songInfo.length - 1);
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 5.0),
+      child: SMMIconButton(
+          icon: Icon(Icons.info_outline),
+          color: Theme.of(context).iconTheme.color,
+          size: 40.0,
+          onPressed: () {
+            ShowFunctions.showAlert(
+              context,
+              title: const Text("Информация о песне"),
+              content: Container(
+                child: Text(
+                  songInfo ?? "null",
+                  style: const TextStyle(fontSize: 13),
+                ),
               ),
-            ),
-          );
-        });
+            );
+          }),
+    );
   }
 }
 
@@ -507,7 +512,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
     super.initState();
     // Handle track switch
     _songChangeSubscription =
-        PlaylistControl.onSongChange.listen((event) async {
+        ContentControl.state.onSongChange.listen((event) async {
       // Create new key for marque widget to reset scroll
       setState(() {
         marqueeKey = UniqueKey();
@@ -523,6 +528,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
 
   @override
   Widget build(BuildContext context) {
+    final currentSong = ContentControl.state.currentSong;
     return Container(
       child: Padding(
         padding: const EdgeInsets.only(top: 0),
@@ -536,7 +542,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
               child: MarqueeWidget(
                 key: marqueeKey,
                 text: Text(
-                  PlaylistControl.currentSong?.title,
+                  currentSong.title,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 21, fontWeight: FontWeight.w500),
                 ),
@@ -545,15 +551,14 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 30),
               child: Artist(
-                artist: PlaylistControl.currentSong.artist,
+                artist: currentSong.artist,
                 textStyle:
                     TextStyle(fontSize: 15.5, fontWeight: FontWeight.w500),
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-              child:
-                  AlbumArtLarge(path: PlaylistControl.currentSong?.albumArtUri),
+              child: AlbumArtLarge(path: currentSong?.albumArtUri),
             ),
           ],
         ),
@@ -604,7 +609,7 @@ class _TrackSliderState extends State<_TrackSlider> {
     });
 
     // Handle track switch
-    _songChangeSubscription = PlaylistControl.onSongChange.listen((event) {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
       setState(() {
         _isDragging = false;
         _localValue = 0.0;
@@ -623,9 +628,9 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   Future<void> _setInitialCurrentPosition() async {
     var currentPosition = await MusicPlayer.currentPosition;
-    var currentDuration = await MusicPlayer.currentDuration;
     setState(() {
-      _duration = Duration(milliseconds: PlaylistControl.currentSong?.duration);
+      _duration =
+          Duration(milliseconds: ContentControl.state.currentSong?.duration);
       _value = currentPosition;
     });
   }

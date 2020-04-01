@@ -39,17 +39,16 @@ public class ServiceChannel implements MethodChannel.MethodCallHandler {
 
     @Override
     public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
-        final String method = call.method;
-        switch (method) {
+        switch (call.method) {
             case Constants.channels.service.METHOD_STOP_SERVICE:
                 ServiceHandler.stopService();
                 break;
-            case Constants.channels.service.METHOD_SEND_SONG:
+            case Constants.channels.service.METHOD_SEND_CURRENT_SONG:
                 PlaylistHandler.setCurrentSong(Song.fromJson(new JSONObject((HashMap) call.argument("song"))));
                 break;
             default:
                 result.notImplemented();
-                Log.e(Constants.LogTag, "generalChannel: Invalid method name call from Dart code");
+                Log.e(Constants.LogTag, "serviceChannel: Invalid method name call from Dart code");
         }
         result.success(1);
     }

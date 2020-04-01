@@ -8,6 +8,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -440,6 +441,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 
   @override
   Widget build(BuildContext context) {
+   
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel =
@@ -460,15 +462,18 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         break;
     }
     String routeName;
-    switch (theme.platform) {
+     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         routeName = '';
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
+
 
     return Semantics(
       explicitChildNodes: true,
@@ -660,7 +665,7 @@ class SongsSearchDelegate extends SearchDelegate {
     /// Search songs if previous query is distinct from current
     if (_prevQuery == '' || _prevQuery != query) {
       searched =
-          PlaylistControl.searchSongs(query.trim() /* Remove any whitespaces*/)
+          ContentControl.searchSongs(query.trim() /* Remove any whitespaces*/)
               ?.toList();
       dirty = true;
     }
@@ -688,7 +693,7 @@ class SongsSearchDelegate extends SearchDelegate {
           children: <Widget>[
             Scrollbar(
               child: StreamBuilder(
-                  stream: PlaylistControl.onSongChange,
+                  stream: ContentControl.state.onSongChange,
                   builder: (context, snapshot) {
                     return ListView.builder(
                         // physics: const SMMBouncingScrollPhysics(),
@@ -699,7 +704,7 @@ class SongsSearchDelegate extends SearchDelegate {
                           return SongTile(
                             song: searched[index],
                             playing: searched[index].id ==
-                                PlaylistControl.currentSong?.id,
+                                ContentControl.state.currentSongId,
                             onTap: () async {
                               _writeInputToSearchHistory(query);
                               // close(context, searchedList[index]);
@@ -709,7 +714,7 @@ class SongsSearchDelegate extends SearchDelegate {
                               await Future.delayed(Duration(milliseconds: 650));
 
                               if (dirty) {
-                                PlaylistControl.setSearchedPlaylist(
+                                ContentControl.setSearchedPlaylist(
                                   searched,
                                 );
                                 dirty = false;

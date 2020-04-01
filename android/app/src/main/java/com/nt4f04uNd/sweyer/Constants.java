@@ -90,7 +90,7 @@ public class Constants {
             public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "SERVICE_CHANNEL";
 
             public static final String METHOD_STOP_SERVICE = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_STOP_SERVICE";
-            public static final String METHOD_SEND_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_SONG";
+            public static final String METHOD_SEND_CURRENT_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_CURRENT_SONG";
 
         }
 
@@ -100,6 +100,7 @@ public class Constants {
 
             public static final String METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
             public static final String METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
-        }
+            public static final String METHOD_DELETE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_DELETE_SONGS";
+    }
     }
 }

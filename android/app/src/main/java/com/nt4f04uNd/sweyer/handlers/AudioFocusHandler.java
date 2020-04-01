@@ -21,7 +21,7 @@ public abstract class AudioFocusHandler {
         if (audioManager == null) {
             audioManager = (AudioManager) GeneralHandler.getAppContext().getSystemService(Context.AUDIO_SERVICE);
 
-            if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Higher or equal than android 8.0
                 AudioAttributes attributes = new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .build();
@@ -55,7 +55,7 @@ public abstract class AudioFocusHandler {
     public static void requestFocus() {
         if (audioManager != null) {
             int res;
-            if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Higher or equal than android 8.0
                 res = audioManager.requestAudioFocus(focusRequest);
             } else {
                 // NOTE This causes message "uses or overrides a deprecated API."
@@ -85,7 +85,7 @@ public abstract class AudioFocusHandler {
     public static void abandonFocus() {
         if (audioManager != null) {
             int res;
-            if (Build.VERSION.SDK_INT >= 26) { // Higher or equal than android 8.0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Higher or equal than android 8.0
                 res = audioManager.abandonAudioFocusRequest(focusRequest);
             } else {
                 res = audioManager.abandonAudioFocus(afChangeListener);
