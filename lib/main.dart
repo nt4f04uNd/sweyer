@@ -13,12 +13,14 @@ import 'constants/constants.dart';
 import 'routes/routes.dart';
 
 void main() {
-  final CatcherOptions debugOptions = CatcherOptions(CustomDialogReportMode(), [
+  final CatcherOptions debugOptions = CatcherOptions(SnackBarReportMode(), [
     ConsoleHandler(),
+      FirebaseReportHandler(),
   ]);
   final CatcherOptions releaseOptions =
-      CatcherOptions(CustomDialogReportMode(), [
-    EmailManualHandler([Constants.Config.REPORT_EMAIL]),
+      CatcherOptions(SnackBarReportMode(), [
+    // EmailManualHandler([Constants.Config.REPORT_EMAIL]),
+    FirebaseReportHandler(),
   ]);
 
   Catcher(App(), debugConfig: debugOptions, releaseConfig: releaseOptions);
@@ -27,6 +29,10 @@ void main() {
 }
 
 class App extends StatelessWidget {
+
+  /// A global key to obtain the navigatro
+ static GlobalKey<NavigatorState> get navigatorKey => Catcher.navigatorKey;
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<bool>(
@@ -37,7 +43,7 @@ class App extends StatelessWidget {
               builder: (context, snapshot) {
                 return MaterialApp(
                   title: Constants.Config.APPLICATION_TITLE,
-                  navigatorKey: Catcher.navigatorKey,
+                  navigatorKey: navigatorKey,
                   supportedLocales: [const Locale('ru')],
                   locale: const Locale('ru'),
                   localizationsDelegates: const [
@@ -51,7 +57,7 @@ class App extends StatelessWidget {
                   darkTheme: AppTheme.materialApp.dark,
                   initialRoute: Routes.main.value,
                   onGenerateRoute: RouteControl.handleOnGenerateRoute,
-                  onGenerateInitialRoutes: 
+                  onGenerateInitialRoutes:
                       RouteControl.handleOnGenerateInitialRoutes,
                   onUnknownRoute: RouteControl.handleOnUnknownRoute,
                   // Uncomment to replace red screen of death

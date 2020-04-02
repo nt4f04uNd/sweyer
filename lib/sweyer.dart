@@ -13,3 +13,4 @@ export 'package:sweyer/logic/logic.dart';
 export 'package:sweyer/routes/routes.dart';
 export 'package:sweyer/screens/screens.dart';
 export 'package:sweyer/utils/utils.dart';
+export 'package:sweyer/main.dart';

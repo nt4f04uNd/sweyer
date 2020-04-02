@@ -5,15 +5,18 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
+import 'package:flutter/foundation.dart';
+
 /// A class that represents some async operation
 ///
 /// Can add to queue calls if it is still in work
-class AsyncOperation {
-  final Completer _completer = Completer();
+class AsyncOperation<T> {
+  final Completer<T> _completer = Completer();
 
-  /// Async callback
-  final Function _callback;
-  AsyncOperation(Function callback) : this._callback = callback;
+  /// Async callback, represents some action, e.g. start of data feting
+  final AsyncValueGetter<T> _callback;
+  AsyncOperation([AsyncValueGetter<T> callback]) : this._callback = callback;
 
   /// Returns status of the operation
   ///
@@ -21,23 +24,23 @@ class AsyncOperation {
   bool get isWorking => !_completer.isCompleted;
 
   // Returns future to wait before operation completion
-  Future<void> wait() {
+  Future<T> wait() {
     return _completer.future;
   }
 
   /// Calls [_callback]
   void start() {
-    _callback();
+    if (_callback != null) _callback();
   }
 
   /// End operation
-  void finish() {
-    _completer.complete();
+  void finish([FutureOr<T> value]) {
+    _completer.complete(value);
   }
 
   /// Fill completer future that is returned from [wait] method with error
-  void errorFinish(error) {
-    _completer.completeError(error);
+  void errorFinish(Object error, [StackTrace stackTrace]) {
+    _completer.completeError(error, stackTrace);
   }
 }
 
@@ -46,7 +49,7 @@ class AsyncOperation {
 /// Adds new [AsyncOperation] to the end
 ///
 /// Completes from start of list to end
-class OperationsQueue {
+class AsyncOperationsQueue {
   List<AsyncOperation> _queue = [];
 
   /// first element of [_queue] is considered to be current
@@ -57,7 +60,7 @@ class OperationsQueue {
   /// If [_queue] length equals 1 calls [_completeQueue] to start queue completion
   ///
   /// @return [AsyncOperation.wait] future
-  Future<void> add(Function callback) {
+  Future<T> add<T>(AsyncValueGetter<T> callback) {
     _queue.add(AsyncOperation(callback));
     if (_queue.length == 1) _completeQueue();
     return _queue[_queue.length - 1]
@@ -73,7 +76,9 @@ class OperationsQueue {
   Future<void> _completeQueue() async {
     while (_queue.isNotEmpty) {
       _currentOperation.start();
-      await _currentOperation.wait(); /// Wait before [finishCurrent] calls
+      await _currentOperation.wait();
+
+      /// Wait before [finishCurrent] calls
       _queue.removeAt(0); // Remove completed operation
     }
   }

@@ -32,9 +32,6 @@ abstract class AppTheme {
   static final _ThemeContainer<Color> albumArtSmallRound =
       _ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
 
-  static final _ThemeContainer<Color> bottomTrackPanel = _ThemeContainer(
-      light: AppColors.whiteDarkened, dark: AppColors.greyLight);
-
   static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
       // light: Colors.black.withOpacity(0.05),
       light: AppColors.whiteDarkened,
@@ -51,9 +48,6 @@ abstract class AppTheme {
 
   static final _ThemeContainer<Color> acceptButton = _ThemeContainer(
       light: Colors.deepPurple.shade300, dark: Colors.deepPurple.shade200);
-
-  static final _ThemeContainer<Color> splash =
-      _ThemeContainer(light: Color(0x90bbbbbb), dark: Color(0x44c8c8c8));
 
   static final _ThemeContainer<Color> disabledIcon =
       _ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
@@ -84,7 +78,38 @@ abstract class AppTheme {
 
   static _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
     light: ThemeData(
+      //******** General ********
       fontFamily: 'Manrope',
+      brightness: Brightness.light,
+      //****************** Colors **********************
+      accentColor: Colors.grey,
+      backgroundColor: Colors.white,
+      primaryColor: Colors.deepPurple,
+
+      //****************** Color scheme (preferable to colors) *********************
+      colorScheme: ColorScheme(
+          background: Colors.white,
+          brightness: Brightness.light,
+          error: const Color(0xffed3b3b),
+          onBackground: Colors.black,
+          onError: Colors.yellow,
+          onPrimary: Colors.white,
+          onSecondary: AppColors.greyLight,
+          onSurface: Colors.black,
+          primary: Colors.deepPurple,
+          primaryVariant: Colors.deepPurpleAccent,
+          secondary: AppColors.whiteDarkened,
+          secondaryVariant: Colors.white,
+          surface: Colors.white),
+
+      //****************** Specific app elements *****************
+      scaffoldBackgroundColor: Colors.white,
+      textSelectionColor: Colors.deepPurple,
+      textSelectionHandleColor: Colors.deepPurple,
+      cursorColor: Colors.deepPurple,
+      splashColor: Color(0x90bbbbbb),
+
+      //****************** Themes *********************
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
@@ -120,12 +145,6 @@ abstract class AppTheme {
         color: Colors.white,
         elevation: 0,
       ),
-      // iconTheme: ,
-      scaffoldBackgroundColor: Colors.white,
-      brightness: Brightness.light,
-      accentColor: Colors.grey,
-      backgroundColor: Colors.white,
-      primaryColor: Colors.deepPurple,
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: const BorderRadius.only(
@@ -135,12 +154,39 @@ abstract class AppTheme {
         ),
         backgroundColor: AppColors.whiteDarkened,
       ),
+    ),
+    dark: ThemeData(
+      //******** General ********
+      fontFamily: 'Manrope',
+      brightness: Brightness.dark,
+      //****************** Colors **********************
+      accentColor: const Color(0xff131313),
+      backgroundColor: AppColors.grey,
+      primaryColor: Colors.deepPurple,
+      //****************** Color scheme (preferable to colors) *********************
+      colorScheme: ColorScheme(
+        background: AppColors.grey,
+        brightness: Brightness.dark,
+        error: Colors.red.shade800,
+        onBackground: AppColors.whiteDarkened,
+        onError: Colors.yellow,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: Colors.white,
+        primary: Colors.deepPurple,
+        primaryVariant: Colors.deepPurpleAccent,
+        // secondary: const Color(0xff131313),
+        secondary: AppColors.greyLight,
+        secondaryVariant: Colors.grey,
+        surface: AppColors.grey,
+      ),
+      //****************** Specific app elements *****************
+      scaffoldBackgroundColor: AppColors.grey,
       textSelectionColor: Colors.deepPurple,
       textSelectionHandleColor: Colors.deepPurple,
       cursorColor: Colors.deepPurple,
-    ),
-    dark: ThemeData(
-      fontFamily: 'Manrope',
+      splashColor: Color(0x44c8c8c8),
+      //****************** Themes *********************
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
@@ -176,11 +222,6 @@ abstract class AppTheme {
         color: AppColors.grey,
         elevation: 0,
       ),
-      scaffoldBackgroundColor: AppColors.grey,
-      brightness: Brightness.dark,
-      accentColor:const Color(0xff131313),
-      backgroundColor: AppColors.grey,
-      primaryColor: Colors.deepPurple,
       bottomSheetTheme: const BottomSheetThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -190,9 +231,6 @@ abstract class AppTheme {
         ),
         backgroundColor: Color(0xff070707),
       ),
-      textSelectionColor: Colors.deepPurple,
-      textSelectionHandleColor: Colors.deepPurple,
-      cursorColor: Colors.deepPurple,
     ),
   );
 }
@@ -201,7 +239,7 @@ abstract class AppSystemUIThemes {
   /// Generic theme for all screens
   static final _ThemeContainer<SystemUiOverlayStyle> allScreens =
       _ThemeContainer(
-    light:const SystemUiOverlayStyle(
+    light: const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,

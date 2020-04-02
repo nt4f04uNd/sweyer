@@ -228,7 +228,6 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
       child: SMMIconButton(
         size: widget.size ?? kSMMIconButtonSize,
         iconSize: widget.iconSize ?? kSMMIconButtonIconSize,
-        splashColor: Constants.AppTheme.splash.auto(context),
         color: Constants.AppTheme.mainContrast.auto(context),
         onPressed: widget.animateDirection != null && widget.animateDirection
             ? widget.onCloseClick

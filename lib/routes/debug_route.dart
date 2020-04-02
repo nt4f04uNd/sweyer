@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:catcher/core/catcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/api.dart' as API;
@@ -13,7 +14,7 @@ import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 class DebugRoute extends StatelessWidget {
-  const DebugRoute({Key key}) : super(key: key);
+  DebugRoute({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +39,15 @@ class DebugRoute extends StatelessWidget {
                     backgroundColor: Colors.deepPurple);
               },
             ),
-            // Padding(
-            //   padding: const EdgeInsets.only(top: 6.0),
-            //   child:
             _TimeDilationSlider(),
-            // ),
+            Builder(
+              builder: (BuildContext context) => ListTile(
+                title: Text('Сгенерировать ошибку'),
+                onTap: () async {
+                  Catcher.sendTestException();
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -82,6 +87,18 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
   Widget build(BuildContext context) {
     return SettingItem(
       title: "Замедление анимаций",
+      trailing: ChangedSwitcher(
+        changed: _value != 1.0,
+        child: ButtonTheme(
+          height: 36.0,
+          child: PrimaryRaisedButton(
+            text: "Сбросить",
+            onPressed: () {
+              _handleChangeEnd(1.0);
+            },
+          ),
+        ),
+      ),
       content: LabelledSlider(
         activeColor: Colors.deepPurple,
         inactiveColor: Constants.AppTheme.sliderInactive.auto(context),

@@ -36,7 +36,7 @@ class BottomTrackPanel extends StatelessWidget {
               stream: MusicPlayer.onPlayerStateChanged,
               builder: (context, snapshot) {
                 return Material(
-                  color: Constants.AppTheme.bottomTrackPanel.auto(context),
+                  color: Theme.of(context).colorScheme.secondary,
                   child: GestureDetector(
                     onTap: () async {
                       Navigator.of(context)
@@ -165,15 +165,16 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle song change
-    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription =
+        ContentControl.state.onSongChange.listen((event) async {
       _value = await MusicPlayer.currentPosition;
-      if(mounted)
-      setState(() {
-        _duration = Duration(milliseconds: event.duration);
-        // Update art
-        // _rotatingArtGlobalKey.currentState
-        //     .reloadArt(ContentControl.state.currentSong?.albumArtUri);
-      });
+      if (mounted)
+        setState(() {
+          _duration = Duration(milliseconds: event.duration);
+          // Update art
+          // _rotatingArtGlobalKey.currentState
+          //     .reloadArt(ContentControl.state.currentSong?.albumArtUri);
+        });
     });
   }
 
@@ -189,7 +190,8 @@ class _RotatingAlbumArtWithProgressState
     var currentPosition = await MusicPlayer.currentPosition;
     setState(() {
       _value = currentPosition;
-      _duration = Duration(milliseconds: ContentControl.state.currentSong?.duration);
+      _duration =
+          Duration(milliseconds: ContentControl.state.currentSong?.duration);
     });
   }
 
@@ -209,8 +211,9 @@ class _RotatingAlbumArtWithProgressState
     return Container(
       child: CircularPercentIndicator(
         percent: _calcProgress(),
-        radius: 48.0 -
-            progressLineHeight, /// 48.0 is `constraints.maxHeight` if we see it in [LayoutBuilder]
+        radius: 48.0 - progressLineHeight,
+
+        /// 48.0 is `constraints.maxHeight` if we see it in [LayoutBuilder]
         lineWidth: progressLineHeight,
         circularStrokeCap: CircularStrokeCap.round,
         progressColor: Colors.deepPurple,

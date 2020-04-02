@@ -16,7 +16,7 @@ class ExtendedSettingsRoute extends StatefulWidget {
 
 class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
   /// Whether user changed something or not
-  bool isChanged = false;
+  bool changed = false;
 
   /// Value before change
   ///
@@ -42,20 +42,20 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
     });
   }
 
-  void handleSliderChange(int newSettingMinFileDuration) {
+  void _handleSliderChange(int newSettingMinFileDuration) {
     if (initSettingMinFileDuration != newSettingMinFileDuration)
       setState(() {
-        isChanged = true;
+        changed = true;
         settingMinFileDuration = newSettingMinFileDuration;
       });
     else
       setState(() {
-        isChanged = false;
+        changed = false;
         settingMinFileDuration = newSettingMinFileDuration;
       });
   }
 
-  void _handleSave() async {
+  Future<void> _handleSave()  {
     Prefs.byKey.settingMinFileDurationInt.setPref(settingMinFileDuration);
     if (initSettingMinFileDuration <= settingMinFileDuration)
       ContentControl.filterSongs();
@@ -63,39 +63,77 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
       ContentControl.refetchSongs();
     initSettingMinFileDuration = settingMinFileDuration;
     ShowFunctions.showToast(msg: "Настройки сохранены");
-    setState(() {
-      isChanged = false;
-    });
+    if (mounted)
+      setState(() {
+        changed = false;
+      });
+  }
+
+  Future<bool> _handlePop() async {
+    if (!changed) return true;
+
+    bool res = (await ShowFunctions.showDialog(
+      context,
+      title: Text("Сохранить настройки?"),
+      content: Text(
+          "Некоторые настройки были изменены, желаете ли вы сохранить их? Нажмите снаружи, чтобы остаться"),
+      acceptButton: DialogFlatButton(
+        child: Text('Сохранить'),
+        textColor: Constants.AppTheme.acceptButton.auto(context),
+        onPressed: () => Navigator.of(context).pop(true),
+      ),
+      declineButton: DialogFlatButton(
+        child: Text('Отменить'),
+        textColor: Constants.AppTheme.declineButton.auto(context),
+        onPressed: () => Navigator.of(context).pop(false),
+      ),
+    ));
+
+    if (res == null) {
+      // Dismiss
+      return false;
+    } else if (res) {
+      // Save confirmed
+      _handleSave();
+      return true;
+    } else {
+      // Save cancelled
+      return true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return PageBase(
-      name: "Расширенные",
-      actions: <Widget>[
-        IgnorePointer(
-          ignoring: !isChanged,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 500),
-            opacity: isChanged ? 1.0 : 0.0,
+    return WillPopScope(
+      onWillPop: _handlePop,
+      child: PageBase(
+        name: "Расширенные",
+        backButton: SMMBackButton(
+          onPressed: () async {
+            if (await _handlePop()) Navigator.of(context).pop();
+          },
+        ),
+        actions: <Widget>[
+          ChangedSwitcher(
+            changed: changed,
             child: Padding(
               padding:
                   const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 10.0),
               child: PrimaryRaisedButton(
                   text: "Сохранить", onPressed: _handleSave),
             ),
-          ),
-        )
-      ],
-      child: ListView(
-        physics: NeverScrollableScrollPhysics(),
-        children: <Widget>[
-          _MinFileDurationSlider(
-            key: sliderKey,
-            parentHandleChange: handleSliderChange,
-            initValue: settingMinFileDuration,
-          ),
+          )
         ],
+        child: ListView(
+          physics: NeverScrollableScrollPhysics(),
+          children: <Widget>[
+            _MinFileDurationSlider(
+              key: sliderKey,
+              parentHandleChange: _handleSliderChange,
+              initValue: settingMinFileDuration,
+            ),
+          ],
+        ),
       ),
     );
   }

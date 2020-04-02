@@ -9,13 +9,20 @@ import 'package:sweyer/constants.dart' as Constants;
 
 /// Button to go back from page
 class SMMBackButton extends StatelessWidget {
+  const SMMBackButton({
+    Key key,
+    this.icon,
+    this.size = kSMMIconButtonSize,
+    this.onPressed,
+  }) : super(key: key);
+
   /// A custom icon for back button
   final IconData icon;
 
   /// Custom button size
   final double size;
-  const SMMBackButton({Key key, this.icon, this.size = kSMMIconButtonSize})
-      : super(key: key);
+
+  final Function onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -25,29 +32,32 @@ class SMMBackButton extends StatelessWidget {
         color: Theme.of(context).iconTheme.color,
       ),
       size: size,
-      splashColor: Constants.AppTheme.splash.auto(context),
-      onPressed: () => Navigator.of(context).pop(),
+      onPressed: onPressed ?? () => Navigator.of(context).pop(),
     );
   }
 }
 
 /// Creates [Raised] with border radius, by default colored into main app color - `Colors.deepPurple`
 class PrimaryRaisedButton extends RaisedButton {
-  PrimaryRaisedButton(
-      {Key key,
-      @required Function onPressed,
+  PrimaryRaisedButton({
+    Key key,
 
-      /// Text to show inside button
-      @required String text,
+    /// Text to show inside button
+    @required String text,
+    @required Function onPressed,
 
-      /// Loading shows loading inside button
-      bool loading = false,
+    /// Loading shows loading inside button
+    bool loading = false,
 
-      /// Style applied to text
-      TextStyle textStyle = const TextStyle(color: Colors.white),
-      Color color = Colors.deepPurple,
-      double borderRadius = 15.0})
-      : super(
+    /// Style applied to text
+    TextStyle textStyle = const TextStyle(color: Colors.white),
+
+    /// Specifies whether the button will have margins or not
+    MaterialTapTargetSize materialTapTargetSize =
+        MaterialTapTargetSize.shrinkWrap,
+    Color color = Colors.deepPurple,
+    double borderRadius = 15.0,
+  }) : super(
           key: key,
           child: loading
               ? SizedBox(
@@ -55,12 +65,13 @@ class PrimaryRaisedButton extends RaisedButton {
                   height: 25.0,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    valueColor:const AlwaysStoppedAnimation(Colors.white),
+                    valueColor: const AlwaysStoppedAnimation(Colors.white),
                   ),
                 )
               : Text(text, style: textStyle),
           color: color,
           onPressed: onPressed,
+          materialTapTargetSize: materialTapTargetSize,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
@@ -99,7 +110,6 @@ class LoopButton extends StatelessWidget {
         initialData: MusicPlayer.loopMode,
         builder: (context, snapshot) {
           return SMMIconButton(
-            splashColor: Constants.AppTheme.splash.auto(context),
             icon: Icon(Icons.loop),
             size: 40.0,
             color: snapshot.data
@@ -122,7 +132,6 @@ class _ShuffleButtonState extends State<ShuffleButton> {
   @override
   Widget build(BuildContext context) {
     return SMMIconButton(
-      splashColor: Constants.AppTheme.splash.auto(context),
       icon: Icon(Icons.shuffle),
       color: ContentControl.state.currentPlaylistType == PlaylistType.shuffled
           ? Constants.AppTheme.mainContrast.auto(context)

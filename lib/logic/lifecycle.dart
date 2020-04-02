@@ -42,9 +42,6 @@ abstract class LaunchControl {
   static Stream<bool> get onLaunch => _streamController.stream;
 
   static Future<void> init() async {
-    API.EventsHandler.init();
-    API.SongsHandler.init();
-
     // Add callback to stop service when app is destroyed, temporary
     // WidgetsBinding.instance
     //     .addObserver(LifecycleEventHandler(detachedCallback: () async {
@@ -52,9 +49,13 @@ abstract class LaunchControl {
     // }));
 
     try {
+      API.EventsHandler.init();
+      API.SongsHandler.init();
+      FirebaseControl.init();
+
       await Permissions.init();
       await Future.wait([
-     ThemeControl.init(),
+        ThemeControl.init(),
         ContentControl.init(),
         MusicPlayer.init(),
       ]);

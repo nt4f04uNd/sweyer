@@ -184,6 +184,11 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
 
       prevAnimationValue = animation.value;
     });
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed && shouldCheckSystemUiEnt())
+        SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
+    });
+
     secondaryAnimation.addListener(() {
       if (secondaryAnimation.value < prevSecondaryAnimationValue &&
           secondaryAnimation.value >= 0.35 &&
@@ -192,6 +197,10 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
         SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
 
       prevSecondaryAnimationValue = secondaryAnimation.value;
+    });
+    secondaryAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed && shouldCheckSystemUiExitRev())
+        SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
     });
   }
 

@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
@@ -319,6 +320,7 @@ class _MainPlayerTabState extends State<_MainPlayerTab>
         //   child:
 
         _InfoButton(),
+
         // _MoreButton(),
 
         // )
@@ -431,6 +433,7 @@ class _InfoButton extends StatelessWidget {
         .replaceAll(r', ', ',\n');
     songInfo = songInfo?.substring(1, songInfo.length - 1);
 
+// TODO: refactor this!!!
     return Padding(
       padding: const EdgeInsets.only(right: 5.0),
       child: SMMIconButton(
@@ -441,12 +444,37 @@ class _InfoButton extends StatelessWidget {
             ShowFunctions.showAlert(
               context,
               title: const Text("Информация о песне"),
-              content: Container(
-                child: Text(
-                  songInfo ?? "null",
-                  style: const TextStyle(fontSize: 13),
-                ),
+              content: Text(
+                songInfo ?? "null",
+                style: const TextStyle(fontSize: 13),
               ),
+              acceptButton: DialogFlatButton(
+                child: Text("Закрыть"),
+                onPressed: () => App.navigatorKey.currentState.pop(),
+              ),
+              additionalActions: [
+                SMMIconButton(
+                  icon: Icon(Icons.content_copy),
+                  size: 44.0,
+                  onPressed: songInfo == null
+                      ? null
+                      : () {
+                          Clipboard.setData(
+                            ClipboardData(text: songInfo),
+                          );
+                          SnackBarControl.showSnackBar(
+                            context,
+                            settings: SMMSnackbarSettings(
+                              duration: const Duration(seconds: 4),
+                              child: SMMSnackBar(
+                                title: Text("Скопировано"),
+                                leading: Icon(Icons.content_copy),
+                              ),
+                            ),
+                          );
+                        },
+                ),
+              ],
             );
           }),
     );
@@ -567,7 +595,6 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
   }
 }
 
-/// TODO: convert this to use [LabelledSlider] widget
 class _TrackSlider extends StatefulWidget {
   _TrackSlider({Key key}) : super(key: key);
 
@@ -698,7 +725,7 @@ class _TrackSliderState extends State<_TrackSlider> {
           transform: Matrix4.translationValues(5, 0, 0),
           child: Text(
             _calculateDisplayedPositionTime(),
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
         ),
         Expanded(
@@ -718,7 +745,7 @@ class _TrackSliderState extends State<_TrackSlider> {
           transform: Matrix4.translationValues(-5, 0, 0),
           child: Text(
             _calculateDisplayedDurationTime(),
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
       ],

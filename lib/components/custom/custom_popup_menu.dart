@@ -1027,7 +1027,6 @@ class _PopupMenuButtonState<T> extends State<SMMPopupMenuButton<T>> {
             child: widget.child,
           )
         : SMMIconButton(
-            splashColor: Constants.AppTheme.splash.auto(context),
             icon: widget.icon ?? _getIcon(Theme.of(context).platform),
             size: widget.buttonSize,
             iconSize: widget.buttonIconSize,

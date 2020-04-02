@@ -11,10 +11,14 @@ import 'package:flutter/material.dart' as material;
 import 'package:flutter/material.dart' hide showDialog;
 import 'package:fluttertoast/fluttertoast.dart';
 
-const flutterShowDialog = material.showDialog;
-
 /// Class that contains composed 'show' functions, like [showDialog] and others
 abstract class ShowFunctions {
+  /// True when some dialog route is opened.
+  /// Needed to prevent route stacking
+  static bool _dialogOpened = false;
+
+  static bool get dialogOpened => _dialogOpened;
+
   /// Shows toast from [Fluttertoast] with already set [backgroundColor] to `Color.fromRGBO(18, 18, 18, 1)`
   static Future<bool> showToast({
     @required String msg,
@@ -57,8 +61,7 @@ abstract class ShowFunctions {
     final sortFeature = ContentControl.state.currentSortFeature;
     showModalBottomSheet<void>(
         context: context,
-        backgroundColor: Constants.AppTheme.main.auto(context),
-        
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         builder: (BuildContext context) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,88 +91,173 @@ abstract class ShowFunctions {
   }
 
   /// Calls [showDialog] function from flutter material library to show a message to user (only accept button)
+  ///
+  /// Won't show up anything if some dialog route is already on top of the stack
+  ///
+  /// NOTE you can call [await Navigator.of(context).pop()] if you want to navigate from one dialog to another
   static Future<dynamic> showAlert(
     BuildContext context, {
     Widget title: const Text("Предупреждение"),
     Widget content: const Text("Контент"),
-    DialogFlatButton acceptButton,
+    EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+    EdgeInsets contentPadding:
+        const EdgeInsets.only(top: 6.0, left: 24.0, right: 24.0),
+    MaterialButton acceptButton,
+    List<Widget> additionalActions,
   }) async {
-    acceptButton ??= DialogFlatButton(
-      child: Text('Принять'),
-      textColor: Constants.AppTheme.acceptButton.auto(context),
-      onPressed: () => Navigator.of(context).pop(),
-    );
-    return await flutterShowDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: title,
-        content: content,
-        contentPadding:
-            const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
-        contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
-              fontWeight: FontWeight.w500,
-              fontSize: 15,
-            ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-        actions: <Widget>[
-          ButtonBar(
+    var res;
+    if (!dialogOpened) {
+      _dialogOpened = true;
+
+      acceptButton ??= DialogFlatButton(
+        child: Text('Принять'),
+        textColor: Constants.AppTheme.acceptButton.auto(context),
+        onPressed: () => Navigator.of(context).maybePop(true),
+      );
+
+      res = await material.showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: title,
+          titlePadding: titlePadding,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: material.CrossAxisAlignment.start,
             children: <Widget>[
-              acceptButton,
+              Flexible(
+                child: Padding(
+                  padding: contentPadding,
+                  child: content,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: Row(
+                  mainAxisAlignment: additionalActions == null
+                      ? MainAxisAlignment.end
+                      : MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    if (additionalActions != null)
+                      ButtonBar(
+                        alignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          ...?additionalActions,
+                        ],
+                      ),
+                    ButtonBar(
+                      alignment: MainAxisAlignment.end,
+                      children: <Widget>[acceptButton],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-        ],
-      ),
-    );
+          contentPadding: const EdgeInsets.all(0),
+          contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 15.0,
+              ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+      );
+
+      _dialogOpened = false;
+    }
+    return res;
   }
 
   /// Calls [showDialog] function from flutter material library to show a dialog to user (accept and decline buttons)
+  ///
+  /// Won't show up anything if some dialog route is already on top of the stack
+  ///
+  /// NOTE you can call [await Navigator.of(context).maybePop()] if you want to navigate from one dialog to another
   static Future<dynamic> showDialog(
     BuildContext context, {
     Widget title: const Text("Диалог"),
     Widget content: const Text("Контент"),
-    DialogFlatButton acceptButton,
-    DialogFlatButton declineButton,
+    EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+    EdgeInsets contentPadding:
+        const EdgeInsets.only(top: 6.0, left: 24.0, right: 24.0),
+    MaterialButton acceptButton,
+    MaterialButton declineButton,
+    List<Widget> additionalActions,
   }) async {
-    acceptButton ??= DialogFlatButton(
-      child: Text('Принять'),
-      textColor: Constants.AppTheme.acceptButton.auto(context),
-      onPressed: () => Navigator.of(context).pop(),
-    );
-    declineButton ??= DialogFlatButton(
-      child: Text('Отмена'),
-      textColor: Constants.AppTheme.declineButton.auto(context),
-      onPressed: () => Navigator.of(context).pop(),
-    );
+    var res;
 
-    return await flutterShowDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: title,
-        content: content,
-        contentPadding:
-            const EdgeInsets.only(top: 7.0, left: 27.0, right: 27.0),
-        contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
-              fontWeight: FontWeight.w500,
-              fontSize: 15,
-            ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
-          ),
-        ),
-        actions: <Widget>[
-          ButtonBar(
+    if (!_dialogOpened) {
+      _dialogOpened = true;
+
+      acceptButton ??= DialogFlatButton(
+        child: Text('Принять'),
+        textColor: Constants.AppTheme.acceptButton.auto(context),
+        onPressed: () => Navigator.of(context).maybePop(true),
+      );
+      declineButton ??= DialogFlatButton(
+        child: Text('Отмена'),
+        textColor: Constants.AppTheme.declineButton.auto(context),
+        onPressed: () => Navigator.of(context).maybePop(true),
+      );
+
+      res = await material.showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: title,
+          titlePadding: titlePadding,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              acceptButton,
-              declineButton,
+              //  widget(child: content),
+              Flexible(
+                child: Padding(
+                  padding: contentPadding,
+                  child: content,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: Row(
+                  mainAxisAlignment: additionalActions == null
+                      ? MainAxisAlignment.end
+                      : MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    if (additionalActions != null)
+                      ButtonBar(
+                        alignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          ...?additionalActions,
+                        ],
+                      ),
+                    ButtonBar(
+                      alignment: MainAxisAlignment.end,
+                      children: <Widget>[acceptButton, declineButton],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-        ],
-      ),
-    );
+          contentPadding: const EdgeInsets.all(0.0),
+          contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 15.0,
+              ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+      );
+
+      _dialogOpened = false;
+    }
+
+    return res;
   }
 }

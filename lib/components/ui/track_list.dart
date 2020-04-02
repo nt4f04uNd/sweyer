@@ -231,7 +231,6 @@ class _TrackListScreenState extends State<TrackListScreen> {
           duration: kSelectionDuration,
           child: !isSelection()
               ? SMMIconButton(
-                  splashColor: Constants.AppTheme.splash.auto(context),
                   icon: const Icon(Icons.sort),
                   color: Constants.AppTheme.mainContrast.auto(context),
                   onPressed: () => ShowFunctions.showSongsSortModal(context),
@@ -239,7 +238,6 @@ class _TrackListScreenState extends State<TrackListScreen> {
               : IgnorePointer(
                   ignoring: unselecting,
                   child: SMMIconButton(
-                    splashColor: Constants.AppTheme.splash.auto(context),
                     key: UniqueKey(),
                     color: Constants.AppTheme.mainContrast.auto(context),
                     icon: const Icon(Icons.delete_outline),
@@ -560,67 +558,69 @@ class _SongTileState extends State<SongTile> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPressStart: (_) {
-        var pos = _.globalPosition;
-        print(pos.dx);
-        showSMMMenu<dynamic>(
-          context: context,
-          elevation: 1,
+    return
+        // GestureDetector(
+        //   onLongPressStart: (_) {
+        //     var pos = _.globalPosition;
+        //     print(pos.dx);
+        //     showSMMMenu<dynamic>(
+        //       context: context,
+        //       elevation: 1,
 
-          items: <SMMPopupMenuEntry<dynamic>>[
-            SMMPopupMenuItem<void>(
-              value: '',
-              child: Center(
-                child: Text(
-                  'Флексануть,,,,,,,,,,,,,,,,,,,,,,,,',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-          ],
-          initialValue: "kek",
-          // position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width/16, pos.dy + 8.0, 0, 0),
+        //       items: <SMMPopupMenuEntry<dynamic>>[
+        //         SMMPopupMenuItem<void>(
+        //           value: '',
+        //           child: Center(
+        //             child: Text(
+        //               'Флексануть,,,,,,,,,,,,,,,,,,,,,,,,',
+        //               style: TextStyle(fontSize: 16),
+        //             ),
+        //           ),
+        //         ),
+        //       ],
+        //       initialValue: "kek",
+        //       // position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width/16, pos.dy + 8.0, 0, 0),
 
-          position: RelativeRect.fromLTRB(pos.dx, pos.dy, pos.dx, pos.dy),
+        //       position: RelativeRect.fromLTRB(pos.dx, pos.dy, pos.dx, pos.dy),
 
-          // menuBorderRadius: widget.menuBorderRadius,
-          menuPadding: const EdgeInsets.all(0.0),
-        );
-      },
-      child: ListTileTheme(
-        key: _key,
-        selectedColor: Theme.of(context).textTheme.headline6.color,
-        child: ListTile(
-          subtitle: Artist(artist: widget.song.artist),
-          // subtitle: Text(song.artist),
-          dense: true,
-          isThreeLine: false,
-          contentPadding: const EdgeInsets.only(left: 10, top: 0),
-          onTap: () => _handleTap(context),
-          leading: AlbumArtSmall(path: widget.song.albumArtUri),
-          title: Text(
-            widget.song.title,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 15 /* Default flutter title font size (not dense) */,
-            ),
+        //       // menuBorderRadius: widget.menuBorderRadius,
+        //       menuPadding: const EdgeInsets.all(0.0),
+        //     );
+        //   },
+        //   child:
+        ListTileTheme(
+      key: _key,
+      selectedColor: Theme.of(context).textTheme.headline6.color,
+      child: ListTile(
+        subtitle: Artist(artist: widget.song.artist),
+        // subtitle: Text(song.artist),
+        dense: true,
+        isThreeLine: false,
+        contentPadding: const EdgeInsets.only(left: 10, top: 0),
+        onTap: () => _handleTap(context),
+        leading: AlbumArtSmall(path: widget.song.albumArtUri),
+        title: Text(
+          widget.song.title,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 15 /* Default flutter title font size (not dense) */,
           ),
-          trailing: widget.playing
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                )
-              : null,
         ),
+        trailing: widget.playing
+            ? Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              )
+            : null,
       ),
+      // ),
     );
   }
 }

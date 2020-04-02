@@ -8,7 +8,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as material;
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -560,7 +559,6 @@ class SongsSearchDelegate extends SearchDelegate {
   @override
   Widget buildLeading(BuildContext context) {
     return SMMIconButton(
-      splashColor: Constants.AppTheme.splash.auto(context),
       icon: Icon(
         Icons.arrow_back,
         color: Constants.AppTheme.mainContrast.auto(context),
@@ -579,7 +577,6 @@ class SongsSearchDelegate extends SearchDelegate {
           : Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: SMMIconButton(
-                splashColor: Constants.AppTheme.splash.auto(context),
                 icon: const Icon(Icons.clear),
                 // color: Theme.of(context).iconTheme.color,
                 color: Constants.AppTheme.mainContrast.auto(context),
@@ -832,7 +829,6 @@ class SongsSearchDelegate extends SearchDelegate {
             child: Padding(
               padding: const EdgeInsets.only(right: 3.0, top: 5.0),
               child: SMMIconButton(
-                  splashColor: Constants.AppTheme.splash.auto(context),
                   icon: Icon(Icons.delete_sweep),
                   color: Theme.of(context).hintColor,
                   onPressed: () {

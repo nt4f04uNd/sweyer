@@ -47,7 +47,9 @@ class InitialRouteState extends State<InitialRoute> {
                 ? LoadingScreen()
                 : Permissions.notGranted
                     ? _NoPermissionsScreen()
-                    : ContentControl.state.getPlaylist(PlaylistType.global).isEmpty
+                    : ContentControl.state
+                            .getPlaylist(PlaylistType.global)
+                            .isEmpty
                         ? ContentControl.initFetching
                             ? _SearchingSongsScreen()
                             : _SongsEmptyScreen()
@@ -64,7 +66,7 @@ class _SearchingSongsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constants.AppTheme.main.auto(context),
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -103,7 +105,7 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constants.AppTheme.main.auto(context),
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -174,7 +176,7 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constants.AppTheme.main.auto(context),
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[

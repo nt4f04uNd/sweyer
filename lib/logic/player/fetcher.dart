@@ -14,7 +14,7 @@ import 'package:sweyer/api.dart' as API;
 import 'song.dart';
 
 class SongsFetcher {
-  OperationsQueue _fetchQueue = OperationsQueue();
+  AsyncOperationsQueue _fetchQueue = AsyncOperationsQueue();
 
   /// A temporary container for found songs
   List<Song> _foundSongsTemp;

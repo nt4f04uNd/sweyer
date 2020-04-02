@@ -80,20 +80,19 @@ class LabelledSlider extends StatelessWidget {
       children: <Widget>[
         //******** Min Label ********
         if (minLabel != null)
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Text(
-              minLabel,
-              style: const TextStyle(fontSize: 13),
-            ),
+          Text(
+            minLabel,
+            style: const TextStyle(fontSize: 13),
           ),
+
         //******** Slider ********
         Expanded(
           child: Container(
             height: 30.0,
             child: SliderTheme(
               data: themeData.copyWith(
-                trackShape: themeData.trackShape ?? TrackShapeToRemoveBorders(),
+                trackShape:
+                    themeData.trackShape ?? const TrackShapeWithMargin(),
               ),
               child: Slider(
                 value: value,
@@ -111,22 +110,27 @@ class LabelledSlider extends StatelessWidget {
             ),
           ),
         ),
+        
         //******** Max Label ********
         if (maxLabel != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 12.0),
-            child: Text(
-              maxLabel,
-              style: const TextStyle(fontSize: 13),
-            ),
+          Text(
+            maxLabel,
+            style: const TextStyle(fontSize: 13),
           ),
       ],
     );
   }
 }
 
-/// Put it into slider theme to remove borders from right and left of the slider
-class TrackShapeToRemoveBorders extends RoundedRectSliderTrackShape {
+/// Put it into slider theme to make custom track margin
+class TrackShapeWithMargin extends RoundedRectSliderTrackShape {
+  const TrackShapeWithMargin({
+    this.horizontalMargin = 12.0,
+  });
+
+  /// Margin to be applied for each side horizontally
+  final double horizontalMargin;
+
   @override
   Rect getPreferredRect({
     @required RenderBox parentBox,
@@ -136,10 +140,10 @@ class TrackShapeToRemoveBorders extends RoundedRectSliderTrackShape {
     bool isDiscrete = false,
   }) {
     final double trackHeight = sliderTheme.trackHeight;
-    final double trackLeft = offset.dx;
+    final double trackLeft = offset.dx + horizontalMargin;
     final double trackTop =
         offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width;
+    final double trackWidth = parentBox.size.width - horizontalMargin * 2;
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }

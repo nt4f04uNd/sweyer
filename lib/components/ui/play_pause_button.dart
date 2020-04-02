@@ -70,7 +70,6 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
       child: SMMIconButton(
         size: widget.size ?? _kButtonSize,
         iconSize: widget.iconSize ?? _kIconSize,
-        splashColor: Constants.AppTheme.splash.auto(context),
         onPressed: _handlePress,
         icon: AnimatedIcon(
           icon: AnimatedIcons.play_pause,
