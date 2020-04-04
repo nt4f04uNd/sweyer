@@ -15,13 +15,14 @@ export 'zoom_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 
 // const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 650);
 // const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 550);
 const Duration kSMMRouteTransitionDuration = const Duration(milliseconds: 240);
 
 /// Type for function that returns boolean
-typedef BoolFunction = bool Function();
+typedef bool BoolFunction();
 
 /// Needed to define constant [defBoolFunc]
 bool _trueFunc() {
@@ -32,7 +33,7 @@ bool _trueFunc() {
 const BoolFunction defBoolFunc = _trueFunc;
 
 /// Type for function that returns [SystemUiOverlayStyle]
-typedef UIFunction = SystemUiOverlayStyle Function();
+typedef SystemUiOverlayStyle UIFunction();
 
 // Tweens for exit dim animations
 
@@ -102,20 +103,16 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
   /// Defaults to [Constants.AppSstemUIThemes.allScreens.auto(context)]
   UIFunction checkSystemUi;
 
-  /// Function to enable/disable [checkSystemUi] checker to disable ui changes after transition on enter
-  BoolFunction shouldCheckSystemUiEnt;
-
-  /// Function to enable/disable [checkSystemUi] checker to disable ui changes after transition on exit
-  BoolFunction shouldCheckSystemUiExitRev;
-
   @override
   RoutePageBuilder pageBuilder;
 
   @override
   RouteTransitionsBuilder transitionsBuilder;
 
-  double prevAnimationValue = 0.0;
-  double prevSecondaryAnimationValue = 0.0;
+  /// Variable to disable the animation switch call if ui is already animating.
+  ///
+  /// Mostly needed to correctly switch when popping the route, because secondaryAnimation status listener is called multiple times.
+  bool uiAnimating = false;
 
   /// Says when to disable [animation]
   bool entAnimationEnabled = false;
@@ -142,8 +139,6 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
     this.exitIgnoreEventsForward = false,
     this.exitIgnoreEventsReverse = false,
     this.checkSystemUi,
-    this.shouldCheckSystemUiEnt = defBoolFunc,
-    this.shouldCheckSystemUiExitRev = defBoolFunc,
     Duration transitionDuration = kSMMRouteTransitionDuration,
     RouteSettings settings,
     bool opaque = true,
@@ -175,36 +170,31 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
     checkSystemUi ??=
         () => Constants.AppSystemUIThemes.allScreens.autoWithoutContext;
 
-    animation.addListener(() {
-      if (animation.value > prevAnimationValue &&
-          animation.value >= 0.5 &&
-          animation.value <= 0.65 &&
-          shouldCheckSystemUiEnt())
-        SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
-
-      prevAnimationValue = animation.value;
+    animation.addStatusListener((status) async {
+      if (!uiAnimating && status == AnimationStatus.forward) {
+        uiAnimating = true;
+        await SystemUiOverlayStyleControl.animateSystemUiOverlay(
+          to: checkSystemUi(),
+          curve: entCurve,
+          settings: AnimationControllerSettings(duration: transitionDuration),
+        );
+        uiAnimating = false;
+      }
     });
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed && shouldCheckSystemUiEnt())
-        SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
-    });
-
-    secondaryAnimation.addListener(() {
-      if (secondaryAnimation.value < prevSecondaryAnimationValue &&
-          secondaryAnimation.value >= 0.35 &&
-          secondaryAnimation.value < 0.5 &&
-          shouldCheckSystemUiExitRev())
-        SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
-
-      prevSecondaryAnimationValue = secondaryAnimation.value;
-    });
-    secondaryAnimation.addStatusListener((status) {
-      if (status == AnimationStatus.dismissed && shouldCheckSystemUiExitRev())
-        SystemChrome.setSystemUIOverlayStyle(checkSystemUi());
+    secondaryAnimation.addStatusListener((status) async {
+      if (!uiAnimating && status == AnimationStatus.reverse) {
+        uiAnimating = true;
+        await SystemUiOverlayStyleControl.animateSystemUiOverlay(
+          to: checkSystemUi(),
+          curve: entReverseCurve,
+          settings: AnimationControllerSettings(duration: transitionDuration),
+        );
+        uiAnimating = false;
+      }
     });
   }
 
-  /// Checks if animation enabled must be
+  /// Checks if animation  must be enabled
   void handleEnabledCheck(
       Animation<double> animation, Animation<double> secondaryAnimation) {
     animation.addStatusListener((status) {
@@ -228,6 +218,52 @@ abstract class RouteTransition<T extends Widget> extends PageRouteBuilder<T> {
               exitIgnoreEventsReverse && status == AnimationStatus.reverse;
     });
   }
+}
+
+class RouteAwareWidget extends StatefulWidget {
+  RouteAwareWidget({@required this.child}) : assert(child != null);
+  final Widget child;
+  State<RouteAwareWidget> createState() => RouteAwareWidgetState();
+}
+
+// Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
+class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() {
+    print("PUSH");
+    // Route was pushed onto navigator and is now topmost route.
+  }
+
+  @override
+  void didPopNext() {
+    print("didPopNext");
+    // Covering route was popped off the navigator.
+  }
+
+  @override
+  void didPop() {
+    print("didPop");
+  }
+
+  @override
+  void didPushNext() {
+    print("didPushNext");
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// [SlideTransition] class, but with [enabled] parameter

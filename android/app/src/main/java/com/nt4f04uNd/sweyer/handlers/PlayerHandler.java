@@ -149,6 +149,15 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         }
 
     }
+
+
+    /// Removes callbacks and messages from all handlers
+    /// Needed to safely destroy the service
+    public static void stopAllHandlers() {
+        positionHandler.removeCallbacksAndMessages(null);
+        hookButtonHandler.removeCallbacksAndMessages(null);
+        timeoutHandler.removeCallbacksAndMessages(null);
+    }
     // END OF HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

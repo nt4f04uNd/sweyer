@@ -27,10 +27,6 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
   final bool exitIgnoreEventsReverse;
   @override
   UIFunction checkSystemUi;
-  @override
-  BoolFunction shouldCheckSystemUiEnt;
-  @override
-  BoolFunction shouldCheckSystemUiExitRev;
 
   StackFadeRouteTransition({
     @required this.route,
@@ -42,8 +38,6 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
     this.exitIgnoreEventsForward = false,
     this.exitIgnoreEventsReverse = false,
     this.checkSystemUi,
-    this.shouldCheckSystemUiEnt = defBoolFunc,
-    this.shouldCheckSystemUiExitRev = defBoolFunc,
     Duration transitionDuration = kSMMRouteTransitionDuration,
     RouteSettings settings,
     bool opaque = true,
@@ -71,7 +65,7 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
     ) {
       final slideAnimation = animation.status == AnimationStatus.forward
           // Move in on enter
-          ? Tween<Offset>(begin: const Offset(0.1, 0.0), end: Offset.zero)
+          ? Tween<Offset>(begin: const Offset(0.16, 0.0), end: Offset.zero)
               .animate(
               CurvedAnimation(
                 parent: animation,
@@ -92,7 +86,15 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
 
       final fadeAnimation = animation.status == AnimationStatus.forward
           // Fade in on enter
-          ? Tween<double>(begin: 0.2, end: 1.0).animate(animation)
+          ? Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                  curve: Interval(
+                    0.0,
+                    0.7,
+                    curve: Curves.ease,
+                  ),
+                  parent: animation),
+            )
           // Fade out on exit
           : animation.status == AnimationStatus.reverse
               ? Tween<double>(begin: -0.5, end: 1.0).animate(animation)

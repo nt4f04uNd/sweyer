@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:flutter/scheduler.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
@@ -12,13 +13,15 @@ import 'package:catcher/catcher_plugin.dart';
 import 'constants/constants.dart';
 import 'routes/routes.dart';
 
+final RouteObserver<Route> routeObserver = RouteObserver();
+
 void main() {
+
   final CatcherOptions debugOptions = CatcherOptions(SnackBarReportMode(), [
     ConsoleHandler(),
-      FirebaseReportHandler(),
+    FirebaseReportHandler(),
   ]);
-  final CatcherOptions releaseOptions =
-      CatcherOptions(SnackBarReportMode(), [
+  final CatcherOptions releaseOptions = CatcherOptions(SnackBarReportMode(), [
     // EmailManualHandler([Constants.Config.REPORT_EMAIL]),
     FirebaseReportHandler(),
   ]);
@@ -29,9 +32,8 @@ void main() {
 }
 
 class App extends StatelessWidget {
-
   /// A global key to obtain the navigatro
- static GlobalKey<NavigatorState> get navigatorKey => Catcher.navigatorKey;
+  static GlobalKey<NavigatorState> get navigatorKey => Catcher.navigatorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class App extends StatelessWidget {
                   theme: AppTheme.materialApp.light,
                   darkTheme: AppTheme.materialApp.dark,
                   initialRoute: Routes.main.value,
+                  navigatorObservers: [routeObserver],
                   onGenerateRoute: RouteControl.handleOnGenerateRoute,
                   onGenerateInitialRoutes:
                       RouteControl.handleOnGenerateInitialRoutes,

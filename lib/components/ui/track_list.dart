@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-const Duration kSelectionDuration = Duration(milliseconds: 450);
+const Duration kSMMSelectionDuration = Duration(milliseconds: 500);
 
 /// This widget is needed because I need to call `Scaffold.of(context).openDrawer()`
 /// which requires context to have scaffold in it
@@ -78,7 +78,7 @@ class FakeInputBox extends StatelessWidget {
 class TrackListScreen extends StatefulWidget {
   final EdgeInsets bottomPadding;
   TrackListScreen(
-      {Key key, this.bottomPadding: const EdgeInsets.only(bottom: 0.0)})
+      {Key key, this.bottomPadding: const EdgeInsets.only(bottom: 34.0)})
       : super(key: key);
 
   @override
@@ -108,6 +108,9 @@ class _TrackListScreenState extends State<TrackListScreen> {
 
   StreamSubscription<void> _playlistChangeSubscription;
   StreamSubscription<Song> _songChangeSubscription;
+
+  // Var to show exit toast
+  DateTime _lastBackPressTime;
 
   @override
   void initState() {
@@ -188,7 +191,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
       _switcher.change();
     });
     // Needed to release clear set fully when animation is ended, cause some tiles may be out of scope
-    await Future.delayed(kSelectionDuration);
+    await Future.delayed(applyDilation(kSMMSelectionDuration));
     if (mounted)
       setState(() {
         selectionSet = {};
@@ -203,23 +206,32 @@ class _TrackListScreenState extends State<TrackListScreen> {
       content: Text(
         "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо",
       ),
-      acceptButton: DialogFlatButton(
-        child: const Text('Удалить'),
-        textColor: Constants.AppTheme.acceptButton.auto(context),
+      acceptButton: DialogRaisedButton(
+        text: "Удалить",
         onPressed: () {
-          Navigator.of(context).pop();
           ContentControl.deleteSongs(selectionSet);
           _handleCloseSelection();
         },
       ),
-      declineButton: DialogFlatButton(
-        child: const Text('Отмена'),
-        textColor: Constants.AppTheme.declineButton.auto(context),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
     );
+  }
+
+  Future<bool> _handlePop(BuildContext context) async {
+    print(Scaffold.of(context).isDrawerOpen);
+    if (Scaffold.of(context).isDrawerOpen) {
+      Navigator.of(context).pop();
+      return Future.value(false);
+    } else {
+      DateTime now = DateTime.now();
+      // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
+      if (_lastBackPressTime == null ||
+          now.difference(_lastBackPressTime) > Duration(seconds: 2)) {
+        _lastBackPressTime = now;
+        ShowFunctions.showToast(msg: 'Нажмите еще раз для выхода');
+        return Future.value(false);
+      }
+      return Future.value(true);
+    }
   }
 
   //***************ACTIONS*******************************************************
@@ -228,7 +240,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
       Padding(
         padding: const EdgeInsets.only(left: 5.0, right: 5.0),
         child: AnimatedSwitcher(
-          duration: kSelectionDuration,
+          duration: kSMMSelectionDuration,
           child: !isSelection()
               ? SMMIconButton(
                   icon: const Icon(Icons.sort),
@@ -252,7 +264,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
 //***************TITLE*******************************************************
   Widget _renderAppBarTitle() {
     return AnimatedSwitcher(
-      duration: kSelectionDuration,
+      duration: kSMMSelectionDuration,
       child: !isSelection()
           ? const FakeInputBox()
           : Row(
@@ -370,6 +382,8 @@ class _TrackListScreenState extends State<TrackListScreen> {
     );
   }
 
+  ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final songs = ContentControl.state.getPlaylist(PlaylistType.global).songs;
@@ -385,27 +399,42 @@ class _TrackListScreenState extends State<TrackListScreen> {
         actions: _renderAppBarActions(),
         title: _renderAppBarTitle(),
       ),
-      body: Stack(
-        children: <Widget>[
-          Padding(
-            padding: widget.bottomPadding,
-            child: Container(
-              child: CustomRefreshIndicator(
-                color: Constants.AppTheme.refreshIndicatorArrow.auto(context),
-                backgroundColor: Colors.deepPurple,
-                strokeWidth: 2.5,
-                key: _refreshIndicatorKey,
-                onRefresh: _handleRefresh,
-                child: SingleTouchRecognizerWidget(
-                  child: Container(
-                    child: Scrollbar(
+      body: Builder(
+        builder: (context) => WillPopScope(
+          onWillPop: () => _handlePop(context),
+          child: Stack(
+            children: <Widget>[
+              Padding(
+                padding: widget.bottomPadding,
+                child: CustomRefreshIndicator(
+                  color: Constants.AppTheme.refreshIndicatorArrow.auto(context),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  strokeWidth: 2.5,
+                  key: _refreshIndicatorKey,
+                  onRefresh: _handleRefresh,
+                  child: SingleTouchRecognizerWidget(
+                    child: SongsListScrollBar(
+                      controller: _scrollController,
+                      labelTextBuilder: (offsetY) {
+                        int idx = offsetY ~/ kSMMSongTileHeight;
+                        if (idx >= songs.length) {
+                          idx = songs.length - 1;
+                        }
+                        return Text(
+                          songs[idx].title[0],
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        );
+                      },
                       child: ListView.builder(
                         // physics: const SMMBouncingScrollPhysics(),
+                        controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         itemCount: ContentControl.state
                             .getPlaylist(PlaylistType.global)
                             .length,
-                        padding: const EdgeInsets.only(bottom: 65, top: 0),
+                        padding: const EdgeInsets.only(bottom: 34.0, top: 0),
                         itemBuilder: (context, index) {
                           return SelectableSongTile(
                             song: songs[index],
@@ -428,10 +457,10 @@ class _TrackListScreenState extends State<TrackListScreen> {
                   ),
                 ),
               ),
-            ),
+              BottomTrackPanel(),
+            ],
           ),
-          BottomTrackPanel(),
-        ],
+        ),
       ),
     );
   }
@@ -469,22 +498,24 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
 
     return Container(
       child: SingleTouchRecognizerWidget(
-        child: Scrollbar(
+        child: SMMScrollbar(
           child: ScrollablePositionedList.builder(
-              // physics: const SMMBouncingScrollPhysics(),
-              physics: const AlwaysScrollableScrollPhysics(),
-              frontScrollController: frontScrollController,
-              itemScrollController: itemScrollController,
-              itemCount: length,
-              padding: const EdgeInsets.only(bottom: 10, top: 5),
-              initialScrollIndex: initialScrollIndex,
-              itemBuilder: (context, index) {
-                return SongTile(
-                  song: songs[index],
-                  playing: index == currentSongIndex,
-                  pushToPlayerRouteOnClick: false,
-                );
-              }),
+            // physics: const SMMBouncingScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
+            frontScrollController: frontScrollController,
+            itemScrollController: itemScrollController,
+            itemCount: length,
+            // padding: const EdgeInsets.only(bottom: 10, top: 5),
+            
+            initialScrollIndex: initialScrollIndex,
+            itemBuilder: (context, index) {
+              return SongTile(
+                song: songs[index],
+                playing: index == currentSongIndex,
+                pushToPlayerRouteOnClick: false,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -492,6 +523,9 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
 }
 
 //***************************************** Song Tiles ******************************************
+
+/// Needed for scrollbar label computations
+const double kSMMSongTileHeight = 66.0;
 
 /// Every SongTile flavor must implement this
 abstract class SongTileInterface {
@@ -529,17 +563,8 @@ class SongTile extends StatefulWidget implements SongTileInterface {
 
 class _SongTileState extends State<SongTile> {
   void _handleTap(BuildContext context) async {
-    // int prevCurrentSongId = ContentControl.currentSongId;
-
     await MusicPlayer.handleClickSongTile(context, widget.song,
         pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
-
-    // if (pushToPlayerRouteOnClick &&
-    //     (song.id != prevCurrentSongId ||
-    //         song.id == prevCurrentSongId &&
-    //             MusicPlayer.playerState != AudioPlayerState.PLAYING)) {
-    //   Navigator.of(context).pushNamed(Constants.Routes.player.value);
-    // }
 
     if (widget.onTap != null) widget.onTap();
   }
@@ -613,7 +638,7 @@ class _SongTileState extends State<SongTile> {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -699,27 +724,29 @@ class _SelectableSongTileState extends State<SelectableSongTile>
     _selected = widget.selected ?? false;
     _animationController = AnimationController(
       vsync: this,
-      duration: kSelectionDuration,
+      duration: kSMMSelectionDuration,
     );
 
     final CurvedAnimation animationBase = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
     );
 
-    _animationOpacity = Tween<double>(begin: 0, end: 1).animate(animationBase);
+    _animationOpacity =
+        Tween<double>(begin: 0.0, end: 1.0).animate(animationBase);
     _animationOpacityInverse =
         Tween<double>(begin: 1.0, end: 0.0).animate(animationBase);
 
     _animationBorderRadius =
-        Tween<double>(begin: 10, end: 20).animate(animationBase);
+        Tween<double>(begin: 10.0, end: 20.0).animate(animationBase);
 
     _animationScale =
         Tween<double>(begin: 1.0, end: 1.2).animate(animationBase);
 
     _animationScaleInverse =
-        Tween<double>(begin: 1.17, end: 1.0).animate(animationBase);
+        // Tween<double>(begin: 1.17, end: 1.0).animate(animationBase);
+        Tween<double>(begin: 1.23, end: 1.0).animate(animationBase);
 
     _animationController
       ..addListener(() {
@@ -820,7 +847,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
                     child: Container(
                       width: 48.0,
                       height: 48.0,
-                      color: Colors.deepPurple,
+                      color: Theme.of(context).colorScheme.primary,
                       child: ScaleTransition(
                         scale: _animationScaleInverse,
                         child: const Icon(
@@ -841,7 +868,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple,
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),

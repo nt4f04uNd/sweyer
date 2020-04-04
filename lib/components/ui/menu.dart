@@ -17,17 +17,19 @@ class DrawerWidget extends StatefulWidget {
   _DrawerWidgetState createState() => _DrawerWidgetState();
 }
 
-class _DrawerWidgetState extends State<DrawerWidget> {
+class _DrawerWidgetState extends State<DrawerWidget>
+    with SingleTickerProviderStateMixin {
   bool _tappedList = false;
 
-  void _handleClickSettings() {
+  Future<void> _handleClickSettings() {
     _tappedList = true;
 
     // Set ui to all screens
     SystemChrome.setSystemUIOverlayStyle(
         Constants.AppSystemUIThemes.allScreens.auto(context));
 
-    Navigator.of(context).popAndPushNamed(Constants.Routes.settings.value);
+    return App.navigatorKey.currentState
+        .popAndPushNamed(Constants.Routes.settings.value);
   }
 
   // void _handleClickSendLog() => Logger.send();
@@ -37,30 +39,100 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
     SystemChrome.setSystemUIOverlayStyle(
         Constants.AppSystemUIThemes.allScreens.auto(context));
-    try {
-      return Navigator.of(context)
-          .popAndPushNamed(Constants.Routes.debug.value);
-    } catch (e) {}
+
+    return App.navigatorKey.currentState
+        .popAndPushNamed(Constants.Routes.debug.value);
   }
 
   @override
   void initState() {
     super.initState();
+
+    // TODO: this method
+    // SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription());
+
+    // animation.addListener(() async {
+    //   // print(animation.value);
+    //   // SystemChrome.setSystemUIOverlayStyle(
+    //   //   SystemUiOverlayStyle(statusBarColor: animation.value),
+    //   // );
+
+    //   // SystemChrome.setSystemUIOverlayStyle(
+    //   //   SystemUiOverlayStyle(statusBarColor: Colors.black),
+    //   // );
+    //   (() async {
+    //     // Without a microtask this won't work
+    //     await Future.microtask(
+    //       () => SystemChrome.setSystemUIOverlayStyle(
+    //         SystemUiOverlayStyle(
+    //           systemNavigationBarColor: animation.value,
+    //           // // statusBarColor: Colors.black,
+    //           statusBarColor: animation.value,
+    //         ),
+    //       ),
+    //     );
+    //   })();
+    // });
+    // controller.addStatusListener((status) {
+    //   if (status == AnimationStatus.completed) {
+    //     controller.reverse();
+    //   } else if (status == AnimationStatus.dismissed) {
+    //     controller.forward();
+    //   }
+    // });
+    // controller.forward();
+
     (() async {
-      await Future.delayed(
-          Duration(microseconds: 1)); // Without delay this won't work
-      SystemChrome.setSystemUIOverlayStyle(
-          Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext);
+      // Without a this future this won't work
+      await Future.delayed(const Duration(microseconds: 1));
+
+      SystemUiOverlayStyleControl.setSystemUiOverlay(
+          Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
+          saveToHistory: false);
     })();
+
+    // SystemUiOverlayStyleControl.setSystemUiOverlay(
+    //   Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
+    // );
   }
 
   @override
   void dispose() {
     // Set ui to main screen on drawer close
-    if (!_tappedList)
-      SystemChrome.setSystemUIOverlayStyle(
-          Constants.AppSystemUIThemes.mainScreen.autoWithoutContext);
+    // if (!_tappedList)
+    // SystemChrome.setSystemUIOverlayStyle(
+    //   SystemUiOverlayStyle(
+    //       statusBarColor: Constants
+    //           .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor),
+    // );
+    // SystemChrome.setSystemUIOverlayStyle(
+    //   Constants.AppSystemUIThemes.mainScreen.autoWithoutContext,
+    // );
+    _handleDispose();
+
+    // controller.dispose();
     super.dispose();
+  }
+
+  void _handleDispose() async {
+    if (!_tappedList) {
+      // Animate only nav panel here
+      await SystemUiOverlayStyleControl.animateSystemUiOverlay(
+        from: Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext
+            .copyWith(
+          statusBarColor: Constants
+              .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
+        ),
+        to: Constants.AppSystemUIThemes.mainScreen.autoWithoutContext.copyWith(
+          statusBarColor: Constants
+              .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
+        ),
+        curve: Curves.easeInCirc,
+        settings: AnimationControllerSettings(
+          duration: const Duration(milliseconds: 150),
+        ),
+      );
+    }
   }
 
   @override
@@ -199,19 +271,22 @@ class AnimatedMenuCloseButton extends StatefulWidget {
 class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
     with SingleTickerProviderStateMixin {
   AnimationController _animationController;
+  Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
+    _animationController =
+        AnimationController(vsync: this, duration: kSMMSelectionDuration);
+    _animation =
+        CurveTween(curve: Curves.easeOut).animate(_animationController);
 
     if (widget.animateDirection != null) {
       if (widget.animateDirection) {
         _animationController.forward();
       } else {
-        _animationController.value = 1.0;
-        _animationController.reverse();
+        _animationController.value = 0.0;
+        _animationController.forward();
       }
     }
   }
@@ -229,14 +304,17 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
         size: widget.size ?? kSMMIconButtonSize,
         iconSize: widget.iconSize ?? kSMMIconButtonIconSize,
         color: Constants.AppTheme.mainContrast.auto(context),
-        onPressed: widget.animateDirection != null && widget.animateDirection
+        onPressed: widget.animateDirection == true
             ? widget.onCloseClick
             : widget.onMenuClick,
         icon: AnimatedIcon(
-          icon: AnimatedIcons.menu_close,
+          icon:
+              widget.animateDirection == null || widget.animateDirection == true
+                  ? AnimatedIcons.menu_close
+                  : AnimatedIcons.close_menu,
           color: widget.iconColor ??
               Constants.AppTheme.playPauseIcon.auto(context),
-          progress: _animationController,
+          progress: _animation,
         ),
       ),
     );

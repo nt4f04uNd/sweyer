@@ -10,7 +10,7 @@ class CaughtError {
   CaughtError(this.exception, this.stackTrace);
 }
 
-typedef ReportCallback = void Function(CaughtError);
+typedef  void ReportCallback(CaughtError);
 
 /// Abstract class used to create error bridge between app initialization processes
 /// to bring error messages to UI to display them in dialog message

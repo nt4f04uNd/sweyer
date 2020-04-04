@@ -90,6 +90,7 @@ public class PlayerForegroundService extends Service {
         // Handlers
         // These may affect user interaction with other apps if I won't destroy them
         // Other handlers seem to be not necessary to clear them
+        PlayerHandler.stopAllHandlers();
         WakelockHandler.release();
         AudioFocusHandler.abandonFocus();
         PlaylistHandler.resetPlaylist();

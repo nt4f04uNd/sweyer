@@ -4,14 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/sweyer.dart';
 
 const double kSMMLargeAlbumArtMargins = 80.0;
 const double kSMMSmallArtSize = 48.0;
@@ -58,7 +56,7 @@ mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
     // Call loading promise if path is not null
     if (path != null) {
       File file = File(path);
-      // if (await file.exists()) return file.readAsBytes();
+      if (await file.exists()) return file.readAsBytes();
     }
     return null;
   }
@@ -199,10 +197,12 @@ class AlbumPlaceholderLarge extends StatelessWidget {
         color: Constants.AppTheme.albumArtLarge.auto(context),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
-      padding: EdgeInsets.all(size / 4),
+      padding: EdgeInsets.all(size / 4.0),
       child: SvgPicture.asset(
         // TODO: move all asset paths to constants
         'assets/images/icons/note_rounded.svg',
+        // color: Theme.of(context).colorScheme.primaryVariant,
+        // color: Colors.deepP,
       ),
     );
   }
@@ -256,7 +256,8 @@ class AlbumPlaceholderSmall extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlbumArtBaseSmall(
       child: Image.asset(
-        'assets/images/placeholder_thumb.png',
+        // 'assets/images/placeholder_thumb.png',
+        'assets/images/placeholder_thumb_new.png',
       ),
     );
   }
@@ -341,8 +342,6 @@ class AlbumArtRotatingState extends State<AlbumArtRotating>
 
     if (widget.initIsRotating)
       rotate();
-    else
-      stopRotating();
   }
 
   @override
@@ -430,7 +429,8 @@ class RotatingAlbumPlaceholder extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       // TODO: path to const
-      child: Image.asset('assets/images/placeholder_thumb.png'),
+      // child: Image.asset('assets/images/placeholder_thumb.png'),
+      child: Image.asset('assets/images/placeholder_thumb_new.png'),
     );
   }
 }

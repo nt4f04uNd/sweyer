@@ -58,6 +58,17 @@ class Playlist {
   bool get isEmpty => _songs.isEmpty;
   bool get isNotEmpty => _songs.isNotEmpty;
 
+  // Setters
+  /// Explicit setter for songs
+  void setSongs(List<Song> songs) {
+    _songs = songs;
+  }
+
+  /// Clears the songs list
+  void clear() {
+    _songs = [];
+  }
+
   // Methods
 
   /// Checks if playlist contains song
@@ -98,7 +109,9 @@ class Playlist {
   /// Returns next song id
   int getNextSongId(int id) {
     final int nextSongIndex = getSongIndexById(id) + 1;
-    if (nextSongIndex >= length) {
+    if (nextSongIndex == -1) {
+      return null;
+    } else if (nextSongIndex >= length) {
       return _songs[0].id;
     }
     return _songs[nextSongIndex].id;
@@ -107,7 +120,9 @@ class Playlist {
   /// Returns prev song id
   int getPrevSongId(int id) {
     final int prevSongIndex = getSongIndexById(id) - 1;
-    if (prevSongIndex < 0) {
+    if (prevSongIndex == -1) {
+      return null;
+    } else if (prevSongIndex < 0) {
       return _songs[length - 1].id;
     }
     return _songs[prevSongIndex].id;
@@ -117,10 +132,18 @@ class Playlist {
   void filter(FilterFeature feature, {Duration duration}) {
     if (feature == FilterFeature.duration) {
       assert(duration != null);
-      _songs = _songs
-          .where((el) => Duration(milliseconds: el.duration) > duration)
-          .toList();
+      _songs
+          .retainWhere((el) => Duration(milliseconds: el.duration) >= duration);
     }
   }
-}
 
+  /// Will search each song in another playlist and remove it if won't find it.
+  void compareAndRemoveObsolete(Playlist playlist) {
+    print("fwqf");
+    _songs.removeWhere((song) {
+      final res  = playlist.getSongById(song.id);
+        print("${song.id} ${res}");
+      return res == null;
+    });
+  }
+}

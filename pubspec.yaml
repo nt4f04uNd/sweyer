@@ -68,6 +68,7 @@ flutter:
    - assets/images/icons/note_rounded.svg
    - assets/images/placeholder_thumb.png
    - assets/images/placeholder_thumb_old.png
+   - assets/images/placeholder_thumb_new.png
 
   fonts:
     - family: Manrope

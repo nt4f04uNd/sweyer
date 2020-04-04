@@ -14,6 +14,7 @@ export 'marquee.dart';
 export 'menu.dart';
 export 'play_pause_button.dart';
 export 'route.dart';
+export 'scrollbar.dart';
 export 'settings_widgets.dart';
 export 'slider.dart';
 export 'snackbar.dart';

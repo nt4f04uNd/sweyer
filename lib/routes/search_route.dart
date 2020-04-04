@@ -440,7 +440,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 
   @override
   Widget build(BuildContext context) {
-   
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel =
@@ -461,7 +460,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         break;
     }
     String routeName;
-     switch (theme.platform) {
+    switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         routeName = '';
@@ -472,7 +471,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
-
 
     return Semantics(
       explicitChildNodes: true,
@@ -650,9 +648,6 @@ class SongsSearchDelegate extends SearchDelegate {
     showSuggestions(context); // Update suggestions ListView
   }
 
-  // TODO:?????
-  // final key = UniqueKey();
-
   /// This method called both for build suggestions and results
   ///
   /// This because we need user to see actual suggestions only when query is empty
@@ -686,40 +681,65 @@ class SongsSearchDelegate extends SearchDelegate {
         if (searched != null && searched.length == 0)
           return _buildEmptyResults();
 
+        ScrollController scrollController = ScrollController();
+
         return Stack(
           children: <Widget>[
-            Scrollbar(
-              child: StreamBuilder(
-                  stream: ContentControl.state.onSongChange,
-                  builder: (context, snapshot) {
-                    return ListView.builder(
-                        // physics: const SMMBouncingScrollPhysics(),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.only(bottom: 65, top: 0),
-                        itemCount: searched.length,
-                        itemBuilder: (context, index) {
-                          return SongTile(
-                            song: searched[index],
-                            playing: searched[index].id ==
-                                ContentControl.state.currentSongId,
-                            onTap: () async {
-                              _writeInputToSearchHistory(query);
-                              // close(context, searchedList[index]);
-                              FocusScope.of(context).requestFocus(FocusNode());
+            StreamBuilder(
+              stream: ContentControl.state.onSongChange,
+              builder: (context, snapshot) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 34.0),
+                  child:
+                   SongsListScrollBar(
+                    controller: scrollController,
+                    labelTextBuilder: (offsetY) {
+                      int idx = offsetY ~/ kSMMSongTileHeight;
+                      if (idx >= searched.length) {
+                        idx = searched.length - 1;
+                      }
+                      return Text(
+                        searched[idx].title[0],
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      );
+                    },
+                    child: 
+                    ListView.builder(
+                      // physics: const SMMBouncingScrollPhysics(),
+                      controller: scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 34.0, top: 0),
+                      itemCount: searched.length,
+                      itemBuilder: (context, index) {
+                        return SongTile(
+                          song: searched[index],
+                          playing: searched[index].id ==
+                              ContentControl.state.currentSongId,
+                          onTap: () async {
+                            _writeInputToSearchHistory(query);
+                            // close(context, searchedList[index]);
+                            FocusScope.of(context).requestFocus(FocusNode());
 
-                              // Wait before route animation completes
-                              await Future.delayed(Duration(milliseconds: 650));
+                            // Wait before route animation completes
+                            await Future.delayed(
+                              applyDilation(kSMMPlayerRouteTransitionDuration),
+                            );
 
-                              if (dirty) {
-                                ContentControl.setSearchedPlaylist(
-                                  searched,
-                                );
-                                dirty = false;
-                              }
-                            },
-                          );
-                        });
-                  }),
+                            if (dirty) {
+                              ContentControl.setSearchedPlaylist(
+                                songs: searched,
+                              );
+                              dirty = false;
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
             BottomTrackPanel(),
           ],
@@ -837,21 +857,10 @@ class SongsSearchDelegate extends SearchDelegate {
                       title: Text("Очистить историю поиска"),
                       content:
                           Text("Вы действительно хотите очистить историю?"),
-                      acceptButton: DialogFlatButton(
-                        child: Text('Удалить'),
-                        textColor:
-                            Constants.AppTheme.acceptButton.auto(context),
+                      acceptButton: DialogRaisedButton(
+                        text: "Удалить",
                         onPressed: () async {
-                          Navigator.of(context).pop();
                           await _resetSearchHistory(context);
-                        },
-                      ),
-                      declineButton: DialogFlatButton(
-                        child: Text('Отмена'),
-                        textColor:
-                            Constants.AppTheme.declineButton.auto(context),
-                        onPressed: () {
-                          Navigator.of(context).pop();
                         },
                       ),
                     );
@@ -878,19 +887,10 @@ class SongsSearchDelegate extends SearchDelegate {
           title: Text("Удалить запрос"),
           content:
               Text("Вы действительно хотите удалить этот запрос из истории?"),
-          acceptButton: DialogFlatButton(
-            child: Text('Удалить'),
-            textColor: Constants.AppTheme.acceptButton.auto(context),
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _deleteItemFromHistory(context, index);
-            },
-          ),
-          declineButton: DialogFlatButton(
-            child: Text('Отмена'),
-            textColor: Constants.AppTheme.declineButton.auto(context),
+          acceptButton: DialogRaisedButton(
+            text: "Удалить",
             onPressed: () {
-              Navigator.of(context).pop();
+              _deleteItemFromHistory(context, index);
             },
           ),
         );

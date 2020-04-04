@@ -242,7 +242,7 @@ class SMMPopupMenuItemState<T, W extends SMMPopupMenuItem<T>> extends State<W> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    TextStyle style = theme.textTheme.subhead;
+    TextStyle style = theme.textTheme.subtitle1;
     if (!widget.enabled) style = style.copyWith(color: theme.disabledColor);
 
     Widget item = AnimatedDefaultTextStyle(
@@ -496,7 +496,7 @@ class _PopupMenu<T> extends StatelessWidget {
     return AnimatedBuilder(
       animation: route.animation,
       builder: (BuildContext context, Widget child) {
-        return Transform.translate(
+        return Transform.translate( // TODO: add animation variations and rewrite it with [SlideTransition]
           offset: translateOffsetAnimation.value,
           child: FadeTransition(
             opacity: fadeAnimation,

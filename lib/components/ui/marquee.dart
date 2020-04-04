@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
+import 'package:sweyer/sweyer.dart';
 
 /// Creates marque widget that scrolls text back and forward to see it all
 class MarqueeWidget extends StatefulWidget {
@@ -81,20 +82,20 @@ class _MarqueeWidgetState extends State<MarqueeWidget> {
 
   void scroll() async {
     while (true) {
-      if (!this.mounted) break;
-      await Future.delayed(widget.pauseDuration);
+      if (!mounted) break;
+      await Future.delayed(applyDilation(widget.pauseDuration));
 
-      if (!this.mounted) break;
+      if (!mounted) break;
       if (_scrollController.hasClients)
         await _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             duration: _animationDuration,
             curve: Curves.easeInOut);
 
-      if (!this.mounted) break;
-      await Future.delayed(widget.pauseDuration);
+      if (!mounted) break;
+      await Future.delayed(applyDilation(widget.pauseDuration));
 
-      if (!this.mounted) break;
+      if (!mounted) break;
       if (_scrollController.hasClients)
         await _scrollController.animateTo(0.0,
             duration: _backDuration, curve: Curves.easeInOut);

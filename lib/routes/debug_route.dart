@@ -34,9 +34,10 @@ class DebugRoute extends StatelessWidget {
               title: Text('Тестовый тост'),
               onTap: () {
                 ShowFunctions.showToast(
-                    msg: "Тест",
-                    toastLength: Toast.LENGTH_LONG,
-                    backgroundColor: Colors.deepPurple);
+                  msg: "Тест",
+                  toastLength: Toast.LENGTH_LONG,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                );
               },
             ),
             _TimeDilationSlider(),
@@ -100,7 +101,6 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        activeColor: Colors.deepPurple,
         inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
         min: 0.001,
         max: 10,

@@ -40,10 +40,6 @@ class ZoomRouteTransition<T extends Widget> extends RouteTransition<T> {
   RoutePageBuilder pageBuilder;
   @override
   UIFunction checkSystemUi;
-  @override
-  BoolFunction shouldCheckSystemUiEnt;
-  @override
-  BoolFunction shouldCheckSystemUiExitRev;
 
   ZoomRouteTransition({
     @required this.route,
@@ -58,8 +54,6 @@ class ZoomRouteTransition<T extends Widget> extends RouteTransition<T> {
     this.exitIgnoreEventsForward = false,
     this.exitIgnoreEventsReverse = false,
     this.checkSystemUi,
-    this.shouldCheckSystemUiEnt = defBoolFunc,
-    this.shouldCheckSystemUiExitRev = defBoolFunc,
     Duration transitionDuration = kSMMRouteTransitionDuration,
     RouteSettings settings,
     bool opaque = true,

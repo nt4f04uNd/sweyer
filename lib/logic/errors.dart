@@ -21,15 +21,13 @@ class SnackBarReportMode extends DialogReportMode {
 
 // TODO: refactor this!!!
     SnackBarControl.showSnackBar(
-      context,
       settings: SMMSnackbarSettings(
         globalKey: globalKey,
-        duration: const Duration(seconds: 4),
         child: SMMSnackBar(
-          title: Text("😮 Упс! Произошла ошибка"),
+          message: "😮 Упс! Произошла ошибка",
           action: PrimaryRaisedButton(
             text: "Детали",
-            color: Theme.of(context).colorScheme.error,
+            color: (() => Theme.of(context).colorScheme.error)(),
             onPressed: () {
               globalKey.currentState.close();
 
@@ -47,37 +45,12 @@ ${report.stackTrace.toString()}''';
                     const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
                 contentPadding:
                     const EdgeInsets.only(top: 7.0, left: 2.0, right: 2.0),
-                content: SingleChildScrollView(
-                  child: SelectableText(
-                    errorInfo,
-                    style: const TextStyle(fontSize: 11.0),
-                  ),
-                ),
-                acceptButton: DialogFlatButton(
-                  child: Text("Закрыть"),
-                  onPressed: () => App.navigatorKey.currentState.pop(),
+                content: SelectableText(
+                  errorInfo,
+                  style: const TextStyle(fontSize: 11.0),
                 ),
                 additionalActions: [
-                  SMMIconButton(
-                    icon: Icon(Icons.content_copy),
-                    size: 44.0,
-                    onPressed: () {
-                      Clipboard.setData(
-                        ClipboardData(text: errorInfo),
-                      );
-                      SnackBarControl.showSnackBar(
-                        context,
-                        settings: SMMSnackbarSettings(
-                          globalKey: globalKey,
-                          duration: const Duration(seconds: 4),
-                          child: SMMSnackBar(
-                            title: Text("Скопировано"),
-                            leading: Icon(Icons.content_copy),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  CopyButton(text: errorInfo),
                 ],
               );
             },
@@ -102,13 +75,14 @@ class FirebaseReportHandler extends ReportHandler {
   @override
   Future<bool> handle(Report error) async {
     bool res = true;
-    try { // TODO: uncomment this
-      Crashlytics.instance.recordFlutterError(
-        FlutterErrorDetails(
-          exception: error.error,
-          stack: error.stackTrace,
-        ),
-      );
+    try {
+      // TODO: uncomment this
+      // Crashlytics.instance.recordFlutterError(
+      //   FlutterErrorDetails(
+      //     exception: error.error,
+      //     stack: error.stackTrace,
+      //   ),
+      // );
     } catch (e) {
       res = false;
       print("ERROR IN FIREBASE REPORT HANDLER: " + e);

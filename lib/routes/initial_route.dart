@@ -13,9 +13,6 @@ class InitialRoute extends StatefulWidget {
 }
 
 class InitialRouteState extends State<InitialRoute> {
-  // Var to show toast in `_handleHomePop`
-  static DateTime _currentBackPressTime;
-
   @override
   void initState() {
     super.initState();
@@ -23,39 +20,23 @@ class InitialRouteState extends State<InitialRoute> {
     // LaunchControl.afterAppMount();
   }
 
-  /// Handles route pop and shows user toast
-  static Future<bool> _handleHomePop() async {
-    DateTime now = DateTime.now();
-    // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
-    if (_currentBackPressTime == null ||
-        now.difference(_currentBackPressTime) > Duration(seconds: 2)) {
-      _currentBackPressTime = now;
-      ShowFunctions.showToast(msg: 'Нажмите еще раз для выхода');
-      return Future.value(false);
-    }
-    return Future.value(true);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _handleHomePop,
-      child: StreamBuilder(
-          stream: ContentControl.state.onPlaylistListChange,
-          builder: (context, snapshot) {
-            return !ContentControl.playReady
-                ? LoadingScreen()
-                : Permissions.notGranted
-                    ? _NoPermissionsScreen()
-                    : ContentControl.state
-                            .getPlaylist(PlaylistType.global)
-                            .isEmpty
-                        ? ContentControl.initFetching
-                            ? _SearchingSongsScreen()
-                            : _SongsEmptyScreen()
-                        : TrackListScreen();
-          }),
-    );
+    return StreamBuilder(
+        stream: ContentControl.state.onPlaylistListChange,
+        builder: (context, snapshot) {
+          return !ContentControl.playReady
+              ? LoadingScreen()
+              : Permissions.notGranted
+                  ? _NoPermissionsScreen()
+                  : ContentControl.state
+                          .getPlaylist(PlaylistType.global)
+                          .isEmpty
+                      ? ContentControl.initFetching
+                          ? _SearchingSongsScreen()
+                          : _SongsEmptyScreen()
+                      : TrackListScreen();
+        });
   }
 }
 
@@ -79,7 +60,8 @@ class _SearchingSongsScreen extends StatelessWidget {
               ),
             ),
             CircularProgressIndicator(
-              valueColor: const AlwaysStoppedAnimation(Colors.deepPurple),
+              valueColor:
+                  AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
             ),
           ],
         ),

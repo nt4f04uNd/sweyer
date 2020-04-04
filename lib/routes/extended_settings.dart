@@ -55,11 +55,12 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
       });
   }
 
-  Future<void> _handleSave()  {
+  Future<void> _handleSave() async {
     Prefs.byKey.settingMinFileDurationInt.setPref(settingMinFileDuration);
-    if (initSettingMinFileDuration <= settingMinFileDuration)
+    if (initSettingMinFileDuration <= settingMinFileDuration) {
       ContentControl.filterSongs();
-    else
+      // ContentControl.updatePlaylistsWithGlobal();
+    } else
       ContentControl.refetchSongs();
     initSettingMinFileDuration = settingMinFileDuration;
     ShowFunctions.showToast(msg: "Настройки сохранены");
@@ -77,16 +78,8 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
       title: Text("Сохранить настройки?"),
       content: Text(
           "Некоторые настройки были изменены, желаете ли вы сохранить их? Нажмите снаружи, чтобы остаться"),
-      acceptButton: DialogFlatButton(
-        child: Text('Сохранить'),
-        textColor: Constants.AppTheme.acceptButton.auto(context),
-        onPressed: () => Navigator.of(context).pop(true),
-      ),
-      declineButton: DialogFlatButton(
-        child: Text('Отменить'),
-        textColor: Constants.AppTheme.declineButton.auto(context),
-        onPressed: () => Navigator.of(context).pop(false),
-      ),
+      acceptButton: DialogRaisedButton.accept(text: "Сохранить"),
+    
     ));
 
     if (res == null) {
@@ -186,7 +179,6 @@ class _MinFileDurationSliderState extends State<_MinFileDurationSlider> {
       title: "Минимальная длительность файла",
       description: "Скрыть файлы короче, чем ${_calcLabel()}",
       content: LabelledSlider(
-        activeColor: Colors.deepPurple,
         inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
         min: 0,
         max: 60 * 5.0,

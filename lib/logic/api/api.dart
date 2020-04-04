@@ -20,4 +20,4 @@ export 'songs.dart';
 
 import 'package:flutter/services.dart';
 
-typedef MethodChannelHandler = Future<dynamic> Function(MethodCall call);
+typedef Future<dynamic> MethodChannelHandler(MethodCall call);

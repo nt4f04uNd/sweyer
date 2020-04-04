@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
+const kSMMPlayerRouteTransitionDuration = const Duration(milliseconds: 550);
+
 class PlayerRoute extends StatefulWidget {
   @override
   _PlayerRouteState createState() => _PlayerRouteState();
@@ -279,11 +281,11 @@ class _MainPlayerTabState extends State<_MainPlayerTab>
   //   _animationController.addListener(() {
   //     setState(() {});
   //   });
-  //   _colorAnimation = ColorTween(
-  //           begin: ContentControl.currentArtColor,
-  //           end: ContentControl.currentArtColor)
-  //       .animate(CurvedAnimation(
-  //           curve: Curves.easeOutCubic, parent: _animationController));
+  // _colorAnimation = ColorTween(
+  //         begin: ContentControl.currentArtColor,
+  //         end: ContentControl.currentArtColor)
+  //     .animate(CurvedAnimation(
+  //         curve: Curves.easeOutCubic, parent: _animationController));
 
   //   _artColorChangeSubscription =
   //       ContentControl.onArtColorChange.listen((event) {
@@ -444,36 +446,13 @@ class _InfoButton extends StatelessWidget {
             ShowFunctions.showAlert(
               context,
               title: const Text("Информация о песне"),
-              content: Text(
+              content: SelectableText(
                 songInfo ?? "null",
                 style: const TextStyle(fontSize: 13),
               ),
-              acceptButton: DialogFlatButton(
-                child: Text("Закрыть"),
-                onPressed: () => App.navigatorKey.currentState.pop(),
-              ),
+      
               additionalActions: [
-                SMMIconButton(
-                  icon: Icon(Icons.content_copy),
-                  size: 44.0,
-                  onPressed: songInfo == null
-                      ? null
-                      : () {
-                          Clipboard.setData(
-                            ClipboardData(text: songInfo),
-                          );
-                          SnackBarControl.showSnackBar(
-                            context,
-                            settings: SMMSnackbarSettings(
-                              duration: const Duration(seconds: 4),
-                              child: SMMSnackBar(
-                                title: Text("Скопировано"),
-                                leading: Icon(Icons.content_copy),
-                              ),
-                            ),
-                          );
-                        },
-                ),
+                CopyButton(text: songInfo),
               ],
             );
           }),
@@ -730,7 +709,7 @@ class _TrackSliderState extends State<_TrackSlider> {
         ),
         Expanded(
           child: Slider(
-            activeColor: Colors.deepPurple,
+            activeColor: Theme.of(context).colorScheme.primary,
             inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
             value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
             max: _duration.inSeconds.toDouble(),

@@ -26,16 +26,30 @@ class BottomTrackPanel extends StatelessWidget {
 
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Container(
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          child: StreamBuilder(
-              stream: MusicPlayer.onPlayerStateChanged,
-              builder: (context, snapshot) {
-                return Material(
+      child: StreamBuilder(
+          stream: MusicPlayer.onPlayerStateChanged,
+          builder: (context, snapshot) {
+            return AnimatedPhysicalModel(
+              duration: const Duration(seconds: 1),
+              shadowColor: Colors.black87,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(26),
+                topRight: Radius.circular(26),
+              ),
+              color: Colors.transparent,
+              // elevation: 0.0,
+              elevation: 20.0,
+              child: Container(
+                height: 76.0,
+              
+                alignment: Alignment.bottomCenter,
+                child: Material(
+                  // elevation: 24.0,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
                   color: Theme.of(context).colorScheme.secondary,
                   child: GestureDetector(
                     onTap: () async {
@@ -60,53 +74,30 @@ class BottomTrackPanel extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 1),
                             child: Artist(
                               artist: ContentControl.state.currentSong.artist,
-                              // textStyle: TextStyle(fontWeight: ThemeControl.isDark ? FontWeight.w400 : FontWeight.w500),
                             ),
                           ),
                         ],
                       ),
                       leading: RotatingAlbumArtWithProgress(),
-                      trailing: Transform.translate(
-                        offset: Offset(0, 0),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 50.0),
-                          child: Stack(
-                            children: <Widget>[
-                              Transform.translate(
-                                // offset: Offset(-16, 0),
-                                offset: Offset(0, 0),
-                                child: AnimatedPlayPauseButton(
-                                  size: 40.0,
-                                  iconSize: 28.0,
-                                  iconColor: Constants.AppTheme.mainContrast
-                                      .auto(context),
-                                ),
-                              ),
-                              // Transform.translate(
-                              //   offset: Offset(18, 0),
-                              //   child: SMMIconButton(
-                              //     icon: Icon(Icons.skip_next),
-                              //     onPressed: MusicPlayer.playNext,
-                              //     size: 40.0,
-                              //     iconSize: 28.0,
-                              //     splashColor:
-                              //         Constants.AppTheme.splash.auto(context),
-                              //     // color: Constants.AppTheme.playPauseIcon
-                              //     //     .auto(context),
-                              //     color: Constants.AppTheme.mainContrast
-                              //         .auto(context),
-                              //   ),
-                              // ),
-                            ],
-                          ),
+                      trailing: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 50.0),
+                        child: Stack(
+                          children: <Widget>[
+                            AnimatedPlayPauseButton(
+                              size: 40.0,
+                              iconSize: 28.0,
+                              iconColor:
+                                  Constants.AppTheme.mainContrast.auto(context),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                );
-              }),
-        ),
-      ),
+                ),
+              ),
+            );
+          }),
     );
   }
 }
@@ -216,7 +207,7 @@ class _RotatingAlbumArtWithProgressState
         /// 48.0 is `constraints.maxHeight` if we see it in [LayoutBuilder]
         lineWidth: progressLineHeight,
         circularStrokeCap: CircularStrokeCap.round,
-        progressColor: Colors.deepPurple,
+        progressColor: Theme.of(context).colorScheme.primary,
         backgroundColor: Colors.transparent,
         center: AlbumArtRotating(
           key: _rotatingArtGlobalKey,

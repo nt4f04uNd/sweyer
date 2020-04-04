@@ -57,10 +57,6 @@ class ExpandUpRouteTransition<T extends Widget> extends RouteTransition<T> {
   final bool exitIgnoreEventsReverse;
   @override
   UIFunction checkSystemUi;
-  @override
-  BoolFunction shouldCheckSystemUiEnt;
-  @override
-  BoolFunction shouldCheckSystemUiExitRev;
 
   /// Begin offset for exit animation
   ///
@@ -88,8 +84,6 @@ class ExpandUpRouteTransition<T extends Widget> extends RouteTransition<T> {
     this.exitIgnoreEventsForward = false,
     this.exitIgnoreEventsReverse = false,
     this.checkSystemUi,
-    this.shouldCheckSystemUiEnt = defBoolFunc,
-    this.shouldCheckSystemUiExitRev = defBoolFunc,
     this.exitBegin = Offset.zero,
     this.exitEnd = const Offset(-0.2, 0.0),
     Duration transitionDuration = kSMMRouteTransitionDuration,

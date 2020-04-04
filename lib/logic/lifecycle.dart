@@ -8,28 +8,40 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:catcher/core/catcher.dart';
 
+import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/logic/api/api.dart' as API;
 
-class LifecycleEventHandler extends WidgetsBindingObserver {
-  LifecycleEventHandler({@required this.detachedCallback})
-      : assert(detachedCallback != null);
+class WidgetBindingHandler extends WidgetsBindingObserver {
+  WidgetBindingHandler({
+    this.onInactive,
+    this.onPaused,
+    this.onDetached,
+    this.onResumed,
+  });
 
-  final AsyncCallback detachedCallback;
+  final AsyncCallback onInactive;
+  final AsyncCallback onPaused;
+  final AsyncCallback onDetached;
+  final AsyncCallback onResumed;
 
   @override
   Future<Null> didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
       case AppLifecycleState.inactive:
+        if (onInactive != null) await onInactive();
         break;
       case AppLifecycleState.paused:
+        if (onPaused != null) await onPaused();
         break;
       case AppLifecycleState.detached:
-        await detachedCallback();
+        if (onDetached != null) await onDetached();
         break;
       case AppLifecycleState.resumed:
+        if (onResumed != null) await onResumed();
         break;
     }
   }
@@ -43,10 +55,21 @@ abstract class LaunchControl {
 
   static Future<void> init() async {
     // Add callback to stop service when app is destroyed, temporary
-    // WidgetsBinding.instance
-    //     .addObserver(LifecycleEventHandler(detachedCallback: () async {
-    //   await API.ServiceHandler.stopService();
-    // }));
+    WidgetsBinding.instance.addObserver(
+      WidgetBindingHandler(
+        // onDetached: () async {
+        //   await API.ServiceHandler.stopService();
+        // },
+        onResumed: () {
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              systemNavigationBarIconBrightness:
+                  ThemeControl.contrastBrightness,
+            ),
+          );
+        },
+      ),
+    );
 
     try {
       API.EventsHandler.init();

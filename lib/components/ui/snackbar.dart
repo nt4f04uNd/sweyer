@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -13,18 +12,11 @@ const Duration kSMMSnackBarDismissMovementDuration =
     const Duration(milliseconds: 170);
 const int kSMMSnackBarMaxQueueLength = 15;
 
-/// A container class for [globalKey] and [overlayEntry] itself to render
-class _SnackbarToRender {
-  _SnackbarToRender({@required this.globalKey, @required this.overlayEntry});
-  final GlobalKey<SMMSnackBarWrapperState> globalKey;
-  final OverlayEntry overlayEntry;
-}
-
 class SMMSnackbarSettings {
   SMMSnackbarSettings({
     @required this.child,
     this.globalKey,
-    this.duration = const Duration(seconds: 5),
+    this.duration = const Duration(seconds: 4),
   }) : assert(child != null) {
     if (globalKey == null)
       this.globalKey = GlobalKey<SMMSnackBarWrapperState>();
@@ -67,8 +59,7 @@ abstract class SnackBarControl {
   static GlobalKey<SMMSnackBarWrapperState> get globalKey =>
       snackbarsList.isNotEmpty ? snackbarsList[0].globalKey : null;
 
-  static void showSnackBar(BuildContext context,
-      {@required SMMSnackbarSettings settings}) async {
+  static void showSnackBar({@required SMMSnackbarSettings settings}) async {
     assert(settings != null);
 
     snackbarsList.add(settings);
@@ -123,7 +114,7 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
   /// TODO: use [AsyncOperationsQueue] here
   AsyncOperation<bool> asyncOperation;
   AnimationController controller;
-  AnimationController progressController;
+  AnimationController timeoutController;
   Animation animation;
 
   @override
@@ -137,7 +128,7 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
       debugLabel: "SMMSnackBarWrapper",
       duration: kSMMSnackBarAnimationDuration,
     );
-    progressController = AnimationController(
+    timeoutController = AnimationController(
       vsync: this,
       debugLabel: "SMMSnackbarProgress",
       duration: widget.settings.duration,
@@ -147,9 +138,9 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
     );
 
     controller.forward();
-    progressController.value = 1;
-    progressController.reverse();
-    progressController.addStatusListener((status) {
+    timeoutController.value = 1;
+    timeoutController.reverse();
+    timeoutController.addStatusListener((status) {
       if (status == AnimationStatus.dismissed) asyncOperation.finish(true);
     });
 
@@ -162,7 +153,7 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
       asyncOperation.finish(false);
     }
     controller.dispose();
-    progressController.dispose();
+    timeoutController.dispose();
     super.dispose();
   }
 
@@ -183,46 +174,73 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
     if (res) SnackBarControl._handleSnackBarDismissed();
   }
 
+  /// Will stop snackbar timeout close timer
+  void stopTimer() {
+    timeoutController.stop();
+  }
+
+  /// Will resume snackbar timeout close timer
+  void resumeTimer() {
+    timeoutController.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: Tween(begin: 0.1, end: 1.0).animate(
         CurvedAnimation(curve: Curves.easeOutCubic, parent: controller),
       ),
-      child: GestureDetector(
-        onPanDown: (_) {
-          progressController.stop();
-        },
-        onPanCancel: () {
-          progressController.reverse();
-        },
-        onPanEnd: (_) {
-          progressController.reverse();
-        },
-        child: Dismissible(
-          key: UniqueKey(),
-          movementDuration: kSMMSnackBarDismissMovementDuration,
-          direction: DismissDirection.down,
-          onDismissed: (_) => SnackBarControl._handleSnackBarDismissed(),
-          child: AnimatedBuilder(
-            animation: animation,
-            child: widget.settings.child,
-            builder: (BuildContext context, Widget child) =>
-                Transform.translate(
-              offset: animation.value,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  child,
-                  AnimatedBuilder(
-                    animation: progressController,
-                    // child:,
-                    builder: (BuildContext context, Widget child) =>
-                        LinearProgressIndicator(
-                      value: progressController.value,
+      child: AnimatedBuilder(
+        animation: animation,
+        child: widget.settings.child,
+        builder: (BuildContext context, Widget child) => IgnorePointer(
+          ignoring: controller.status == AnimationStatus.reverse,
+          child: GestureDetector(
+            onPanDown: (_) {
+              stopTimer();
+            },
+            onPanEnd: (_) {
+              resumeTimer();
+            },
+            onPanCancel: () {
+              resumeTimer();
+            },
+            onLongPress: () {
+              stopTimer();
+            },
+            onLongPressEnd: (_) {
+              resumeTimer();
+            },
+            child: Dismissible(
+              key: Key("SnackBarDismissible"),
+              movementDuration: kSMMSnackBarDismissMovementDuration,
+              direction: DismissDirection.down,
+              onDismissed: (_) => SnackBarControl._handleSnackBarDismissed(),
+              child: Transform.translate(
+                offset: animation.value,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(10.0),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        child,
+                        // AnimatedBuilder(
+                        //   animation: timeoutController,
+                        //   // child:,
+                        //   builder: (BuildContext context, Widget child) =>
+                        //       LinearProgressIndicator(
+                        //     value: timeoutController.value,
+                        //   ),
+                        // ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -235,22 +253,30 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
 class SMMSnackBar extends StatelessWidget {
   const SMMSnackBar({
     Key key,
-    this.title,
+    this.message,
     this.leading,
     this.action,
   }) : super(key: key);
-  final Widget title;
+  final String message;
   final Widget leading;
   final Widget action;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.secondary,
-      child: ListTile(
-        title: title,
-        leading: leading,
-        trailing: action,
+      color: Theme.of(context).colorScheme.primary,
+      child: ListTileTheme(
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        style: ListTileStyle.list,
+        child: ListTile(
+          title: Text(
+            message,
+            style: const TextStyle(fontSize: 15.0),
+          ),
+          leading: leading,
+          trailing: action,
+          dense: true,
+        ),
       ),
     );
   }

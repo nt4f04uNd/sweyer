@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Creates slider with labels of min and max values
 class LabelledSlider extends StatelessWidget {
@@ -103,14 +104,15 @@ class LabelledSlider extends StatelessWidget {
                 max: max,
                 divisions: divisions,
                 label: label,
-                activeColor: activeColor,
-                inactiveColor: inactiveColor,
+                activeColor:
+                    activeColor ?? Theme.of(context).colorScheme.primary,
+                inactiveColor: inactiveColor ?? Constants.AppTheme.sliderInactive.auto(context),
                 semanticFormatterCallback: semanticFormatterCallback,
               ),
             ),
           ),
         ),
-        
+
         //******** Max Label ********
         if (maxLabel != null)
           Text(

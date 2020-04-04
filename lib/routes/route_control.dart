@@ -47,11 +47,9 @@ abstract class RouteControl {
       //******** Initial ********
       StackFadeRouteTransition(
         checkEntAnimationEnabled: () => false,
-        shouldCheckSystemUiEnt: () =>
-            _currentRouteEquals(Constants.Routes.player.value),
         maintainState: true,
-        checkSystemUi: () => Constants.AppSystemUIThemes.mainScreen
-            .autoBr(ThemeControl.brightness),
+        checkSystemUi: () =>
+            Constants.AppSystemUIThemes.mainScreen.autoWithoutContext,
         exitIgnoreEventsForward: false,
         route: InitialRoute(),
       )
@@ -65,8 +63,8 @@ abstract class RouteControl {
     if (settings.name == Constants.Routes.debug.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.debug,
-        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
+        checkSystemUi: () =>
+            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: DebugRoute(),
       );
     }
@@ -74,8 +72,8 @@ abstract class RouteControl {
     else if (settings.name == Constants.Routes.exif.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.exif,
-        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
+        checkSystemUi: () =>
+            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: ExifRoute(),
       );
     }
@@ -83,8 +81,8 @@ abstract class RouteControl {
     else if (settings.name == Constants.Routes.extendedSettings.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.extendedSettings,
-        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
+        checkSystemUi: () =>
+            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: ExtendedSettingsRoute(),
       );
     }
@@ -94,11 +92,11 @@ abstract class RouteControl {
       return ExpandUpRouteTransition(
         routeType: Constants.Routes.player,
         opaque: true,
-        transitionDuration: const Duration(milliseconds: 550),
+        transitionDuration: kSMMPlayerRouteTransitionDuration,
         checkExitAnimationEnabled: () => false,
-        entIgnoreEventsForward: true,
-        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
+        // entIgnoreEventsForward: true,
+        checkSystemUi: () =>
+            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: PlayerRoute(),
       );
     }
@@ -110,12 +108,12 @@ abstract class RouteControl {
     else if (settings.name == Constants.Routes.settings.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.settings,
-        checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
-            .autoBr(ThemeControl.brightness),
+        checkSystemUi: () =>
+            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: SettingsRoute(),
       );
     }
-    
+
     return null;
   }
 }

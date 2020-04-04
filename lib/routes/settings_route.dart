@@ -25,7 +25,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 
   void _switchTheme() {
     setState(() {
-      ThemeControl.switchTheme(true);
+      ThemeControl.switchTheme();
       _switched = !_switched;
     });
   }
@@ -47,7 +47,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
             ),
             SwitchListTile(
               title: Text("Темная тема"),
-              activeColor: Theme.of(context).primaryColor,
+              activeColor: Theme.of(context).colorScheme.primary,
               value: _switched,
               onChanged: (value) {
                 _switchTheme();

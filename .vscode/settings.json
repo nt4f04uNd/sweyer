@@ -4,6 +4,7 @@
       "BACKSCROLLCONTROLLER",
       "Exif",
       "RGBO",
-      "cupertino"
+      "cupertino",
+      "microtask"
    ]
 }

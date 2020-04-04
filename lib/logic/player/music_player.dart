@@ -157,12 +157,13 @@ abstract class MusicPlayer {
       success = false;
       // Do not handle this, because other exceptions are not expected
       rethrow;
-    } finally {
-      // Change playing track id
-      if (success) {
-      } else
-        play(ContentControl.state.currentSongId, silent: silent);
-    }
+    } 
+    // finally {
+    //   // Change playing track id
+    //   if (success) {
+    //   } else
+    //     play(ContentControl.state.currentSongId, silent: silent);
+    // }
   }
 
   /// Resume player

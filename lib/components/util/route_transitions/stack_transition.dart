@@ -35,10 +35,6 @@ class StackRouteTransition<T extends Widget> extends RouteTransition<T> {
   final bool exitIgnoreEventsReverse;
   @override
   UIFunction checkSystemUi;
-  @override
-  BoolFunction shouldCheckSystemUiEnt;
-  @override
-  BoolFunction shouldCheckSystemUiExitRev;
 
   /// Begin offset for enter animation
   ///
@@ -73,8 +69,6 @@ class StackRouteTransition<T extends Widget> extends RouteTransition<T> {
     this.exitIgnoreEventsForward = false,
     this.exitIgnoreEventsReverse = false,
     this.checkSystemUi,
-    this.shouldCheckSystemUiEnt = defBoolFunc,
-    this.shouldCheckSystemUiExitRev = defBoolFunc,
     this.entBegin = const Offset(1.0, 0.0),
     this.entEnd = Offset.zero,
     this.exitBegin = Offset.zero,

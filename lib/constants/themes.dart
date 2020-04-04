@@ -40,14 +40,6 @@ abstract class AppTheme {
   static final _ThemeContainer<Color> popupMenu =
       _ThemeContainer(light: Color(0xFFeeeeee), dark: Color(0xFF333333));
 
-  static final _ThemeContainer<Color> declineButton =
-      _ThemeContainer(light: Color(0xFF606060), dark: null);
-
-  // static final _ThemeContainer<Color> redFlatButton =
-  //     _ThemeContainer(light: Colors.red.shade300, dark: Colors.red.shade200);
-
-  static final _ThemeContainer<Color> acceptButton = _ThemeContainer(
-      light: Colors.deepPurple.shade300, dark: Colors.deepPurple.shade200);
 
   static final _ThemeContainer<Color> disabledIcon =
       _ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
@@ -76,7 +68,7 @@ abstract class AppTheme {
   static final _ThemeContainer<Color> refreshIndicatorArrow =
       _ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
 
-  static _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
+  static final _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
     light: ThemeData(
       //******** General ********
       fontFamily: 'Manrope',
@@ -84,29 +76,30 @@ abstract class AppTheme {
       //****************** Colors **********************
       accentColor: Colors.grey,
       backgroundColor: Colors.white,
-      primaryColor: Colors.deepPurple,
+      primaryColor: Colors.deepPurpleAccent,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
-          background: Colors.white,
-          brightness: Brightness.light,
-          error: const Color(0xffed3b3b),
-          onBackground: Colors.black,
-          onError: Colors.yellow,
-          onPrimary: Colors.white,
-          onSecondary: AppColors.greyLight,
-          onSurface: Colors.black,
-          primary: Colors.deepPurple,
-          primaryVariant: Colors.deepPurpleAccent,
-          secondary: AppColors.whiteDarkened,
-          secondaryVariant: Colors.white,
-          surface: Colors.white),
+        background: Colors.white,
+        brightness: Brightness.light,
+        error: const Color(0xffed3b3b),
+        onBackground: Colors.black,
+        onError: Colors.yellow,
+        onPrimary: Colors.white,
+        onSecondary: AppColors.greyLight,
+        onSurface: Colors.black,
+        primary: Colors.deepPurpleAccent,
+        primaryVariant: Colors.deepPurple,
+        secondary: AppColors.whiteDarkened,
+        secondaryVariant: Colors.white,
+        surface: Colors.white,
+      ),
 
       //****************** Specific app elements *****************
       scaffoldBackgroundColor: Colors.white,
-      textSelectionColor: Colors.deepPurple,
-      textSelectionHandleColor: Colors.deepPurple,
-      cursorColor: Colors.deepPurple,
+      textSelectionColor: Colors.deepPurpleAccent,
+      textSelectionHandleColor: Colors.deepPurpleAccent,
+      cursorColor: Colors.deepPurpleAccent,
       splashColor: Color(0x90bbbbbb),
 
       //****************** Themes *********************
@@ -143,7 +136,7 @@ abstract class AppTheme {
       appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
         color: Colors.white,
-        elevation: 0,
+        elevation: 0.0,
       ),
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
@@ -162,29 +155,28 @@ abstract class AppTheme {
       //****************** Colors **********************
       accentColor: const Color(0xff131313),
       backgroundColor: AppColors.grey,
-      primaryColor: Colors.deepPurple,
+      primaryColor: Colors.deepPurpleAccent,
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
         background: AppColors.grey,
         brightness: Brightness.dark,
-        error: Colors.red.shade800,
+        error:  const Color(0xffed3b3b),
         onBackground: AppColors.whiteDarkened,
         onError: Colors.yellow,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: Colors.white,
-        primary: Colors.deepPurple,
-        primaryVariant: Colors.deepPurpleAccent,
-        // secondary: const Color(0xff131313),
+        primary: Colors.deepPurpleAccent,
+        primaryVariant: Colors.deepPurple,
         secondary: AppColors.greyLight,
         secondaryVariant: Colors.grey,
         surface: AppColors.grey,
       ),
       //****************** Specific app elements *****************
       scaffoldBackgroundColor: AppColors.grey,
-      textSelectionColor: Colors.deepPurple,
-      textSelectionHandleColor: Colors.deepPurple,
-      cursorColor: Colors.deepPurple,
+      textSelectionColor: Colors.deepPurpleAccent,
+      textSelectionHandleColor: Colors.deepPurpleAccent,
+      cursorColor: Colors.deepPurpleAccent,
       splashColor: Color(0x44c8c8c8),
       //****************** Themes *********************
       textTheme: const TextTheme(
