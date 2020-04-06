@@ -22,7 +22,7 @@ abstract class EventsHandler {
   /// Starts listening to the events
   static void init() {
     _eventSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
-      print("RECEIVED EVENT IN DART SIDE: $event");
+      // print("RECEIVED EVENT IN DART SIDE: $event");
       switch (event) {
         case Constants.EventChannel.BECOME_NOISY: // headphones disconnect
           break;

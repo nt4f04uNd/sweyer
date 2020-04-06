@@ -17,6 +17,7 @@ class SMMSnackbarSettings {
     @required this.child,
     this.globalKey,
     this.duration = const Duration(seconds: 4),
+    this.important = false,
   }) : assert(child != null) {
     if (globalKey == null)
       this.globalKey = GlobalKey<SMMSnackBarWrapperState>();
@@ -29,10 +30,17 @@ class SMMSnackbarSettings {
   /// How long the snackbar will be shown
   final Duration duration;
 
+  /// Whether the snack bar is important and must interrupt the current displaying one
+  final bool important;
+
   OverlayEntry overlayEntry;
+
+  /// True when snackbar is visible
+  bool onScreen = false;
 
   /// Create [OverlayEntry] for snackbar
   void createSnackbar() {
+    onScreen = true;
     overlayEntry = OverlayEntry(
       builder: (BuildContext context) => Container(
         child: Align(
@@ -45,30 +53,35 @@ class SMMSnackbarSettings {
 
   /// Removes [OverlayEntry]
   void removeSnackbar() {
+    onScreen = false;
     overlayEntry.remove();
   }
 }
 
 abstract class SnackBarControl {
   /// A list to render the snackbars
-  static List<SMMSnackbarSettings> snackbarsList = List();
+  static List<SMMSnackbarSettings> snackbarsList = [];
 
-  /// Gets the current snackbar global key
-  ///
-  /// Will return null if snackbars list is empty
-  static GlobalKey<SMMSnackBarWrapperState> get globalKey =>
-      snackbarsList.isNotEmpty ? snackbarsList[0].globalKey : null;
-
-  static void showSnackBar({@required SMMSnackbarSettings settings}) async {
+  static void showSnackBar(SMMSnackbarSettings settings) async {
     assert(settings != null);
 
-    snackbarsList.add(settings);
+    if (settings.important && snackbarsList.length > 1) {
+      snackbarsList.insert(1, settings);
+    } else {
+      snackbarsList.add(settings);
+    }
 
     if (snackbarsList.length == 1) {
-      snackbarsList[0].createSnackbar();
-      App.navigatorKey.currentState.overlay
-          .insert(snackbarsList[0].overlayEntry);
+      _showSnackBar();
+    } else if (settings.important) {
+      for (int i = 0; i < snackbarsList.length; i++) {
+        if (snackbarsList[i].onScreen) {
+          _dismissSnackBar(index: i);
+        }
+      }
+      _showSnackBar();
     }
+
     if (snackbarsList.length >= kSMMSnackBarMaxQueueLength) {
       /// Reset when queue runs out of space
       snackbarsList = [
@@ -79,17 +92,28 @@ abstract class SnackBarControl {
     }
   }
 
+  /// Method to be called after the current snack bar has went out of screen
   static void _handleSnackBarDismissed() {
-    snackbarsList[0].removeSnackbar();
-    snackbarsList.removeAt(0);
+    _dismissSnackBar(index: 0);
     if (snackbarsList.isNotEmpty) {
       _showSnackBar();
     }
   }
 
-  static void _showSnackBar() {
-    snackbarsList[0].createSnackbar();
-    App.navigatorKey.currentState.overlay.insert(snackbarsList[0].overlayEntry);
+  /// Creates next snackbar and shows it to screen
+  /// [index] can be used to justify what snackbar to show
+  static void _showSnackBar({int index = 0}) {
+    assert(!snackbarsList[index].onScreen);
+    snackbarsList[index].createSnackbar();
+    App.navigatorKey.currentState.overlay
+        .insert(snackbarsList[index].overlayEntry);
+  }
+
+  /// Removes next snackbar from screen without animation
+  /// [index] can be used to justify what snackbar to hide
+  static void _dismissSnackBar({int index = 0}) {
+    snackbarsList[index].removeSnackbar();
+    snackbarsList.removeAt(index);
   }
 
   // static void
@@ -116,11 +140,12 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
   AnimationController controller;
   AnimationController timeoutController;
   Animation animation;
+  Key dismissibleKey;
 
   @override
   void initState() {
     super.initState();
-
+    dismissibleKey = UniqueKey();
     asyncOperation = AsyncOperation()..start();
 
     controller = AnimationController(
@@ -164,14 +189,21 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
     }
   }
 
-  void close() async {
+  /// Will close snackbar with Animation
+  ///
+  /// If [notifyControl] is true, the [SnackBarControl._handleSnackBarDismissed] will be called internally after the closure
+  Future<void> close({bool notifyControl = true}) async {
     asyncOperation = AsyncOperation()..start();
     controller.addStatusListener((status) {
-      if (status == AnimationStatus.dismissed) asyncOperation.finish(true);
+      if (status == AnimationStatus.dismissed) {
+        asyncOperation.finish(true);
+      }
     });
     controller.reverse();
     var res = await asyncOperation.wait();
-    if (res) SnackBarControl._handleSnackBarDismissed();
+    if (res && notifyControl) {
+      SnackBarControl._handleSnackBarDismissed();
+    }
   }
 
   /// Will stop snackbar timeout close timer
@@ -212,7 +244,7 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
               resumeTimer();
             },
             child: Dismissible(
-              key: Key("SnackBarDismissible"),
+              key: dismissibleKey,
               movementDuration: kSMMSnackBarDismissMovementDuration,
               direction: DismissDirection.down,
               onDismissed: (_) => SnackBarControl._handleSnackBarDismissed(),
@@ -229,14 +261,6 @@ class SMMSnackBarWrapperState extends State<_SMMSnackBarWrapper>
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         child,
-                        // AnimatedBuilder(
-                        //   animation: timeoutController,
-                        //   // child:,
-                        //   builder: (BuildContext context, Widget child) =>
-                        //       LinearProgressIndicator(
-                        //     value: timeoutController.value,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
@@ -256,27 +280,63 @@ class SMMSnackBar extends StatelessWidget {
     this.message,
     this.leading,
     this.action,
+    this.color,
+    this.messagePadding = const EdgeInsets.all(0.0),
   }) : super(key: key);
-  final String message;
   final Widget leading;
+  final String message;
   final Widget action;
+  final Color color;
+  final EdgeInsets messagePadding;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.primary,
+      color: color ?? Theme.of(context).colorScheme.primary,
       child: ListTileTheme(
         textColor: Theme.of(context).colorScheme.onPrimary,
-        style: ListTileStyle.list,
-        child: ListTile(
-          title: Text(
-            message,
-            style: const TextStyle(fontSize: 15.0),
+        child: Container(
+          padding: const EdgeInsets.only(
+              left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+          constraints: const BoxConstraints(minHeight: 48.0, maxHeight: 128.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              if (leading != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: leading,
+                ),
+              Expanded(
+                child: Padding(
+                  padding: messagePadding,
+                  child: Text(
+                    message,
+                    style: TextStyle(
+                        fontSize: 15.0,
+                        color: Theme.of(context).colorScheme.onError),
+                  ),
+                ),
+              ),
+              if (action != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: action,
+                )
+            ],
           ),
-          leading: leading,
-          trailing: action,
-          dense: true,
         ),
+        // ListTile(
+        //   title: Text(
+        //     message,
+        //     style: const TextStyle(fontSize: 15.0),
+        //   ),
+        //   leading: leading,
+        //   trailing: action,
+        //   dense: true,
+        // ),
       ),
     );
   }

@@ -3,7 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-enum Routes { main, settings, extendedSettings, player, exif, search, debug, unknown }
+enum Routes { main, settings, extendedSettings, player, exif, search, dev, unknown }
 
 extension RouteExtension on Routes {
   /// Returns string route path, like `'/settings'`
@@ -21,8 +21,8 @@ extension RouteExtension on Routes {
         return "/exif";
       case Routes.search:
         return "/search";
-      case Routes.debug:
-        return "/debug";
+      case Routes.dev:
+        return "/dev";
       case Routes.unknown:
         return "/unknown";
       default:

@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:catcher/core/catcher.dart';
 
-import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/logic/api/api.dart' as API;
 
 class WidgetBindingHandler extends WidgetsBindingObserver {
@@ -85,8 +84,8 @@ abstract class LaunchControl {
       // Init playlist control, we don't want to wait it
     } catch (exception, stacktrace) {
       CatcherErrorBridge.add(CaughtError(exception, stacktrace));
-      print("ERROR ON STARTUP:  " + exception);
-      print(stacktrace);
+      // print("ERROR ON STARTUP:  " + exception);
+      // print(stacktrace);
     } finally {
       _streamController.add(true);
     }

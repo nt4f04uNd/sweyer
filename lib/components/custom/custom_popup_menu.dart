@@ -9,7 +9,6 @@
 import 'dart:async';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

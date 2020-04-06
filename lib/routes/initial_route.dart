@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 
 class InitialRoute extends StatefulWidget {

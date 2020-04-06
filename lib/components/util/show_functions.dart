@@ -69,11 +69,11 @@ abstract class ShowFunctions {
                   ),
                 ),
               ),
-              ListTile(
+              SMMListTile(
                 title: Text("По названию"),
                 onTap: () => _handleSortClick(context, SortFeature.title),
               ),
-              ListTile(
+              SMMListTile(
                 title: Text("По дате"),
                 onTap: () => _handleSortClick(context, SortFeature.date),
               )
@@ -86,13 +86,16 @@ abstract class ShowFunctions {
   static Future<dynamic> showAlert(
     BuildContext context, {
     Widget title: const Text("Предупреждение"),
-    Widget content: const Text("Контент"),
+    @required Widget content,
     EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     EdgeInsets contentPadding:
         const EdgeInsets.only(top: 6.0, left: 24.0, right: 24.0),
     Widget acceptButton,
     List<Widget> additionalActions,
   }) async {
+    assert(title != null);
+    assert(content != null);
+
     acceptButton ??= DialogRaisedButton.accept(text: "Закрыть");
 
     return showDialog(
@@ -110,8 +113,8 @@ abstract class ShowFunctions {
   /// Calls [showGeneralDialog] function from flutter material library to show a dialog to user (accept and decline buttons)
   static Future<dynamic> showDialog(
     BuildContext context, {
-    Widget title: const Text("Диалог"),
-    Widget content: const Text("Контент"),
+    @required Widget title,
+    @required Widget content,
     EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     EdgeInsets contentPadding:
         const EdgeInsets.only(top: 6.0, left: 24.0, right: 24.0),
@@ -120,6 +123,9 @@ abstract class ShowFunctions {
     bool hideDeclineButton = false,
     List<Widget> additionalActions,
   }) async {
+    assert(title != null);
+    assert(content != null);
+
     acceptButton ??= DialogRaisedButton.accept();
     if (!hideDeclineButton) {
       declineButton ??= DialogRaisedButton.decline();
@@ -132,7 +138,7 @@ abstract class ShowFunctions {
       barrierLabel: 'SMMAlertDialog',
       context: context,
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final scaleAnimation = Tween(begin: 0.96, end: 1.0).animate(
+        final scaleAnimation = Tween(begin: 0.98, end: 1.0).animate(
           CurvedAnimation(
             curve: Curves.easeOutCubic,
             reverseCurve: Curves.easeInCubic,
@@ -185,11 +191,13 @@ abstract class ShowFunctions {
                         : MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       if (additionalActions != null)
-                        ButtonBar(
-                          alignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            ...?additionalActions,
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.only(left:6.0),
+                          child: ButtonBar(
+                            buttonPadding: const EdgeInsets.all( 0.0),
+                            alignment: MainAxisAlignment.start,
+                            children: additionalActions,
+                          ),
                         ),
                       ButtonBar(
                         mainAxisSize: MainAxisSize.min,
@@ -217,6 +225,55 @@ abstract class ShowFunctions {
           ),
         );
       },
+    );
+  }
+
+  /// Will show up a snack bar notification that something's went wrong
+  ///
+  /// From that snack bar will be possible to proceed to special alert to see the error details with the ability to copy them.
+  /// [errorDetails] string to show in the alert
+  static void showError(BuildContext context, {@required String errorDetails}) {
+    GlobalKey<SMMSnackBarWrapperState> globalKey = GlobalKey();
+
+    SnackBarControl.showSnackBar(
+      SMMSnackbarSettings(
+        globalKey: globalKey,
+        child: SMMSnackBar(
+          message: "😮 Упс! Произошла ошибка",
+          color: Theme.of(context).colorScheme.error,
+          action: PrimaryRaisedButton(
+            text: "Детали",
+            color: Colors.white,
+            textStyle: const TextStyle(color: Colors.black),
+            onPressed: () {
+              globalKey.currentState.close();
+
+              ShowFunctions.showAlert(
+                context,
+                title: Text(
+                  "Информация об ошибке",
+                  textAlign: TextAlign.center,
+                ),
+                titlePadding:
+                    const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
+                contentPadding:
+                    const EdgeInsets.only(top: 7.0, left: 2.0, right: 2.0),
+                content: SelectableText(
+                  errorDetails,
+                  style: const TextStyle(fontSize: 11.0),
+                ),
+                additionalActions: [
+                  CopyButton(text: errorDetails),
+                  InfoButton(
+                    info:
+                        "Потому что я криворукий черт, в приложении произошла ошибка. Ее тип и стактрейс отображаются в предыдущем окне. Эти данные будут автоматически отправлены на сервер Google, и я их увижу. Чтобы я мог лучше разобраться в проблеме, пожалуйста, сообщите мне о том, при каких условиях это случилось, какие действия вы совершали перед этим, или просто ваше предположение о том, что могло вызвать ее.",
+                  )
+                ],
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 }

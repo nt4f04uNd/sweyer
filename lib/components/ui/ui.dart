@@ -10,6 +10,8 @@ export 'album_art.dart';
 export 'artist.dart';
 export 'bottom_track_panel.dart';
 export 'buttons.dart';
+export 'list_tile.dart';
+export 'logo.dart';
 export 'marquee.dart';
 export 'menu.dart';
 export 'play_pause_button.dart';

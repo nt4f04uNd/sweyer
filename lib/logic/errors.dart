@@ -17,47 +17,11 @@ import 'package:flutter/material.dart';
 class SnackBarReportMode extends DialogReportMode {
   @override
   void requestAction(Report report, BuildContext context) {
-    GlobalKey<SMMSnackBarWrapperState> globalKey = GlobalKey();
-
-// TODO: refactor this!!!
-    SnackBarControl.showSnackBar(
-      settings: SMMSnackbarSettings(
-        globalKey: globalKey,
-        child: SMMSnackBar(
-          message: "😮 Упс! Произошла ошибка",
-          action: PrimaryRaisedButton(
-            text: "Детали",
-            color: (() => Theme.of(context).colorScheme.error)(),
-            onPressed: () {
-              globalKey.currentState.close();
-
-              final errorInfo = '''${report.error.toString()}
+    final errorDetails = '''${report.error.toString()}
                       
 ${report.stackTrace.toString()}''';
 
-              ShowFunctions.showAlert(
-                context,
-                title: Text(
-                  "Информация об ошибке",
-                  textAlign: TextAlign.center,
-                ),
-                titlePadding:
-                    const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
-                contentPadding:
-                    const EdgeInsets.only(top: 7.0, left: 2.0, right: 2.0),
-                content: SelectableText(
-                  errorInfo,
-                  style: const TextStyle(fontSize: 11.0),
-                ),
-                additionalActions: [
-                  CopyButton(text: errorInfo),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
+    ShowFunctions.showError(context, errorDetails: errorDetails);
 
     _acceptReport(context, report);
   }
@@ -76,13 +40,12 @@ class FirebaseReportHandler extends ReportHandler {
   Future<bool> handle(Report error) async {
     bool res = true;
     try {
-      // TODO: uncomment this
-      // Crashlytics.instance.recordFlutterError(
-      //   FlutterErrorDetails(
-      //     exception: error.error,
-      //     stack: error.stackTrace,
-      //   ),
-      // );
+      Crashlytics.instance.recordFlutterError(
+        FlutterErrorDetails(
+          exception: error.error,
+          stack: error.stackTrace,
+        ),
+      );
     } catch (e) {
       res = false;
       print("ERROR IN FIREBASE REPORT HANDLER: " + e);

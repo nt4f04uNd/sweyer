@@ -601,20 +601,17 @@ class SongsSearchDelegate extends SearchDelegate {
 
   /// Function to fetch user search from shared preferences
   Future<void> _fetchSearchHistory() async {
-    var searchHistoryList = await Prefs.byKey.searchHistoryStringList.getPref();
-    if (searchHistoryList == null)
-      _suggestions = [];
-    else
-      _suggestions = searchHistoryList;
+    _suggestions = await Prefs.searchHistoryStringList.getPref();
   }
 
   /// Delete item from search history by its index
   Future<void> _deleteItemFromHistory(BuildContext context, int index) async {
-    var prefs = await Prefs.getSharedInstance();
-    var searchHistoryList =
-        await Prefs.byKey.searchHistoryStringList.getPref(prefs);
+    final prefs = await Prefs.getSharedInstance();
+    final searchHistoryList =
+        await Prefs.searchHistoryStringList.getPref(prefs);
     searchHistoryList.removeAt(index);
-    await Prefs.byKey.searchHistoryStringList.setPref(searchHistoryList, prefs);
+    await Prefs.searchHistoryStringList
+        .setPref(value: searchHistoryList, prefs: prefs);
     _suggestions.removeAt(index); // Remove element from _suggestions list too
     showSuggestions(context); // Update suggestions ListView
   }
@@ -624,27 +621,29 @@ class SongsSearchDelegate extends SearchDelegate {
     input = input.trim(); // Remove any whitespaces
     if (input.isNotEmpty) {
       final prefs = await Prefs.getSharedInstance();
-      var searchHistoryList =
-          await Prefs.byKey.searchHistoryStringList.getPref(prefs);
-      if (searchHistoryList == null) {
-        searchHistoryList = <String>[input];
-      } else {
-        if (!searchHistoryList.contains(input))
-          searchHistoryList.insert(0, input);
-        if (searchHistoryList.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
-          // Remove last element from history if length is greater than constants constraint
-          searchHistoryList.removeLast();
-        }
+      final searchHistoryList =
+          await Prefs.searchHistoryStringList.getPref(prefs);
+      // TODO: make pref changes more effective with dirty flag
+      // Remove if this input is in array
+      searchHistoryList.removeWhere((e) => e == input);
+      searchHistoryList.insert(0, input);
+
+      if (searchHistoryList.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+        // Remove last element from history if length is greater than constants constraint
+        searchHistoryList.removeLast();
       }
 
-      await Prefs.byKey.searchHistoryStringList
-          .setPref(searchHistoryList, prefs);
+      _suggestions = searchHistoryList;
+
+      await Prefs.searchHistoryStringList
+          .setPref(value: searchHistoryList, prefs: prefs);
     }
   }
 
   Future<void> _resetSearchHistory(BuildContext context) async {
-    await Prefs.byKey.searchHistoryStringList.setPref([]);
-    _suggestions = [];
+    if (await Prefs.searchHistoryStringList.setPref()) {
+      _suggestions = [];
+    }
     showSuggestions(context); // Update suggestions ListView
   }
 
@@ -690,23 +689,71 @@ class SongsSearchDelegate extends SearchDelegate {
               builder: (context, snapshot) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 34.0),
-                  child:
-                   SongsListScrollBar(
+                  child: SongsListScrollBar(
                     controller: scrollController,
-                    labelTextBuilder: (offsetY) {
-                      int idx = offsetY ~/ kSMMSongTileHeight;
+                    labelContentBuilder: (offsetY) {
+                      // int idx = offsetY ~/ kSMMSongTileHeight;
+                      // if (idx >= searched.length) {
+                      //   idx = searched.length - 1;
+                      // }
+                      // return Text(
+                      //   searched[idx].title[0].toUpperCase(),
+                      //   style: TextStyle(
+                      //     color: Theme.of(context).colorScheme.onPrimary,
+                      //   ),
+                      // );
+
+                      int idx = ((offsetY - 32.0) / kSMMSongTileHeight).round();
                       if (idx >= searched.length) {
                         idx = searched.length - 1;
                       }
-                      return Text(
-                        searched[idx].title[0],
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
+                      return Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            // TODO: refactor and move to separate widget
+                            padding:
+                                const EdgeInsets.only(left: 4.0, right: 4.0),
+                            width: 22.0,
+                            margin: const EdgeInsets.only(left: 4.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(8.0),
+                              ),
+                            ),
+                            child: Text(
+                              searched[idx].title[0].toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontSize: 16.0,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                          const Text(
+                            "  —  ",
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              child: Text(
+                                searched[idx].title,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     },
-                    child: 
-                    ListView.builder(
+                    child: ListView.builder(
                       // physics: const SMMBouncingScrollPhysics(),
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -723,11 +770,13 @@ class SongsSearchDelegate extends SearchDelegate {
                             FocusScope.of(context).requestFocus(FocusNode());
 
                             // Wait before route animation completes
-                            await Future.delayed(
-                              applyDilation(kSMMPlayerRouteTransitionDuration),
-                            );
+                            // await Future.delayed(
+                            //   applyDilation(kSMMPlayerRouteTransitionDuration),
+                            // );
 
-                            if (dirty) {
+                            if (dirty ||
+                                ContentControl.state.currentPlaylistType !=
+                                    PlaylistType.searched) {
                               ContentControl.setSearchedPlaylist(
                                 songs: searched,
                               );
@@ -851,6 +900,7 @@ class SongsSearchDelegate extends SearchDelegate {
               child: SMMIconButton(
                   icon: Icon(Icons.delete_sweep),
                   color: Theme.of(context).hintColor,
+                  // color: Theme.of(context).hintColor,
                   onPressed: () {
                     ShowFunctions.showDialog(
                       context,
@@ -873,7 +923,7 @@ class SongsSearchDelegate extends SearchDelegate {
   }
 
   Widget _buildSuggestionTile(BuildContext context, int index) {
-    return ListTile(
+    return SMMListTile(
       title: Text(_suggestions[index], style: TextStyle(fontSize: 15.5)),
       dense: true,
       leading: Padding(

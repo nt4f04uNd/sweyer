@@ -2,21 +2,24 @@
 *  Copyright (c) nt4f04und. All rights reserved.
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *
-*  Copyright (c) The Chromium Authors.
+*  Copyright (c) The Flutter Authors.
 *  See ThirdPartyNotices.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
-const Duration _kUnconfirmedRippleDuration = Duration(milliseconds: 500);
-const Duration _kFadeInDuration = Duration(milliseconds: 200);
+const Duration _kUnconfirmedRippleDuration = Duration(milliseconds: 275);
+const Duration _kFadeInDuration = Duration(milliseconds: 120);
 const Duration _kRadiusDuration = Duration(milliseconds: 225);
-const Duration _kFadeOutDuration = Duration(milliseconds: 375);
-const Duration _kCancelDuration = Duration(milliseconds: 200);
+const Duration _kFadeOutDuration = Duration(milliseconds: 475);
+const Duration _kCancelDuration = Duration(milliseconds: 250);
 
-// The fade out begins 225ms after the _fadeOutController starts. See confirm().
-const double _kFadeOutIntervalStart = 225.0 / 375.0;
+// The fade out start interval, when the cancel wasn't called
+const double _kFadeOutIntervalStart = 0.4;
 
 RectCallback _getClipCallback(
     RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback) {
@@ -38,10 +41,8 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell,
   return math.max(d1, d2) / 2.0;
 }
 
-class _IconButtonInkRippleFactory extends InteractiveInkFeatureFactory {
-  const _IconButtonInkRippleFactory({this.radius});
-
-  final double radius;
+class _ListTileInkRippleFactory extends InteractiveInkFeatureFactory {
+  const _ListTileInkRippleFactory();
 
   @override
   InteractiveInkFeature create({
@@ -57,7 +58,7 @@ class _IconButtonInkRippleFactory extends InteractiveInkFeatureFactory {
     double radius,
     VoidCallback onRemoved,
   }) {
-    return IconButtonInkRipple(
+    return ListTileInkRipple(
       controller: controller,
       referenceBox: referenceBox,
       position: position,
@@ -66,7 +67,7 @@ class _IconButtonInkRippleFactory extends InteractiveInkFeatureFactory {
       rectCallback: rectCallback,
       borderRadius: borderRadius,
       customBorder: customBorder,
-      radius: this.radius ?? radius,
+      radius: radius,
       onRemoved: onRemoved,
       textDirection: textDirection,
     );
@@ -95,7 +96,7 @@ class _IconButtonInkRippleFactory extends InteractiveInkFeatureFactory {
 ///  * [Material], which is the widget on which the ink splash is painted.
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
-class IconButtonInkRipple extends InteractiveInkFeature {
+class ListTileInkRipple extends InteractiveInkFeature {
   /// Begin a ripple, centered at [position] relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -111,7 +112,7 @@ class IconButtonInkRipple extends InteractiveInkFeature {
   /// This is the default.
   ///
   /// When the ripple is removed, [onRemoved] will be called.
-  IconButtonInkRipple({
+  ListTileInkRipple({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     @required Offset position,
@@ -161,8 +162,8 @@ class IconButtonInkRipple extends InteractiveInkFeature {
     // diameter is 10dps larger than the target diameter.
     _radius = _radiusController.drive(
       Tween<double>(
-        begin: _targetRadius * 0.30,
-        end: _targetRadius, 
+        begin: _targetRadius * 0.20,
+        end: _targetRadius + 5.0,
       ).chain(_easeCurveTween),
     );
 
@@ -172,12 +173,6 @@ class IconButtonInkRipple extends InteractiveInkFeature {
         duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _fadeOut = _fadeOutController.drive(
-      IntTween(
-        begin: color.alpha,
-        end: 0,
-      ).chain(_fadeOutIntervalTween),
-    );
 
     controller.addInkFeature(this);
   }
@@ -189,25 +184,29 @@ class IconButtonInkRipple extends InteractiveInkFeature {
   final RectCallback _clipCallback;
   final TextDirection _textDirection;
 
+
+  bool isCancelled = false;
+
   Animation<double> _radius;
   AnimationController _radiusController;
 
   Animation<int> _fadeIn;
   AnimationController _fadeInController;
 
-  Animation<int> _fadeOut;
+  // Animation<int> _fadeOut;
   AnimationController _fadeOutController;
 
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
   /// or material [Theme].
-  static InteractiveInkFeatureFactory splashFactory({double radius}) {
-    return _IconButtonInkRippleFactory(radius: radius);
-  }
+  static const InteractiveInkFeatureFactory splashFactory =
+      _ListTileInkRippleFactory();
 
   static final Animatable<double> _easeCurveTween =
-      CurveTween(curve: Curves.ease);
-  static final Animatable<double> _fadeOutIntervalTween =
-      CurveTween(curve: const Interval(_kFadeOutIntervalStart, 1.0));
+      CurveTween(curve: Curves.easeOutCubic);
+  static final Animatable<double> _fadeOutIntervalTween = CurveTween(
+      curve: const Interval(_kFadeOutIntervalStart, 1.0,
+          curve: Curves.easeOutCubic));
+
 
   @override
   void confirm() {
@@ -216,11 +215,24 @@ class IconButtonInkRipple extends InteractiveInkFeature {
       ..forward();
     // This confirm may have been preceded by a cancel.
     _fadeInController.forward();
-    _fadeOutController..animateTo(1.0, duration: _kFadeOutDuration);
+    _fadeOutController.animateTo(1.0, duration: _kFadeOutDuration);
   }
 
   @override
   void cancel() {
+    isCancelled = true;
+    if (_radiusController.isAnimating) {
+      _radiusController.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _startFadeOut();
+        }
+      });
+    } else {
+      _startFadeOut();
+    }
+  }
+
+  void _startFadeOut() {
     _fadeInController.stop();
     // Watch out: setting _fadeOutController's value to 1.0 will
     // trigger a call to _handleAlphaStatusChanged() which will
@@ -245,41 +257,43 @@ class IconButtonInkRipple extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final int alpha =
-        _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
+    final int alpha = _fadeInController.isAnimating
+        ? _fadeIn.value
+        : !isCancelled
+            ? _fadeOutController
+                .drive(IntTween(
+                  begin: color.alpha,
+                  end: 0,
+                ).chain(_fadeOutIntervalTween))
+                .value
+            : _fadeOutController
+                .drive(
+                  IntTween(
+                    begin: color.alpha,
+                    end: 0,
+                  ).chain(
+                    CurveTween(curve: Curves.easeOutCubic),
+                  ),
+                )
+                .value;
+
     final Paint paint = Paint()..color = color.withAlpha(alpha);
-    // final Paint paint = Paint()..color = color.withAlpha(200);
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(
       _position,
       referenceBox.size.center(Offset.zero),
       Curves.ease.transform(_radiusController.value),
     );
-    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
-    canvas.save();
-    if (originOffset == null) {
-      canvas.transform(transform.storage);
-    } else {
-      canvas.translate(originOffset.dx, originOffset.dy);
-    }
-
-    // Commented section that limits splash effect
-
-    // if (_clipCallback != null) {
-    //   final Rect rect = _clipCallback();
-    //   if (_customBorder != null) {
-    //     canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
-    //   } else if (_borderRadius != BorderRadius.zero) {
-    //     canvas.clipRRect(RRect.fromRectAndCorners(
-    //       rect,
-    //       topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-    //       bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
-    //     ));
-    //   } else {
-    //     canvas.clipRect(rect);
-    //   }
-    // }
-    canvas.drawCircle(center, _radius.value, paint);
-    canvas.restore();
+    paintInkCircle(
+      canvas: canvas,
+      transform: transform,
+      paint: paint,
+      center: center,
+      textDirection: _textDirection,
+      radius: _radius.value,
+      customBorder: _customBorder,
+      borderRadius: _borderRadius,
+      clipCallback: _clipCallback,
+    );
   }
 }

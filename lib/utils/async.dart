@@ -5,7 +5,6 @@
 
 import 'dart:async';
 
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 
 /// A class that represents some async operation

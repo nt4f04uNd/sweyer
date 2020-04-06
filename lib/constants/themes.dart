@@ -23,14 +23,13 @@ abstract class AppTheme {
 
   //************************************** WIDGET SPECIFIC COLORS ******************************************
 
-  static final _ThemeContainer<Color> albumArtLarge =
-      _ThemeContainer(light: Color(0xFFe8e8e8), dark: Color(0xFF333333));
-
-  static final _ThemeContainer<Color> albumArtSmall =
-      _ThemeContainer(light: Color(0xfff1f2f4), dark: Color(0xFF313131));
+  static final _ThemeContainer<Color> albumArt =
+      _ThemeContainer(light: Color(0xfff1f2f4), dark: AppColors.greyLighter);
 
   static final _ThemeContainer<Color> albumArtSmallRound =
       _ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
+
+      
 
   static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
       // light: Colors.black.withOpacity(0.05),
@@ -39,7 +38,6 @@ abstract class AppTheme {
 
   static final _ThemeContainer<Color> popupMenu =
       _ThemeContainer(light: Color(0xFFeeeeee), dark: Color(0xFF333333));
-
 
   static final _ThemeContainer<Color> disabledIcon =
       _ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
@@ -84,7 +82,7 @@ abstract class AppTheme {
         brightness: Brightness.light,
         error: const Color(0xffed3b3b),
         onBackground: Colors.black,
-        onError: Colors.yellow,
+        onError: Colors.white,
         onPrimary: Colors.white,
         onSecondary: AppColors.greyLight,
         onSurface: Colors.black,
@@ -101,8 +99,12 @@ abstract class AppTheme {
       textSelectionHandleColor: Colors.deepPurpleAccent,
       cursorColor: Colors.deepPurpleAccent,
       splashColor: Color(0x90bbbbbb),
+    
+      highlightColor:Colors.transparent,
+      // highlightColor: Colors.deepPurpleAccent.shade100,
 
       //****************** Themes *********************
+     
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
@@ -160,24 +162,26 @@ abstract class AppTheme {
       colorScheme: ColorScheme(
         background: AppColors.grey,
         brightness: Brightness.dark,
-        error:  const Color(0xffed3b3b),
+        error: const Color(0xffed3b3b),
         onBackground: AppColors.whiteDarkened,
-        onError: Colors.yellow,
+        onError: Colors.white,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: Colors.white,
         primary: Colors.deepPurpleAccent,
         primaryVariant: Colors.deepPurple,
         secondary: AppColors.greyLight,
-        secondaryVariant: Colors.grey,
-        surface: AppColors.grey,
+        secondaryVariant: AppColors.grey,
+        surface: AppColors.greyLighter,
       ),
       //****************** Specific app elements *****************
       scaffoldBackgroundColor: AppColors.grey,
       textSelectionColor: Colors.deepPurpleAccent,
       textSelectionHandleColor: Colors.deepPurpleAccent,
       cursorColor: Colors.deepPurpleAccent,
-      splashColor: Color(0x44c8c8c8),
+      splashColor: Colors.deepPurpleAccent,
+      highlightColor: Colors.transparent,
+
       //****************** Themes *********************
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale

@@ -120,7 +120,7 @@ class Playlist {
   /// Returns prev song id
   int getPrevSongId(int id) {
     final int prevSongIndex = getSongIndexById(id) - 1;
-    if (prevSongIndex == -1) {
+    if (prevSongIndex == -2) {
       return null;
     } else if (prevSongIndex < 0) {
       return _songs[length - 1].id;
@@ -139,11 +139,8 @@ class Playlist {
 
   /// Will search each song in another playlist and remove it if won't find it.
   void compareAndRemoveObsolete(Playlist playlist) {
-    print("fwqf");
     _songs.removeWhere((song) {
-      final res  = playlist.getSongById(song.id);
-        print("${song.id} ${res}");
-      return res == null;
+      return playlist.getSongById(song.id) == null;
     });
   }
 }

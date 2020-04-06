@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter/scheduler.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
@@ -16,10 +15,8 @@ import 'routes/routes.dart';
 final RouteObserver<Route> routeObserver = RouteObserver();
 
 void main() {
-
   final CatcherOptions debugOptions = CatcherOptions(SnackBarReportMode(), [
     ConsoleHandler(),
-    FirebaseReportHandler(),
   ]);
   final CatcherOptions releaseOptions = CatcherOptions(SnackBarReportMode(), [
     // EmailManualHandler([Constants.Config.REPORT_EMAIL]),
@@ -32,7 +29,7 @@ void main() {
 }
 
 class App extends StatelessWidget {
-  /// A global key to obtain the navigatro
+  /// A global key to obtain the navigator
   static GlobalKey<NavigatorState> get navigatorKey => Catcher.navigatorKey;
 
   @override
@@ -46,6 +43,7 @@ class App extends StatelessWidget {
                 return MaterialApp(
                   title: Constants.Config.APPLICATION_TITLE,
                   navigatorKey: navigatorKey,
+                  color: Theme.of(context).colorScheme.secondaryVariant,
                   supportedLocales: [const Locale('ru')],
                   locale: const Locale('ru'),
                   localizationsDelegates: const [

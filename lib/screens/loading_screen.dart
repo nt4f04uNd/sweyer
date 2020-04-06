@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// TODO: probably add some fancy list loading animation here or when fetching songs instead of spinner
 class LoadingScreen extends StatelessWidget {

@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/api.dart' as API;
 
 abstract class MusicPlayer {
   // Native player subscriptions
@@ -94,7 +95,7 @@ abstract class MusicPlayer {
     int savedSongPos;
     // Disable restoring position if native player is actually playing right now
     if (!(await NativeAudioPlayer.isPlaying()))
-      savedSongPos = await Prefs.byKey.songPositionInt.getPref(prefs);
+      savedSongPos = await Prefs.songPositionInt.getPref(prefs);
 
     // Seek to saved position
     if (savedSongPos != null)
@@ -126,14 +127,14 @@ abstract class MusicPlayer {
     final song = ContentControl.state
         .getPlaylist(PlaylistType.global)
         .getSongById(songId);
-    bool success = true;
     try {
       if (!silent) // [stayAwake] is very important for player to stay play even in background
         await NativeAudioPlayer.play(song, stayAwake: true);
-      else
+      else {
+        await API.ServiceHandler.sendSong(song);
         await setUri(song.id);
+      }
     } on PlatformException catch (e) {
-      success = false;
       if (e.code == "error") {
         if (e.message == Constants.Errors.UNABLE_ACCESS_RESOURCE) {
           ShowFunctions.showToast(
@@ -154,16 +155,9 @@ abstract class MusicPlayer {
         }
       }
     } catch (e) {
-      success = false;
       // Do not handle this, because other exceptions are not expected
       rethrow;
     } 
-    // finally {
-    //   // Change playing track id
-    //   if (success) {
-    //   } else
-    //     play(ContentControl.state.currentSongId, silent: silent);
-    // }
   }
 
   /// Resume player
@@ -178,7 +172,7 @@ abstract class MusicPlayer {
   }
 
   /// Sets track url
-  ///
+  /// TODO: remove this method at all, or remove play [silent] parameter
   /// Unlike [play], the playback will not resume, but song will be switched if it player is playing
   static Future<void> setUri(int songId) async {
     try {

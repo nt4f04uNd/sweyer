@@ -10,28 +10,10 @@ import 'package:flutter/material.dart';
 
 /// Class to control how routes are created
 abstract class RouteControl {
-  /// Needed to disable animations on some routes
-  static String _currentRoute = Constants.Routes.main.value;
-
-  /// Changes the value of [_currentRoute]
-  static void _setCurrentRoute(String newValue) {
-    _currentRoute = newValue;
-  }
-
-  /// Check the equality of [_currentRoute] to some value
-  static bool _currentRouteEquals(String value) {
-    return _currentRoute == value;
-  }
-
   static Route<dynamic> handleOnUnknownRoute(RouteSettings settings) {
     //******** Unknown ********
     return StackFadeRouteTransition(
-      checkEntAnimationEnabled: () => false,
-      maintainState: true,
       routeType: Constants.Routes.unknown,
-      exitIgnoreEventsForward: false,
-      checkSystemUi: () => Constants.AppSystemUIThemes.allScreens
-          .autoBr(ThemeControl.brightness),
       route: Scaffold(
         // TODO: move to separate file
         body: Center(
@@ -57,23 +39,17 @@ abstract class RouteControl {
   }
 
   static Route<dynamic> handleOnGenerateRoute(RouteSettings settings) {
-    _setCurrentRoute(settings.name);
-
-    //******** Debug ********
-    if (settings.name == Constants.Routes.debug.value) {
+    //******** Developer ********
+    if (settings.name == Constants.Routes.dev.value) {
       return StackFadeRouteTransition(
-        routeType: Constants.Routes.debug,
-        checkSystemUi: () =>
-            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
-        route: DebugRoute(),
+        routeType: Constants.Routes.dev,
+        route: DevRoute(),
       );
     }
     //******** Exif ********
     else if (settings.name == Constants.Routes.exif.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.exif,
-        checkSystemUi: () =>
-            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: ExifRoute(),
       );
     }
@@ -81,8 +57,6 @@ abstract class RouteControl {
     else if (settings.name == Constants.Routes.extendedSettings.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.extendedSettings,
-        checkSystemUi: () =>
-            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: ExtendedSettingsRoute(),
       );
     }
@@ -94,9 +68,6 @@ abstract class RouteControl {
         opaque: true,
         transitionDuration: kSMMPlayerRouteTransitionDuration,
         checkExitAnimationEnabled: () => false,
-        // entIgnoreEventsForward: true,
-        checkSystemUi: () =>
-            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: PlayerRoute(),
       );
     }
@@ -108,8 +79,6 @@ abstract class RouteControl {
     else if (settings.name == Constants.Routes.settings.value) {
       return StackFadeRouteTransition(
         routeType: Constants.Routes.settings,
-        checkSystemUi: () =>
-            Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
         route: SettingsRoute(),
       );
     }

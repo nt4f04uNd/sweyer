@@ -10,6 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
+// TODO: see what this method is doing
+// SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription());
+
 const String kSMMSystemUiOverlayAnimationDebugLabel =
     "SystemUIOverlayAnimationController";
 
@@ -73,8 +76,6 @@ abstract class SystemUiOverlayStyleControl {
 
   static SystemUiOverlayStyle _lastOverlayStyle;
 
-  static StreamSubscription<Brightness> _themeChangeSubscription;
-
   /// Sets up settings of the controller.
   /// Will override the existing settings with new ones.
   /// Will reset settings to default if no value has been passed.
@@ -119,9 +120,10 @@ abstract class SystemUiOverlayStyleControl {
   }
 
   /// Sets a new overlay ui style
-  /// 
+  ///
   /// [saveToHistory] - whether to save the ui change to history
-  static void setSystemUiOverlay(SystemUiOverlayStyle newStyle, {bool saveToHistory = true}) {
+  static void setSystemUiOverlay(SystemUiOverlayStyle newStyle,
+      {bool saveToHistory = true}) {
     _handleEnd(newStyle, saveToHistory: saveToHistory);
     SystemChrome.setSystemUIOverlayStyle(newStyle);
   }

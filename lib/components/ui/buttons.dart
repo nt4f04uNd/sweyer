@@ -40,29 +40,40 @@ class PrimaryRaisedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-      key: key,
-      child: loading
-          ? SizedBox(
-              width: 25.0,
-              height: 25.0,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                valueColor: const AlwaysStoppedAnimation(Colors.white),
-              ),
-            )
-          : Text(
-              text,
-              style: textStyle ??
-                  TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-            ),
-      color: color ?? Theme.of(context).colorScheme.primary,
-      onPressed: onPressed,
-      materialTapTargetSize: materialTapTargetSize,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(borderRadius),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashFactory: ListTileInkRipple.splashFactory,
       ),
-      padding: padding,
+      child: RaisedButton(
+        key: key,
+        splashColor: Colors.black.withOpacity(0.18),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          child: loading
+              ? SizedBox(
+                  width: 25.0,
+                  height: 25.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: const AlwaysStoppedAnimation(Colors.white),
+                  ),
+                )
+              : Text(
+                  text,
+                  style: textStyle ??
+                      TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                ),
+        ),
+        color: color ?? Theme.of(context).colorScheme.primary,
+        onPressed: loading ? null : onPressed,
+        materialTapTargetSize: materialTapTargetSize,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        padding: padding,
+      ),
     );
   }
 }
@@ -88,9 +99,8 @@ class DialogRaisedButton extends StatelessWidget {
   /// The returned value will be passed to [Navigator.maybePop()] method call
   final Function onPressed;
 
-
   /// Constructs an accept button.
-  /// 
+  ///
   /// `true` will be always passed to [Navigator.maybePop()] call.
   factory DialogRaisedButton.accept(
       {String text = "Принять", Function onPressed}) {
@@ -104,8 +114,9 @@ class DialogRaisedButton extends StatelessWidget {
       },
     );
   }
-   /// Constructs a decline button.
-  /// 
+
+  /// Constructs a decline button.
+  ///
   /// `false` will be always passed to [Navigator.maybePop()] call.
   factory DialogRaisedButton.decline(
       {String text = "Отмена", Function onPressed}) {
@@ -124,25 +135,30 @@ class DialogRaisedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RaisedButton(
-      child: Text(
-        text,
-        style: textStyle ??
-            TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashFactory: ListTileInkRipple.splashFactory,
       ),
-      color: color ?? Theme.of(context).colorScheme.primary,
-      padding: padding,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(borderRadius),
+      child: RaisedButton(
+        splashColor: Colors.black.withOpacity(0.18),
+        child: Text(
+          text,
+          style: textStyle ??
+              TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+        color: color ?? Theme.of(context).colorScheme.primary,
+        padding: padding,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        onPressed: () async {
+          var res;
+          if (onPressed != null) {
+            res = await onPressed();
+          }
+          App.navigatorKey.currentState.maybePop(res);
+        },
       ),
-      onPressed: () async {
-        var res;
-        if (onPressed != null) {
-          res = await onPressed();
-        }
-        print(res);
-        App.navigatorKey.currentState.maybePop(res);
-      },
     );
   }
 }
@@ -270,7 +286,6 @@ class CopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return SMMIconButton(
     return SMMIconButton(
       icon: const Icon(Icons.content_copy),
       size: size,
@@ -281,13 +296,48 @@ class CopyButton extends StatelessWidget {
                 ClipboardData(text: text),
               );
               SnackBarControl.showSnackBar(
-                settings: SMMSnackbarSettings(
+                SMMSnackbarSettings(
                   child: SMMSnackBar(
                     message: "Скопировано",
+                    messagePadding: const EdgeInsets.only(left: 8.0),
                     leading: Icon(Icons.content_copy,
                         color: Theme.of(context).colorScheme.onPrimary),
                   ),
                 ),
+              );
+            },
+    );
+  }
+}
+
+/// An information button.
+/// On click creates an alert with information
+class InfoButton extends StatelessWidget {
+  const InfoButton({
+    Key key,
+    this.size = 44.0,
+    @required this.info,
+    this.infoAlertTitle = "Что это значит?",
+  }) : super(key: key);
+
+  final double size;
+  final String info;
+
+  /// Text displayed as a title of an info window
+  final String infoAlertTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return SMMIconButton(
+      icon: const Icon(Icons.info_outline),
+      size: size,
+      onPressed: info == null
+          ? null
+          : () {
+              ShowFunctions.showAlert(
+                context,
+                title: Text(infoAlertTitle),
+                content: Text(this.info),
               );
             },
     );

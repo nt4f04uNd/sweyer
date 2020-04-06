@@ -20,17 +20,17 @@ abstract class EventChannel {
   /// Event when user disconnects headset
   static const String BECOME_NOISY = DOTTED_PACKAGE_NAME + 'EVENT_BECAME_NOISY';
   // Events for notification clicks
-  static const String NOTIFICATION_PLAY =         DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_PLAY';
-  static const String NOTIFICATION_PAUSE =        DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_PAUSE';
-  static const String NOTIFICATION_NEXT =         DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_NEXT';
-  static const String NOTIFICATION_PREV =         DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_PREV';
+  static const String NOTIFICATION_PLAY         = DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_PLAY';
+  static const String NOTIFICATION_PAUSE        = DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_PAUSE';
+  static const String NOTIFICATION_NEXT         = DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_NEXT';
+  static const String NOTIFICATION_PREV         = DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_PREV';
   static const String NOTIFICATION_KILL_SERVICE = DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_KILL_SERVICE';
-  static const String NOTIFICATION_LOOP =         DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_LOOP';
-  static const String NOTIFICATION_LOOP_ON =      DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_LOOP_ON";
+  static const String NOTIFICATION_LOOP         = DOTTED_PACKAGE_NAME + 'EVENT_NOTIFICATION_LOOP';
+  static const String NOTIFICATION_LOOP_ON      = DOTTED_PACKAGE_NAME + "EVENT_NOTIFICATION_LOOP_ON";
 
-  static const String AUDIOFOCUS_GAIN =                    DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_GAIN";
-  static const String AUDIOFOCUS_LOSS =                    DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS";
-  static const String AUDIOFOCUS_LOSS_TRANSIENT =          DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT";
+  static const String AUDIOFOCUS_GAIN                    = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_GAIN";
+  static const String AUDIOFOCUS_LOSS                    = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS";
+  static const String AUDIOFOCUS_LOSS_TRANSIENT          = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT";
   static const String AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK = DOTTED_PACKAGE_NAME + "EVENT_AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK";
 
   static const String MEDIABUTTON_AUDIO_TRACK          = DOTTED_PACKAGE_NAME + "EVENT_MEDIABUTTON_AUDIO_TRACK";
@@ -65,28 +65,28 @@ abstract class EventChannel {
 
 //****************GENERAL***************************************************************************************
 abstract class GeneralChannel {
-  static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'GENERAL_CHANNEL';
+  static const String CHANNEL_NAME              = DOTTED_PACKAGE_NAME + 'GENERAL_CHANNEL';
 
   static const String METHOD_INTENT_ACTION_VIEW = DOTTED_PACKAGE_NAME + "GENERAL_METHOD_INTENT_ACTION_VIEW";
 }
 
 //****************SERVICE***************************************************************************************
 abstract class ServiceChannel {
-  static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'SERVICE_CHANNEL';
+  static const String CHANNEL_NAME             = DOTTED_PACKAGE_NAME + 'SERVICE_CHANNEL';
 
-  static const String METHOD_STOP_SERVICE = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_STOP_SERVICE";
+  static const String METHOD_STOP_SERVICE      = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_STOP_SERVICE";
   static const String METHOD_SEND_CURRENT_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_CURRENT_SONG";
 }
 
 //****************SONGS***************************************************************************************
 abstract class SongsChannel {
-  static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'SONGS_CHANNEL';
+  static const String CHANNEL_NAME =             DOTTED_PACKAGE_NAME + 'SONGS_CHANNEL';
 
   /// Retrieve songs method
-  static const String METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
+  static const String METHOD_RETRIEVE_SONGS =    DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
 
   /// Method that sends found songs from native code to flutter code
-  static const String METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
+  static const String METHOD_SEND_SONGS =        DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
 
-  static const String METHOD_DELETE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_DELETE_SONGS";
+  static const String METHOD_DELETE_SONGS =      DOTTED_PACKAGE_NAME + "SONGS_METHOD_DELETE_SONGS";
 }

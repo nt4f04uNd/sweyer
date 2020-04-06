@@ -4,8 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
@@ -20,118 +18,75 @@ class DrawerWidget extends StatefulWidget {
 class _DrawerWidgetState extends State<DrawerWidget>
     with SingleTickerProviderStateMixin {
   bool _tappedList = false;
-
-  Future<void> _handleClickSettings() {
-    _tappedList = true;
-
-    // Set ui to all screens
-    SystemChrome.setSystemUIOverlayStyle(
-        Constants.AppSystemUIThemes.allScreens.auto(context));
-
-    return App.navigatorKey.currentState
-        .popAndPushNamed(Constants.Routes.settings.value);
-  }
-
-  // void _handleClickSendLog() => Logger.send();
-
-  Future<void> _handleClickDebug() async {
-    _tappedList = true;
-
-    SystemChrome.setSystemUIOverlayStyle(
-        Constants.AppSystemUIThemes.allScreens.auto(context));
-
-    return App.navigatorKey.currentState
-        .popAndPushNamed(Constants.Routes.debug.value);
-  }
+  bool _devMode = false;
 
   @override
   void initState() {
     super.initState();
-
-    // TODO: this method
-    // SystemChrome.setApplicationSwitcherDescription(ApplicationSwitcherDescription());
-
-    // animation.addListener(() async {
-    //   // print(animation.value);
-    //   // SystemChrome.setSystemUIOverlayStyle(
-    //   //   SystemUiOverlayStyle(statusBarColor: animation.value),
-    //   // );
-
-    //   // SystemChrome.setSystemUIOverlayStyle(
-    //   //   SystemUiOverlayStyle(statusBarColor: Colors.black),
-    //   // );
-    //   (() async {
-    //     // Without a microtask this won't work
-    //     await Future.microtask(
-    //       () => SystemChrome.setSystemUIOverlayStyle(
-    //         SystemUiOverlayStyle(
-    //           systemNavigationBarColor: animation.value,
-    //           // // statusBarColor: Colors.black,
-    //           statusBarColor: animation.value,
-    //         ),
-    //       ),
-    //     );
-    //   })();
-    // });
-    // controller.addStatusListener((status) {
-    //   if (status == AnimationStatus.completed) {
-    //     controller.reverse();
-    //   } else if (status == AnimationStatus.dismissed) {
-    //     controller.forward();
-    //   }
-    // });
-    // controller.forward();
-
-    (() async {
+    _fetchDevMode();
+    () async {
       // Without a this future this won't work
       await Future.delayed(const Duration(microseconds: 1));
 
       SystemUiOverlayStyleControl.setSystemUiOverlay(
-          Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
-          saveToHistory: false);
-    })();
-
-    // SystemUiOverlayStyleControl.setSystemUiOverlay(
-    //   Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
-    // );
+        Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
+        saveToHistory: false,
+      );
+    }();
   }
 
   @override
   void dispose() {
-    // Set ui to main screen on drawer close
-    // if (!_tappedList)
-    // SystemChrome.setSystemUIOverlayStyle(
-    //   SystemUiOverlayStyle(
-    //       statusBarColor: Constants
-    //           .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor),
-    // );
-    // SystemChrome.setSystemUIOverlayStyle(
-    //   Constants.AppSystemUIThemes.mainScreen.autoWithoutContext,
-    // );
-    _handleDispose();
+    () async {
+      if (!_tappedList) {
+        // Animate only nav panel here
+        await SystemUiOverlayStyleControl.animateSystemUiOverlay(
+          from: Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext
+              .copyWith(
+            statusBarColor: Constants
+                .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
+          ),
+          to: Constants.AppSystemUIThemes.mainScreen.autoWithoutContext
+              .copyWith(
+            statusBarColor: Constants
+                .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
+          ),
+          curve: Curves.easeInCirc,
+          settings: AnimationControllerSettings(
+            duration: const Duration(milliseconds: 300),
+          ),
+        );
+      }
+    }();
 
-    // controller.dispose();
     super.dispose();
   }
 
-  void _handleDispose() async {
-    if (!_tappedList) {
-      // Animate only nav panel here
-      await SystemUiOverlayStyleControl.animateSystemUiOverlay(
-        from: Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext
-            .copyWith(
-          statusBarColor: Constants
-              .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
-        ),
-        to: Constants.AppSystemUIThemes.mainScreen.autoWithoutContext.copyWith(
-          statusBarColor: Constants
-              .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
-        ),
-        curve: Curves.easeInCirc,
-        settings: AnimationControllerSettings(
-          duration: const Duration(milliseconds: 150),
-        ),
-      );
+  /// Should be called when menu item is pressed
+  void _handleMenuItemClick() {
+    _tappedList = true;
+    SystemUiOverlayStyleControl.setSystemUiOverlay(
+      Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
+      saveToHistory: false,
+    );
+  }
+
+  Future<void> _handleClickSettings() {
+    _handleMenuItemClick();
+    return App.navigatorKey.currentState
+        .popAndPushNamed(Constants.Routes.settings.value);
+  }
+
+  Future<void> _handleClickDebug() async {
+    _handleMenuItemClick();
+    return App.navigatorKey.currentState
+        .popAndPushNamed(Constants.Routes.dev.value);
+  }
+
+  Future<void> _fetchDevMode() async {
+    _devMode = await Prefs.developerModeBool.getPref();
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -145,7 +100,6 @@ class _DrawerWidgetState extends State<DrawerWidget>
       child: Drawer(
         child: ListView(
           physics: NeverScrollableScrollPhysics(),
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
@@ -154,8 +108,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  SvgPicture.asset('assets/images/icons/note_rounded.svg',
-                      width: 40.0, height: 40.0),
+                  const SweyerLogo(),
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0),
                     child: Text(
@@ -170,7 +123,6 @@ class _DrawerWidgetState extends State<DrawerWidget>
                 ],
               ),
             ),
-            // SizedBox(height: 45),
             Divider(),
             SizedBox(
               height: 7.0,
@@ -180,16 +132,12 @@ class _DrawerWidgetState extends State<DrawerWidget>
               icon: Icons.settings,
               onTap: _handleClickSettings,
             ),
-            // MenuItem(
-            //   'Отправить лог',
-            //   icon: Icons.assignment,
-            //   onTap: _handleClickSendLog,
-            // ),
-            MenuItem(
-              'Дебаг',
-              icon: Icons.adb,
-              onTap: _handleClickDebug,
-            ),
+            if (_devMode)
+              MenuItem(
+                'Дебаг',
+                icon: Icons.adb,
+                onTap: _handleClickDebug,
+              ),
           ],
         ),
       ),
@@ -213,7 +161,7 @@ class MenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: ListTile(
+      child: SMMListTile(
         dense: true,
         leading: icon != null
             ? Padding(
@@ -299,23 +247,20 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: SMMIconButton(
-        size: widget.size ?? kSMMIconButtonSize,
-        iconSize: widget.iconSize ?? kSMMIconButtonIconSize,
-        color: Constants.AppTheme.mainContrast.auto(context),
-        onPressed: widget.animateDirection == true
-            ? widget.onCloseClick
-            : widget.onMenuClick,
-        icon: AnimatedIcon(
-          icon:
-              widget.animateDirection == null || widget.animateDirection == true
-                  ? AnimatedIcons.menu_close
-                  : AnimatedIcons.close_menu,
-          color: widget.iconColor ??
-              Constants.AppTheme.playPauseIcon.auto(context),
-          progress: _animation,
-        ),
+    return SMMIconButton(
+      size: widget.size ?? kSMMIconButtonSize,
+      iconSize: widget.iconSize ?? kSMMIconButtonIconSize,
+      color: Constants.AppTheme.mainContrast.auto(context),
+      onPressed: widget.animateDirection == true
+          ? widget.onCloseClick
+          : widget.onMenuClick,
+      icon: AnimatedIcon(
+        icon: widget.animateDirection == null || widget.animateDirection == true
+            ? AnimatedIcons.menu_close
+            : AnimatedIcons.close_menu,
+        color:
+            widget.iconColor ?? Constants.AppTheme.playPauseIcon.auto(context),
+        progress: _animation,
       ),
     );
   }

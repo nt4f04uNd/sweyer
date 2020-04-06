@@ -46,9 +46,6 @@ public class PlaylistHandler {
           GeneralHandler.isSystemThemeDark()
                 ? FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_new_dark.png")
                 : FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_new.png");
-      //   GeneralHandler.isSystemThemeDark()
-      //           ? FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_old.png")
-      //           : FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb.png");
 
         try {
             InputStream istream = assetManager.open(key);

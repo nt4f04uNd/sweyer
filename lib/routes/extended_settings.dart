@@ -34,10 +34,10 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
   }
 
   Future<void> _fetchMinFileDuration() async {
-    final res = await Prefs.byKey.settingMinFileDurationInt.getPref();
+    final res = await Settings.minFileDurationInt.getPref();
     setState(() {
-      initSettingMinFileDuration = res ?? 30;
-      settingMinFileDuration = res ?? 30; // Thirty seconds is default
+      initSettingMinFileDuration = res;
+      settingMinFileDuration = res;
       sliderKey = UniqueKey();
     });
   }
@@ -56,12 +56,14 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
   }
 
   Future<void> _handleSave() async {
-    Prefs.byKey.settingMinFileDurationInt.setPref(settingMinFileDuration);
+    Settings.minFileDurationInt.setPref(value: settingMinFileDuration);
+    // TODO: rewrite this
     if (initSettingMinFileDuration <= settingMinFileDuration) {
-      ContentControl.filterSongs();
-      // ContentControl.updatePlaylistsWithGlobal();
-    } else
+      await ContentControl.filterSongs(emitChangeEvent: false);
+      ContentControl.updatePlaylistsWithGlobal();
+    } else{
       ContentControl.refetchSongs();
+    }
     initSettingMinFileDuration = settingMinFileDuration;
     ShowFunctions.showToast(msg: "Настройки сохранены");
     if (mounted)
@@ -79,7 +81,6 @@ class _ExtendedSettingsRouteState extends State<ExtendedSettingsRoute> {
       content: Text(
           "Некоторые настройки были изменены, желаете ли вы сохранить их? Нажмите снаружи, чтобы остаться"),
       acceptButton: DialogRaisedButton.accept(text: "Сохранить"),
-    
     ));
 
     if (res == null) {

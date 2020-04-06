@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sweyer/sweyer.dart';
-
 const _kSMMScrollBarHeight = 40.0;
 
 /// Scrollbar specially for song lists
@@ -26,18 +25,20 @@ const _kSMMScrollBarHeight = 40.0;
 ///
 /// TODO: add scrollbar pad with letters
 class SongsListScrollBar extends StatelessWidget {
-  const SongsListScrollBar({
+  SongsListScrollBar({
     Key key,
+    this.scrollThumbKey,
     @required this.child,
-    @required this.labelTextBuilder,
+    @required this.labelContentBuilder,
     @required this.controller,
   })  : assert(child != null),
-        assert(labelTextBuilder != null),
+        assert(labelContentBuilder != null),
         assert(controller != null),
         super(key: key);
 
   final Widget child;
-  final Widget Function(double) labelTextBuilder;
+  final Key scrollThumbKey;
+  final Widget Function(double) labelContentBuilder;
   final ScrollController controller;
 
   @override
@@ -45,13 +46,16 @@ class SongsListScrollBar extends StatelessWidget {
     return SMMDraggableScrollbar.rrect(
       alwaysVisibleScrollThumb:
           ContentControl.state.currentSortFeature == SortFeature.title,
-      padding: const EdgeInsets.only(right: 2.0),
-      labelConstraints: const BoxConstraints(maxWidth: 56.0, maxHeight: 24.0),
-      labelTextBuilder:
+      scrollThumbKey: scrollThumbKey,
+      padding: const EdgeInsets.only(right: 3.0),
+      // labelConstraints: const BoxConstraints(maxWidth: 56.0, maxHeight: 24.0),
+      labelConstraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width - 28.0, maxHeight: 36.0),
+      labelContentBuilder:
           ContentControl.state.currentSortFeature != SortFeature.title
               ? null
-              : labelTextBuilder,
-      marginTop: 4.0,
+              : labelContentBuilder,
+      marginTop: 7.0,
       marginBottom: 40.0,
       widthScrollThumb: 12.0,
       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -231,13 +235,13 @@ typedef Widget ScrollThumbBuilder(
   Animation<double> labelAnimation,
   double height,
   double width,
-  bool canScroll, {
-  Text labelText,
+  bool shouldAppear, {
+  Widget labelContent,
   BoxConstraints labelConstraints,
 });
 
 /// Build a Text widget using the current scroll offset
-typedef Text LabelTextBuilder(double offsetY);
+typedef Widget LabelContentBuilder(double offsetY);
 
 /// A widget that will display a BoxScrollView with a ScrollThumb that can be dragged
 /// for quick navigation of the BoxScrollView.
@@ -274,8 +278,8 @@ class SMMDraggableScrollbar extends StatefulWidget {
   /// How long should the thumb be visible before fading out
   final Duration scrollbarTimeToFade;
 
-  /// Build a Text widget from the current offset in the BoxScrollView
-  final LabelTextBuilder labelTextBuilder;
+  /// Build a Widget from the current offset in the BoxScrollView
+  final LabelContentBuilder labelContentBuilder;
 
   /// Determines box constraints for Container displaying label
   final BoxConstraints labelConstraints;
@@ -300,7 +304,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
     this.padding,
     this.scrollbarAnimationDuration = _kScrollbarFadeDuration,
     this.scrollbarTimeToFade = _kScrollbarTimeToFade,
-    this.labelTextBuilder,
+    this.labelContentBuilder,
     this.labelConstraints,
   })  : assert(controller != null),
         assert(scrollThumbBuilder != null),
@@ -320,7 +324,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
     this.padding,
     this.scrollbarAnimationDuration = _kScrollbarFadeDuration,
     this.scrollbarTimeToFade = _kScrollbarTimeToFade,
-    this.labelTextBuilder,
+    this.labelContentBuilder,
     this.labelConstraints,
   })  : scrollThumbBuilder =
             _thumbRRectBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
@@ -340,7 +344,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
     this.padding,
     this.scrollbarAnimationDuration = _kScrollbarFadeDuration,
     this.scrollbarTimeToFade = _kScrollbarTimeToFade,
-    this.labelTextBuilder,
+    this.labelContentBuilder,
     this.labelConstraints,
   })  : scrollThumbBuilder =
             _thumbArrowBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
@@ -360,7 +364,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
     this.padding,
     this.scrollbarAnimationDuration = _kScrollbarFadeDuration,
     this.scrollbarTimeToFade = _kScrollbarTimeToFade,
-    this.labelTextBuilder,
+    this.labelContentBuilder,
     this.labelConstraints,
   })  : scrollThumbBuilder =
             _thumbSemicircleBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
@@ -374,11 +378,11 @@ class SMMDraggableScrollbar extends StatefulWidget {
     @required Color backgroundColor,
     @required Animation<double> thumbAnimation,
     @required Animation<double> labelAnimation,
-    @required Text labelText,
+    @required Widget labelContent,
     @required BoxConstraints labelConstraints,
     @required bool alwaysVisibleScrollThumb,
   }) {
-    var scrollThumbAndLabel = labelText == null
+    var scrollThumbAndLabel = labelContent == null
         ? scrollThumb
         : Row(
             mainAxisSize: MainAxisSize.min,
@@ -386,7 +390,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
             children: [
               ScrollLabel(
                 animation: labelAnimation,
-                child: labelText,
+                child: labelContent,
                 backgroundColor: backgroundColor,
                 constraints: labelConstraints,
               ),
@@ -411,8 +415,8 @@ class SMMDraggableScrollbar extends StatefulWidget {
       Animation<double> labelAnimation,
       double height,
       double width,
-      bool canScroll, {
-      Text labelText,
+      bool shouldAppear, {
+      Widget labelContent,
       BoxConstraints labelConstraints,
     }) {
       final scrollThumb = CustomPaint(
@@ -438,9 +442,9 @@ class SMMDraggableScrollbar extends StatefulWidget {
         backgroundColor: backgroundColor,
         thumbAnimation: thumbAnimation,
         labelAnimation: labelAnimation,
-        labelText: labelText,
+        labelContent: labelContent,
         labelConstraints: labelConstraints,
-        alwaysVisibleScrollThumb: canScroll && alwaysVisibleScrollThumb,
+        alwaysVisibleScrollThumb: shouldAppear && alwaysVisibleScrollThumb,
       );
     };
   }
@@ -453,8 +457,8 @@ class SMMDraggableScrollbar extends StatefulWidget {
       Animation<double> labelAnimation,
       double height,
       double width,
-      bool canScroll, {
-      Text labelText,
+      bool shouldAppear, {
+      Widget labelContent,
       BoxConstraints labelConstraints,
     }) {
       final scrollThumb = ClipPath(
@@ -476,9 +480,9 @@ class SMMDraggableScrollbar extends StatefulWidget {
         backgroundColor: backgroundColor,
         thumbAnimation: thumbAnimation,
         labelAnimation: labelAnimation,
-        labelText: labelText,
+        labelContent: labelContent,
         labelConstraints: labelConstraints,
-        alwaysVisibleScrollThumb: canScroll && alwaysVisibleScrollThumb,
+        alwaysVisibleScrollThumb: shouldAppear && alwaysVisibleScrollThumb,
       );
     };
   }
@@ -491,11 +495,12 @@ class SMMDraggableScrollbar extends StatefulWidget {
       Animation<double> labelAnimation,
       double height,
       double width,
-      bool canScroll, {
-      Text labelText,
+      bool shouldAppear, {
+      Widget labelContent,
       BoxConstraints labelConstraints,
     }) {
       final scrollThumb = Material(
+        key: scrollThumbKey,
         elevation: 4.0,
         child: Container(
           constraints: BoxConstraints.tight(
@@ -511,9 +516,9 @@ class SMMDraggableScrollbar extends StatefulWidget {
         backgroundColor: backgroundColor,
         thumbAnimation: thumbAnimation,
         labelAnimation: labelAnimation,
-        labelText: labelText,
+        labelContent: labelContent,
         labelConstraints: labelConstraints,
-        alwaysVisibleScrollThumb: canScroll && alwaysVisibleScrollThumb,
+        alwaysVisibleScrollThumb: shouldAppear && alwaysVisibleScrollThumb,
       );
     };
   }
@@ -522,7 +527,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
 class ScrollLabel extends StatelessWidget {
   final Animation<double> animation;
   final Color backgroundColor;
-  final Text child;
+  final Widget child;
 
   final BoxConstraints constraints;
   static const BoxConstraints _defaultConstraints =
@@ -540,16 +545,27 @@ class ScrollLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: animation,
-      child: Container(
-        margin: EdgeInsets.only(right: 12.0),
-        child: Material(
-          elevation: 4.0,
-          color: backgroundColor,
-          borderRadius: BorderRadius.all(Radius.circular(16.0)),
-          child: Container(
-            constraints: constraints ?? _defaultConstraints,
-            alignment: Alignment.center,
-            child: child,
+      child: SlideTransition(
+        position:
+            Tween(begin: const Offset(0.005, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+            parent: animation,
+          ),
+        ),
+        child: Container(
+          margin: const EdgeInsets.only(right: 6.0),
+          child: Material(
+            elevation: 20.0,
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.all(Radius.circular(11.0)),
+            child: Container(
+              constraints: constraints ?? _defaultConstraints,
+              padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+              alignment: Alignment.centerLeft,
+              child: child,
+            ),
           ),
         ),
       ),
@@ -595,6 +611,11 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
       parent: _labelAnimationController,
       curve: Curves.fastOutSlowIn,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      /// Call setState to make shouldAppear getter available
+      setState(() {});
+    });
   }
 
   @override
@@ -613,13 +634,18 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
 
   double get viewMinScrollExtent => widget.controller.position.minScrollExtent;
 
-  bool get canScroll => widget.controller.position.maxScrollExtent != 0.0;
+  /// Whether the scrollbar should appear on the screen
+  bool get shouldAppear =>
+      widget.controller.position.maxScrollExtent != 0.0 &&
+      widget.controller.position.maxScrollExtent -
+              widget.controller.position.minScrollExtent >
+          300.0;
 
   @override
   Widget build(BuildContext context) {
-    Widget labelText;
-    if (widget.labelTextBuilder != null && _isDragInProcess) {
-      labelText = widget.labelTextBuilder(
+    Widget labelContent;
+    if (widget.labelContentBuilder != null && _isDragInProcess) {
+      labelContent = widget.labelContentBuilder(
         _viewOffset + _barOffset + widget.heightScrollThumb / 2,
       );
     }
@@ -629,9 +655,7 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
       //print("LayoutBuilder constraints=$constraints");
 
       return NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          changePosition(notification);
-        },
+        onNotification: _handleScrollNotification,
         child: Stack(
           children: <Widget>[
             RepaintBoundary(
@@ -652,8 +676,8 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
                   _labelAnimation,
                   widget.heightScrollThumb,
                   widget.widthScrollThumb,
-                  widget.controller.hasClients && canScroll,
-                  labelText: labelText,
+                  widget.controller.hasClients && shouldAppear,
+                  labelContent: labelContent,
                   labelConstraints: widget.labelConstraints,
                 ),
               ),
@@ -667,26 +691,15 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
   //scroll bar has received notification that it's view was scrolled
   //so it should also changes his position
   //but only if it isn't dragged
-  changePosition(ScrollNotification notification) {
-    if (_isDragInProcess) {
-      return;
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (_isDragInProcess ||
+        notification.metrics.maxScrollExtent <
+            notification.metrics.minScrollExtent) {
+      return false;
     }
 
     setState(() {
       if (notification is ScrollUpdateNotification) {
-        _barOffset += getBarDelta(
-          notification.scrollDelta,
-          barMaxScrollExtent,
-          viewMaxScrollExtent,
-        );
-
-        if (_barOffset < barMinScrollExtent) {
-          _barOffset = barMinScrollExtent;
-        }
-        if (_barOffset > barMaxScrollExtent) {
-          _barOffset = barMaxScrollExtent;
-        }
-
         _viewOffset += notification.scrollDelta;
         if (_viewOffset < widget.controller.position.minScrollExtent) {
           _viewOffset = widget.controller.position.minScrollExtent;
@@ -694,11 +707,16 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
         if (_viewOffset > viewMaxScrollExtent) {
           _viewOffset = viewMaxScrollExtent;
         }
+
+        _barOffset = _viewOffset *
+                (barMaxScrollExtent - barMinScrollExtent) /
+                viewMaxScrollExtent +
+            barMinScrollExtent;
       }
 
       if (notification is ScrollUpdateNotification ||
           notification is OverscrollNotification) {
-        if (canScroll &&
+        if (shouldAppear &&
             _thumbAnimationController.status != AnimationStatus.forward) {
           _thumbAnimationController.forward();
         }
@@ -711,22 +729,8 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
         });
       }
     });
-  }
 
-  double getBarDelta(
-    double scrollViewDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) {
-    return scrollViewDelta * barMaxScrollExtent / viewMaxScrollExtent;
-  }
-
-  double getScrollViewDelta(
-    double barDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) {
-    return barDelta * viewMaxScrollExtent / barMaxScrollExtent;
+    return false;
   }
 
   void _onVerticalDragStart(DragStartDetails details) {
@@ -752,31 +756,24 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
           _barOffset = barMaxScrollExtent;
         }
 
-        double viewDelta = getScrollViewDelta(
-            details.delta.dy, barMaxScrollExtent, viewMaxScrollExtent);
-
-        _viewOffset = widget.controller.position.pixels + viewDelta;
-        if (_viewOffset < widget.controller.position.minScrollExtent) {
-          _viewOffset = widget.controller.position.minScrollExtent;
-        }
-        if (_viewOffset > viewMaxScrollExtent) {
-          _viewOffset = viewMaxScrollExtent;
-        }
-
-        print(_viewOffset);
+        _viewOffset = (_barOffset - barMinScrollExtent) *
+            (viewMaxScrollExtent +
+                barMinScrollExtent * viewMaxScrollExtent / barMaxScrollExtent) /
+            barMaxScrollExtent;
+    
         widget.controller.jumpTo(_viewOffset);
       }
     });
   }
 
   Future<void> _onVerticalDragEnd(DragEndDetails details) async {
-    _fadeoutTimer = Timer(widget.scrollbarTimeToFade, () {
+    _isDragInProcess = false;
+    _fadeoutTimer = Timer(applyDilation(widget.scrollbarTimeToFade), () {
       _thumbAnimationController.reverse();
       _labelAnimationController.reverse();
-      _fadeoutTimer = Timer(widget.scrollbarAnimationDuration, () {
-        setState(() {
-          _isDragInProcess = false;
-        });
+      _fadeoutTimer =
+          Timer(applyDilation(widget.scrollbarAnimationDuration), () {
+        setState(() {});
         _fadeoutTimer = null;
       });
     });

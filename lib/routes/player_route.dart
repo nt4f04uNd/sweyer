@@ -5,12 +5,10 @@
 
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 const kSMMPlayerRouteTransitionDuration = const Duration(milliseconds: 550);
 
@@ -107,12 +105,17 @@ class _PlaylistTabState extends State<_PlaylistTab>
     _songChangeSubscription =
         ContentControl.state.onSongChange.listen((event) async {
       // Scroll when track changes
+
       if (opened) {
-        // Just update list if opened, this is needed to update current track indicator
-        setState(() {});
+        if (mounted) {
+          // Just update list if opened, this is needed to update current track indicator
+          setState(() {});
+        }
       } else {
         await performScrolling();
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
   }
@@ -132,7 +135,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
     return globalKeyPlayerRoutePlaylist.currentState.itemScrollController
         .scrollTo(
-            index: index, duration: scrollDuration, curve: Curves.easeInOut);
+            index: index, duration: scrollDuration, curve: Curves.easeOutCubic);
   }
 
   /// Jumps to current song
@@ -450,7 +453,6 @@ class _InfoButton extends StatelessWidget {
                 songInfo ?? "null",
                 style: const TextStyle(fontSize: 13),
               ),
-      
               additionalActions: [
                 CopyButton(text: songInfo),
               ],
@@ -634,11 +636,13 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   Future<void> _setInitialCurrentPosition() async {
     var currentPosition = await MusicPlayer.currentPosition;
+        if (mounted) {
     setState(() {
       _duration =
           Duration(milliseconds: ContentControl.state.currentSong?.duration);
       _value = currentPosition;
     });
+        }
   }
 
   void _getPrefsInstance() async {
@@ -646,7 +650,7 @@ class _TrackSliderState extends State<_TrackSlider> {
   }
 
   // Drag functions
-  void _handleChangeStart(double newValue) async {
+  void _handleChangeStart(double newValue) {
     setState(() {
       _isDragging = true;
       _localValue = newValue;
@@ -662,13 +666,14 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   /// FIXME: this called multiple times since it is inside [TabBarView], currently unable to fix, as this issue relies deeply to flutter architecture
   void _handleChangeEnd(double newValue) async {
-    // if (_isDragging) {
+
     await MusicPlayer.seek(Duration(seconds: newValue.toInt()));
+        if (mounted) {
     setState(() {
       _isDragging = false;
       _value = Duration(seconds: newValue.toInt());
     });
-    // }
+    }
   }
 
   String _calculateDisplayedPositionTime() {

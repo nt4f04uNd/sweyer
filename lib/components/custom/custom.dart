@@ -6,7 +6,6 @@
 /// Module for coped and modified files from flutter framework
 
 export 'custom_icon_button.dart';
-export 'custom_icon_button_splash.dart';
 export 'custom_popup_menu.dart';
 export 'custom_refresh_indicator.dart';
 export 'custom_scaffold.dart';

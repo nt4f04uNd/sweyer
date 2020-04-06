@@ -35,8 +35,7 @@ abstract class ThemeControl {
       {SystemUiOverlayStyleControl systemUiOverlayStyle}) async {
     _brightness =
         _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
-    Prefs.byKey.settingThemeBrightnessBool
-        .setPref(_brightness == Brightness.dark);
+    Settings.darkThemeBool.setPref(value: _brightness == Brightness.dark);
     emitThemeChange(_brightness);
 
     await SystemUiOverlayStyleControl.animateSystemUiOverlay(
@@ -56,17 +55,15 @@ abstract class ThemeControl {
   /// FIXME even this way transition is triggered
   static Future<void> init() async {
     try {
-      final savedBrightness =
-          await Prefs.byKey.settingThemeBrightnessBool.getPref();
-      if (savedBrightness == null)
-        _brightness = Brightness.light;
-      else
-        _brightness = savedBrightness ? Brightness.dark : Brightness.light;
+      final savedBrightness = await Settings.darkThemeBool.getPref();
+      _brightness = savedBrightness ? Brightness.dark : Brightness.light;
     } catch (e, stackTrace) {
       CatcherErrorBridge.add(CaughtError(e, stackTrace));
     } finally {
-      SystemChrome.setSystemUIOverlayStyle(
-          Constants.AppSystemUIThemes.mainScreen.autoBr(_brightness));
+      SystemUiOverlayStyleControl.setSystemUiOverlay(
+        Constants.AppSystemUIThemes.mainScreen.autoBr(_brightness),
+        saveToHistory: false,
+      );
       // emitThemeChange();
     }
   }

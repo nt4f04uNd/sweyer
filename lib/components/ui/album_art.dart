@@ -81,15 +81,21 @@ class AlbumArtLarge extends StatelessWidget {
       if (path == null || !File(path).existsSync()) {
         return AlbumPlaceholderLarge(size: size);
       } else {
-        return ClipRRect(
+        return Material(
+          elevation: 6.0,
           borderRadius: const BorderRadius.all(
-            Radius.circular(10),
+            Radius.circular(10.0),
           ),
-          child: Image.file(
-            File(path),
-            width: size,
-            height: size,
-            fit: BoxFit.fill,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10.0),
+            ),
+            child: Image.file(
+              File(path),
+              width: size,
+              height: size,
+              fit: BoxFit.fill,
+            ),
           ),
         );
       }
@@ -190,19 +196,25 @@ class AlbumPlaceholderLarge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Constants.AppTheme.albumArtLarge.auto(context),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+    return Material(
+      elevation: 3.0,
+      borderRadius: const BorderRadius.all(
+        Radius.circular(10.0),
       ),
-      padding: EdgeInsets.all(size / 4.0),
-      child: SvgPicture.asset(
-        // TODO: move all asset paths to constants
-        'assets/images/icons/note_rounded.svg',
-        // color: Theme.of(context).colorScheme.primaryVariant,
-        // color: Colors.deepP,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Constants.AppTheme.albumArt.auto(context),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+        ),
+        padding: EdgeInsets.all(size / 4.0),
+        child: SvgPicture.asset(
+          // TODO: move all asset paths to constants
+          'assets/images/icons/note_rounded.svg',
+          // color: Theme.of(context).colorScheme.primaryVariant,
+          // color: Colors.deepP,
+        ),
       ),
     );
   }
@@ -221,7 +233,7 @@ class AlbumArtBaseSmall extends StatelessWidget {
       width: kSMMSmallArtSize,
       height: kSMMSmallArtSize,
       decoration: BoxDecoration(
-        color: Constants.AppTheme.albumArtSmall.auto(context),
+        color: Constants.AppTheme.albumArt.auto(context),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       padding: const EdgeInsets.all(10),
@@ -256,7 +268,6 @@ class AlbumPlaceholderSmall extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlbumArtBaseSmall(
       child: Image.asset(
-        // 'assets/images/placeholder_thumb.png',
         'assets/images/placeholder_thumb_new.png',
       ),
     );
@@ -273,7 +284,7 @@ class AlbumArtErrorLarge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Constants.AppTheme.albumArtLarge.auto(context),
+        color: Constants.AppTheme.albumArt.auto(context),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       padding: EdgeInsets.all(size / 4),
@@ -340,8 +351,7 @@ class AlbumArtRotatingState extends State<AlbumArtRotating>
         setState(() {});
       });
 
-    if (widget.initIsRotating)
-      rotate();
+    if (widget.initIsRotating) rotate();
   }
 
   @override
@@ -429,7 +439,6 @@ class RotatingAlbumPlaceholder extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       // TODO: path to const
-      // child: Image.asset('assets/images/placeholder_thumb.png'),
       child: Image.asset('assets/images/placeholder_thumb_new.png'),
     );
   }

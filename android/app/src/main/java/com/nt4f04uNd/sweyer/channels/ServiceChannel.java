@@ -6,9 +6,12 @@
 package com.nt4f04uNd.sweyer.channels;
 
 import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
 import com.nt4f04uNd.sweyer.handlers.PlaylistHandler;
 import com.nt4f04uNd.sweyer.handlers.ServiceHandler;
+import com.nt4f04uNd.sweyer.handlers.NotificationHandler;
 import com.nt4f04uNd.sweyer.player.Song;
+import com.nt4f04uNd.sweyer.player.PlayerForegroundService;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -23,34 +26,37 @@ import io.flutter.view.FlutterView;
 
 public class ServiceChannel implements MethodChannel.MethodCallHandler {
 
-    public static void init(FlutterView view) {
-        if (channel == null) {
-            channel = new MethodChannel(view, Constants.channels.service.CHANNEL_NAME);
-            channel.setMethodCallHandler(new ServiceChannel());
-        }
-    }
+   public static void init(FlutterView view) {
+      if (channel == null) {
+         channel = new MethodChannel(view, Constants.channels.service.CHANNEL_NAME);
+         channel.setMethodCallHandler(new ServiceChannel());
+      }
+   }
 
-    public static void kill() {
-        channel = null;
-    }
+   public static void kill() {
+      channel = null;
+   }
 
-    @Nullable
-    private static MethodChannel channel;
+   @Nullable
+   private static MethodChannel channel;
 
-    @Override
-    public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
-        switch (call.method) {
-            case Constants.channels.service.METHOD_STOP_SERVICE:
-                ServiceHandler.stopService();
-                break;
-            case Constants.channels.service.METHOD_SEND_CURRENT_SONG:
-                PlaylistHandler.setCurrentSong(Song.fromJson(new JSONObject((HashMap) call.argument("song"))));
-                break;
-            default:
-                result.notImplemented();
-                Log.e(Constants.LogTag, "serviceChannel: Invalid method name call from Dart code");
-        }
-        result.success(1);
-    }
+   @Override
+   public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
+      switch (call.method) {
+         case Constants.channels.service.METHOD_STOP_SERVICE:
+            ServiceHandler.stopService();
+            break;
+         case Constants.channels.service.METHOD_SEND_CURRENT_SONG:
+            PlaylistHandler.setCurrentSong(Song.fromJson(new JSONObject((HashMap) call.argument("song"))));
+            if (PlayerForegroundService.isRunning) {
+               NotificationHandler.updateNotification(PlayerHandler.isPlaying(), PlayerHandler.isLooping());
+            }
+            break;
+         default:
+            result.notImplemented();
+            Log.e(Constants.LogTag, "serviceChannel: Invalid method name call from Dart code");
+      }
+      result.success(1);
+   }
 
 }

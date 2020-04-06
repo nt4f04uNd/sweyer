@@ -5,7 +5,6 @@
 
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/sweyer.dart';
 import 'api.dart';
 
 abstract class SongsHandler {

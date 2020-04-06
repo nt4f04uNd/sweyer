@@ -85,15 +85,15 @@ class TrackListScreen extends StatefulWidget {
   _TrackListScreenState createState() => _TrackListScreenState();
 }
 
-class _TrackListScreenState extends State<TrackListScreen> {
+class _TrackListScreenState extends State<TrackListScreen>
+    with SingleTickerProviderStateMixin {
+  bool everSelected = false;
+
   /// Contains selected song ids
   Set<int> selectionSet = {};
 
   /// Value used to animate selection count number
   int prevSetLength = 0;
-
-  /// Enables selection mode
-  bool _selectionMode;
 
   /// Denotes state of unselection animation
   bool unselecting = false;
@@ -106,6 +106,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
+  AnimationController selectionController;
   StreamSubscription<void> _playlistChangeSubscription;
   StreamSubscription<Song> _songChangeSubscription;
 
@@ -115,6 +116,21 @@ class _TrackListScreenState extends State<TrackListScreen> {
   @override
   void initState() {
     super.initState();
+
+    selectionController =
+        AnimationController(vsync: this, duration: kSMMSelectionDuration);
+    selectionController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        if (unselecting) {
+          selectionSet = {};
+          unselecting = false;
+        }
+        setState(() {
+          _switcher.change();
+        });
+      }
+    });
+
     _playlistChangeSubscription =
         ContentControl.state.onPlaylistListChange.listen((event) {
       // Update list on playlist changes
@@ -130,6 +146,7 @@ class _TrackListScreenState extends State<TrackListScreen> {
   void dispose() {
     _playlistChangeSubscription.cancel();
     _songChangeSubscription.cancel();
+    selectionController.dispose();
     super.dispose();
   }
 
@@ -139,88 +156,66 @@ class _TrackListScreenState extends State<TrackListScreen> {
     return Future.value();
   }
 
-  /// Check if user selecting tracks
-  bool isSelection() {
-    return _selectionMode != null && _selectionMode;
-  }
-
-  /// Adds item index to set and enables selection mode if needed
-  void _handleSelect(int id) {
-    prevSetLength = selectionSet.length;
-    selectionSet.add(id);
-    if (!isSelection())
-      setState(() {
-        _selectionMode = true;
-      });
-    else
+  void _handleSelectionUpdate(Song song) {
+    everSelected = true;
+    if (selectionSet.length == 1) {
       setState(() {});
-  }
-
-  /// Removes item index from set and disables selection mode if set is empty
-  void _handleUnselect(int id, bool onMount) {
-    prevSetLength = selectionSet.length;
-    selectionSet.remove(id);
-    if (selectionSet.isEmpty) {
-      // If none elements are selected - trigger unselecting animation and disable selection mode
-      if (!unselecting) {
-        setState(() {
-          unselecting = true;
-          _selectionMode = false;
-        });
-      } else
-        _selectionMode = false;
+      selectionController.forward();
+    } else if (selectionSet.isEmpty) {
+      selectionController.reverse();
     } else {
-      if (!onMount) setState(() {});
+      setState(() {});
     }
   }
 
-  /// Sets [unselecting] to false when all items are removed (they are removed from [SongTile] widget itself, calling [onUnselect])
-  void _handleNotifyUnselection() {
-    if (selectionSet.isEmpty) {
-      setState(() {
-        selectionSet = {};
-        unselecting = false;
-      });
-    }
-  }
-
-  void _handleCloseSelection() async {
+  void _handleCloseSelection() {
     setState(() {
-      _selectionMode = false;
       unselecting = true;
+      selectionController.reverse();
       _switcher.change();
     });
-    // Needed to release clear set fully when animation is ended, cause some tiles may be out of scope
-    await Future.delayed(applyDilation(kSMMSelectionDuration));
-    if (mounted)
-      setState(() {
-        selectionSet = {};
-        unselecting = false;
-      });
   }
 
   void _handleDelete() {
     ShowFunctions.showDialog(
       context,
       title: const Text("Удаление"),
-      content: Text(
-        "Вы действительно хотите удалить ${selectionSet.length} треков? Это действие необратимо",
+      content: Text.rich(
+        TextSpan(
+          style: const TextStyle(fontSize: 15.0),
+          children: [
+            TextSpan(text: "Вы уверены, что хотите удалить "),
+            TextSpan(
+              text: selectionSet.length == 1
+                  ? ContentControl.state
+                      .getPlaylist(PlaylistType.global)
+                      .getSongById(selectionSet.first)
+                      .title
+                  : "${selectionSet.length} треков",
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: " ?"),
+          ],
+        ),
       ),
       acceptButton: DialogRaisedButton(
         text: "Удалить",
         onPressed: () {
-          ContentControl.deleteSongs(selectionSet);
           _handleCloseSelection();
+          ContentControl.deleteSongs(selectionSet);
         },
       ),
     );
   }
 
   Future<bool> _handlePop(BuildContext context) async {
-    print(Scaffold.of(context).isDrawerOpen);
     if (Scaffold.of(context).isDrawerOpen) {
       Navigator.of(context).pop();
       return Future.value(false);
+    } else if (selectionController.status == AnimationStatus.forward ||
+        selectionController.status == AnimationStatus.completed) {
+      _handleCloseSelection();
+      return false;
     } else {
       DateTime now = DateTime.now();
       // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
@@ -236,26 +231,43 @@ class _TrackListScreenState extends State<TrackListScreen> {
 
   //***************ACTIONS*******************************************************
   List<Widget> _renderAppBarActions() {
+    // TODO: refactor
     return <Widget>[
       Padding(
         padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-        child: AnimatedSwitcher(
-          duration: kSMMSelectionDuration,
-          child: !isSelection()
-              ? SMMIconButton(
-                  icon: const Icon(Icons.sort),
-                  color: Constants.AppTheme.mainContrast.auto(context),
-                  onPressed: () => ShowFunctions.showSongsSortModal(context),
-                )
-              : IgnorePointer(
-                  ignoring: unselecting,
+        child: AnimatedBuilder(
+          animation: selectionController,
+          builder: (BuildContext context, Widget child) => Stack(
+            children: [
+              IgnorePointer(
+                ignoring:
+                    selectionController.status == AnimationStatus.forward ||
+                        selectionController.status == AnimationStatus.completed,
+                child: FadeTransition(
+                  opacity:
+                      Tween(begin: 1.0, end: 0.0).animate(selectionController),
                   child: SMMIconButton(
-                    key: UniqueKey(),
+                    icon: const Icon(Icons.sort),
+                    color: Constants.AppTheme.mainContrast.auto(context),
+                    onPressed: () => ShowFunctions.showSongsSortModal(context),
+                  ),
+                ),
+              ),
+              IgnorePointer(
+                ignoring:
+                    selectionController.status == AnimationStatus.reverse ||
+                        selectionController.status == AnimationStatus.dismissed,
+                child: FadeTransition(
+                  opacity: selectionController,
+                  child: SMMIconButton(
                     color: Constants.AppTheme.mainContrast.auto(context),
                     icon: const Icon(Icons.delete_outline),
                     onPressed: _handleDelete,
                   ),
                 ),
+              ),
+            ],
+          ),
         ),
       ),
     ];
@@ -263,122 +275,150 @@ class _TrackListScreenState extends State<TrackListScreen> {
 
 //***************TITLE*******************************************************
   Widget _renderAppBarTitle() {
-    return AnimatedSwitcher(
-      duration: kSMMSelectionDuration,
-      child: !isSelection()
-          ? const FakeInputBox()
-          : Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Text(
-                  "Выбрано",
-                  style: TextStyle(
-                    color: Constants.AppTheme.mainContrast.auto(context),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: 20.0),
-                    child: AnimatedSwitcher(
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        final inForwardAnimation = Tween<Offset>(
-                          begin: const Offset(0.0, -0.7),
-                          end: const Offset(0.0, 0.0),
-                        ).animate(
-                          CurvedAnimation(
-                            curve: Curves.easeOut,
-                            parent: animation,
-                          ),
-                        );
-
-                        final inBackAnimation = Tween<Offset>(
-                          begin: const Offset(0.0, 0.7),
-                          end: const Offset(0.0, 0.0),
-                        ).animate(
-                          CurvedAnimation(
-                            curve: Curves.easeOut,
-                            parent: animation,
-                          ),
-                        );
-
-                        final outForwardAnimation = Tween<Offset>(
-                          begin: const Offset(0.0, 0.7),
-                          end: const Offset(0.0, 0.0),
-                        ).animate(
-                          CurvedAnimation(
-                            curve: Curves.easeIn,
-                            parent: animation,
-                          ),
-                        );
-
-                        final outBackAnimation = Tween<Offset>(
-                          begin: const Offset(0.0, -0.7),
-                          end: const Offset(0.0, 0.0),
-                        ).animate(
-                          CurvedAnimation(
-                            curve: Curves.easeIn,
-                            parent: animation,
-                          ),
-                        );
-
-                        //* For entering widget
-                        if (child.key == ValueKey(selectionSet.length)) {
-                          if (selectionSet.length >= prevSetLength)
-                            return SlideTransition(
-                              position: inForwardAnimation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
+    // TODO: refactor
+    return AnimatedBuilder(
+      animation: selectionController,
+      builder: (BuildContext context, Widget child) => IgnorePointer(
+        ignoring: selectionController.isAnimating,
+        child: Stack(
+          children: [
+            IgnorePointer(
+              ignoring: selectionController.status == AnimationStatus.forward ||
+                  selectionController.status == AnimationStatus.completed,
+              child: FadeTransition(
+                opacity:
+                    Tween(begin: 1.0, end: 0.0).animate(selectionController),
+                child: FakeInputBox(),
+              ),
+            ),
+            IgnorePointer(
+              ignoring: selectionController.status == AnimationStatus.reverse ||
+                  selectionController.status == AnimationStatus.dismissed,
+              child: FadeTransition(
+                opacity: selectionController,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text(
+                      "Выбрано",
+                      style: TextStyle(
+                        color: Constants.AppTheme.mainContrast.auto(context),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4.0),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minWidth: 20.0),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                            final inForwardAnimation = Tween<Offset>(
+                              begin: const Offset(0.0, -0.7),
+                              end: const Offset(0.0, 0.0),
+                            ).animate(
+                              CurvedAnimation(
+                                curve: Curves.easeOut,
+                                parent: animation,
                               ),
                             );
-                          else
-                            return SlideTransition(
-                              position: inBackAnimation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
+
+                            final inBackAnimation = Tween<Offset>(
+                              begin: const Offset(0.0, 0.7),
+                              end: const Offset(0.0, 0.0),
+                            ).animate(
+                              CurvedAnimation(
+                                curve: Curves.easeOut,
+                                parent: animation,
                               ),
                             );
-                        }
-                        //* For exiting widget
-                        else {
-                          if (selectionSet.length >= prevSetLength) {
-                            return SlideTransition(
-                              position: outForwardAnimation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
+
+                            final outForwardAnimation = Tween<Offset>(
+                              begin: const Offset(0.0, 0.7),
+                              end: const Offset(0.0, 0.0),
+                            ).animate(
+                              CurvedAnimation(
+                                curve: Curves.easeIn,
+                                parent: animation,
                               ),
                             );
-                          } else
-                            return SlideTransition(
-                              position: outBackAnimation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
+
+                            final outBackAnimation = Tween<Offset>(
+                              begin: const Offset(0.0, -0.7),
+                              end: const Offset(0.0, 0.0),
+                            ).animate(
+                              CurvedAnimation(
+                                curve: Curves.easeIn,
+                                parent: animation,
                               ),
                             );
-                        }
-                      },
-                      duration: const Duration(milliseconds: 200),
-                      child: Padding(
-                        key: ValueKey(selectionSet.length),
-                        padding: const EdgeInsets.only(left: 5.0),
-                        child: Text(
-                          selectionSet.length.toString(),
-                          style: TextStyle(
-                            color:
-                                Constants.AppTheme.mainContrast.auto(context),
+
+                            //* For entering widget
+                            if (child.key == ValueKey(selectionSet.length)) {
+                              if (selectionSet.length >= prevSetLength)
+                                return SlideTransition(
+                                  position: inForwardAnimation,
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                              else
+                                return SlideTransition(
+                                  position: inBackAnimation,
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                            }
+                            //* For exiting widget
+                            else {
+                              if (selectionSet.length >= prevSetLength) {
+                                return SlideTransition(
+                                  position: outForwardAnimation,
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                              } else
+                                return SlideTransition(
+                                  position: outBackAnimation,
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                            }
+                          },
+                          child: Padding(
+                            // Not letting to go less 1 to not play animation from 1 to 0
+                            key: ValueKey(
+                              selectionSet.length > 0 ? selectionSet.length : 1,
+                            ),
+                            padding: const EdgeInsets.only(left: 5.0),
+                            child: Text(
+                              (selectionSet.length > 0
+                                      ? selectionSet.length
+                                      : 1)
+                                  .toString(),
+                              style: TextStyle(
+                                color: Constants.AppTheme.mainContrast
+                                    .auto(context),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -392,9 +432,16 @@ class _TrackListScreenState extends State<TrackListScreen> {
       drawer: const DrawerWidget(),
       appBar: AppBar(
         titleSpacing: 0.0,
-        leading: _MainRouteAppBarLeading(
-          selectionMode: _selectionMode,
-          onCloseClick: _handleCloseSelection,
+        leading: AnimatedBuilder(
+          animation: selectionController,
+          builder: (BuildContext context, Widget child) =>
+              _MainRouteAppBarLeading(
+            selectionMode: !everSelected
+                ? null
+                : selectionController.status == AnimationStatus.forward ||
+                    selectionController.status == AnimationStatus.completed,
+            onCloseClick: _handleCloseSelection,
+          ),
         ),
         actions: _renderAppBarActions(),
         title: _renderAppBarTitle(),
@@ -415,16 +462,57 @@ class _TrackListScreenState extends State<TrackListScreen> {
                   child: SingleTouchRecognizerWidget(
                     child: SongsListScrollBar(
                       controller: _scrollController,
-                      labelTextBuilder: (offsetY) {
-                        int idx = offsetY ~/ kSMMSongTileHeight;
+                      labelContentBuilder: (offsetY) {
+                        int idx =
+                            ((offsetY - 32.0) / kSMMSongTileHeight).round();
                         if (idx >= songs.length) {
                           idx = songs.length - 1;
                         }
-                        return Text(
-                          songs[idx].title[0],
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
+                        return Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                              // TODO: refactor and move to separate widget
+                              padding:
+                                  const EdgeInsets.only(left: 4.0, right: 4.0),
+                              width: 22.0,
+                              margin: const EdgeInsets.only(left: 4.0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(8.0),
+                                ),
+                              ),
+                              child: Text(
+                                songs[idx].title[0].toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: 16.0,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            const Text(
+                              "  —  ",
+                              style: TextStyle(
+                                fontSize: 16.0,
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                child: Text(
+                                  songs[idx].title,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                       child: ListView.builder(
@@ -438,18 +526,18 @@ class _TrackListScreenState extends State<TrackListScreen> {
                         itemBuilder: (context, index) {
                           return SelectableSongTile(
                             song: songs[index],
+                            selectionSet: selectionSet,
+                            selectionController: selectionController,
                             // Specify object key that can be changed to re-render song tile
                             key: ValueKey(index + _switcher.value),
                             selected: selectionSet.contains(songs[index].id),
-                            someSelected: isSelection(),
                             unselecting: unselecting,
                             playing: songs[index].id ==
                                 ContentControl.state.currentSongId,
                             onTap: ContentControl.resetPlaylists,
-                            onSelected: () => _handleSelect(songs[index].id),
-                            onUnselected: (bool onMount) =>
-                                _handleUnselect(songs[index].id, onMount),
-                            notifyUnselection: () => _handleNotifyUnselection(),
+                            onSelected: _handleSelectionUpdate,
+                            onUnselected: _handleSelectionUpdate,
+                            // notifyUnselection: () => _handleNotifyUnselection(),
                           );
                         },
                       ),
@@ -506,9 +594,10 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
             itemScrollController: itemScrollController,
             itemCount: length,
             // padding: const EdgeInsets.only(bottom: 10, top: 5),
-            
+
             initialScrollIndex: initialScrollIndex,
             itemBuilder: (context, index) {
+              // print("udx $index");
               return SongTile(
                 song: songs[index],
                 playing: index == currentSongIndex,
@@ -525,7 +614,7 @@ class PlayerRoutePlaylistState extends State<PlayerRoutePlaylist> {
 //***************************************** Song Tiles ******************************************
 
 /// Needed for scrollbar label computations
-const double kSMMSongTileHeight = 66.0;
+const double kSMMSongTileHeight = 64.0;
 
 /// Every SongTile flavor must implement this
 abstract class SongTileInterface {
@@ -563,10 +652,10 @@ class SongTile extends StatefulWidget implements SongTileInterface {
 
 class _SongTileState extends State<SongTile> {
   void _handleTap(BuildContext context) async {
+    if (widget.onTap != null) widget.onTap();
+
     await MusicPlayer.handleClickSongTile(context, widget.song,
         pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
-
-    if (widget.onTap != null) widget.onTap();
   }
 
   final GlobalKey _key = GlobalKey();
@@ -616,7 +705,7 @@ class _SongTileState extends State<SongTile> {
         ListTileTheme(
       key: _key,
       selectedColor: Theme.of(context).textTheme.headline6.color,
-      child: ListTile(
+      child: SMMListTile(
         subtitle: Artist(artist: widget.song.artist),
         // subtitle: Text(song.artist),
         dense: true,
@@ -655,21 +744,28 @@ class SelectableSongTile extends StatefulWidget implements SongTileInterface {
   SelectableSongTile({
     Key key,
     @required this.song,
-    this.pushToPlayerRouteOnClick: true,
-    this.playing: false,
+    @required this.selectionSet,
+    @required this.selectionController,
+    this.pushToPlayerRouteOnClick = true,
+    this.playing = false,
     this.onTap,
-    this.selected = false,
-    this.someSelected = false,
-    this.unselecting = false,
     this.onSelected,
     this.onUnselected,
-    this.notifyUnselection,
+    this.selected = false,
+    this.unselecting = false,
   })  : assert(song != null),
         super(key: key);
 
   /// Provide song data to render it directly, not from playlist (e.g. used in search)
   @override
   final Song song;
+
+  /// A set to of selected songs.
+  /// The items are automatically added on tile selection.
+  final Set<int> selectionSet;
+
+  /// Global selection controller
+  final AnimationController selectionController;
 
   /// Enables animated indicator at the end of the tile
   final bool playing;
@@ -681,25 +777,19 @@ class SelectableSongTile extends StatefulWidget implements SongTileInterface {
 
   // Selection props
 
+  /// Callback that is fired when item gets selected (before animation)
+  final void Function(Song) onSelected;
+
+  /// Callback that is fired when item gets unselected (before animation)
+  final void Function(Song) onUnselected;
+
   /// Makes tiles to be selected on first render, after this can be done via internal state
   final bool selected;
 
-  /// If any tile is selected
-  final bool someSelected;
-
   /// Blocks tile events when true
   ///
-  /// Used to know when unselection animation is performed
+  /// Used to know when unselection animation is performed and perform it too
   final bool unselecting;
-
-  /// Callback that is fired when item gets selected (before animation)
-  final Function onSelected;
-
-  /// Callback that is fired when item gets unselected (before animation)
-  final Function onUnselected;
-
-  /// Callback that is fired when item gets unselected (after animation)
-  final Function notifyUnselection;
 
   @override
   _SelectableSongTileState createState() => _SelectableSongTileState();
@@ -759,7 +849,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
       // Perform unselection animation
       if (_selected) {
         _animationController.value = 1;
-        _unselect(true);
+        _animationController.reverse();
         _selected = false;
       }
     } else {
@@ -776,23 +866,31 @@ class _SelectableSongTileState extends State<SelectableSongTile>
     super.dispose();
   }
 
-  void _handleTap() async {
-    await MusicPlayer.handleClickSongTile(context, widget.song,
-        pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
-
+  void _handleTap() {
     if (widget.onTap != null) widget.onTap();
+    MusicPlayer.handleClickSongTile(context, widget.song,
+        pushToPlayerRoute: widget.pushToPlayerRouteOnClick);
+  }
+
+  void _select() {
+    widget.selectionSet.add(widget.song.id);
+    widget.selectionController.forward();
+    // widget.onSelected();
+    _animationController.forward();
+    if (widget.onSelected != null) {
+      widget.onSelected(widget.song);
+    }
   }
 
   // Performs unselect animation and calls [onSelected] and [notifyUnselection]
-  void _unselect([bool onMount = false]) async {
-    widget.onUnselected(onMount);
-    await _animationController.reverse();
-    widget.notifyUnselection();
-  }
-
-  void _select() async {
-    widget.onSelected();
-    await _animationController.forward();
+  void _unselect([bool onMount = false]) {
+    // widget.onUnselected(onMount);
+    widget.selectionSet.remove(widget.song.id);
+    _animationController.reverse();
+    if (widget.onUnselected != null) {
+      widget.onUnselected(widget.song);
+    }
+    // widget.notifyUnselection();
   }
 
   void _toggleSelection() {
@@ -808,16 +906,16 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      ignoring: widget.unselecting,
+      ignoring: widget.selectionController.status == AnimationStatus.reverse,
       child: ListTileTheme(
         selectedColor: Theme.of(context).textTheme.headline6.color,
-        child: ListTile(
+        child: SMMListTile(
           subtitle: Artist(artist: widget.song.artist),
           selected: _selected,
           dense: true,
           isThreeLine: false,
           contentPadding: const EdgeInsets.only(left: 10, top: 0),
-          onTap: widget.someSelected ? _toggleSelection : _handleTap,
+          onTap: widget.selectionSet.isNotEmpty ? _toggleSelection : _handleTap,
           onLongPress: _toggleSelection,
           title: Text(
             widget.song.title,
@@ -830,9 +928,6 @@ class _SelectableSongTileState extends State<SelectableSongTile>
             borderRadius: BorderRadius.circular(_animationBorderRadius.value),
             child: Stack(
               children: <Widget>[
-                // Container(
-                //   color: Constants.AppTheme.albumArtSmall.auto(context),
-                //   child:
                 FadeTransition(
                   opacity: _animationOpacityInverse, // Inverse values
                   child: ScaleTransition(
@@ -840,7 +935,6 @@ class _SelectableSongTileState extends State<SelectableSongTile>
                     child: AlbumArtSmall(path: widget.song.albumArtUri),
                   ),
                 ),
-                // ),
                 if (_animationController.value != 0)
                   FadeTransition(
                     opacity: _animationOpacity,
@@ -873,6 +967,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
                     ),
                   ),
                 ),
+          // ),
         ),
       ),
     );

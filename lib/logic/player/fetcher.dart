@@ -8,21 +8,18 @@ import 'dart:convert';
 
 import 'package:sweyer/utils/async.dart';
 import 'package:flutter/services.dart';
-import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/api.dart' as API;
 
 import 'song.dart';
 
 class SongsFetcher {
+  // TODO: rewrite with cancelable operationh
   AsyncOperationsQueue _fetchQueue = AsyncOperationsQueue();
 
   /// A temporary container for found songs
   List<Song> _foundSongsTemp;
 
-  /// Function from [SongsSerializer] to save songs after fetching
-  final Function saveJson;
-
-  SongsFetcher(this.saveJson) {
+  SongsFetcher() {
     API.SongsHandler.setOnGetSongsHandler((MethodCall call) {
       // List to songs that come from channel
       // NOTE: cast method is must be here, [as] crashes code execution
@@ -54,8 +51,6 @@ class SongsFetcher {
     }
     // Save songs to temp container
     _foundSongsTemp = foundSongs;
-    // Serialize found songs
-    saveJson(foundSongs);
     // Say to [fetchSongs] that operation ended and it can continue its execution
     _fetchQueue.finishCurrent();
   }
