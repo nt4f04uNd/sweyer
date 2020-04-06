@@ -10,7 +10,7 @@ Some conventions that I use when I write my application can be found in [README_
 
 ## Demos
 
-<img alt="App start up" src="demos/start.gif" width="25%"><img alt="Player" src="demos/player.gif" width="25%" /><img alt="Dark mode" src="demos/dark.gif" width="25%" /><img alt="Search" src="demos/search.gif" width="25%" />
+<img alt="" src="demos/1.gif" width="33%"><img alt="" src="demos/2.gif" width="33%" /><img alt="" src="demos/3.gif" width="33%" />
 
 ## In plans
 
