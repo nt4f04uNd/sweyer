@@ -27,7 +27,7 @@ Some conventions that I use when I write my application can be found in [README_
 
 ## How to run Flutter in GitPod
 
-After GitPod workspace creating the `flutter pub get` should run, wait before it completes and ensure that all has installed correctly by running `flutter doctor`. 
+After GitPod workspace creation the `flutter pub get` and `flutter doctor` should run, wait before they complete and ensure that all has installed correctly. 
 
 Then:
 
