@@ -1,5 +1,5 @@
 tasks:
-  - init: flutter pub get
+  - init: flutter pub get && flutter doctor
     # command: flutter run --debug
 image:
   file: .gitpod.Dockerfile
