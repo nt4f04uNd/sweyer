@@ -478,27 +478,30 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       namesRoute: true,
       label: routeName,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: theme.primaryColor,
-          iconTheme: theme.primaryIconTheme,
-          textTheme: theme.primaryTextTheme,
-          brightness: theme.primaryColorBrightness,
-          leading: widget.delegate.buildLeading(context),
-          title: TextField(
-            controller: widget.delegate._queryTextController,
-            focusNode: focusNode,
-            style: theme.textTheme.headline6,
-            textInputAction: TextInputAction.search,
-            onSubmitted: (String _) {
-              widget.delegate.showResults(context);
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: searchFieldLabel,
-              hintStyle: theme.inputDecorationTheme.hintStyle,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kSMMAppBarPreferredSize),
+          child: AppBar(
+            backgroundColor: theme.primaryColor,
+            iconTheme: theme.primaryIconTheme,
+            textTheme: theme.primaryTextTheme,
+            brightness: theme.primaryColorBrightness,
+            leading: widget.delegate.buildLeading(context),
+            title: TextField(
+              controller: widget.delegate._queryTextController,
+              focusNode: focusNode,
+              style: theme.textTheme.headline6,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (String _) {
+                widget.delegate.showResults(context);
+              },
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: searchFieldLabel,
+                hintStyle: theme.inputDecorationTheme.hintStyle,
+              ),
             ),
+            actions: widget.delegate.buildActions(context),
           ),
-          actions: widget.delegate.buildActions(context),
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
@@ -559,7 +562,7 @@ class SongsSearchDelegate extends SearchDelegate {
     return SMMIconButton(
       icon: Icon(
         Icons.arrow_back,
-        color: Constants.AppTheme.mainContrast.auto(context),
+        color: Theme.of(context).colorScheme.onSurface,
       ),
       onPressed: () {
         close(context, null);
@@ -577,7 +580,7 @@ class SongsSearchDelegate extends SearchDelegate {
               child: SMMIconButton(
                 icon: const Icon(Icons.clear),
                 // color: Theme.of(context).iconTheme.color,
-                color: Constants.AppTheme.mainContrast.auto(context),
+                color: Theme.of(context).colorScheme.onSurface,
                 onPressed: () {
                   query = '';
                   showSuggestions(context);
@@ -689,80 +692,100 @@ class SongsSearchDelegate extends SearchDelegate {
               builder: (context, snapshot) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 34.0),
-                  child: SongsListScrollBar(
+                  child: SMMDefaultDraggableScrollbar(
                     controller: scrollController,
-                    labelContentBuilder: (offsetY) {
-                      // int idx = offsetY ~/ kSMMSongTileHeight;
-                      // if (idx >= searched.length) {
-                      //   idx = searched.length - 1;
-                      // }
-                      // return Text(
-                      //   searched[idx].title[0].toUpperCase(),
-                      //   style: TextStyle(
-                      //     color: Theme.of(context).colorScheme.onPrimary,
-                      //   ),
-                      // );
+                    alwaysVisibleScrollThumb:
+                        ContentControl.state.currentSortFeature ==
+                            SortFeature.title,
+                    labelContentBuilder: ContentControl
+                                .state.currentSortFeature !=
+                            SortFeature.title
+                        ? null
+                        : (offsetY) {
+                            // int idx = offsetY ~/ kSMMSongTileHeight;
+                            // if (idx >= searched.length) {
+                            //   idx = searched.length - 1;
+                            // }
+                            // return Text(
+                            //   searched[idx].title[0].toUpperCase(),
+                            //   style: TextStyle(
+                            //     color: Theme.of(context).colorScheme.onPrimary,
+                            //   ),
+                            // );
 
-                      int idx = ((offsetY - 32.0) / kSMMSongTileHeight).round();
-                      if (idx >= searched.length) {
-                        idx = searched.length - 1;
-                      }
-                      return Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            // TODO: refactor and move to separate widget
-                            padding:
-                                const EdgeInsets.only(left: 4.0, right: 4.0),
-                            width: 22.0,
-                            margin: const EdgeInsets.only(left: 4.0),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(8.0),
-                              ),
-                            ),
-                            child: Text(
-                              searched[idx].title[0].toUpperCase(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                fontSize: 16.0,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                          const Text(
-                            "  —  ",
-                            style: TextStyle(
-                              fontSize: 16.0,
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              child: Text(
-                                searched[idx].title,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16.0,
+                            int idx =
+                                ((offsetY - 32.0) / kSMMSongTileHeight).round();
+                            if (idx >= searched.length) {
+                              idx = searched.length - 1;
+                            }
+                            return Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Container(
+                                  // TODO: refactor and move to separate widget
+                                  padding: const EdgeInsets.only(
+                                      left: 4.0, right: 4.0),
+                                  width: 22.0,
+                                  margin: const EdgeInsets.only(left: 4.0),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    searched[idx].title[0].toUpperCase(),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      fontSize: 16.0,
+                                      height: 1.4,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                                const Text(
+                                  "  —  ",
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Text(
+                                      searched[idx].title,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 16.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                     child: ListView.builder(
                       // physics: const SMMBouncingScrollPhysics(),
                       controller: scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 34.0, top: 0),
-                      itemCount: searched.length,
+                      itemCount: searched.length + 1,
                       itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                                left: 13.0, top: 8.0, bottom: 10.0),
+                            child: SearchHeader(
+                                text: "Найдено ${searched.length}"),
+                          );
+                        }
+
                         return SongTile(
-                          song: searched[index],
-                          playing: searched[index].id ==
+                          song: searched[index - 1],
+                          playing: searched[index - 1].id ==
                               ContentControl.state.currentSongId,
                           onTap: () async {
                             _writeInputToSearchHistory(query);
@@ -837,8 +860,9 @@ class SongsSearchDelegate extends SearchDelegate {
                           'Здесь будет отображаться история вашего поиска',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Constants.AppTheme.mainContrast
-                                .auto(context)
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
                                 .withOpacity(0.7),
                           ),
                         ),
@@ -880,19 +904,12 @@ class SongsSearchDelegate extends SearchDelegate {
 
   Widget _buildSuggestionsHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 0.0, left: 13.0),
+      padding: const EdgeInsets.only(left: 13.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(
-            "История поиска",
-            style: TextStyle(
-              // fontWeight: FontWeight.w400,
-              fontSize: 16,
-              color: Theme.of(context).hintColor,
-            ),
-          ),
+          SearchHeader(text: "История поиска"),
           Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: Padding(
@@ -928,8 +945,10 @@ class SongsSearchDelegate extends SearchDelegate {
       dense: true,
       leading: Padding(
         padding: const EdgeInsets.only(left: 2.0),
-        child: Icon(Icons.history,
-            color: Constants.AppTheme.mainContrast.auto(context)),
+        child: Icon(
+          Icons.history,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
       ),
       onLongPress: () {
         ShowFunctions.showDialog(
@@ -950,6 +969,26 @@ class SongsSearchDelegate extends SearchDelegate {
         query = _suggestions[index];
         showResults(context);
       },
+    );
+  }
+}
+
+/// Will display styled text as a search body header
+class SearchHeader extends StatelessWidget {
+  const SearchHeader({
+    Key key,
+    this.text = "",
+  }) : super(key: key);
+
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 16.0,
+        color: Theme.of(context).hintColor,
+      ),
     );
   }
 }

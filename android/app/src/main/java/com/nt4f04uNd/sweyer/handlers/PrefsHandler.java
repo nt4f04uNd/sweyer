@@ -46,4 +46,9 @@ public class PrefsHandler { // TODO: maybe move strings to constants?
     public static boolean getLoopMode() {
         return getPrefs().getBoolean(PREFIX + "loop_mode", false);
     }
+
+    // **************** Sort feature *************************
+    public static long getSortFeature() {
+     return getPrefs().getLong(PREFIX + "sort_feature", 0);
+    }
 }

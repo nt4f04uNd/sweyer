@@ -10,6 +10,7 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/sweyer.dart';
 
 const double kSMMLargeAlbumArtMargins = 80.0;
 const double kSMMSmallArtSize = 48.0;
@@ -69,10 +70,17 @@ mixin _AlbumArtStateMixin<T extends _AlbumArtWidget> on State<T> {
 /// Has size [constraints] minus [kSMMLargeAlbumArtMargins]
 ///
 /// Shows placeholder or art, depending on provided path
-class AlbumArtLarge extends StatelessWidget {
-  AlbumArtLarge({Key key, @required this.path}) : super(key: key);
+///
+/// With [onTap] will generate draw ripples on taps
+class AlbumArtPlayerRoute extends StatelessWidget {
+  AlbumArtPlayerRoute({
+    Key key,
+    @required this.path,
+    this.onTap,
+  }) : super(key: key);
 
   final String path;
+  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +108,97 @@ class AlbumArtLarge extends StatelessWidget {
         );
       }
     });
+  }
+}
+
+/// TODO: make a special class for album arts page, that will work the same as album art small
+class AlbumArtLarge extends StatelessWidget {
+  AlbumArtLarge({
+    Key key,
+    @required this.path,
+    this.size,
+    this.placeholderLogoFactor = 0.5,
+    this.onTap,
+  }) : super(key: key);
+
+  final String path;
+  final double size;
+  final double placeholderLogoFactor;
+  final Function onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path == null || !File(path).existsSync()) {
+      return AlbumPlaceholderLarge(
+        size: size,
+        logoFactor: placeholderLogoFactor,
+      );
+    } else {
+      return Material(
+        elevation: 6.0,
+        borderRadius: const BorderRadius.all(
+          Radius.circular(10.0),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(
+            Radius.circular(10.0),
+          ),
+          child: Image.file(
+            File(path),
+            width: size,
+            height: size,
+            fit: BoxFit.fill,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+/// Album art to display in albums page, for example
+///
+/// Pretty the same as [AlbumArt], but can be tappable
+class AlbumArtTappable extends StatelessWidget {
+  AlbumArtTappable({
+    Key key,
+    @required this.path,
+    this.size,
+    this.placeholderLogoFactor = 0.5,
+    this.onTap,
+  }) : super(key: key);
+
+  final String path;
+  final double size;
+  final double placeholderLogoFactor;
+  final Function onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          // child: AlbumPlaceholderLarge(size: 240.0),
+          child: AlbumArtLarge(
+            path: path,
+            size: size,
+            placeholderLogoFactor: placeholderLogoFactor,
+          ),
+        ),
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: SMMInkWell(
+              onTap: onTap,
+              splashColor:
+                  ThemeControl.isLight ? Colors.white24 : Colors.white12,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -190,10 +289,21 @@ class _AlbumArtSmallState extends State<AlbumArtSmall>
 //***************************************** Album placeholders and other fake images ******************************************
 
 class AlbumPlaceholderLarge extends StatelessWidget {
-  const AlbumPlaceholderLarge({Key key, @required this.size}) : super(key: key);
+  const AlbumPlaceholderLarge({
+    Key key,
+    @required this.size,
+    this.logoFactor = 0.5,
+  })  : assert(size != null),
+        assert(logoFactor >= 0.0 && logoFactor <= 1.0),
+        super(key: key);
 
+  /// The container size.
   final double size;
 
+  /// A factor applied to a note logo to reduce it's size inside the container.
+  ///
+  /// Must be in range from 0.0 to 1.0
+  final double logoFactor;
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -206,15 +316,10 @@ class AlbumPlaceholderLarge extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           color: Constants.AppTheme.albumArt.auto(context),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         ),
-        padding: EdgeInsets.all(size / 4.0),
-        child: SvgPicture.asset(
-          // TODO: move all asset paths to constants
-          'assets/images/icons/note_rounded.svg',
-          // color: Theme.of(context).colorScheme.primaryVariant,
-          // color: Colors.deepP,
-        ),
+        padding: EdgeInsets.all(size / 2 * (1 - logoFactor)),
+        child: SvgPicture.asset(Constants.Paths.ASSET_LOGO_SVG),
       ),
     );
   }
@@ -234,9 +339,9 @@ class AlbumArtBaseSmall extends StatelessWidget {
       height: kSMMSmallArtSize,
       decoration: BoxDecoration(
         color: Constants.AppTheme.albumArt.auto(context),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
       ),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10.0),
       child: child,
     );
   }
@@ -253,9 +358,9 @@ class AlbumArtEmptySpace extends StatelessWidget {
       width: kSMMSmallArtSize,
       height: kSMMSmallArtSize,
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
       ),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10.0),
       child: child,
     );
   }
@@ -268,7 +373,7 @@ class AlbumPlaceholderSmall extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlbumArtBaseSmall(
       child: Image.asset(
-        'assets/images/placeholder_thumb_new.png',
+        Constants.Paths.ASSET_LOGO_THUMB,
       ),
     );
   }
@@ -287,10 +392,10 @@ class AlbumArtErrorLarge extends StatelessWidget {
         color: Constants.AppTheme.albumArt.auto(context),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
-      padding: EdgeInsets.all(size / 4),
+      padding: EdgeInsets.all(size / 4.0),
       child: Icon(
         Icons.error_outline,
-        size: size / 4,
+        size: size / 4.0,
       ),
     );
   }
@@ -438,8 +543,9 @@ class RotatingAlbumPlaceholder extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(100)),
       ),
       padding: const EdgeInsets.all(8),
-      // TODO: path to const
-      child: Image.asset('assets/images/placeholder_thumb_new.png'),
+      child: Image.asset(
+        Constants.Paths.ASSET_LOGO_THUMB,
+      ),
     );
   }
 }

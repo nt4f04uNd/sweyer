@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,11 @@ class ContentState {
     PlaylistType.searched: Playlist([]),
     PlaylistType.shuffled: Playlist([]),
   };
+
+  List<Album> albums = [];
+
+  /// After initial albums are fetched, will contain song album arts by album ids
+  Map<int, String> albumArts = {};
 
   /// What playlist is now playing?
   PlaylistType _currentPlaylistType = PlaylistType.global;
@@ -70,10 +76,14 @@ class ContentState {
 
   //****************** Streams *****************************************************
   /// Controller for stream of playlist changes
-  StreamController<PlaylistType> _playlistChangeStreamController =
-      StreamController<PlaylistType>.broadcast();
+  StreamController<void> _playlistChangeStreamController =
+      StreamController<void>.broadcast();
 
-  /// Controller for stream of song changes
+  /// Controller for stream of fetched albums changes
+  StreamController<void> _albumsChangeStreamController =
+      StreamController<void>.broadcast();
+
+  /// Controller for stream of current song changes
   StreamController<Song> _songChangeStreamController =
       StreamController<Song>.broadcast();
 
@@ -82,8 +92,11 @@ class ContentState {
       StreamController<Color>.broadcast();
 
   /// A stream of changes on playlist
-  Stream<PlaylistType> get onPlaylistListChange =>
+  Stream<void> get onPlaylistListChange =>
       _playlistChangeStreamController.stream;
+
+  /// A stream of changes on fetched albums
+  Stream<void> get onAlbumsChange => _playlistChangeStreamController.stream;
 
   /// A stream of changes on song
   Stream<Song> get onSongChange => _songChangeStreamController.stream;
@@ -95,10 +108,12 @@ class ContentState {
   ///
   /// Should be only called when user can see playlist change, i.e. songs sort.
   /// Shouldn't be called, e.g. on tile click, when playlist changes, but user can't actually see it
-  ///
-  /// Parameter [playlistType] denotes preferred update scope, this means e.g. that if [PlaylistType.searched] changes, [ListView] dependant on [PlaylistType.global] shouldn't get any updates
-  void emitPlaylistChange([PlaylistType playlistType = PlaylistType.global]) {
-    _playlistChangeStreamController.add(playlistType);
+  void emitPlaylistChange() {
+    _playlistChangeStreamController.add(null);
+  }
+
+  void emitAlbumsChange() {
+    _playlistChangeStreamController.add(null);
   }
 
   /// Emits song change event
@@ -129,13 +144,10 @@ abstract class ContentControl {
   static ContentState state = ContentState();
 
   /// An object to serialize songs
-  static SongsSerialization songsSerializer = SongsSerialization();
+  // static SongsSerialization songsSerializer = SongsSerialization();
 
   /// An object to serialize playlist
   static PlaylistSerialization playlistSerializer = PlaylistSerialization();
-
-  /// Songs fetcher class instance
-  static final SongsFetcher songsFetcher = SongsFetcher();
 
   /// A subscription to song changes, needed to get current art color
   // static StreamSubscription<Song> _songChangeSubscription;
@@ -153,20 +165,18 @@ abstract class ContentControl {
     if (Permissions.granted) {
       // Reset [playReady]
       state._playlists[PlaylistType.global] = null;
-
       initFetching = true;
-      await Future.wait([
-        songsSerializer.initJson(), // Init songs json
-        playlistSerializer.initJson() // Init playlist json
-      ]);
-      // Get songs from json and create global playlist
-      state._playlists[PlaylistType.global] =
-          Playlist(await songsSerializer.readJson());
+      await playlistSerializer.initJson(); // Init playlist json
       await _restoreSortFeature();
-      await filterSongs(emitChangeEvent: false);
-      sortSongs(emitChangeEvent: false);
-
+      await refetchSongs();
+      refetchAlbums();
       await _restoreLastSong();
+      await _restorePlaylist();
+      // Retry do all the same as before fetching songs (set duration, set track uri), if it hadn't been performed before (_playingSongIdState == null)
+      if (state._currentSongId == null) {
+        await _restoreLastSong();
+      }
+      initFetching = false;
 
       // // Setting up the subscription to get the art color
       // _songChangeSubscription = onSongChange.listen((event) async {
@@ -192,9 +202,7 @@ abstract class ContentControl {
       //   }
       // });
 
-      await _restorePlaylist();
-
-      _initialSongsFetch();
+      // _initialFetch();
     } else {
       // Init empty playlist if no permission granted
       if (!playReady) {
@@ -258,7 +266,10 @@ abstract class ContentControl {
   /// Returns playlist that was before shuffle and clears [shuffledPlaylist]
   ///
   /// @param [returnTo] if specified - returns to this playlist
-  static void backFromShuffledPlaylist({PlaylistType returnTo}) {
+  static void backFromShuffledPlaylist({
+    PlaylistType returnTo,
+    bool emitChangeEvent = true,
+  }) {
     returnTo ??= state._playlistTypeBeforeShuffle;
     switch (returnTo) {
       case PlaylistType.global:
@@ -270,19 +281,24 @@ abstract class ContentControl {
       default:
     }
     state._playlists[PlaylistType.shuffled].clear();
-    state.emitPlaylistChange();
+    if (emitChangeEvent) {
+      state.emitPlaylistChange();
+    }
   }
 
   /// Switches to global playlist an resets all playlists except it.
   ///
-  /// This function doesn't call [ContentState.emitPlaylistChange]
-  static void resetPlaylists() {
+  /// This function doesn't call [ContentState.emitPlaylistChange] by default
+  static void resetPlaylists({bool emitChangeEvent = false}) {
     if (state._currentPlaylistType != PlaylistType.global) {
       Prefs.playlistTypeInt.setPref(value: 0); // Save to prefs
       playlistSerializer.saveJson(const []);
       state._currentPlaylistType = PlaylistType.global;
       state._playlists[PlaylistType.searched].clear();
       state._playlists[PlaylistType.shuffled].clear();
+    }
+    if (emitChangeEvent) {
+      state.emitPlaylistChange();
     }
   }
 
@@ -334,18 +350,42 @@ abstract class ContentControl {
     }
   }
 
-  //****************** Song manipulation methods *****************************************************
+  //****************** Content manipulation methods *****************************************************
 
   /// Refetch songs and update playlist
-  static Future<void> refetchSongs() async {
-    state._playlists[PlaylistType.global]
-        // .setSongs(await songsFetcher.fetchSongs());
-        .setSongs( await songsFetcher.fetchSongs());
+  static Future<void> refetchSongs({bool emitChangeEvent = true}) async {
+    final json = await API.ContentHandler.retrieveSongs();
+    final List<Song> songs = [];
+    for (String songStr in json) {
+      songs.add(Song.fromJson(jsonDecode(songStr)));
+    }
+
+    if (state._playlists[PlaylistType.global] == null) {
+      state._playlists[PlaylistType.global] = Playlist([]);
+    }
+    state._playlists[PlaylistType.global].setSongs(songs);
     await filterSongs(emitChangeEvent: false);
     sortSongs(emitChangeEvent: false);
     updatePlaylistsWithGlobal(emitChangeEvent: false);
-    songsSerializer.saveJson(state._playlists[PlaylistType.global].songs);
-    state.emitPlaylistChange();
+    // songsSerializer.saveJson(state._playlists[PlaylistType.global].songs);
+    if (emitChangeEvent) {
+      state.emitPlaylistChange();
+    }
+  }
+
+  static Future<void> refetchAlbums({bool emitChangeEvent = true}) async {
+    final json = await API.ContentHandler.retrieveAlbums();
+    state.albums = [];
+    state.albumArts = {};
+    var albumJson;
+    for (String albumStr in json) {
+      albumJson = jsonDecode(albumStr);
+      state.albumArts[albumJson["id"] as int] = albumJson["albumArt"] as String;
+      state.albums.add(Album.fromJson(albumJson));
+    }
+    if (emitChangeEvent) {
+      state.emitAlbumsChange();
+    }
   }
 
   /// Search in playlist song array by query
@@ -387,8 +427,8 @@ abstract class ContentControl {
         Prefs.sortFeatureInt.setPref(value: 0);
         break;
       case SortFeature.title:
-        state._playlists[PlaylistType.global].songs
-            .sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        state._playlists[PlaylistType.global].songs.sort(
+            (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
         state._currentSortFeature = feature;
         Prefs.sortFeatureInt.setPref(value: 1);
         break;
@@ -431,7 +471,7 @@ abstract class ContentControl {
     updatePlaylistsWithGlobal();
 
     try {
-      await API.SongsHandler.deleteSongs(dataSet);
+      await API.ContentHandler.deleteSongs(dataSet);
     } catch (e) {
       ShowFunctions.showToast(msg: "Ошибка при удалении");
       debugPrint("Deleting error: $e");
@@ -446,9 +486,9 @@ abstract class ContentControl {
   static Future<void> _restoreSortFeature() async {
     final int savedSortFeature = await Prefs.sortFeatureInt.getPref();
     if (savedSortFeature == 0) {
-      sortSongs(feature: SortFeature.date, emitChangeEvent: false);
+      state._currentSortFeature = SortFeature.date;
     } else if (savedSortFeature == 1) {
-      sortSongs(feature: SortFeature.title, emitChangeEvent: false);
+      state._currentSortFeature = SortFeature.title;
     } else
       throw Exception(
           "_restoreSortFeature: wrong saved sortFeatureInt: $savedSortFeature");
@@ -505,15 +545,5 @@ abstract class ContentControl {
       // Set url of first track in player instance
       await MusicPlayer.setUri(state._currentSongId);
     }
-  }
-
-  /// Function to fetch all songs from user devices
-  static Future<void> _initialSongsFetch() async {
-    await refetchSongs();
-    // Retry do all the same as before fetching songs (set duration, set track uri), if it hadn't been performed before (_playingSongIdState == null)
-    if (state._currentSongId == null) {
-      await _restoreLastSong();
-    }
-    initFetching = false;
   }
 }

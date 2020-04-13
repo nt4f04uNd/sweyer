@@ -13,58 +13,72 @@ abstract class AppTheme {
   //******************************************** GENERIC COLORS ********************************************
   /// Main colors - [whiteDarkened] and [greyLight]
   static final _ThemeContainer<Color> main = _ThemeContainer(
-      light: AppColors.whiteDarkened, dark: AppColors.greyLight);
-
-  /// Colors that are in contrast with [main], so they can be use for text and icons
-  ///
-  /// Alternatively `main.autoInverse` can be used
-  static final _ThemeContainer<Color> mainContrast =
-      _ThemeContainer(light: Color(0xff616266), dark: Color(0xfff1f2f4));
+    light: AppColors.whiteDarkened,
+    dark: AppColors.greyLight,
+  );
 
   //************************************** WIDGET SPECIFIC COLORS ******************************************
 
-  static final _ThemeContainer<Color> albumArt =
-      _ThemeContainer(light: Color(0xfff1f2f4), dark: AppColors.greyLighter);
+  static final _ThemeContainer<Color> albumArt = _ThemeContainer(
+    light: Color(0xfff1f2f4),
+    dark: AppColors.greyLighter,
+  );
 
-  static final _ThemeContainer<Color> albumArtSmallRound =
-      _ThemeContainer(light: Colors.white, dark: Color(0xFF353535));
-
-      
+  static final _ThemeContainer<Color> albumArtSmallRound = _ThemeContainer(
+    light: Colors.white,
+    dark: Color(0xFF353535),
+  );
 
   static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
-      // light: Colors.black.withOpacity(0.05),
-      light: AppColors.whiteDarkened,
-      dark: Colors.white.withOpacity(0.05));
+    // light: Colors.black.withOpacity(0.05),
+    light: AppColors.whiteDarkened,
+    dark: Colors.white.withOpacity(0.05),
+  );
 
-  static final _ThemeContainer<Color> popupMenu =
-      _ThemeContainer(light: Color(0xFFeeeeee), dark: Color(0xFF333333));
+  static final _ThemeContainer<Color> popupMenu = _ThemeContainer(
+    light: Color(0xFFeeeeee),
+    dark: Color(0xFF333333),
+  );
 
-  static final _ThemeContainer<Color> disabledIcon =
-      _ThemeContainer(light: Colors.grey.shade400, dark: Colors.grey.shade800);
+  static final _ThemeContainer<Color> disabledIcon = _ThemeContainer(
+    light: Colors.grey.shade400,
+    dark: Colors.grey.shade800,
+  );
 
-  static final _ThemeContainer<Color> playPauseIcon =
-      _ThemeContainer(light: Color(0xff555659), dark: Color(0xfff1f2f4));
+  static final _ThemeContainer<Color> playPauseIcon = _ThemeContainer(
+    light: Color(0xff555659),
+    dark: Color(0xfff1f2f4),
+  );
 
   static final _ThemeContainer<Color> prevNextBorder = _ThemeContainer(
-      light: Colors.black.withOpacity(0.1),
-      dark: Colors.white.withOpacity(0.1));
+    light: Colors.black.withOpacity(0.1),
+    dark: Colors.white.withOpacity(0.1),
+  );
 
   static final _ThemeContainer<Color> playPauseBorder = _ThemeContainer(
-      light: Colors.black.withOpacity(0.15),
-      dark: Colors.white.withOpacity(0.15));
+    light: Colors.black.withOpacity(0.15),
+    dark: Colors.white.withOpacity(0.15),
+  );
 
   static final _ThemeContainer<Color> sliderInactive = _ThemeContainer(
-      light: Colors.black.withOpacity(0.2),
-      dark: Colors.white.withOpacity(0.2));
+    light: Colors.black.withOpacity(0.2),
+    dark: Colors.white.withOpacity(0.2),
+  );
 
-  static final _ThemeContainer<Color> drawer =
-      _ThemeContainer(light: Colors.white, dark: AppColors.grey);
+  static final _ThemeContainer<Color> drawer = _ThemeContainer(
+    light: Colors.white,
+    dark: AppColors.grey,
+  );
 
-  static final _ThemeContainer<Color> menuItem =
-      _ThemeContainer(light: Color(0xff3d3e42), dark: Color(0xffe7e8ec));
+  static final _ThemeContainer<Color> menuItem = _ThemeContainer(
+    light: Color(0xff3d3e42),
+    dark: Color(0xffe7e8ec),
+  );
 
-  static final _ThemeContainer<Color> refreshIndicatorArrow =
-      _ThemeContainer(light: Color(0xFFe7e7e7), dark: Colors.white);
+  static final _ThemeContainer<Color> refreshIndicatorArrow = _ThemeContainer(
+    light: Color(0xFFe7e7e7),
+    dark: Colors.white,
+  );
 
   static final _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
     light: ThemeData(
@@ -72,25 +86,29 @@ abstract class AppTheme {
       fontFamily: 'Manrope',
       brightness: Brightness.light,
       //****************** Colors **********************
-      accentColor: Colors.grey,
+      accentColor:Colors.white,
       backgroundColor: Colors.white,
       primaryColor: Colors.deepPurpleAccent,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
-        background: Colors.white,
         brightness: Brightness.light,
-        error: const Color(0xffed3b3b),
+        background: Colors.white,
         onBackground: Colors.black,
-        onError: Colors.white,
-        onPrimary: Colors.white,
-        onSecondary: AppColors.greyLight,
-        onSurface: Colors.black,
         primary: Colors.deepPurpleAccent,
         primaryVariant: Colors.deepPurple,
+        onPrimary: Colors.white,
         secondary: AppColors.whiteDarkened,
         secondaryVariant: Colors.white,
+        onSecondary: AppColors.greyLight,
+        error: const Color(0xffed3b3b),
+        onError: Colors.white,
+
+        /// For windows (e.g. alert dialogs)
         surface: Colors.white,
+
+        /// For dimmed text (e.g. in appbar)
+        onSurface: Color(0xff616266),
       ),
 
       //****************** Specific app elements *****************
@@ -98,13 +116,14 @@ abstract class AppTheme {
       textSelectionColor: Colors.deepPurpleAccent,
       textSelectionHandleColor: Colors.deepPurpleAccent,
       cursorColor: Colors.deepPurpleAccent,
-      splashColor: Color(0x90bbbbbb),
-    
-      highlightColor:Colors.transparent,
+      splashColor: Color(0x40cccccc),
+      // splashColor: Color(0x90bbbbbb),
+
+      highlightColor: Colors.transparent,
       // highlightColor: Colors.deepPurpleAccent.shade100,
 
       //****************** Themes *********************
-     
+
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
@@ -123,7 +142,7 @@ abstract class AppTheme {
             TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
         subtitle2:
             TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        bodyText1: TextStyle(fontWeight: FontWeight.w600),
+        bodyText1: TextStyle(fontWeight: FontWeight.w700),
         bodyText2: TextStyle(fontWeight: FontWeight.w600),
         overline: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
@@ -137,8 +156,9 @@ abstract class AppTheme {
       ),
       appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
-        color: Colors.white,
         elevation: 0.0,
+        color: Colors.white,
+        iconTheme: IconThemeData(color: Colors.red),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
@@ -155,24 +175,28 @@ abstract class AppTheme {
       fontFamily: 'Manrope',
       brightness: Brightness.dark,
       //****************** Colors **********************
-      accentColor: const Color(0xff131313),
+      accentColor: AppColors.grey,
       backgroundColor: AppColors.grey,
       primaryColor: Colors.deepPurpleAccent,
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
-        background: AppColors.grey,
         brightness: Brightness.dark,
-        error: const Color(0xffed3b3b),
+        background: AppColors.grey,
         onBackground: AppColors.whiteDarkened,
-        onError: Colors.white,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: Colors.white,
         primary: Colors.deepPurpleAccent,
         primaryVariant: Colors.deepPurple,
+        onPrimary: Colors.white,
         secondary: AppColors.greyLight,
         secondaryVariant: AppColors.grey,
+        onSecondary: Colors.white,
+        error: const Color(0xffed3b3b),
+        onError: Colors.white,
+
+        /// For windows (e.g. alert dialogs)
         surface: AppColors.greyLighter,
+
+        /// For dimmed text (e.g. in appbar)
+        onSurface: Color(0xfff1f2f4),
       ),
       //****************** Specific app elements *****************
       scaffoldBackgroundColor: AppColors.grey,
@@ -201,7 +225,7 @@ abstract class AppTheme {
             fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
         subtitle2: TextStyle(
             fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        bodyText1: TextStyle(fontWeight: FontWeight.w600),
+        bodyText1: TextStyle(fontWeight: FontWeight.w700),
         bodyText2: TextStyle(fontWeight: FontWeight.w600),
         overline: TextStyle(fontWeight: FontWeight.w600),
         caption: TextStyle(fontWeight: FontWeight.w600),
@@ -214,7 +238,7 @@ abstract class AppTheme {
         },
       ),
       appBarTheme: AppBarTheme(
-        // brightness: Brightness.dark,
+        brightness: Brightness.dark,
         color: AppColors.grey,
         elevation: 0,
       ),

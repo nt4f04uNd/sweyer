@@ -7,7 +7,8 @@
 
 export 'channels.dart';
 export 'colors.dart';
-export 'themes.dart';
-export 'routes.dart';
 export 'config.dart';
 export 'errors.dart';
+export 'paths.dart';
+export 'routes.dart';
+export 'themes.dart';

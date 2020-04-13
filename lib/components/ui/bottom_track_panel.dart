@@ -34,21 +34,18 @@ class BottomTrackPanel extends StatelessWidget {
               shadowColor: Colors.black87,
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(26),
-                topRight: Radius.circular(26),
+                topLeft: Radius.circular(26.0),
+                topRight: Radius.circular(26.0),
               ),
               color: Colors.transparent,
-              // elevation: 0.0,
               elevation: 20.0,
               child: Container(
                 height: 76.0,
-              
                 alignment: Alignment.bottomCenter,
                 child: Material(
-                  // elevation: 24.0,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+                    topLeft: Radius.circular(28.0),
+                    topRight: Radius.circular(28.0),
                   ),
                   color: Theme.of(context).colorScheme.secondary,
                   child: GestureDetector(
@@ -87,7 +84,7 @@ class BottomTrackPanel extends StatelessWidget {
                               size: 40.0,
                               iconSize: 28.0,
                               iconColor:
-                                  Constants.AppTheme.mainContrast.auto(context),
+                                  Theme.of(context).colorScheme.onSurface,
                             ),
                           ],
                         ),
@@ -208,10 +205,11 @@ class _RotatingAlbumArtWithProgressState
         lineWidth: progressLineHeight,
         circularStrokeCap: CircularStrokeCap.round,
         progressColor: Theme.of(context).colorScheme.primary,
+        // progressColor: Constants.AppTheme.menuItem.auto(context),
         backgroundColor: Colors.transparent,
         center: AlbumArtRotating(
           key: _rotatingArtGlobalKey,
-          path: ContentControl.state.currentSong?.albumArtUri,
+          path: ContentControl.state.currentSong?.albumArt,
           initRotation: math.Random(DateTime.now().second).nextDouble(),
           initIsRotating: MusicPlayer.playerState == AudioPlayerState.PLAYING,
         ),

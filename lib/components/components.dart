@@ -5,7 +5,5 @@
 
 /// This module contains all application widgets and also flutter specific classes
 
-
-export 'custom/custom.dart';
 export 'ui/ui.dart';
 export 'util/util.dart';

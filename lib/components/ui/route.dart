@@ -6,7 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
-const double _kPreferredSize = 63.0;
+// const double kSMMAppBarPreferredSize = 63.0;
+const double kSMMAppBarPreferredSize = 50.0;
 
 /// Creates [Scaffold] with preferred size [AppBar]
 class PageBase extends StatelessWidget {
@@ -38,7 +39,7 @@ class PageBase extends StatelessWidget {
       backgroundColor: backgroundColor,
       appBar: PreferredSize(
         preferredSize:
-            Size.fromHeight(_kPreferredSize), // here the desired height
+            Size.fromHeight(kSMMAppBarPreferredSize), // here the desired height
         child: AppBar(
           titleSpacing: 0.0,
           backgroundColor: Colors.transparent,
@@ -93,7 +94,7 @@ class AnimatedPageBase extends AnimatedWidget {
       backgroundColor: animation.value,
       appBar: PreferredSize(
         preferredSize:
-            Size.fromHeight(_kPreferredSize), // here the desired height
+            Size.fromHeight(kSMMAppBarPreferredSize), // here the desired height
         child: AppBar(
           titleSpacing: 0.0,
           backgroundColor: Colors.transparent,

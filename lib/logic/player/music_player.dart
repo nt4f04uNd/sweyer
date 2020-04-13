@@ -3,7 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-export 'fetcher.dart';
+export 'album.dart';
 export 'native_player.dart';
 export 'playlist.dart';
 export 'serialization.dart';

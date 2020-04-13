@@ -291,11 +291,9 @@ class SMMSnackBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Material( // TODO: remove listtile theme
       color: color ?? Theme.of(context).colorScheme.primary,
-      child: ListTileTheme(
-        textColor: Theme.of(context).colorScheme.onPrimary,
-        child: Container(
+      child:  Container(
           padding: const EdgeInsets.only(
               left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
           constraints: const BoxConstraints(minHeight: 48.0, maxHeight: 128.0),
@@ -315,8 +313,9 @@ class SMMSnackBar extends StatelessWidget {
                   child: Text(
                     message,
                     style: TextStyle(
-                        fontSize: 15.0,
-                        color: Theme.of(context).colorScheme.onError),
+                      fontSize: 15.0,
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
                   ),
                 ),
               ),
@@ -327,16 +326,7 @@ class SMMSnackBar extends StatelessWidget {
                 )
             ],
           ),
-        ),
-        // ListTile(
-        //   title: Text(
-        //     message,
-        //     style: const TextStyle(fontSize: 15.0),
-        //   ),
-        //   leading: leading,
-        //   trailing: action,
-        //   dense: true,
-        // ),
+     
       ),
     );
   }

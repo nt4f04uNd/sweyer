@@ -146,12 +146,10 @@ abstract class ShowFunctions {
           ),
         );
 
-        final fadeAnimation = Tween(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            curve: Curves.easeOutCubic,
-            reverseCurve: Curves.easeInCubic,
-            parent: animation,
-          ),
+        final fadeAnimation = CurvedAnimation(
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+          parent: animation,
         );
 
         return ScaleTransition(
@@ -192,9 +190,9 @@ abstract class ShowFunctions {
                     children: <Widget>[
                       if (additionalActions != null)
                         Padding(
-                          padding: const EdgeInsets.only(left:6.0),
+                          padding: const EdgeInsets.only(left: 6.0),
                           child: ButtonBar(
-                            buttonPadding: const EdgeInsets.all( 0.0),
+                            buttonPadding: const EdgeInsets.all(0.0),
                             alignment: MainAxisAlignment.start,
                             children: additionalActions,
                           ),

@@ -7,7 +7,9 @@
 
 export 'route_transitions/route_transitions.dart';
 export 'gestures.dart';
+export 'animation.dart';
 export 'scroll_physics.dart';
+export 'selection.dart';
 export 'show_functions.dart';
 export 'splash/splash.dart';
 export 'system_ui_overlay_animations.dart';

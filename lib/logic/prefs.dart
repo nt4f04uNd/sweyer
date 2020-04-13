@@ -42,6 +42,8 @@ abstract class Prefs {
   /// `0` represents date feature
   ///
   /// `1` represents title feature
+  // static final Pref<int> sortFeatureInt =
+  //     Pref<int>(key: 'sort_feature', defaultValue: 0);
   static final Pref<int> sortFeatureInt =
       Pref<int>(key: 'sort_feature', defaultValue: 0);
 

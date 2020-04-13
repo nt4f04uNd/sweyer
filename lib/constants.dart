@@ -6,4 +6,4 @@
 /// Module for more convenient import of constants
 /// You should import this module `as Constants`
 
-export 'package:sweyer/constants/constants.dart';
+export 'constants/constants.dart';

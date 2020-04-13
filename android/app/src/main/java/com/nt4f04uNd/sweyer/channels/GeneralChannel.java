@@ -20,7 +20,7 @@ import io.flutter.view.FlutterView;
 
 public class GeneralChannel implements MethodChannel.MethodCallHandler {
     public static void init(FlutterView view, Activity activity) {
-        if(channel == null) {
+        if (channel == null) {
             GeneralChannel.activity = activity;
             channel = new MethodChannel(view, Constants.channels.general.CHANNEL_NAME);
             channel.setMethodCallHandler(new GeneralChannel());
@@ -37,17 +37,19 @@ public class GeneralChannel implements MethodChannel.MethodCallHandler {
     public static Activity activity;
 
 
-
     @Override
     public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
         // NOTE: this method is invoked on the main thread.
-        switch (call.method) {
-            case Constants.channels.general.METHOD_INTENT_ACTION_VIEW:
-                result.success(GeneralHandler.isIntentActionView(activity));
-                break;
-            default:
-                result.notImplemented();
-                Log.e(Constants.LogTag, "generalChannel: Invalid method name call from Dart code");
+        try {
+            switch (call.method) {
+                case Constants.channels.general.METHOD_INTENT_ACTION_VIEW:
+                    result.success(GeneralHandler.isIntentActionView(activity));
+                    break;
+                default:
+                    result.notImplemented();
+            }
+        } catch (Exception e) {
+            result.error("GENERAL_CHANNEL_ERROR", e.getMessage(), e.getStackTrace());
         }
     }
 }

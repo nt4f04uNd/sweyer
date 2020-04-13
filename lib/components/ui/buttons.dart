@@ -238,7 +238,7 @@ class LoopButton extends StatelessWidget {
           icon: Icon(Icons.loop),
           size: 40.0,
           color: snapshot.data
-              ? Constants.AppTheme.mainContrast.auto(context)
+              ? Theme.of(context).colorScheme.onSurface
               : Constants.AppTheme.disabledIcon.auto(context),
           onPressed: MusicPlayer.switchLoopMode,
         );
@@ -260,7 +260,7 @@ class _ShuffleButtonState extends State<ShuffleButton> {
     return SMMIconButton(
       icon: Icon(Icons.shuffle),
       color: ContentControl.state.currentPlaylistType == PlaylistType.shuffled
-          ? Constants.AppTheme.mainContrast.auto(context)
+          ?Theme.of(context).colorScheme.onSurface
           : Constants.AppTheme.disabledIcon.auto(context),
       onPressed: () {
         setState(() {

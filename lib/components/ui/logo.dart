@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Creates a SVG Sweyer logo
 class SweyerLogo extends StatefulWidget {
@@ -20,9 +21,8 @@ class SweyerLogo extends StatefulWidget {
 class _SweyerLogoState extends State<SweyerLogo> {
   @override
   Widget build(BuildContext context) {
-    // TODO: move to const
     return SvgPicture.asset(
-      'assets/images/icons/note_rounded.svg',
+      Constants.Paths.ASSET_LOGO_SVG,
       width: widget.size,
       height: widget.size,
     );

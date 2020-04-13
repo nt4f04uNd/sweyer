@@ -61,7 +61,7 @@ public class PlayerChannel implements MethodChannel.MethodCallHandler {
             handleMethodCall(call, response);
         } catch (Exception e) {
             PlayerHandler.handleError(e);
-            response.error("NATIVE_PLAYER_ERROR", e.getMessage(), e);
+            response.error("NATIVE_PLAYER_ERROR", e.getMessage(), e.getStackTrace());
         }
     }
 

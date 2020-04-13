@@ -21,6 +21,9 @@ abstract class ThemeControl {
   static Brightness get contrastBrightness =>
       isDark ? Brightness.light : Brightness.dark;
 
+  /// True if [brightness] is light
+  static bool get isLight => _brightness == Brightness.light;
+
   /// True if [brightness] is dark
   static bool get isDark => _brightness == Brightness.dark;
 

@@ -1,9 +1,3 @@
-
-/*---------------------------------------------------------------------------------------------
-*  Copyright (c) nt4f04und. All rights reserved.
-*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
-*--------------------------------------------------------------------------------------------*/
-
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'song.dart';
@@ -28,7 +22,6 @@ Song _$SongFromJson(Map<String, dynamic> json) {
     duration: json['duration'] as int,
     size: json['size'] as int,
     data: json['data'] as String,
-    albumArtUri: json['albumArtUri'] as String,
   );
 }
 
@@ -47,5 +40,4 @@ Map<String, dynamic> _$SongToJson(Song instance) => <String, dynamic>{
       'duration': instance.duration,
       'size': instance.size,
       'data': instance.data,
-      'albumArtUri': instance.albumArtUri,
     };

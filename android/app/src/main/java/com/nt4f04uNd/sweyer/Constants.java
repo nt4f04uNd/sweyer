@@ -95,12 +95,13 @@ public class Constants {
         }
 
         //****************SONGS***************************************************************************************
-        public static final class songs {
-            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "SONGS_CHANNEL";
+        public static final class content {
+            public static final String CHANNEL_NAME = DOTTED_PACKAGE_NAME + "CONTENT_CHANNEL";
 
-            public static final String METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
-            public static final String METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
-            public static final String METHOD_DELETE_SONGS = DOTTED_PACKAGE_NAME + "SONGS_METHOD_DELETE_SONGS";
+            public static final String METHOD_RETRIEVE_SONGS = DOTTED_PACKAGE_NAME + "CONTENT_METHOD_RETRIEVE_SONGS";
+            public static final String METHOD_RETRIEVE_ALBUMS = DOTTED_PACKAGE_NAME + "CONTENT_METHOD_RETRIEVE_ALBUMS";
+            public static final String METHOD_SEND_SONGS = DOTTED_PACKAGE_NAME + "CONTENT_METHOD_SEND_SONGS";
+            public static final String METHOD_DELETE_SONGS = DOTTED_PACKAGE_NAME + "CONTENT_METHOD_DELETE_SONGS";
     }
     }
 }

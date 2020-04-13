@@ -5,13 +5,17 @@
 
 package com.nt4f04uNd.sweyer.handlers;
 
+import android.content.ContentUris;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.R;
+import com.nt4f04uNd.sweyer.player.Album;
 import com.nt4f04uNd.sweyer.player.Song;
 
 import java.io.ByteArrayOutputStream;
@@ -42,10 +46,10 @@ public class PlaylistHandler {
 
     public static byte[] getArtPlaceholder() {
         AssetManager assetManager = GeneralHandler.getAppContext().getAssets();
-        String key = 
-          GeneralHandler.isSystemThemeDark()
-                ? FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_new_dark.png")
-                : FlutterMain.getLookupKeyForAsset("assets/images/placeholder_thumb_new.png");
+        String key =
+                GeneralHandler.isSystemThemeDark()
+                        ? FlutterMain.getLookupKeyForAsset("assets/images/logo_thumb_dark.png")
+                        : FlutterMain.getLookupKeyForAsset("assets/images/logo_thumb.png");
 
         try {
             InputStream istream = assetManager.open(key);
@@ -65,7 +69,7 @@ public class PlaylistHandler {
     public static void getLastPlaylist() {
         if (songs == null) { // Songs will be rested to null every time app activity starts
             songs = SerializationHandler.getPlaylistSongs();
-//
+
 //           // Song song =  songs.get(7);
 //            GeneralHandler.print("wfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwfwf, ID"
 //                    + song.id + "  TITLE  "
@@ -99,23 +103,11 @@ public class PlaylistHandler {
     }
 
     public static void setCurrentSong(Song newSong) {
-        currentSong = newSong;
         if (newSong != null) {
-            boolean success = false;
-            // Album art fetch
-            if (newSong.albumArtUri != null) {
-                File imgFile = new File(newSong.albumArtUri);
-                if (imgFile.exists()) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    currentSongArtBitmapBytes = stream.toByteArray();
-                    success = true;
-                }
-            }
-            if (!success) {
-                currentSongArtBitmapBytes = null;
-            }
+            currentSong = newSong;
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(newSong.data);
+            currentSongArtBitmapBytes = retriever.getEmbeddedPicture();
         }
     }
 

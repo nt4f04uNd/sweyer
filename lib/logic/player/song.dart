@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:sweyer/sweyer.dart';
 
 /// This allows the [Song] class to access private members in
 /// the generated file. The value for this is *.g.dart, where
@@ -31,7 +32,6 @@ class Song {
   final int duration;
   final int size;
   final String data;
-  final String albumArtUri;
 
   Song(
       {@required this.id,
@@ -47,8 +47,7 @@ class Song {
       @required this.dateModified,
       @required this.duration,
       @required this.size,
-      @required this.data,
-      @required this.albumArtUri});
+      @required this.data});
 
   // Song.test()
   //     : id = 0,
@@ -69,4 +68,7 @@ class Song {
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$SongToJson(this);
+
+  /// Returns the albumArt path, that is taken from album arts map in [ContentControl.state]
+  String get albumArt => ContentControl.state.albumArts[albumId];
 }

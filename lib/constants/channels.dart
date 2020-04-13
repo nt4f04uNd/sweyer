@@ -8,12 +8,12 @@
 /// Android package prefix
 const String DOTTED_PACKAGE_NAME = "com.nt4f04und.sweyer.";
 
-//****************PLAYER***************************************************************************************
+//**************** PLAYER ***************************************************************************************
 abstract class PlayerChannel {
   static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'PLAYER_CHANNEL';
 }
 
-//****************EVENTS***************************************************************************************
+//**************** EVENTS ***************************************************************************************
 abstract class EventChannel {
   static const String CHANNEL_NAME = DOTTED_PACKAGE_NAME + 'EVENT_CHANNEL';
 
@@ -63,14 +63,14 @@ abstract class EventChannel {
   static const String GENERALIZED_PLAY_PREV = DOTTED_PACKAGE_NAME + "EVENT_GENERALIZED_PLAY_PREV";
 }
 
-//****************GENERAL***************************************************************************************
+//**************** GENERAL ***************************************************************************************
 abstract class GeneralChannel {
   static const String CHANNEL_NAME              = DOTTED_PACKAGE_NAME + 'GENERAL_CHANNEL';
 
   static const String METHOD_INTENT_ACTION_VIEW = DOTTED_PACKAGE_NAME + "GENERAL_METHOD_INTENT_ACTION_VIEW";
 }
 
-//****************SERVICE***************************************************************************************
+//**************** SERVICE ***************************************************************************************
 abstract class ServiceChannel {
   static const String CHANNEL_NAME             = DOTTED_PACKAGE_NAME + 'SERVICE_CHANNEL';
 
@@ -78,15 +78,16 @@ abstract class ServiceChannel {
   static const String METHOD_SEND_CURRENT_SONG = DOTTED_PACKAGE_NAME + "SERVICE_METHOD_SEND_CURRENT_SONG";
 }
 
-//****************SONGS***************************************************************************************
-abstract class SongsChannel {
-  static const String CHANNEL_NAME =             DOTTED_PACKAGE_NAME + 'SONGS_CHANNEL';
+//**************** CONTENT ***************************************************************************************
+abstract class ContentChannel {
+  static const String CHANNEL_NAME =             DOTTED_PACKAGE_NAME + 'CONTENT_CHANNEL';
 
   /// Retrieve songs method
-  static const String METHOD_RETRIEVE_SONGS =    DOTTED_PACKAGE_NAME + "SONGS_METHOD_RETRIEVE_SONGS";
+  static const String METHOD_RETRIEVE_SONGS =    DOTTED_PACKAGE_NAME + "CONTENT_METHOD_RETRIEVE_SONGS";
+  static const String METHOD_RETRIEVE_ALBUMS =   DOTTED_PACKAGE_NAME + "CONTENT_METHOD_RETRIEVE_ALBUMS";
 
   /// Method that sends found songs from native code to flutter code
-  static const String METHOD_SEND_SONGS =        DOTTED_PACKAGE_NAME + "SONGS_METHOD_SEND_SONGS";
+  static const String METHOD_SEND_SONGS =        DOTTED_PACKAGE_NAME + "CONTENT_METHOD_SEND_SONGS";
 
-  static const String METHOD_DELETE_SONGS =      DOTTED_PACKAGE_NAME + "SONGS_METHOD_DELETE_SONGS";
+  static const String METHOD_DELETE_SONGS =      DOTTED_PACKAGE_NAME + "CONTENT_METHOD_DELETE_SONGS";
 }

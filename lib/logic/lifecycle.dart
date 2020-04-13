@@ -72,7 +72,7 @@ abstract class LaunchControl {
 
     try {
       API.EventsHandler.init();
-      API.SongsHandler.init();
+      API.ContentHandler.init();
       FirebaseControl.init();
 
       await Permissions.init();

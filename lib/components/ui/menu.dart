@@ -169,7 +169,7 @@ class MenuItem extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 22.0,
-                  color: Constants.AppTheme.mainContrast.auto(context),
+                  color: Theme.of(context).colorScheme.onSurface,
                   // color: Constants.AppTheme,
                 ),
               )
@@ -250,7 +250,7 @@ class AnimatedMenuCloseButtonState extends State<AnimatedMenuCloseButton>
     return SMMIconButton(
       size: widget.size ?? kSMMIconButtonSize,
       iconSize: widget.iconSize ?? kSMMIconButtonIconSize,
-      color: Constants.AppTheme.mainContrast.auto(context),
+      color: Theme.of(context).colorScheme.onSurface,
       onPressed: widget.animateDirection == true
           ? widget.onCloseClick
           : widget.onMenuClick,

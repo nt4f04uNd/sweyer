@@ -19,6 +19,9 @@ class PlayerRoute extends StatefulWidget {
 
 class _PlayerRouteState extends State<PlayerRoute> {
   bool initialRender = true;
+
+  /// Using [PageView] instead of [TabView], 
+  /// because I need a decent page value (only when user fully switches to first tab, jump on index should be called)
   PageController _pageController = PageController();
 
   final GlobalKey<_PlaylistTabState> _playlistTabKey =
@@ -77,7 +80,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
 
   /// How much tracks to ignore scrolling
   static const int tracksScrollOffset = 6;
-  static const Duration scrollDuration = const Duration(milliseconds: 600);
+  static const Duration scrollDuration = const Duration(milliseconds: 800);
 
 // This is set in parent via global key
   bool opened = false;
@@ -88,7 +91,7 @@ class _PlaylistTabState extends State<_PlaylistTab>
   /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
   bool scrolling = false;
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<PlaylistType> _playlistChangeSubscription;
+  StreamSubscription<void> _playlistChangeSubscription;
 
   int prevPlayingIndex = ContentControl.state.currentSongIndex;
 
@@ -389,7 +392,7 @@ class _PlaybackButtons extends StatelessWidget {
                 size: 44,
                 icon: Icon(
                   Icons.skip_previous,
-                  color: Constants.AppTheme.mainContrast.auto(context),
+                  color:Theme.of(context).colorScheme.onSurface,
                 ),
                 onPressed: MusicPlayer.playPrev,
               ),
@@ -415,7 +418,7 @@ class _PlaybackButtons extends StatelessWidget {
                 size: 44,
                 icon: Icon(
                   Icons.skip_next,
-                  color: Constants.AppTheme.mainContrast.auto(context),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 onPressed: MusicPlayer.playNext,
               ),
@@ -567,7 +570,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-              child: AlbumArtLarge(path: currentSong?.albumArtUri),
+              child: AlbumArtPlayerRoute(path: currentSong?.albumArt),
             ),
           ],
         ),

@@ -12,16 +12,8 @@ abstract class GeneralHandler {
       const MethodChannel(Constants.GeneralChannel.CHANNEL_NAME);
 
   /// Checks if open intent is view (user tried to open file with app)
-  static Future<void> isIntentActionView() async {  
-    return debugPrint((await _generalChannel
-            .invokeMethod(Constants.GeneralChannel.METHOD_INTENT_ACTION_VIEW))
-        .toString());
-  }
-
-  /// Test method that will kill activity, for test purposes
-  static Future<void> killActivity() async {
-    return debugPrint((await _generalChannel
-            .invokeMethod(Constants.GeneralChannel.METHOD_INTENT_ACTION_VIEW))
-        .toString());
+  static Future<bool> isIntentActionView() async {
+    return _generalChannel
+        .invokeMethod<bool>(Constants.GeneralChannel.METHOD_INTENT_ACTION_VIEW);
   }
 }

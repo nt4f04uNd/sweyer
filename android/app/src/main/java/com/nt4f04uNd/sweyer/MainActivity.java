@@ -9,7 +9,7 @@ import com.nt4f04uNd.sweyer.channels.GeneralChannel;
 import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 import com.nt4f04uNd.sweyer.channels.PlayerChannel;
 import com.nt4f04uNd.sweyer.channels.ServiceChannel;
-import com.nt4f04uNd.sweyer.channels.SongChannel;
+import com.nt4f04uNd.sweyer.channels.ContentChannel;
 import com.nt4f04uNd.sweyer.handlers.AudioFocusHandler;
 import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
 import com.nt4f04uNd.sweyer.handlers.MediaSessionHandler;
@@ -45,7 +45,7 @@ public class MainActivity extends FlutterActivity {
         MediaSessionHandler.init();
         ServiceHandler.init(); // Contains intent to start service
         ServiceChannel.init(getFlutterView());
-        SongChannel.init(getFlutterView());
+        ContentChannel.init(getFlutterView());
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MainActivity extends FlutterActivity {
         NativeEventsChannel.kill();
         GeneralChannel.kill();
         PlayerChannel.kill();
-        SongChannel.kill();
+        ContentChannel.kill();
         ServiceChannel.kill();
     }
 }

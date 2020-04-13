@@ -3,10 +3,13 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// Module for coped and modified files from flutter framework
+abstract class Paths {
+  /// Main svg logo asset
+  static const ASSET_LOGO_SVG = "assets/images/logo.svg";
 
-export 'custom_icon_button.dart';
-export 'custom_popup_menu.dart';
-export 'custom_refresh_indicator.dart';
-export 'custom_scaffold.dart';
-export 'custom_drawer.dart';
+  /// A png logo image
+  static const ASSET_LOGO_THUMB = "assets/images/logo_thumb.png";
+
+  /// A png logo image for dark theme (has a lightened borders)
+  static const ASSET_LOGO_THUMB_DARK = "assets/images/logo_thumb_dark.png";
+}

@@ -15,24 +15,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
+
 const _kSMMScrollBarHeight = 40.0;
 
-/// Scrollbar specially for song lists
+/// SMM default styled draggable scrollbar
 ///
 /// If current sort feature is [SortFeature.title], will have a scroll label and will be always visible
 ///
 /// NOTE Can't be applied from [ScrollablePositionedList], because this list doesn't have a consistent scroll controller
 ///
 /// TODO: add scrollbar pad with letters
-class SongsListScrollBar extends StatelessWidget {
-  SongsListScrollBar({
+class SMMDefaultDraggableScrollbar extends StatelessWidget {
+  SMMDefaultDraggableScrollbar({
     Key key,
     this.scrollThumbKey,
     @required this.child,
-    @required this.labelContentBuilder,
     @required this.controller,
+    this.labelContentBuilder,
+    this.alwaysVisibleScrollThumb = false,
   })  : assert(child != null),
-        assert(labelContentBuilder != null),
         assert(controller != null),
         super(key: key);
 
@@ -40,25 +42,24 @@ class SongsListScrollBar extends StatelessWidget {
   final Key scrollThumbKey;
   final Widget Function(double) labelContentBuilder;
   final ScrollController controller;
+  final bool alwaysVisibleScrollThumb;
 
   @override
   Widget build(BuildContext context) {
     return SMMDraggableScrollbar.rrect(
       alwaysVisibleScrollThumb:
-          ContentControl.state.currentSortFeature == SortFeature.title,
+         alwaysVisibleScrollThumb,
       scrollThumbKey: scrollThumbKey,
       padding: const EdgeInsets.only(right: 3.0),
       // labelConstraints: const BoxConstraints(maxWidth: 56.0, maxHeight: 24.0),
       labelConstraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width - 28.0, maxHeight: 36.0),
       labelContentBuilder:
-          ContentControl.state.currentSortFeature != SortFeature.title
-              ? null
-              : labelContentBuilder,
+         labelContentBuilder,
       marginTop: 7.0,
       marginBottom: 40.0,
       widthScrollThumb: 12.0,
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor:  Constants.AppTheme.menuItem.auto(context),
       controller: controller,
       child: child,
     );
@@ -508,7 +509,7 @@ class SMMDraggableScrollbar extends StatefulWidget {
           ),
         ),
         color: backgroundColor,
-        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+        borderRadius: BorderRadius.all(Radius.circular(5.0)),
       );
 
       return buildScrollThumbAndLabel(

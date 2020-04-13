@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'api.dart';
 
-abstract class SongsHandler {
-  static MethodChannel _songsChannel =
-      const MethodChannel(Constants.SongsChannel.CHANNEL_NAME);
+abstract class ContentHandler {
+  static MethodChannel _contentChannel =
+      const MethodChannel(Constants.ContentChannel.CHANNEL_NAME);
 
   static MethodChannelHandler _onGetSongHandler;
 
@@ -20,8 +20,8 @@ abstract class SongsHandler {
 
   /// Starts to listen to a native method calls
   static void init() {
-    _songsChannel.setMethodCallHandler((MethodCall call) async {
-      if (call.method == Constants.SongsChannel.METHOD_SEND_SONGS) {
+    _contentChannel.setMethodCallHandler((MethodCall call) async {
+      if (call.method == Constants.ContentChannel.METHOD_SEND_SONGS) {
         // Getting the fetched songs
         if (_onGetSongHandler != null) {
           _onGetSongHandler(call);
@@ -31,15 +31,20 @@ abstract class SongsHandler {
   }
 
   /// Invocation of this method will trigger native code to start the process of fetching songs
-  static Future<void> retrieveSongs() {
-    return _songsChannel
-        .invokeMethod<String>(Constants.SongsChannel.METHOD_RETRIEVE_SONGS);
+  static Future<List<String>> retrieveSongs() async {
+    return _contentChannel
+        .invokeListMethod<String>(Constants.ContentChannel.METHOD_RETRIEVE_SONGS);
+  }
+  /// Invocation of this method will trigger native code to start the process of fetching songs
+  static Future<List<String>> retrieveAlbums()async {
+            return _contentChannel
+        .invokeListMethod<String>(Constants.ContentChannel.METHOD_RETRIEVE_ALBUMS);
   }
 
   /// Deletes the song by id
-  static Future<void> deleteSongs(Set<String> songDataSet) {
-    return _songsChannel.invokeMethod<String>(
-      Constants.SongsChannel.METHOD_DELETE_SONGS,
+  static Future<void> deleteSongs(Set<String> songDataSet)async {
+    return _contentChannel.invokeMethod(
+      Constants.ContentChannel.METHOD_DELETE_SONGS,
       {"songDataList": songDataSet.toList()},
     );
   }

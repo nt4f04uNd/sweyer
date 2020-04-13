@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
@@ -60,22 +61,21 @@ public class SerializationHandler {
      **/
     public static ArrayList<Song> getPlaylistSongs() {
         JSONArray jsonPlaylist;
-        JSONArray jsonSongs;
-        ArrayList<Song> songs = new ArrayList<>(0);
+        ArrayList<Song> fetchedSongs;
+        ArrayList<Song> songs = new ArrayList<>();
         try {
             jsonPlaylist = new JSONArray(SerializationHandler.loadJSON(SerializationHandler.getFlutterAppPath() + "playlist.json"));
-            jsonSongs = new JSONArray(SerializationHandler.loadJSON(SerializationHandler.getFlutterAppPath() + "songs.json"));
+            fetchedSongs = FetchHandler.retrieveSongsForBackground();
 
             if (jsonPlaylist.length() == 0) { // If playlist array is empty, then it is global and all playlist will be deserialized
-                for (int i = 0; i < jsonSongs.length(); i++) {
-                    songs.add(Song.fromJson(jsonSongs.getJSONObject(i)));
-                }
+                return fetchedSongs;
             } else {
                 for (int i = 0; i < jsonPlaylist.length(); i++) {
-                    for (int j = 0; j < jsonSongs.length(); j++) {
-                        JSONObject songJsonObject = jsonSongs.getJSONObject(j);
-                        if (songJsonObject.getInt("id") == jsonPlaylist.getInt(i)) {
-                            songs.add(Song.fromJson(songJsonObject));
+                    int songId = jsonPlaylist.getInt(i);
+                    for (int j = 0; j < fetchedSongs.size(); j++) {
+                        if (songId == fetchedSongs.get(j).id) {
+                            songs.add(fetchedSongs.get(j));
+                            break;
                         }
                     }
                 }
