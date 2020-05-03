@@ -47,19 +47,19 @@ class SMMDefaultDraggableScrollbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SMMDraggableScrollbar.rrect(
-      alwaysVisibleScrollThumb:
-         alwaysVisibleScrollThumb,
+      alwaysVisibleScrollThumb: alwaysVisibleScrollThumb,
       scrollThumbKey: scrollThumbKey,
-      padding: const EdgeInsets.only(right: 3.0),
+      // padding: const EdgeInsets.only(right: 3.0),
       // labelConstraints: const BoxConstraints(maxWidth: 56.0, maxHeight: 24.0),
       labelConstraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width - 28.0, maxHeight: 36.0),
-      labelContentBuilder:
-         labelContentBuilder,
-      marginTop: 7.0,
+      labelContentBuilder: labelContentBuilder,
       marginBottom: 40.0,
-      widthScrollThumb: 12.0,
-      backgroundColor:  Constants.AppTheme.menuItem.auto(context),
+      marginTop: 3.0,
+      widthScrollThumb: 7.0,
+      // backgroundColor: Constants.AppTheme.menuItem.auto(context),
+      backgroundColor: Theme.of(context).colorScheme.onBackground,
+      borderRadius:  const BorderRadius.all(Radius.circular(4.0)),
       controller: controller,
       child: child,
     );
@@ -327,8 +327,10 @@ class SMMDraggableScrollbar extends StatefulWidget {
     this.scrollbarTimeToFade = _kScrollbarTimeToFade,
     this.labelContentBuilder,
     this.labelConstraints,
-  })  : scrollThumbBuilder =
-            _thumbRRectBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
+    BorderRadiusGeometry borderRadius =
+        const BorderRadius.all(Radius.circular(0.0)),
+  })  : scrollThumbBuilder = _thumbRRectBuilder(
+            scrollThumbKey, alwaysVisibleScrollThumb, borderRadius),
         super(key: key);
 
   SMMDraggableScrollbar.arrows({
@@ -488,8 +490,8 @@ class SMMDraggableScrollbar extends StatefulWidget {
     };
   }
 
-  static ScrollThumbBuilder _thumbRRectBuilder(
-      Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
+  static ScrollThumbBuilder _thumbRRectBuilder(Key scrollThumbKey,
+      bool alwaysVisibleScrollThumb, BorderRadiusGeometry borderRadius) {
     return (
       Color backgroundColor,
       Animation<double> thumbAnimation,
@@ -501,16 +503,15 @@ class SMMDraggableScrollbar extends StatefulWidget {
       BoxConstraints labelConstraints,
     }) {
       final scrollThumb = Material(
-        key: scrollThumbKey,
-        elevation: 4.0,
-        child: Container(
-          constraints: BoxConstraints.tight(
-            Size(width, height),
+          key: scrollThumbKey,
+          elevation: 4.0,
+          child: Container(
+            constraints: BoxConstraints.tight(
+              Size(width, height),
+            ),
           ),
-        ),
-        color: backgroundColor,
-        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-      );
+          color: backgroundColor,
+          borderRadius: borderRadius);
 
       return buildScrollThumbAndLabel(
         scrollThumb: scrollThumb,
@@ -761,7 +762,7 @@ class _SMMDraggableScrollbarState extends State<SMMDraggableScrollbar>
             (viewMaxScrollExtent +
                 barMinScrollExtent * viewMaxScrollExtent / barMaxScrollExtent) /
             barMaxScrollExtent;
-    
+
         widget.controller.jumpTo(_viewOffset);
       }
     });

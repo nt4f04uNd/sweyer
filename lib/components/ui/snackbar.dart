@@ -281,7 +281,7 @@ class SMMSnackBar extends StatelessWidget {
     this.leading,
     this.action,
     this.color,
-    this.messagePadding = const EdgeInsets.all(0.0),
+    this.messagePadding = EdgeInsets.zero,
   }) : super(key: key);
   final Widget leading;
   final String message;

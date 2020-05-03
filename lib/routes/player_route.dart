@@ -10,7 +10,7 @@ import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const kSMMPlayerRouteTransitionDuration = const Duration(milliseconds: 550);
+const kSMMPlayerRouteTransitionDuration = const Duration(milliseconds: 400);
 
 class PlayerRoute extends StatefulWidget {
   @override
@@ -20,7 +20,7 @@ class PlayerRoute extends StatefulWidget {
 class _PlayerRouteState extends State<PlayerRoute> {
   bool initialRender = true;
 
-  /// Using [PageView] instead of [TabView], 
+  /// Using [PageView] instead of [TabView],
   /// because I need a decent page value (only when user fully switches to first tab, jump on index should be called)
   PageController _pageController = PageController();
 
@@ -222,12 +222,11 @@ class _PlaylistTabState extends State<_PlaylistTab>
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Далее',
-                        style: TextStyle(
-                          fontSize: 24,
-                          height: 1,
-                          color: Theme.of(context).textTheme.headline6.color,
-                        ),
+                        "Далее",
+                        style: Theme.of(context).textTheme.headline6.copyWith(
+                              fontSize: 24,
+                              height: 1.2,
+                            ),
                       ),
                       Text(
                         ContentControl.state.currentPlaylistType ==
@@ -237,21 +236,18 @@ class _PlaylistTabState extends State<_PlaylistTab>
                                     PlaylistType.shuffled
                                 ? 'Перемешанный плейлист'
                                 : 'Найденный плейлист',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).textTheme.caption.color,
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .subtitle2
+                            .copyWith(fontSize: 14, height: 1.0),
                       )
                     ],
                   ),
                 ),
               ),
             ),
-            body: Container(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: PlayerRoutePlaylist(
-                key: globalKeyPlayerRoutePlaylist,
-              ),
+            body: PlayerRoutePlaylist(
+              key: globalKeyPlayerRoutePlaylist,
             ),
           );
         });
@@ -318,7 +314,9 @@ class _MainPlayerTabState extends State<_MainPlayerTab>
     super.build(context);
     return PageBase(
       // animation: _colorAnimation,
+      appBarElevation: 0.0,
       backgroundColor: widget.color,
+      appBarBackgroundColor: Colors.transparent,
       backButton: SMMBackButton(
         icon: Icons.keyboard_arrow_down,
         size: 40.0,
@@ -392,7 +390,7 @@ class _PlaybackButtons extends StatelessWidget {
                 size: 44,
                 icon: Icon(
                   Icons.skip_previous,
-                  color:Theme.of(context).colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 onPressed: MusicPlayer.playPrev,
               ),
@@ -492,7 +490,7 @@ class _MoreButton extends StatelessWidget {
           itemBuilder: _itemBuilder,
           tooltipEnabled: false,
           buttonSize: 40.0,
-          menuPadding: const EdgeInsets.all(0.0),
+          menuPadding:EdgeInsets.zero,
           menuBorderRadius: const BorderRadius.all(
             Radius.circular(15.0),
           ),
@@ -556,7 +554,10 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
                 text: Text(
                   currentSong.title,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w500),
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline6
+                      .copyWith(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
               ),
             ),
@@ -565,7 +566,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
               child: Artist(
                 artist: currentSong.artist,
                 textStyle:
-                    TextStyle(fontSize: 15.5, fontWeight: FontWeight.w500),
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
             ),
             Padding(
@@ -639,13 +640,13 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   Future<void> _setInitialCurrentPosition() async {
     var currentPosition = await MusicPlayer.currentPosition;
-        if (mounted) {
-    setState(() {
-      _duration =
-          Duration(milliseconds: ContentControl.state.currentSong?.duration);
-      _value = currentPosition;
-    });
-        }
+    if (mounted) {
+      setState(() {
+        _duration =
+            Duration(milliseconds: ContentControl.state.currentSong?.duration);
+        _value = currentPosition;
+      });
+    }
   }
 
   void _getPrefsInstance() async {
@@ -669,13 +670,12 @@ class _TrackSliderState extends State<_TrackSlider> {
 
   /// FIXME: this called multiple times since it is inside [TabBarView], currently unable to fix, as this issue relies deeply to flutter architecture
   void _handleChangeEnd(double newValue) async {
-
     await MusicPlayer.seek(Duration(seconds: newValue.toInt()));
-        if (mounted) {
-    setState(() {
-      _isDragging = false;
-      _value = Duration(seconds: newValue.toInt());
-    });
+    if (mounted) {
+      setState(() {
+        _isDragging = false;
+        _value = Duration(seconds: newValue.toInt());
+      });
     }
   }
 
@@ -708,31 +708,46 @@ class _TrackSliderState extends State<_TrackSlider> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Container(
-          width: 35.0,
+          width: 36.0,
           transform: Matrix4.translationValues(5, 0, 0),
           child: Text(
             _calculateDisplayedPositionTime(),
-            style: const TextStyle(fontSize: 12),
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.headline6.color),
           ),
         ),
         Expanded(
-          child: Slider(
-            activeColor: Theme.of(context).colorScheme.primary,
-            inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
-            value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
-            max: _duration.inSeconds.toDouble(),
-            min: 0,
-            onChangeStart: _handleChangeStart,
-            onChanged: _handleChanged,
-            onChangeEnd: _handleChangeEnd,
+          child: SliderTheme(
+            data: SliderThemeData(
+                trackHeight: 2,
+                // overlayColor: Colors.transparent,
+                activeTrackColor: Theme.of(context).colorScheme.primary,
+                inactiveTrackColor:
+                    Constants.AppTheme.sliderInactive.auto(context)),
+            child: Slider(
+              // activeColor: Theme.of(context).colorScheme.primary,
+              // inactiveColor: ,
+              value: _isDragging ? _localValue : _value.inSeconds.toDouble(),
+              max: _duration.inSeconds.toDouble(),
+              min: 0,
+              onChangeStart: _handleChangeStart,
+              onChanged: _handleChanged,
+              onChangeEnd: _handleChangeEnd,
+              useV2Slider: true,
+            ),
           ),
         ),
         Container(
-          width: 35.0,
+          width: 36.0,
           transform: Matrix4.translationValues(-5, 0, 0),
           child: Text(
             _calculateDisplayedDurationTime(),
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.headline6.color),
           ),
         ),
       ],

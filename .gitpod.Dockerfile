@@ -27,7 +27,7 @@ ENV PATH="${FLUTTER_HOME}/bin:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform
 # Flutter SDK
 RUN cd /home/gitpod \
     && wget -qO flutter_sdk.tar.xz \
-    https://storage.googleapis.com/flutter_infra/releases/dev/linux/flutter_linux_v1.16.3-dev.tar.xz &&\
+    https://storage.googleapis.com/flutter_infra/releases/dev/linux/flutter_linux_1.18.0-8.0.pre-dev.tar.xz &&\
     tar -xvf flutter_sdk.tar.xz\
     && rm -f flutter_sdk.tar.xz
 

@@ -64,7 +64,7 @@ abstract class ThemeControl {
       CatcherErrorBridge.add(CaughtError(e, stackTrace));
     } finally {
       SystemUiOverlayStyleControl.setSystemUiOverlay(
-        Constants.AppSystemUIThemes.mainScreen.autoBr(_brightness),
+        Constants.AppSystemUIThemes.allScreens.autoBr(_brightness),
         saveToHistory: false,
       );
       // emitThemeChange();

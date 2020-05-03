@@ -3,7 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// Dumb switcher, that changes its value from true to false
+/// A switcher interface
 abstract class Switcher<T> {
   Switcher(T value) : _value = value;
   T _value;
@@ -11,21 +11,11 @@ abstract class Switcher<T> {
   void change();
 }
 
-/// Switches between [false] and [true]
-class BoolSwitcher extends Switcher<bool> {
-  BoolSwitcher([bool value = false]) : super(value);
-
-  /// Changes [value] to opposite
-  void change() {
-    _value = !_value;
-  }
-}
-
 // Switches sequentially until 999, then goes back to 0
 class IntSwitcher extends Switcher<int> {
   IntSwitcher([int value = 0]) : super(value);
 
-  /// Changes [value] to opposite
+  /// Iteratively changes [value].
   void change() {
     if (_value < 1000)
       _value++;
@@ -33,3 +23,4 @@ class IntSwitcher extends Switcher<int> {
       _value = 0;
   }
 }
+

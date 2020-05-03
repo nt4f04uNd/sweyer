@@ -6,6 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
+/// Just an [AppBar], but has the properties to specify how it will look in the selection mode.
+/// Also performs a fade switch animation while switching in and out of the selection mode.
 class SelectionAppBar extends AppBar {
   SelectionAppBar({
     Key key,

@@ -91,9 +91,15 @@ class LabelledSlider extends StatelessWidget {
           child: Container(
             height: 30.0,
             child: SliderTheme(
-              data: themeData.copyWith(
+              data: SliderThemeData(
                 trackShape:
                     themeData.trackShape ?? const TrackShapeWithMargin(),
+                valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+                overlayColor: Colors.transparent,
+                activeTrackColor:
+                    activeColor ?? Theme.of(context).colorScheme.primary,
+                inactiveTrackColor: inactiveColor ??
+                    Constants.AppTheme.sliderInactive.auto(context),
               ),
               child: Slider(
                 value: value,
@@ -104,10 +110,8 @@ class LabelledSlider extends StatelessWidget {
                 max: max,
                 divisions: divisions,
                 label: label,
-                activeColor:
-                    activeColor ?? Theme.of(context).colorScheme.primary,
-                inactiveColor: inactiveColor ?? Constants.AppTheme.sliderInactive.auto(context),
                 semanticFormatterCallback: semanticFormatterCallback,
+                useV2Slider: true,
               ),
             ),
           ),

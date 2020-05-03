@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 class Artist extends StatelessWidget {
   final String artist;
   final TextStyle textStyle;
-  const Artist({Key key, @required this.artist, this.textStyle}) : super(key: key);
+  const Artist({Key key, @required this.artist, this.textStyle})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +19,8 @@ class Artist extends StatelessWidget {
       child: Text(
         artistString(artist),
         overflow: TextOverflow.ellipsis,
-        style:  TextStyle(
-          //Default flutter subtitle font size (not dense)
-          fontSize: 13.5,
-          // This is used in ListTile elements
-          color: Theme.of(context).textTheme.caption.color,
-          // fontWeight: ThemeControl.isDark ? FontWeight.w300 : FontWeight.w600,
-          height: 0.9
-        ).merge(textStyle),
+        style: Theme.of(context).textTheme.subtitle2.merge(textStyle),
+        // style: Theme.of(context).textTheme.caption.merge(textStyle),
       ),
     );
   }

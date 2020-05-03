@@ -28,6 +28,27 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
   @override
   UIFunction checkSystemUi;
 
+  // /// Begin offset for the enter animation
+  // ///
+  // /// Defaults to [const Offset(0.16, 0.0)]
+  // final Offset entBegin;
+
+  // /// End offset for the quit animation
+  // ///
+  // /// Defaults to [const Offset(0.2, 0.0)]
+  // final Offset quitEnd;
+
+  // factory StackFadeRouteTransition.fromBottom({
+  //   @required T route,
+  //   Constants.Routes routeType,
+  // }) {
+  //   return StackFadeRouteTransition(
+  //     route: route,
+  //     entBegin: const Offset(0.0, 0.16),
+  //     quitEnd: const Offset(0.0, 0.2),
+  //   );
+  // }
+
   StackFadeRouteTransition({
     @required this.route,
     this.routeType = Constants.Routes.main,
@@ -38,6 +59,8 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
     this.exitIgnoreEventsForward = false,
     this.exitIgnoreEventsReverse = false,
     this.checkSystemUi,
+    // this.entBegin = const Offset(0.16, 0.0),
+    // this.quitEnd = const Offset(0.2, 0.0),
     Duration transitionDuration = kSMMRouteTransitionDuration,
     RouteSettings settings,
     bool opaque = true,
@@ -65,8 +88,7 @@ class StackFadeRouteTransition<T extends Widget> extends RouteTransition<T> {
     ) {
       final slideAnimation = animation.status == AnimationStatus.forward
           // Move in on enter
-          ? Tween<Offset>(begin: const Offset(0.16, 0.0), end: Offset.zero)
-              .animate(
+          ? Tween<Offset>(begin: const Offset(0.16, 0.0), end: Offset.zero).animate(
               CurvedAnimation(
                 parent: animation,
                 curve: entCurve,

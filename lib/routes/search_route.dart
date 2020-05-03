@@ -309,10 +309,6 @@ class SearchPageRoute extends RouteTransition<_SearchPage> {
   Duration get transitionDuration => const Duration(milliseconds: 450);
 
   @override
-  UIFunction checkSystemUi =
-      () => Constants.AppSystemUIThemes.mainScreen.autoWithoutContext;
-
-  @override
   bool get maintainState => delegate.maintainState;
 
   @override

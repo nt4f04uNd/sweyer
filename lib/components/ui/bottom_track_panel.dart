@@ -33,20 +33,20 @@ class BottomTrackPanel extends StatelessWidget {
               duration: const Duration(seconds: 1),
               shadowColor: Colors.black87,
               shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(26.0),
-                topRight: Radius.circular(26.0),
-              ),
+              // borderRadius: BorderRadius.only(
+              //   topLeft: Radius.circular(26.0),
+              //   topRight: Radius.circular(26.0),
+              // ),
               color: Colors.transparent,
               elevation: 20.0,
               child: Container(
                 height: 76.0,
                 alignment: Alignment.bottomCenter,
                 child: Material(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(28.0),
-                    topRight: Radius.circular(28.0),
-                  ),
+                  // borderRadius: BorderRadius.only(
+                  //   topLeft: Radius.circular(28.0),
+                  //   topRight: Radius.circular(28.0),
+                  // ),
                   color: Theme.of(context).colorScheme.secondary,
                   child: GestureDetector(
                     onTap: () async {
@@ -65,10 +65,10 @@ class BottomTrackPanel extends StatelessWidget {
                           Text(
                             ContentControl.state.currentSong.title,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 16.5),
+                            style: Theme.of(context).textTheme.headline6.copyWith(fontSize: 16.5),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 1),
+                            padding: const EdgeInsets.only( bottom: 4.0),
                             child: Artist(
                               artist: ContentControl.state.currentSong.artist,
                             ),

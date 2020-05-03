@@ -28,7 +28,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
     if (_appVersion != null) {
       postFix = "@v" + _appVersion;
     }
-    return "Sweyer" + postFix;
+    return Constants.Config.APPLICATION_TITLE + postFix;
   }
 
   int _clickCount = 0;
@@ -175,8 +175,9 @@ class _SettingsRouteState extends State<SettingsRoute> {
                       //     children: <Widget>[
                       Text(
                         appName,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.w700,
+                          color: Theme.of(context).textTheme.headline6.color,
                         ),
                       ),
                       //       Padding(
@@ -199,11 +200,11 @@ class _SettingsRouteState extends State<SettingsRoute> {
                       ),
                     ),
                     onTap: () async {
-                      final url = Constants.Config.GITHUB_REPO_URL;
+                      const url = Constants.Config.GITHUB_REPO_URL;
                       if (await canLaunch(url)) {
                         await launch(url);
                       } else {
-                        throw 'Could not launch ${url}';
+                        throw 'Could not launch $url';
                       }
                     },
                   ),

@@ -89,21 +89,15 @@ class AlbumArtPlayerRoute extends StatelessWidget {
       if (path == null || !File(path).existsSync()) {
         return AlbumPlaceholderLarge(size: size);
       } else {
-        return Material(
-          elevation: 6.0,
+        return ClipRRect(
           borderRadius: const BorderRadius.all(
             Radius.circular(10.0),
           ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(10.0),
-            ),
-            child: Image.file(
-              File(path),
-              width: size,
-              height: size,
-              fit: BoxFit.fill,
-            ),
+          child: Image.file(
+            File(path),
+            width: size,
+            height: size,
+            fit: BoxFit.fill,
           ),
         );
       }
@@ -134,21 +128,15 @@ class AlbumArtLarge extends StatelessWidget {
         logoFactor: placeholderLogoFactor,
       );
     } else {
-      return Material(
-        elevation: 6.0,
+      return ClipRRect(
         borderRadius: const BorderRadius.all(
           Radius.circular(10.0),
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(10.0),
-          ),
-          child: Image.file(
-            File(path),
-            width: size,
-            height: size,
-            fit: BoxFit.fill,
-          ),
+        child: Image.file(
+          File(path),
+          width: size,
+          height: size,
+          fit: BoxFit.fill,
         ),
       );
     }
@@ -306,21 +294,15 @@ class AlbumPlaceholderLarge extends StatelessWidget {
   final double logoFactor;
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 3.0,
-      borderRadius: const BorderRadius.all(
-        Radius.circular(10.0),
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Constants.AppTheme.albumArt.auto(context),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
       ),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Constants.AppTheme.albumArt.auto(context),
-          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-        ),
-        padding: EdgeInsets.all(size / 2 * (1 - logoFactor)),
-        child: SvgPicture.asset(Constants.Paths.ASSET_LOGO_SVG),
-      ),
+      padding: EdgeInsets.all(size / 2 * (1 - logoFactor)),
+      child: SvgPicture.asset(Constants.Paths.ASSET_LOGO_SVG),
     );
   }
 }
@@ -341,26 +323,7 @@ class AlbumArtBaseSmall extends StatelessWidget {
         color: Constants.AppTheme.albumArt.auto(context),
         borderRadius: const BorderRadius.all(Radius.circular(10.0)),
       ),
-      padding: const EdgeInsets.all(10.0),
-      child: child,
-    );
-  }
-}
-
-/// An empty box that occupies the same space as the small album art
-class AlbumArtEmptySpace extends StatelessWidget {
-  const AlbumArtEmptySpace({Key key, this.child}) : super(key: key);
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: kSMMSmallArtSize,
-      height: kSMMSmallArtSize,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-      ),
-      padding: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(9.0),
       child: child,
     );
   }

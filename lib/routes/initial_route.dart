@@ -9,8 +9,6 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-const Duration kSMMSelectionDuration = Duration(milliseconds: 500);
-
 class InitialRoute extends StatefulWidget {
   @override
   InitialRouteState createState() => InitialRouteState();
@@ -144,7 +142,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       return Future.value(false);
     } else if (selectionController.inSelection) {
       selectionController.close();
-      return false;
+      return Future.value(false);
     } else {
       DateTime now = DateTime.now();
       // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
@@ -163,10 +161,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final baseAnimation = SMMDefaultAnimation(
       parent: selectionController.animationController,
     );
-    final tapBarSlideAnimation = Tween(
-      begin: const Offset(0.0, 0.0),
-      end: const Offset(0.0, -0.8),
-    ).animate(baseAnimation);
+    // final tapBarSlideAnimation = Tween(
+    //   begin: const Offset(0.0, 0.0),
+    //   end: const Offset(0.0, -0.8),
+    // ).animate(baseAnimation);
 
     return Scaffold(
       drawer: const DrawerWidget(),
@@ -175,7 +173,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         child: SelectionAppBar(
           titleSpacing: 0.0,
           elevation: 0.0,
-          elevationSelection: 2.0,
+          elevationSelection: 0.0,
           selectionController: selectionController,
           actions: [
             SMMIconButton(
@@ -204,12 +202,21 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           title: Padding(
             padding: const EdgeInsets.only(left: 15.0),
             child: Text(
-              "Sweyer",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onBackground,
-                fontSize: 22.0,
-                fontWeight: FontWeight.w600,
-              ),
+              Constants.Config.APPLICATION_TITLE,
+              style:   TextStyle(
+          fontWeight: FontWeight.w700,
+          color:  Theme.of(context).textTheme.headline6.color,
+          fontSize: 22.0,
+        )
+              
+              // Theme.of(context).textTheme.headline5,
+              // TextStyle(
+              //   color:  Constants.AppTheme.menuItem.auto(context),
+              //   // color: Theme.of(context).colorScheme.onBackground,
+              //   // color: const Color(0xff343434),
+              //   fontSize: 22.0,
+              //   fontWeight: FontWeight.w700,
+              // ),
             ),
           ),
           titleSelection: Transform.translate(
@@ -262,51 +269,59 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   builder: (BuildContext context, Widget child) => Padding(
                     padding: EdgeInsets.only(
-                        top: 44.0 * (1 - baseAnimation.value), bottom: 34.0),
+                        top: 44.0
+                        // * (1 - baseAnimation.value)
+                        ,
+                        bottom: 34.0),
                     child: child,
                   ),
                 ),
               ),
               IgnorePointer(
                 ignoring: selectionController.inSelection,
-                child: FadeTransition(
-                  opacity: ReverseAnimation(baseAnimation),
-                  child: SlideTransition(
-                    position: tapBarSlideAnimation,
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        splashFactory: ListTileInkRipple.splashFactory,
-                      ),
-                      child: Material(
-                        elevation: 2.0,
-                        color: Theme.of(context).colorScheme.background,
-                        child: SMMTabBar(
-                          controller: _tabController,
-                          indicatorWeight: 5.0,
-                          indicator: BoxDecoration(
-                            color: Constants.AppTheme.menuItem.auto(context),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: const Radius.circular(3.0),
-                              topRight: const Radius.circular(3.0),
-                            ),
-                          ),
-                          labelColor: Constants.AppTheme.menuItem.auto(context),
-                          indicatorSize: TabBarIndicatorSize.label,
-                          unselectedLabelColor: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.6),
-                          labelStyle: Theme.of(context)
-                              .textTheme
-                              .bodyText1
-                              .copyWith(fontSize: 15.0),
-                          tabs: _tabs,
+                child:
+                    // FadeTransition(
+                    //   opacity: ReverseAnimation(baseAnimation),
+                    //   child:
+                    // SlideTransition(
+                    //   position: tapBarSlideAnimation,
+                    // child:
+                    Theme(
+                  data: Theme.of(context).copyWith(
+                    splashFactory: ListTileInkRipple.splashFactory,
+                  ),
+                  child: Material(
+                    elevation: 2.0,
+                    color: Theme.of(context).appBarTheme.color,
+                    child: SMMTabBar(
+                      controller: _tabController,
+                      indicatorWeight: 5.0,
+                      indicator: BoxDecoration(
+                        // color: Theme.of(context).textTheme.headline6.color,
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: const Radius.circular(3.0),
+                          topRight: const Radius.circular(3.0),
                         ),
                       ),
+                      labelColor: Theme.of(context).textTheme.headline6.color,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      unselectedLabelColor: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
+                      labelStyle: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(
+                              fontSize: 15.0, fontWeight: FontWeight.w900),
+                      tabs: _tabs,
                     ),
                   ),
                 ),
               ),
+              // ),
+              // ),
               BottomTrackPanel(),
             ],
           ),

@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 class AlbumTile extends StatelessWidget {
   const AlbumTile({
@@ -18,7 +19,9 @@ class AlbumTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        // Navigator.of(context).pushNamed(Constants.Routes.album.value);
+      },
       splashFactory: ListTileInkRipple.splashFactory,
       child: Container(
         padding: const EdgeInsets.only(
@@ -34,7 +37,7 @@ class AlbumTile extends StatelessWidget {
               child: AlbumArtLarge(
                 path: album.albumArt,
                 size: 70.0,
-                placeholderLogoFactor: 0.63,
+                placeholderLogoFactor: 0.62,
               ),
             ),
             Expanded(
@@ -45,17 +48,12 @@ class AlbumTile extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       album.album,
-                      style: TextStyle(
-                        fontSize: 15.0,
-                      ),
+                      style: Theme.of(context).textTheme.headline6,
                     ),
-                    Text(
-                      album.artist,
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: Theme.of(context).textTheme.caption.color,
-                      ),
-                    ),
+                    Artist(
+                      artist: album.artist,
+                      textStyle: const TextStyle(fontSize: 14, height: 1.0),
+                    )
                   ],
                 ),
               ),

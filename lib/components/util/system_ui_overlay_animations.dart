@@ -151,7 +151,7 @@ abstract class SystemUiOverlayStyleControl {
     assert(to != null);
 
     _lastOverlayStyle ??=
-        Constants.AppSystemUIThemes.mainScreen.autoWithoutContext;
+        Constants.AppSystemUIThemes.allScreens.autoWithoutContext;
     from ??= _lastOverlayStyle;
 
     if (_controller.isAnimating) {

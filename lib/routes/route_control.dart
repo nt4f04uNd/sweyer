@@ -30,8 +30,6 @@ abstract class RouteControl {
       StackFadeRouteTransition(
         checkEntAnimationEnabled: () => false,
         maintainState: true,
-        checkSystemUi: () =>
-            Constants.AppSystemUIThemes.mainScreen.autoWithoutContext,
         exitIgnoreEventsForward: false,
         route: InitialRoute(),
       )
@@ -62,15 +60,19 @@ abstract class RouteControl {
     }
     //******** Player ********
     else if (settings.name == Constants.Routes.player.value) {
-      // return RouteExpandTransition(route: PlayerRoute());
       return ExpandUpRouteTransition(
         routeType: Constants.Routes.player,
-        opaque: true,
         transitionDuration: kSMMPlayerRouteTransitionDuration,
         checkExitAnimationEnabled: () => false,
         route: PlayerRoute(),
       );
     }
+    // else if (settings.name == Constants.Routes.album.value) {
+    //   return StackFadeRouteTransition(
+    //     routeType: Constants.Routes.album,
+    //     route: AlbumRoute(),
+    //   );
+    // }
     //******** Search ********
     else if (settings.name == Constants.Routes.search.value) {
       return (settings.arguments as Route);

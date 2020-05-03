@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:catcher/core/catcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/api.dart' as API;

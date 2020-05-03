@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 // const double kSMMAppBarPreferredSize = 63.0;
-const double kSMMAppBarPreferredSize = 50.0;
+const double kSMMAppBarPreferredSize = 52.0;
 
 /// Creates [Scaffold] with preferred size [AppBar]
 class PageBase extends StatelessWidget {
@@ -16,7 +16,8 @@ class PageBase extends StatelessWidget {
   /// Text that will be displayed in app bar title
   final String name;
   final Color backgroundColor;
-
+  final Color appBarBackgroundColor;
+final double appBarElevation;
   /// Actions in [AppBar]
   final List<Widget> actions;
 
@@ -28,6 +29,8 @@ class PageBase extends StatelessWidget {
     @required this.child,
     this.name = "",
     this.backgroundColor,
+    this.appBarBackgroundColor,
+    this.appBarElevation,
     this.actions = const [],
     this.backButton = const SMMBackButton(),
   })  : assert(child != null),
@@ -41,17 +44,21 @@ class PageBase extends StatelessWidget {
         preferredSize:
             Size.fromHeight(kSMMAppBarPreferredSize), // here the desired height
         child: AppBar(
+          elevation: appBarElevation,
           titleSpacing: 0.0,
-          backgroundColor: Colors.transparent,
           automaticallyImplyLeading: false,
+          backgroundColor: appBarBackgroundColor,
           leading: backButton,
           actions: actions,
           title: Text(
             name,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.headline6.color,
-              // fontWeight: FontWE
-            ),
+            style:  Theme.of(context).appBarTheme.textTheme.headline6.copyWith(fontSize:21.0,),
+            // TextStyle(
+            //   color: Theme.of(context).textTheme.headline6.color,
+            //   fontWeight: FontWeight.w600,
+            //   fontSize:22.0,
+            //   // fontWeight: FontWE
+            // ),
           ),
         ),
       ),

@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
+const Duration kSMMSelectionDuration = Duration(milliseconds: 500);
+
 typedef StatusListener(SelectionStatus status);
 enum SelectionStatus {
   inSelection,
@@ -18,8 +20,6 @@ enum SelectionStatus {
   notInSelection,
 }
 
-/// TODO: rewrite comments for this mixin, as it was coped from flutter and then changed
-///
 /// A mixin that implements the addStatusListener/removeStatusListener protocol
 /// and notifies all the registered listeners when notifyStatusListeners is
 /// called.
@@ -43,7 +43,7 @@ mixin SelectionStatusListenersMixin {
   /// notified by [notifyStatusListeners].
   void didUnregisterListener();
 
-  /// Calls listener every time the status of the animation changes.
+  /// Calls listener every time the status of the selection changes.
   ///
   /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(StatusListener listener) {
@@ -51,7 +51,7 @@ mixin SelectionStatusListenersMixin {
     _statusListeners.add(listener);
   }
 
-  /// Stops calling the listener every time the status of the animation changes.
+  /// Stops calling the listener every time the status of the selection changes.
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(StatusListener listener) {
@@ -82,7 +82,7 @@ mixin SelectionStatusListenersMixin {
 ///
 /// * Selection set of generic type T
 /// * Parent general animation controller
-/// * Int switcher to add it to value key and have more extended list elements update control
+/// * Int switcher to add it to value key and achieve by doing so proper list updates
 ///
 /// Status listeners will notify about in selection state change.
 ///
@@ -103,18 +103,15 @@ class SelectionController<T>
       switch (status) {
         case AnimationStatus.forward:
           _wasEverSelected = true;
-          _isClosing = false;
           localStatus = SelectionStatus.selecting;
           break;
         case AnimationStatus.completed:
-          _isClosing = false;
           localStatus = SelectionStatus.inSelection;
           break;
         case AnimationStatus.reverse:
           localStatus = SelectionStatus.unselecting;
           break;
         case AnimationStatus.dismissed:
-          _isClosing = false;
           selectionSet.clear();
           localStatus = SelectionStatus.notInSelection;
           break;
@@ -129,7 +126,6 @@ class SelectionController<T>
   final Set<T> selectionSet;
   SelectionStatus _status = SelectionStatus.notInSelection;
   bool _wasEverSelected = false;
-  bool _isClosing = false;
   int _prevSetLength = 0;
 
   /// Current selection status
@@ -137,9 +133,6 @@ class SelectionController<T>
 
   /// Returns true if controller was never in the [inSelection] state
   bool get wasEverSelected => _wasEverSelected;
-
-  /// An indicator to that controller is unselecting from the call of [close] method
-  bool get isClosing => _isClosing;
 
   /// Whether controller is in [SelectionStatus.inSelection] or [SelectionStatus.selecting]
   bool get inSelection =>
@@ -151,12 +144,12 @@ class SelectionController<T>
       _status == SelectionStatus.notInSelection ||
       _status == SelectionStatus.unselecting;
 
-  /// Returns true when current set length is greater or equal than the previous.
+  /// Returns true when current selection set length is greater or equal than the previous.
   ///
   /// Convenient for tab bar count animation updates, for example.
   bool get lengthIncreased => selectionSet.length >= _prevSetLength;
 
-  /// Returns true when current set length is less than the previous.
+  /// Returns true when current selection set length is less than the previous.
   ///
   /// Convenient for tab bar count animation updates, for example.
   bool get lengthReduced => selectionSet.length < _prevSetLength;
@@ -167,12 +160,12 @@ class SelectionController<T>
 
   /// Adds an item to selection set and also notifies click listeners, in case if selection status mustn't change
   void selectItem(T item) {
-    if (notInSelection && _isClosing) {
+    if (notInSelection) {
       selectionSet.clear();
     }
     _handleSetChange();
     selectionSet.add(item);
-    
+
     if (notInSelection && selectionSet.length > 0) {
       animationController.forward();
     } else if (selectionSet.length > 1) {
@@ -195,7 +188,6 @@ class SelectionController<T>
 
   /// Clears the set and performs the unselect animation
   void close() {
-    _isClosing = true;
     _handleSetChange();
     switcher.change();
     animationController.reverse();
@@ -204,9 +196,6 @@ class SelectionController<T>
   @override
   void dispose() {
     super.dispose();
-
-    if (animationController != null) {
-      animationController.dispose();
-    }
+    animationController.dispose();
   }
 }

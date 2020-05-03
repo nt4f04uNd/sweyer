@@ -91,48 +91,31 @@ class _SongTileState extends State<SongTile> {
         //       position: RelativeRect.fromLTRB(pos.dx, pos.dy, pos.dx, pos.dy),
 
         //       // menuBorderRadius: widget.menuBorderRadius,
-        //       menuPadding: const EdgeInsets.all(0.0),
+        //       menuPadding: EdgeInsets.zero,
         //     );
         //   },
         //   child:
-        ListTileTheme(
+        SMMListTile(
       key: _key,
-      selectedColor: Theme.of(context).textTheme.headline6.color,
-      child: SMMListTile(
-        subtitle: Artist(artist: widget.song.artist),
-        // subtitle: Text(song.artist),
-        dense: true,
-        isThreeLine: false,
-        contentPadding: const EdgeInsets.only(left: 10.0, top: 0.0),
-        onTap: _handleTap,
-        leading: AlbumArtSmall(path: widget.song.albumArt),
-        title: Text(
-          widget.song.title,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 15.0 /* Default flutter title font size (not dense) */,
-          ),
-        ),
-        trailing: widget.playing
-            ? Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-              )
-            : null,
+      subtitle: Artist(artist: widget.song.artist),
+      // subtitle: Text(song.artist),
+      dense: true,
+      isThreeLine: false,
+      contentPadding: const EdgeInsets.only(left: 10.0, top: 0.0),
+      onTap: _handleTap,
+      leading: AlbumArtSmall(path: widget.song.albumArt),
+      title: Text(
+        widget.song.title,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.headline6,
       ),
+      trailing: widget.playing ? const SongIndicator() : null,
       // ),
     );
   }
 }
 
-/// [SongTile] that represents a single track in [TrackList]
+/// [SongTile] that represents a single track in [SongListTab]
 class SelectableSongTile extends StatefulWidget implements SongTileInterface {
   SelectableSongTile({
     Key key,
@@ -160,7 +143,7 @@ class SelectableSongTile extends StatefulWidget implements SongTileInterface {
 
   final Function onTap;
 
-  /// Makes tiles to be selected on first render, after this can be done via internal state
+  /// Basically makes tiles to be selected on first render, after this can be done via internal state
   final bool selected;
 
   @override
@@ -173,6 +156,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   bool _selected;
 
   AnimationController _animationController;
+  CurvedAnimation _animationBase;
   Animation<double> _animationOpacity;
   Animation<double> _animationOpacityInverse;
   Animation<double> _animationBorderRadius;
@@ -188,47 +172,41 @@ class _SelectableSongTileState extends State<SelectableSongTile>
       vsync: this,
       duration: kSMMSelectionDuration,
     );
+    _animationController.addListener(() => setState(() {}));
 
-    final CurvedAnimation animationBase = CurvedAnimation(
+    _animationBase = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
 
     _animationOpacity =
-        Tween<double>(begin: 0.0, end: 1.0).animate(animationBase);
+        Tween<double>(begin: 0.0, end: 1.0).animate(_animationBase);
     _animationOpacityInverse =
-        Tween<double>(begin: 1.0, end: 0.0).animate(animationBase);
-
+        Tween<double>(begin: 1.0, end: 0.0).animate(_animationBase);
     _animationBorderRadius =
-        Tween<double>(begin: 10.0, end: 20.0).animate(animationBase);
-
+        Tween<double>(begin: 10.0, end: 20.0).animate(_animationBase);
     _animationScale =
-        Tween<double>(begin: 1.0, end: 1.2).animate(animationBase);
-
+        Tween<double>(begin: 1.0, end: 1.2).animate(_animationBase);
     _animationScaleInverse =
-        // Tween<double>(begin: 1.17, end: 1.0).animate(animationBase);
-        Tween<double>(begin: 1.23, end: 1.0).animate(animationBase);
+        // Tween<double>(begin: 1.17, end: 1.0).animate(_animationBase);
+        Tween<double>(begin: 1.23, end: 1.0).animate(_animationBase);
 
-    _animationController
-      ..addListener(() {
-        setState(() {
-          // The state that has changed here is the animation object’s value.
-        });
-      });
-
-    if (widget.selectionController.isClosing) {
+    /// We have to check if controller is "closing", i.e. user pressed global close button to quit the selection.
+    /// Doing this check, if user will start to fling down very fast at this moment, some tiles that will be built at this moment
+    /// will know about they have to play the unselection animation too.
+    if (widget.selectionController.notInSelection) {
       // Perform unselection animation
       if (_selected) {
-        _animationController.value = 1;
-        _animationController.reverse();
         _selected = false;
+        _animationController.value =
+            widget.selectionController.animationController.value;
+        _animationController.reverse();
       }
     } else {
-      if (_selected)
+      if (_selected) {
         _animationController.value = 1;
-      else
-        _animationController.value = 0;
+      }
     }
   }
 
@@ -239,8 +217,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   }
 
   void _handleTap() {
-    if (widget.selectionController.selectionSet.isNotEmpty &&
-        !widget.selectionController.isClosing) {
+    if (widget.selectionController.inSelection) {
       _toggleSelection();
     } else {
       if (widget.onTap != null) widget.onTap();
@@ -255,7 +232,7 @@ class _SelectableSongTileState extends State<SelectableSongTile>
   }
 
   // Performs unselect animation and calls [onSelected] and [notifyUnselection]
-  void _unselect([bool onMount = false]) {
+  void _unselect() {
     widget.selectionController.unselectItem(widget.song.id);
     _animationController.reverse();
   }
@@ -272,67 +249,50 @@ class _SelectableSongTileState extends State<SelectableSongTile>
 
   @override
   Widget build(BuildContext context) {
-    return ListTileTheme(
-      selectedColor: Theme.of(context).textTheme.headline6.color,
-      child: SMMListTile(
-        subtitle: Artist(artist: widget.song.artist),
-        selected: _selected,
-        dense: true,
-        isThreeLine: false,
-        contentPadding: const EdgeInsets.only(left: 10.0, top: 0.0),
-        onTap: _handleTap,
-        onLongPress: _toggleSelection,
-        title: Text(
-          widget.song.title,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 15.0 /* Default flutter title font size (not dense) */,
-          ),
-        ),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(_animationBorderRadius.value),
-          child: Stack(
-            children: <Widget>[
-              FadeTransition(
-                opacity: _animationOpacityInverse, // Inverse values
-                child: ScaleTransition(
-                  scale: _animationScale,
-                  child: AlbumArtSmall(path: widget.song.albumArt),
-                ),
+    final theme = Theme.of(context);
+    return SMMListTile(
+      subtitle: Artist(artist: widget.song.artist),
+      dense: true,
+      isThreeLine: false,
+      contentPadding: const EdgeInsets.only(left: 10.0, top: 0.0),
+      onTap: _handleTap,
+      onLongPress: _toggleSelection,
+      title: Text(
+        widget.song.title,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.headline6,
+      ),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(_animationBorderRadius.value),
+        child: Stack(
+          children: <Widget>[
+            FadeTransition(
+              opacity: _animationOpacityInverse, // Inverse values
+              child: ScaleTransition(
+                scale: _animationScale,
+                child: AlbumArtSmall(path: widget.song.albumArt),
               ),
-              if (_animationController.value != 0)
-                FadeTransition(
-                  opacity: _animationOpacity,
-                  child: Container(
-                    width: 48.0,
-                    height: 48.0,
-                    color: Theme.of(context).colorScheme.primary,
-                    child: ScaleTransition(
-                      scale: _animationScaleInverse,
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                      ),
+            ),
+            if (_animationController.value != 0)
+              FadeTransition(
+                opacity: _animationOpacity,
+                child: Container(
+                  width: 48.0,
+                  height: 48.0,
+                  color: theme.colorScheme.primary,
+                  child: ScaleTransition(
+                    scale: _animationScaleInverse,
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-            ],
-          ),
-        ),
-        trailing: !widget.playing
-            ? null
-            : Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Container(
-                  width: 10.0,
-                  height: 10.0,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
               ),
+          ],
+        ),
       ),
+      trailing: widget.playing ? const SongIndicator() : null,
     );
   }
 }

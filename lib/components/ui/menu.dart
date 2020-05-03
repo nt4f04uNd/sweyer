@@ -41,16 +41,8 @@ class _DrawerWidgetState extends State<DrawerWidget>
       if (!_tappedList) {
         // Animate only nav panel here
         await SystemUiOverlayStyleControl.animateSystemUiOverlay(
-          from: Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext
-              .copyWith(
-            statusBarColor: Constants
-                .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
-          ),
-          to: Constants.AppSystemUIThemes.mainScreen.autoWithoutContext
-              .copyWith(
-            statusBarColor: Constants
-                .AppSystemUIThemes.mainScreen.autoWithoutContext.statusBarColor,
-          ),
+          from: Constants.AppSystemUIThemes.drawerScreen.autoWithoutContext,
+          to: Constants.AppSystemUIThemes.allScreens.autoWithoutContext,
           curve: Curves.easeInCirc,
           settings: AnimationControllerSettings(
             duration: const Duration(milliseconds: 300),
@@ -112,11 +104,11 @@ class _DrawerWidgetState extends State<DrawerWidget>
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0),
                     child: Text(
-                      'Sweyer',
-                      style: TextStyle(
+                      Constants.Config.APPLICATION_TITLE,
+                      style:TextStyle(
                         fontSize: 30.0,
                         fontWeight: FontWeight.w800,
-                        color: Constants.AppTheme.main.autoInverse(context),
+                        color: Theme.of(context).textTheme.headline6.color,
                       ),
                     ),
                   ),

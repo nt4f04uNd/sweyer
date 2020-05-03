@@ -53,14 +53,22 @@ abstract class ShowFunctions {
     final sortFeature = ContentControl.state.currentSortFeature;
     showModalBottomSheet<void>(
         context: context,
-        backgroundColor: Theme.of(context).colorScheme.secondary,
+        backgroundColor: Theme.of(context).colorScheme.background,
         builder: (BuildContext context) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Padding(
+              Container(
+                width: MediaQuery.of(context).size.width,
                 padding: const EdgeInsets.only(top: 15, bottom: 15, left: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
                 child: Text(
                   "Сортировать — ${sortFeature == SortFeature.title ? "по названию" : "по дате"}",
                   style: TextStyle(
@@ -87,9 +95,8 @@ abstract class ShowFunctions {
     BuildContext context, {
     Widget title: const Text("Предупреждение"),
     @required Widget content,
-    EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
-    EdgeInsets contentPadding:
-        const EdgeInsets.only(top: 6.0, left: 24.0, right: 24.0),
+    EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 6.0),
+    EdgeInsets contentPadding: const EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
     Widget acceptButton,
     List<Widget> additionalActions,
   }) async {
@@ -115,9 +122,8 @@ abstract class ShowFunctions {
     BuildContext context, {
     @required Widget title,
     @required Widget content,
-    EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
-    EdgeInsets contentPadding:
-        const EdgeInsets.only(top: 6.0, left: 24.0, right: 24.0),
+    EdgeInsets titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 10.0),
+    EdgeInsets contentPadding: const EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
     DialogRaisedButton acceptButton,
     DialogRaisedButton declineButton,
     bool hideDeclineButton = false,
@@ -163,8 +169,18 @@ abstract class ShowFunctions {
       pageBuilder: (context, animation, secondaryAnimation) {
         return SafeArea(
           child: AlertDialog(
-            title: title,
-            titlePadding: titlePadding,
+            title: Container(
+              padding: titlePadding,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(10.0),
+                ),
+              ),
+              child: title,
+            ),
+            titlePadding: EdgeInsets.zero,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,36 +197,45 @@ abstract class ShowFunctions {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: Row(
-                    mainAxisAlignment: additionalActions == null
-                        ? MainAxisAlignment.end
-                        : MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      if (additionalActions != null)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 6.0),
-                          child: ButtonBar(
-                            buttonPadding: const EdgeInsets.all(0.0),
-                            alignment: MainAxisAlignment.start,
-                            children: additionalActions,
+                Material(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(10.0),
+                    bottomRight: Radius.circular(10.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5.0, vertical: 2.0),
+                    child: Row(
+                      mainAxisAlignment: additionalActions == null
+                          ? MainAxisAlignment.end
+                          : MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        if (additionalActions != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6.0),
+                            child: ButtonBar(
+                              buttonPadding: EdgeInsets.zero,
+                              alignment: MainAxisAlignment.start,
+                              children: additionalActions,
+                            ),
                           ),
+                        ButtonBar(
+                          buttonPadding: EdgeInsets.zero,
+                          mainAxisSize: MainAxisSize.min,
+                          alignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            acceptButton,
+                            if (!hideDeclineButton) declineButton
+                          ],
                         ),
-                      ButtonBar(
-                        mainAxisSize: MainAxisSize.min,
-                        alignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          acceptButton,
-                          if (!hideDeclineButton) declineButton
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-            contentPadding: const EdgeInsets.all(0.0),
+            contentPadding: EdgeInsets.zero,
             contentTextStyle: Theme.of(context).textTheme.subtitle1.copyWith(
                   fontWeight: FontWeight.w500,
                   fontSize: 15.0,
@@ -253,9 +278,9 @@ abstract class ShowFunctions {
                   textAlign: TextAlign.center,
                 ),
                 titlePadding:
-                    const EdgeInsets.only(top: 12.0, left: 16.0, right: 16.0),
-                contentPadding:
-                    const EdgeInsets.only(top: 7.0, left: 2.0, right: 2.0),
+                    const EdgeInsets.only(top: 10.0, left: 16.0, right: 16.0, bottom: 6.0),
+                contentPadding: const EdgeInsets.only(
+                    top: 7.0, left: 2.0, right: 2.0, bottom: 10.0),
                 content: SelectableText(
                   errorDetails,
                   style: const TextStyle(fontSize: 11.0),

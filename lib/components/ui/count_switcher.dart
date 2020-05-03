@@ -23,6 +23,7 @@ class CountSwitcher extends StatelessWidget {
   /// Can be used to lock the switch animation.
   final Key childKey;
   final Widget child;
+
   /// `true` will play top-to-down animation, `false` vice-versa
   final bool valueIncreased;
 
@@ -33,45 +34,34 @@ class CountSwitcher extends StatelessWidget {
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (Widget child, Animation<double> animation) {
+          final baseAnimation = CurvedAnimation(
+            curve: Curves.easeOut,
+            parent: animation,
+          );
+          final baseReversedAnimation = CurvedAnimation(
+            curve: Curves.easeIn,
+            parent: animation,
+          );
+
           final inForwardAnimation = Tween<Offset>(
             begin: const Offset(0.0, -0.7),
             end: const Offset(0.0, 0.0),
-          ).animate(
-            CurvedAnimation(
-              curve: Curves.easeOut,
-              parent: animation,
-            ),
-          );
+          ).animate(baseAnimation);
 
           final inBackAnimation = Tween<Offset>(
             begin: const Offset(0.0, 0.7),
             end: const Offset(0.0, 0.0),
-          ).animate(
-            CurvedAnimation(
-              curve: Curves.easeOut,
-              parent: animation,
-            ),
-          );
+          ).animate(baseAnimation);
 
           final outForwardAnimation = Tween<Offset>(
             begin: const Offset(0.0, 0.7),
             end: const Offset(0.0, 0.0),
-          ).animate(
-            CurvedAnimation(
-              curve: Curves.easeIn,
-              parent: animation,
-            ),
-          );
+          ).animate(baseReversedAnimation);
 
           final outBackAnimation = Tween<Offset>(
             begin: const Offset(0.0, -0.7),
             end: const Offset(0.0, 0.0),
-          ).animate(
-            CurvedAnimation(
-              curve: Curves.easeIn,
-              parent: animation,
-            ),
-          );
+          ).animate(baseReversedAnimation);
 
           //* For entering widget
           if (child.key == childKey) {

@@ -33,9 +33,9 @@
         there is no splash screen (such as the default splash screen
         defined in @style/LaunchTheme). -->
             <!-- <meta-data android:name="io.flutter.theme.android.SplashScreenUntilFirstFrame" android:value="true" /> -->
-            <meta-data
+            <!-- <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                android:value="true" />
+                android:value="true" /> -->
 
             <!-- Intent filter for opening audio files -->
             <!--          <intent-filter>-->

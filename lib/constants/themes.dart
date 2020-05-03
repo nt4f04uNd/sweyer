@@ -10,34 +10,29 @@ import 'package:sweyer/sweyer.dart';
 import 'colors.dart';
 
 abstract class AppTheme {
-  //******************************************** GENERIC COLORS ********************************************
-  /// Main colors - [whiteDarkened] and [greyLight]
-  static final _ThemeContainer<Color> main = _ThemeContainer(
-    light: AppColors.whiteDarkened,
-    dark: AppColors.greyLight,
-  );
-
   //************************************** WIDGET SPECIFIC COLORS ******************************************
 
   static final _ThemeContainer<Color> albumArt = _ThemeContainer(
-    light: Color(0xfff1f2f4),
-    dark: AppColors.greyLighter,
+    light: const Color(0xfff1f2f4),
+    dark: AppColors.grey,
   );
 
   static final _ThemeContainer<Color> albumArtSmallRound = _ThemeContainer(
-    light: Colors.white,
-    dark: Color(0xFF353535),
+    // light: AppColors.whiteDarkened,
+    light: albumArt.light,
+    dark: const Color(0xFF353535),
   );
 
   static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
     // light: Colors.black.withOpacity(0.05),
-    light: AppColors.whiteDarkened,
+    // light: AppColors.whiteDarkened,
+    light: Colors.white,
     dark: Colors.white.withOpacity(0.05),
   );
 
   static final _ThemeContainer<Color> popupMenu = _ThemeContainer(
-    light: Color(0xFFeeeeee),
-    dark: Color(0xFF333333),
+    light: const Color(0xFFeeeeee),
+    dark: const Color(0xFF333333),
   );
 
   static final _ThemeContainer<Color> disabledIcon = _ThemeContainer(
@@ -46,13 +41,13 @@ abstract class AppTheme {
   );
 
   static final _ThemeContainer<Color> playPauseIcon = _ThemeContainer(
-    light: Color(0xff555659),
-    dark: Color(0xfff1f2f4),
+    light: const Color(0xff555659),
+    dark: const Color(0xfff1f2f4),
   );
 
   static final _ThemeContainer<Color> prevNextBorder = _ThemeContainer(
     light: Colors.black.withOpacity(0.1),
-    dark: Colors.white.withOpacity(0.1),
+    dark: AppColors.almostWhite.withOpacity(0.1),
   );
 
   static final _ThemeContainer<Color> playPauseBorder = _ThemeContainer(
@@ -71,12 +66,12 @@ abstract class AppTheme {
   );
 
   static final _ThemeContainer<Color> menuItem = _ThemeContainer(
-    light: Color(0xff3d3e42),
-    dark: Color(0xffe7e8ec),
+    light: const Color(0xff3d3e42),
+    dark: AppColors.almostWhite,
   );
 
   static final _ThemeContainer<Color> refreshIndicatorArrow = _ThemeContainer(
-    light: Color(0xFFe7e7e7),
+    light: const Color(0xFFe7e7e7),
     dark: Colors.white,
   );
 
@@ -86,7 +81,7 @@ abstract class AppTheme {
       fontFamily: 'Manrope',
       brightness: Brightness.light,
       //****************** Colors **********************
-      accentColor:Colors.white,
+      accentColor: Colors.white,
       backgroundColor: Colors.white,
       primaryColor: Colors.deepPurpleAccent,
 
@@ -94,29 +89,32 @@ abstract class AppTheme {
       colorScheme: ColorScheme(
         brightness: Brightness.light,
         background: Colors.white,
-        onBackground: Colors.black,
+        onBackground: AppColors.greyText,
         primary: Colors.deepPurpleAccent,
-        primaryVariant: Colors.deepPurple,
+        // This is not darker, though lighter version
+        primaryVariant: Color(0xff936bff),
         onPrimary: Colors.white,
-        secondary: AppColors.whiteDarkened,
+        // secondary: AppColors.whiteDarkened,
+        secondary: Colors.white,
         secondaryVariant: Colors.white,
-        onSecondary: AppColors.greyLight,
+        onSecondary: AppColors.grey,
         error: const Color(0xffed3b3b),
         onError: Colors.white,
 
-        /// For windows (e.g. alert dialogs)
-        surface: Colors.white,
+        /// For window headers (e.g. alert dialogs)
+        // surface: Colors.white,
+        surface: AppColors.whiteDarkened,
 
         /// For dimmed text (e.g. in appbar)
-        onSurface: Color(0xff616266),
+        onSurface: const Color(0xff616266),
       ),
 
       //****************** Specific app elements *****************
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: AppColors.almostWhite,
       textSelectionColor: Colors.deepPurpleAccent,
       textSelectionHandleColor: Colors.deepPurpleAccent,
       cursorColor: Colors.deepPurpleAccent,
-      splashColor: Color(0x40cccccc),
+      splashColor: const Color(0x40cccccc),
       // splashColor: Color(0x90bbbbbb),
 
       highlightColor: Colors.transparent,
@@ -126,26 +124,40 @@ abstract class AppTheme {
 
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        button: TextStyle(fontWeight: FontWeight.w600),
+        button: const TextStyle(fontWeight: FontWeight.w600),
         headline1:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headline2:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headline3:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
+            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        // For the app title
         headline4:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        headline5: TextStyle(fontWeight: FontWeight.w600),
-        headline6:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        subtitle1:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        subtitle2:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.greyLight),
-        bodyText1: TextStyle(fontWeight: FontWeight.w700),
-        bodyText2: TextStyle(fontWeight: FontWeight.w600),
-        overline: TextStyle(fontWeight: FontWeight.w600),
-        caption: TextStyle(fontWeight: FontWeight.w600),
+            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+
+        headline5:
+            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        // Title in song tiles
+        headline6: const TextStyle(
+          fontWeight: FontWeight.w700,
+          color: AppColors.greyText,
+          fontSize: 15.0,
+        ),
+        subtitle1: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppColors.grey,
+        ),
+        // Artist widget
+        subtitle2: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.black54,
+          fontSize: 13.5,
+          height: 0.9,
+        ),
+        bodyText1: const TextStyle(fontWeight: FontWeight.w700),
+        bodyText2: const TextStyle(fontWeight: FontWeight.w600),
+        overline: const TextStyle(fontWeight: FontWeight.w600),
+        caption: const TextStyle(fontWeight: FontWeight.w600),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -158,7 +170,14 @@ abstract class AppTheme {
         brightness: Brightness.light,
         elevation: 0.0,
         color: Colors.white,
-        iconTheme: IconThemeData(color: Colors.red),
+        iconTheme: const IconThemeData(color: Colors.red),
+        textTheme: TextTheme(
+          headline6: const TextStyle(
+            color: AppColors.greyText,
+             fontWeight: FontWeight.w600,
+              fontSize:20.0,
+          ),
+        ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         shape: RoundedRectangleBorder(
@@ -167,7 +186,8 @@ abstract class AppTheme {
             topRight: Radius.circular(10),
           ),
         ),
-        backgroundColor: AppColors.whiteDarkened,
+        backgroundColor: Colors.white,
+        // backgroundColor: AppColors.whiteDarkened,
       ),
     ),
     dark: ThemeData(
@@ -176,30 +196,35 @@ abstract class AppTheme {
       brightness: Brightness.dark,
       //****************** Colors **********************
       accentColor: AppColors.grey,
-      backgroundColor: AppColors.grey,
+      // backgroundColor: AppColors.grey,
+      backgroundColor: Colors.black,
       primaryColor: Colors.deepPurpleAccent,
+
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
         brightness: Brightness.dark,
-        background: AppColors.grey,
-        onBackground: AppColors.whiteDarkened,
+        // background: AppColors.grey,
+        background: Colors.black,
+        onBackground: AppColors.almostWhite,
         primary: Colors.deepPurpleAccent,
-        primaryVariant: Colors.deepPurple,
-        onPrimary: Colors.white,
-        secondary: AppColors.greyLight,
+        // This is not darker, though lighter version
+        primaryVariant: Color(0xff936bff),
+        onPrimary: AppColors.almostWhite,
+        secondary: AppColors.grey,
         secondaryVariant: AppColors.grey,
-        onSecondary: Colors.white,
+        onSecondary: AppColors.almostWhite,
         error: const Color(0xffed3b3b),
-        onError: Colors.white,
+        onError: AppColors.almostWhite,
 
-        /// For windows (e.g. alert dialogs)
-        surface: AppColors.greyLighter,
+        /// For window headers (e.g. alert dialogs)
+        surface: AppColors.grey,
 
         /// For dimmed text (e.g. in appbar)
-        onSurface: Color(0xfff1f2f4),
+        onSurface: const Color(0xfff1f2f4),
       ),
       //****************** Specific app elements *****************
-      scaffoldBackgroundColor: AppColors.grey,
+      // scaffoldBackgroundColor: AppColors.grey,
+      scaffoldBackgroundColor: Colors.black,
       textSelectionColor: Colors.deepPurpleAccent,
       textSelectionHandleColor: Colors.deepPurpleAccent,
       cursorColor: Colors.deepPurpleAccent,
@@ -209,26 +234,38 @@ abstract class AppTheme {
       //****************** Themes *********************
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        button: TextStyle(fontWeight: FontWeight.w600),
-        headline1: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        headline2: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        headline3: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        headline4: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        headline5: TextStyle(fontWeight: FontWeight.w600),
-        headline6: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        subtitle1: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        subtitle2: TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.whiteDarkened),
-        bodyText1: TextStyle(fontWeight: FontWeight.w700),
-        bodyText2: TextStyle(fontWeight: FontWeight.w600),
-        overline: TextStyle(fontWeight: FontWeight.w600),
-        caption: TextStyle(fontWeight: FontWeight.w600),
+        button: const TextStyle(fontWeight: FontWeight.w600),
+        headline1: const TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline2: const TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline3: const TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline4: const TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline5: const TextStyle(
+            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline6: const TextStyle(
+          fontWeight: FontWeight.w700,
+          color: AppColors.almostWhite,
+          fontSize: 15.0,
+        ),
+        // Title in song tiles
+        subtitle1: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppColors.almostWhite,
+        ),
+        // Artist widget
+        subtitle2: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.white70,
+          fontSize: 13.5,
+          height: 0.9,
+        ),
+        bodyText1: const TextStyle(fontWeight: FontWeight.w700),
+        bodyText2: const TextStyle(fontWeight: FontWeight.w600),
+        overline: const TextStyle(fontWeight: FontWeight.w600),
+        caption: const TextStyle(fontWeight: FontWeight.w600),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -240,7 +277,14 @@ abstract class AppTheme {
       appBarTheme: AppBarTheme(
         brightness: Brightness.dark,
         color: AppColors.grey,
-        elevation: 0,
+        elevation: 0.0,
+        textTheme: TextTheme(
+          headline6: const TextStyle(
+            color: AppColors.almostWhite,
+             fontWeight: FontWeight.w600,
+              fontSize:20.0,
+          ),
+        ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         shape: RoundedRectangleBorder(
@@ -260,7 +304,7 @@ abstract class AppSystemUIThemes {
   static final _ThemeContainer<SystemUiOverlayStyle> allScreens =
       _ThemeContainer(
     light: const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.white,
+      systemNavigationBarColor: AppColors.almostWhite,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
       statusBarColor: Colors.transparent,
@@ -268,22 +312,13 @@ abstract class AppSystemUIThemes {
       statusBarIconBrightness: Brightness.dark,
     ),
     dark: SystemUiOverlayStyle(
-      systemNavigationBarColor: AppColors.grey,
+      systemNavigationBarColor: Colors.black,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.light,
     ),
-  );
-
-  /// Theme for the main screen
-  static final _ThemeContainer<SystemUiOverlayStyle> mainScreen =
-      _ThemeContainer(
-    light: allScreens.light
-        .copyWith(systemNavigationBarColor: AppColors.whiteDarkened),
-    dark:
-        allScreens.dark.copyWith(systemNavigationBarColor: AppColors.greyLight),
   );
 
   /// Theme for the drawer screen
@@ -296,12 +331,12 @@ abstract class AppSystemUIThemes {
   /// Theme for dialog screen
   ///
   /// TODO: implement this with dialogs
-  static final _ThemeContainer<SystemUiOverlayStyle> dialogScreen =
-      _ThemeContainer(
-    light:
-        allScreens.light.copyWith(systemNavigationBarColor: Color(0xffaaaaaa)),
-    dark: allScreens.dark.copyWith(systemNavigationBarColor: Color(0xff111111)),
-  );
+  // static final _ThemeContainer<SystemUiOverlayStyle> dialogScreen =
+  //     _ThemeContainer(
+  //   light:
+  //       allScreens.light.copyWith(systemNavigationBarColor: Color(0xffaaaaaa)),
+  //   dark: allScreens.dark.copyWith(systemNavigationBarColor: Color(0xff111111)),
+  // );
 }
 
 /// Class to wrap some values, so they will have [light] and [dark] variants
