@@ -15,7 +15,7 @@ import com.nt4f04uNd.sweyer.channels.PlayerChannel;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.flutter.Log;
+import android.util.Log;
 
 /**
  * Just a junk yard of various utils methods
@@ -36,7 +36,7 @@ public abstract class GeneralHandler {
     }
 
     public static boolean activityExists() {
-        return PlayerChannel.channel != null;
+        return PlayerChannel.instance.channel != null;
     }
 
     /**

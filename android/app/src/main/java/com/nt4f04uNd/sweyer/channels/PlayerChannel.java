@@ -8,136 +8,144 @@
 
 package com.nt4f04uNd.sweyer.channels;
 
+import android.util.Log;
+
+import com.google.gson.Gson;
 import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04uNd.sweyer.handlers.NotificationHandler;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
-import com.nt4f04uNd.sweyer.player.ReleaseMode;
+import com.nt4f04uNd.sweyer.handlers.QueueHandler;
 import com.nt4f04uNd.sweyer.player.Song;
+import com.nt4f04uNd.sweyer.services.MusicService;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import androidx.annotation.Nullable;
-import io.flutter.Log;
+
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.view.FlutterView;
 
-public class PlayerChannel implements MethodChannel.MethodCallHandler {
+public enum PlayerChannel {
+   instance;
 
-    public static void init(FlutterView view) {
-        if (channel == null) {
-            channel = new MethodChannel(view, Constants.channels.player.CHANNEL_NAME);
-            channel.setMethodCallHandler(new PlayerChannel());
-        }
-    }
+   public void init(BinaryMessenger messenger) {
+      if (channel == null) {
+         channel = new MethodChannel(messenger, "playerChannel");
+         channel.setMethodCallHandler(this::onMethodCall);
+      }
+   }
 
-    public static void kill() {
-        channel = null;
-    }
+   public void kill() {
+      channel = null;
+   }
 
-    @Nullable
-    public static MethodChannel channel;
+   @Nullable
+   public MethodChannel channel;
 
+   /**
+    * This might be called when flutter view is detached
+    * Normally, `kill` method will set channel to null
+    * But `onDestroy` method is not guaranteed to be called, so sometimes it won't happen
+    * AFAIK this isn't something bad and not an error, but warning
+    */
+   public void invokeMethod(String method, Object arguments) {
+      if (channel != null) {
+         channel.invokeMethod(method, arguments);
+      }
+   }
 
-    /**
-     * NOTE that this might be called when flutter view is detached
-     * Normally, `kill` method will set channel to null
-     * But `onDestroy` method is not guaranteed to be called, so sometimes it won't happen
-     * <p>
-     * AFAIK this isn't something bad and not an error, but warning
-     */
-    public static void invokeMethod(String method, Object arguments) {
-        if (channel != null) {
-            channel.invokeMethod(method, arguments);
-        }
-    }
+   public void onMethodCall(@NotNull final MethodCall call, @NotNull final MethodChannel.Result response) {
+      try {
+         handleMethodCall(call, response);
+      } catch (Exception e) {
+         PlayerHandler.handleError(e);
+         response.error("NATIVE_PLAYER_ERROR", e.getMessage(), Log.getStackTraceString(e));
+      }
+   }
 
-    @Override
-    public void onMethodCall(@NotNull final MethodCall call, @NotNull final MethodChannel.Result response) {
-        try {
-            handleMethodCall(call, response);
-        } catch (Exception e) {
-            PlayerHandler.handleError(e);
-            response.error("NATIVE_PLAYER_ERROR", e.getMessage(), e.getStackTrace());
-        }
-    }
-
-    private static void handleMethodCall(final MethodCall call, final MethodChannel.Result result) {
-        // TODO: add getVolume
-        switch (call.method) {
-            case "play": {
-                PlayerHandler.play(
-                        Song.fromJson(new JSONObject((HashMap) call.argument("song"))),
-                        call.argument("volume"),
-                        call.argument("position"),
-                        call.argument("stayAwake")
-                );
-                break;
+   private void handleMethodCall(final MethodCall call, final MethodChannel.Result result) {
+      switch (call.method) {
+         case "clearIdMap": {
+            QueueHandler.initIdMap();
+            QueueHandler.idMap.clear();
+            break;
+         }
+         case "play": {
+            PlayerHandler.play(
+                    new Gson().fromJson((String) call.argument("song"), Song.class),
+                    call.argument("duplicate")
+            );
+            break;
+         }
+         case "setUri": {
+            Song song = new Gson().fromJson((String) call.argument("song"), Song.class);
+            Boolean duplicate = call.argument("duplicate");
+            if (duplicate) {
+               QueueHandler.handleDuplicate(song, duplicate);
             }
-            case "resume": {
-                PlayerHandler.resume();
-                break;
+            QueueHandler.setCurrentSong(song);
+            if (MusicService.isRunning) {
+               NotificationHandler.updateNotification(PlayerHandler.isPlaying(), PlayerHandler.isLooping());
             }
-            case "pause": {
-                PlayerHandler.pause();
-                break;
-            }
-            case "stop": {
-                PlayerHandler.stop();
-                break;
-            }
-            case "release": {
-                PlayerHandler.release();
-                break;
-            }
-            case "seek": {
-                PlayerHandler.seek(call.argument("position"));
-                break;
-            }
-            case "setVolume": {
-                PlayerHandler.setVolume(call.argument("volume"));
-                break;
-            }
-            case "setUri": {
-                PlayerHandler.setUri(call.argument("songId"));
-                break;
-            }
-            case "isPlaying": {
-                result.success(PlayerHandler.isPlaying());
-                return;
-            }
-            case "isLooping": {
-                result.success(PlayerHandler.isLooping());
-                return;
-            }
-            case "switchLoopMode": {
-                PlayerHandler.switchLoopMode();
-                return;
-            }
-            case "getDuration": {
-                result.success(PlayerHandler.getDuration());
-                return;
-            }
-            case "getCurrentPosition": {
-                result.success(PlayerHandler.getCurrentPosition());
-                return;
-            }
-            case "setReleaseMode": {
-                final String releaseModeName = call.argument("releaseMode");
-                final ReleaseMode releaseMode = ReleaseMode.valueOf(releaseModeName.substring("ReleaseMode.".length()));
-                PlayerHandler.setReleaseMode(releaseMode);
-                break;
-            }
-            default: {
-                result.notImplemented();
-                return;
-            }
-        }
-        result.success(1);
-    }
+            PlayerHandler.setUri(song.id);
+            break;
+         }
+         case "resume": {
+            PlayerHandler.resume();
+            break;
+         }
+         case "pause": {
+            PlayerHandler.pause();
+            break;
+         }
+         case "release": {
+            PlayerHandler.release();
+            break;
+         }
+         case "seek": {
+            PlayerHandler.seek(call.argument("position"));
+            break;
+         }
+         case "setVolume": {
+            PlayerHandler.setVolume(call.argument("volume"));
+            break;
+         }
+         case "setLooping": {
+            final boolean looping = call.argument("looping");
+            PlayerHandler.setLooping(looping);
+            break;
+         }
+         case "isPlaying": {
+            result.success(PlayerHandler.isPlaying());
+            return;
+         }
+         case "isLooping": {
+            result.success(PlayerHandler.isLooping());
+            return;
+         }
+         case "getVolume": {
+            result.success(PlayerHandler.getVolume());
+            return;
+         }
+         case "getPosition": {
+            result.success(PlayerHandler.getPosition());
+            return;
+         }
+         case "getDuration": {
+            result.success(PlayerHandler.getDuration());
+            return;
+         }
+         default: {
+            result.notImplemented();
+            return;
+         }
+      }
+      result.success(1);
+   }
 
 
 }

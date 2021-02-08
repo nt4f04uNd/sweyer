@@ -13,14 +13,11 @@ import android.os.Build;
 import android.util.Log;
 
 import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 
 public abstract class AudioFocusHandler {
-
     public static void init() {
         if (audioManager == null) {
             audioManager = (AudioManager) GeneralHandler.getAppContext().getSystemService(Context.AUDIO_SERVICE);
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Higher or equal than android 8.0
                 AudioAttributes attributes = new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -66,9 +63,6 @@ public abstract class AudioFocusHandler {
                         AudioManager.AUDIOFOCUS_GAIN
                 );
             }
-
-            Log.w(Constants.LogTag, "REQUEST FOCUS " + res);
-
             if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
                 focusState = AudioManager.AUDIOFOCUS_LOSS;
             } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -90,9 +84,6 @@ public abstract class AudioFocusHandler {
             } else {
                 res = audioManager.abandonAudioFocus(afChangeListener);
             }
-
-            Log.w(Constants.LogTag, "ABANDON FOCUS " + res);
-
             focusState = AudioManager.AUDIOFOCUS_LOSS;
         }
     }
@@ -100,54 +91,33 @@ public abstract class AudioFocusHandler {
     static public class ImplementedOnAudioFocusListener implements AudioManager.OnAudioFocusChangeListener {
         @Override
         final public void onAudioFocusChange(int focusChange) {
-            Log.w(Constants.LogTag, "ONFOCUSCHANGE: " + focusChange);
-
             focusState = focusChange;
-
             try {
                 switch (focusChange) {
                     // NOTE THAT WE CALL HERE BARE PLAYER FUNCTIONS
                     // THIS IS BECAUSE IN PLAYER HANDLER `pause` AND `resume` FUNCTIONS CALL request AND abandon FOCUS METHODS
                     case AudioManager.AUDIOFOCUS_GAIN: {
-                        io.flutter.Log.w(Constants.LogTag, Constants.channels.events.AUDIOFOCUS_GAIN);
-
-
                         PlayerHandler.bareResume();
-
-                        NativeEventsChannel.success(Constants.channels.events.AUDIOFOCUS_GAIN);
                         break;
                     }
                     case AudioManager.AUDIOFOCUS_LOSS: {
-                        io.flutter.Log.w(Constants.LogTag, Constants.channels.events.AUDIOFOCUS_LOSS);
-
                         PlayerHandler.barePause();
-
-                        NativeEventsChannel.success(Constants.channels.events.AUDIOFOCUS_LOSS);
                         break;
                     }
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: {
-                        io.flutter.Log.w(Constants.LogTag, Constants.channels.events.AUDIOFOCUS_LOSS_TRANSIENT);
-
                         PlayerHandler.barePause();
-
-                        NativeEventsChannel.success(Constants.channels.events.AUDIOFOCUS_LOSS_TRANSIENT);
                         break;
                     }
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: {
-                        io.flutter.Log.w(Constants.LogTag, Constants.channels.events.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
-                        // TODO: implement volume change
-
+                        // TODO: [NR] implement volume change
                         PlayerHandler.barePause();
-
-                        NativeEventsChannel.success(Constants.channels.events.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
                         break;
                     }
                 }
             } catch (IllegalStateException e) {
-                io.flutter.Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+                Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
             }
         }
-
 
     }
 }

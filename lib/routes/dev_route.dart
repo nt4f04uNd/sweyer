@@ -4,90 +4,70 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/api.dart' as API;
-import 'package:flutter/material.dart';
-
 import 'package:sweyer/constants.dart' as Constants;
 
-import 'package:flutter/scheduler.dart' show timeDilation;
-
 class DevRoute extends StatelessWidget {
-  DevRoute({Key key}) : super(key: key);
+  const DevRoute({Key key}) : super(key: key);
 
-  // TODO: refactor this (ontaps handlers)
+  void _testToast() {
+    ShowFunctions.instance.showToast(
+      msg: 'Test',
+      toastLength: Toast.LENGTH_LONG,
+      backgroundColor: ThemeControl.theme.colorScheme.primary,
+    );
+  }
+
+  void _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
+    final res = await ShowFunctions.instance.showDialog(
+      App.navigatorKey.currentContext,
+      title: Text(l10n.areYouSure),
+      content: Text(l10n.quitDevModeDescription),
+      buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
+      acceptButton: NFButton.accept(
+        text: nfl10n.accept,
+        splashColor: Constants.AppTheme.dialogButtonSplash.auto,
+        textStyle: const TextStyle(color: Constants.AppColors.red),
+      ),
+    );
+    if (res != null && res) {
+      ContentControl.setDevMode(false);
+      App.navigatorKey.currentState.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PageBase(
-      name: "Дебаг",
+    final l10n = getl10n(context);
+    return NFPageBase(
+      name: l10n.debug,
       child: Column(
         children: <Widget>[
           Expanded(
             child: ListView(
               physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
-                SMMListTile(
-                  title: Text("Остановить сервис"),
-                  onTap: () {
-                    API.ServiceHandler.stopService();
-                  },
+                NFListTile(
+                  title: Text(l10n.devStopService),
+                  onTap: API.GeneralHandler.stopService,
                 ),
-                SMMListTile(
-                  title: Text("Тестовый тост"),
-                  onTap: () {
-                    ShowFunctions.showToast(
-                      msg: "Тест",
-                      toastLength: Toast.LENGTH_LONG,
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                    );
-                  },
+                NFListTile(
+                  title: Text(l10n.devTestToast),
+                  onTap: _testToast,
                 ),
-                _TimeDilationSlider(),
-                SMMListTile(
-                  title: Text("Сгенерировать снакбар с ошибкой"),
-                  onTap: () async {
-                    try {
-                      throw Exception("Test error");
-                    } catch (e, s) {
-                      ShowFunctions.showError(context, errorDetails: """$e
-
-$s""");
-                    }
-                  },
-                ),
-                SMMListTile(
-                  title: Text("Сгенерировать важный снакбар"),
-                  onTap: () {
-                    SnackBarControl.showSnackBar(
-                      SMMSnackbarSettings(
-                        important: true,
-                        child: SMMSnackBar(
-                          message: "Вы почти у цели!",
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                
+                const _TimeDilationSlider(),
               ],
             ),
           ),
-          SMMListTile(
-            title: Text("Выйти из режима разработчика"),
-            splashColor: Theme.of(context).colorScheme.error,
-            onTap: () async {
-              var res = await ShowFunctions.showDialog(
-                context,
-                title: Text("Вы уверены?"),
-                content: Text("Перестать быть разработчиком?"),
-                // acceptButton: DialogRaisedButton.accept(text: "Сохранить"),
-              );
-
-              if (res != null && res) {
-                Prefs.developerModeBool.setPref(value: false);
-                App.navigatorKey.currentState.pop();
-              }
-            },
+          NFListTile(
+            title: Text(l10n.quitDevMode),
+            splashColor: ThemeControl.theme.colorScheme.error,
+            onTap: () => _quitDevMode(l10n, NFLocalizations.of(context)),
           ),
         ],
       ),
@@ -96,8 +76,7 @@ $s""");
 }
 
 class _TimeDilationSlider extends StatefulWidget {
-  _TimeDilationSlider({Key key}) : super(key: key);
-
+  const _TimeDilationSlider({Key key}) : super(key: key);
   _TimeDilationSliderState createState() => _TimeDilationSliderState();
 }
 
@@ -125,14 +104,16 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = getl10n(context);
     return SettingItem(
-      title: "Замедление анимаций",
+      title: l10n.devAnimationsSlowMo,
       trailing: ChangedSwitcher(
         changed: _value != 1.0,
         child: ButtonTheme(
           height: 36.0,
-          child: PrimaryRaisedButton(
-            text: "Сбросить",
+          child: NFButton(
+            variant: NFButtonVariant.raised,
+            text: l10n.reset,
             onPressed: () {
               _handleChangeEnd(1.0);
             },
@@ -140,18 +121,19 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        inactiveColor: Constants.AppTheme.sliderInactive.auto(context),
+        inactiveColor: Constants.AppTheme.sliderInactive.auto,
         min: 0.001,
         max: 10,
         divisions: 100,
         value: _value,
         onChanged: _handleChange,
         onChangeEnd: _handleChangeEnd,
-        label: "x" + _value.toStringAsFixed(3),
+        label: 'x' + _value.toStringAsFixed(3),
         minLabel: 'x0',
         maxLabel: 'x10',
-        themeData:
-            SliderThemeData(tickMarkShape: SliderTickMarkShape.noTickMark),
+        themeData: SliderThemeData(
+          tickMarkShape: SliderTickMarkShape.noTickMark,
+        ),
       ),
     );
   }

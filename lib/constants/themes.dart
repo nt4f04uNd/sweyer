@@ -5,64 +5,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 
 import 'colors.dart';
 
+// todo: nt4f04unds_widgets
+
 abstract class AppTheme {
+  static const Color defaultPrimaryColor = AppColors.deepPurpleAccent;
+
   //************************************** WIDGET SPECIFIC COLORS ******************************************
-
-  static final _ThemeContainer<Color> albumArt = _ThemeContainer(
-    light: const Color(0xfff1f2f4),
-    dark: AppColors.grey,
-  );
-
-  static final _ThemeContainer<Color> albumArtSmallRound = _ThemeContainer(
-    // light: AppColors.whiteDarkened,
-    light: albumArt.light,
-    dark: const Color(0xFF353535),
-  );
-
-  static final _ThemeContainer<Color> searchFakeInput = _ThemeContainer(
-    // light: Colors.black.withOpacity(0.05),
-    // light: AppColors.whiteDarkened,
-    light: Colors.white,
-    dark: Colors.white.withOpacity(0.05),
-  );
-
-  static final _ThemeContainer<Color> popupMenu = _ThemeContainer(
-    light: const Color(0xFFeeeeee),
-    dark: const Color(0xFF333333),
-  );
-
-  static final _ThemeContainer<Color> disabledIcon = _ThemeContainer(
-    light: Colors.grey.shade400,
-    dark: Colors.grey.shade800,
-  );
-
-  static final _ThemeContainer<Color> playPauseIcon = _ThemeContainer(
-    light: const Color(0xff555659),
-    dark: const Color(0xfff1f2f4),
-  );
-
-  static final _ThemeContainer<Color> prevNextBorder = _ThemeContainer(
-    light: Colors.black.withOpacity(0.1),
-    dark: AppColors.almostWhite.withOpacity(0.1),
-  );
-
-  static final _ThemeContainer<Color> playPauseBorder = _ThemeContainer(
-    light: Colors.black.withOpacity(0.15),
-    dark: Colors.white.withOpacity(0.15),
-  );
 
   static final _ThemeContainer<Color> sliderInactive = _ThemeContainer(
     light: Colors.black.withOpacity(0.2),
     dark: Colors.white.withOpacity(0.2),
-  );
-
-  static final _ThemeContainer<Color> drawer = _ThemeContainer(
-    light: Colors.white,
-    dark: AppColors.grey,
   );
 
   static final _ThemeContainer<Color> menuItem = _ThemeContainer(
@@ -70,12 +27,14 @@ abstract class AppTheme {
     dark: AppColors.almostWhite,
   );
 
-  static final _ThemeContainer<Color> refreshIndicatorArrow = _ThemeContainer(
-    light: const Color(0xFFe7e7e7),
-    dark: Colors.white,
+  static final _ThemeContainer<Color> dialogButtonSplash = _ThemeContainer(
+    light: const Color(0x40cccccc),
+    dark: Colors.white.withOpacity(0.16),
   );
 
-  static final _ThemeContainer<ThemeData> materialApp = _ThemeContainer(
+  static const Color _lightIconColor = Color(0xff616266);
+
+  static _ThemeContainer<ThemeData> app = _ThemeContainer(
     light: ThemeData(
       //******** General ********
       fontFamily: 'Manrope',
@@ -83,45 +42,71 @@ abstract class AppTheme {
       //****************** Colors **********************
       accentColor: Colors.white,
       backgroundColor: Colors.white,
-      primaryColor: Colors.deepPurpleAccent,
+      primaryColor: defaultPrimaryColor,
+      disabledColor: Colors.grey.shade400,
+      unselectedWidgetColor: Colors.grey.shade400,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
         brightness: Brightness.light,
         background: Colors.white,
         onBackground: AppColors.greyText,
-        primary: Colors.deepPurpleAccent,
+        primary: defaultPrimaryColor,
         // This is not darker, though lighter version
         primaryVariant: Color(0xff936bff),
         onPrimary: Colors.white,
-        // secondary: AppColors.whiteDarkened,
-        secondary: Colors.white,
+        secondary: AppColors.eee,
         secondaryVariant: Colors.white,
-        onSecondary: AppColors.grey,
+        // todo: Temporarily used for text in [NFButtons]
+        onSecondary: defaultPrimaryColor,
         error: const Color(0xffed3b3b),
         onError: Colors.white,
 
         /// For window headers (e.g. alert dialogs)
-        // surface: Colors.white,
-        surface: AppColors.whiteDarkened,
+        surface: Colors.white,
 
         /// For dimmed text (e.g. in appbar)
-        onSurface: const Color(0xff616266),
+        onSurface: _lightIconColor,
       ),
 
       //****************** Specific app elements *****************
-      scaffoldBackgroundColor: AppColors.almostWhite,
-      textSelectionColor: Colors.deepPurpleAccent,
-      textSelectionHandleColor: Colors.deepPurpleAccent,
-      cursorColor: Colors.deepPurpleAccent,
+      scaffoldBackgroundColor: Colors.white,
       splashColor: const Color(0x40cccccc),
-      // splashColor: Color(0x90bbbbbb),
-
+      splashFactory: NFListTileInkRipple.splashFactory,
       highlightColor: Colors.transparent,
-      // highlightColor: Colors.deepPurpleAccent.shade100,
 
       //****************** Themes *********************
-
+      iconTheme: const IconThemeData(color: _lightIconColor),
+      tooltipTheme: const TooltipThemeData(
+        verticalOffset: 20.0,
+        textStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+        decoration: BoxDecoration(
+          color: defaultPrimaryColor,
+          borderRadius: BorderRadius.all(
+            Radius.circular(100.0),
+          ),
+        ),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: defaultPrimaryColor,
+        selectionColor: defaultPrimaryColor,
+        selectionHandleColor: defaultPrimaryColor,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          textStyle: MaterialStateProperty.all(
+            const TextStyle(
+              color: defaultPrimaryColor,
+            ),
+          ),
+        ),
+      ),
+      buttonTheme: ButtonThemeData(
+        textTheme: ButtonTextTheme.primary,
+      ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: const TextStyle(fontWeight: FontWeight.w600),
@@ -159,23 +144,15 @@ abstract class AppTheme {
         overline: const TextStyle(fontWeight: FontWeight.w600),
         caption: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      pageTransitionsTheme: const PageTransitionsTheme(
-        builders: {
-          TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-          TargetPlatform.fuchsia: OpenUpwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
-        },
-      ),
       appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
         elevation: 0.0,
-        color: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.red),
+        color: AppColors.eee,
         textTheme: TextTheme(
           headline6: const TextStyle(
             color: AppColors.greyText,
-             fontWeight: FontWeight.w600,
-              fontSize:20.0,
+            fontWeight: FontWeight.w600,
+            fontSize: 20.0,
           ),
         ),
       ),
@@ -187,7 +164,6 @@ abstract class AppTheme {
           ),
         ),
         backgroundColor: Colors.white,
-        // backgroundColor: AppColors.whiteDarkened,
       ),
     ),
     dark: ThemeData(
@@ -196,22 +172,23 @@ abstract class AppTheme {
       brightness: Brightness.dark,
       //****************** Colors **********************
       accentColor: AppColors.grey,
-      // backgroundColor: AppColors.grey,
       backgroundColor: Colors.black,
-      primaryColor: Colors.deepPurpleAccent,
+      primaryColor: defaultPrimaryColor,
+      disabledColor: Colors.grey.shade800,
+      unselectedWidgetColor: Colors.grey.shade800,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: ColorScheme(
         brightness: Brightness.dark,
-        // background: AppColors.grey,
         background: Colors.black,
         onBackground: AppColors.almostWhite,
-        primary: Colors.deepPurpleAccent,
+        primary: defaultPrimaryColor,
         // This is not darker, though lighter version
         primaryVariant: Color(0xff936bff),
         onPrimary: AppColors.almostWhite,
         secondary: AppColors.grey,
-        secondaryVariant: AppColors.grey,
+        secondaryVariant: Colors.black,
+        // todo: Temporarily used for [NFButtons]
         onSecondary: AppColors.almostWhite,
         error: const Color(0xffed3b3b),
         onError: AppColors.almostWhite,
@@ -220,18 +197,34 @@ abstract class AppTheme {
         surface: AppColors.grey,
 
         /// For dimmed text (e.g. in appbar)
-        onSurface: const Color(0xfff1f2f4),
+        onSurface: AppColors.whiteDarkened,
       ),
       //****************** Specific app elements *****************
       // scaffoldBackgroundColor: AppColors.grey,
       scaffoldBackgroundColor: Colors.black,
-      textSelectionColor: Colors.deepPurpleAccent,
-      textSelectionHandleColor: Colors.deepPurpleAccent,
-      cursorColor: Colors.deepPurpleAccent,
-      splashColor: Colors.deepPurpleAccent,
+      splashColor: defaultPrimaryColor,
       highlightColor: Colors.transparent,
 
       //****************** Themes *********************
+      iconTheme: const IconThemeData(color: AppColors.whiteDarkened),
+      tooltipTheme: const TooltipThemeData(
+        verticalOffset: 20.0,
+        textStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+        decoration: BoxDecoration(
+          color: defaultPrimaryColor,
+          borderRadius: BorderRadius.all(
+            Radius.circular(100.0),
+          ),
+        ),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: defaultPrimaryColor,
+        selectionColor: defaultPrimaryColor,
+        selectionHandleColor: defaultPrimaryColor,
+      ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: const TextStyle(fontWeight: FontWeight.w600),
@@ -267,13 +260,6 @@ abstract class AppTheme {
         overline: const TextStyle(fontWeight: FontWeight.w600),
         caption: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      pageTransitionsTheme: const PageTransitionsTheme(
-        builders: {
-          TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-          TargetPlatform.fuchsia: OpenUpwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
-        },
-      ),
       appBarTheme: AppBarTheme(
         brightness: Brightness.dark,
         color: AppColors.grey,
@@ -281,8 +267,8 @@ abstract class AppTheme {
         textTheme: TextTheme(
           headline6: const TextStyle(
             color: AppColors.almostWhite,
-             fontWeight: FontWeight.w600,
-              fontSize:20.0,
+            fontWeight: FontWeight.w600,
+            fontSize: 20.0,
           ),
         ),
       ),
@@ -299,15 +285,20 @@ abstract class AppTheme {
   );
 }
 
-abstract class AppSystemUIThemes {
-  /// Generic theme for all screens
-  static final _ThemeContainer<SystemUiOverlayStyle> allScreens =
-      _ThemeContainer(
-    light: const SystemUiOverlayStyle(
-      systemNavigationBarColor: AppColors.almostWhite,
+abstract class UiTheme {
+  /// Default theme for all screens.
+  ///
+  /// Theme where nav bar is [black] (with default dark theme).
+  /// For light this means [white].
+  ///
+  /// The opposite is [grey].
+  static final _ThemeContainer<SystemUiOverlayStyle> black = _ThemeContainer(
+    /// [withOpacity] needed for smooth transtion to [drawerScreen].
+    light: SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent,
+      statusBarColor: Colors.white.withOpacity(0.0),
       statusBarBrightness: Brightness.dark,
       statusBarIconBrightness: Brightness.dark,
     ),
@@ -315,64 +306,85 @@ abstract class AppSystemUIThemes {
       systemNavigationBarColor: Colors.black,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
-      statusBarColor: Colors.transparent,
+      statusBarColor: AppColors.grey.withOpacity(0.0),
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.light,
     ),
   );
 
-  /// Theme for the drawer screen
-  static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen =
-      _ThemeContainer(
-    light: allScreens.light.copyWith(statusBarColor: Colors.white),
-    dark: allScreens.dark.copyWith(statusBarColor: AppColors.grey),
+  /// Theme where nav bar is [grey] (with default dark theme).
+  /// For light this means [eee].
+  ///
+  /// The opposite is [black].
+  static final _ThemeContainer<SystemUiOverlayStyle> grey = _ThemeContainer(
+    light: black.light.copyWith(systemNavigationBarColor: AppColors.eee),
+    dark: black.dark.copyWith(systemNavigationBarColor: AppColors.grey),
   );
 
-  /// Theme for dialog screen
-  ///
-  /// TODO: implement this with dialogs
-  // static final _ThemeContainer<SystemUiOverlayStyle> dialogScreen =
-  //     _ThemeContainer(
-  //   light:
-  //       allScreens.light.copyWith(systemNavigationBarColor: Color(0xffaaaaaa)),
-  //   dark: allScreens.dark.copyWith(systemNavigationBarColor: Color(0xff111111)),
-  // );
+  /// Theme for the drawer screen.
+  static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen =
+      _ThemeContainer(
+    light: black.light.copyWith(
+      statusBarColor: Colors.white,
+      systemNavigationBarColor: Colors.white,
+    ),
+    dark: black.dark.copyWith(
+      statusBarColor: AppColors.grey,
+      systemNavigationBarColor: AppColors.grey,
+    ),
+  );
+
+  /// Theme for the bottom sheet dialog.
+  static final _ThemeContainer<SystemUiOverlayStyle> bottomSheet =
+      _ThemeContainer(
+    light: black.light.copyWith(
+      systemNavigationBarColor: Colors.white,
+      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.light,
+    ),
+    dark: black.dark.copyWith(
+      systemNavigationBarColor: Colors.black,
+    ),
+  );
+
+  /// Theme for the modal dialog.
+  static final _ThemeContainer<SystemUiOverlayStyle> modal = _ThemeContainer(
+    light: black.light.copyWith(
+      systemNavigationBarColor: const Color(0xff757575),
+      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.light,
+    ),
+    dark: black.dark.copyWith(
+      statusBarColor: Colors.black,
+    ),
+  );
+
+  /// Theme for the modal dialog that is displayed over [grey].
+  static final _ThemeContainer<SystemUiOverlayStyle> modalOverGrey =
+      _ThemeContainer(
+    light: modal.light.copyWith(
+      systemNavigationBarColor: const Color(0xff6d6d6d),
+    ),
+    dark: modal.dark.copyWith(
+      systemNavigationBarColor: const Color(0xff0d0d0d),
+    ),
+  );
 }
 
-/// Class to wrap some values, so they will have [light] and [dark] variants
+/// Class to wrap some values, so they will have [light] and [dark] variants.
 class _ThemeContainer<T> {
   final T light;
   final T dark;
-  _ThemeContainer({@required this.light, @required this.dark});
+  const _ThemeContainer({@required this.light, @required this.dark});
 
-  /// Checks theme and automatically returns corresponding ui style
-  ///
-  /// Requires [BuildContext]
-  ///
-  /// @return [light] or [dark], depending on current brightness
-  T auto(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark ? dark : light;
+  /// Checks theme and automatically [light] or [dark], depending on current brightness.
+  T get auto => ThemeControl.isDark ? dark : light;
 
-  /// Checks theme and automatically returns corresponding ui style
-  ///
-  /// Unlike [auto] doesn't require context
-  T get autoWithoutContext => ThemeControl.isDark ? dark : light;
-
-  /// Inverses brightness
-  T autoInverse(BuildContext context) =>
-      Theme.of(context).brightness != Brightness.dark ? dark : light;
-
-  /// Copy [auto], but accepts brightness instead of context
-  ///
-  /// Also checks theme and automatically returns corresponding ui style
-  ///
-  /// Requires [Brightness]
-  ///
-  /// @return [light] or [dark], depending on current brightness
-  T autoBr(Brightness brightness) =>
-      brightness == Brightness.dark ? dark : light;
-
-  /// Inverses brightness
-  T autoBrInverse(Brightness brightness) =>
-      brightness == Brightness.light ? dark : light;
+  _ThemeContainer<T> copyWith({T light, T dark}) {
+    return _ThemeContainer(
+      light: light ?? this.light,
+      dark: dark ?? this.dark,
+    );
+  }
 }

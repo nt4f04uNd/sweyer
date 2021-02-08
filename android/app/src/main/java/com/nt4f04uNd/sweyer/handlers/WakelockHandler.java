@@ -12,10 +12,10 @@ public abstract class WakelockHandler {
      */
     private static boolean timed = false;
 
-    /** TODO: move this to constants
-     *  5 minutes wake lock timeout
+    /**
+     *  1 minute wake lock timeout
      */
-    private static final int TIMEOUT = 5*60000;
+    private static final int TIMEOUT = 60000;
 
     /**
      * Acquires (or switches) wake lock without timeout

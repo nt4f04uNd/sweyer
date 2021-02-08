@@ -6,50 +6,60 @@
 package com.nt4f04uNd.sweyer.channels;
 
 import android.app.Activity;
+import android.util.Log;
 
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
+import com.nt4f04uNd.sweyer.handlers.QueueHandler;
+import com.nt4f04uNd.sweyer.services.MusicService;
 
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.Nullable;
-import io.flutter.Log;
+
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.view.FlutterView;
 
-public class GeneralChannel implements MethodChannel.MethodCallHandler {
-    public static void init(FlutterView view, Activity activity) {
+public enum GeneralChannel {
+    instance;
+    public void init(BinaryMessenger messenger, FlutterActivity activity) {
         if (channel == null) {
-            GeneralChannel.activity = activity;
-            channel = new MethodChannel(view, Constants.channels.general.CHANNEL_NAME);
-            channel.setMethodCallHandler(new GeneralChannel());
+            this.activity = activity;
+            channel = new MethodChannel(messenger, "generalChannel");
+            channel.setMethodCallHandler(this::onMethodCall);
         }
     }
 
-    public static void kill() {
+    public void kill() {
         channel = null;
         activity = null;
     }
 
     @Nullable
-    public static MethodChannel channel;
-    public static Activity activity;
+    public MethodChannel channel;
+    public Activity activity;
 
-
-    @Override
-    public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
+    public void onMethodCall(@NotNull MethodCall call, @NotNull MethodChannel.Result result) {
         // NOTE: this method is invoked on the main thread.
         try {
             switch (call.method) {
-                case Constants.channels.general.METHOD_INTENT_ACTION_VIEW:
+                case "isIntentActionView":
                     result.success(GeneralHandler.isIntentActionView(activity));
+                    break;
+                case "stopService":
+                    MusicService.stopService();
+                    break;
+                case "reloadArtPlaceholder":
+                    QueueHandler.reloadArtPlaceholder(((Long) call.arguments).intValue());
                     break;
                 default:
                     result.notImplemented();
             }
         } catch (Exception e) {
-            result.error("GENERAL_CHANNEL_ERROR", e.getMessage(), e.getStackTrace());
+            result.error("GENERAL_CHANNEL_ERROR", e.getMessage(), Log.getStackTraceString(e));
         }
     }
+
 }

@@ -7,40 +7,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
-/// This enum is meant to be used as a parameter of [setReleaseMode] method.
-///
-/// It represents the behaviour of [AudioPlayer] when an audio is finished or
-/// stopped.
-enum ReleaseMode {
-  /// Releases all resources, just like calling [release] method.
-  ///
-  /// In Android, the media player is quite resource-intensive, and this will
-  /// let it go. Data will be buffered again when needed (if it's a remote file,
-  /// it will be downloaded again).
-  /// In iOS, works just like [stop] method.
-  ///
-  /// This is the default behaviour.
-  RELEASE,
-
-  /// Keeps buffered data and plays again after completion, creating a loop.
-  /// Notice that calling [stop] method is not enough to release the resources
-  /// when this mode is being used.
-  LOOP,
-
-  /// Stops audio playback but keep all resources intact.
-  /// Use this if you intend to play again later.
-  STOP
-}
-
 /// Self explanatory. Indicates the state of the audio player.
-enum AudioPlayerState {
+enum MusicPlayerState {
   PLAYING,
   PAUSED,
-  STOPPED,
   COMPLETED,
 }
 
@@ -49,14 +23,13 @@ enum AudioPlayerState {
 /// It holds methods to play, loop, pause, stop, seek the audio, and some useful
 /// hooks for handlers and callbacks.
 ///
-/// NOTE that initialization part is located at native side
+/// The initialization part is located at native side.
 abstract class NativeAudioPlayer {
-  static final MethodChannel _channel =
-      const MethodChannel(Constants.PlayerChannel.CHANNEL_NAME)
-        ..setMethodCallHandler(platformCallHandler);
+  static final MethodChannel _channel = const MethodChannel('playerChannel')
+    ..setMethodCallHandler(platformCallHandler);
 
-  static final StreamController<AudioPlayerState> _playerStateController =
-      StreamController<AudioPlayerState>.broadcast();
+  static final StreamController<MusicPlayerState> _playerStateController =
+      StreamController<MusicPlayerState>.broadcast();
 
   static final StreamController<Duration> _positionController =
       StreamController<Duration>.broadcast();
@@ -76,115 +49,101 @@ abstract class NativeAudioPlayer {
   /// Enables more verbose logging.
   static bool logEnabled = false;
 
-  static AudioPlayerState _internalState = AudioPlayerState.PAUSED;
-  static bool _internalLoopMode = false;
+  static MusicPlayerState _internalState = MusicPlayerState.PAUSED;
+  static MusicPlayerState get state => _internalState;
 
-  static AudioPlayerState get state => _internalState;
-  static bool get loopMode => _internalLoopMode;
+  static bool _looping = false;
+  static bool get looping => _looping;
 
-  /// It is observable, that means on every set we emit event to [onPlayerStateChanged] stream
-  static set state(AudioPlayerState value) {
+  /// It is observable, that means on every set we emit event to [onStateChange] stream
+  static set state(MusicPlayerState value) {
     _playerStateController.add(value);
     _internalState = value;
   }
 
-  /// It is observable, that means on every set we emit event to [onPlayerStateChanged] stream
+  /// It is observable, that means on every set we emit event to [onLoopSwitch] stream
   static set loopMode(bool value) {
     _loopController.add(value);
-    _internalLoopMode = value;
+    _looping = value;
   }
 
   /// Stream of changes on player state.
-  static Stream<AudioPlayerState> get onPlayerStateChanged =>
+  static Stream<MusicPlayerState> get onStateChange =>
       _playerStateController.stream;
 
   /// Stream of changes on audio position.
   ///
-  /// Roughly fires every 200 milliseconds. Will continuously update the
-  /// position of the playback if the status is [AudioPlayerState.PLAYING].
+  /// Roughly fires every 500 milliseconds. Will continuously update the
+  /// position of the playback if the status is [MusicPlayerState.PLAYING].
   ///
   /// You can use it on a progress bar, for instance.
-  static Stream<Duration> get onAudioPositionChanged =>
-      _positionController.stream;
-
-  /// Stream of changes on audio duration.
-  ///
-  /// An event is going to be sent as soon as the audio duration is available
-  /// (it might take a while to download or buffer it).
-  static Stream<Duration> get onDurationChanged => _durationController.stream;
+  static Stream<Duration> get onPosition => _positionController.stream;
 
   /// Stream of player completions.
   ///
   /// Events are sent every time an audio is finished, therefore no event is
   /// sent when an audio is paused or stopped.
   ///
-  /// [ReleaseMode.LOOP] also sends events to this stream.
-  static Stream<void> get onPlayerCompletion => _completionController.stream;
+  /// If player is looping the events to this stream are not emitted.
+  static Stream<void> get onCompletion => _completionController.stream;
 
   /// Stream of loop mode changes.
   static Stream<void> get onLoopSwitch => _loopController.stream;
 
-  /// Stream of player errors.
+  /// Stream of native player errors.
   ///
   /// Events are sent when an unexpected error is thrown in the native code.
-  static Stream<PlatformException> get onPlayerError => _errorController.stream;
+  static Stream<PlatformException> get onError => _errorController.stream;
 
   /// Checks if player playing and if so, changes state to playing appropriately
-  /// Also sets release mode to be `ReleaseMode.STOP`
   static Future<void> init() async {
-    if (await isPlaying()) state = AudioPlayerState.PLAYING;
+    if (await isPlaying()) state = MusicPlayerState.PLAYING;
     loopMode = await isLooping();
   }
 
-  /// Plays an audio.
+  static Future<void> clearIdMap() {
+    return _channel.invokeMethod('clearIdMap');
+  }
+
+  /// Plays a song.
   ///
-  /// If [isLocal] is true, [url] must be a local file system path.
-  /// If [isLocal] is false, [url] must be a remote URL.
+  /// The [duplicate] indicates that the current song is already present in the current queue and its id should be mapped.
   ///
-  /// Throws `Unsupported value: java.lang.IllegalStateException` message thrown when [play] gets called in wrong state
-  ///
-  /// Throws `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
-  static Future<void> play(
-    Song song, {
-    double volume = 1.0,
-    // position must be null by default to be compatible with radio streams
-    Duration position,
-    bool stayAwake = true,
-  }) async {
+  /// Throws:
+  /// * `Unsupported value: java.lang.IllegalStateException` message thrown when [play] gets called in wrong state
+  /// * `Unsupported value: java.lang.RuntimeException: Unable to access resource` message thrown when resource can't be played
+  static Future<void> play(Song song, bool duplicate) async {
     return _channel.invokeMethod('play', {
-      'song': song.toJson(),
-      'volume': volume,
-      'position': position?.inMilliseconds,
-      'stayAwake': stayAwake,
+      'song': jsonEncode(song.toJson()),
+      'duplicate': duplicate,
     });
   }
 
-  /// Pauses the audio that is currently playing.
+  /// Silently prepares the resourses for the given [songId], from wich
+  /// the song source path is constructed.
   ///
-  /// If you call [resume] later, the audio will resume from the point that it
-  /// has been paused.
-  static Future<void> pause() async {
-    return _channel.invokeMethod('pause');
+  /// The [duplicate] indicates that the current song is already present in the current queue and its id should be mapped.
+  ///
+  /// The resources will start being fetched or buffered as soon as you call
+  /// this method.
+  static Future<void> setUri(Song song, bool duplicate) async {
+    return _channel.invokeMethod('setUri', {
+      'song': jsonEncode(song.toJson()),
+      'duplicate': duplicate,
+    });
   }
 
-  /// Stops the audio that is currently playing.
-  ///
-  /// The position is going to be reset and you will no longer be able to resume
-  /// from the last point.
-  static Future<void> stop() async {
-    return _channel.invokeMethod('stop');
-  }
-
-  /// Resumes the audio that has been paused or stopped, just like calling
-  /// [play], but without changing the parameters.
+  /// Resumes the playback.
   static Future<void> resume() async {
     return _channel.invokeMethod('resume');
   }
 
+  /// Pauses the playback.
+  static Future<void> pause() async {
+    return _channel.invokeMethod('pause');
+  }
+
   /// Releases the resources associated with this media player.
-  ///
-  /// The resources are going to be fetched or buffered again as soon as you
-  /// call [play] or [setUri].
   static Future<void> release() async {
     return _channel.invokeMethod('release');
   }
@@ -195,54 +154,33 @@ abstract class NativeAudioPlayer {
     return _channel.invokeMethod('seek', {'position': position.inMilliseconds});
   }
 
-  /// Sets the volume (amplitude).
-  ///
-  /// 0 is mute and 1 is the max volume. The values between 0 and 1 are linearly
-  /// interpolated.
+  /// Sets the [volume]. Has to be in range from `0.0` to `1.0`.
   static Future<void> setVolume(double volume) async {
     return _channel.invokeMethod('setVolume', {'volume': volume});
   }
 
-  /// Sets the release mode.
-  ///
-  /// Check [ReleaseMode]'s doc to understand the difference between the modes.
-  static Future<void> setReleaseMode(ReleaseMode releaseMode) async {
-    return _channel.invokeMethod(
-      'setReleaseMode',
-      {'releaseMode': releaseMode.toString()},
-    );
+  /// Sets the looping mode.
+  static Future<void> setLooping(bool looping) async {
+    return _channel.invokeMethod('setLooping', {'looping': looping});
   }
 
-  /// Sets the URL.
-  ///
-  /// Unlike [play], the playback will not resume.
-  ///
-  /// The resources will start being fetched or buffered as soon as you call
-  /// this method.
-  /// 
-  /// Uses id to get song path
-  static Future<void> setUri(int songId) async {
-    return _channel.invokeMethod('setUri', {'songId': songId});
-  }
-
-  /// Checks is the actual player is playing
-  /// Needed on the app start, to check if service is running and playing music
+  /// Checks is the actual native player is actually playing.
+  /// Needed on the app start, to check if service is running and playing music.
   static Future<bool> isPlaying() async {
     return _channel.invokeMethod('isPlaying');
   }
 
-  /// Checks is the actual player has release mode [ReleaseMode.LOOP]
+  /// Checks is the player is looping.
   static Future<bool> isLooping() async {
     return _channel.invokeMethod('isLooping');
   }
 
-  /// Switches loop mode
-  static Future<void> switchLoopMode() async {
-    return _channel.invokeMethod('switchLoopMode');
+  // Gets the current player position.
+  static Future<int> getPosition() async {
+    return _channel.invokeMethod('getPosition');
   }
 
-  /// Get audio duration after setting url.
-  /// Use it in conjunction with setUrl.
+  /// Get audio duration after setting uri.
   ///
   /// It will be available as soon as the audio duration is available
   /// (it might take a while to download or buffer it if file is not local).
@@ -250,69 +188,58 @@ abstract class NativeAudioPlayer {
     return _channel.invokeMethod('getDuration');
   }
 
-  // Gets audio current playing position
-  static Future<int> getCurrentPosition() async {
-    return _channel.invokeMethod('getCurrentPosition');
-  }
-
   static Future<void> platformCallHandler(MethodCall call) async {
     try {
-      _doHandlePlatformCall(call);
+      _platformCall(call);
     } catch (ex) {
       _log('Unexpected error: $ex');
     }
   }
 
-  static void _doHandlePlatformCall(MethodCall call) {
+  static void _platformCall(MethodCall call) {
     final Map<dynamic, dynamic> callArgs = call.arguments as Map;
     _log('_platformCallHandler call ${call.method} $callArgs');
 
     final value = callArgs['value'];
 
     switch (call.method) {
-      case 'audio.onDuration': // Todo: remove this event, cause it should be triggered from the dart side
+      case 'audio.state.set':
         {
-          // Duration newDuration = Duration(milliseconds: value);
-          // _durationController.add(newDuration);
+          switch (value) {
+            case 'PLAYING':
+              state = MusicPlayerState.PLAYING;
+              break;
+            case 'PAUSED':
+              state = MusicPlayerState.PAUSED;
+              break;
+            case 'COMPLETED':
+              state = MusicPlayerState.COMPLETED;
+              _completionController.add(null);
+          }
           break;
         }
-      case 'audio.onCurrentPosition':
+      case 'audio.onPosition':
         {
-          Duration newDuration = Duration(milliseconds: value);
-          _positionController.add(newDuration);
-          break;
-        }
-      case 'audio.onComplete':
-        {
-          state = AudioPlayerState.COMPLETED;
-          _completionController.add(null);
+          Duration position = Duration(milliseconds: value);
+          if ((ContentControl.state.queues.current?.isNotEmpty ?? false) &&
+              position <=
+                  Duration(
+                    milliseconds: ContentControl.state.currentSong.duration,
+                  )) {
+            _positionController.add(position);
+          }
           break;
         }
       case 'audio.onError':
         {
-          state = AudioPlayerState.STOPPED;
-          // TODO : add exception various codes
+          state = MusicPlayerState.PAUSED;
           _errorController
-              .add(PlatformException(code: "0", message: value["message"]));
+              .add(PlatformException(code: '0', message: value['message']));
           break;
         }
       case 'audio.onLoopModeSwitch':
         {
           loopMode = value;
-          break;
-        }
-      case 'audio.state.set':
-        {
-          switch (value) {
-            case 'PLAYING':
-              state = AudioPlayerState.PLAYING;
-              break;
-            case 'PAUSED':
-              state = AudioPlayerState.PAUSED;
-              break;
-            case 'STOPPED':
-              state = AudioPlayerState.STOPPED;
-          }
           break;
         }
       default:
@@ -327,9 +254,6 @@ abstract class NativeAudioPlayer {
   }
 
   /// Closes all [StreamController]s.
-  ///
-  /// You must call this method when your [AudioPlayer] instance is not going to
-  /// be used anymore.
   static Future<void> dispose() async {
     await Future.wait([
       _playerStateController.close(),
@@ -338,11 +262,5 @@ abstract class NativeAudioPlayer {
       _completionController.close(),
       _errorController.close()
     ]);
-  }
-
-
-  static void emitDurationChange(int value){
-    Duration newDuration = Duration(milliseconds: value);
-          _durationController.add(newDuration);
   }
 }

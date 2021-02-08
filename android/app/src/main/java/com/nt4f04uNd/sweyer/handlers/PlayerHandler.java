@@ -8,80 +8,58 @@
 
 package com.nt4f04uNd.sweyer.handlers;
 
-import android.app.Service;
-import android.content.ContentUris;
 import android.media.AudioManager;
 import android.os.Handler;
-import android.provider.MediaStore;
 
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 import com.nt4f04uNd.sweyer.channels.PlayerChannel;
 import com.nt4f04uNd.sweyer.player.Player;
+import com.nt4f04uNd.sweyer.services.MusicService;
 import com.nt4f04uNd.sweyer.player.PlayerState;
-import com.nt4f04uNd.sweyer.player.ReleaseMode;
 import com.nt4f04uNd.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.flutter.Log;
-import io.flutter.plugin.common.MethodChannel;
+import android.util.Log;
 
-/**
- * NOTE Every time you use this class, don't forget to try...catch its method calls
- */
-public abstract class PlayerHandler { // TODO: add error handling and logging
+/** Every time you use this class, don't forget to try...catch its method calls */
+public abstract class PlayerHandler {
 
-    public static Player player;
-    /**
-     * For position updates
-     */
+    private static Player player;
+    /** For position updates */
     private static final Handler positionHandler = new Handler();
     private static Runnable positionUpdates;
-    /**
-     * For hook button handling
-     */
-    private static final Handler hookButtonHandler = new Handler();
-    private static int hookButtonPressCount = 0;
-    /**
-     * To kill the service with timeout the service when player is paused
-     */
+    /** To kill the service with timeout the service when player is paused */
     private static final Handler timeoutHandler = new Handler();
 
     public static void init() {
         if (player == null) {
             player = new Player();
-            if (PrefsHandler.getLoopMode()) { // I don't call handleLoopModeSwitch(true) 'cause a the moment of execution of this code dart code hasn't been initiated yet
-                setReleaseMode(ReleaseMode.LOOP);
+            if (PrefsHandler.getLoopMode()) {
+                // I don't call handleLoopModeSwitch(true) 'cause a the moment of execution of this code dart code hasn't been initiated yet
+                player.setLooping(true);
             } else {
-                setReleaseMode(ReleaseMode.STOP);
+                player.setLooping(false);
             }
         }
     }
 
-    // HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // HANDLERS /////////////////
 
-    /**
-     * Builds arguments to send them to PlayerChannel
-     */
+    /** Builds arguments to send them to PlayerChannel */
     private static Map<String, Object> buildArguments(Object value) {
         Map<String, Object> arguments = new HashMap<>();
         arguments.put("value", value);
         return arguments;
     }
 
-    public static void handleDuration(Player player) {
-        PlayerChannel.invokeMethod("audio.onDuration", buildArguments(player.getDuration()));
-    }
-
     public static void handleCompletion() {
-        PlayerChannel.invokeMethod("audio.onComplete", buildArguments(true));
+        callSetState(PlayerState.COMPLETED);
         // Handle completion when activity is killed
         if (!GeneralHandler.activityExists()) {
             if (!isLooping()) {
@@ -98,51 +76,24 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         exception.put("message", e.getMessage());
         arguments.put("value", exception);
 
-        PlayerChannel.invokeMethod("audio.onError", arguments);
+        PlayerChannel.instance.invokeMethod("audio.onError", arguments);
     }
 
-    public static void handleHookButton() {
-        hookButtonPressCount++;
-        if (hookButtonPressCount == 1) {
-            hookButtonHandler.postDelayed(() -> {
-                try {
-                    if (hookButtonPressCount == 1) {
-                        NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PAUSE);
-                        playPause();
-                    } else if (hookButtonPressCount == 2) {
-                        NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_NEXT);
-                        playNext();
-                    } else {
-                        NativeEventsChannel.success(Constants.channels.events.HOOK_PLAY_PREV);
-                        playPrev();
-                    }
-                } catch (IllegalStateException e) {
-                    Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
-                } finally {
-                    hookButtonPressCount = 0;
-                }
-            }, 500);
-        }
-    }
-
-    /// Notifies channel about loop mode switch
+    /** Notifies channel about loop mode switch */
     public static void handleLoopModeSwitch(boolean value) {
-        PlayerChannel.invokeMethod("audio.onLoopModeSwitch", buildArguments(value));
+        PlayerChannel.instance.invokeMethod("audio.onLoopModeSwitch", buildArguments(value));
     }
 
     public static void callSetState(PlayerState state) {
         switch (state) {
             case PLAYING:
-                PlayerChannel.invokeMethod("audio.state.set", buildArguments("PLAYING"));
+                PlayerChannel.instance.invokeMethod("audio.state.set", buildArguments("PLAYING"));
                 break;
             case PAUSED:
-                PlayerChannel.invokeMethod("audio.state.set", buildArguments("PAUSED"));
+                PlayerChannel.instance.invokeMethod("audio.state.set", buildArguments("PAUSED"));
                 break;
-            case STOPPED:
-                PlayerChannel.invokeMethod("audio.state.set", buildArguments("STOPPED"));
-                break;
-            case COMPLETED: // Deprecated to call is directly
-                PlayerChannel.invokeMethod("audio.state.set", buildArguments("COMPLETED"));
+            case COMPLETED:
+                PlayerChannel.instance.invokeMethod("audio.state.set", buildArguments("COMPLETED"));
                 break;
             default:
                 break;
@@ -150,33 +101,25 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     }
 
-
-    /// Removes callbacks and messages from all handlers
-    /// Needed to safely destroy the service
+    /** Removes callbacks and messages from all handlers
+     * Needed to safely destroy the service */
     public static void stopAllHandlers() {
         positionHandler.removeCallbacksAndMessages(null);
-        hookButtonHandler.removeCallbacksAndMessages(null);
         timeoutHandler.removeCallbacksAndMessages(null);
     }
-    // END OF HANDLERS ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    // END OF HANDLERS /////////////////
 
-
-    // COMPOSED METHODS (wrappers over default player methods) ///////////////////////////////////////////////////////////////
-    // TODO: remove respect silence, isLocal and stayAwake
-    public static void play(@NotNull Song song, double volume, Integer position, boolean stayAwake) {
+    // COMPOSED METHODS (wrappers over default player methods) /////////////////
+    public static void play(@NotNull Song song, Boolean duplicate) {
         WakelockHandler.acquire();
-        ServiceHandler.startService(true);
-
-        PlaylistHandler.setCurrentSong(song);
-        NotificationHandler.updateNotification(true, isLooping());
+        MusicService.startService();
+        QueueHandler.handleDuplicate(song, duplicate);
+        QueueHandler.setCurrentSong(song);
         PrefsHandler.setSongId(song.id);
+        NotificationHandler.updateNotification(true, PlayerHandler.isLooping());
 
-        player.setAwake(GeneralHandler.getAppContext(), stayAwake);
-        player.setVolume(volume);
+        player.setAwake(GeneralHandler.getAppContext(), true);
         setUri(song.id);
-
-        if (position != null)
-            PlayerHandler.player.seek(position);
 
         if (AudioFocusHandler.focusState != AudioManager.AUDIOFOCUS_GAIN)
             AudioFocusHandler.requestFocus();
@@ -189,7 +132,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
                 throw e;
             } finally {
                 if (success) {
-                    PlayerHandler.callSetState(PlayerState.PLAYING);
+                    callSetState(PlayerState.PLAYING);
                 }
             }
         }
@@ -208,24 +151,18 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         AudioFocusHandler.abandonFocus();
     }
 
-    /**
-     * Discouraged to use
-     */
     public static void stop() {
         bareStop();
         AudioFocusHandler.abandonFocus();
     }
 
-    /**
-     * Discouraged to use
-     */
     public static void release() {
         bareRelease();
         AudioFocusHandler.abandonFocus();
     }
 
     public static void seek(Integer position) {
-        PlayerHandler.player.seek(position);
+        player.seek(position);
     }
 
     public static void setVolume(double volume) {
@@ -244,73 +181,82 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         return player.getDuration();
     }
 
-    public static int getCurrentPosition() {
-        return player.getCurrentPosition();
-    }
-
-    public static void setReleaseMode(ReleaseMode releaseMode) {
-        player.setReleaseMode(releaseMode);
+    public static int getPosition() {
+        return player.getPosition();
     }
 
     public static boolean isPlaying() {
-        return player.isActuallyPlaying();
+        return player.isPlaying();
+    }
+
+    public static boolean isLooping() {
+        return player.isLooping();
+    }
+
+    public static void setLooping(boolean value) {
+        if (value) {
+            player.setLooping(true);
+            PrefsHandler.setLoopMode(true);
+            handleLoopModeSwitch(true);
+            NotificationHandler.updateNotification(isPlaying(), true);
+        } else {
+            player.setLooping(false);
+            PrefsHandler.setLoopMode(false);
+            handleLoopModeSwitch(false);
+            NotificationHandler.updateNotification(isPlaying(), false);
+        }
     }
     // END OF COMPOSED METHODS ///////////////////////////////////////////////////////////////////////////////////
 
-
     /// BARE METHODS (they do all stuff, just do not care about audio focus) ///////////////////////////////////
-
-    /**
-     * Normal resume function, it just doesn't care about handling audio focus
-     */
+    /** Normal resume function, it just doesn't care about handling audio focus */
     public static void bareResume() {
         WakelockHandler.acquire();
         timeoutHandler.removeCallbacksAndMessages(null);
-        ServiceHandler.startService(true);
         player.play(GeneralHandler.getAppContext());
+        MusicService.startService();
+        MediaSessionHandler.updatePlaybackState();
         PrefsHandler.setSongIsPlaying(true);
-        PlayerHandler.callSetState(PlayerState.PLAYING);
-        NotificationHandler.updateNotification(true, isLooping());
+        callSetState(PlayerState.PLAYING);
+        NotificationHandler.updateNotification(isPlaying(), isLooping());
         player.setAwake(GeneralHandler.getAppContext(), true);
     }
 
     public static void barePause() {
         WakelockHandler.acquireTimed();
-        ServiceHandler.startService(false);
-        // TODO: make this time out a customisable user setting, now it's static 10 minutes after the pause
-        timeoutHandler.postDelayed(ServiceHandler::stopService, 10 * 60 * 1000);
+        timeoutHandler.postDelayed(MusicService::stopService, 2 * 60 * 1000);
         player.pause();
+        MusicService.stopForeground();
+        MediaSessionHandler.updatePlaybackState();
         PrefsHandler.setSongIsPlaying(false);
-        PlayerHandler.callSetState(PlayerState.PAUSED);
-        NotificationHandler.updateNotification(false, isLooping());
+        callSetState(PlayerState.PAUSED);
     }
 
     public static void bareStop() {
         WakelockHandler.acquireTimed();
-        ServiceHandler.stopService();
+        MusicService.stopService();
         timeoutHandler.removeCallbacksAndMessages(null);
-        player.stop();
+        player.pause();
+        MediaSessionHandler.updatePlaybackState();
         PrefsHandler.setSongIsPlaying(false);
-        PlayerHandler.callSetState(PlayerState.STOPPED);
-        // TODO: maybe remove notification at all?
+        callSetState(PlayerState.PAUSED);
         NotificationHandler.updateNotification(false, isLooping());
     }
 
     public static void bareRelease() {
-        ServiceHandler.stopService();
+        MusicService.stopService();
         timeoutHandler.removeCallbacksAndMessages(null);
         player.release();
+        MediaSessionHandler.updatePlaybackState();
         PrefsHandler.setSongIsPlaying(false);
-        PlayerHandler.callSetState(PlayerState.STOPPED);
-        // TODO: maybe remove notification at all?
+        callSetState(PlayerState.PAUSED);
         NotificationHandler.updateNotification(false, isLooping());
         WakelockHandler.release();
     }
-    /// END OF BARE METHODS ////////////////////////////////////////////////////////////////////////
+    /// END OF BARE METHODS ///////////////
 
 
-    // ONLY NATIVE PART METHODS (add more extended playback handling and are called only on native part) //////////////////////////////////////////////
-
+    // ONLY NATIVE PART METHODS (add more extended playback handling and are called only on native part) ///////////////
     public static void playPause() {
         try {
             if (player.isUriNull())
@@ -319,13 +265,12 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
                     return;
                 } else {
                     // Fetch current song if activity does not exists
-                    PlaylistHandler.initCurrentSong();
+                    QueueHandler.initCurrentSong();
                 }
 
-
-            if (PlayerHandler.isPlaying())
-                PlayerHandler.pause();
-            else PlayerHandler.resume();
+            if (isPlaying())
+                pause();
+            else resume();
 
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
@@ -335,10 +280,11 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     public static void playNext() {
         try {
             if (GeneralHandler.activityExists()) {
-                NativeEventsChannel.success(Constants.channels.events.GENERALIZED_PLAY_NEXT);
+                NativeEventsChannel.instance.success(Constants.eventsChannel.GENERALIZED_PLAY_NEXT);
             } else {
-                PlaylistHandler.getLastPlaylist();
-                PlayerHandler.play(PlaylistHandler.getNextSong(), PlayerHandler.getVolume(), 0, true);
+                QueueHandler.restoreQueue();
+                seek(0);
+                play(QueueHandler.getNextSong(),null);
             }
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
@@ -348,10 +294,11 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
     public static void playPrev() {
         try {
             if (GeneralHandler.activityExists()) {
-                NativeEventsChannel.success(Constants.channels.events.GENERALIZED_PLAY_PREV);
+                NativeEventsChannel.instance.success(Constants.eventsChannel.GENERALIZED_PLAY_PREV);
             } else {
-                PlaylistHandler.getLastPlaylist();
-                PlayerHandler.play(PlaylistHandler.getPrevSong(), PlayerHandler.getVolume(), 0, true);
+                QueueHandler.restoreQueue();
+                seek(0);
+                play(QueueHandler.getPrevSong(), null);
             }
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
@@ -360,7 +307,7 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void rewind() {
         try {
-            PlayerHandler.player.seek(PlayerHandler.getCurrentPosition() - 3000);
+           player.seek(getPosition() - 3000);
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
         }
@@ -368,34 +315,25 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
 
     public static void fastForward() {
         try {
-            PlayerHandler.player.seek(PlayerHandler.getCurrentPosition() + 3000);
+           player.seek(getPosition() + 3000);
         } catch (IllegalStateException e) {
             Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
         }
     }
 
-    public static boolean isLooping() {
-        return player.getReleaseMode().equals(ReleaseMode.LOOP);
+    public static void switchLooping() {
+        setLooping(!player.isLooping());
     }
+    // END OF NATIVE PART METHODS ///////////////
 
-    public static void switchLoopMode() {
-        if (isLooping()) {
-            setReleaseMode(ReleaseMode.STOP);
-            PrefsHandler.setLoopMode(false);
-            handleLoopModeSwitch(false);
-            NotificationHandler.updateNotification(isPlaying(), false);
-        } else {
-            setReleaseMode(ReleaseMode.LOOP);
-            PrefsHandler.setLoopMode(true);
-            handleLoopModeSwitch(true);
-            NotificationHandler.updateNotification(isPlaying(), true);
-        }
+    // HANDLER METHODS ///////////////
+    public static void notifyPositions() {
+        final int position = player.getPosition();
+        MediaSessionHandler.updatePlaybackState();
+        // Convert to seconds
+        PrefsHandler.setSongPosition(position / 1000);
+        PlayerChannel.instance.invokeMethod("audio.onPosition", buildArguments(position));
     }
-
-    // END OF NATIVE PART METHODS ///////////////////////////////////////////////////////////////////////////////////
-
-
-    // HANDLER METHODS /////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Starts handler
@@ -407,7 +345,6 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         positionUpdates = new UpdatePositionRunnable(positionHandler);
         positionHandler.post(positionUpdates);
     }
-
 
     /**
      * Stops handler
@@ -431,18 +368,12 @@ public abstract class PlayerHandler { // TODO: add error handling and logging
         @Override
         public void run() {
             final Handler handler = this.handlerRef.get();
-
             if (handler == null) {
                 stopPositionUpdates();
                 return;
             }
-
             try {
-                final int currentPosition = player.getCurrentPosition();
-                // convert to seconds
-                PrefsHandler.setSongPosition(currentPosition / 1000);
-
-                PlayerChannel.invokeMethod("audio.onCurrentPosition", buildArguments(currentPosition));
+                notifyPositions();
             } catch (UnsupportedOperationException e) {
                 handleError(e);
             } finally {

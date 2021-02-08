@@ -3,162 +3,146 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-/// Class to save and get [SharedPreferences]
-/// It is a unite container for all the shared preferences of the application.
-/// Though it doesn't contain settings prefs, that are used in the settings route, they can be found in [Settings] class.
-/// It contains even ones that aren't used in dart side directly, but only on native.
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
+
+/// Class to save and get [SharedPreferences].
+///
+/// It is a unite container for all the shared preferences of the application,
+/// though it doesn't contain settings prefs, that are used in the settings route,
+/// they can be found in [Settings] class.
+///
+/// It also contains prefs that aren't used in dart side directly, but only on native.
 abstract class Prefs {
-  /// Search history list
+  /// Search history list.
   static final Pref<List<String>> searchHistoryStringList =
       Pref<List<String>>(key: 'search_history', defaultValue: <String>[]);
 
-  /// Track position
-  ///
-  /// NOTE IN SECONDS
+  /// Track position.
+  /// Stored in seconds.
   static final Pref<int> songPositionInt =
       Pref<int>(key: 'song_position', defaultValue: 0);
 
-  /// Last playing track id
+  /// Last playing track id.
   static final Pref<int> songIdIntNullable =
       Pref<int>(key: 'song_id', defaultValue: null);
 
-  /// Last playing track id
+  /// Last playing track id.
+  /// Used on native side only to allow service be sticky
   ///
-  /// NOTE Used on native side only to allow service be sticky
+  /// todo: not used properly yet, and service is not sticky for now
   static final Pref<bool> songIsPlayingBool =
       Pref<bool>(key: 'song_is_playing', defaultValue: false);
 
-  /// Loop mode
-  ///
-  /// NOTE Used on native side
+  /// Loop mode. Used on native side.
   static final Pref<bool> loopModeBool =
       Pref<bool>(key: 'loop_mode', defaultValue: false);
 
-  /// Sort feature
-  ///
-  /// `0` represents date feature
-  ///
-  /// `1` represents title feature
-  // static final Pref<int> sortFeatureInt =
-  //     Pref<int>(key: 'sort_feature', defaultValue: 0);
-  static final Pref<int> sortFeatureInt =
-      Pref<int>(key: 'sort_feature', defaultValue: 0);
+  //****************** Sorts *****************************************************
 
-  /// Last played [_currentPlaylistType]
-  ///
-  /// `0` represents [global]
-  ///
-  /// `1` represents [searched]
-  ///
-  /// `2` represents [shuffled]
-  static final Pref<int> playlistTypeInt =
-      Pref<int>(key: 'playlist_type', defaultValue: 0);
+  /// Sort feature used for song list.
+  static final Pref<String> songSortString = Pref<String>(
+    key: 'songs_sort',
+    defaultValue: jsonEncode(
+      SongSort.defaultOrder(SongSortFeature.dateModified).toJson(),
+    ),
+  );
+
+  /// Sort feature used for album list.
+  static final Pref<String> albumSortString = Pref<String>(
+    key: 'album_sort',
+    defaultValue: jsonEncode(
+      AlbumSort.defaultOrder(AlbumSortFeature.year).toJson(),
+    ),
+  );
+
+  /// Last played [QueueType].
+  static final Pref<String> queueTypeString = Pref<String>(
+    key: 'queue_type',
+    defaultValue: QueueType.all.value,
+  );
+
+  /// Last persistent queue.
+  static final Pref<int> persistentQueueIdNullable =
+      Pref<int>(key: 'persistent_queue_id', defaultValue: null);
+
+  /// Last search query.
+  static final Pref<String> searchQueryStringNullable =
+      Pref<String>(key: 'search_query', defaultValue: null);
+
+  /// Whether the saved queue is modified or not.
+  static final Pref<bool> queueModifiedBool =
+      Pref<bool>(key: 'queue_modified', defaultValue: false);
+
+  /// Whether the saved queue is shuffled or not.
+  static final Pref<bool> queueShuffledBool =
+      Pref<bool>(key: 'queue_shuffled', defaultValue: false);
 
   /// Developer mode pref.
-  /// When true, special dev menu in the drawer gets unlocked.
-  /// Activated through taps on app logo in settings menu.
-  static final Pref<bool> developerModeBool =
-      Pref<bool>(key: 'developer_mode', defaultValue: false);
+  /// 
+  /// When `true`:
+  /// * special dev menu in the drawer gets unlocked
+  /// * error snackbards are shown
+  /// * song info button available in the top right menu of [PlayerRoute].
+  static final Pref<bool> devModeBool =
+      Pref<bool>(key: 'dev_mode', defaultValue: false);
+}
 
-  /// Returns [SharedPreferences] instance
-  static Future<SharedPreferences> getSharedInstance() async {
-    return SharedPreferences.getInstance();
+class SearchHistory {
+  SearchHistory._internal();
+  static final SearchHistory _instance = SearchHistory._internal();
+  static SearchHistory get instance => _instance;
+
+  List<String> history;
+
+  Future<void> load() async {
+    if (history == null) {
+      history = await Prefs.searchHistoryStringList.get();
+    }
+  }
+
+  Future<void> clear() async {
+    history = null;
+    await Prefs.searchHistoryStringList.set(const []);
+  }
+
+  Future<void> remove(int index) async {
+    await load();
+    history.removeAt(index);
+    await Prefs.searchHistoryStringList.set(history);
+  }
+
+  Future<void> save(String entry) async {
+    entry = entry.trim();
+    if (entry.isNotEmpty) {
+      await load();
+      // Remove if this input is in array
+      history.removeWhere((el) => el == entry);
+      history.insert(0, entry);
+      if (history.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+        history.removeLast();
+      }
+      await Prefs.searchHistoryStringList.set(history);
+    }
   }
 }
 
-/// Prefs specially for settings route
+/// Prefs specially for settings route.
 abstract class Settings {
-  /// Minimal file duration to be considered as a song
+  /// Stores theme brightness.
   ///
-  /// Stored in seconds
-  static final Pref<int> minFileDurationInt =
-      Pref<int>(key: 'setting_min_file_duration', defaultValue: 30);
+  /// * `true` means light
+  /// * `false` means dark
+  static final Pref<bool> lightThemeBool =
+      Pref<bool>(key: 'setting_light_theme', defaultValue: false);
 
-  /// Stores theme brightness
-  ///
-  /// [false] means light
-  ///
-  /// [true] means dark
-  static final Pref<bool> darkThemeBool =
-      Pref<bool>(key: 'setting_dark_theme', defaultValue: false);
-}
-
-/// Class that represents single pref
-///
-/// Even if default value is null, you should specify it explicitly and give a pref variable "Nullable" postfix
-class Pref<T> {
-  Pref({
-    @required this.key,
-    @required this.defaultValue,
-  }) : assert(key != null) {
-    /// Call this to check current pref value and set it to default, if it's null
-    getPref();
-  }
-
-  final String key;
-  final T defaultValue;
-
-  /// Set pref value.
-  /// Without [value] will set the pref to its [defaultValue].
-  ///
-  /// @param [value] new pref value to set.
-  ///
-  /// @param [prefs] optional [SharedPreferences] instance.
-  Future<bool> setPref({T value, SharedPreferences prefs}) async {
-    value ??= defaultValue;
-    prefs ??= await SharedPreferences.getInstance();
-
-    // Convert type to string because [is] operator doesn't work
-    final String strT = T.toString();
-
-    if (strT == "bool") {
-      return prefs.setBool(key, value as bool);
-    } else if (strT == "int") {
-      return prefs.setInt(key, value as int);
-    } else if (strT == "double") {
-      return prefs.setDouble(key, value as double);
-    } else if (strT == "String") {
-      return prefs.setString(key, value as String);
-    } else if (strT == "List<String>") {
-      return prefs.setStringList(key, value as List<String>);
-    }
-    throw Exception("setPref: Wrong type of pref generic: T = $T");
-  }
-
-  /// Get pref value.
-  /// If the current value is `null`, will return [defaultValue] call [setPref] to reset the pref to the [defaultValue].
-  ///
-  /// @param prefs optional [SharedPreferences] instance
-  Future<T> getPref([SharedPreferences prefs]) async {
-    prefs ??= await SharedPreferences.getInstance();
-    // Convert type to string because [is] operator doesn't work
-    final String strT = T.toString();
-
-    T res;
-
-    if (strT == "bool") {
-      res = prefs.getBool(key) as T;
-    } else if (strT == "int") {
-      res = prefs.getInt(key) as T;
-    } else if (strT == "double") {
-      res = prefs.getDouble(key) as T;
-    } else if (strT == "String") {
-      res = prefs.getString(key) as T;
-    } else if (strT == "List<String>") {
-      res = prefs.getStringList(key) as T;
-    } else {
-      throw Exception("getPref: Wrong type of pref generic: T = $T");
-    }
-
-    // Reset pref value to default value if defaultValue is not null
-    if (res == null && defaultValue != null) {
-      res = defaultValue;
-      setPref(prefs: prefs);
-    }
-
-    return res;
-  }
+  /// Stores primary color int value.
+  static final Pref<int> primaryColorInt = Pref<int>(
+    key: 'setting_primary_color',
+    defaultValue: Constants.AppTheme.defaultPrimaryColor.value,
+  );
 }

@@ -8,12 +8,8 @@
 /// API is not exported as you should use `as API`
 
 export 'player/music_player.dart';
-export 'firebase/firebase.dart';
 
-export 'error_bridge.dart';
-export 'errors.dart';
-export 'lifecycle.dart';
-export 'logger.dart';
 export 'permissions.dart';
 export 'prefs.dart';
+export 'selection.dart';
 export 'theme.dart';

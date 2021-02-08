@@ -7,27 +7,28 @@ package com.nt4f04uNd.sweyer.channels;
 
 import com.nt4f04uNd.sweyer.Constants;
 import androidx.annotation.Nullable;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.StreamHandler;
-import io.flutter.view.FlutterView;
 
-public class NativeEventsChannel implements StreamHandler {
-    public static void init(FlutterView view) {
+public enum NativeEventsChannel implements StreamHandler {
+    instance;
+    public void init(BinaryMessenger messenger) {
         if (channel == null) {
-            channel = new EventChannel(view, Constants.channels.events.CHANNEL_NAME);
-            channel.setStreamHandler(new NativeEventsChannel());
+            channel = new EventChannel(messenger, "eventsChannel");
+            channel.setStreamHandler(this);
         }
     }
 
-    public static void kill() {
+    public void kill() {
         channel = null;
         events = null;
     }
 
     @Nullable
-    private static EventChannel channel;
+    private EventChannel channel;
     @Nullable
-    private static EventChannel.EventSink events;
+    private EventChannel.EventSink events;
 
 
     /** NOTE that this might be called when flutter view is detached
@@ -36,15 +37,15 @@ public class NativeEventsChannel implements StreamHandler {
      **
      *  AFAIK this isn't something bad and not an error, but warning
      */
-    public static void success(Object event) {
-        if (events != null) {
-            events.success(event);
+    public void success(Object event) {
+        if (this.events != null) {
+            this.events.success(event);
         }
     }
 
     @Override
     public void onListen(Object args, final EventChannel.EventSink events) {
-        NativeEventsChannel.events = events;
+        this.events = events;
     }
 
     @Override

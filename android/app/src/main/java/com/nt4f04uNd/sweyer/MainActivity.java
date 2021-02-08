@@ -5,63 +5,67 @@
 
 package com.nt4f04uNd.sweyer;
 
+import android.content.Intent;
+import android.os.Bundle;
+
 import com.nt4f04uNd.sweyer.channels.GeneralChannel;
 import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 import com.nt4f04uNd.sweyer.channels.PlayerChannel;
-import com.nt4f04uNd.sweyer.channels.ServiceChannel;
 import com.nt4f04uNd.sweyer.channels.ContentChannel;
 import com.nt4f04uNd.sweyer.handlers.AudioFocusHandler;
 import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
 import com.nt4f04uNd.sweyer.handlers.MediaSessionHandler;
-import com.nt4f04uNd.sweyer.handlers.NotificationHandler;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
-import com.nt4f04uNd.sweyer.handlers.PlaylistHandler;
-import com.nt4f04uNd.sweyer.handlers.ServiceHandler;
+import com.nt4f04uNd.sweyer.handlers.QueueHandler;
 
-import android.os.Bundle;
+import androidx.annotation.Nullable;
 
-import io.flutter.app.FlutterActivity;
-import io.flutter.plugins.GeneratedPluginRegistrant;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.plugin.common.BinaryMessenger;
 
 public class MainActivity extends FlutterActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        GeneratedPluginRegistrant.registerWith(this);
+   @Override
+   protected void onCreate(@Nullable Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
 
-        // Setup handlers and channels
-        // ----------------------------------------------------------------------------------
-        // Clear playlist kept in memory for background playing
-        // All the handling for playback now is delegated to a dart side
-        PlaylistHandler.resetPlaylist();
-        GeneralHandler.init(getApplicationContext()); // The most important, as it contains app context
-        PlayerHandler.init(); // Create player
-        GeneralChannel.init(getFlutterView(), this); // Inits general channel
-        NotificationHandler.init();
-        AudioFocusHandler.init();
-        NativeEventsChannel.init(getFlutterView()); // Inits event channel
-        PlayerChannel.init(getFlutterView()); // Inits player channel
-        MediaSessionHandler.init();
-        ServiceHandler.init(); // Contains intent to start service
-        ServiceChannel.init(getFlutterView());
-        ContentChannel.init(getFlutterView());
-    }
+      // Setup handlers and channels
+      // ----------------------------------------------------------------------------------
+      // Clear queue kept in memory for background playing
+      // All the handling for playback now is delegated to a dart side
+      QueueHandler.resetQueue();
+      GeneralHandler.init(getApplicationContext()); // The most important, as it contains app context
+      PlayerHandler.init(); // Create player
+      GeneralChannel.instance.init(getFlutterView(), this); // Inits general channel
+      AudioFocusHandler.init();
+      NativeEventsChannel.instance.init(getFlutterView()); // Inits event channel
+      PlayerChannel.instance.init(getFlutterView()); // Inits player channel
+      MediaSessionHandler.init();
+      ContentChannel.instance.init(getFlutterView());
+   }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        NativeEventsChannel.kill();
-        GeneralChannel.kill();
-        PlayerChannel.kill();
-        ContentChannel.kill();
-        ServiceChannel.kill();
-    }
+   BinaryMessenger getFlutterView() {
+      return getFlutterEngine().getDartExecutor().getBinaryMessenger();
+   }
+
+   @Override
+   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+      super.onActivityResult(requestCode, resultCode, data);
+      if (requestCode == Constants.intents.PERMANENT_DELETION_REQUEST) {
+         // Report deletion intent result on android R
+         ContentChannel.instance.sendDeletionResult(resultCode == RESULT_OK);
+      }
+   }
+
+   @Override
+   protected void onDestroy() {
+      super.onDestroy();
+      NativeEventsChannel.instance.kill();
+      GeneralChannel.instance.kill();
+      PlayerChannel.instance.kill();
+      ContentChannel.instance.kill();
+   }
 }
 
 // TODO: probably? add launch intent broadcast receiver and get extra argument
 // that denotes that activity has been opened from notification
-
-// TODO: as I specify very big priority for mediabutton intent-filter, i should
-// add handler to start music when media button gets clicked, but the application is
-// not started

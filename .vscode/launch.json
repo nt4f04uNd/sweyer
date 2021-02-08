@@ -24,5 +24,14 @@
          "request": "launch",
          "program": "lib/main.dart"
       },
+      {
+         "name": "Flutter Dev (fast-start)",
+         "type": "dart",
+         "request": "launch",
+         "program": "lib/main.dart",
+         "args": [
+            "--fast-start"
+         ]
+      },
    ]
 }

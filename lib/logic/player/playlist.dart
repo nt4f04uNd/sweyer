@@ -3,62 +3,80 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:enum_to_string/enum_to_string.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Features to sort by
-enum SortFeature { date, title }
+/// The type of currently playing queue.
+enum QueueType {
+  /// Queue of all songs.
+  all,
 
-/// Features to filter playlist by
-enum FilterFeature { duration, fileSize }
-
-/// What playlist is now playing? type
-enum PlaylistType {
-  /// Playlist for songs
-  global,
-
-  /// Playlist used to save searched tracks
+  /// Queue of searched tracks.
   searched,
 
-  /// Shuffled version of any other playlist
-  shuffled
+  /// Some persistent queue on user device, has id.
+  /// Maybe:
+  /// * album
+  /// * playlist
+  /// * favorites
+  /// * etc.
+  persistent,
+
+  /// Some arbitrary queue.
+  /// Сannot have modified state.
+  /// Made up when:
+  /// * user adds a song to [persistent] queue, that’s not included in it
+  /// * after restoring shuffled queue (as the info about the queue it was shuffled from is lost on app restart)
+  /// * in any other ways not described yet
+  arbitrary,
 }
 
-/// Class, representing a single playlist in application
+extension QueueTypeSerialization on QueueType {
+  String get value => EnumToString.convertToString(this);
+}
+
+abstract class PersistentQueue extends Queue with EquatableMixin {
+  PersistentQueue({@required this.id, @required List<Song> songs})
+      : super(songs);
+  PersistentQueue.shuffled({@required this.id, @required List<Song> songs})
+      : super.shuffled(songs);
+  final int id;
+  @override
+  List<Object> get props => [id];
+}
+
+/// Class, representing a queue in application
 ///
-/// It is more array-like, as it has shuffle methods and explicit indexing
-/// Though it doesn't allow to have two songs with a unique id (it is possible only via constructor, but e.g. [add] method will do a check)
-///
-class Playlist {
+/// It is more array-like, as it has shuffle methods and explicit indexing.
+class Queue implements _QueueOperations<Song> {
+  Queue(this._songs) {
+    byId = _QueueOperationsById(this);
+  }
+
+  /// Creates queue and shuffles specified songs array
+  Queue.shuffled(List<Song> songs) : this._songs = Queue.shuffleSongs(songs) {
+    byId = _QueueOperationsById(this);
+  }
+
   List<Song> _songs;
+  _QueueOperationsById byId;
 
-  // Constructors
-
-  Playlist(List<Song> songs) : this._songs = songs;
-
-  /// Creates playlist and shuffles specified songs array
-  Playlist.shuffled(List<Song> songs)
-      : this._songs = Playlist.shuffleSongs(songs);
-
-  // Statics
-
-  /// Returns a shuffled copy of songs
-  /// It is static because we don't want accidentally shuffle the original playlist
-  /// Rather we want to make a copy and save it somewhere
+  /// Returns a shuffled copy of songs.
   static List<Song> shuffleSongs(List<Song> songsToShuffle) {
     List<Song> shuffledSongs = List.from(songsToShuffle);
     shuffledSongs.shuffle();
     return shuffledSongs;
   }
 
-  // Getters
-  List<Song> get songs => _songs;
-
-  /// Get playlist length
+  /// Returns queue length
   int get length => _songs.length;
   bool get isEmpty => _songs.isEmpty;
   bool get isNotEmpty => _songs.isNotEmpty;
 
-  // Setters
+  List<Song> get songs => _songs;
+
   /// Explicit setter for songs
   void setSongs(List<Song> songs) {
     _songs = songs;
@@ -66,29 +84,29 @@ class Playlist {
 
   /// Clears the songs list
   void clear() {
-    _songs = [];
+    songs.clear();
   }
 
-  // Methods
-
-  /// Checks if playlist contains song
+  /// Checks if queue contains song
   bool contains(Song song) {
-    for (var _song in _songs) {
-      if (_song.id == song.id) return true;
+    for (final _song in _songs) {
+      if (_song == song) return true;
     }
     return false;
   }
 
-  /// Adds song to a playlist
-  /// Returns a boolean result of the operation
-  bool add(Song song) {
-    var success = !contains(song);
-    if (success) _songs.add(song);
-    return success;
+  /// Adds song (copy of it) to a queue
+  void add(Song song) {
+    _songs.add(song.copyWith());
   }
 
-  void removeSongById(int id) {
-    _songs.removeWhere((el) => el.id == id);
+  /// Insers song (copy of it) to a given position in queue
+  void insert(int index, Song song) {
+    _songs.insert(index, song.copyWith());
+  }
+
+  void removeSong(Song song) {
+    byId.removeSong(song.id);
   }
 
   /// Returns the removed object
@@ -96,51 +114,81 @@ class Playlist {
     return _songs.removeAt(index);
   }
 
-  /// Returns song object by song id
-  Song getSongById(int id) {
-    return _songs.firstWhere((el) => el.id == id, orElse: () => null);
+  /// Finds the song
+  Song getSong(Song song) {
+    return byId.getSong(song.id);
   }
 
-  /// Returns song index in array by its id
-  int getSongIndexById(int id) {
-    return _songs.indexWhere((el) => el.id == id);
+  /// Returns the song index in array
+  int getSongIndex(Song song) {
+    return byId.getSongIndex(song.id);
   }
 
-  /// Returns next song id
-  int getNextSongId(int id) {
-    final int nextSongIndex = getSongIndexById(id) + 1;
-    if (nextSongIndex == -1) {
-      return null;
-    } else if (nextSongIndex >= length) {
-      return _songs[0].id;
-    }
-    return _songs[nextSongIndex].id;
+  /// Returns next song
+  Song getNextSong(Song song) {
+    return byId.getNextSong(song.id);
   }
 
-  /// Returns prev song id
-  int getPrevSongId(int id) {
-    final int prevSongIndex = getSongIndexById(id) - 1;
-    if (prevSongIndex == -2) {
-      return null;
-    } else if (prevSongIndex < 0) {
-      return _songs[length - 1].id;
-    }
-    return _songs[prevSongIndex].id;
+  /// Returns prev song
+  Song getPrevSong(Song song) {
+    return byId.getPrevSong(song.id);
   }
 
-  // TODO: implement file size filter
-  void filter(FilterFeature feature, {Duration duration}) {
-    if (feature == FilterFeature.duration) {
-      assert(duration != null);
-      _songs
-          .retainWhere((el) => Duration(milliseconds: el.duration) >= duration);
-    }
-  }
-
-  /// Will search each song in another playlist and remove it if won't find it.
-  void compareAndRemoveObsolete(Playlist playlist) {
+  /// Will search each song in another queue and remove it if won't find it.
+  void compareAndRemoveObsolete(Queue queue) {
     _songs.removeWhere((song) {
-      return playlist.getSongById(song.id) == null;
+      return queue.getSong(song) == null;
     });
+  }
+}
+
+abstract class _QueueOperations<T> {
+  void removeSong(T arg);
+
+  /// Finds the song
+  Song getSong(T arg);
+  int getSongIndex(T arg);
+  Song getNextSong(T arg);
+  Song getPrevSong(T arg);
+}
+
+class _QueueOperationsById implements _QueueOperations<int> {
+  const _QueueOperationsById(this._queue);
+  final Queue _queue;
+
+  Song getSong(int id) {
+    return _queue._songs.firstWhere((el) => el.id == id, orElse: () => null);
+  }
+
+  int getSongIndex(int id) {
+    return _queue._songs.indexWhere((el) => el.id == id);
+  }
+
+  Song getNextSong(int id) {
+    final songIndex = getSongIndex(id);
+    if (songIndex < 0) {
+      return null;
+    }
+    final nextSongIndex = songIndex + 1;
+    if (nextSongIndex >= _queue._songs.length) {
+      return _queue._songs[0];
+    }
+    return _queue._songs[nextSongIndex];
+  }
+
+  Song getPrevSong(int id) {
+    final songIndex = getSongIndex(id);
+    if (songIndex < 0) {
+      return null;
+    }
+    final int prevSongIndex = songIndex - 1;
+    if (prevSongIndex < 0) {
+      return _queue._songs.last;
+    }
+    return _queue._songs[prevSongIndex];
+  }
+
+  void removeSong(int id) {
+    _queue._songs.removeWhere((el) => el.id == id);
   }
 }

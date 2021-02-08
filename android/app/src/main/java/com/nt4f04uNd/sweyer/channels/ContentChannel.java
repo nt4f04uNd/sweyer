@@ -5,60 +5,75 @@
 
 package com.nt4f04uNd.sweyer.channels;
 
+import android.os.AsyncTask;
+import android.os.Build;
+import android.util.Log;
+
+import com.google.gson.Gson;
 import com.nt4f04uNd.sweyer.Constants;
 import com.nt4f04uNd.sweyer.handlers.FetchHandler;
+import com.nt4f04uNd.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
 import androidx.annotation.Nullable;
-import io.flutter.Log;
+
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.view.FlutterView;
 
-public class ContentChannel implements MethodChannel.MethodCallHandler {
-    public static void init(FlutterView view) {
-        if (channel == null) {
-            channel = new MethodChannel(view, Constants.channels.content.CHANNEL_NAME);
-            channel.setMethodCallHandler(new ContentChannel());
-        }
-    }
+public enum ContentChannel {
+   instance;
 
-    public static void kill() {
-        channel = null;
-    }
+   public void init(BinaryMessenger messenger) {
+      if (channel == null) {
+         channel = new MethodChannel(messenger, "contentChannel");
+         channel.setMethodCallHandler(this::onMethodCall);
+      }
+   }
 
-    @Nullable
-    public static MethodChannel channel;
+   public void kill() {
+      channel = null;
+   }
 
-    @Override
-    public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
-        // Note: this method is invoked on the main thread.
+   @Nullable
+   MethodChannel channel;
+   @Nullable
+   private MethodChannel.Result result;
 
-        try {
-            switch (call.method) {
-                case Constants.channels.content.METHOD_RETRIEVE_SONGS: {
-                    // Run method on another thread
-                    new FetchHandler.TaskSearchSongs(result).execute();
-                    break;
-                }
-                case Constants.channels.content.METHOD_RETRIEVE_ALBUMS: {
-                    // Run method on another thread
-                    new FetchHandler.TaskSearchAlbums(result).execute();
-                    break;
-                }
-                case Constants.channels.content.METHOD_DELETE_SONGS: {
-                    FetchHandler.deleteSongs(call.argument("songDataList"));
-                    result.success(null);
-                    break;
-                }
-                default:
-                    result.notImplemented();
+   public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
+      // Note: this method is invoked on the main thread.
+      try {
+         switch (call.method) {
+            case "retrieveSongs": {
+               new FetchHandler.TaskSearchSongs().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               break;
             }
-        } catch (Exception e) {
-            result.error("CONTENT_CHANNEL_ERROR", e.getMessage(), e.getStackTrace());
-        }
-    }
+            case "retrieveAlbums": {
+               new FetchHandler.TaskSearchAlbums().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               break;
+            }
+            case "deleteSongs": {
+               FetchHandler.deleteSongs((String) call.argument("songs"));
+               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                  // Save the result to report to the flutter code later in `sendDeletionResult`
+                  this.result = result;
+               } else {
+                  result.success(true);
+               }
+               break;
+            }
+            default:
+               result.notImplemented();
+         }
+      } catch (Exception e) {
+         result.error("CONTENT_CHANNEL_ERROR", e.getMessage(), Log.getStackTraceString(e));
+      }
+   }
 
+   public void sendDeletionResult(boolean result) {
+      if (this.result != null) {
+         this.result.success(result);
+      }
+   }
 }

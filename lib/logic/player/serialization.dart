@@ -6,97 +6,130 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'song.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:sweyer/sweyer.dart';
+
+import 'models/song.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Class to create serialization objects
+/// Interface to manage serialization.
 ///
-/// @param TRead denotes type of list that is returned from [readJson] method
-/// @param TSave denotes type that has to be provided into [saveJson] method
-abstract class Serialization<TRead, TSave> {
-  final String fileName = "";
+/// [R] denotes type that is returned from [read] method.
+/// [S] denotes type that has to be provided to the [save] method.
+abstract class JsonSerializer<R, S> {
+  String get fileName;
 
-  /// Create file json if it does not exists or of it is empty then write to it empty array
-  Future<void> initJson() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/$fileName');
+  /// Value that will be written in [init] method.
+  S get initialValue;
+
+  /// Create file json if it does not exists or of it is empty then write to it empty array.
+  Future<void> init() async {
+    final file = await getFile();
     if (!await file.exists()) {
       await file.create();
-      await file.writeAsString(jsonEncode([]));
-    } else if (await file.readAsString() == "") {
-      await file.writeAsString(jsonEncode([]));
+      await file.writeAsString(jsonEncode(initialValue));
+    } else if (await file.readAsString() == '') {
+      await file.writeAsString(jsonEncode(initialValue));
     }
   }
 
-  /// Reads json and returns decoded data
-  Future<List<TRead>> readJson();
+  Future<File> getFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/$fileName');
+  }
 
-  /// Serializes provided data
-  Future<void> saveJson(List<TSave> data) async {}
+  /// Reads json and returns decoded data.
+  Future<R> read();
+
+  /// Serializes provided data into json.
+  Future<void> save(S data);
 }
 
-/// Implementation of [Serialization] to serialize songs
-class SongsSerialization extends Serialization<Song, Song> {
-  @override
-  final String fileName = 'songs.json';
+/// Used to serialize queue.
+///
+/// Saves only songs ids, so you have to search indexes in 'all' queue to restore.
+class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
+  QueueSerializer._internal();
+  static final QueueSerializer _instance = QueueSerializer._internal();
+  static QueueSerializer get instance => _instance;
 
-  // / Reads json and returns decoded data
   @override
-  Future<List<Song>> readJson() async {
+  String get fileName => 'queue.json';
+  @override
+  List<Song> get initialValue => [];
+
+  /// Returns a list of song ids.
+  @override
+  Future<List<int>> read() async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/$fileName');
+      final file = await getFile();
       String jsonContent = await file.readAsString();
-      return [...jsonDecode(jsonContent).map((el) => Song.fromJson(el))];
-    } catch (e) {
+      return jsonDecode(jsonContent).cast<int>();
+    } catch (ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in QueueSerializer.read, fileName: $fileName',
+      );
+      ShowFunctions.instance.showError(
+        errorDetails: buildErrorReport(ex, stack),
+      );
       debugPrint(
           '$fileName: Error reading songs json, setting to empty songs list');
-      return []; // Return empty array if error has been caught
+      return [];
     }
   }
 
-  /// Serializes provided songs data list
+  /// Serializes provided songs into queue
   @override
-  Future<void> saveJson(List<Song> data) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/$fileName');
-    var jsonContent = jsonEncode(data);
-    await file.writeAsString(jsonContent);
+  Future<void> save(List<Song> data) async {
+    final file = await getFile();
+    final lol = jsonEncode(data.map((el) => el.id).toList());
+    await file.writeAsString(lol);
     debugPrint('$fileName: json saved');
   }
 }
 
-/// Implementation of [Serialization] to serialize playlists
-///
-/// Saves only songs ids, so you have to search indexes in [globalPlaylist] to restore playlist
-class PlaylistSerialization extends Serialization<int, Song> {
-  @override
-  final String fileName = 'playlist.json';
+/// Used to serialize song id map.
+class IdMapSerializer
+    extends JsonSerializer<Map<String, int>, Map<String, int>> {
+  IdMapSerializer._internal();
+  static final IdMapSerializer _instance = IdMapSerializer._internal();
+  static IdMapSerializer get instance => _instance;
 
-  // / Reads json and returns decoded data
   @override
-  Future<List<int>> readJson() async {
+  String get fileName => 'id_map.json';
+  @override
+  Map<String, int> get initialValue => {};
+
+  @override
+  Future<Map<String, int>> read() async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/$fileName');
+      final file = await getFile();
       String jsonContent = await file.readAsString();
-      return jsonDecode(jsonContent).cast<int>();
-    } catch (e) {
+      return jsonDecode(jsonContent).cast<String, int>();
+    } catch (ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in IdMapSerializer.read, fileName: $fileName',
+      );
+      ShowFunctions.instance.showError(
+        errorDetails: buildErrorReport(ex, stack),
+      );
       debugPrint(
           '$fileName: Error reading songs json, setting to empty songs list');
-      return []; // Return empty array if error has been caught
+      return {};
     }
   }
 
-  /// Serializes provided playlist
+  /// Serializes provided map as id map.
+  /// Used on dart side to saved cleared map, in other cases used on native.
   @override
-  Future<void> saveJson(List<Song> data) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/$fileName');
-    var idsArray = data.map((el) => el.id).toList();
-    var jsonContent = jsonEncode(idsArray);
-    await file.writeAsString(jsonContent);
+  Future<void> save(Map<String, int> data) async {
+    final file = await getFile();
+    await file.writeAsString(jsonEncode(data));
     debugPrint('$fileName: json saved');
   }
 }

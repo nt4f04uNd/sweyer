@@ -10,8 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
 import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
 
 /** Broadcast receiver for become noisy intent
@@ -25,7 +23,6 @@ public class BecomingNoisyReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
             PlayerHandler.pause();
-            NativeEventsChannel.success(Constants.channels.events.BECOME_NOISY);
         }
     }
 }

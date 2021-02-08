@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.nt4f04uNd.sweyer">
 
 
@@ -8,7 +9,7 @@
           additional functionality it is fine to subclass or reimplement
           FlutterApplication and put your custom class here. -->
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="com.nt4f04uNd.sweyer.Application"
         android:icon="@mipmap/ic_launcher"
         android:label="Sweyer"
         android:requestLegacyExternalStorage="true"
@@ -19,23 +20,38 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/LaunchThemeSystemUI"
+            android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustNothing">
+
+            <!-- Displays an Android View that continues showing the launch screen
+                Drawable until Flutter paints its first frame, then this splash
+                screen fades out. A splash screen is useful to avoid any visual
+                gap between the end of Android's launch screen and the painting of
+                Flutter's first frame. -->
+            <meta-data
+                android:name="io.flutter.embedding.android.SplashScreenDrawable"
+                android:resource="@drawable/launch_background" />
+                
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                the Android process has started. This theme is visible to the user
+                while the Flutter UI initializes. After that, this theme continues
+                to determine the Window background behind the Flutter UI. -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- NOTE see https://github.com/flutter/flutter/issues/20827 -->
             <!-- This keeps the window background of the activity showing
-        until Flutter renders its first frame. It can be removed if
-        there is no splash screen (such as the default splash screen
-        defined in @style/LaunchTheme). -->
-            <!-- <meta-data android:name="io.flutter.theme.android.SplashScreenUntilFirstFrame" android:value="true" /> -->
-            <!-- <meta-data
+                until Flutter renders its first frame. It can be removed if
+                there is no splash screen (such as the default splash screen
+                defined in @style/LaunchTheme). -->
+            <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                android:value="true" /> -->
+                android:value="true" />
 
             <!-- Intent filter for opening audio files -->
             <!--          <intent-filter>-->
@@ -45,17 +61,25 @@
             <!--         </intent-filter>-->
         </activity>
 
-        <service
-            android:name="com.nt4f04uNd.sweyer.player.PlayerForegroundService"
-            android:enabled="true"
-            android:foregroundServiceType="mediaPlayback">
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
 
+        <service
+            android:name="com.nt4f04uNd.sweyer.services.MusicService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
         </service>
 
-    </application>
+        <!-- <service android:name=".services.MusicService">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service> -->
 
-    <!-- Allow media notification -->
-    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+        <service android:enabled="true" android:name="com.nt4f04uNd.sweyer.services.DeletionService"/>
+    </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

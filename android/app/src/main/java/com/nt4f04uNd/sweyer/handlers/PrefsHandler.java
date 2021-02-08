@@ -9,8 +9,8 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
 
-public class PrefsHandler { // TODO: maybe move strings to constants?
-    // These two variable may change, as the are from `shared_preferences` flutter library
+public class PrefsHandler {
+    // These are coming from from `shared_preferences` flutter library
     private static String SHARED_PREFERENCES_NAME = "FlutterSharedPreferences";
     private static String PREFIX = "flutter.";
 
@@ -47,8 +47,8 @@ public class PrefsHandler { // TODO: maybe move strings to constants?
         return getPrefs().getBoolean(PREFIX + "loop_mode", false);
     }
 
-    // **************** Sort feature *************************
-    public static long getSortFeature() {
-     return getPrefs().getLong(PREFIX + "sort_feature", 0);
+    // **************** Setting primary color *************************
+    public static long getSettingPrimaryColor() {
+        return getPrefs().getLong(PREFIX + "setting_primary_color", 0xFF7C4DFF);
     }
 }

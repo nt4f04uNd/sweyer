@@ -3,70 +3,52 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-export 'album.dart';
 export 'native_player.dart';
 export 'playlist.dart';
 export 'serialization.dart';
-export 'song.dart';
 export 'content.dart';
+export 'models/models.dart';
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-import 'playlist.dart';
 import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/api.dart' as API;
 
 abstract class MusicPlayer {
-  // Native player subscriptions
-  static StreamSubscription<AudioPlayerState> _stateChangeSubscription;
-  static StreamSubscription<void> _completionSubscription;
-  static StreamSubscription<PlatformException> _errorSubscription;
-
   // Getters
 
   /// Get stream of changes on audio position.
-  static Stream<Duration> get onAudioPositionChanged =>
-      NativeAudioPlayer.onAudioPositionChanged;
+  static Stream<Duration> get onPosition => NativeAudioPlayer.onPosition;
 
   /// Get stream of changes on player state.
-  static Stream<AudioPlayerState> get onPlayerStateChanged =>
-      NativeAudioPlayer.onPlayerStateChanged;
-
-  /// Get stream of changes on audio duration
-  // static Stream<Duration> get onDurationChanged =>
-  //     NativeAudioPlayer.onDurationChanged;
+  static Stream<MusicPlayerState> get onStateChange =>
+      NativeAudioPlayer.onStateChange;
 
   /// Get stream of player completions
-  static Stream<void> get onPlayerCompletion =>
-      NativeAudioPlayer.onPlayerCompletion;
+  static Stream<void> get onCompletion => NativeAudioPlayer.onCompletion;
 
   /// Get stream of player errors
-  static Stream<PlatformException> get onPlayerError =>
-      NativeAudioPlayer.onPlayerError;
+  static Stream<PlatformException> get onError => NativeAudioPlayer.onError;
 
   /// Get stream of loop mode changes
   static Stream<bool> get onLoopSwitch => NativeAudioPlayer.onLoopSwitch;
-
-  static AudioPlayerState get playerState => NativeAudioPlayer.state;
-
-  static bool get loopMode => NativeAudioPlayer.loopMode;
+  static MusicPlayerState get playerState => NativeAudioPlayer.state;
+  static bool get looping => NativeAudioPlayer.looping;
 
   /// Get current position
-  static Future<Duration> get currentPosition async {
+  static Future<Duration> get position async {
     try {
-      return Duration(
-          milliseconds: await NativeAudioPlayer.getCurrentPosition());
+      return Duration(milliseconds: await NativeAudioPlayer.getPosition());
     } catch (e) {
       return Duration(seconds: 0);
     }
   }
 
   /// Get duration of current song
-  static Future<Duration> get currentDuration async {
+  static Future<Duration> get duration async {
     try {
       return Duration(milliseconds: await NativeAudioPlayer.getDuration());
     } catch (e) {
@@ -79,76 +61,80 @@ abstract class MusicPlayer {
   static Future<void> init() async {
     NativeAudioPlayer.init();
 
-    _errorSubscription = NativeAudioPlayer.onPlayerError.listen((event) {
-      // debugger();
-    });
-
-    _completionSubscription = onPlayerCompletion.listen((event) {
+    onCompletion.listen((event) {
       // Play next track if not in loop mode, as in loop mode this event is not triggered
       playNext();
     });
 
     //******** RESTORE BY PREFS ***************
 
-    var prefs = await Prefs.getSharedInstance();
-
-    int savedSongPos;
+    int songPosition;
     // Disable restoring position if native player is actually playing right now
-    if (!(await NativeAudioPlayer.isPlaying()))
-      savedSongPos = await Prefs.songPositionInt.getPref(prefs);
+    if (!(await NativeAudioPlayer.isPlaying())) {
+      songPosition = await Prefs.songPositionInt.get();
+    }
 
     // Seek to saved position
-    if (savedSongPos != null)
-      await MusicPlayer.seek(Duration(seconds: savedSongPos));
+    if (songPosition != null) {
+      await MusicPlayer.seek(Duration(seconds: songPosition));
+    }
   }
 
-  // TODO: improve and add usage to this method
-  static void dispose() {
-    _stateChangeSubscription.cancel();
-    // _songChangeSubscription.cancel();
-    _errorSubscription.cancel();
-    _completionSubscription.cancel();
+  static Future<void> switchLooping() async {
+    return NativeAudioPlayer.setLooping(!looping);
   }
 
-  static Future<void> switchLoopMode() async {
-    return NativeAudioPlayer.switchLoopMode();
+  static bool _hasDuplicates(Song song) {
+    return (ContentControl.state.queues.type != QueueType.all ||
+            ContentControl.state.queues.modified) &&
+        ContentControl.state.queues.current.songs
+                .where((el) => el.id == song.id)
+                .length >
+            1;
   }
 
-  /// Play track
+  /// Plays the [song].
   ///
-  /// @param [songId] argument denotes an id track to play
-  ///
-  /// @param [silent] - if it is true, won't play track, but just switch to it
-  /// (the difference with the [setUri] with this parameter is that this function will also update current playing song respectively)
+  /// If [silent] is true, won't play track, but just switch to it.
   static Future<void> play(
-    int songId, {
+    Song song, {
     bool silent = false,
+    bool duplicate,
   }) async {
-    final song = ContentControl.state
-        .getPlaylist(PlaylistType.global)
-        .getSongById(songId);
+    song ??= ContentControl.state.queues.all.songs[0];
+    ContentControl.state.changeSong(song);
     try {
-      if (!silent) // [stayAwake] is very important for player to stay play even in background
-        await NativeAudioPlayer.play(song, stayAwake: true);
-      else {
-        await API.ServiceHandler.sendSong(song);
-        await setUri(song.id);
+      final _duplicate = duplicate ?? _hasDuplicates(song);
+      final copiedSong = song.copyWith(
+        id: song.id < 0
+            ? ContentControl.state.idMap[song.id.toString()]
+            : song.id,
+      );
+      var res;
+      if (!silent) {
+        res = NativeAudioPlayer.play(copiedSong, _duplicate);
+      } else {
+        res = NativeAudioPlayer.setUri(copiedSong, _duplicate);
       }
+      if (_duplicate && duplicate == null) {
+        ContentControl.handleDuplicate(song);
+      }
+      await res;
     } on PlatformException catch (e) {
-      if (e.code == "error") {
+      if (e.code == 'error') {
         if (e.message == Constants.Errors.UNABLE_ACCESS_RESOURCE) {
-          ShowFunctions.showToast(
-            msg: 'Произошла ошибка при воспроизведении,\n удаление трека',
+          ShowFunctions.instance.showToast(
+            msg: getl10n(App.navigatorKey.currentContext).playbackErrorMessage,
           );
-          // NOTE THAT ORDER OF THESE INSTRUCTION MATTERS
-          // Play next track after broken one
-          await play(ContentControl.state.currentPlaylist.getNextSongId(songId),
-              silent: silent);
-          ContentControl.state.getPlaylist(PlaylistType.global).removeSongAt(
-            ContentControl.state.getPlaylist(PlaylistType.global)
-                .getSongIndexById(songId),
-          ); //Remove broken track
-          ContentControl.state.emitPlaylistChange();
+          // The order of these calls matters
+          // Play next song after broken one
+          await playNext(
+            song: song,
+            silent: silent,
+          );
+          // Remove broken song
+          ContentControl.state.queues.all.removeSong(song);
+          ContentControl.state.emitSongListChange();
           ContentControl.refetchSongs(); // perform fetching
         } else if (e.message == Constants.Errors.NATIVE_PLAYER_ILLEGAL_STATE) {
           // ...
@@ -157,7 +143,7 @@ abstract class MusicPlayer {
     } catch (e) {
       // Do not handle this, because other exceptions are not expected
       rethrow;
-    } 
+    }
   }
 
   /// Resume player
@@ -171,145 +157,134 @@ abstract class MusicPlayer {
     }
   }
 
-  /// Sets track url
-  /// TODO: remove this method at all, or remove play [silent] parameter
-  /// Unlike [play], the playback will not resume, but song will be switched if it player is playing
-  static Future<void> setUri(int songId) async {
-    try {
-      return NativeAudioPlayer.setUri(songId);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   /// Pause player
   static Future<void> pause() async {
     return NativeAudioPlayer.pause();
   }
 
-  /// Stop player
-  static Future<void> stop() async {
-    return NativeAudioPlayer.stop();
-  }
-
   /// Seek
-  static Future<void> seek(Duration timing) async {
-    return NativeAudioPlayer.seek(timing);
+  static Future<void> seek(Duration position) async {
+    return NativeAudioPlayer.seek(position);
   }
 
-  /// Seek 3 seconds forward
-  ///
-  /// @param (optional) interval makes it possible to seek for specified interval
+  /// Seeks by [interval] forward, by default `3` seconds.
   static Future<void> fastForward([Duration interval]) async {
     if (interval == null) interval = Duration(seconds: 3);
-    return NativeAudioPlayer.seek(((await currentPosition) + interval));
+    return NativeAudioPlayer.seek(((await position) + interval));
   }
 
-  /// Seek 3 seconds backwards
-  ///
-  /// @param (optional) interval makes it possible to seek for specified interval
+  /// Seeks by [interval] backwards, by default `3` seconds.
   static Future<void> rewind([Duration interval]) async {
     if (interval == null) interval = Duration(seconds: 3);
-    return NativeAudioPlayer.seek(((await currentPosition) - interval));
+    return NativeAudioPlayer.seek(((await position) - interval));
   }
 
   /// Function that fires when pause/play button got clicked
   static Future<void> playPause() async {
     switch (playerState) {
-      case AudioPlayerState.PLAYING:
+      case MusicPlayerState.PLAYING:
         await pause();
         break;
-      case AudioPlayerState.PAUSED:
+      case MusicPlayerState.PAUSED:
         await resume();
         break;
-      case AudioPlayerState.STOPPED:
-        // Currently unused and shouldn't
-        await play(ContentControl.state.currentSongId);
-        break;
-      case AudioPlayerState.COMPLETED:
-        await play(ContentControl.state.currentSongId);
+      case MusicPlayerState.COMPLETED:
+        await play(ContentControl.state.currentSong);
         break;
       default: // Can be null, so don't throw
         break;
     }
   }
 
-  /// Function that fires when next track button got clicked
-  ///
-  /// If provided [songId] - plays next from this id
-  static Future<void> playNext({int songId, bool silent = false}) async {
-    songId ??= ContentControl.state.currentPlaylist
-        .getNextSongId(ContentControl.state.currentSongId);
-    ContentControl.state.changeSong(songId);
-    play(songId, silent: silent);
-  }
+  /// Plays the song after current, or if speceified, then after [song].
+  static Future<void> playNext({Song song, bool silent = false}) async {
+    song ??= ContentControl.state.queues.current.getNextSong(
+      song ?? ContentControl.state.currentSong,
+    );
+    var res;
 
-  /// Function that fires when prev track button got clicked
-  ///
-  /// If provided [songId] - plays prev from this id
-  static Future<void> playPrev({int songId, bool silent = false}) async {
-    songId ??= ContentControl.state.currentPlaylist.getPrevSongId(ContentControl.state.currentSongId);
-    ContentControl.state.changeSong(songId);
-    play(songId, silent: silent);
-  }
-
-  /// Function that handles click on track tile
-  ///
-  /// [clickedSongId] argument denotes an id of clicked track [MainRouteTrackList]
-  static Future<void> handleClickSongTile(
-      BuildContext context, Song clickedSong,
-      {bool pushToPlayerRoute = false}) async {
-    int prevCurrentSongId = ContentControl.state.currentSongId;
-
-    ContentControl.state.changeSong(clickedSong.id);
-
-    // print(
-    //     "$prevCurrentSongId   ${clickedSong.id}    ${MusicPlayer.playerState}");
-
-    switch (playerState) {
-      case AudioPlayerState.PLAYING:
-        {
-          // If user clicked the same track
-          if (prevCurrentSongId == clickedSong.id)
-            await pause();
-
-          // If user decided to click a new track
-          else
-            await play(clickedSong.id);
-          break;
-        }
-      case AudioPlayerState.PAUSED:
-        {
-          // If user clicked the same track
-          if (prevCurrentSongId == clickedSong.id)
-            await resume(clickedSong.id);
-
-          // If user decided to click a new track
-          else
-            await play(clickedSong.id);
-          break;
-        }
-      case AudioPlayerState.STOPPED:
-        // Currently unused and shouldn't
-        await play(clickedSong.id);
-        break;
-      case AudioPlayerState.COMPLETED:
-        await play(clickedSong.id);
-        break;
-      default: // Can be null, so don't throw, just play
-        await play(clickedSong.id);
-        break;
+    if (song != null) {
+      play(song, silent: silent);
+    } else {
+      final songs = ContentControl.state.queues.all.songs;
+      if (songs.isNotEmpty) {
+        song = songs[0];
+        play(song, silent: silent);
+      }
     }
+    seek(const Duration());
+    await res;
+  }
 
-    if (pushToPlayerRoute &&
-        (clickedSong.id != prevCurrentSongId ||
-            clickedSong.id == prevCurrentSongId &&
-                MusicPlayer.playerState == AudioPlayerState.PLAYING)) {
-      Navigator.of(context).pushNamed(Constants.Routes.player.value);
+  /// Plays the song before current, or if speceified, then before [song].
+  static Future<void> playPrev({Song song, bool silent = false}) async {
+    song ??= ContentControl.state.queues.current.getPrevSong(
+      song ?? ContentControl.state.currentSong,
+    );
+    var res;
+    if (song != null) {
+      res = play(song, silent: silent);
+    } else {
+      final songs = ContentControl.state.queues.all.songs;
+      if (songs.isNotEmpty) {
+        song = songs[0];
+        res = play(song, silent: silent);
+      }
+    }
+    seek(const Duration());
+    await res;
+  }
+
+  /// Function that handles click on track tile.
+  /// Opens player route.
+  /// Default click [behaviour] is [SongClickBehavior.play].
+  static Future<void> handleSongClick(
+    BuildContext context,
+    Song clickedSong, {
+    SongClickBehavior behavior = SongClickBehavior.play,
+  }) async {
+    final duplicate = _hasDuplicates(clickedSong);
+    bool isSame;
+    if (duplicate) {
+      ContentControl.handleDuplicate(clickedSong);
+      isSame = false;
+    } else {
+      isSame = clickedSong == ContentControl.state.currentSong;
+    }
+    if (behavior == SongClickBehavior.play) {
+      getPlayerRouteControllerProvider(context).controller.open();
+      final res = play(clickedSong, duplicate: duplicate);
+
+      /// I'm doing this in this order because for some reason on
+      /// the VERY FIRST seek it will be ignored. Just ignored,
+      /// it will seek and after it will start playing, it will be just restored
+      /// back for some reason. In other places the same applies.
+      seek(const Duration());
+      await res;
+    } else {
+      if (isSame) {
+        if (playerState == MusicPlayerState.PAUSED ||
+            playerState == MusicPlayerState.COMPLETED) {
+          getPlayerRouteControllerProvider(context).controller.open();
+          await resume();
+        } else {
+          await pause();
+        }
+      } else {
+        getPlayerRouteControllerProvider(context).controller.open();
+        final res = play(clickedSong, duplicate: duplicate);
+        seek(const Duration());
+        await res;
+      }
     }
   }
 }
 
-/// Function that returns artist, or automatically show "Неизвестный исполнитель" instead of "<unknown>"
-String artistString(String artist) =>
-    artist != '<unknown>' ? artist : 'Неизвестный исполнитель';
+/// Describes how to respond to song tile clicks.
+enum SongClickBehavior {
+  /// Behavior to always start the clicked song from the beginning.
+  play,
+
+  /// Behavior to allow play/pause on the clicked song.
+  playPause
+}
