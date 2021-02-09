@@ -1,377 +1,378 @@
 {
-  "@@last_modified": "2021-01-24T04:21:22.256772",
-  "artistUnknown": "Unknown artist",
+  "@@locale": "ru_ru",
+  "@@last_modified": "2020-05-25T04:00:59.715314",
+  "artistUnknown": "Неизвестный исполнитель",
   "@artistUnknown": {
     "type": "text",
     "placeholders": {}
   },
-  "tracks": "Tracks",
+  "tracks": "Треки",
   "@tracks": {
     "type": "text",
     "placeholders": {}
   },
-  "albums": "Albums",
+  "albums": "Альбомы",
   "@albums": {
     "type": "text",
     "placeholders": {}
   },
-  "tracksPlural": "{count,plural, =0{Tracks}=1{Track}=2{Tracks}few{Tracks}many{Tracks}other{Tracks}}",
+  "tracksPlural": "{count,plural, =0{Треков}=1{Трек}=2{Трека}few{Трека}many{Треков}other{Трека}}",
   "@tracksPlural": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "albumsPlural": "{count,plural, =0{Albums}=1{Album}=2{Albums}few{Albums}many{Albums}other{Albums}}",
+  "albumsPlural": "{count,plural, =0{Альбомов}=1{Альбом}=2{Альбома}few{Альбома}many{Альбомов}other{Альбома}}",
   "@albumsPlural": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "allTracks": "All tracks",
+  "allTracks": "Все треки",
   "@allTracks": {
     "type": "text",
     "placeholders": {}
   },
-  "playlist": "Playlist",
+  "playlist": "Плейлист",
   "@playlist": {
     "type": "text",
     "placeholders": {}
   },
-  "arbitraryQueue": "Arbitrary queue",
+  "arbitraryQueue": "Произвольная очередь",
   "@arbitraryQueue": {
     "type": "text",
     "placeholders": {}
   },
-  "shuffled": "Shuffled",
+  "shuffled": "Перемешано",
   "@shuffled": {
     "type": "text",
     "placeholders": {}
   },
-  "modified": "Modified",
+  "modified": "Изменено",
   "@modified": {
     "type": "text",
     "placeholders": {}
   },
-  "byQuery": "By query",
+  "byQuery": "По запросу",
   "@byQuery": {
     "type": "text",
     "placeholders": {}
   },
-  "debug": "Debug",
+  "debug": "Дебаг",
   "@debug": {
     "type": "text",
     "placeholders": {}
   },
-  "areYouSure": "Are you sure?",
+  "areYouSure": "Вы уверены?",
   "@areYouSure": {
     "type": "text",
     "placeholders": {}
   },
-  "reset": "Reset",
+  "reset": "Сбросить",
   "@reset": {
     "type": "text",
     "placeholders": {}
   },
-  "save": "Save",
+  "save": "Сохранить",
   "@save": {
     "type": "text",
     "placeholders": {}
   },
-  "secondsShorthand": "s",
+  "secondsShorthand": "с",
   "@secondsShorthand": {
     "type": "text",
     "placeholders": {}
   },
-  "minutesShorthand": "min",
+  "minutesShorthand": "мин",
   "@minutesShorthand": {
     "type": "text",
     "placeholders": {}
   },
-  "remove": "Remove",
+  "remove": "Убрать",
   "@remove": {
     "type": "text",
     "placeholders": {}
   },
-  "delete": "Delete",
+  "delete": "Удалить",
   "@delete": {
     "type": "text",
     "placeholders": {}
   },
-  "deletion": "Deletion",
+  "deletion": "Удаление",
   "@deletion": {
     "type": "text",
     "placeholders": {}
   },
-  "deletionError": "Deletion error",
+  "deletionError": "Ошибка при удалении",
   "@deletionError": {
     "type": "text",
     "placeholders": {}
   },
-  "edit": "Edit",
+  "edit": "Редактировать",
   "@edit": {
     "type": "text",
     "placeholders": {}
   },
-  "refresh": "Refresh",
+  "refresh": "Обновить",
   "@refresh": {
     "type": "text",
     "placeholders": {}
   },
-  "grant": "Grant",
+  "grant": "Предоставить",
   "@grant": {
     "type": "text",
     "placeholders": {}
   },
-  "errorMessage": "Oops! An error occurred",
+  "errorMessage": "Упс! Произошла ошибка",
   "@errorMessage": {
     "type": "text",
     "placeholders": {}
   },
-  "errorDetails": "Error details",
+  "errorDetails": "Информация об ошибке",
   "@errorDetails": {
     "type": "text",
     "placeholders": {}
   },
-  "playbackErrorMessage": "An error occurred during the playback, removing the track",
+  "playbackErrorMessage": "Произошла ошибка при воспроизведении, удаление трека",
   "@playbackErrorMessage": {
     "type": "text",
     "placeholders": {}
   },
-  "details": "Details",
+  "details": "Детали",
   "@details": {
     "type": "text",
     "placeholders": {}
   },
-  "songInformation": "Track information",
+  "songInformation": "Информация о треке",
   "@songInformation": {
     "type": "text",
     "placeholders": {}
   },
-  "editMetadata": "Edit metadata",
+  "editMetadata": "Изменить информацию",
   "@editMetadata": {
     "type": "text",
     "placeholders": {}
   },
-  "unknownRoute": "Unknown route!",
+  "unknownRoute": "Неизвестная страница!",
   "@unknownRoute": {
     "type": "text",
     "placeholders": {}
   },
-  "found": "Found",
+  "found": "Найдено",
   "@found": {
     "type": "text",
     "placeholders": {}
   },
-  "upNext": "Up next",
+  "upNext": "Далее",
   "@upNext": {
     "type": "text",
     "placeholders": {}
   },
-  "almostThere": "You're almost there",
+  "almostThere": "Вы почти у цели",
   "@almostThere": {
     "type": "text",
     "placeholders": {}
   },
-  "pressOnceAgainToExit": "Press once again to exit",
+  "pressOnceAgainToExit": "Нажмите еще раз для выхода",
   "@pressOnceAgainToExit": {
     "type": "text",
     "placeholders": {}
   },
-  "noMusic": "There's no music on your device",
+  "noMusic": "На вашем устройстве нету музыки",
   "@noMusic": {
     "type": "text",
     "placeholders": {}
   },
-  "searchingForTracks": "Searching for tracks...",
+  "searchingForTracks": "Ищем треки...",
   "@searchingForTracks": {
     "type": "text",
     "placeholders": {}
   },
-  "allowAccessToExternalStorage": "Please, allow access to storage",
+  "allowAccessToExternalStorage": "Пожалуйста, предоставьте доступ к хранилищу",
   "@allowAccessToExternalStorage": {
     "type": "text",
     "placeholders": {}
   },
-  "allowAccessToExternalStorageManually": "Allow access to storage manually",
-  "@allowAccessToExternalStorageManually": {
-    "type": "text",
-    "placeholders": {}
+  "allowAccessToExternalStorageManually": "Предоставьте доступ к хранилищу вручную",
+   "@allowAccessToExternalStorageManually": {
+     "type": "text",
+     "placeholders": {}
   },
-  "openAppSettingsError": "Error opening the app settings",
+  "openAppSettingsError": "Произошла ошибка при открытии настроек приложения",
   "@openAppSettingsError": {
-    "type": "text",
-    "placeholders": {}
+     "type": "text",
+     "placeholders": {}
   },
-  "actions": "Actions",
+  "actions": "Действия",
   "@actions": {
     "type": "text",
     "placeholders": {}
   },
-  "goToAlbum": "Go to album",
+  "goToAlbum": "Открыть альбом",
   "@goToAlbum": {
     "type": "text",
     "placeholders": {}
   },
-  "playNext": "Play next",
+  "playNext": "Включить следующим",
   "@playNext": {
     "type": "text",
     "placeholders": {}
   },
-  "addToQueue": "Add to queue",
+  "addToQueue": "Добавить в очередь",
   "@addToQueue": {
     "type": "text",
     "placeholders": {}
   },
-  "sort": "Sort",
+  "sort": "Сортировка",
   "@sort": {
     "type": "text",
     "placeholders": {}
   },
-  "artist": "Artist",
+  "artist": "Исполнитель",
   "@artist": {
     "type": "text",
     "placeholders": {}
   },
-  "title": "Title",
+  "title": "Название",
   "@title": {
     "type": "text",
     "placeholders": {}
   },
-  "dateModified": "Date modified",
+  "dateModified": "Дата изменения",
   "@dateModified": {
     "type": "text",
     "placeholders": {}
   },
-  "dateAdded": "Date added",
+  "dateAdded": "Дата добавления",
   "@dateAdded": {
     "type": "text",
     "placeholders": {}
   },
-  "year": "Year",
+  "year": "Год",
   "@year": {
     "type": "text",
     "placeholders": {}
   },
-  "numberOfTracks": "Number of tracks",
+  "numberOfTracks": "Количество треков",
   "@numberOfTracks": {
     "type": "text",
     "placeholders": {}
   },
-  "deletionPromptDescriptionP1": "Are you sure you want to delete ",
+  "deletionPromptDescriptionP1": "Вы точно хотите удалить ",
   "@deletionPromptDescriptionP1": {
     "type": "text",
     "placeholders": {}
   },
-  "deletionPromptDescriptionP2": " selected tracks?",
+  "deletionPromptDescriptionP2": " выбранные треки?",
   "@deletionPromptDescriptionP2": {
     "type": "text",
     "placeholders": {}
   },
-  "devModeGreet": "Done! You are now a developer",
+  "devModeGreet": "Готово! Теперь вы разработчик",
   "@devModeGreet": {
     "type": "text",
     "placeholders": {}
   },
-  "onThePathToDevMode": "Something should happen now...",
+  "onThePathToDevMode": "Сейчас должно что-то произойти...",
   "@onThePathToDevMode": {
     "type": "text",
     "placeholders": {}
   },
-  "onThePathToDevModeLastClick": "only 1 click remaining...",
+  "onThePathToDevModeLastClick": "остался всего 1 клик...",
   "@onThePathToDevModeLastClick": {
     "type": "text",
     "placeholders": {}
   },
-  "onThePathToDevModeClicksRemaining": "only {remainingClicks} clicks remaining...",
+  "onThePathToDevModeClicksRemaining": "осталось всего {remainingClicks} клика...",
   "@onThePathToDevModeClicksRemaining": {
     "type": "text",
     "placeholders": {
       "remainingClicks": {}
     }
   },
-  "devStopService": "Stop the service",
+  "devStopService": "Остановить сервис",
   "@devStopService": {
     "type": "text",
     "placeholders": {}
   },
-  "devTestToast": "Test toast",
+  "devTestToast": "Тестовый тост",
   "@devTestToast": {
     "type": "text",
     "placeholders": {}
   },
-  "devErrorSnackbar": "Show error snackbar",
+  "devErrorSnackbar": "Показать снакбар с ошибкой",
   "@devErrorSnackbar": {
     "type": "text",
     "placeholders": {}
   },
-  "devImportantSnackbar": "Show important snackbar",
+  "devImportantSnackbar": "Показать важный снакбар",
   "@devImportantSnackbar": {
     "type": "text",
     "placeholders": {}
   },
-  "devAnimationsSlowMo": "Slow down animations",
+  "devAnimationsSlowMo": "Замедление анимаций",
   "@devAnimationsSlowMo": {
     "type": "text",
     "placeholders": {}
   },
-  "quitDevMode": "Quit the developer mode",
+  "quitDevMode": "Выйти из режима разработчика",
   "@quitDevMode": {
     "type": "text",
     "placeholders": {}
   },
-  "quitDevModeDescription": "Stop being a developer?",
+  "quitDevModeDescription": "Перестать быть разработчиком?",
   "@quitDevModeDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "settings": "Settings",
+  "settings": "Настройки",
   "@settings": {
     "type": "text",
     "placeholders": {}
   },
-  "general": "General",
+  "general": "Общие",
   "@general": {
     "type": "text",
     "placeholders": {}
   },
-  "theme": "Theme",
+  "theme": "Тема",
   "@theme": {
     "type": "text",
     "placeholders": {}
   },
-  "settingLightMode": "Light mode",
+  "settingLightMode": "Светлая тема",
   "@settingLightMode": {
     "type": "text",
     "placeholders": {}
   },
-  "searchHistory": "Search history",
+  "searchHistory": "История поиска",
   "@searchHistory": {
     "type": "text",
     "placeholders": {}
   },
-  "searchHistoryPlaceholder": "Your search history will be displayed here",
+  "searchHistoryPlaceholder": "Здесь будет отображаться история вашего поиска",
   "@searchHistoryPlaceholder": {
     "type": "text",
     "placeholders": {}
   },
-  "searchNothingFound": "Nothing found",
+  "searchNothingFound": "Ничего не найдено",
   "@searchNothingFound": {
     "type": "text",
     "placeholders": {}
   },
-  "searchHistoryRemoveEntryDescriptionP1": "Are you sure you want to remove ",
+  "searchHistoryRemoveEntryDescriptionP1": "Вы точно хотите убрать запрос ",
   "@searchHistoryRemoveEntryDescriptionP1": {
     "type": "text",
     "placeholders": {}
   },
-  "searchHistoryRemoveEntryDescriptionP2": " from your search history?",
+  "searchHistoryRemoveEntryDescriptionP2": " из истории поиска?",
   "@searchHistoryRemoveEntryDescriptionP2": {
     "type": "text",
     "placeholders": {}
   },
-  "searchClearHistory": "Clear search history?",
+  "searchClearHistory": "Очистить историю поиска?",
   "@searchClearHistory": {
     "type": "text",
     "placeholders": {}

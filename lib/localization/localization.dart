@@ -638,7 +638,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) {
-    return Constants.Config.supportedLocales.contains(locale.languageCode);
+    return Constants.Config.supportedLocales.contains(locale);
   }
 
   @override

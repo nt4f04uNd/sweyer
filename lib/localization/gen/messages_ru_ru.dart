@@ -1,5 +1,5 @@
 // DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
-// This is a library that provides messages for a ru locale. All the
+// This is a library that provides messages for a ru_RU locale. All the
 // messages from the main program should be duplicated here with the same
 // function name.
 
@@ -17,7 +17,7 @@ final messages = new MessageLookup();
 typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 
 class MessageLookup extends MessageLookupByLibrary {
-  String get localeName => 'ru';
+  String get localeName => 'ru_RU';
 
   static m0(count) => "${Intl.plural(count, zero: 'Альбомов', one: 'Альбом', two: 'Альбома', few: 'Альбома', many: 'Альбомов', other: 'Альбома')}";
 

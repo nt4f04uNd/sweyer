@@ -16,15 +16,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'constants/constants.dart';
 import 'routes/routes.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
 final RouteObserver<Route> routeObserver = RouteObserver();
 final RouteObserver<Route> homeRouteObserver = RouteObserver();
-
-final Iterable<Locale> _supportedLocales = Constants.Config.supportedLocales
-    .map<Locale>((e) => Locale(e, e.toUpperCase()));
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
@@ -157,7 +153,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
               title: Constants.Config.APPLICATION_TITLE,
               navigatorKey: App.navigatorKey,
               color: ThemeControl.theme.colorScheme.primary,
-              supportedLocales: _supportedLocales,
+              supportedLocales: Constants.Config.supportedLocales,
               localizationsDelegates: const [
                 AppLocalizations.delegate,
                 NFLocalizations.delegate,
@@ -165,7 +161,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
                 GlobalWidgetsLocalizations.delegate,
               ],
               theme: ThemeControl.theme,
-              initialRoute: Routes.home.value,
+              initialRoute: Constants.Routes.home.value,
               navigatorObservers: [routeObserver],
               onGenerateRoute: RouteControl.handleOnGenerateRoute,
               onGenerateInitialRoutes:
