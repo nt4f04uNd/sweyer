@@ -85,8 +85,8 @@ class _DrawerWidgetState extends State<DrawerWidget>
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) => Slidable(
-          startOffset: Offset(-1.0, 0.0),
-          endOffset: const Offset(0.0, 0.0),
+          startOffset: Offset(-304.0 / screenWidth, 0.0),
+          endOffset: Offset.zero,
           direction: SlideDirection.startToEnd,
           shouldGiveUpGesture: (event) {
             return controller.value == 0.0 &&
@@ -102,12 +102,20 @@ class _DrawerWidgetState extends State<DrawerWidget>
             color: Colors.black26,
           ),
           controller: controller,
-          barrierIgnoringStrategy: const IgnoringStrategy(),
-          hitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(),
-          notIgnoringHitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
+          barrierIgnoringStrategy: const IgnoringStrategy(
+            dismissed: true,
+          ),
+          hitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
             dismissed: HitTestBehavior.translucent,
           ),
-          child: _DrawerWidgetContent(controller: controller),
+          draggedHitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
+            dismissed: HitTestBehavior.translucent,
+          ),
+          child: Container(
+            width: 304.0,
+            alignment: Alignment.centerLeft,
+            child: _DrawerWidgetContent(controller: controller),
+          ),
         ),
       ),
     );

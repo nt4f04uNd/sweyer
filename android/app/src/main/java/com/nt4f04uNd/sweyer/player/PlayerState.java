@@ -6,7 +6,7 @@
  *  See ThirdPartyNotices.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.player;
+package com.nt4f04und.sweyer.player;
 
 public enum PlayerState {
     PLAYING,

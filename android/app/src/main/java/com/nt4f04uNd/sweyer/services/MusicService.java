@@ -3,7 +3,7 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.services;
+package com.nt4f04und.sweyer.services;
 
 import android.app.Service;
 import android.content.Intent;
@@ -13,17 +13,17 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.handlers.AudioFocusHandler;
-import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
-import com.nt4f04uNd.sweyer.handlers.MediaSessionHandler;
-import com.nt4f04uNd.sweyer.handlers.NotificationHandler;
-import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
-import com.nt4f04uNd.sweyer.handlers.QueueHandler;
-import com.nt4f04uNd.sweyer.handlers.PrefsHandler;
-import com.nt4f04uNd.sweyer.handlers.WakelockHandler;
-import com.nt4f04uNd.sweyer.receivers.BecomingNoisyReceiver;
-import com.nt4f04uNd.sweyer.receivers.NotificationReceiver;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.handlers.AudioFocusHandler;
+import com.nt4f04und.sweyer.handlers.GeneralHandler;
+import com.nt4f04und.sweyer.handlers.MediaSessionHandler;
+import com.nt4f04und.sweyer.handlers.NotificationHandler;
+import com.nt4f04und.sweyer.handlers.PlayerHandler;
+import com.nt4f04und.sweyer.handlers.QueueHandler;
+import com.nt4f04und.sweyer.handlers.PrefsHandler;
+import com.nt4f04und.sweyer.handlers.WakelockHandler;
+import com.nt4f04und.sweyer.receivers.BecomingNoisyReceiver;
+import com.nt4f04und.sweyer.receivers.NotificationReceiver;
 
 import androidx.annotation.Nullable;
 

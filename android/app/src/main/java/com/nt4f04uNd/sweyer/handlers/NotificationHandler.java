@@ -3,7 +3,7 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -19,11 +19,11 @@ import android.os.Build;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.MainActivity;
-import com.nt4f04uNd.sweyer.R;
-import com.nt4f04uNd.sweyer.services.MusicService;
-import com.nt4f04uNd.sweyer.player.Song;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.MainActivity;
+import com.nt4f04und.sweyer.R;
+import com.nt4f04und.sweyer.services.MusicService;
+import com.nt4f04und.sweyer.player.Song;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;

@@ -3,12 +3,12 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04und.sweyer.Constants;
 
 import java.io.File;
 import java.io.FileInputStream;

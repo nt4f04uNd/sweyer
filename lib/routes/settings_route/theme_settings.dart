@@ -100,7 +100,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
           child: const NFBackButton(),
         ),
         child: ScrollConfiguration(
-          behavior: const NFScrollBehaviorGlowless(),
+          behavior: const GlowlessScrollBehavior(),
           child: AnimatedBuilder(
             animation: controller,
             child: Container(

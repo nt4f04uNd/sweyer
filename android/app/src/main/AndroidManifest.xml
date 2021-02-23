@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.nt4f04uNd.sweyer">
+    package="com.nt4f04und.sweyer">
 
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
@@ -9,13 +9,13 @@
           additional functionality it is fine to subclass or reimplement
           FlutterApplication and put your custom class here. -->
     <application
-        android:name="com.nt4f04uNd.sweyer.Application"
+        android:name="com.nt4f04und.sweyer.Application"
         android:icon="@mipmap/ic_launcher"
         android:label="Sweyer"
         android:requestLegacyExternalStorage="true"
         android:resizeableActivity="false">
         <activity
-            android:name="com.nt4f04uNd.sweyer.MainActivity"
+            android:name="com.nt4f04und.sweyer.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
@@ -66,7 +66,7 @@
             android:value="2" />
 
         <service
-            android:name="com.nt4f04uNd.sweyer.services.MusicService"
+            android:name="com.nt4f04und.sweyer.services.MusicService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
@@ -78,7 +78,7 @@
             </intent-filter>
         </service> -->
 
-        <service android:enabled="true" android:name="com.nt4f04uNd.sweyer.services.DeletionService"/>
+        <service android:enabled="true" android:name="com.nt4f04und.sweyer.services.DeletionService"/>
     </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

@@ -3,9 +3,9 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.channels;
+package com.nt4f04und.sweyer.channels;
 
-import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04und.sweyer.Constants;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
@@ -34,7 +34,7 @@ public enum NativeEventsChannel implements StreamHandler {
     /** NOTE that this might be called when flutter view is detached
      *  Normally, `kill` method will set channel to null
      *  But `onDestroy` method is not guaranteed to be called, so sometimes it won't happen
-     **
+     *
      *  AFAIK this isn't something bad and not an error, but warning
      */
     public void success(Object event) {

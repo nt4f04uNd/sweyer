@@ -3,7 +3,7 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -12,7 +12,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.util.Log;
 
-import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04und.sweyer.Constants;
 
 public abstract class AudioFocusHandler {
     public static void init() {

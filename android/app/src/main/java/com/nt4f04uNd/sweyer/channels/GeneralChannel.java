@@ -3,15 +3,15 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.channels;
+package com.nt4f04und.sweyer.channels;
 
 import android.app.Activity;
 import android.util.Log;
 
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
-import com.nt4f04uNd.sweyer.handlers.QueueHandler;
-import com.nt4f04uNd.sweyer.services.MusicService;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.handlers.GeneralHandler;
+import com.nt4f04und.sweyer.handlers.QueueHandler;
+import com.nt4f04und.sweyer.services.MusicService;
 
 import org.jetbrains.annotations.NotNull;
 

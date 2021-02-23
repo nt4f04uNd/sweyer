@@ -3,15 +3,15 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.channels.PlayerChannel;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.channels.PlayerChannel;
 
 import org.jetbrains.annotations.NotNull;
 

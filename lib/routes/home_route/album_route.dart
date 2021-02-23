@@ -141,7 +141,7 @@ class _AlbumRouteState extends State<AlbumRoute>
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) => ScrollConfiguration(
-          behavior: const NFScrollBehaviorGlowless(),
+          behavior: const GlowlessScrollBehavior(),
           child: StreamBuilder(
             stream: ContentControl.state.onSongChange,
             builder: (context, snapshot) => CustomScrollView(

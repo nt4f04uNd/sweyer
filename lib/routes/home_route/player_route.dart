@@ -1020,7 +1020,7 @@ class _SeekbarState extends State<_Seekbar> {
             width: 36.0 * scaleFactor,
             transform: Matrix4.translationValues(5.0, 0.0, 0.0),
             child: Text(
-              (_duration * workingValue).getFormattedDuration(),
+              formatDuration(_duration * workingValue),
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
@@ -1050,7 +1050,7 @@ class _SeekbarState extends State<_Seekbar> {
             width: 36.0 * scaleFactor,
             transform: Matrix4.translationValues(-5.0, 0.0, 0.0),
             child: Text(
-              _duration.getFormattedDuration(),
+              formatDuration(_duration),
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,

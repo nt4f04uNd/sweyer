@@ -3,7 +3,7 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer;
+package com.nt4f04und.sweyer;
 
 public class Constants {
    public static final String PACKAGE_NAME = "com.nt4f04und.sweyer";

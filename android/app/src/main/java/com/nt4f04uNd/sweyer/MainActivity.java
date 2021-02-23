@@ -3,20 +3,20 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer;
+package com.nt4f04und.sweyer;
 
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.nt4f04uNd.sweyer.channels.GeneralChannel;
-import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
-import com.nt4f04uNd.sweyer.channels.PlayerChannel;
-import com.nt4f04uNd.sweyer.channels.ContentChannel;
-import com.nt4f04uNd.sweyer.handlers.AudioFocusHandler;
-import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
-import com.nt4f04uNd.sweyer.handlers.MediaSessionHandler;
-import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
-import com.nt4f04uNd.sweyer.handlers.QueueHandler;
+import com.nt4f04und.sweyer.channels.GeneralChannel;
+import com.nt4f04und.sweyer.channels.NativeEventsChannel;
+import com.nt4f04und.sweyer.channels.PlayerChannel;
+import com.nt4f04und.sweyer.channels.ContentChannel;
+import com.nt4f04und.sweyer.handlers.AudioFocusHandler;
+import com.nt4f04und.sweyer.handlers.GeneralHandler;
+import com.nt4f04und.sweyer.handlers.MediaSessionHandler;
+import com.nt4f04und.sweyer.handlers.PlayerHandler;
+import com.nt4f04und.sweyer.handlers.QueueHandler;
 
 import androidx.annotation.Nullable;
 

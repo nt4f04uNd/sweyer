@@ -6,18 +6,18 @@
  *  See ThirdPartyNotices.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.media.AudioManager;
 import android.os.Handler;
 
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.channels.NativeEventsChannel;
-import com.nt4f04uNd.sweyer.channels.PlayerChannel;
-import com.nt4f04uNd.sweyer.player.Player;
-import com.nt4f04uNd.sweyer.services.MusicService;
-import com.nt4f04uNd.sweyer.player.PlayerState;
-import com.nt4f04uNd.sweyer.player.Song;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.channels.NativeEventsChannel;
+import com.nt4f04und.sweyer.channels.PlayerChannel;
+import com.nt4f04und.sweyer.player.Player;
+import com.nt4f04und.sweyer.services.MusicService;
+import com.nt4f04und.sweyer.player.PlayerState;
+import com.nt4f04und.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 

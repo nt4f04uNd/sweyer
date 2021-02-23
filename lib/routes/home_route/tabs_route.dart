@@ -228,7 +228,7 @@ class _TabsRouteState extends State<TabsRoute> {
             child: Stack(
               children: [
                 ScrollConfiguration(
-                  behavior: const NFScrollBehaviorGlowless(),
+                  behavior: const GlowlessScrollBehavior(),
                   child: Padding(
                     padding: EdgeInsets.only(
                       top: ContentControl.state.albums.isNotEmpty ? 44.0 : 0.0,

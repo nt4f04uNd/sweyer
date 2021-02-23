@@ -1,4 +1,4 @@
-package com.nt4f04uNd.sweyer.player;
+package com.nt4f04und.sweyer.player;
 
 public enum PlayerResourceState {
     /// State when player doesn't exist or released

@@ -784,7 +784,7 @@ class SongsSearchDelegate extends SearchDelegate {
             width: double.infinity,
             child: SearchHistory.instance.history.length > 0
                 ? ScrollConfiguration(
-                    behavior: const NFScrollBehaviorGlowless(),
+                    behavior: const GlowlessScrollBehavior(),
                     child: ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(
                         parent: ClampingScrollPhysics(),

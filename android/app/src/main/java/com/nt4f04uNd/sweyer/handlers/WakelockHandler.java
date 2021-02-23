@@ -1,9 +1,9 @@
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.content.Context;
 import android.os.PowerManager;
 
-import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04und.sweyer.Constants;
 
 public abstract class WakelockHandler {
     private static PowerManager.WakeLock wl;

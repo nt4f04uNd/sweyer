@@ -3,7 +3,7 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.handlers;
+package com.nt4f04und.sweyer.handlers;
 
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
@@ -12,7 +12,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 
 import androidx.annotation.Nullable;
 
-import com.nt4f04uNd.sweyer.Constants;
+import com.nt4f04und.sweyer.Constants;
 
 public class MediaSessionHandler {
    private static MediaSession mediaSession;

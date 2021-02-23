@@ -3,14 +3,14 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.receivers;
+package com.nt4f04und.sweyer.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 
-import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
+import com.nt4f04und.sweyer.handlers.PlayerHandler;
 
 /** Broadcast receiver for become noisy intent
  *

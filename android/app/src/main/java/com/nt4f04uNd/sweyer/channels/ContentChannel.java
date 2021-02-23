@@ -3,16 +3,16 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.channels;
+package com.nt4f04und.sweyer.channels;
 
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.handlers.FetchHandler;
-import com.nt4f04uNd.sweyer.player.Song;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.handlers.FetchHandler;
+import com.nt4f04und.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 

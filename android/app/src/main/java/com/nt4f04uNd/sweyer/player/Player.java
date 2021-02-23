@@ -6,7 +6,7 @@
  *  See ThirdPartyNotices.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.player;
+package com.nt4f04und.sweyer.player;
 
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -16,8 +16,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 
-import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
-import com.nt4f04uNd.sweyer.handlers.PlayerHandler;
+import com.nt4f04und.sweyer.handlers.GeneralHandler;
+import com.nt4f04und.sweyer.handlers.PlayerHandler;
 
 import java.io.IOException;
 import android.util.Log;

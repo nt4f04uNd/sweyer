@@ -3,7 +3,7 @@
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.nt4f04uNd.sweyer.services;
+package com.nt4f04und.sweyer.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -18,11 +18,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.nt4f04uNd.sweyer.Constants;
-import com.nt4f04uNd.sweyer.channels.GeneralChannel;
-import com.nt4f04uNd.sweyer.handlers.FetchHandler;
-import com.nt4f04uNd.sweyer.handlers.GeneralHandler;
-import com.nt4f04uNd.sweyer.player.Song;
+import com.nt4f04und.sweyer.Constants;
+import com.nt4f04und.sweyer.channels.GeneralChannel;
+import com.nt4f04und.sweyer.handlers.FetchHandler;
+import com.nt4f04und.sweyer.handlers.GeneralHandler;
+import com.nt4f04und.sweyer.player.Song;
 
 import java.io.File;
 import java.util.ArrayList;
