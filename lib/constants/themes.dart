@@ -17,19 +17,36 @@ abstract class AppTheme {
 
   //************************************** WIDGET SPECIFIC COLORS ******************************************
 
-  static final _ThemeContainer<Color> sliderInactive = _ThemeContainer(
+  static final _ThemeContainer<Color> sliderInactiveColor = _ThemeContainer(
     light: Colors.black.withOpacity(0.2),
     dark: Colors.white.withOpacity(0.2),
   );
 
-  static final _ThemeContainer<Color> menuItem = _ThemeContainer(
+  static const _ThemeContainer<Color> appBarBorderColor = _ThemeContainer(
+    light: AppColors.eee,
+    dark: const Color(0xff191b1a),
+  );
+
+  static final _ThemeContainer<Color> menuItemColor = _ThemeContainer(
     light: const Color(0xff3d3e42),
     dark: AppColors.almostWhite,
   );
 
-  static final _ThemeContainer<Color> dialogButtonSplash = _ThemeContainer(
-    light: const Color(0x40cccccc),
-    dark: Colors.white.withOpacity(0.16),
+  static final _lightThemeSplashColor = const Color(0x40cccccc);
+
+  /// Additional "glow" splash color aside of the one I put into the [ThemeData.splashColor],
+  /// that is the primary splash of the application (see [app]).
+  ///
+  /// In light mode it's the same as the mentioned above primary splash color.
+  ///
+  /// This color can be used instead of the [ThemeData.splashColor]
+  /// for creating splashes over sold colors (because otherwise splash will be indistinguishable from the color
+  /// it's drawn over).
+  ///
+  /// For example, it can be used for better look of splashes over the primary color in dark mode.
+  static final _ThemeContainer<Color> glowSplashColor = _ThemeContainer(
+    light: _lightThemeSplashColor,
+    dark: Colors.white.withOpacity(0.1),
   );
 
   static const Color _lightIconColor = Color(0xff616266);
@@ -71,7 +88,7 @@ abstract class AppTheme {
 
       //****************** Specific app elements *****************
       scaffoldBackgroundColor: Colors.white,
-      splashColor: const Color(0x40cccccc),
+      splashColor: _lightThemeSplashColor,
       splashFactory: NFListTileInkRipple.splashFactory,
       highlightColor: Colors.transparent,
 
@@ -100,6 +117,8 @@ abstract class AppTheme {
           textStyle: MaterialStateProperty.all(
             const TextStyle(
               color: defaultPrimaryColor,
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

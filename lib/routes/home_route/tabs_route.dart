@@ -142,10 +142,10 @@ class _TabsRouteState extends State<TabsRoute> {
             ],
           ),
         ),
-        buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
+        buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
         acceptButton: NFButton.accept(
           text: l10n.delete,
-          splashColor: Constants.AppTheme.dialogButtonSplash.auto,
+          splashColor: Constants.AppTheme.glowSplashColor.auto,
           textStyle: const TextStyle(color: Constants.AppColors.red),
           onPressed: () {
             ContentControl.deleteSongs(controller.data.map((e) => e.song.sourceId).toSet());

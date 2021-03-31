@@ -28,10 +28,10 @@ class DevRoute extends StatelessWidget {
       AppRouter.instance.navigatorKey.currentContext,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
-      buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
+      buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
       acceptButton: NFButton.accept(
         text: nfl10n.accept,
-        splashColor: Constants.AppTheme.dialogButtonSplash.auto,
+        splashColor: Constants.AppTheme.glowSplashColor.auto,
         textStyle: const TextStyle(color: Constants.AppColors.red),
       ),
     );
@@ -121,7 +121,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        inactiveColor: Constants.AppTheme.sliderInactive.auto,
+        inactiveColor: Constants.AppTheme.sliderInactiveColor.auto,
         min: 0.001,
         max: 10,
         divisions: 100,

@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Themed border divider that can be shown and hidden with animation.
 /// 
@@ -23,8 +24,7 @@ class AppBarBorder extends StatelessWidget {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 400),
       color: shown
-          // ? theme.colorScheme.secondary
-          ? Color(0xff191b1a)
+          ? Constants.AppTheme.appBarBorderColor.auto
           : theme.colorScheme.secondary.withOpacity(0.0),
       height: height,
     );

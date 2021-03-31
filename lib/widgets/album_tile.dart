@@ -17,7 +17,8 @@ class AlbumTile extends StatefulWidget {
   const AlbumTile({
     Key key,
     @required this.album,
-    this.current = false,
+    this.trailing,
+    this.currentTest,
     this.onTap,
     this.small = false,
     double horizontalPadding,
@@ -33,7 +34,8 @@ class AlbumTile extends StatefulWidget {
     @required this.album,
     @required this.index,
     @required this.selectionController,
-    this.current = false,
+    this.trailing,
+    this.currentTest,
     this.onTap,
     this.small = false,
     double horizontalPadding,
@@ -47,9 +49,20 @@ class AlbumTile extends StatefulWidget {
   final Album album;
   final int index;
 
-  /// Whether this album is currently playing.
-  /// Enables animated indicator at the end of the tile.
-  final bool current;
+  /// Widget to be rendered at the end of the tile.
+  final Widget trailing;
+
+  /// Checks whether this album is currently playing, if so, enables animated
+  /// [CurrentIndicator] over the ablum art.
+  /// 
+  /// If not specified, by default checks if album is `currentSongOrigin` or
+  /// if it's currently playing persistent playlist:
+  /// 
+  /// ```dart
+  /// return album == ContentControl.state.currentSongOrigin ||
+  ///        album == ContentControl.state.queues.persistent;
+  /// ```
+  final ValueGetter<bool> currentTest;
   final VoidCallback onTap;
 
   /// Creates a small variant of the tile with the sizes of [SelectableTile].
@@ -159,7 +172,16 @@ class _AlbumTileState extends State<AlbumTile> with SingleTickerProviderStateMix
     controller.reverse();
   }
 
+  bool _performCurrentTest() {
+    if (widget.currentTest != null)
+      return widget.currentTest();
+    final album = widget.album;
+    return album == ContentControl.state.currentSongOrigin ||
+           album == ContentControl.state.queues.persistent;
+  }
+
   Widget _buildTile() {
+    final current = _performCurrentTest();
     return InkWell(
       onTap: _handleTap,
       onLongPress: selectable ? _toggleSelection : null,
@@ -178,11 +200,11 @@ class _AlbumTileState extends State<AlbumTile> with SingleTickerProviderStateMix
               child: widget.small
                 ? AlbumArt.songTile(
                     path: widget.album.albumArt,
-                    current: widget.current,
+                    current: current,
                   )
                 : AlbumArt.albumTile(
                   path: widget.album.albumArt,
-                  current: widget.current,
+                  current: current,
                 ),
             ),
             Expanded(
@@ -205,6 +227,11 @@ class _AlbumTileState extends State<AlbumTile> with SingleTickerProviderStateMix
                 ),
               ),
             ),
+            if (widget.trailing != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: widget.trailing,
+              ),
           ],
         ),
       ),

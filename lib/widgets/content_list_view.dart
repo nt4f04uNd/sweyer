@@ -8,10 +8,10 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Signature used for [SongListView.currentTest]
+/// Signature used for the [SongListView.currentTest] and others in this file.
 ///
 /// The is [index] is index of the song.
-typedef CurrentTest = bool Function(int index);
+typedef _CurrentTest = bool Function(int index);
 
 /// Creates a list of content.
 /// 
@@ -36,10 +36,8 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Callback to be called on item tap.
   final VoidCallback onItemTap;
 
-  /// An explicity content type.
-  /// 
-  /// Can be omitted, if you specified a content type in `T`.
-  final ContentType contentType;
+  /// An explicit content type.
+  final Type contentType;
 
   @override
   Widget build(BuildContext context) {
@@ -87,18 +85,8 @@ class SongListView extends StatefulWidget {
   /// A widget to build before all items.
   final Widget leading;
 
-  /// Called for each item build, returned bool value
-  /// will be passed to [SongTile.current].
-  /// 
-  /// The is [index] is index of the item.
-  /// 
-  /// By default checks for equality of [Song.sourceId] of song with given [index]
-  /// and current song:
-  /// 
-  /// ```dart
-  /// songs[index].sourceId == ContentControl.state.currentSong.sourceId
-  /// ```
-  final CurrentTest currentTest;
+  /// Passed to [SongTile.currentTest].
+  final _CurrentTest currentTest;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -180,13 +168,6 @@ class _SongListViewState extends State<SongListView> {
     widget.onScrollbarDragEnd?.call();
   }
 
-  bool _performCurrentTest(int index) {
-    if (widget.currentTest != null)
-      return widget.currentTest(index);
-    // TODO: move to some place that contains all default tests + whatver else related
-    return widget.songs[index].sourceId == ContentControl.state.currentSong.sourceId;
-  }
-
   @override
   Widget build(BuildContext context) {
     final items = widget.songs;
@@ -206,6 +187,7 @@ class _SongListViewState extends State<SongListView> {
             index--;
           }
           final item = items[index];
+          final currentTest = widget.currentTest != null ? () => widget.currentTest(index): null;
           if (selectable) {
             return SongTile.selectable(
               index: index,
@@ -213,14 +195,14 @@ class _SongListViewState extends State<SongListView> {
               selectionController: widget.selectionController,
               clickBehavior: widget.songClickBehavior,
               variant: widget.songTileVariant,
-              current: _performCurrentTest(index),
+              currentTest: currentTest,
               selected: widget.selectionController.data.contains(SongSelectionEntry(index: index)),
               onTap: widget.onItemTap,
             );
           }
           return SongTile(
             song: item,
-            current: _performCurrentTest(index),
+            currentTest: currentTest,
             clickBehavior: widget.songClickBehavior,
             variant: widget.songTileVariant,
             onTap: widget.onItemTap,
@@ -280,19 +262,8 @@ class AlbumListView extends StatefulWidget {
   /// A widget to build before all items.
   final Widget leading;
 
-  /// Called for each item build, returned bool value
-  /// will be passed to [AlbumTile.current].
-  /// 
-  /// The is [index] is index of the item.
-  /// 
-  /// By default checks if album is `currentSongOrigin` or if it's currently playing persistent playlist:
-  /// 
-  /// ```dart
-  /// final album = widget.albums[index];
-  /// return album == ContentControl.state.currentSongOrigin ||
-  ///        album == ContentControl.state.queues.persistent;
-  /// ```
-  final CurrentTest currentTest;
+  /// Passed to [AlbumTile.currentTest].
+  final _CurrentTest currentTest;
 
   /// Called on item tap.
   final VoidCallback onItemTap;
@@ -368,15 +339,6 @@ class _AlbumListViewState extends State<AlbumListView> {
     widget.onScrollbarDragEnd?.call();
   }
 
-  bool _performCurrentTest(int index) {
-    if (widget.currentTest != null)
-      return widget.currentTest(index);
-    final album = widget.albums[index];
-    // TODO: move to some place that contains all default tests + whatver else related
-    return album == ContentControl.state.currentSongOrigin ||
-           album == ContentControl.state.queues.persistent;
-  }
-
   @override
   Widget build(BuildContext context) {
     final items = widget.albums;
@@ -396,11 +358,12 @@ class _AlbumListViewState extends State<AlbumListView> {
             index--;
           }
           final item = items[index];
+          final currentTest = widget.currentTest != null ? () => widget.currentTest(index): null;
           if (selectable) {
             return AlbumTile.selectable(
               index: index,
               album: item,
-              current: _performCurrentTest(index),
+              currentTest: currentTest,
               onTap: widget.onItemTap,
               selected: widget.selectionController.data.contains(AlbumSelectionEntry(index: index)),
               selectionController: widget.selectionController,
@@ -409,7 +372,7 @@ class _AlbumListViewState extends State<AlbumListView> {
           return AlbumTile(
             album: item,
             onTap: widget.onItemTap,
-            current: _performCurrentTest(index),
+            currentTest: currentTest,
           );
         },
       ),

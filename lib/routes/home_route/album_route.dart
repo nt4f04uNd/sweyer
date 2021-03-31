@@ -156,8 +156,8 @@ class _AlbumRouteState extends State<AlbumRoute>
                     leading: child,
                     titleSpacing: 0.0,
                     backgroundColor: appBarController.isDismissed
-                        ? ThemeControl.theme.colorScheme.background
-                        : ThemeControl.theme.colorScheme.background.withOpacity(0.0),
+                        ? theme.colorScheme.background
+                        : theme.colorScheme.background.withOpacity(0.0),
                     title: AnimatedOpacity(
                       opacity: 1.0 - appBarController.value > 0.2 ? 1.0 : 0.0,
                       curve: Curves.easeOut,
@@ -191,8 +191,8 @@ class _AlbumRouteState extends State<AlbumRoute>
                         return SongTile(
                           song: song,
                           variant: SongTileVariant.number,
-                          current: ContentControl.state.queues.persistent == widget.album &&
-                                    song.sourceId ==ContentControl.state.currentSong.sourceId,
+                          currentTest: () => ContentControl.state.queues.persistent == widget.album &&
+                                             song.sourceId == ContentControl.state.currentSong.sourceId,
                           onTap: () => ContentControl.setQueue(
                             type: QueueType.persistent,
                             persistentQueue: widget.album,

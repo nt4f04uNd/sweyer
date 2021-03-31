@@ -57,7 +57,7 @@ class ShowFunctions extends NFShowFunctions {
     final context = AppRouter.instance.navigatorKey.currentContext;
     assert(context != null);
     final l10n = getl10n(context);
-    final theme = Theme.of(context);
+    final theme = ThemeControl.theme;
     final GlobalKey<NFSnackbarEntryState> globalKey = GlobalKey();
     NFSnackbarController.showSnackbar(
       NFSnackbarEntry(
@@ -70,7 +70,7 @@ class ShowFunctions extends NFShowFunctions {
               color: theme.colorScheme.onError,
             ),
           ),
-          color: ThemeControl.theme.colorScheme.error,
+          color: theme.colorScheme.error,
           trailing: NFButton(
             variant: NFButtonVariant.raised,
             text: l10n.details,

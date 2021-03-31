@@ -133,7 +133,10 @@ class _PlayerRouteState extends State<PlayerRoute> {
                     );
                   }
                 }
-                return child;
+                return IgnorePointer(
+                  ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
+                  child: child,
+                );
               },
             ),
             TrackPanel(
@@ -947,7 +950,7 @@ class _SeekbarState extends State<_Seekbar> {
               data: SliderThemeData(
                 trackHeight: 2.0,
                 activeTrackColor: ThemeControl.theme.colorScheme.primary,
-                inactiveTrackColor: Constants.AppTheme.sliderInactive.auto,
+                inactiveTrackColor: Constants.AppTheme.sliderInactiveColor.auto,
                 thumbShape: const RoundSliderThumbShape(
                   enabledThumbRadius: 7.5,
                 ),

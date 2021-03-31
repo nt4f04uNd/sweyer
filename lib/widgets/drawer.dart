@@ -15,12 +15,8 @@ import 'package:sweyer/constants.dart' as Constants;
 class DrawerWidget extends StatefulWidget {
   const DrawerWidget({
     Key key,
-    this.swipeGesture = trueCallback,
     this.canBeOpened = trueCallback,
   }) : super(key: key);
-
-  /// Function that checks if drawer swipe gesture is enabled.
-  final BoolCallback swipeGesture;
 
   /// Function that checks if drawer can be opened.
   final BoolCallback canBeOpened;
@@ -90,10 +86,8 @@ class _DrawerWidgetState extends State<DrawerWidget>
             return controller.value == 0.0 &&
                 // when on another drag on the right to next tab
                 (event.delta.dx < 0.0 ||
-                    // when on another tab
-                    !widget.swipeGesture() ||
-                    // when player route is opened, for example
-                    !widget.canBeOpened());
+                 // when player route is opened, for example
+                 !widget.canBeOpened());
           },
           onBarrierTap: controller.close,
           barrier: Container(color: Colors.black26),
@@ -179,8 +173,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
-              padding:
-                  const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
+              padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -199,10 +192,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                 ],
               ),
             ),
-            Divider(),
-            const SizedBox(
-              height: 7.0,
-            ),
+            const Divider(),
+            const SizedBox(height: 7.0),
             MenuItem(
               l10n.settings,
               icon: Icons.settings_rounded,
@@ -210,8 +201,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
             ),
             ValueListenableBuilder(
               valueListenable: ContentControl.state.devMode,
-              builder: (context, value, child) =>
-                  value ? child : const SizedBox.shrink(),
+              builder: (context, value, child) => value ? child : const SizedBox.shrink(),
               child: MenuItem(
                 l10n.debug,
                 icon: Icons.adb_rounded,
@@ -261,7 +251,7 @@ class MenuItem extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: fontSize,
-            color: Constants.AppTheme.menuItem.auto,
+            color: Constants.AppTheme.menuItemColor.auto,
           ),
         ),
         onTap: onTap,

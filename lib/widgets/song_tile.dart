@@ -29,8 +29,10 @@ class SongNumber extends StatelessWidget {
   })  : assert(current != null),
         number = int.tryParse(number ?? ''),
         super(key: key);
+
   final int number;
   final bool current;
+
   @override
   Widget build(BuildContext context) {
     Widget child;
@@ -80,7 +82,7 @@ class SongTile extends StatefulWidget {
   SongTile({
     Key key,
     @required this.song,
-    this.current = false,
+    this.currentTest,
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
@@ -96,7 +98,7 @@ class SongTile extends StatefulWidget {
     @required this.song,
     @required this.index,
     @required this.selectionController,
-    this.current = false,
+    this.currentTest,
     this.onTap,
     this.selected = false,
     this.clickBehavior = SongClickBehavior.play,
@@ -110,9 +112,16 @@ class SongTile extends StatefulWidget {
   final Song song;
   final int index;
 
-  /// Whether this song is current.
-  /// Enables animated indicator at the end of the tile.
-  final bool current;
+  /// Checks whether this song is current, if so, enables animated
+  /// [CurrentIndicator] over the ablum art/instead song number.
+  /// 
+  /// If not specified, by default checks for equality of [Song.sourceId]
+  /// of song with given [index] and current song:
+  /// 
+  /// ```dart
+  /// song.sourceId == ContentControl.state.currentSong.sourceId
+  /// ```
+  final ValueGetter<bool> currentTest;
   final VoidCallback onTap;
   final SongClickBehavior clickBehavior;
   final SongTileVariant variant;
@@ -127,8 +136,7 @@ class SongTile extends StatefulWidget {
   _SongTileState createState() => _SongTileState();
 }
 
-class _SongTileState extends State<SongTile>
-    with SingleTickerProviderStateMixin {
+class _SongTileState extends State<SongTile> with SingleTickerProviderStateMixin {
   bool _selected;
   AnimationController controller;
   Animation scaleAnimation;
@@ -230,6 +238,12 @@ class _SongTileState extends State<SongTile>
     controller.reverse();
   }
 
+  bool _performCurrentTest() {
+    if (widget.currentTest != null)
+      return widget.currentTest();
+    return widget.song.sourceId == ContentControl.state.currentSong.sourceId;
+  }
+
   Widget _buildTile(
     Widget albumArt, [
     double rightPadding,
@@ -271,14 +285,15 @@ class _SongTileState extends State<SongTile>
 
   @override
   Widget build(BuildContext context) {
+    final current = _performCurrentTest();
     final albumArt = showAlbumArt
         ? AlbumArt.songTile(
             path: widget.song.albumArt,
-            current: widget.current,
+            current: current,
           )
         : SongNumber(
             number: widget.song.track,
-            current: widget.current,
+            current: current,
           );
     if (!selectable)
       return _buildTile(albumArt);

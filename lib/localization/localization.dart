@@ -421,7 +421,7 @@ class AppLocalizations {
 
   /// Picks a string of a [Content] in plural form.
   /// For example "tracks".
-  String contents<T extends Content>([ContentType contentType]) {
+  String contents<T extends Content>([Type contentType]) {
     return contentPick<T, String Function()>(
       contentType: contentType,
       song: () => tracks,

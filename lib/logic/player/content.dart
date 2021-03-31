@@ -19,12 +19,12 @@ import 'package:sweyer/api.dart' as API;
 /// 
 /// Instead of `T`, you can explicitly specify [contentType].
 V contentPick<T extends Content, V>({
-  ContentType contentType,
+  Type contentType,
   @required V song,
   @required V album,
 }) {
   assert(song != null && album != null);
-  switch (contentType?.value ?? T) {
+  switch (contentType ?? T) {
     case Song:
       return song;
     case Album:
@@ -68,13 +68,13 @@ class _Sorts {
   /// Returs a [Sort] per `T` [Content] from the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
-  Sort<T> getValue<T extends Content>([ContentType key]) => _map[key?.value ?? T];
+  Sort<T> getValue<T extends Content>([Type key]) => _map[key ?? T];
 
   /// Puts a [Sort] typed with `T` into the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
-  void setValue<T extends Content>(Sort<T> value, {ContentType key}) {
-    _map[key?.value ?? T] = value;
+  void setValue<T extends Content>(Sort<T> value, {Type key}) {
+    _map[key ?? T] = value;
   }
 }
 
@@ -306,7 +306,7 @@ abstract class ContentControl {
       state.queues._all = Queue([]);
       state.emitSongListChange(); // update ui to show "Searching songs screen"
       await Future.wait([
-        for (final contentType in ContentType.values)
+        for (final contentType in Content.enumerate())
           refetch(contentType: contentType, updateQueues: false, emitChangeEvent: false),
       ]);
       await _restoreQueue();
@@ -618,7 +618,7 @@ abstract class ContentControl {
   /// Refetches all the content.
   static Future<void> refetchAll() async {
     await Future.wait([
-      for (final contentType in ContentType.values)
+      for (final contentType in Content.enumerate())
         refetch(contentType: contentType),
     ]);
     return _restoreLastSong();
@@ -631,7 +631,7 @@ abstract class ContentControl {
   /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling [removeObsolete].
   /// (only works with [Song]s).
   static Future<void> refetch<T extends Content>({
-    ContentType contentType,
+    Type contentType,
     bool updateQueues = true,
     bool emitChangeEvent = true,
   }) async {
@@ -670,7 +670,7 @@ abstract class ContentControl {
   /// Searches for content by given [query] and the `T` content type.
   ///
   /// Instead of `T`, you can explicitly specify [contentType]..
-  static List<T> search<T extends Content>(String query, { ContentType contentType }) {
+  static List<T> search<T extends Content>(String query, { Type contentType }) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
     final words = query.split(' ');

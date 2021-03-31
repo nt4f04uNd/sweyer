@@ -156,6 +156,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
                 title: Constants.Config.APPLICATION_TITLE,
                 color: ThemeControl.theme.colorScheme.primary,
                 supportedLocales: Constants.Config.supportedLocales,
+                scrollBehavior: _ScrollBehavior(),
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   NFLocalizations.delegate,
@@ -170,6 +171,17 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           },
         ),
       ),
+    );
+  }
+}
+
+class _ScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return GlowingOverscrollIndicator(
+      child: child,
+      axisDirection: axisDirection,
+      color: ThemeControl.theme.colorScheme.background,
     );
   }
 }

@@ -100,7 +100,7 @@ class LabelledSlider extends StatelessWidget {
                 activeTrackColor:
                     activeColor ?? ThemeControl.theme.colorScheme.primary,
                 inactiveTrackColor: inactiveColor ??
-                    Constants.AppTheme.sliderInactive.auto,
+                    Constants.AppTheme.sliderInactiveColor.auto,
               ),
               child: Slider(
                 value: value,

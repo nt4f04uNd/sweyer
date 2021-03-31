@@ -15,15 +15,15 @@
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
 
+// TODO: remove all ignores when migrate to nnbd
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Flow;
 import 'package:flutter/scheduler.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:sweyer/sweyer.dart';
-
-/// The amount of vertical space to separate chunks of text.
-const double _textVerticalSeparation = 18.0;
 
 /// A page that shows licenses for software used by the application.
 ///
@@ -123,6 +123,7 @@ class _PackagesView extends StatefulWidget {
     Key? key,
     required this.isLateral,
     required this.selectedId,
+  // ignore: unnecessary_null_comparison
   })   : assert(isLateral != null),
         super(key: key);
 
@@ -553,28 +554,6 @@ class _PackageLicensePageTitle extends StatelessWidget {
   }
 }
 
-String _defaultApplicationName(BuildContext context) {
-  // This doesn't handle the case of the application's title dynamically
-  // changing. In theory, we should make Title expose the current application
-  // title using an InheritedWidget, and so forth. However, in practice, if
-  // someone really wants their application title to change dynamically, they
-  // can provide an explicit applicationName to the widgets defined in this
-  // file, instead of relying on the default.
-  final Title? ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
-  return ancestorTitle?.title ??
-      Platform.resolvedExecutable.split(Platform.pathSeparator).last;
-}
-
-String _defaultApplicationVersion(BuildContext context) {
-  // TODO(ianh): Get this from the embedder somehow.
-  return '';
-}
-
-Widget? _defaultApplicationIcon(BuildContext context) {
-  // TODO(ianh): Get this from the embedder somehow.
-  return null;
-}
-
 const int _materialGutterThreshold = 720;
 const double _wideGutterSize = 24.0;
 const double _narrowGutterSize = 12.0;
@@ -609,6 +588,7 @@ enum _ActionLevel {
   top,
 
   /// Indicates the master view app bar in the lateral UI.
+  // ignore: unused_field
   view,
 
   /// Indicates the master page app bar in the nested UI.
@@ -661,9 +641,13 @@ class _MasterDetailFlow extends StatefulWidget {
     this.masterPageBuilder,
     this.masterViewWidth,
     this.title,
+  // ignore: unnecessary_null_comparison
   })  : assert(masterViewBuilder != null),
+        // ignore: unnecessary_null_comparison
         assert(automaticallyImplyLeading != null),
+        // ignore: unnecessary_null_comparison
         assert(detailPageBuilder != null),
+        // ignore: unnecessary_null_comparison
         assert(displayMode != null),
         super(key: key);
 
@@ -1050,7 +1034,9 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
     this.masterViewWidth,
+  // ignore: unnecessary_null_comparison
   })  : assert(detailPageBuilder != null),
+        // ignore: unnecessary_null_comparison
         assert(masterViewBuilder != null),
         super(key: key);
 
@@ -1236,6 +1222,7 @@ class _DetailView extends StatelessWidget {
     Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
+  // ignore: unnecessary_null_comparison
   })  : assert(builder != null),
         _builder = builder,
         _arguments = arguments,
@@ -1259,7 +1246,6 @@ class _DetailView extends StatelessWidget {
       expand: false,
       builder: (BuildContext context, ScrollController controller) {
         return MouseRegion(
-          // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
           child: Card(
             color: ThemeControl.theme.colorScheme.secondary,
             elevation: _kCardElevation,

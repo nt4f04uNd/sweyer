@@ -135,7 +135,7 @@ class JumpingDraggableScrollbar extends StatefulWidget {
         itemHeight = kSongTileArtSize,
         alignment = 0.0,
         endAlignment = 0.885,
-        contentType = ContentType.song,
+        contentType = Song,
         super(key: key);
 
   JumpingDraggableScrollbar.albums({
@@ -167,7 +167,7 @@ class JumpingDraggableScrollbar extends StatefulWidget {
         itemHeight = kAlbumTileArtSize,
         alignment = 0.0,
         endAlignment = 0.845,
-        contentType = ContentType.album,
+        contentType = Album,
         super(key: key);
 
   final Key barKey;
@@ -195,7 +195,7 @@ class JumpingDraggableScrollbar extends StatefulWidget {
   final double alignment;
   final double endAlignment;
   final ItemScrollController itemScrollController;
-  final ContentType contentType;
+  final Type contentType;
 
   @override
   _JumpingDraggableScrollbarState createState() => _JumpingDraggableScrollbarState();

@@ -130,10 +130,8 @@ class _MainScreenState extends State<MainScreen>
   bool get drawerCanBeOpened =>
       playerRouteController.closed &&
       selectionControllersMap.values.every((el) => el.notInSelection) &&
-      HomeRouter.instance.routes.last != HomeRoutes.album;
-
-  /// Whether the drawer swipe is enabled.
-  bool get drawerSwipe => tabController.animation.value == 0.0;
+      HomeRouter.instance.routes.last != HomeRoutes.album &&
+      (tabController.animation.value == 0.0 || HomeRouter.instance.routes.length > 1);
 
   @override
   void initState() {
@@ -282,7 +280,6 @@ class _MainScreenState extends State<MainScreen>
                   ),
                   DrawerWidget(
                     canBeOpened: () => drawerCanBeOpened,
-                    swipeGesture: () => drawerSwipe,
                   ),
                 ],
               ),

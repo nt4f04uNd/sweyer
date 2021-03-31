@@ -37,8 +37,7 @@ abstract class ThemeControl {
   /// True if [brightness] is dark
   static bool get isDark => _brightness == Brightness.dark;
 
-  static ThemeData get theme =>
-      isLight ? Constants.AppTheme.app.light : Constants.AppTheme.app.dark;
+  static ThemeData get theme => isLight ? Constants.AppTheme.app.light : Constants.AppTheme.app.dark;
 
   /// Returns primary or onBackground color, depending on:
   /// * the current primary

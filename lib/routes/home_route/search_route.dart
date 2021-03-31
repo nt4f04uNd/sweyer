@@ -136,12 +136,6 @@ class _SearchPageRoute extends RouteTransition<_SearchPage> {
           settings: page,
           transitionSettings: page.transitionSettings,
         ) {
-    assert(
-      delegate._route == null,
-      'The ${delegate.runtimeType} instance is currently used by another active '
-      'search. Please close that search by calling close() on the SearchDelegate '
-      'before opening another search with the same delegate instance.',
-    );
     delegate._route = this;
   }
 
@@ -213,6 +207,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with SingleTickerProvide
   @override
   void initState() {
     super.initState();
+    widget.delegate.onQueryChange();
     widget.delegate._queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     focusNode.addListener(_onFocusChanged);
@@ -370,26 +365,26 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with SingleTickerProvide
 /// Search results container.
 /// Updated on each query change.
 class _Results {
-  Map<Type, List<Content>> _map = {
+  Map<Type, List<Content>> map = {
     Song: [],
     Album: [],
   };
 
-  List<Song> get songs => _map[Song];
-  List<Album> get albums => _map[Album];
+  List<Song> get songs => map[Song];
+  List<Album> get albums => map[Album];
 
-  bool get empty => _map.values.every((element) => element.isEmpty);
-  bool get notEmpty => _map.values.any((element) => element.isNotEmpty);
+  bool get empty => map.values.every((element) => element.isEmpty);
+  bool get notEmpty => map.values.any((element) => element.isNotEmpty);
 
   void clear() {
-    for (final value in _map.values) {
+    for (final value in map.values) {
       value.clear();
     }
   }
 
   void search(query) {
-    _map[Song] = ContentControl.search<Song>(query);
-    _map[Album] = ContentControl.search<Album>(query);
+    map[Song] = ContentControl.search<Song>(query);
+    map[Album] = ContentControl.search<Album>(query);
   }
 }
 
@@ -397,14 +392,11 @@ class AppSearchDelegate extends SearchDelegate {
   /// Content type to filter results by.
   ///
   /// When null results are displayed as list of sections, see [_ContentSection].
-  ContentType get contentType => contentTypeNotifier.value;
-  final ValueNotifier<ContentType> contentTypeNotifier = ValueNotifier(null);
-  set contentType(ContentType value) {
+  Type get contentType => contentTypeNotifier.value;
+  final ValueNotifier<Type> contentTypeNotifier = ValueNotifier(null);
+  set contentType(Type value) {
     contentTypeNotifier.value = value;
     bodyScrolledNotifier.value = false;
-    if (itemScrollController.isAttached) {
-      itemScrollController.jumpTo(index: 0);
-    }
   }
 
   _Results results = _Results();
@@ -424,7 +416,7 @@ class AppSearchDelegate extends SearchDelegate {
       bodyScrolledNotifier.value = false;
     } else if (_prevQuery != query) {
       bodyScrolledNotifier.value = false;
-      if (scrollController.hasClients) {
+      if (scrollController?.hasClients ?? false) {
         scrollController.jumpTo(0);
       }
       if (itemScrollController.isAttached) {
@@ -441,7 +433,7 @@ class AppSearchDelegate extends SearchDelegate {
   }
 
   /// Handles tap to different content tiles.
-  VoidCallback getContentTileTapHandler<T extends Content>([ContentType contentType]) {
+  VoidCallback getContentTileTapHandler<T extends Content>([Type contentType]) {
     return contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
@@ -519,17 +511,18 @@ class AppSearchDelegate extends SearchDelegate {
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) {
-    final contentTypeEntries = results._map.entries
+    const bottomPadding = 12.0;
+    final contentTypeEntries = results.map.entries
       .where((el) => el.value.isNotEmpty)
       .toList();
     final showChips = results.notEmpty && contentTypeEntries.length > 1;
     return PreferredSize(
       preferredSize: Size.fromHeight(
         showChips
-          ? AppBarBorder.height + 34.0 + 4.0
+          ? AppBarBorder.height + 34.0 + bottomPadding
           : AppBarBorder.height,
       ),
-      child: ValueListenableBuilder<ContentType>(
+      child: ValueListenableBuilder<Type>(
         valueListenable: contentTypeNotifier,
         builder: (context, contentTypeValue, child) {
           return !showChips
@@ -539,14 +532,14 @@ class AppSearchDelegate extends SearchDelegate {
                 SizedBox(
                   height: 34.0,
                   child: ListView.separated(
-                    padding: const EdgeInsets.only(left: 8.0),
+                    padding: const EdgeInsets.only(left: 12.0),
                     scrollDirection: Axis.horizontal,
                     itemCount: contentTypeEntries.length,
                     separatorBuilder: (context, index) => const SizedBox(width: 8.0),
-                    itemBuilder: (context, index) => _ContentChip(delegate: this, contentType: ContentType(contentTypeEntries[index].key)),
+                    itemBuilder: (context, index) => _ContentChip(delegate: this, contentType: contentTypeEntries[index].key),
                   ),
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(height: bottomPadding),
                 child,
               ],
             );
@@ -620,7 +613,7 @@ class _DelegateBuilder extends StatelessWidget {
     final delegate = AppSearchDelegate._of(context);
     final results = delegate.results;
     final l10n = getl10n(context);
-    return ValueListenableBuilder<ContentType>(
+    return ValueListenableBuilder<Type>(
       valueListenable: delegate.contentTypeNotifier,
       builder: (context, contentType, child) {
         if (delegate._trimmedQuery.isEmpty) {
@@ -647,12 +640,12 @@ class _DelegateBuilder extends StatelessWidget {
             ),
           );
         } else {
-          final contentTypeEntries = results._map.entries
+          final contentTypeEntries = results.map.entries
             .where((el) => el.value.isNotEmpty)
             .toList();
           final single = contentTypeEntries.length == 1;
           final showSingleCategoryContentList = single || contentType != null;
-          final contentListContentType = single ? ContentType(contentTypeEntries.single.key) : contentType;
+          final contentListContentType = single ? contentTypeEntries.single.key : contentType;
           final controller = delegate.itemScrollController;
           return BackButtonListener(
             onPressed: () => _handlePop(delegate),
@@ -667,7 +660,7 @@ class _DelegateBuilder extends StatelessWidget {
                   child: child,
                 ),
               child: Container(
-                key: ValueKey("$single${contentType?.value}"),
+                key: ValueKey("$single$contentType"),
                 child: showSingleCategoryContentList
                     ? NotificationListener<ScrollNotification>(
                         onNotification: (notification) => _handleNotification(delegate, notification),
@@ -686,16 +679,13 @@ class _DelegateBuilder extends StatelessWidget {
                     : ListView(
                       controller: delegate.scrollController,
                       children: [
-                        if (results.songs.isNotEmpty)
-                          _ContentSection<Song>(
-                            items: results.songs,
-                            onTap: () => delegate.contentType = ContentType.song,
-                          ),
-                        if (results.albums.isNotEmpty)
-                          _ContentSection<Album>(
-                            items: results.albums,
-                            onTap: () => delegate.contentType = ContentType.album,
-                          ),
+                        for (final entry in contentTypeEntries)
+                          if (entry.value.isNotEmpty)
+                            _ContentSection(
+                              contentType: entry.key,
+                              items: results.map[entry.key],
+                              onTap: () => delegate.contentType = entry.key,
+                            ),
                       ],
                     ),
                 ),
@@ -716,9 +706,7 @@ class _ContentChip extends StatefulWidget {
   }) : super(key: key);
 
   final AppSearchDelegate delegate;
-  final ContentType contentType;
-
-  static const borderRadius = const BorderRadius.all(Radius.circular(50.0));
+  final Type contentType;
 
   @override
   _ContentChipState createState() => _ContentChipState();
@@ -748,21 +736,33 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     if (active) {
       widget.delegate.contentType = null;
     } else {
+      if (widget.delegate.itemScrollController.isAttached) {
+        widget.delegate.itemScrollController.jumpTo(index: 0);
+      }
       widget.delegate.contentType = widget.contentType;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    const borderRadius = const BorderRadius.all(Radius.circular(50.0));
     final l10n = getl10n(context);
-    final colorAnimation = ColorTween(
-      begin: ThemeControl.theme.colorScheme.secondary,
-      end: ThemeControl.theme.colorScheme.primary,
-    ).animate(CurvedAnimation(
+    final colorScheme =  ThemeControl.theme.colorScheme;
+    final colorTween = ColorTween(
+      begin: colorScheme.secondary,
+      end: colorScheme.onBackground,
+    );
+    final baseAnimation = CurvedAnimation(
       parent: controller,
       curve: Curves.easeOut,
       reverseCurve: Curves.easeIn,
-    ));
+    );
+    final colorAnimation = colorTween.animate(baseAnimation);
+    final textColorAnimation = ReverseTween(colorTween).animate(baseAnimation);
+    final splashColorAnimation = ColorTween(
+      begin: ThemeControl.isLight ? Constants.AppTheme.glowSplashColor.light : Constants.AppTheme.glowSplashColor.dark,
+      end: ThemeControl.isLight ? Constants.AppTheme.glowSplashColor.dark :Constants.AppTheme.glowSplashColor.light,
+    ).animate(baseAnimation);
     if (active) {
       controller.forward();
     } else {
@@ -772,29 +772,34 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       animation: controller,
       builder: (context, child) => Material(
         color: colorAnimation.value,
-        borderRadius: _ContentChip.borderRadius,
-        child: child,
-      ),
-      child: NFInkWell(
-        borderRadius: _ContentChip.borderRadius,
-        onTap: _handleTap,
-        child: IgnorePointer(
-          child: Theme(
-            data: ThemeControl.theme.copyWith(canvasColor: Colors.transparent),
-            child: RawChip(
-              shape: StadiumBorder(side: BorderSide(color: Colors.white.withOpacity(0.05), width: 1.0)),
-              backgroundColor: Colors.transparent,
-              label: Text(
-                l10n.contents(widget.contentType),
-                style: TextStyle(
-                  color: ThemeControl.theme.colorScheme.onBackground,
-                  fontWeight: FontWeight.w800,
+        borderRadius: borderRadius,
+        child: NFInkWell(
+          borderRadius: borderRadius,
+          splashColor: splashColorAnimation.value,
+          onTap: _handleTap,
+            child: IgnorePointer(
+              child: Theme(
+                data: ThemeControl.theme.copyWith(canvasColor: Colors.transparent),
+                child: RawChip(
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: colorScheme.onBackground.withOpacity(0.05),
+                      width: 1.0
+                    ),
+                  ),
+                  backgroundColor: Colors.transparent,
+                  label: Text(
+                    l10n.contents(widget.contentType),
+                    style: TextStyle(
+                      color: textColorAnimation.value,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -806,16 +811,19 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 class _ContentSection<T extends Content> extends StatelessWidget {
   const _ContentSection({
     Key key,
+    this.contentType,
     @required this.items,
     @required this.onTap,
   }) : super(key: key);
 
-  final List<T> items;
+  final Type contentType;
+  final List<Content> items;
   final VoidCallback onTap;
 
   String getHeaderText(BuildContext context) {
     final l10n = getl10n(context);
     return contentPick<T, String>(
+      contentType: contentType,
       song: l10n.tracks,
       album: l10n.albums,
     );
@@ -825,28 +833,18 @@ class _ContentSection<T extends Content> extends StatelessWidget {
   Widget build(BuildContext context) {
     final delegate = AppSearchDelegate._of(context);
     final builder = contentPick<T, Widget Function(int)>(
-      song: (index) {
-        final song = items[index] as Song;
-        return SongTile(
-          song: song,
-          horizontalPadding: 12.0,
-          // TODO: move to some place that contains all default tests + whatver else related
-          current: song.sourceId == ContentControl.state.currentSong.sourceId,
-          onTap: delegate.getContentTileTapHandler<Song>(),
-        );
-      },
-      album: (index) {
-        final album = items[index] as Album;
-        return AlbumTile(
-          album: items[index] as Album,
-          small: true,
-          horizontalPadding: 12.0,
-          // TODO: move to some place that contains all default tests + whatver else related
-          current: album == ContentControl.state.currentSongOrigin ||
-                   album == ContentControl.state.queues.persistent,
-          onTap: delegate.getContentTileTapHandler<Album>(),
-        );
-      },
+      contentType: contentType,
+      song: (index) => SongTile(
+        song: items[index] as Song,
+        horizontalPadding: 12.0,
+        onTap: delegate.getContentTileTapHandler<Song>(),
+      ),
+      album: (index) => AlbumTile(
+        album: items[index] as Album,
+        small: false,
+        horizontalPadding: 12.0,
+        onTap: delegate.getContentTileTapHandler<Album>(),
+      ),
     );
     return Column(
       children: [
@@ -870,7 +868,7 @@ class _ContentSection<T extends Content> extends StatelessWidget {
         ),
         Column(
           children: [
-            for (int index = 0; index < math.min(6, items.length); index ++)
+            for (int index = 0; index < math.min(5, items.length); index ++)
               builder(index),
           ],
         )
@@ -972,10 +970,10 @@ class _SuggestionsHeader extends StatelessWidget {
               context,
               ui: Constants.UiTheme.modalOverGrey.auto,
               title: Text(l10n.searchClearHistory),
-              buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
+              buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
               acceptButton: NFButton.accept(
                 text: l10n.delete,
-                splashColor: Constants.AppTheme.dialogButtonSplash.auto,
+                splashColor: Constants.AppTheme.glowSplashColor.auto,
                 textStyle: const TextStyle(color: Constants.AppColors.red),
                 onPressed: () => clearHistory(context),
               ),
@@ -1046,10 +1044,10 @@ class _SuggestionTile extends StatelessWidget {
               ],
             ),
           ),
-          buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
+          buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
           acceptButton: NFButton.accept(
             text: l10n.remove,
-            splashColor: Constants.AppTheme.dialogButtonSplash.auto,
+            splashColor: Constants.AppTheme.glowSplashColor.auto,
             textStyle: const TextStyle(color: Constants.AppColors.red),
             onPressed: () => _removeEntry(context, index)
           ),
