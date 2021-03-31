@@ -11,13 +11,6 @@ import 'package:sweyer/constants.dart' as Constants;
 const double _colorItemSize = 36.0;
 const double _colorItemActiveBorderWidth = 2.5;
 
-StackFadeRouteTransitionSettings themeSettingsTransitionSetttings =
-    StackFadeRouteTransitionSettings(
-  opaque: false,
-  dismissible: true,
-  dismissBarrier: RouteControl.barrier,
-);
-
 class ThemeSettingsRoute extends StatefulWidget {
   const ThemeSettingsRoute({Key key}) : super(key: key);
   @override
@@ -74,9 +67,9 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   }
 
   void _handleThemeChange() {
-    themeSettingsTransitionSetttings.dismissible = false;
-    Future.delayed(dilate(kNFRouteTransitionDuration), () {
-      themeSettingsTransitionSetttings.dismissible = true;
+    AppRouter.themeSettingsTransitionSetttings.dismissible = false;
+    Future.delayed(dilate(const Duration(milliseconds: 300)), () {
+      AppRouter.themeSettingsTransitionSetttings.dismissible = true;
     });
   }
 
@@ -159,14 +152,13 @@ class _ColorItem extends StatefulWidget {
   }) : super(key: key);
   final Color color;
   final bool active;
-  final Function onTap;
+  final VoidCallback onTap;
 
   @override
   _ColorItemState createState() => _ColorItemState();
 }
 
-class _ColorItemState extends State<_ColorItem>
-    with SingleTickerProviderStateMixin {
+class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMixin {
   AnimationController controller;
   @override
   void initState() {

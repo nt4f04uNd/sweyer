@@ -7,156 +7,46 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchDelegate;
 import 'package:flutter/services.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
-/// Shows a full screen search page and returns the search result selected by
-/// the user when the page is closed.
-///
-/// The search page consists of an app bar with a search field and a body which
-/// can either show suggested search queries or the search results.
-///
-/// The appearance of the search page is determined by the provided
-/// [delegate]. The initial query string is given by [query], which defaults
-/// to the empty string. When [query] is set to null, [delegate.query] will
-/// be used as the initial query.
-///
-/// This method returns the selected search result, which can be set in the
-/// [SearchDelegate.close] call. If the search page is closed with the system
-/// back button, it returns null.
-///
-/// A given [SearchDelegate] can only be associated with one active [showSearch]
-/// call. Call [SearchDelegate.close] before re-using the same delegate instance
-/// for another [showSearch] call.
-///
-/// The transition to the search page triggered by this method looks best if the
-/// screen triggering the transition contains an [AppBar] at the top and the
-/// transition is called from an [IconButton] that's part of [AppBar.actions].
-/// The animation provided by [SearchDelegate.transitionAnimation] can be used
-/// to trigger additional animations in the underlying page while the search
-/// page fades in or out. This is commonly used to animate an [AnimatedIcon] in
-/// the [AppBar.leading] position e.g. from the hamburger menu to the back arrow
-/// used to exit the search page.
-///
-/// See also:
-///
-///  * [SearchDelegate] to define the content of the search page.
-Future<void> showCustomSearch({
-  @required BuildContext context,
-  @required SearchDelegate delegate,
-  String query = '',
-  bool openKeyboard = true,
-}) {
-  assert(delegate != null);
-  assert(context != null);
-  delegate.query = query ?? delegate.query;
-  delegate._currentBody = _SearchBody.suggestions;
-  delegate._disableAutoKeyboard = !openKeyboard;
-  // Pass delegate through route options
-  return Navigator.of(context).pushNamed(
-    Constants.HomeRoutes.search.value,
-    arguments: SearchPageRoute(delegate: delegate),
-  );
+class _Notifier extends ChangeNotifier {
+  void notify() {
+    notifyListeners();
+  }
 }
 
-/// Delegate for [showSearch] to define the content of the search page.
-///
-/// The search page always shows an [AppBar] at the top where users can
-/// enter their search queries. The buttons shown before and after the search
-/// query text field can be customized via [SearchDelegate.leading] and
-/// [SearchDelegate.actions].
-///
-/// The body below the [AppBar] can either show suggested queries (returned by
-/// [SearchDelegate.buildSuggestions]) or - once the user submits a search  - the
-/// results of the search as returned by [SearchDelegate.buildResults].
-///
-/// [SearchDelegate.query] always contains the current query entered by the user
-/// and should be used to build the suggestions and results.
-///
-/// The results can be brought on screen by calling [SearchDelegate.showResults]
-/// and you can go back to showing the suggestions by calling
-/// [SearchDelegate.showSuggestions].
-///
-/// Once the user has selected a search result, [SearchDelegate.close] should be
-/// called to remove the search page from the top of the navigation stack and
-/// to notify the caller of [showSearch] about the selected search result.
-///
-/// A given [SearchDelegate] can only be associated with one active [showSearch]
-/// call. Call [SearchDelegate.close] before re-using the same delegate instance
-/// for another [showSearch] call.
 abstract class SearchDelegate {
-  /// Suggestions shown in the body of the search page while the user types a
-  /// query into the search field.
+  /// Force rubuild the delegate body.
   ///
-  /// The delegate method is called whenever the content of [query] changes.
-  /// The suggestions should be based on the current [query] string. If the query
-  /// string is empty, it is good practice to show suggested queries based on
-  /// past queries or the current context.
-  ///
-  /// Usually, this method will return a [ListView] with one [ListTile] per
-  /// suggestion. When [ListTile.onTap] is called, [query] should be updated
-  /// with the corresponding suggestion and the results page should be shown
-  /// by calling [showResults].
-  Widget buildSuggestions(BuildContext context);
+  /// Most of the time this is not needed, because all delegate is automatically rebuilt
+  /// when [query] changes.
+  void rebuildBody() {
+    _bodyNotifier.notify();
+  }
+  _Notifier _bodyNotifier = _Notifier();
 
-  /// The results shown after the user submits a search from the search page.
-  ///
-  /// The current value of [query] can be used to determine what the user
-  /// searched for.
-  ///
-  /// This method might be applied more than once to the same query.
-  /// If your [buildResults] method is computationally expensive, you may want
-  /// to cache the search results for one or more queries.
-  ///
-  /// Typically, this method returns a [ListView] with the search results.
-  /// When the user taps on a particular search result, [close] should be called
-  /// with the selected result as argument. This will close the search page and
-  /// communicate the result back to the initial caller of [showSearch].
-  Widget buildResults(BuildContext context);
+  /// Build the delegate body.
+  Widget buildBody(BuildContext context);
 
   /// A widget to display before the current query in the [AppBar].
-  ///
-  /// Typically an [IconButton] configured with a [BackButtonIcon] that exits
-  /// the search with [close]. One can also use an [AnimatedIcon] driven by
-  /// [transitionAnimation], which animates from e.g. a hamburger menu to the
-  /// back button as the search overlay fades in.
-  ///
-  /// Returns null if no widget should be shown.
-  ///
-  /// See also:
-  ///
-  ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget buildLeading(BuildContext context);
 
   /// Widgets to display after the search query in the [AppBar].
-  ///
-  /// If the [query] is not empty, this should typically contain a button to
-  /// clear the query and show the suggestions again (via [showSuggestions]) if
-  /// the results are currently shown.
-  ///
-  /// Returns null if no widget should be shown
-  ///
-  /// See also:
-  ///
-  ///  * [AppBar.actions], the intended use for the return value of this method.
   List<Widget> buildActions(BuildContext context);
 
+  /// Widget to display across the bottom of the [AppBar].
+  PreferredSizeWidget buildBottom(BuildContext context) => null;
+
   /// The theme used to style the [AppBar].
-  ///
-  /// By default, a white theme is used.
-  ///
-  /// See also:
-  ///
-  ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
-  ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
-  ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
   ThemeData appBarTheme(BuildContext context) {
     assert(context != null);
     final ThemeData theme = ThemeControl.theme;
@@ -171,11 +61,6 @@ abstract class SearchDelegate {
   }
 
   /// The current query string shown in the [AppBar].
-  ///
-  /// The user manipulates this string via the keyboard.
-  ///
-  /// If the user taps on a suggestion provided by [buildSuggestions] this
-  /// string should be updated to that suggestion via the setter.
   String get query => _queryTextController.text;
 
   set query(String value) {
@@ -183,47 +68,17 @@ abstract class SearchDelegate {
     _queryTextController.text = value;
   }
 
-  /// Transition from the suggestions returned by [buildSuggestions] to the
-  /// [query] results returned by [buildResults].
-  ///
-  /// If the user taps on a suggestion provided by [buildSuggestions] the
-  /// screen should typically transition to the page showing the search
-  /// results for the suggested query. This transition can be triggered
-  /// by calling this method.
-  ///
-  /// See also:
-  ///
-  ///  * [showSuggestions] to show the search suggestions again.
-  void showResults(BuildContext context) {
-    _focusNode?.unfocus();
-    _currentBody = _SearchBody.results;
-  }
+  /// Called whenever [query] changes.
+  void onQueryChange() { } 
 
-  /// Transition from showing the results returned by [buildResults] to showing
-  /// the suggestions returned by [buildSuggestions].
-  ///
-  /// Calling this method will also put the input focus back into the search
-  /// field of the [AppBar].
-  ///
-  /// If the results are currently shown this method can be used to go back
-  /// to showing the search suggestions.
-  ///
-  /// See also:
-  ///
-  ///  * [showResults] to show the search results.
-  void showSuggestions(BuildContext context) {
-    assert(_focusNode != null,
-        '_focusNode must be set by route before showSuggestions is called.');
-    _focusNode.requestFocus();
-    _currentBody = _SearchBody.suggestions;
-  }
+  /// Called when user submits the input.
+  void onSubmit() { }
 
   /// Closes the search page and returns to the underlying route.
   ///
   /// The value provided for [result] is used as the return value of the call
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, dynamic result) {
-    _currentBody = null;
     _focusNode?.unfocus();
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
@@ -239,19 +94,7 @@ abstract class SearchDelegate {
   Animation<double> get transitionAnimation => _proxyAnimation;
 
   /// Override this property to change route property [maintainState]
-  ///
-  /// Copied from route docs:
-  ///
-  /// Whether the route should remain in memory when it is inactive.
-  /// If this is true, then the route is maintained, so that any futures it is holding from the next route will properly resolve when the next route pops.
-  /// If this is not necessary this can be set to false to allow the framework to entirely discard the route's widget hierarchy when it is not visible.
-  /// The value of this getter should not change during the lifetime of the object. It is used by [createOverlayEntries], which is called by [install] near the beginning of the route lifecycle.
   bool get maintainState => false;
-
-  /// Getter to test whether delegate should update, similar to React.
-  ///
-  /// Affects only results.
-  // bool get shouldUpdateResults => true;
 
   // The focus node to use for manipulating focus on the search page. This is
   // managed, owned, and set by the SearchPageRoute using this delegate.
@@ -259,50 +102,39 @@ abstract class SearchDelegate {
 
   /// Will disable the keyboard will be opened with [_SearchBody.suggestions] for one time.
   /// When any animation is complete (even to [_SearchBody.results]), will become `false` again.
-  bool _disableAutoKeyboard = false;
+  bool disableAutoKeyboard = false;
 
   final TextEditingController _queryTextController = TextEditingController();
 
-  final ProxyAnimation _proxyAnimation =
-      ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _proxyAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
-  final ValueNotifier<_SearchBody> _currentBodyNotifier =
-      ValueNotifier<_SearchBody>(null);
-
-  _SearchBody get _currentBody => _currentBodyNotifier.value;
-
-  set _currentBody(_SearchBody value) {
-    _currentBodyNotifier.value = value;
-  }
-
-  SearchPageRoute _route;
+  _SearchPageRoute _route;
 }
 
-/// Describes the body that is currently shown under the [AppBar] in the
-/// search page.
-enum _SearchBody {
-  /// Suggested queries are shown in the body.
-  ///
-  /// The suggested queries are generated by [SearchDelegate.buildSuggestions].
-  suggestions,
-
-  /// Search results are currently shown in the body.
-  ///
-  /// The search results are generated by [SearchDelegate.buildResults].
-  results,
-}
-
-class SearchPageRoute extends RouteTransition<_SearchPage> {
-  SearchPageRoute({
+class SearchPage extends Page<void> {
+  SearchPage({
+    LocalKey key,
     @required this.delegate,
+    this.transitionSettings,
+    String name,
+  }) : super(key: key, name: name);
 
-    /// Here it is allowed to omit `super` call with `@required` [route] parameter because we the method [buildPage] is overridden
-  })  : assert(delegate != null),
+  final SearchDelegate delegate;
+  final RouteTransitionSettings transitionSettings;
+
+  @override
+  _SearchPageRoute createRoute(BuildContext context) {
+    return _SearchPageRoute(page: this);
+  }
+}
+
+class _SearchPageRoute extends RouteTransition<_SearchPage> {
+  _SearchPageRoute({
+    @required this.page,
+  })  : assert(page != null),
         super(
-          route: null,
-          transitionSettings: RouteTransitionSettings(
-            checkSystemUi: () => Constants.UiTheme.grey.auto,
-          ),
+          settings: page,
+          transitionSettings: page.transitionSettings,
         ) {
     assert(
       delegate._route == null,
@@ -313,30 +145,33 @@ class SearchPageRoute extends RouteTransition<_SearchPage> {
     delegate._route = this;
   }
 
-  final SearchDelegate delegate;
+  final SearchPage page;
 
-  @override
-  RouteSettings get settings =>
-      RouteSettings(name: Constants.HomeRoutes.search.value);
-
-  @override
-  Color get barrierColor => null;
-
-  @override
-  String get barrierLabel => null;
+  SearchDelegate get delegate => page.delegate;
 
   @override
   bool get maintainState => delegate.maintainState;
+  
+
+  GlobalKey<_SearchPageState> pageKey = GlobalKey();
 
   @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
+  Widget buildContent(BuildContext context) {
+    return _SearchPage(
+      key: pageKey,
+      delegate: delegate,
+      animation: animation,
+    );
+  }
+
+  @override
+  Widget buildAnimation(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return FadeTransition(
-      opacity: NFDefaultAnimation(parent: animation),
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      ),
       child: child,
     );
   }
@@ -349,32 +184,19 @@ class SearchPageRoute extends RouteTransition<_SearchPage> {
   }
 
   @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    handleChecks(animation, secondaryAnimation);
-    return _SearchPage(
-      delegate: delegate,
-      animation: animation,
-    );
-  }
-
-  @override
   void didComplete(result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
-    delegate._currentBody = null;
   }
 }
 
 class _SearchPage<T> extends StatefulWidget {
   const _SearchPage({
+    Key key,
     this.delegate,
     this.animation,
-  });
+  }) : super(key: key);
 
   final SearchDelegate delegate;
   final Animation<double> animation;
@@ -383,8 +205,7 @@ class _SearchPage<T> extends StatefulWidget {
   State<StatefulWidget> createState() => _SearchPageState<T>();
 }
 
-class _SearchPageState<T> extends State<_SearchPage<T>>
-    with SingleTickerProviderStateMixin, PlayerRouteControllerMixin {
+class _SearchPageState<T> extends State<_SearchPage<T>> with SingleTickerProviderStateMixin, PlayerRouteControllerMixin {
   // This node is owned, but not hosted by, the search page. Hosting is done by
   // the text field.
   FocusNode focusNode = FocusNode();
@@ -394,7 +215,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
     super.initState();
     widget.delegate._queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
-    widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
     focusNode.addListener(_onFocusChanged);
     widget.delegate._focusNode = focusNode;
     playerRouteController.addStatusListener(_handlePlayerRouteStatusChange);
@@ -404,12 +224,9 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
   void dispose() {
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
-    widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
     widget.delegate._focusNode = null;
     playerRouteController.removeStatusListener(_handlePlayerRouteStatusChange);
     focusNode.dispose();
-    // Don't dispose [_playerRouteController] because this will cause multiple dispose error.
-    // Apparently it is disposed somewhere in the tree below, as I pass it down the inherited state.
     super.dispose();
   }
 
@@ -417,7 +234,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
     if (playerRouteController.opened) {
       setState(() {
         // Hide keyboard when player route is opened.
-        FocusScope.of(context).unfocus();
+        focusNode.unfocus();
       });
     }
   }
@@ -427,12 +244,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
       return;
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
-    if (widget.delegate._currentBody == _SearchBody.suggestions &&
-        !widget.delegate._disableAutoKeyboard) {
+    if (widget.delegate.disableAutoKeyboard) {
+      widget.delegate.disableAutoKeyboard = false;
+    } else {
       focusNode.requestFocus();
-    }
-    if (!widget.delegate._disableAutoKeyboard) {
-      widget.delegate._disableAutoKeyboard = false;
     }
   }
 
@@ -442,30 +257,25 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
       widget.delegate._queryTextController.addListener(_onQueryChanged);
-      oldWidget.delegate._currentBodyNotifier
-          .removeListener(_onSearchBodyChanged);
-      widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
       oldWidget.delegate._focusNode = null;
       widget.delegate._focusNode = focusNode;
     }
   }
 
   void _onFocusChanged() {
-    if (focusNode.hasFocus &&
-        widget.delegate._currentBody != _SearchBody.suggestions) {
-      widget.delegate.showSuggestions(context);
+    if (focusNode.hasFocus) {
+      if (widget.delegate.disableAutoKeyboard) {
+        widget.delegate.disableAutoKeyboard = false;
+      } else {
+        setState(() { });
+      }
     }
   }
 
   void _onQueryChanged() {
+    widget.delegate.onQueryChange();
     setState(() {
       // rebuild ourselves because query changed.
-    });
-  }
-
-  void _onSearchBodyChanged() {
-    setState(() {
-      // rebuild ourselves because search body changed.
     });
   }
 
@@ -481,26 +291,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel =
-        MaterialLocalizations.of(context).searchFieldLabel;
-    Widget body;
-    switch (widget.delegate._currentBody) {
-      case _SearchBody.suggestions:
-        // I removed KeyedSubtrees because results and suggestions are the same in my app.
-        body = widget.delegate.buildSuggestions(context);
-        // KeyedSubtree(
-        //   key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
-        //   child:
-        // );
-        break;
-      case _SearchBody.results:
-        body = widget.delegate.buildResults(context);
-        // KeyedSubtree(
-        //   key: const ValueKey<_SearchBody>(_SearchBody.results),
-        //   child:
-        // );
-        break;
-    }
+    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
+    final PreferredSizeWidget bottom = widget.delegate.buildBottom(context);
     String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -513,7 +305,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
-
     return Builder(
       builder: (context) => WillPopScope(
         onWillPop: () => _handlePop(context),
@@ -524,61 +315,50 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
           label: routeName,
           child: Scaffold(
             resizeToAvoidBottomInset: false,
-            body: Stack(
-              children: [
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: kNFAppBarPreferredSize + 4.0,
+            extendBodyBehindAppBar: true,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(kNFAppBarPreferredSize + bottom.preferredSize.height),
+              child: AppBar(
+                elevation: theme.appBarTheme.elevation,
+                backgroundColor: theme.primaryColor,
+                iconTheme: theme.primaryIconTheme,
+                textTheme: theme.primaryTextTheme,
+                brightness: theme.primaryColorBrightness,
+                leading: widget.delegate.buildLeading(context),
+                title: Padding(
+                  padding: const EdgeInsets.only(left: 0.0, right: 8.0),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      cardColor: Colors.red,
+                      canvasColor: Colors.red,
                     ),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: body,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                  child: PreferredSize(
-                    preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
-                    child: AppBar(
-                      elevation: 2.0,
-                      backgroundColor: theme.primaryColor,
-                      iconTheme: theme.primaryIconTheme,
-                      textTheme: theme.primaryTextTheme,
-                      brightness: theme.primaryColorBrightness,
-                      leading: widget.delegate.buildLeading(context),
-                      title: Padding(
-                        padding: const EdgeInsets.only(left: 0.0, right: 8.0),
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            cardColor: Colors.red,
-                            canvasColor: Colors.red,
-                          ),
-                          child: TextField(
-                            selectionControls: NFTextSelectionControls(),
-                            controller: widget.delegate._queryTextController,
-                            focusNode: focusNode,
-                            style: theme.textTheme.headline6,
-                            textInputAction: TextInputAction.search,
-                            onSubmitted: (String _) {
-                              widget.delegate.showResults(context);
-                            },
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: searchFieldLabel,
-                              hintStyle: theme.inputDecorationTheme.hintStyle,
-                            ),
-                          ),
-                        ),
+                    child: TextField(
+                      selectionControls: NFTextSelectionControls(),
+                      controller: widget.delegate._queryTextController,
+                      focusNode: focusNode,
+                      style: theme.textTheme.headline6,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (String _) => widget.delegate.onSubmit(),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: searchFieldLabel,
+                        hintStyle: theme.inputDecorationTheme.hintStyle,
                       ),
-                      actions: widget.delegate.buildActions(context),
                     ),
                   ),
                 ),
-              ],
+                actions: widget.delegate.buildActions(context),
+                bottom: bottom,
+              ),
+            ),
+            body: SafeArea(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: AnimatedBuilder(
+                  animation: widget.delegate._bodyNotifier,
+                  builder: (context, child) => widget.delegate.buildBody(context),
+                ),
+              ),
             ),
           ),
         ),
@@ -587,26 +367,109 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
   }
 }
 
-class SongsSearchDelegate extends SearchDelegate {
-  SongsSearchDelegate() {
-    fetchingFuture = SearchHistory.instance.load();
+/// Search results container.
+/// Updated on each query change.
+class _Results {
+  Map<Type, List<Content>> _map = {
+    Song: [],
+    Album: [],
+  };
+
+  List<Song> get songs => _map[Song];
+  List<Album> get albums => _map[Album];
+
+  bool get empty => _map.values.every((element) => element.isEmpty);
+  bool get notEmpty => _map.values.any((element) => element.isNotEmpty);
+
+  void clear() {
+    for (final value in _map.values) {
+      value.clear();
+    }
   }
 
-  /// Needed to check if queue has to be updated
-  bool dirty = true;
-  List<Song> searched = [];
-  String prevQuery = '';
-  Future<void> fetchingFuture;
+  void search(query) {
+    _map[Song] = ContentControl.search<Song>(query);
+    _map[Album] = ContentControl.search<Album>(query);
+  }
+}
+
+class AppSearchDelegate extends SearchDelegate {
+  /// Content type to filter results by.
+  ///
+  /// When null results are displayed as list of sections, see [_ContentSection].
+  ContentType get contentType => contentTypeNotifier.value;
+  final ValueNotifier<ContentType> contentTypeNotifier = ValueNotifier(null);
+  set contentType(ContentType value) {
+    contentTypeNotifier.value = value;
+    bodyScrolledNotifier.value = false;
+    if (itemScrollController.isAttached) {
+      itemScrollController.jumpTo(index: 0);
+    }
+  }
+
+  _Results results = _Results();
+  String _prevQuery = '';
+  String _trimmedQuery = '';
+  ScrollController scrollController;
+  final ItemScrollController itemScrollController = ItemScrollController();
+
+  @override
+  void onQueryChange() {
+    _trimmedQuery = query.trim();
+    // Update results if previous query is distinct from current.
+    if (_trimmedQuery.isEmpty) {
+      results.clear();
+      contentType = null;
+      // Scroll is reset when content type changes
+      bodyScrolledNotifier.value = false;
+    } else if (_prevQuery != query) {
+      bodyScrolledNotifier.value = false;
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(0);
+      }
+      if (itemScrollController.isAttached) {
+        itemScrollController.jumpTo(index: 0);
+      }
+      results.search(_trimmedQuery);
+    }
+    _prevQuery = _trimmedQuery;
+  }
+
+  @override
+  void onSubmit() {
+    SearchHistory.instance.save(query);
+  }
+
+  /// Handles tap to different content tiles.
+  VoidCallback getContentTileTapHandler<T extends Content>([ContentType contentType]) {
+    return contentPick<T, VoidCallback>(
+      contentType: contentType,
+      song: () {
+        if (ContentControl.state.queues.type != QueueType.searched || query != ContentControl.state.queues.searchQuery) {
+          onSubmit();
+          ContentControl.setQueue(
+            type: QueueType.searched,
+            searchQuery: query,
+            modified: false,
+            shuffled: false,
+            songs: results.songs,
+          );
+        }
+      },
+      album: onSubmit,
+    );
+  }
 
   // Maintain search state
   // That is needed we want to preserve state when user navigates to player route
   @override
   bool get maintainState => true;
 
-  @override
-  void close(BuildContext context, dynamic result) {
-    super.close(context, result);
-    dirty = true;
+  /// Used to check whether the body is scrolled.
+  final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
+
+  static AppSearchDelegate _of(BuildContext context) {
+    return _DelegateProvider.of(context).delegate;
   }
 
   @override
@@ -616,8 +479,9 @@ class SongsSearchDelegate extends SearchDelegate {
     assert(theme != null);
 
     return theme.copyWith(
-      primaryColor: ThemeControl.theme.appBarTheme.color,
+      primaryColor: ThemeControl.theme.backgroundColor,
       primaryColorBrightness: ThemeControl.theme.appBarTheme.brightness,
+      appBarTheme: ThemeControl.theme.appBarTheme.copyWith(elevation: 0.0),
       textTheme: TextTheme(
         headline6: TextStyle(
           fontSize: 20.0,
@@ -640,168 +504,415 @@ class SongsSearchDelegate extends SearchDelegate {
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       query.isEmpty
-          ? const SizedBox.shrink()
-          : Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: NFIconButton(
-                icon: const Icon(Icons.clear_rounded),
-                onPressed: () {
-                  query = '';
-                  showSuggestions(context);
-                },
-              ),
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: NFIconButton(
+              icon: const Icon(Icons.clear_rounded),
+              onPressed: () {
+                query = '';
+              },
             ),
+          ),
     ];
   }
 
   @override
-  Widget buildResults(BuildContext context) {
-    // Save search query to history when click submit button
-    SearchHistory.instance.save(query);
-    return _buildResultsAndSuggestions(context);
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return _buildResultsAndSuggestions(context);
-  }
-
-  /// Delete item from search history by its index
-  Future<void> _removeEntry(BuildContext context, int index) async {
-    SearchHistory.instance.remove(index);
-    showSuggestions(context);
-  }
-
-  Future<void> _clearSearchHistory(BuildContext context) async {
-    SearchHistory.instance.clear();
-    showSuggestions(context); // Update suggestions ListView
-  }
-
-  ItemScrollController _itemScrollController = ItemScrollController();
-
-  /// This method called both for build suggestions and results
-  ///
-  /// This because we need user to see actual suggestions only when query is empty
-  ///
-  /// And when query is not empty - found songs will be displayed
-  Widget _buildResultsAndSuggestions(BuildContext context) {
-    final trimmedQuery = query.trim();
-
-    /// Search songs if previous query is distinct from current
-    if (prevQuery == '' || prevQuery != query) {
-      searched = ContentControl.searchSongs(trimmedQuery)?.toList();
-      dirty = true;
-    }
-    prevQuery = query.trim();
-
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      onVerticalDragStart: (_) => FocusScope.of(context).unfocus(),
-      onVerticalDragCancel: () => FocusScope.of(context).unfocus(),
-      onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
-      onVerticalDragEnd: (_) => FocusScope.of(context).unfocus(),
-      onVerticalDragUpdate: (_) => FocusScope.of(context).unfocus(),
-      child: (() {
-        if (trimmedQuery == '') {
-          // Display suggestions on start screen
-          return _buildSuggestions();
-        } else if (searched.length == 0) {
-          // Display when nothing has been found
-          return _buildEmptyResults(context);
-        }
-        final songs = searched;
-        final itemCount = searched.length + 1;
-        final l10n = getl10n(context);
-        return StreamBuilder(
-          stream: ContentControl.state.onSongChange,
-          builder: (context, snapshot) {
-            return JumpingDraggableScrollbar.songs(
-              itemCount: itemCount,
-              itemScrollController: _itemScrollController,
-              labelBuilder: (context, progress, barPadHeight, jumpIndex) {
-                return NFScrollLabel(
-                  text: songs[
-                          (jumpIndex - 1).clamp(0.0, songs.length - 1).round()]
-                      .title[0]
-                      .toUpperCase(),
-                );
-              },
-              child: SingleTouchRecognizerWidget(
-                child: ScrollablePositionedList.builder(
-                  itemScrollController: _itemScrollController,
-                  itemCount: itemCount,
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: ClampingScrollPhysics(),
+  PreferredSizeWidget buildBottom(BuildContext context) {
+    final contentTypeEntries = results._map.entries
+      .where((el) => el.value.isNotEmpty)
+      .toList();
+    final showChips = results.notEmpty && contentTypeEntries.length > 1;
+    return PreferredSize(
+      preferredSize: Size.fromHeight(
+        showChips
+          ? AppBarBorder.height + 34.0 + 4.0
+          : AppBarBorder.height,
+      ),
+      child: ValueListenableBuilder<ContentType>(
+        valueListenable: contentTypeNotifier,
+        builder: (context, contentTypeValue, child) {
+          return !showChips
+            ? child
+            : Column(
+              children: [
+                SizedBox(
+                  height: 34.0,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: contentTypeEntries.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 8.0),
+                    itemBuilder: (context, index) => _ContentChip(delegate: this, contentType: ContentType(contentTypeEntries[index].key)),
                   ),
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return ListHeader(
-                        leading: Text(
-                          l10n.found + ' ' + songs.length.toString(),
-                        ),
-                      );
-                    }
-                    return SongTile(
-                      song: songs[index - 1],
-                      current: songs[index - 1].sourceId ==
-                          ContentControl.state.currentSong.sourceId,
-                      onTap: () async {
-                        if (dirty ||
-                            ContentControl.state.queues.type !=
-                                QueueType.searched) {
-                          SearchHistory.instance.save(query);
-                          ContentControl.setQueue(
-                            type: QueueType.searched,
-                            searchQuery: query,
-                            modified: false,
-                            shuffled: false,
-                            songs: songs,
-                          );
-                          dirty = false;
-                        }
-                      },
-                    );
-                  },
                 ),
-              ),
+                const SizedBox(height: 4.0),
+                child,
+              ],
             );
-          },
-        );
-      })(),
+        },
+        child: ValueListenableBuilder<bool>(
+          valueListenable: bodyScrolledNotifier,
+          builder: (context, scrolled, child) => AppBarBorder(shown: scrolled)
+        ),
+      ),
     );
   }
 
-  /// Method that builds suggestions list
-  Widget _buildSuggestions() {
-    return FutureBuilder<void>(
-        future: fetchingFuture,
-        // use pre-obtained future, see https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
-        builder: (context, snapshot) {
-          final l10n = getl10n(context);
+  @override
+  Widget buildBody(BuildContext context) {
+    if (scrollController == null) {
+      scrollController = ScrollController()..addListener(() { 
+        bodyScrolledNotifier.value = scrollController.offset != scrollController.position.minScrollExtent;
+      });
+    }
+    return _DelegateProvider(
+      delegate: this,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        onVerticalDragStart: (_) => FocusScope.of(context).unfocus(),
+        onVerticalDragCancel: () => FocusScope.of(context).unfocus(),
+        onVerticalDragDown: (_) => FocusScope.of(context).unfocus(),
+        onVerticalDragEnd: (_) => FocusScope.of(context).unfocus(),
+        onVerticalDragUpdate: (_) => FocusScope.of(context).unfocus(),
+        child: _DelegateBuilder()
+      ),
+    );
+  }
+}
 
-          /// I could use snapshot from builder to display returned suggestions from [_fetchSearchHistory], but if I would do, the search would blink on mount, so I user [_suggestions] array that is set in [_fetchSearchHistory]
-          return Container(
-            width: double.infinity,
-            child: SearchHistory.instance.history.length > 0
-                ? ScrollConfiguration(
-                    behavior: const GlowlessScrollBehavior(),
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(
-                        parent: ClampingScrollPhysics(),
-                      ),
-                      itemCount: SearchHistory.instance.history.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return _buildSuggestionsHeader(context);
-                        }
-                        index--;
-                        return _buildSuggestionTile(context, index);
-                      },
+class _DelegateProvider extends InheritedWidget {
+  _DelegateProvider({
+    Key key, 
+    @required this.delegate,
+    this.child,
+  }) : super(key: key, child: child);
+
+  final Widget child;
+  final AppSearchDelegate delegate;
+
+  static _DelegateProvider of(BuildContext context) {
+    return context.getElementForInheritedWidgetOfExactType<_DelegateProvider>().widget as _DelegateProvider;
+  }
+
+  @override
+  bool updateShouldNotify(_DelegateProvider oldWidget) => false;
+}
+
+class _DelegateBuilder extends StatelessWidget {
+  _DelegateBuilder({Key key}) : super(key: key);
+
+  Future<bool> _handlePop(AppSearchDelegate delegate) async {
+    if (delegate.contentType != null) {
+      delegate.contentType = null;
+      return true;
+    }
+    return false;
+  }
+
+  bool _handleNotification(AppSearchDelegate delegate, ScrollNotification notification) {
+    delegate.bodyScrolledNotifier.value = notification.metrics.pixels != notification.metrics.minScrollExtent;
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final delegate = AppSearchDelegate._of(context);
+    final results = delegate.results;
+    final l10n = getl10n(context);
+    return ValueListenableBuilder<ContentType>(
+      valueListenable: delegate.contentTypeNotifier,
+      builder: (context, contentType, child) {
+        if (delegate._trimmedQuery.isEmpty) {
+          return _Suggestions();
+        } else if (results.empty) {
+          // Displays a message that there's nothing found
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Icon(Icons.error_outline_rounded),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 80.0),
+                  child: Text(
+                    l10n.searchNothingFound,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          final contentTypeEntries = results._map.entries
+            .where((el) => el.value.isNotEmpty)
+            .toList();
+          final single = contentTypeEntries.length == 1;
+          final showSingleCategoryContentList = single || contentType != null;
+          final contentListContentType = single ? ContentType(contentTypeEntries.single.key) : contentType;
+          final controller = delegate.itemScrollController;
+          return BackButtonListener(
+            onPressed: () => _handlePop(delegate),
+            child: PageTransitionSwitcher(
+              duration: const Duration(milliseconds: 300),
+              reverse: !single && contentType == null,
+              transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                  transitionType: SharedAxisTransitionType.vertical,
+                  animation: animation,
+                  secondaryAnimation: secondaryAnimation,
+                  fillColor: Colors.transparent,
+                  child: child,
+                ),
+              child: Container(
+                key: ValueKey("$single${contentType?.value}"),
+                child: showSingleCategoryContentList
+                    ? NotificationListener<ScrollNotification>(
+                        onNotification: (notification) => _handleNotification(delegate, notification),
+                        child: ContentListView(
+                          // ItemScrollController can only be attached to one ScrollablePositionedList, see https://github.com/google/flutter.widgets/issues/219
+                          itemScrollController: controller.isAttached ? null : controller,
+                          contentType: contentListContentType,
+                          onItemTap: delegate.getContentTileTapHandler(contentListContentType),
+                          list: single ? contentTypeEntries.single.value : contentPick<Content, List<Content>>(
+                            contentType: contentType,
+                            song: delegate.results.songs,
+                            album: delegate.results.albums,
+                          ),
+                        ),
+                      )
+                    : ListView(
+                      controller: delegate.scrollController,
+                      children: [
+                        if (results.songs.isNotEmpty)
+                          _ContentSection<Song>(
+                            items: results.songs,
+                            onTap: () => delegate.contentType = ContentType.song,
+                          ),
+                        if (results.albums.isNotEmpty)
+                          _ContentSection<Album>(
+                            items: results.albums,
+                            onTap: () => delegate.contentType = ContentType.album,
+                          ),
+                      ],
                     ),
-                  )
-                : Padding(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height / 3 - 50.0,
+                ),
+              ),
+            );
+        }
+      }
+    );
+  }
+}
+
+
+class _ContentChip extends StatefulWidget {
+  const _ContentChip({
+    Key key,
+    @required this.delegate,
+    @required this.contentType,
+  }) : super(key: key);
+
+  final AppSearchDelegate delegate;
+  final ContentType contentType;
+
+  static const borderRadius = const BorderRadius.all(Radius.circular(50.0));
+
+  @override
+  _ContentChipState createState() => _ContentChipState();
+}
+
+class _ContentChipState extends State<_ContentChip> with SingleTickerProviderStateMixin {
+  AnimationController controller;
+  
+  bool get active => widget.delegate.contentType == widget.contentType;
+
+  @override
+  void initState() { 
+    super.initState();
+    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    if (active) {
+      controller.forward();
+    }
+  }
+
+  @override
+  void dispose() { 
+    controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    if (active) {
+      widget.delegate.contentType = null;
+    } else {
+      widget.delegate.contentType = widget.contentType;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final colorAnimation = ColorTween(
+      begin: ThemeControl.theme.colorScheme.secondary,
+      end: ThemeControl.theme.colorScheme.primary,
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    ));
+    if (active) {
+      controller.forward();
+    } else {
+      controller.reverse();
+    }
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) => Material(
+        color: colorAnimation.value,
+        borderRadius: _ContentChip.borderRadius,
+        child: child,
+      ),
+      child: NFInkWell(
+        borderRadius: _ContentChip.borderRadius,
+        onTap: _handleTap,
+        child: IgnorePointer(
+          child: Theme(
+            data: ThemeControl.theme.copyWith(canvasColor: Colors.transparent),
+            child: RawChip(
+              shape: StadiumBorder(side: BorderSide(color: Colors.white.withOpacity(0.05), width: 1.0)),
+              backgroundColor: Colors.transparent,
+              label: Text(
+                l10n.contents(widget.contentType),
+                style: TextStyle(
+                  color: ThemeControl.theme.colorScheme.onBackground,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The search results are split into a few sections - songs, albums, etc.
+/// 
+/// This widget renders a tappable header for such sections, and the sections
+/// content.
+class _ContentSection<T extends Content> extends StatelessWidget {
+  const _ContentSection({
+    Key key,
+    @required this.items,
+    @required this.onTap,
+  }) : super(key: key);
+
+  final List<T> items;
+  final VoidCallback onTap;
+
+  String getHeaderText(BuildContext context) {
+    final l10n = getl10n(context);
+    return contentPick<T, String>(
+      song: l10n.tracks,
+      album: l10n.albums,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final delegate = AppSearchDelegate._of(context);
+    final builder = contentPick<T, Widget Function(int)>(
+      song: (index) {
+        final song = items[index] as Song;
+        return SongTile(
+          song: song,
+          horizontalPadding: 12.0,
+          // TODO: move to some place that contains all default tests + whatver else related
+          current: song.sourceId == ContentControl.state.currentSong.sourceId,
+          onTap: delegate.getContentTileTapHandler<Song>(),
+        );
+      },
+      album: (index) {
+        final album = items[index] as Album;
+        return AlbumTile(
+          album: items[index] as Album,
+          small: true,
+          horizontalPadding: 12.0,
+          // TODO: move to some place that contains all default tests + whatver else related
+          current: album == ContentControl.state.currentSongOrigin ||
+                   album == ContentControl.state.queues.persistent,
+          onTap: delegate.getContentTileTapHandler<Album>(),
+        );
+      },
+    );
+    return Column(
+      children: [
+        NFInkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+            child: Row(
+              children: [
+                Text(
+                  getHeaderText(context),
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded),
+              ],
+            ), 
+          ),
+        ),
+        Column(
+          children: [
+            for (int index = 0; index < math.min(6, items.length); index ++)
+              builder(index),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class _Suggestions extends StatefulWidget {
+  const _Suggestions({Key key}) : super(key: key);
+
+  @override
+  _SuggestionsState createState() => _SuggestionsState();
+}
+
+class _SuggestionsState extends State<_Suggestions> {
+  Future<void> _loadFuture;
+
+  @override
+  void initState() { 
+    super.initState();
+    _loadFuture = SearchHistory.instance.load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    return FutureBuilder<void>(
+      future: _loadFuture,
+      builder: (context, snapshot) {
+        if (SearchHistory.instance.history == null) {
+          return Center(
+            child: Spinner(),
+          );
+        }
+        return Container(
+          width: double.infinity,
+          child: SearchHistory.instance.history.length == 0
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 160.0,
                       left: 50.0,
                       right: 50.0,
                     ),
@@ -809,48 +920,47 @@ class SongsSearchDelegate extends SearchDelegate {
                       l10n.searchHistoryPlaceholder,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: ThemeControl.theme.colorScheme.onSurface
-                            .withOpacity(0.7),
+                        color: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ),
-          );
-        });
-  }
-
-  /// Builds screen with message that nothing had been found
-  Widget _buildEmptyResults(BuildContext context) {
-    final l10n = getl10n(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Icon(Icons.error_outline_rounded),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 80.0),
-            child: Text(
-              l10n.searchNothingFound,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
+                )
+              : ScrollConfiguration(
+                  behavior: const GlowlessScrollBehavior(),
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: ClampingScrollPhysics(),
+                    ),
+                    itemCount: SearchHistory.instance.history.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return const _SuggestionsHeader();
+                      }
+                      index--;
+                      return _SuggestionTile(index: index);
+                    },
+                  ),
+                )
+        );
+      },
     );
   }
+}
 
-  Widget _buildSuggestionsHeader(BuildContext context) {
+
+class _SuggestionsHeader extends StatelessWidget {
+  const _SuggestionsHeader({Key key}) : super(key: key);
+
+  void clearHistory(BuildContext context) {
+    SearchHistory.instance.clear();
+    AppSearchDelegate._of(context).rebuildBody();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = getl10n(context);
     return ListHeader(
-      margin: const EdgeInsets.only(
-        top: 3.0,
-        bottom: 0.0,
-        left: 16.0,
-        right: 7.0,
-      ),
+      margin: const EdgeInsets.fromLTRB(16.0, 3.0, 7.0, 0.0),
       leading: Text(l10n.searchHistory),
       trailing: Padding(
         padding: const EdgeInsets.only(top: 5.0),
@@ -863,13 +973,11 @@ class SongsSearchDelegate extends SearchDelegate {
               ui: Constants.UiTheme.modalOverGrey.auto,
               title: Text(l10n.searchClearHistory),
               buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
-              acceptButton: NFButton(
+              acceptButton: NFButton.accept(
                 text: l10n.delete,
                 splashColor: Constants.AppTheme.dialogButtonSplash.auto,
                 textStyle: const TextStyle(color: Constants.AppColors.red),
-                onPressed: () async {
-                  await _clearSearchHistory(context);
-                },
+                onPressed: () => clearHistory(context),
               ),
             );
           },
@@ -877,10 +985,32 @@ class SongsSearchDelegate extends SearchDelegate {
       ),
     );
   }
+}
 
-  Widget _buildSuggestionTile(BuildContext context, int index) {
+class _SuggestionTile extends StatelessWidget {
+  const _SuggestionTile({
+    Key key,
+    @required this.index,
+  }) : super(key: key);
+
+  final int index;
+
+  /// Deletes item from search history by its index.
+  void _removeEntry(BuildContext context, int index) async {
+    SearchHistory.instance.remove(index);
+    AppSearchDelegate._of(context).rebuildBody();
+  }
+
+  void _handleTap(context) {
+    final delegate = AppSearchDelegate._of(context);
+    delegate.query = SearchHistory.instance.history[index];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = getl10n(context);
     return NFListTile(
+      onTap: () => _handleTap(context),
       title: Text(
         SearchHistory.instance.history[index],
         style: const TextStyle(
@@ -917,20 +1047,13 @@ class SongsSearchDelegate extends SearchDelegate {
             ),
           ),
           buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
-          acceptButton: NFButton(
+          acceptButton: NFButton.accept(
             text: l10n.remove,
             splashColor: Constants.AppTheme.dialogButtonSplash.auto,
             textStyle: const TextStyle(color: Constants.AppColors.red),
-            onPressed: () {
-              _removeEntry(context, index);
-            },
+            onPressed: () => _removeEntry(context, index)
           ),
         );
-      },
-      onTap: () {
-        // Do search onTap
-        query = SearchHistory.instance.history[index];
-        showResults(context);
       },
     );
   }

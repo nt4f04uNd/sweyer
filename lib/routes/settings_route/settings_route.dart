@@ -7,25 +7,11 @@ import 'package:package_info/package_info.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:flutter/material.dart' hide LicensePage;
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // import 'general_settings.dart';
-import 'licenses_route.dart';
-import 'theme_settings.dart';
-
-void _pushRoute(
-  Widget route, {
-  StackFadeRouteTransitionSettings transitionSettings,
-}) {
-  App.navigatorKey.currentState.push(
-    StackFadeRouteTransition(
-      route: route,
-      transitionSettings:
-          transitionSettings ?? RouteControl.defaultTransitionSetttings,
-    ),
-  );
-}
+// import 'licenses_route.dart';
 
 class SettingsRoute extends StatefulWidget {
   const SettingsRoute({Key key}) : super(key: key);
@@ -39,10 +25,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
   // }
 
   void _handleClickThemeSettings() {
-    _pushRoute(
-      const ThemeSettingsRoute(),
-      transitionSettings: themeSettingsTransitionSetttings,
-    );
+    AppRouter.instance.goto(AppRoutes.themeSettings);
   }
 
   @override
@@ -50,7 +33,6 @@ class _SettingsRouteState extends State<SettingsRoute> {
     final l10n = getl10n(context);
     return NFPageBase(
       name: l10n.settings,
-      backButton: const NFBackButton(),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -127,7 +109,7 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleLicenseTap() {
-    _pushRoute(const LicensePage());
+    AppRouter.instance.goto(AppRoutes.licenses);
   }
 
   void _handleSecretLogoClick() {
@@ -135,13 +117,18 @@ class _FooterState extends State<_Footer> {
       final int remainingClicks = clicksForDevMode - 1 - _clickCount;
 
       final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+      final theme = Theme.of(context);
+      final textStyle = TextStyle(
+        fontSize: 15.0,
+        color: theme.colorScheme.onError,
+      );
       final l10n = getl10n(context);
       if (remainingClicks < 0) {
         return;
       } else if (remainingClicks == 0) {
         ContentControl.setDevMode(true);
-        NFSnackbarControl.showSnackbar(
-          NFSnackbarSettings(
+        NFSnackbarController.showSnackbar(
+          NFSnackbarEntry(
             important: true,
             duration: const Duration(seconds: 7),
             child: NFSnackbar(
@@ -150,34 +137,32 @@ class _FooterState extends State<_Footer> {
                 color: Colors.white,
                 size: Constants.iconSize * textScaleFactor,
               ),
-              message: l10n.devModeGreet,
+              title: Text(l10n.devModeGreet, style: textStyle),
               color: Constants.AppColors.androidGreen,
             ),
           ),
         );
       } else if (_clickCount == 4) {
-        NFSnackbarControl.showSnackbar(
-          NFSnackbarSettings(
+        NFSnackbarController.showSnackbar(
+          NFSnackbarEntry(
             important: true,
             child: NFSnackbar(
-              message: l10n.onThePathToDevMode,
+              title: Text(l10n.onThePathToDevMode, style: textStyle),
               color: Constants.AppColors.androidGreen,
             ),
           ),
         );
       } else if (remainingClicks < 5) {
-        NFSnackbarControl.showSnackbar(
-          NFSnackbarSettings(
+        NFSnackbarController.showSnackbar(
+          NFSnackbarEntry(
             important: true,
             child: NFSnackbar(
-              message: (() {
-                return l10n.almostThere +
-                    ', ' +
-                    (remainingClicks == 1
+              title: Text(
+                l10n.almostThere + ', ' + (remainingClicks == 1
                         ? l10n.onThePathToDevModeLastClick
-                        : l10n.onThePathToDevModeClicksRemaining(
-                            remainingClicks));
-              })(),
+                        : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
+                style: textStyle,
+              ),
               color: Constants.AppColors.androidGreen,
             ),
           ),

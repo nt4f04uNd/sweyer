@@ -94,8 +94,7 @@ abstract class Prefs {
 
 class SearchHistory {
   SearchHistory._internal();
-  static final SearchHistory _instance = SearchHistory._internal();
-  static SearchHistory get instance => _instance;
+  static final SearchHistory instance = SearchHistory._internal();
 
   List<String> history;
 
@@ -106,7 +105,11 @@ class SearchHistory {
   }
 
   Future<void> clear() async {
-    history = null;
+    if (history != null) {
+      history.clear();
+    } else {
+      history = [];
+    }
     await Prefs.searchHistoryStringList.set(const []);
   }
 

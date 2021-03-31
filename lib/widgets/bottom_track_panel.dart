@@ -20,7 +20,7 @@ class TrackPanel extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  final Function onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +29,7 @@ class TrackPanel extends StatelessWidget {
     }
 
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final playerRouteController =
-        getPlayerRouteControllerProvider(context).controller;
+    final playerRouteController = getPlayerRouteControllerProvider(context).controller;
     final fadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         curve: const Interval(0.0, 0.5),
@@ -130,24 +129,22 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
   const RotatingAlbumArtWithProgress({Key key}) : super(key: key);
 
   @override
-  _RotatingAlbumArtWithProgressState createState() =>
-      _RotatingAlbumArtWithProgressState();
+  _RotatingAlbumArtWithProgressState createState() => _RotatingAlbumArtWithProgressState();
 }
 
 class _RotatingAlbumArtWithProgressState
     extends State<RotatingAlbumArtWithProgress> {
   /// Actual track position value
-  Duration _value = Duration(seconds: 0);
+  Duration _value = const Duration(seconds: 0);
   // Duration of playing track
-  Duration _duration = Duration(seconds: 0);
+  Duration _duration = const Duration(seconds: 0);
 
   StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<MusicPlayerState> _playerStateSubscription;
   StreamSubscription<void> _songListChangeSubscription;
 
-  GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey =
-      GlobalKey<AlbumArtRotatingState>();
+  GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
 
   @override
   void initState() {
@@ -179,8 +176,7 @@ class _RotatingAlbumArtWithProgressState
     });
 
     // Handle song change
-    _songChangeSubscription =
-        ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
       _value = await MusicPlayer.position;
       if (mounted)
         setState(() {
@@ -188,8 +184,7 @@ class _RotatingAlbumArtWithProgressState
         });
     });
 
-    _songListChangeSubscription =
-        ContentControl.state.onSongListChange.listen((event) async {
+    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
       setState(() {
         /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
         /// So sometimes even though current song is being restored, its album art might still be fetching.
@@ -219,7 +214,7 @@ class _RotatingAlbumArtWithProgressState
     if (_value.inMilliseconds == 0.0 || _duration.inMilliseconds == 0.0) {
       return 0.001;
     }
-    // Additional safety checkS
+    // Additional safety checks
     var result = _value.inMilliseconds / _duration.inMilliseconds;
     if (result < 0) {
       result = 0;

@@ -419,10 +419,20 @@ class AppLocalizations {
     );
   }
 
-  String sortFeature<T extends Sort>(SortFeature feature) {
-    return sortPick<T, Function>(
+  /// Picks a string of a [Content] in plural form.
+  /// For example "tracks".
+  String contents<T extends Content>([ContentType contentType]) {
+    return contentPick<T, String Function()>(
+      contentType: contentType,
+      song: () => tracks,
+      album: () => albums,
+    )();
+  }
+
+  String sortFeature<T extends Content>(SortFeature<T> feature) {
+    return contentPick<T, String Function()>(
       song: () {
-        switch (feature) {
+        switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
             return dateModified;
           case SongSortFeature.dateAdded:
@@ -434,12 +444,11 @@ class AppLocalizations {
           case SongSortFeature.album:
             return albumsPlural(1);
           default:
-            assert(false);
-            return '';
+            throw UnimplementedError();
         }
       },
       album: () {
-        switch (feature) {
+        switch (feature as AlbumSortFeature) {
           case AlbumSortFeature.title:
             return title;
           case AlbumSortFeature.artist:
@@ -449,8 +458,7 @@ class AppLocalizations {
           case AlbumSortFeature.numberOfSongs:
             return numberOfTracks;
           default:
-            assert(false);
-            return '';
+            throw UnimplementedError();
         }
       },
     )();

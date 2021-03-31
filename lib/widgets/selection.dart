@@ -81,14 +81,14 @@ class SelectionBottomBar extends StatelessWidget {
     this.right = const [],
   }) : super(key: key);
 
-  final NFSelectionController<SelectionEntry> controller;
+  final SelectionController<SelectionEntry> controller;
   final List<Widget> left;
   final List<Widget> right;
 
   @override
   Widget build(BuildContext context) {
     final selectionAnimation = controller.animationController;
-    final fadeAnimation = NFDefaultAnimation(
+    final fadeAnimation = CurvedAnimation(
       curve: Interval(
         0.0,
         0.7,
@@ -155,8 +155,10 @@ class _SelectionAnimation extends AnimatedWidget {
     final animation = Tween(
       begin: begin,
       end: end,
-    ).animate(NFDefaultAnimation(
+    ).animate(CurvedAnimation(
       parent: listenable,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
     ));
     return ClipRect(
       child: AnimatedBuilder(
@@ -181,7 +183,7 @@ class ActionsSelectionTitle extends StatelessWidget {
   const ActionsSelectionTitle({Key key, @required this.controller})
       : assert(controller != null),
         super(key: key);
-  final NFSelectionController controller;
+  final SelectionController controller;
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
@@ -199,11 +201,10 @@ class GoToAlbumSelectionAction extends StatefulWidget {
   const GoToAlbumSelectionAction({Key key, @required this.controller})
       : assert(controller != null),
         super(key: key);
-  final NFSelectionController<SongSelectionEntry> controller;
+  final SelectionController<SongSelectionEntry> controller;
 
   @override
-  _GoToAlbumSelectionActionState createState() =>
-      _GoToAlbumSelectionActionState();
+  _GoToAlbumSelectionActionState createState() => _GoToAlbumSelectionActionState();
 }
 
 class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
@@ -234,11 +235,8 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
   }
 
   void _handleTap() {
-    final album = widget.controller.data.first.song.getAlum();
-    App.homeNavigatorKey.currentState.pushNamed(
-      Constants.HomeRoutes.album.value,
-      arguments: album,
-    );
+    final album = widget.controller.data.first.song.getAlbum();
+    HomeRouter.instance.goto(HomeRoutes.factory.album(album));
     widget.controller.close();
   }
 
@@ -268,15 +266,14 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
   }
 }
 
-class PlayNextSelectionAction<T extends SelectionEntry>
-    extends StatelessWidget {
+class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
   const PlayNextSelectionAction({Key key, @required this.controller})
       : assert(controller != null),
         super(key: key);
-  final NFSelectionController<T> controller;
+  final SelectionController<SelectionEntry<T>> controller;
 
   void _handleTap() {
-    selectionEntryPick<T, Function>(
+    contentPick<T, VoidCallback>(
       song: () {
         final entries = controller.data.toList()
           ..sort((a, b) => a.index.compareTo(b.index));
@@ -311,15 +308,14 @@ class PlayNextSelectionAction<T extends SelectionEntry>
   }
 }
 
-class AddToQueueSelectionAction<T extends SelectionEntry>
-    extends StatelessWidget {
+class AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
   const AddToQueueSelectionAction({Key key, @required this.controller})
       : assert(controller != null),
         super(key: key);
-  final NFSelectionController<T> controller;
+  final SelectionController<SelectionEntry<T>> controller;
 
   void _handleTap() {
-    selectionEntryPick<T, Function>(
+    contentPick<T, VoidCallback>(
       song: () {
         final entries = controller.data.toList()
           ..sort((a, b) => a.index.compareTo(b.index));

@@ -10,11 +10,15 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Shows an indicator that marks out the current playing song tile.
+/// Consists of three equalizer bars.
 class CurrentIndicator extends StatelessWidget {
   const CurrentIndicator({Key key, this.color = Colors.white})
       : assert(color != null),
         super(key: key);
+
+  /// Color of the bars.
   final Color color;
+
   @override
   Widget build(BuildContext context) {
     const spacer = SizedBox(width: 3.0);
@@ -108,7 +112,7 @@ class _Bar extends StatefulWidget {
 
 class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
   int index;
-  bool looping = false;
+  Timer timer;
   StreamSubscription<MusicPlayerState> _playerStateSubscription;
 
   @override
@@ -116,16 +120,15 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
     super.initState();
     index = math.Random().nextInt(widget.values.length);
     if (MusicPlayer.playerState == MusicPlayerState.PLAYING) {
-      loop();
+      start();
     }
-    _playerStateSubscription =
-        MusicPlayer.onStateChange.listen(_handlePlayerStateChange);
+    _playerStateSubscription = MusicPlayer.onStateChange.listen(_handlePlayerStateChange);
   }
 
-  _handlePlayerStateChange(state) {
+  void _handlePlayerStateChange(state) {
     switch (state) {
       case MusicPlayerState.PLAYING:
-        loop();
+        start();
         break;
       case MusicPlayerState.PAUSED:
       case MusicPlayerState.COMPLETED:
@@ -136,46 +139,51 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
   }
 
   void _iterate() {
-    assert(mounted);
-    setState(() {
-      if (index == widget.values.length - 1) {
-        index = 0;
-      } else {
-        index++;
-      }
+    if (!mounted) {
+      assert(false);
+      timer.cancel();
+      timer = null;
+    }
+    timer = Timer(dilate(widget.values[index].duration), () {
+      setState(() {
+        if (index == widget.values.length - 1) {
+          index = 0;
+        } else {
+          index++;
+        }
+      });
+      _iterate();
     });
   }
 
-  Future<void> loop() async {
-    if (looping) return;
-    looping = true;
-    while (looping) {
-      await Future.delayed(dilate(widget.values[index].duration));
-      if (looping) {
-        _iterate();
-      }
+  Future<void> start() async {
+    if (timer == null) {
+      _iterate();
     }
   }
 
   void stop() {
-    if (!looping) return;
-    setState(() {
-      looping = false;
-    });
+    if (timer != null && mounted) {
+      setState(() {
+        timer.cancel();
+        timer = null;
+      });
+    }
   }
 
   @override
   void dispose() {
-    looping = false;
+    timer?.cancel();
     _playerStateSubscription.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final animating = timer != null;
     return AnimatedContainer(
-      height: looping ? 1.0 + 19.0 * widget.values[index].height : 3.0,
-      curve: looping ? widget.values[index].curve : Curves.easeOutCubic,
+      height: animating ? 1.0 + 19.0 * widget.values[index].height : 3.0,
+      curve: animating ? widget.values[index].curve : Curves.easeOutCubic,
       decoration: BoxDecoration(
         color: widget.color,
         borderRadius: const BorderRadius.all(
@@ -183,7 +191,7 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
         ),
       ),
       width: 5.0,
-      duration: looping
+      duration: animating
           ? widget.values[index].duration
           : const Duration(milliseconds: 500),
     );

@@ -24,7 +24,6 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
     final l10n = getl10n(context);
     return NFPageBase(
       name: l10n.general,
-      backButton: const NFBackButton(),
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[

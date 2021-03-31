@@ -10,9 +10,8 @@ import 'package:sweyer/sweyer.dart';
 part 'playlist.g.dart';
 
 @JsonSerializable()
-class Playlist {
+class Playlist { // todo: implements Content
   Playlist();
-  factory Playlist.fromJson(Map<String, dynamic> json) =>
-      _$PlaylistFromJson(json);
+  factory Playlist.fromJson(Map<String, dynamic> json) => _$PlaylistFromJson(json);
   Map<String, dynamic> toJson() => _$PlaylistToJson(this);
 }

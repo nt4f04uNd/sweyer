@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
@@ -29,11 +30,13 @@ class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
 }
 
 class TabsRoute extends StatefulWidget {
-  TabsRoute({
+  TabsRoute(
+    this.tabController, {
     Key key,
-    @required this.tabController,
   }) : super(key: key);
+
   final TabController tabController;
+
   @override
   _TabsRouteState createState() => _TabsRouteState();
 }
@@ -44,15 +47,14 @@ class _TabsRouteState extends State<TabsRoute> {
   TabController get tabController => widget.tabController;
   SelectionControllers selectionControllers;
 
-  NFSelectionController get selectionController {
+  SelectionController get selectionController {
     switch (tabController.index) {
       case 0:
         return selectionControllers.song;
       case 1:
         return selectionControllers.album;
       default:
-        assert(false);
-        return null;
+        throw UnimplementedError();
     }
   }
 
@@ -67,8 +69,7 @@ class _TabsRouteState extends State<TabsRoute> {
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
       setState(() {/* update current track indicator */});
     });
-    _songListChangeSubscription =
-        ContentControl.state.onSongListChange.listen((event) {
+    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) {
       setState(() {/* update to display possible changes in the list */});
     });
     tabController.addListener(() {
@@ -78,8 +79,8 @@ class _TabsRouteState extends State<TabsRoute> {
 
   void _handleSelection() {
     setState(() {
-      /*  update appbar and tiles on selection
-      primarily needed to update the selection number in [NFSelectionAppBar] */
+      /* update appbar and tiles on selection
+      primarily needed to update the selection number in [SelectionAppBar] */
     });
   }
 
@@ -110,8 +111,7 @@ class _TabsRouteState extends State<TabsRoute> {
     final controller = selectionControllers.song;
     if (ContentControl.state.sdkInt >= 30) {
       // On Android R the deletion is performed with OS dialog.
-      ContentControl.deleteSongs(
-          controller.data.map((e) => e.song.sourceId).toSet());
+      ContentControl.deleteSongs(controller.data.map((e) => e.song.sourceId).toSet());
       controller.close();
     } else {
       // On all versions below show in app dialog.
@@ -119,8 +119,7 @@ class _TabsRouteState extends State<TabsRoute> {
       final count = controller.data.length;
       Song song;
       if (count == 1) {
-        song = ContentControl.state.queues.all.byId
-            .getSong(controller.data.first.song.sourceId);
+        song = ContentControl.state.queues.all.byId.getSong(controller.data.first.song.sourceId);
       }
       ShowFunctions.instance.showDialog(
         context,
@@ -144,13 +143,12 @@ class _TabsRouteState extends State<TabsRoute> {
           ),
         ),
         buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
-        acceptButton: NFButton(
+        acceptButton: NFButton.accept(
           text: l10n.delete,
           splashColor: Constants.AppTheme.dialogButtonSplash.auto,
           textStyle: const TextStyle(color: Constants.AppColors.red),
           onPressed: () {
-            ContentControl.deleteSongs(
-                controller.data.map((e) => e.song.sourceId).toSet());
+            ContentControl.deleteSongs(controller.data.map((e) => e.song.sourceId).toSet());
             controller.close();
           },
         ),
@@ -167,24 +165,22 @@ class _TabsRouteState extends State<TabsRoute> {
     );
 
     /// Not letting to go less 1 to not play animation from 1 to 0.
-    final selectionCount = selectionController.data.length > 0
-        ? selectionController.data.length
-        : 1;
+    final selectionCount = selectionController.data.length > 0 ? selectionController.data.length : 1;
     final appBar = PreferredSize(
-      preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
-      child: NFSelectionAppBar(
+      preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
+      child: SelectionAppBar(
         titleSpacing: 0.0,
         elevation: 0.0,
         elevationSelection: 0.0,
         selectionController: selectionController,
-        onMenuClick: () {
+        onMenuPressed: () {
           getDrawerControllerProvider(context).controller.open();
         },
         actions: [
           NFIconButton(
             icon: const Icon(Icons.search_rounded),
             onPressed: () {
-              ShowFunctions.showSongsSearch(context);
+              ShowFunctions.instance.showSongsSearch();
             },
           ),
         ],
@@ -234,15 +230,15 @@ class _TabsRouteState extends State<TabsRoute> {
                       top: ContentControl.state.albums.isNotEmpty ? 44.0 : 0.0,
                     ),
                     child: ContentControl.state.albums.isEmpty
-                        ? SongsTab()
+                        ? _SongsTab()
                         : TabBarView(
                             controller: tabController,
                             physics: selectionController.inSelection
                                 ? const NeverScrollableScrollPhysics()
                                 : const _TabsScrollPhysics(),
-                            children: <Widget>[
-                              SongsTab(),
-                              AlbumListTab(),
+                            children: [
+                              _SongsTab(), 
+                              _AlbumsTab(),
                             ],
                           ),
                   ),
@@ -267,14 +263,10 @@ class _TabsRouteState extends State<TabsRoute> {
                               topRight: const Radius.circular(3.0),
                             ),
                           ),
-                          labelColor:
-                              ThemeControl.theme.textTheme.headline6.color,
+                          labelColor: ThemeControl.theme.textTheme.headline6.color,
                           indicatorSize: TabBarIndicatorSize.label,
-                          unselectedLabelColor: ThemeControl
-                              .theme.colorScheme.onSurface
-                              .withOpacity(0.6),
-                          labelStyle:
-                              ThemeControl.theme.textTheme.headline6.copyWith(
+                          unselectedLabelColor: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.6),
+                          labelStyle: ThemeControl.theme.textTheme.headline6.copyWith(
                             fontSize: 15.0,
                             fontWeight: FontWeight.w900,
                           ),
@@ -294,6 +286,133 @@ class _TabsRouteState extends State<TabsRoute> {
           child: appBar,
         ),
       ],
+    );
+  }
+}
+
+
+class _SongsTab extends StatefulWidget {
+  _SongsTab({Key key}) : super(key: key);
+
+  @override
+  _SongsTabState createState() => _SongsTabState();
+}
+
+class _SongsTabState extends State<_SongsTab> with AutomaticKeepAliveClientMixin<_SongsTab> {
+  @override
+  bool get wantKeepAlive => true;
+
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final ItemScrollController itemScrollController = ItemScrollController();
+  bool _scrollbarDragged = false;
+
+  void _handleDragStart() {
+    _scrollbarDragged = true;
+  }
+
+  void _handleDragEnd() {
+    _scrollbarDragged = false;
+  }
+
+  /// Performs tracks refetch
+  Future<void> _handleRefreshSongs() async {
+    await Future.wait([
+      ContentControl.refetch<Song>(),
+      ContentControl.refetch<Album>(),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final songs = ContentControl.state.queues.all.songs;
+    final selectionController = SelectionControllers.of(context).song;
+    return RefreshIndicator(
+      color: Colors.white,
+      backgroundColor: ThemeControl.theme.colorScheme.primary,
+      strokeWidth: 2.5,
+      key: _refreshIndicatorKey,
+      onRefresh: _handleRefreshSongs,
+      notificationPredicate: (notification) {
+        // Prevent pull to refresh when scrollbar is dragged.
+        return !_scrollbarDragged &&
+            selectionController.notInSelection &&
+            notification.depth == 0;
+      },
+      child: SongListView(
+        songs: songs,
+        itemScrollController: itemScrollController,
+        selectionController: selectionController,
+        scrollbar: ScrollbarType.draggable,
+        onScrollbarDragStart: _handleDragStart,
+        onScrollbarDragEnd: _handleDragEnd,
+        leading: SongSortListHeader(
+          count: songs.length,
+          selectionController: selectionController,
+        ),
+        onItemTap: () => ContentControl.setQueue(
+          type: QueueType.all,
+          modified: false,
+          shuffled: false,
+        ),
+      )
+    );
+  }
+}
+
+
+class _AlbumsTab extends StatefulWidget {
+  _AlbumsTab({Key key}) : super(key: key);
+
+  @override
+  _AlbumsTabState createState() => _AlbumsTabState();
+}
+
+class _AlbumsTabState extends State<_AlbumsTab> with AutomaticKeepAliveClientMixin<_AlbumsTab> {
+  @override
+  bool get wantKeepAlive => true;
+
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  final ItemScrollController itemScrollController = ItemScrollController();
+  bool _scrollbarDragged = false;
+
+  void _handleDragStart() {
+    _scrollbarDragged = true;
+  }
+
+  void _handleDragEnd() {
+    _scrollbarDragged = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final albums = ContentControl.state.albums.values.toList();
+    final selectionController = SelectionControllers.of(context).album;
+    return RefreshIndicator(
+      color: Colors.white,
+      backgroundColor: ThemeControl.theme.colorScheme.primary,
+      strokeWidth: 2.5,
+      key: _refreshIndicatorKey,
+      onRefresh: () => ContentControl.refetch<Album>(),
+      notificationPredicate: (notification) {
+        // Prevent pull to refresh when scrollbar is dragged.
+        return !_scrollbarDragged &&
+            selectionController.notInSelection &&
+            notification.depth == 0;
+      },
+      child: AlbumListView(
+        albums: albums,
+        itemScrollController: itemScrollController,
+        selectionController: selectionController,
+        scrollbar: ScrollbarType.draggable,
+        onScrollbarDragStart: _handleDragStart,
+        onScrollbarDragEnd: _handleDragEnd,
+        leading: AlbumSortListHeader(
+          count: albums.length,
+          selectionController: selectionController,
+        ),
+      )
     );
   }
 }

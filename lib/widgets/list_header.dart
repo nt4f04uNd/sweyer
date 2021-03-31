@@ -31,10 +31,10 @@ class ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(
-            fontSize: 16.0,
-            color: ThemeControl.theme.hintColor,
-            fontWeight: FontWeight.w700,
-          ),
+        fontSize: 16.0,
+        color: ThemeControl.theme.hintColor,
+        fontWeight: FontWeight.w700,
+      ),
       child: Container(
         color: color,
         padding: margin,
@@ -51,7 +51,7 @@ class ListHeader extends StatelessWidget {
   }
 }
 
-abstract class SortListHeader<T extends Sort> extends StatelessWidget {
+abstract class SortListHeader<T extends Content> extends StatelessWidget {
   const SortListHeader({
     Key key,
     @required this.count,
@@ -63,40 +63,42 @@ abstract class SortListHeader<T extends Sort> extends StatelessWidget {
 
   /// This needed to ignore the header sort buttons when the controller is in selection.
   /// This parameter can be `null`.
-  final NFSelectionController selectionController;
+  final SelectionController<SelectionEntry<T>> selectionController;
 
-  T get sort => ContentControl.state.sorts[T];
+  Sort<T> getSort() => ContentControl.state.sorts.getValue<T>();
 
   String getContentCountText(AppLocalizations l10n) {
-    final plural = sortPick<T, String Function(int)>(
+    final plural = contentPick<T, String Function(int)>(
       song: l10n.tracksPlural,
       album: l10n.albumsPlural,
-    )(count)
-        .toLowerCase();
+    )(count).toLowerCase();
     return '$count $plural';
   }
 
   void _handleTap() {
-    final context = App.navigatorKey.currentContext;
+    final context = HomeRouter.instance.navigatorKey.currentContext;
     final l10n = getl10n(context);
+    final sort = getSort();
     Widget buildItem(SortFeature feature) {
       return Theme(
         data: Theme.of(context).copyWith(
           splashFactory: NFListTileInkRipple.splashFactory,
         ),
-        child: _RadioListTile<SortFeature>(
-          title: Text(
-            l10n.sortFeature<T>(feature).toLowerCase(),
-            style: ThemeControl.theme.textTheme.subtitle1,
+        child: Builder( // i need the proper context to pop the dialog
+          builder: (context) => _RadioListTile<SortFeature>(
+            title: Text(
+              l10n.sortFeature<T>(feature).toLowerCase(),
+              style: ThemeControl.theme.textTheme.subtitle1,
+            ),
+            value: feature,
+            groupValue: sort.feature,
+            onChanged: (_) {
+              ContentControl.sort(
+                sort: sort.copyWith(feature: feature).withDefaultOrder,
+              );
+              Navigator.pop(context);
+            },
           ),
-          value: feature,
-          groupValue: sort.feature,
-          onChanged: (_) {
-            ContentControl.sort<T>(
-              sort: sort.copyWith(feature: feature).withDefaultOrder,
-            );
-            Navigator.of(context).pop();
-          },
         ),
       );
     }
@@ -109,8 +111,10 @@ abstract class SortListHeader<T extends Sort> extends StatelessWidget {
       contentPadding: EdgeInsets.only(top: 5.0, bottom: 10.0),
       acceptButton: SizedBox.shrink(),
       content: Column(
-        children:
-            SortFeature.getValues<T>().map((el) => buildItem(el)).toList(),
+        children: contentPick<T, List<SortFeature> Function()>(
+          song: () => SongSortFeature.values,
+          album: () => AlbumSortFeature.values,
+        )().map((el) => buildItem(el)).toList(),
       ),
     );
   }
@@ -123,6 +127,7 @@ abstract class SortListHeader<T extends Sort> extends StatelessWidget {
       fontSize: 14.0,
       fontWeight: FontWeight.w800,
     );
+    final sort = getSort();
     Widget child = ListHeader(
       margin: const EdgeInsets.only(
         top: 10.0,
@@ -150,7 +155,7 @@ abstract class SortListHeader<T extends Sort> extends StatelessWidget {
               size: 28.0,
               iconSize: 20.0,
               onPressed: () {
-                ContentControl.sort<T>(
+                ContentControl.sort(
                   sort: sort.copyWith(orderAscending: !sort.orderAscending),
                 );
               },
@@ -172,7 +177,8 @@ abstract class SortListHeader<T extends Sort> extends StatelessWidget {
         ),
       ),
     );
-    if (selectionController == null) return child;
+    if (selectionController == null)
+      return child;
     return AnimatedBuilder(
       animation: selectionController.animationController,
       builder: (context, child) => IgnorePointer(
@@ -239,18 +245,18 @@ class _OrderSwitcher extends StatelessWidget {
   }
 }
 
-class SongSortListHeader extends SortListHeader<SongSort> {
+class SongSortListHeader extends SortListHeader<Song> {
   const SongSortListHeader({
     Key key,
     @required int count,
-    @required NFSelectionController selectionController,
+    @required SelectionController selectionController,
   }) : super(key: key, count: count, selectionController: selectionController);
 }
 
-class AlbumSortListHeader extends SortListHeader<AlbumSort> {
+class AlbumSortListHeader extends SortListHeader<Album> {
   const AlbumSortListHeader({
     Key key,
     @required int count,
-    @required NFSelectionController selectionController,
+    @required SelectionController selectionController,
   }) : super(key: key, count: count, selectionController: selectionController);
 }

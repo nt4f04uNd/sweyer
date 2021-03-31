@@ -27,12 +27,10 @@ class _AlbumRouteState extends State<AlbumRoute>
   AnimationController appBarController;
 
   static const _appBarHeight = kNFAppBarPreferredSize - 8.0;
-  static const _appBarBorderHeight = 1.0;
   static const _albumArtSize = 130.0;
   static const _albumSectionTopPadding = 10.0;
   static const _albumSectionBottomPadding = 20.0;
-  static const _albumSectionHeight =
-      _albumArtSize + _albumSectionTopPadding + _albumSectionBottomPadding;
+  static const _albumSectionHeight = _albumArtSize + _albumSectionTopPadding + _albumSectionBottomPadding;
 
   @override
   void initState() {
@@ -52,7 +50,7 @@ class _AlbumRouteState extends State<AlbumRoute>
   void handleSongSelection() {
     setState(() {
       /*  update appbar and tiles on selection
-      primarily needed to update the selection number in [NFSelectionAppBar] */
+      primarily needed to update the selection number in [SelectionAppBar] */
     });
   }
 
@@ -159,8 +157,7 @@ class _AlbumRouteState extends State<AlbumRoute>
                     titleSpacing: 0.0,
                     backgroundColor: appBarController.isDismissed
                         ? ThemeControl.theme.colorScheme.background
-                        : ThemeControl.theme.colorScheme.background
-                            .withOpacity(0.0),
+                        : ThemeControl.theme.colorScheme.background.withOpacity(0.0),
                     title: AnimatedOpacity(
                       opacity: 1.0 - appBarController.value > 0.2 ? 1.0 : 0.0,
                       curve: Curves.easeOut,
@@ -174,13 +171,8 @@ class _AlbumRouteState extends State<AlbumRoute>
                   overlapsContent: false,
                   header: AnimatedBuilder(
                     animation: appBarController,
-                    builder: (context, child) => AnimatedContainer(
-                      curve: Curves.easeOut,
-                      duration: const Duration(milliseconds: 400),
-                      color: scrollController.offset > _albumSectionHeight
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.secondary.withOpacity(0.0),
-                      height: _appBarBorderHeight,
+                    builder: (context, child) => AppBarBorder(
+                      shown: scrollController.offset > _albumSectionHeight,
                     ),
                   ),
                   sliver: SliverList(
@@ -190,7 +182,7 @@ class _AlbumRouteState extends State<AlbumRoute>
                           final height = constraints.maxHeight -
                               _appBarHeight -
                               kSongTileHeight * length -
-                              _appBarBorderHeight -
+                              AppBarBorder.height -
                               MediaQuery.of(context).padding.top;
                           if (height <= 0) return const SizedBox.shrink();
                           return Container(height: height);
@@ -199,10 +191,8 @@ class _AlbumRouteState extends State<AlbumRoute>
                         return SongTile(
                           song: song,
                           variant: SongTileVariant.number,
-                          current: ContentControl.state.queues.persistent ==
-                                  widget.album &&
-                              song.sourceId ==
-                                  ContentControl.state.currentSong.sourceId,
+                          current: ContentControl.state.queues.persistent == widget.album &&
+                                    song.sourceId ==ContentControl.state.currentSong.sourceId,
                           onTap: () => ContentControl.setQueue(
                             type: QueueType.persistent,
                             persistentQueue: widget.album,
@@ -222,10 +212,8 @@ class _AlbumRouteState extends State<AlbumRoute>
                         //   selected: songSelectionController.data.contains(
                         //     SongSelectionEntry(index: index),
                         //   ),
-                        //   current: ContentControl.state.queues.persistent ==
-                        //           widget.album &&
-                        //       song.sourceId ==
-                        //           ContentControl.state.currentSong.sourceId,
+                        //   current: ContentControl.state.queues.persistent == widget.album &&
+                        //            song.sourceId == ContentControl.state.currentSong.sourceId,
                         //   onTap: () => ContentControl.setQueue(
                         //     type: QueueType.persistent,
                         //     persistentQueue: widget.album,

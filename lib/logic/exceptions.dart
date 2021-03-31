@@ -3,14 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// This module contains all pure app logic classes 
+/// Indicates that reached code path that is invalid.
 /// 
-/// API is not exported as you should use `as API`
-
-export 'player/music_player.dart';
-
-export 'exceptions.dart';
-export 'permissions.dart';
-export 'prefs.dart';
-export 'selection.dart';
-export 'theme.dart';
+/// In difference with [UnimplementedError], this exception used to mark that
+/// given code path should never be reached.
+class InvalidCodePathError extends Error { }

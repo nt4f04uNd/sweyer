@@ -27,11 +27,9 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
 
   void _animateNotMainUi() {
     if (_onTop && playerRouteController.value == 0.0) {
-      NFSystemUiControl.animateSystemUiOverlay(
+      SystemUiStyleController.animateSystemUiOverlay(
         to: Constants.UiTheme.black.auto,
-        settings: NFAnimationControllerSettings(
-          duration: const Duration(milliseconds: 550),
-        ),
+        duration: const Duration(milliseconds: 550),
       );
     }
   }
@@ -50,27 +48,28 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
         builder: (context, snapshot) {
           if (!ContentControl.playReady) {
             _animateNotMainUi();
-            return const LoadingScreen();
+            return Container(
+              color: ThemeControl.theme.colorScheme.background,
+            );
           }
           if (Permissions.notGranted) {
             _animateNotMainUi();
             return const _NoPermissionsScreen();
           }
-          if (ContentControl.state.queues.all.isNotEmpty &&
-              !ContentControl.initFetching) {
-            if (ThemeControl.ready &&
-                _onTop &&
-                playerRouteController.value == 0.0) {
-              NFSystemUiControl.animateSystemUiOverlay(
+          if (ContentControl.state.queues.all.isNotEmpty && !ContentControl.initFetching) {
+            if (ThemeControl.ready && _onTop && playerRouteController.value == 0.0) {
+              SystemUiStyleController.animateSystemUiOverlay(
                 to: Constants.UiTheme.grey.auto,
               );
             }
             return StreamBuilder<bool>(
                 stream: ThemeControl.onThemeChange,
                 builder: (context, snapshot) {
-                  if (snapshot.data == true) return const SizedBox.shrink();
+                  if (snapshot.data == true)
+                    return const SizedBox.shrink();
                   return const MainScreen();
-                });
+                }
+              );
           }
           _animateNotMainUi();
           if (ContentControl.initFetching) {
@@ -93,15 +92,13 @@ class SelectionControllers extends InheritedWidget {
         super(key: key, child: child);
 
   final Widget child;
-  final Map<Type, NFSelectionController<SelectionEntry>> map;
+  final Map<Type, SelectionController<SelectionEntry>> map;
 
-  NFSelectionController<SongSelectionEntry> get song => map[Song];
-  NFSelectionController<AlbumSelectionEntry> get album => map[Album];
+  SelectionController<SongSelectionEntry> get song => map[Song];
+  SelectionController<AlbumSelectionEntry> get album => map[Album];
 
   static SelectionControllers of(BuildContext context) {
-    return context
-        .getElementForInheritedWidgetOfExactType<SelectionControllers>()
-        .widget;
+    return context.getElementForInheritedWidgetOfExactType<SelectionControllers>().widget;
   }
 
   @override
@@ -113,12 +110,6 @@ class SelectionControllers extends InheritedWidget {
 /// Main app route with song and album list tabs
 class MainScreen extends StatefulWidget {
   const MainScreen({Key key}) : super(key: key);
-  static bool get shown =>
-      ContentControl.playReady &&
-      !Permissions.notGranted &&
-      ContentControl.state.queues.all.isNotEmpty;
-
-  static bool _albumRouteOpened = false;
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -131,7 +122,7 @@ class _MainScreenState extends State<MainScreen>
         PlayerRouteControllerMixin {
   static const int _tabsLength = 2;
 
-  Map<Type, NFSelectionController<SelectionEntry>> selectionControllersMap;
+  Map<Type, SelectionController<SelectionEntry>> selectionControllersMap;
   TabController tabController;
   SlidableController playerRouteController;
   SlidableController drawerController;
@@ -139,7 +130,7 @@ class _MainScreenState extends State<MainScreen>
   bool get drawerCanBeOpened =>
       playerRouteController.closed &&
       selectionControllersMap.values.every((el) => el.notInSelection) &&
-      !MainScreen._albumRouteOpened;
+      HomeRouter.instance.routes.last != HomeRoutes.album;
 
   /// Whether the drawer swipe is enabled.
   bool get drawerSwipe => tabController.animation.value == 0.0;
@@ -148,14 +139,18 @@ class _MainScreenState extends State<MainScreen>
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      AppRouter.instance.mainScreenShown = true;
+    });
+
     selectionControllersMap = {
-      Song: NFSelectionController<SongSelectionEntry>(
+      Song: SelectionController<SongSelectionEntry>(
         animationController: AnimationController(
           vsync: this,
           duration: kSelectionDuration,
         ),
       ),
-      Album: NFSelectionController<AlbumSelectionEntry>(
+      Album: SelectionController<AlbumSelectionEntry>(
         animationController: AnimationController(
           vsync: this,
           duration: kSelectionDuration,
@@ -171,6 +166,9 @@ class _MainScreenState extends State<MainScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      AppRouter.instance.mainScreenShown = false;
+    });
     for (final controller in selectionControllersMap.values) {
       controller.dispose();
     }
@@ -178,24 +176,33 @@ class _MainScreenState extends State<MainScreen>
     super.dispose();
   }
 
+  /// Handles pop before any other pops in the [HomeRouter].
+  bool _handleNecessaryPop() {
+    if (playerRouteController.opened) {
+      playerRouteController.close();
+      return true;
+    } else if (drawerController.opened) {
+      drawerController.close();
+      return true;
+    }
+    return false;
+  }
+
   // Var to show exit toast
   DateTime _lastBackPressTime;
   Future<bool> _handlePop(BuildContext context) async {
-    if (playerRouteController.opened) {
-      playerRouteController.close();
-      return Future.value(false);
-    } else if (drawerController.opened) {
-      drawerController.close();
-      return Future.value(false);
-    } else if (selectionControllersMap.values.any((el) => el.inSelection)) {
+    final handled = _handleNecessaryPop();
+    if (handled)
+      return false;
+    if (selectionControllersMap.values.any((el) => el.inSelection)) {
       for (final controller in selectionControllersMap.values) {
         controller.close();
       }
-      return Future.value(false);
-    } else if (App.homeNavigatorKey.currentState != null &&
-        App.homeNavigatorKey.currentState.canPop()) {
-      App.homeNavigatorKey.currentState.pop();
-      return Future.value(false);
+      return false;
+    } else if (HomeRouter.instance.navigatorKey.currentState != null &&
+               HomeRouter.instance.navigatorKey.currentState.canPop()) {
+      HomeRouter.instance.navigatorKey.currentState.pop();
+      return false;
     } else {
       DateTime now = DateTime.now();
       // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
@@ -205,9 +212,9 @@ class _MainScreenState extends State<MainScreen>
         ShowFunctions.instance.showToast(
           msg: getl10n(context).pressOnceAgainToExit,
         );
-        return Future.value(false);
+        return false;
       }
-      return Future.value(true);
+      return true;
     }
   }
 
@@ -218,6 +225,7 @@ class _MainScreenState extends State<MainScreen>
       child: Builder(
         builder: (context) {
           final selectionControllers = SelectionControllers.of(context);
+          HomeRouter.instance.home = TabsRoute(tabController);
           return Scaffold(
             resizeToAvoidBottomInset: false,
             body: WillPopScope(
@@ -226,56 +234,14 @@ class _MainScreenState extends State<MainScreen>
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(bottom: kSongTileHeight),
-                    child: Navigator(
-                      key: App.homeNavigatorKey,
-                      observers: [homeRouteObserver],
-                      initialRoute: Constants.HomeRoutes.tabs.value,
-                      onGenerateInitialRoutes: (state, name) => [
-                        StackFadeRouteTransition(
-                          transitionSettings: StackFadeRouteTransitionSettings(
-                            checkEntAnimationEnabled: () => false,
-                            maintainState: true,
-                            checkSystemUi: () => Constants.UiTheme.grey.auto,
-                            settings: RouteSettings(
-                              name: name,
-                            ),
-                          ),
-                          route: TabsRoute(
-                            tabController: tabController,
-                          ),
-                        ),
-                      ],
-                      onUnknownRoute: RouteControl.handleOnUnknownRoute,
-                      onGenerateRoute: (settings) {
-                        if (settings.name == Constants.HomeRoutes.album.value) {
-                          return StackFadeRouteTransition(
-                            transitionSettings:
-                                StackFadeRouteTransitionSettings(
-                              opaque: false,
-                              dismissible: true,
-                              checkSystemUi: () => Constants.UiTheme.grey.auto,
-                              dismissBarrier: RouteControl.barrier,
-                              settings: settings,
-                            ),
-                            route: RouteAwareWidget(
-                              onPop: () {
-                                MainScreen._albumRouteOpened = false;
-                              },
-                              onPush: () {
-                                MainScreen._albumRouteOpened = true;
-                              },
-                              child: AlbumRoute(
-                                album: settings.arguments,
-                              ),
-                            ),
-                          );
-                        }
-                        if (settings.name ==
-                            Constants.HomeRoutes.search.value) {
-                          return (settings.arguments as Route);
-                        }
-                        return null;
-                      },
+                    child: Router<HomeRoutes>(
+                      routerDelegate: HomeRouter.instance,
+                      routeInformationParser: HomeRouteInformationParser(),
+                      routeInformationProvider: HomeRouteInformationProvider(),
+                      backButtonDispatcher: HomeRouteBackButtonDispatcher(
+                        parent: Router.of(context).backButtonDispatcher,
+                        necessaryPopHandler: _handleNecessaryPop,
+                      ),
                     ),
                   ),
                   const PlayerRoute(),
@@ -290,10 +256,10 @@ class _MainScreenState extends State<MainScreen>
                       GoToAlbumSelectionAction(
                         controller: selectionControllers.song,
                       ),
-                      PlayNextSelectionAction<SongSelectionEntry>(
+                      PlayNextSelectionAction<Song>(
                         controller: selectionControllers.song,
                       ),
-                      AddToQueueSelectionAction<SongSelectionEntry>(
+                      AddToQueueSelectionAction<Song>(
                         controller: selectionControllers.song,
                       ),
                     ],
@@ -306,10 +272,10 @@ class _MainScreenState extends State<MainScreen>
                       )
                     ],
                     right: [
-                      PlayNextSelectionAction<AlbumSelectionEntry>(
+                      PlayNextSelectionAction<Album>(
                         controller: selectionControllers.album,
                       ),
-                      AddToQueueSelectionAction<AlbumSelectionEntry>(
+                      AddToQueueSelectionAction<Album>(
                         controller: selectionControllers.album,
                       ),
                     ],
@@ -399,6 +365,8 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
   bool _fetching = false;
 
   Future<void> _handlePermissionRequest() async {
+    if (_fetching)
+      return;
     setState(() {
       _fetching = true;
     });

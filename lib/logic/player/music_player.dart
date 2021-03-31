@@ -124,7 +124,7 @@ abstract class MusicPlayer {
       if (e.code == 'error') {
         if (e.message == Constants.Errors.UNABLE_ACCESS_RESOURCE) {
           ShowFunctions.instance.showToast(
-            msg: getl10n(App.navigatorKey.currentContext).playbackErrorMessage,
+            msg: getl10n(AppRouter.instance.navigatorKey.currentContext).playbackErrorMessage,
           );
           // The order of these calls matters
           // Play next song after broken one
@@ -135,7 +135,7 @@ abstract class MusicPlayer {
           // Remove broken song
           ContentControl.state.queues.all.removeSong(song);
           ContentControl.state.emitSongListChange();
-          ContentControl.refetchSongs(); // perform fetching
+          ContentControl.refetch<Song>(); // perform fetching
         } else if (e.message == Constants.Errors.NATIVE_PLAYER_ILLEGAL_STATE) {
           // ...
         }

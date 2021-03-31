@@ -17,7 +17,7 @@ part 'song.g.dart';
 /// JSON serialization logic to be generated.
 @JsonSerializable()
 // ignore: must_be_immutable
-class Song extends Equatable {
+class Song extends Equatable implements Content {
   int id;
 
   /// Album name.
@@ -47,15 +47,15 @@ class Song extends Equatable {
   List<Object> get props => [id];
 
   int get sourceId => getSourceId(id);
-  static getSourceId(int id) =>
-      id < 0 ? ContentControl.state.idMap[id.toString()] : id;
+  static getSourceId(int id) {
+    return id < 0 ? ContentControl.state.idMap[id.toString()] : id;
+  }
 
   /// Returns the album this song belongs to (if any).
-  Album getAlum() =>
-      albumId == null ? null : ContentControl.state.albums[albumId];
+  Album getAlbum() => albumId == null ? null : ContentControl.state.albums[albumId];
 
   /// Returns the album art for this (if any).
-  String get albumArt => getAlum()?.albumArt;
+  String get albumArt => getAlbum()?.albumArt;
 
   Song({
     @required this.id,

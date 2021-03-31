@@ -3,15 +3,13 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// Needed for scrollbar label computations
 const double kSongTileHeight = 64.0;
-const double _horizontalPadding = 10.0;
+const double kSongTileHorizontalPadding = 10.0;
 
 /// Describes what to draw in the tile leading.
 enum SongTileVariant {
@@ -86,6 +84,7 @@ class SongTile extends StatefulWidget {
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
+    this.horizontalPadding = kSongTileHorizontalPadding,
   })  : assert(song != null),
         selected = null,
         index = null,
@@ -102,6 +101,7 @@ class SongTile extends StatefulWidget {
     this.selected = false,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
+    this.horizontalPadding = kSongTileHorizontalPadding,
   })  : assert(song != null),
         assert(index != null),
         assert(selectionController != null),
@@ -113,14 +113,15 @@ class SongTile extends StatefulWidget {
   /// Whether this song is current.
   /// Enables animated indicator at the end of the tile.
   final bool current;
-  final Function onTap;
+  final VoidCallback onTap;
   final SongClickBehavior clickBehavior;
   final SongTileVariant variant;
+  final double horizontalPadding;
 
   /// Basically makes tiles aware whether they are selected in some global set.
   /// This will be used on first build, after this tile will have internal selection state.
   final bool selected;
-  final NFSelectionController<SongSelectionEntry> selectionController;
+  final SelectionController<SongSelectionEntry> selectionController;
 
   @override
   _SongTileState createState() => _SongTileState();
@@ -196,7 +197,9 @@ class _SongTileState extends State<SongTile>
     if (selectable && widget.selectionController.inSelection) {
       _toggleSelection();
     } else {
-      if (widget.onTap != null) widget.onTap();
+      if (widget.onTap != null) {
+        widget.onTap();
+      }
       await MusicPlayer.handleSongClick(
         context,
         widget.song,
@@ -206,13 +209,14 @@ class _SongTileState extends State<SongTile>
   }
 
   void _toggleSelection() {
-    if (!selectable) return;
+    if (!selectable)
+      return;
     setState(() {
       _selected = !_selected;
     });
-    if (_selected) {
+    if (_selected)
       _select();
-    } else
+    else
       _unselect();
   }
 
@@ -228,8 +232,9 @@ class _SongTileState extends State<SongTile>
 
   Widget _buildTile(
     Widget albumArt, [
-    double rightPadding = _horizontalPadding,
+    double rightPadding,
   ]) {
+    rightPadding ??= widget.horizontalPadding;
     final theme = ThemeControl.theme;
     Widget title = Text(
       widget.song.title,
@@ -253,7 +258,7 @@ class _SongTileState extends State<SongTile>
       dense: true,
       isThreeLine: false,
       contentPadding: EdgeInsets.only(
-        left: _horizontalPadding,
+        left: widget.horizontalPadding,
         right: rightPadding,
       ),
       onTap: _handleTap,
@@ -275,27 +280,27 @@ class _SongTileState extends State<SongTile>
             number: widget.song.track,
             current: widget.current,
           );
-    if (!selectable) return _buildTile(albumArt);
+    if (!selectable)
+      return _buildTile(albumArt);
     return Stack(
       children: [
         AnimatedBuilder(
           animation: scaleAnimation,
           builder: (context, child) {
-            var rightPadding = _horizontalPadding;
-            if (!showAlbumArt)
-              rightPadding +=
-                  (scaleAnimation.status == AnimationStatus.forward ||
-                          scaleAnimation.status == AnimationStatus.completed
-                      ? 40.0
-                      : scaleAnimation.value > 0.2
-                          ? 40.0
-                          : 0.0);
+            var rightPadding = widget.horizontalPadding;
+            if (!showAlbumArt) {
+              if (scaleAnimation.status == AnimationStatus.forward ||
+                  scaleAnimation.status == AnimationStatus.completed ||
+                  scaleAnimation.value > 0.2) {
+                rightPadding += 40.0;
+              }
+            }
             return _buildTile(albumArt, rightPadding);
           },
         ),
         Positioned(
-          left: showAlbumArt ? 44.0 : null,
-          right: showAlbumArt ? null : 20.0,
+          left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
+          right: showAlbumArt ? null : 10.0 + widget.horizontalPadding,
           bottom: showAlbumArt ? 2.0 : 20.0,
           child: SelectionCheckmark(animation: scaleAnimation),
         ),

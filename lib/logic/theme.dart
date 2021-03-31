@@ -29,8 +29,7 @@ abstract class ThemeControl {
   static Brightness get brightness => _brightness;
 
   /// Returns a brightness, opposite to the main brightness
-  static Brightness get contrastBrightness =>
-      isDark ? Brightness.light : Brightness.dark;
+  static Brightness get contrastBrightness => isDark ? Brightness.light : Brightness.dark;
 
   /// True if [brightness] is light
   static bool get isLight => _brightness == Brightness.light;
@@ -72,7 +71,7 @@ abstract class ThemeControl {
   /// This is needed to show start up application animation.
   static Future<void> initSystemUi() async {
     // Show purple ui firstly.
-    NFSystemUiControl.setSystemUiOverlay(SystemUiOverlayStyle(
+    SystemUiStyleController.setSystemUiOverlay(SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.deepPurpleAccent,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
@@ -81,14 +80,12 @@ abstract class ThemeControl {
       statusBarIconBrightness: Brightness.light,
     ));
     await Future.delayed(const Duration(milliseconds: 500));
-    if (NFSystemUiControl.lastUi.systemNavigationBarColor != Colors.black) {
+    if (SystemUiStyleController.lastUi.systemNavigationBarColor != Colors.black) {
       final ui = Constants.UiTheme.grey.auto;
-      await NFSystemUiControl.animateSystemUiOverlay(
+      await SystemUiStyleController.animateSystemUiOverlay(
         to: ui,
         curve: Curves.easeOut,
-        settings: NFAnimationControllerSettings(
-          duration: const Duration(milliseconds: 550),
-        ),
+        duration: const Duration(milliseconds: 550),
       );
     }
     _ready = true;
@@ -98,16 +95,19 @@ abstract class ThemeControl {
   ///
   /// By default performs an animation of system ui to [Constants.UiTheme.topGrey].
   /// Optional [systemUiOverlayStyle] allows change that behavior.
-  static Future<void> switchTheme(
-      {NFSystemUiControl systemUiOverlayStyle}) async {
+  static Future<void> switchTheme({ SystemUiStyleController systemUiOverlayStyle }) async {
     _rebuildOperation?.cancel();
-    _brightness =
-        _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
+    _brightness = _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Settings.lightThemeBool.set(_brightness == Brightness.light);
-    NFWidgets.defaultSystemUiStyle = Constants.UiTheme.black.auto;
-    NFWidgets.defaultModalSystemUiStyle = Constants.UiTheme.modal.auto;
-    NFWidgets.defaultBottomSheetSystemUiStyle =
-        Constants.UiTheme.bottomSheet.auto;
+    App.nfThemeData =  App.nfThemeData.copyWith(
+      systemUiStyle: Constants.UiTheme.black.auto,
+      modalSystemUiStyle: Constants.UiTheme.modal.auto,
+      bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+    );
+
+    // Update the ui in home transition settings.
+    AppRouter.instance.updateHomeTransitionSettings();
+
     emitThemeChange(true);
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(const Duration(milliseconds: 300)));
@@ -115,12 +115,10 @@ abstract class ThemeControl {
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
       emitThemeChange(false);
     }());
-    await NFSystemUiControl.animateSystemUiOverlay(
+    await SystemUiStyleController.animateSystemUiOverlay(
       to: systemUiOverlayStyle ?? Constants.UiTheme.black.auto,
       curve: Curves.easeIn,
-      settings: NFAnimationControllerSettings(
-        duration: const Duration(milliseconds: 160),
-      ),
+      duration: const Duration(milliseconds: 160),
     );
   }
 
@@ -157,8 +155,7 @@ abstract class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme:
-            Constants.AppTheme.app.light.textSelectionTheme.copyWith(
+        textSelectionTheme: Constants.AppTheme.app.light.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
@@ -179,8 +176,7 @@ abstract class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme:
-            Constants.AppTheme.app.dark.textSelectionTheme.copyWith(
+        textSelectionTheme: Constants.AppTheme.app.dark.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
@@ -189,10 +185,8 @@ abstract class ThemeControl {
     );
   }
 
-  static final StreamController<bool> _controller =
-      StreamController<bool>.broadcast();
-  static const Duration primaryColorChangeDuration =
-      Duration(milliseconds: 240);
+  static final StreamController<bool> _controller = StreamController<bool>.broadcast();
+  static const Duration primaryColorChangeDuration = Duration(milliseconds: 240);
   static CancelableOperation _rebuildOperation;
 
   /// Gets stream of changes on theme.

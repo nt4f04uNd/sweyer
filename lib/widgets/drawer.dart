@@ -3,8 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -17,15 +15,15 @@ import 'package:sweyer/constants.dart' as Constants;
 class DrawerWidget extends StatefulWidget {
   const DrawerWidget({
     Key key,
-    this.swipeGesture = trueFunc,
-    this.canBeOpened = trueFunc,
+    this.swipeGesture = trueCallback,
+    this.canBeOpened = trueCallback,
   }) : super(key: key);
 
   /// Function that checks if drawer swipe gesture is enabled.
-  final BoolFunction swipeGesture;
+  final BoolCallback swipeGesture;
 
   /// Function that checks if drawer can be opened.
-  final BoolFunction canBeOpened;
+  final BoolCallback canBeOpened;
 
   @override
   _DrawerWidgetState createState() => _DrawerWidgetState();
@@ -55,11 +53,11 @@ class _DrawerWidgetState extends State<DrawerWidget>
     // Change system UI on expanding/collapsing the drawer.
     if (_onTop && widget.canBeOpened()) {
       if (status == AnimationStatus.dismissed) {
-        NFSystemUiControl.animateSystemUiOverlay(
+        SystemUiStyleController.animateSystemUiOverlay(
           to: Constants.UiTheme.grey.auto,
         );
       } else {
-        NFSystemUiControl.animateSystemUiOverlay(
+        SystemUiStyleController.animateSystemUiOverlay(
           to: Constants.UiTheme.drawerScreen.auto,
         );
       }
@@ -85,9 +83,9 @@ class _DrawerWidgetState extends State<DrawerWidget>
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) => Slidable(
-          startOffset: Offset(-304.0 / screenWidth, 0.0),
-          endOffset: Offset.zero,
-          direction: SlideDirection.startToEnd,
+          direction: SlideDirection.right,
+          start: -304.0 / screenWidth,
+          end: 0.0,
           shouldGiveUpGesture: (event) {
             return controller.value == 0.0 &&
                 // when on another drag on the right to next tab
@@ -98,23 +96,18 @@ class _DrawerWidgetState extends State<DrawerWidget>
                     !widget.canBeOpened());
           },
           onBarrierTap: controller.close,
-          barrier: Container(
-            color: Colors.black26,
-          ),
+          barrier: Container(color: Colors.black26),
           controller: controller,
-          barrierIgnoringStrategy: const IgnoringStrategy(
-            dismissed: true,
-          ),
-          hitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
-            dismissed: HitTestBehavior.translucent,
-          ),
-          draggedHitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
-            dismissed: HitTestBehavior.translucent,
-          ),
-          child: Container(
-            width: 304.0,
-            alignment: Alignment.centerLeft,
-            child: _DrawerWidgetContent(controller: controller),
+          barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
+          hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
+          child:  Container(
+            height: screenHeight,
+            width: screenWidth,
+            child: Container(
+              width: 304.0,
+              alignment: Alignment.centerLeft,
+              child: _DrawerWidgetContent(controller: controller),
+            ),
           ),
         ),
       ),
@@ -161,15 +154,14 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
     }
   }
 
-  Future<void> _handleClickSettings() {
+  void _handleClickSettings() {
     widget.controller.close();
-    return App.navigatorKey.currentState
-        .pushNamed(Constants.Routes.settings.value);
+    AppRouter.instance.goto(AppRoutes.settings);
   }
 
-  Future<void> _handleClickDebug() async {
+  void _handleClickDebug() {
     widget.controller.close();
-    return App.navigatorKey.currentState.pushNamed(Constants.Routes.dev.value);
+    AppRouter.instance.goto(AppRoutes.dev);
   }
 
   @override
@@ -236,8 +228,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
 class MenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
-  final Function onTap;
-  final Function onLongPress;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final double iconSize;
   final double fontSize;
   const MenuItem(

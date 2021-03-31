@@ -10,21 +10,7 @@ import 'package:sweyer/sweyer.dart';
 
 const Duration kSelectionDuration = Duration(milliseconds: 350);
 
-/// Picks some value based on the provided sort type [T].
-V selectionEntryPick<T extends SelectionEntry, V>(
-    {@required V song, @required V album}) {
-  switch (T) {
-    case SongSelectionEntry:
-      return song;
-    case AlbumSelectionEntry:
-      return album;
-    default:
-      assert(false);
-      return null;
-  }
-}
-
-abstract class SelectionEntry<T> extends Equatable {
+abstract class SelectionEntry<T extends Content> extends Equatable {
   SelectionEntry({this.index, this.data});
   final int index;
   final T data;
@@ -38,23 +24,22 @@ class SongSelectionEntry extends SelectionEntry<Song> {
 }
 
 class AlbumSelectionEntry extends SelectionEntry<Album> {
-  AlbumSelectionEntry({int index, Album album})
-      : super(index: index, data: album);
+  AlbumSelectionEntry({int index, Album album}) : super(index: index, data: album);
   Album get album => data;
 }
 
 /// Mixin to easily create a song selection controller.
 mixin SongSelectionMixin<T extends StatefulWidget> on State<T> {
-  NFSelectionController<SongSelectionEntry> songSelectionController;
+  SelectionController<SongSelectionEntry> songSelectionController;
   @override
   void initState() {
     super.initState();
     assert(
       this is SingleTickerProviderStateMixin<T> ||
-          this is TickerProviderStateMixin<T>,
+      this is TickerProviderStateMixin<T>,
       'SongSelectionMixin can only be used on ticker providers',
     );
-    songSelectionController = NFSelectionController(
+    songSelectionController = SelectionController(
       animationController: AnimationController(
         vsync: this as dynamic,
         duration: kSelectionDuration,
@@ -76,16 +61,16 @@ mixin SongSelectionMixin<T extends StatefulWidget> on State<T> {
 
 /// Mixin to easily create an album selection controller.
 mixin AlbumSelectionMixin<T extends StatefulWidget> on State<T> {
-  NFSelectionController<AlbumSelectionEntry> albumSelectionController;
+  SelectionController<AlbumSelectionEntry> albumSelectionController;
   @override
   void initState() {
     super.initState();
     assert(
       this is SingleTickerProviderStateMixin<T> ||
-          this is TickerProviderStateMixin<T>,
+      this is TickerProviderStateMixin<T>,
       'AlbumSelectionMixin can only be used on ticker providers',
     );
-    albumSelectionController = NFSelectionController(
+    albumSelectionController = SelectionController(
       animationController: AnimationController(
         vsync: this as dynamic,
         duration: kSelectionDuration,

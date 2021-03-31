@@ -1,3 +1,8 @@
+## [1.0.2] - TODO: tbd
+
+- enhanced the searched route
+- fixed a few bugs
+
 ## [1.0.1] - february 08, 2021
 
 - localization (ru, en)

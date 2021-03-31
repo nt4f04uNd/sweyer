@@ -6,42 +6,28 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/logic/logic.dart';
 
 /// Inteface for other sort feature enums.
-abstract class SortFeature {
-  const SortFeature._(this._value);
-  final String _value;
-  String get value => _value;
-  String toString() => '$runtimeType.$value';
+abstract class SortFeature<T extends Content> extends Enum<String> {
+  const SortFeature._(String value) : super(value);
   bool get defaultOrderAscending;
-
-  static List<SortFeature> getValues<T extends Sort>() {
-    switch (T) {
-      case SongSort:
-        return SongSortFeature.values;
-      case AlbumSort:
-        return AlbumSortFeature.values;
-      default:
-        assert(false);
-        return null;
-    }
-  }
 }
 
 /// Features to sort by a [Song] list.
 ///
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [SongSortFeature] the new default sort order is applied.
-class SongSortFeature extends SortFeature {
+class SongSortFeature extends SortFeature<Song> {
   const SongSortFeature._(String value) : super._(value);
+
+  @override
+  bool get defaultOrderAscending => this != dateModified && this != dateAdded;
 
   static List<SongSortFeature> get values {
     return [dateModified, dateAdded, title, artist, album];
   }
-
-  @override
-  bool get defaultOrderAscending => this != dateModified && this != dateAdded;
 
   /// Sort by the [Song.dateModified].
   /// Default sort order is DESC.
@@ -68,7 +54,7 @@ class SongSortFeature extends SortFeature {
 ///
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [AlbumSortFeature] the new default sort order is applied.
-class AlbumSortFeature extends SortFeature {
+class AlbumSortFeature extends SortFeature<Album> {
   const AlbumSortFeature._(String value) : super._(value);
 
   bool get defaultOrderAscending => this != year;
@@ -94,20 +80,7 @@ class AlbumSortFeature extends SortFeature {
   static const numberOfSongs = const AlbumSortFeature._('numberOfSongs');
 }
 
-/// Picks some value based on the provided sort type [T].
-V sortPick<T extends Sort, V>({@required V song, @required V album}) {
-  switch (T) {
-    case SongSort:
-      return song;
-    case AlbumSort:
-      return album;
-    default:
-      assert(false);
-      return null;
-  }
-}
-
-abstract class Sort<T> extends Equatable {
+abstract class Sort<T extends Content> extends Equatable {
   const Sort({
     @required this.feature,
     @required this.orderAscending,
@@ -116,7 +89,7 @@ abstract class Sort<T> extends Equatable {
   Sort.defaultOrder(this.feature)
       : orderAscending = feature.defaultOrderAscending;
 
-  final SortFeature feature;
+  final SortFeature<T> feature;
   final bool orderAscending;
 
   @override
@@ -126,14 +99,19 @@ abstract class Sort<T> extends Equatable {
   Sort<T> get withDefaultOrder;
 
   Comparator<T> get comparator;
+
+  Map<String, dynamic> toJson() => {
+      'feature': feature.value,
+      'orderAscending': orderAscending,
+    };
 }
 
 class SongSort extends Sort<Song> {
   const SongSort({
-    @required this.feature,
+    SongSortFeature feature,
     bool orderAscending = true,
   }) : super(feature: feature, orderAscending: orderAscending);
-  SongSort.defaultOrder(this.feature) : super.defaultOrder(feature);
+  SongSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory SongSort.fromJson(Map<String, dynamic> json) => SongSort(
         feature: EnumToString.fromString(
@@ -142,13 +120,6 @@ class SongSort extends Sort<Song> {
         ),
         orderAscending: json['orderAscending'],
       );
-  Map<String, dynamic> toJson() => {
-        'feature': feature.value,
-        'orderAscending': orderAscending,
-      };
-
-  @override
-  final SongSortFeature feature;
 
   SongSort copyWith({
     covariant SongSortFeature feature,
@@ -215,8 +186,7 @@ class SongSort extends Sort<Song> {
         };
         break;
       default:
-        assert(false);
-        return null;
+        throw UnimplementedError();
     }
     if (!orderAscending) {
       return (a, b) => c(b, a);
@@ -227,10 +197,10 @@ class SongSort extends Sort<Song> {
 
 class AlbumSort extends Sort<Album> {
   const AlbumSort({
-    @required this.feature,
+    AlbumSortFeature feature,
     bool orderAscending = true,
   }) : super(feature: feature, orderAscending: orderAscending);
-  AlbumSort.defaultOrder(this.feature) : super.defaultOrder(feature);
+  AlbumSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory AlbumSort.fromJson(Map<String, dynamic> json) => AlbumSort(
         feature: EnumToString.fromString(
@@ -243,9 +213,6 @@ class AlbumSort extends Sort<Album> {
         'feature': feature.value,
         'orderAscending': orderAscending,
       };
-
-  @override
-  final AlbumSortFeature feature;
 
   AlbumSort copyWith({
     covariant AlbumSortFeature feature,
@@ -304,8 +271,7 @@ class AlbumSort extends Sort<Album> {
         };
         break;
       default:
-        assert(false);
-        return null;
+        throw UnimplementedError();
     }
     if (!orderAscending) {
       return (a, b) => c(b, a);

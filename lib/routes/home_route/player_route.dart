@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:animations/animations.dart';
 import 'package:flutter/physics.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -15,8 +14,7 @@ import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final SpringDescription playerRouteSpringDescription =
-    SpringDescription.withDampingRatio(
+final SpringDescription playerRouteSpringDescription = SpringDescription.withDampingRatio(
   mass: 0.01,
   stiffness: 30.0,
   ratio: 2.0,
@@ -32,37 +30,28 @@ class PlayerRoute extends StatefulWidget {
 class _PlayerRouteState extends State<PlayerRoute> {
   final GlobalKey<_QueueTabState> _queueTabKey = GlobalKey<_QueueTabState>();
   List<Widget> _tabs;
-
-  /// Active tab index.
-  int index = 0;
-  int prevIndex = 0;
-
-  /// Whether can transition on swipe.
-  bool canTransition = true;
-  double dragDelta = 0.0;
-
-  void _changeTab(int _index) {
-    prevIndex = index;
-    index = _index;
-    if (index == 0) {
-      _queueTabKey.currentState.opened = false;
-    } else if (index == 1) {
-      _queueTabKey.currentState.opened = true;
-    }
-    setState(() {/* update ui to show new tab */});
-  }
-
   SlidableController controller;
+  SharedAxisTabController tabController;
+
+  Animation _queueTabAnimation;
+  bool dontJump = false;
 
   @override
   void initState() {
     super.initState();
     _tabs = [
       _MainTab(),
-      _QueueTab(
-        key: _queueTabKey,
-      ),
+      _QueueTab(key: _queueTabKey),
     ];
+    tabController = SharedAxisTabController(length: 2);
+    tabController.addListener(() {
+      /// Don't jump when user swipes to right and the previous animation
+      /// didn't reach the main tab. If I don't do this, the unwanted jump will occur
+      /// and user will see it while on the queue tab.
+      if (!_queueTabAnimation.isDismissed) {
+        dontJump = true;
+      }
+    });
     controller = getPlayerRouteControllerProvider(context).controller;
     controller.addListener(_handleControllerChange);
     controller.addStatusListener(_handleControllerStatusChange);
@@ -70,6 +59,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
 
   @override
   void dispose() {
+    tabController.dispose();
     controller.removeListener(_handleControllerChange);
     controller.removeStatusListener(_handleControllerStatusChange);
     super.dispose();
@@ -86,23 +76,18 @@ class _PlayerRouteState extends State<PlayerRoute> {
     );
 
     // Change system UI on expanding/collapsing the player route.
-    NFSystemUiControl.setSystemUiOverlay(
-      NFSystemUiControl.lastUi.copyWith(
-        systemNavigationBarColor: systemNavigationBarColorTween.evaluate(
-          controller,
-        ),
+    SystemUiStyleController.setSystemUiOverlay(
+      SystemUiStyleController.lastUi.copyWith(
+        systemNavigationBarColor: systemNavigationBarColorTween.evaluate(controller),
       ),
     );
   }
 
   void _handleControllerStatusChange(AnimationStatus status) {
     if (status == AnimationStatus.reverse) {
-      _changeTab(0);
+      tabController.changeTab(0);
     }
   }
-
-  Animation _queueTabAnimation;
-  bool dontJump = false;
 
   void _handleQueueTabAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.dismissed) {
@@ -119,94 +104,42 @@ class _PlayerRouteState extends State<PlayerRoute> {
 
   @override
   Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final sign = textScaleFactor < 1 ? 1 : -1;
     final backgroundColor = ThemeControl.theme.colorScheme.background;
     return Slidable(
       controller: controller,
-      // startOffset:
-      //     Offset(0.92 + sign * 0.002 * math.pow(textScaleFactor, 8), 0.0),
-      startOffset: Offset(1.0 - kSongTileHeight / screenHeight, 0.0),
-      endOffset: const Offset(0.0, 0.0),
-      direction: SlideDirection.upFromBottom,
+      start: 1.0 - kSongTileHeight / screenHeight,
+      end: 0.0,
+      direction: SlideDirection.up,
       barrier: Container(
         color: ThemeControl.isDark ? Colors.black : Colors.black26,
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Container(
-          color: backgroundColor,
-          child: Stack(
-            children: <Widget>[
-              GestureDetector(
-                onHorizontalDragStart: (_) {
-                  canTransition = true;
-                },
-                onHorizontalDragUpdate: (details) {
-                  if (canTransition) {
-                    dragDelta += details.delta.dx;
-                    if (dragDelta.abs() > 15.0) {
-                      if (dragDelta.sign > 0.0 && index - 1 >= 0) {
-                        _changeTab(index - 1);
-                        canTransition = false;
-                      } else if (dragDelta.sign < 0.0 && index + 1 < 2) {
-                        /// Don't jump when user swipes to right and the previous animation
-                        /// didn't reach the main tab. If I don't do this, the unwanted jump will occur
-                        /// and user will see it while on the queue tab.
-                        if (!_queueTabAnimation.isDismissed) {
-                          dontJump = true;
-                        }
-                        _changeTab(index + 1);
-                        canTransition = false;
-                      }
+        backgroundColor: backgroundColor,
+        body: Stack(
+          children: <Widget>[
+            SharedAxisTabView(
+              children: _tabs,
+              controller: tabController,
+              tabBuilder: (context, animation, secondayAnimation, child) {
+                if (child is _QueueTab) {
+                  if (animation != _queueTabAnimation) {
+                    if (_queueTabAnimation != null) {
+                      _queueTabAnimation.removeStatusListener(_handleQueueTabAnimationStatus);
                     }
-                  }
-                },
-                onHorizontalDragEnd: (_) {
-                  canTransition = false;
-                  dragDelta = 0.0;
-                },
-                child: IndexedTransitionSwitcher(
-                  index: index,
-                  duration: const Duration(milliseconds: 200),
-                  reverse: prevIndex > index,
-                  children: _tabs,
-                  transitionBuilder: (
-                    Widget child,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    if (child is _QueueTab) {
-                      if (animation != _queueTabAnimation) {
-                        _queueTabAnimation = animation;
-                        animation.addStatusListener(
-                          _handleQueueTabAnimationStatus,
-                        );
-                      }
-                    }
-                    return SharedAxisTransition(
-                      transitionType: SharedAxisTransitionType.horizontal,
-                      animation: animation,
-                      secondaryAnimation: secondaryAnimation,
-                      fillColor: Colors.transparent,
-                      child: AnimatedBuilder(
-                        animation: animation,
-                        child: child,
-                        builder: (context, child) => IgnorePointer(
-                          ignoring: child is _QueueTab &&
-                              animation.status == AnimationStatus.reverse,
-                          child: child,
-                        ),
-                      ),
+                    _queueTabAnimation = animation;
+                    animation.addStatusListener(
+                      _handleQueueTabAnimationStatus,
                     );
-                  },
-                ),
-              ),
-              TrackPanel(
-                onTap: controller.open,
-              ),
-            ],
-          ),
+                  }
+                }
+                return child;
+              },
+            ),
+            TrackPanel(
+              onTap: controller.open,
+            ),
+          ],
         ),
       ),
     );
@@ -221,16 +154,13 @@ class _QueueTab extends StatefulWidget {
 }
 
 class _QueueTabState extends State<_QueueTab>
-    with
-        PlayerRouteControllerMixin,
-        SingleTickerProviderStateMixin,
-        SongSelectionMixin {
+    with PlayerRouteControllerMixin,
+         SingleTickerProviderStateMixin,
+         SongSelectionMixin {
   /// Default scroll alignment.
   static const double scrollAlignment = 0.00;
-
   /// Scroll alignment for jumping to the end of the list.
   static const double endScrollAlignment = 0.9;
-
   static const double appBarHeight = 81.0;
 
   /// How much tracks to list end to apply [endScrollAlignment]
@@ -250,33 +180,34 @@ class _QueueTabState extends State<_QueueTab>
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<void> _songListChangeSubscription;
 
+  QueueType get type => ContentControl.state.queues.type;
   bool get isAlbum => ContentControl.state.queues.persistent is Album;
   Album get album {
     assert(isAlbum);
     return ContentControl.state.queues.persistent as Album;
   }
 
-  QueueType get type => ContentControl.state.queues.type;
 
   @override
   void initState() {
     super.initState();
     songsPerScreen = (screenHeight / kSongTileHeight).ceil() - 2;
     edgeOffset = (screenHeight / kSongTileHeight / 2).ceil();
-    _songListChangeSubscription =
-        ContentControl.state.onSongListChange.listen((event) async {
+    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
       if (ContentControl.state.queues.all.isNotEmpty) {
         // Reset value when queue changes
         prevSongIndex = ContentControl.state.currentSongIndex;
-        // Jump when tracklist changes (e.g. shuffle happened)
-        jumpToSong();
         setState(() {/* update ui list as data list may have changed */});
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          // Jump when tracklist changes (e.g. shuffle happened)
+          jumpToSong();
+          // Post framing it because we need to be sure that list gets updated before we jump.
+        });
       }
     });
-    _songChangeSubscription =
-        ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
       setState(() {
-        /* mupdate current track indicator */
+        /* update current track indicator */
       });
       if (!opened) {
         // Scroll when track changes
@@ -301,12 +232,11 @@ class _QueueTabState extends State<_QueueTab>
   /// Scrolls to current song.
   ///
   /// If optional [index] is provided - scrolls to it.
-  Future<void> scrollToSong(
-      [int index, double alignment = scrollAlignment]) async {
+  Future<void> scrollToSong([ int index, double alignment = scrollAlignment ]) async {
     if (index == null) index = ContentControl.state.currentSongIndex;
     return itemScrollController.scrollTo(
       index: index,
-      duration: Constants.scrollDuration,
+      duration: const Duration(milliseconds: 800),
       curve: Curves.easeOutCubic,
       opacityAnimationWeights: const [20, 20, 60],
       alignment: alignment,
@@ -316,7 +246,7 @@ class _QueueTabState extends State<_QueueTab>
   /// Jumps to current song.
   ///
   /// If optional [index] is provided - jumps to it.
-  void jumpToSong([int index, double alignment = scrollAlignment]) async {
+  void jumpToSong([ int index, double alignment = scrollAlignment ]) async {
     if (index == null) index = ContentControl.state.currentSongIndex;
     itemScrollController.jumpTo(
       index: index,
@@ -368,51 +298,27 @@ class _QueueTabState extends State<_QueueTab>
         final query = ContentControl.state.queues.searchQuery;
         assert(query != null);
         if (query != null) {
-          SearchPageRoute searchRoute;
-          App.homeNavigatorKey.currentState.popUntil((route) {
-            final name = route?.settings?.name;
-            if (name == Constants.HomeRoutes.search.value) {
-              searchRoute = route;
-            }
-            return name == Constants.HomeRoutes.tabs.value ||
-                name == Constants.HomeRoutes.search.value;
-          });
-          if (searchRoute != null) {
-            searchRoute.delegate.query = query;
-            searchRoute.delegate.showResults(context);
-          } else {
-            ShowFunctions.showSongsSearch(
-              App.homeNavigatorKey.currentContext,
-              // This query won't be saved into history.
-              query: query,
-              openKeyboard: false,
-            );
-          }
+          ShowFunctions.instance.showSongsSearch(
+            query: query,
+            openKeyboard: false
+          );
           playerRouteController.close();
           SearchHistory.instance.save(query);
         }
         return;
       case QueueType.persistent:
         if (isAlbum) {
-          App.homeNavigatorKey.currentState.popUntil((route) {
-            final name = route?.settings?.name;
-            return name == Constants.HomeRoutes.tabs.value ||
-                name == Constants.HomeRoutes.search.value;
-          });
-          App.homeNavigatorKey.currentState.pushNamed(
-            Constants.HomeRoutes.album.value,
-            arguments: album,
-          );
+          HomeRouter.instance.goto(HomeRoutes.factory.album(album));
           playerRouteController.close();
         } else {
-          assert(false);
+          throw InvalidCodePathError();
         }
         return;
       case QueueType.all:
       case QueueType.arbitrary:
         return;
       default:
-        assert(false);
+        throw InvalidCodePathError();
     }
   }
 
@@ -447,14 +353,14 @@ class _QueueTabState extends State<_QueueTab>
             ),
           ));
         } else {
-          assert(false);
+          throw InvalidCodePathError();
         }
         break;
       case QueueType.arbitrary:
         text.add(TextSpan(text: l10n.arbitraryQueue));
         break;
       default:
-        assert(false);
+        throw InvalidCodePathError();
     }
     return text;
   }
@@ -540,8 +446,7 @@ class _QueueTabState extends State<_QueueTab>
                         children: [
                           Text(
                             l10n.upNext,
-                            style:
-                                ThemeControl.theme.textTheme.headline6.copyWith(
+                            style: ThemeControl.theme.textTheme.headline6.copyWith(
                               fontSize: 24,
                               height: 1.2,
                             ),
@@ -566,17 +471,12 @@ class _QueueTabState extends State<_QueueTab>
                       ),
                       Row(
                         children: [
-                          Flexible(
-                            child: _buildTitleText(
-                              _getQueueType(l10n),
-                            ),
-                          ),
+                          Flexible(child: _buildTitleText(_getQueueType(l10n))),
                           if (isAlbum || type == QueueType.searched)
                             Icon(
                               Icons.chevron_right_rounded,
                               size: 18.0,
-                              color:
-                                  ThemeControl.theme.textTheme.subtitle2.color,
+                              color: ThemeControl.theme.textTheme.subtitle2.color,
                             ),
                         ],
                       ),
@@ -589,17 +489,38 @@ class _QueueTabState extends State<_QueueTab>
         ),
       ),
     );
+    // TODO: THIS for the queue SongListView
+    // return SongTile.selectable(
+    //   song: songs[index],
+    //   index: index,
+    //   selectionController: widget.selectionController,
+    //   variant: ContentControl.state.queues.persistent is Album
+    //       ? SongTileVariant.number
+    //       : SongTileVariant.albumArt,
+    //   selected: widget.selectionController.data.contains(
+    //     SongSelectionEntry(index: index),
+    //   ),
+    //   current: index == currentSongIndex,
+    //   clickBehavior: SongClickBehavior.playPause,
+    // );
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Padding(
             padding: EdgeInsets.only(top: appBarHeightWithPadding),
-            child: PlayerRouteQueue(
-              selectionController: songSelectionController,
+            child: SongListView(
+              scrollbar: ScrollbarType.notDraggable,
+              padding: const EdgeInsets.only(top: 4.0),
               itemScrollController: itemScrollController,
-              initialAlignment: initialAlignment,
+              songs: ContentControl.state.queues.current.songs,
               initialScrollIndex: initialScrollIndex,
+              initialAlignment: initialAlignment,
+              songTileVariant: ContentControl.state.queues.persistent is Album
+                ? SongTileVariant.number
+                : SongTileVariant.albumArt,
+              songClickBehavior: SongClickBehavior.playPause,
+              currentTest: (index) => index == currentSongIndex,
             ),
           ),
           Positioned(
@@ -689,8 +610,7 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
         actions: <Widget>[
           ValueListenableBuilder(
             valueListenable: ContentControl.state.devMode,
-            builder: (context, value, child) =>
-                value ? child : const SizedBox.shrink(),
+            builder: (context, value, child) => value ? child : const SizedBox.shrink(),
             child: FadeTransition(
               opacity: fadeAnimation,
               child: const _InfoButton(),
@@ -715,16 +635,14 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      child: _Seekbar(),
-                    ),
+                    child: const _Seekbar(),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(
                       bottom: 40.0,
                       top: 10.0,
                     ),
-                    child: _PlaybackButtons(),
+                    child: const _PlaybackButtons(),
                   ),
                 ],
               ),
@@ -746,7 +664,7 @@ class _PlaybackButtons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         const ShuffleButton(),
-        SizedBox(width: buttonMargin),
+        const SizedBox(width: buttonMargin),
         Container(
           padding: const EdgeInsets.only(right: buttonMargin),
           decoration: BoxDecoration(
@@ -784,7 +702,7 @@ class _PlaybackButtons extends StatelessWidget {
             onPressed: MusicPlayer.playNext,
           ),
         ),
-        SizedBox(width: buttonMargin),
+        const SizedBox(width: buttonMargin),
         const LoopButton(),
       ],
     );
@@ -803,10 +721,7 @@ class _InfoButton extends StatelessWidget {
         icon: Icon(Icons.info_outline_rounded),
         size: 40.0,
         onPressed: () {
-          var songInfo = ContentControl.state.currentSong
-              ?.toJson()
-              .toString()
-              .replaceAll(r', ', ',\n');
+          String songInfo = ContentControl.state.currentSong?.toJson().toString().replaceAll(r', ', ',\n');
           if (songInfo != null) {
             songInfo = songInfo.substring(1, songInfo.length - 1);
           }
@@ -908,7 +823,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
 }
 
 class _Seekbar extends StatefulWidget {
-  _Seekbar({Key key}) : super(key: key);
+  const _Seekbar({Key key}) : super(key: key);
 
   _SeekbarState createState() => _SeekbarState();
 }
@@ -966,8 +881,7 @@ class _SeekbarState extends State<_Seekbar> {
   }
 
   double _positionToValue(Duration position) {
-    return (position.inMilliseconds / math.max(_duration.inMilliseconds, 1.0))
-        .clamp(0.0, 1.0);
+    return (position.inMilliseconds / math.max(_duration.inMilliseconds, 1.0)).clamp(0.0, 1.0);
   }
 
   Future<void> _setInitialPosition() async {

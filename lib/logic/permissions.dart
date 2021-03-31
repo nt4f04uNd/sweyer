@@ -9,12 +9,10 @@ import 'package:permission_handler/permission_handler.dart';
 
 abstract class Permissions {
   /// Whether storage permission is granted
-  static PermissionStatus _permissionStorageStatus =
-      PermissionStatus.undetermined;
+  static PermissionStatus _permissionStorageStatus = PermissionStatus.undetermined;
 
   /// Returns true if permissions were granted
-  static bool get granted =>
-      _permissionStorageStatus == PermissionStatus.granted;
+  static bool get granted => _permissionStorageStatus == PermissionStatus.granted;
 
   /// Returns true if permissions were not granted
   static bool get notGranted => !granted;
@@ -28,15 +26,13 @@ abstract class Permissions {
     if (_permissionStorageStatus == PermissionStatus.granted) {
       await ContentControl.init();
     } else if (_permissionStorageStatus == PermissionStatus.permanentlyDenied) {
-      final l10n = getl10n(App.navigatorKey.currentContext);
+      final l10n = getl10n(AppRouter.instance.navigatorKey.currentContext);
       await ShowFunctions.instance.showToast(
         msg: l10n.allowAccessToExternalStorageManually,
       );
       if (!(await openAppSettings())) {
         await Fluttertoast.cancel();
-        await ShowFunctions.instance.showToast(
-          msg: l10n.openAppSettingsError,
-        );
+        await ShowFunctions.instance.showToast(msg: l10n.openAppSettingsError);
       }
     }
   }

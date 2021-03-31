@@ -14,8 +14,7 @@ class ShowFunctions extends NFShowFunctions {
   /// Empty constructor will allow enheritance.
   ShowFunctions();
   ShowFunctions._internal();
-  static final ShowFunctions _instance = ShowFunctions._internal();
-  static ShowFunctions get instance => _instance;
+  static final ShowFunctions instance = ShowFunctions._internal();
 
   /// Shows toast from [Fluttertoast] with already set [backgroundColor] to `Color.fromRGBO(18, 18, 18, 1)`
   Future<bool> showToast({
@@ -39,36 +38,40 @@ class ShowFunctions extends NFShowFunctions {
     );
   }
 
-  /// Function that calls [showCustomSearch] and opens [SongsSearchDelegate] to search songs
-  static Future<void> showSongsSearch(
-    BuildContext context, {
-    String query,
+  /// Opens songs search
+  void showSongsSearch({
+    String query = '',
     bool openKeyboard = true,
   }) async {
-    await showCustomSearch(
-      context: context,
-      delegate: SongsSearchDelegate(),
+    HomeRouter.instance.goto(HomeRoutes.factory.search(SearchArguments(
       query: query,
       openKeyboard: openKeyboard,
-    );
+    )));
   }
 
   /// Will show up a snack bar notification that something's went wrong
   ///
   /// From that snack bar will be possible to proceed to special alert to see the error details with the ability to copy them.
   /// [errorDetails] string to show in the alert
-  void showError({@required String errorDetails}) {
-    final context = App.navigatorKey.currentContext;
-    if (context == null) return;
+  void showError({ @required String errorDetails }) {
+    final context = AppRouter.instance.navigatorKey.currentContext;
+    assert(context != null);
     final l10n = getl10n(context);
-    final GlobalKey<NFSnackbarWrapperState> globalKey = GlobalKey();
-    NFSnackbarControl.showSnackbar(
-      NFSnackbarSettings(
+    final theme = Theme.of(context);
+    final GlobalKey<NFSnackbarEntryState> globalKey = GlobalKey();
+    NFSnackbarController.showSnackbar(
+      NFSnackbarEntry(
         globalKey: globalKey,
         child: NFSnackbar(
-          message: '😮 ' + l10n.errorMessage,
+          title: Text(
+            '😮 ' + l10n.errorMessage,
+            style: TextStyle(
+              fontSize: 15.0,
+              color: theme.colorScheme.onError,
+            ),
+          ),
           color: ThemeControl.theme.colorScheme.error,
-          action: NFButton(
+          trailing: NFButton(
             variant: NFButtonVariant.raised,
             text: l10n.details,
             color: Colors.white,

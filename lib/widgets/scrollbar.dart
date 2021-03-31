@@ -13,6 +13,18 @@ import 'package:flutter/foundation.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/sweyer.dart';
 
+/// Indicates what scrollbar to use with [ScrollablePositionedList].
+enum ScrollbarType {
+  /// Don't use any scorllbar.
+  none,
+
+  /// Use [NFScrollbar].
+  notDraggable,
+
+  /// Use some sort of [NFDraggableScrollbar].
+  draggable,
+}
+
 /// Default styled draggable scrollbar.
 class AppDraggableScrollbar extends StatelessWidget {
   AppDraggableScrollbar({
@@ -29,8 +41,7 @@ class AppDraggableScrollbar extends StatelessWidget {
     this.barAnimationDuration = kScrollbarFadeDuration,
     this.barDuration = kScrollbarTimeToFade,
     this.labelBuilder,
-    this.labelTransitionBuilder =
-        NFDraggableScrollbar.defaultLabelTransitionBuilder,
+    this.labelTransitionBuilder = NFDraggableScrollbar.defaultLabelTransitionBuilder,
     this.onDragStart,
     this.onDragUpdate,
     this.onDragEnd,
@@ -111,8 +122,7 @@ class JumpingDraggableScrollbar extends StatefulWidget {
     this.barAnimationDuration = kScrollbarFadeDuration,
     this.barDuration = kScrollbarTimeToFade,
     this.labelBuilder,
-    this.labelTransitionBuilder =
-        NFDraggableScrollbar.defaultLabelTransitionBuilder,
+    this.labelTransitionBuilder = NFDraggableScrollbar.defaultLabelTransitionBuilder,
     this.onDragStart,
     this.onDragUpdate,
     this.onDragEnd,
@@ -144,8 +154,7 @@ class JumpingDraggableScrollbar extends StatefulWidget {
     this.barAnimationDuration = kScrollbarFadeDuration,
     this.barDuration = kScrollbarTimeToFade,
     this.labelBuilder,
-    this.labelTransitionBuilder =
-        NFDraggableScrollbar.defaultLabelTransitionBuilder,
+    this.labelTransitionBuilder = NFDraggableScrollbar.defaultLabelTransitionBuilder,
     this.onDragStart,
     this.onDragUpdate,
     this.onDragEnd,
@@ -189,8 +198,7 @@ class JumpingDraggableScrollbar extends StatefulWidget {
   final ContentType contentType;
 
   @override
-  _JumpingDraggableScrollbarState createState() =>
-      _JumpingDraggableScrollbarState();
+  _JumpingDraggableScrollbarState createState() => _JumpingDraggableScrollbarState();
 }
 
 class _JumpingDraggableScrollbarState extends State<JumpingDraggableScrollbar> {
@@ -205,24 +213,16 @@ class _JumpingDraggableScrollbarState extends State<JumpingDraggableScrollbar> {
   }
 
   LabelBuilder get labelBuilder {
-    if (widget.labelBuilder == null) return null;
-    switch (widget.contentType) {
-      case ContentType.song:
-        if (ContentControl.state.sorts[SongSort].feature !=
-            SongSortFeature.title) {
-          return null;
-        }
-        break;
-      case ContentType.album:
-        if (ContentControl.state.sorts[AlbumSort].feature !=
-            AlbumSortFeature.title) {
-          return null;
-        }
-        break;
-      default:
-        assert(false);
-        return null;
-    }
+    if (widget.labelBuilder == null)
+      return null;
+    final SortFeature feature = ContentControl.state.sorts.getValue(widget.contentType).feature;
+    final bool showLabel = contentPick<Content, bool>(
+      contentType: widget.contentType,
+      song: feature == SongSortFeature.title,
+      album: feature == AlbumSortFeature.title,
+    );
+    if (!showLabel)
+      return null;
     return (context, progress, barPadHeight) {
       return widget.labelBuilder(
         context,

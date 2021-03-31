@@ -6,11 +6,11 @@
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// Needed for scrollbar computations.
 const double kAlbumTileHeight = kAlbumTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
+const double _horizontalPadding = 16.0;
 
 /// todo: [Selectable] interface
 class AlbumTile extends StatefulWidget {
@@ -18,7 +18,11 @@ class AlbumTile extends StatefulWidget {
     Key key,
     @required this.album,
     this.current = false,
+    this.onTap,
+    this.small = false,
+    double horizontalPadding,
   })  : assert(album != null),
+        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
         index = null,
         selected = null,
         selectionController = null,
@@ -30,10 +34,14 @@ class AlbumTile extends StatefulWidget {
     @required this.index,
     @required this.selectionController,
     this.current = false,
+    this.onTap,
+    this.small = false,
+    double horizontalPadding,
     this.selected = false,
   })  : assert(album != null),
         assert(index != null),
         assert(selectionController != null),
+        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
         super(key: key);
 
   final Album album;
@@ -42,15 +50,20 @@ class AlbumTile extends StatefulWidget {
   /// Whether this album is currently playing.
   /// Enables animated indicator at the end of the tile.
   final bool current;
+  final VoidCallback onTap;
+
+  /// Creates a small variant of the tile with the sizes of [SelectableTile].
+  final bool small;
+  final double horizontalPadding;
+
   final bool selected;
-  final NFSelectionController<AlbumSelectionEntry> selectionController;
+  final SelectionController<AlbumSelectionEntry> selectionController;
 
   @override
   _AlbumTileState createState() => _AlbumTileState();
 }
 
-class _AlbumTileState extends State<AlbumTile>
-    with SingleTickerProviderStateMixin {
+class _AlbumTileState extends State<AlbumTile> with SingleTickerProviderStateMixin {
   bool _selected;
   AnimationController controller;
   Animation scaleAnimation;
@@ -117,21 +130,22 @@ class _AlbumTileState extends State<AlbumTile>
     if (selectable && widget.selectionController.inSelection) {
       _toggleSelection();
     } else {
-      Navigator.of(context).pushNamed(
-        Constants.HomeRoutes.album.value,
-        arguments: widget.album,
-      );
+      if (widget.onTap != null) {
+        widget.onTap();
+      }
+      HomeRouter.instance.goto(HomeRoutes.factory.album(widget.album));
     }
   }
 
   void _toggleSelection() {
-    if (!selectable) return;
+    if (!selectable)
+      return;
     setState(() {
       _selected = !_selected;
     });
-    if (_selected) {
+    if (_selected)
       _select();
-    } else
+    else
       _unselect();
   }
 
@@ -148,11 +162,11 @@ class _AlbumTileState extends State<AlbumTile>
   Widget _buildTile() {
     return InkWell(
       onTap: _handleTap,
-      onLongPress: _toggleSelection,
+      onLongPress: selectable ? _toggleSelection : null,
       splashFactory: NFListTileInkRipple.splashFactory,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
+        padding: EdgeInsets.symmetric(
+          horizontal: widget.horizontalPadding,
           vertical: _tileVerticalPadding,
         ),
         child: Row(
@@ -161,10 +175,15 @@ class _AlbumTileState extends State<AlbumTile>
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
-              child: AlbumArt.albumTile(
-                path: widget.album.albumArt,
-                current: widget.current,
-              ),
+              child: widget.small
+                ? AlbumArt.songTile(
+                    path: widget.album.albumArt,
+                    current: widget.current,
+                  )
+                : AlbumArt.albumTile(
+                  path: widget.album.albumArt,
+                  current: widget.current,
+                ),
             ),
             Expanded(
               child: Padding(
@@ -194,7 +213,8 @@ class _AlbumTileState extends State<AlbumTile>
 
   @override
   Widget build(BuildContext context) {
-    if (!selectable) return _buildTile();
+    if (!selectable)
+      return _buildTile();
     return Stack(
       children: [
         _buildTile(),

@@ -461,7 +461,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+          preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
           child: AppBar(
             elevation: 2.0,
             leading: NFBackButton(
@@ -493,7 +493,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         controller: widget.scrollController,
         slivers: <Widget>[
           PreferredSize(
-            preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
             child: SliverAppBar(
               automaticallyImplyLeading: false,
               titleSpacing: 0.0,
@@ -937,8 +937,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
 
   StackFadeRouteTransition _detailPageRoute(Object? arguments) {
     return StackFadeRouteTransition(
-      transitionSettings: RouteControl.defaultTransitionSetttings,
-      route: Builder(
+      // transitionSettings: RouteControl.defaultTransitionSetttings,
+      transitionSettings: AppRouter.defaultTransitionSetttings,
+      child: Builder(
         builder: (BuildContext context) {
           return WillPopScope(
             onWillPop: () async {
@@ -1007,7 +1008,7 @@ class _MasterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+        preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
         child: AppBar(
           elevation: 2.0,
           titleSpacing: 0.0,
@@ -1123,7 +1124,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           body: _masterPanel(context),
           floatingActionButton: widget.floatingActionButton,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
             child: AppBar(
               titleSpacing: 0.0,
               elevation: 2.0,
@@ -1213,7 +1214,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               backgroundColor: Colors.red,
               body: widget.masterViewBuilder(context, true),
               appBar: PreferredSize(
-                preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+                preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
                 child: AppBar(
                   titleSpacing: 0.0,
                   elevation: 2.0,

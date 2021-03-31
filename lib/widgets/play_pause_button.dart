@@ -89,7 +89,11 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
 
   @override
   Widget build(BuildContext context) {
-    final baseAnimation = NFDefaultAnimation(parent: controller);
+    final baseAnimation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
     final slideAnimation = Tween(
       begin: Offset.zero,
       end: const Offset(0.05, 0.0),

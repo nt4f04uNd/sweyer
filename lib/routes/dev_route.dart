@@ -25,7 +25,7 @@ class DevRoute extends StatelessWidget {
 
   void _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
     final res = await ShowFunctions.instance.showDialog(
-      App.navigatorKey.currentContext,
+      AppRouter.instance.navigatorKey.currentContext,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
       buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
@@ -37,7 +37,7 @@ class DevRoute extends StatelessWidget {
     );
     if (res != null && res) {
       ContentControl.setDevMode(false);
-      App.navigatorKey.currentState.pop();
+      AppRouter.instance.navigatorKey.currentState.pop();
     }
   }
 

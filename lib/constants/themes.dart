@@ -110,18 +110,12 @@ abstract class AppTheme {
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: const TextStyle(fontWeight: FontWeight.w600),
-        headline1:
-            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline2:
-            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline3:
-            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline1: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline2: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline3: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // For the app title
-        headline4:
-            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-
-        headline5:
-            const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline4: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline5: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // Title in song tiles
         headline6: const TextStyle(
           fontWeight: FontWeight.w700,
@@ -171,7 +165,8 @@ abstract class AppTheme {
       fontFamily: 'Manrope',
       brightness: Brightness.dark,
       //****************** Colors **********************
-      accentColor: AppColors.grey,
+      // accentColor: AppColors.grey,
+      accentColor: Colors.red,
       backgroundColor: Colors.black,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade800,
@@ -200,7 +195,6 @@ abstract class AppTheme {
         onSurface: AppColors.whiteDarkened,
       ),
       //****************** Specific app elements *****************
-      // scaffoldBackgroundColor: AppColors.grey,
       scaffoldBackgroundColor: Colors.black,
       splashColor: defaultPrimaryColor,
       highlightColor: Colors.transparent,
@@ -228,16 +222,11 @@ abstract class AppTheme {
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: const TextStyle(fontWeight: FontWeight.w600),
-        headline1: const TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline2: const TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline3: const TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline4: const TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline5: const TextStyle(
-            fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline1: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline2: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline3: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline4: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline5: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
         headline6: const TextStyle(
           fontWeight: FontWeight.w700,
           color: AppColors.almostWhite,

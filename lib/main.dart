@@ -50,6 +50,24 @@ Future<void> reportFlutterError(FlutterErrorDetails details) async {
   await FirebaseCrashlytics.instance.recordFlutterError(details);
 }
 
+
+class _WidgetsBindingObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // This fixes that sometimes the navbar and status bar contrast is not
+      // properly applied when app is resumed.
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarIconBrightness: ThemeControl.contrastBrightness,
+          systemNavigationBarIconBrightness: ThemeControl.contrastBrightness,
+        ),
+      );
+    }
+  }
+}
+
 void main() async {
   // Disabling automatic system UI adjustment, which causes system nav bar
   // color to be reverted to black when the bottom player route is being expanded.
@@ -70,21 +88,7 @@ void main() async {
   }).sendPort);
   FlutterError.onError = reportFlutterError;
   runZonedGuarded<Future<void>>(() async {
-    // Add callback to stop service when app is destroyed, temporary
-    WidgetsBinding.instance.addObserver(
-      NFWidgetsBindingObserver(
-        // ignore: missing_return
-        onResumed: () {
-          SystemChrome.setSystemUIOverlayStyle(
-            SystemUiOverlayStyle(
-              statusBarIconBrightness: ThemeControl.contrastBrightness,
-              systemNavigationBarIconBrightness:
-                  ThemeControl.contrastBrightness,
-            ),
-          );
-        },
-      ),
-    );
+    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
     API.EventsHandler.init();
     await ThemeControl.init();
@@ -99,11 +103,11 @@ void main() async {
 }
 
 class App extends StatefulWidget {
-  /// A global key to obtain the roote navigator.
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-
-  /// A global key to obtain sub navigator on home page.
-  static final GlobalKey<NavigatorState> homeNavigatorKey = GlobalKey();
+  static NFThemeData nfThemeData = NFThemeData(
+    systemUiStyle: Constants.UiTheme.black.auto,
+    modalSystemUiStyle: Constants.UiTheme.modal.auto,
+    bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+  );
 
   static void rebuildAllChildren() {
     void rebuild(Element el) {
@@ -111,7 +115,7 @@ class App extends StatefulWidget {
       el.visitChildren(rebuild);
     }
 
-    (navigatorKey.currentContext as Element).visitChildren(rebuild);
+    (AppRouter.instance.navigatorKey.currentContext as Element).visitChildren(rebuild);
   }
 
   @override
@@ -131,11 +135,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       springDescription: playerRouteSpringDescription,
     );
     NFWidgets.init(
-      navigatorKey: App.navigatorKey,
+      navigatorKey: AppRouter.instance.navigatorKey,
       routeObservers: [routeObserver, homeRouteObserver],
-      defaultSystemUiStyle: Constants.UiTheme.black.auto,
-      defaultModalSystemUiStyle: Constants.UiTheme.modal.auto,
-      defaultBottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
     );
   }
 
@@ -148,25 +149,23 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         child: StreamBuilder(
           stream: ThemeControl.onThemeChange,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
-            return MaterialApp(
-              // showPerformanceOverlay: true,
-              title: Constants.Config.APPLICATION_TITLE,
-              navigatorKey: App.navigatorKey,
-              color: ThemeControl.theme.colorScheme.primary,
-              supportedLocales: Constants.Config.supportedLocales,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                NFLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              theme: ThemeControl.theme,
-              initialRoute: Constants.Routes.home.value,
-              navigatorObservers: [routeObserver],
-              onGenerateRoute: RouteControl.handleOnGenerateRoute,
-              onGenerateInitialRoutes:
-                  RouteControl.handleOnGenerateInitialRoutes,
-              onUnknownRoute: RouteControl.handleOnUnknownRoute,
+            return NFTheme(
+            data: App.nfThemeData,
+              child: MaterialApp.router(
+                // showPerformanceOverlay: true,
+                title: Constants.Config.APPLICATION_TITLE,
+                color: ThemeControl.theme.colorScheme.primary,
+                supportedLocales: Constants.Config.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  NFLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
+                theme: ThemeControl.theme,
+                routerDelegate: AppRouter.instance,
+                routeInformationParser: AppRouteInformationParser(),
+              ),
             );
           },
         ),
@@ -175,12 +174,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   }
 }
 
-SlidableControllerProvider<DrawerWidget> getDrawerControllerProvider(
-        BuildContext context) =>
-    SlidableControllerProvider.of<DrawerWidget>(context);
-SlidableControllerProvider<PlayerRoute> getPlayerRouteControllerProvider(
-        BuildContext context) =>
-    SlidableControllerProvider.of<PlayerRoute>(context);
+SlidableControllerProvider<DrawerWidget> getDrawerControllerProvider(BuildContext context) => SlidableControllerProvider.of<DrawerWidget>(context);
+SlidableControllerProvider<PlayerRoute> getPlayerRouteControllerProvider(BuildContext context) => SlidableControllerProvider.of<PlayerRoute>(context);
 
 mixin DrawerControllerMixin<T extends StatefulWidget> on State<T> {
   SlidableController drawerController;
@@ -196,7 +191,6 @@ mixin PlayerRouteControllerMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-    playerRouteController =
-        getPlayerRouteControllerProvider(context).controller;
+    playerRouteController = getPlayerRouteControllerProvider(context).controller;
   }
 }

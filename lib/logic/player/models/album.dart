@@ -10,7 +10,7 @@ import 'package:sweyer/sweyer.dart';
 part 'album.g.dart';
 
 @JsonSerializable()
-class Album extends PersistentQueue {
+class Album extends PersistentQueue implements Content {
   @override
   final int id;
 
