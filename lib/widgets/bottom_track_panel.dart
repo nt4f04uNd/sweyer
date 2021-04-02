@@ -141,7 +141,7 @@ class _RotatingAlbumArtWithProgressState
 
   StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<PlayerState> _playerStateSubscription;
+  StreamSubscription<bool> _playingSubscription;
   StreamSubscription<void> _songListChangeSubscription;
 
   GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
@@ -152,36 +152,30 @@ class _RotatingAlbumArtWithProgressState
 
     _setInitialCurrentPosition();
 
-    _playerStateSubscription = MusicPlayer.onStateChange.listen((event) {
-      switch (event) {
-        case PlayerState.PLAYING:
-          _rotatingArtGlobalKey.currentState.rotate();
-          break;
-        case PlayerState.PAUSED:
-        case PlayerState.COMPLETED:
-        default: // Can be null so don't throw, just stop animation
-          _rotatingArtGlobalKey.currentState.stopRotating();
-          break;
+    _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
+      if (playing) {
+        _rotatingArtGlobalKey.currentState.rotate();
+      } else {
+        _rotatingArtGlobalKey.currentState.stopRotating();
       }
     });
 
     // Handle track position movement
-    _positionSubscription = MusicPlayer.onPosition.listen((event) {
-      if (event.inSeconds != _value.inSeconds) {
+    _positionSubscription = MusicPlayer.instance.positionStream.listen((position) {
+      if (position.inSeconds != _value.inSeconds) {
         // Prevent waste updates
         setState(() {
-          _value = event;
+          _value = position;
         });
       }
     });
 
     // Handle song change
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
-      _value = await MusicPlayer.position;
-      if (mounted)
-        setState(() {
-          _duration = Duration(milliseconds: event.duration);
-        });
+      _value = MusicPlayer.instance.position;
+      setState(() {
+        _duration = Duration(milliseconds: event.duration);
+      });
     });
 
     _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
@@ -194,19 +188,18 @@ class _RotatingAlbumArtWithProgressState
 
   @override
   void dispose() {
-    _playerStateSubscription.cancel();
+    _playingSubscription.cancel();
     _positionSubscription.cancel();
     _songChangeSubscription.cancel();
     _songListChangeSubscription.cancel();
     super.dispose();
   }
 
-  _setInitialCurrentPosition() async {
-    var position = await MusicPlayer.position;
+  void _setInitialCurrentPosition() {
+    final position = MusicPlayer.instance.position;
     setState(() {
       _value = position;
-      _duration =
-          Duration(milliseconds: ContentControl.state.currentSong?.duration);
+      _duration = Duration(milliseconds: ContentControl.state.currentSong?.duration);
     });
   }
 
@@ -242,7 +235,7 @@ class _RotatingAlbumArtWithProgressState
           key: _rotatingArtGlobalKey,
           path: ContentControl.state.currentSong?.albumArt,
           initRotation: math.Random(DateTime.now().second).nextDouble(),
-          initRotating: MusicPlayer.playerState == PlayerState.PLAYING,
+          initRotating: MusicPlayer.instance.playing,
         ),
       ),
     );

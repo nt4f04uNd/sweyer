@@ -674,7 +674,7 @@ class _PlaybackButtons extends StatelessWidget {
             size: 50.0,
             iconSize: textScaleFactor * 30.0,
             icon: const Icon(Icons.skip_previous_rounded),
-            onPressed: MusicPlayer.playPrev,
+            onPressed: MusicPlayer.instance.playPrev,
           ),
         ),
         Container(
@@ -699,7 +699,7 @@ class _PlaybackButtons extends StatelessWidget {
             size: textScaleFactor * 50.0,
             iconSize: textScaleFactor * 30.0,
             icon: const Icon(Icons.skip_next_rounded),
-            onPressed: MusicPlayer.playNext,
+            onPressed: MusicPlayer.instance.playNext,
           ),
         ),
         const SizedBox(width: buttonMargin),
@@ -855,7 +855,7 @@ class _SeekbarState extends State<_Seekbar> {
     super.initState();
     _setInitialPosition();
     // Handle track position movement
-    _positionSubscription = MusicPlayer.onPosition.listen((position) {
+    _positionSubscription = MusicPlayer.instance.positionStream.listen((position) {
       if (!_isDragging) {
         setState(() {
           _value = _positionToValue(position);
@@ -884,12 +884,11 @@ class _SeekbarState extends State<_Seekbar> {
     return (position.inMilliseconds / math.max(_duration.inMilliseconds, 1.0)).clamp(0.0, 1.0);
   }
 
-  Future<void> _setInitialPosition() async {
-    var position = await MusicPlayer.position;
+  void _setInitialPosition()  {
+    final position = MusicPlayer.instance.position;
     if (mounted) {
       setState(() {
-        _duration =
-            Duration(milliseconds: ContentControl.state.currentSong?.duration);
+        _duration = Duration(milliseconds: ContentControl.state.currentSong?.duration);
         _value = _positionToValue(position);
       });
     }
@@ -912,7 +911,7 @@ class _SeekbarState extends State<_Seekbar> {
 
   /// FIXME: https://github.com/nt4f04uNd/sweyer/issues/6
   void _handleChangeEnd(double newValue) async {
-    await MusicPlayer.seek(_duration * newValue);
+    await MusicPlayer.instance.seek(_duration * newValue);
     if (mounted) {
       setState(() {
         _isDragging = false;

@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:audio_service/audio_service.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,9 @@ class Queue implements _QueueOperations<Song> {
     shuffledSongs.shuffle();
     return shuffledSongs;
   }
+
+  /// Converts the queue to a list of media items.
+  List<MediaItem> toMediaItems() => _songs.map((el) => el.toMediaItem()).toList();
 
   /// Returns queue length
   int get length => _songs.length;

@@ -5,12 +5,6 @@
 
 package com.nt4f04und.sweyer.player;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-/**
- * Class representing a song
- */
 public class Song {
     public int id;
     public final String album;
@@ -67,5 +61,4 @@ public class Song {
         this.size = other.size;
         this.data = other.data;
     }
-
 }

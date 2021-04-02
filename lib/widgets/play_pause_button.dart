@@ -28,7 +28,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     with TickerProviderStateMixin {
   AnimationController controller;
-  StreamSubscription<PlayerState> _playerStateSubscription;
+  StreamSubscription<bool> _playingSubscription;
 
   String _animation;
   set animation(String value) {
@@ -44,19 +44,19 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    if (MusicPlayer.playerState == PlayerState.PLAYING) {
+    if (MusicPlayer.instance.playing) {
       _animation = 'pause';
     } else {
       controller.value = 1.0;
       _animation = 'play';
     }
 
-    _playerStateSubscription = MusicPlayer.onStateChange.listen((event) {
+    _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
       /// Do not handle [PlayerState.PLAYING] as it's not the state the player will remain for long time.
       /// It will start playing next song immediately.
-      if (event == PlayerState.PLAYING) {
+      if (playing) {
         _pause();
-      } else if (event == PlayerState.PAUSED) {
+      } else {
         _play();
       }
     });
@@ -64,11 +64,12 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
 
   @override
   void dispose() {
-    _playerStateSubscription.cancel();
+    _playingSubscription.cancel();
     controller.dispose();
     super.dispose();
   }
 
+ /// Animates to state where it shows "play" button.
   void _play() {
     if (_animation != 'pause_play' && _animation != 'play') {
       controller.forward();
@@ -76,6 +77,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     }
   }
 
+  /// Animates to state where it shows "pause" button.
   void _pause() {
     if (_animation != 'play_pause' && _animation != 'pause') {
       controller.reverse();
@@ -84,7 +86,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   }
 
   void _handlePress() {
-    MusicPlayer.playPause();
+    MusicPlayer.instance.playPause();
   }
 
   @override

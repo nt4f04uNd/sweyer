@@ -9,7 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 abstract class Permissions {
   /// Whether storage permission is granted
-  static PermissionStatus _permissionStorageStatus = PermissionStatus.undetermined;
+  static PermissionStatus _permissionStorageStatus;
 
   /// Returns true if permissions were granted
   static bool get granted => _permissionStorageStatus == PermissionStatus.granted;

@@ -15,16 +15,17 @@ class LoopButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final player = MusicPlayer.instance;
     return StreamBuilder<bool>(
-      stream: MusicPlayer.onLoopSwitch,
-      initialData: MusicPlayer.looping,
+      stream: player.onLoopingSwitch,
+      initialData: player.looping,
       builder: (context, snapshot) {
         return AnimatedIconButton(
           icon: Icon(Icons.loop_rounded),
           size: 40.0,
           iconSize: textScaleFactor * Constants.iconSize,
           active: snapshot.data,
-          onPressed: MusicPlayer.switchLooping,
+          onPressed: player.switchLooping,
         );
       },
     );

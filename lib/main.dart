@@ -83,19 +83,17 @@ void main() async {
     await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
   }).sendPort);
   FlutterError.onError = reportFlutterError;
-  runZonedGuarded<Future<void>>(() async {
+  // runZonedGuarded<Future<void>>(() async {
     WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
-    EventsChannel.init();
+    await AppLocalizations.init();
     await ThemeControl.init();
     ThemeControl.initSystemUi();
     await Permissions.init();
-    await Future.wait([
-      ContentControl.init(),
-      MusicPlayer.init(),
-    ]);
+    await ContentControl.init();
+    await MusicPlayer.instance.init();
     runApp(App());
-  }, reportError);
+  // }, reportError);
 }
 
 class App extends StatefulWidget {
@@ -110,7 +108,6 @@ class App extends StatefulWidget {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
-
     (AppRouter.instance.navigatorKey.currentContext as Element).visitChildren(rebuild);
   }
 

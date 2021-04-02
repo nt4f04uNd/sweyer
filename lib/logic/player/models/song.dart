@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -107,4 +108,24 @@ class Song extends Equatable implements Content {
 
   factory Song.fromJson(Map<String, dynamic> json) => _$SongFromJson(json);
   Map<String, dynamic> toJson() => _$SongToJson(this);
+
+  MediaItem toMediaItem() {
+    return MediaItem(
+      id: sourceId.toString(),
+      album: getAlbum().album,
+      title: title,
+      artist: artist,
+      genre: null, // TODO: GENRE
+      duration: Duration(milliseconds: duration),
+      // artUri: albumArt == null ? null : Uri.file(albumArt),
+      artUri: null,
+      playable: true,
+      // displayTitle: formatArtist(artist, staticl10n),
+      displayTitle: 'displayTitle', // TODO: YO
+      displaySubtitle: 'displaySubtitle', // TODO: YO
+      displayDescription: 'displayDescription', // TODO: YO
+      rating: null,
+      extras: null,
+    );
+  }
 }

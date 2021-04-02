@@ -9,8 +9,6 @@ import android.app.Activity;
 import android.util.Log;
 
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
-import com.nt4f04und.sweyer.handlers.QueueHandler;
-import com.nt4f04und.sweyer.services.MusicService;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -46,12 +44,6 @@ public enum GeneralChannel {
             switch (call.method) {
                 case "isIntentActionView":
                     result.success(GeneralHandler.isIntentActionView(activity));
-                    break;
-                case "stopService":
-                    MusicService.stopService();
-                    break;
-                case "reloadArtPlaceholder":
-                    QueueHandler.reloadArtPlaceholder(((Long) call.arguments).intValue());
                     break;
                 default:
                     result.notImplemented();

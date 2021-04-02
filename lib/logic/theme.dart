@@ -126,7 +126,8 @@ abstract class ThemeControl {
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
-    GeneralChannel.reloadArtPlaceholder(color);
+    // todo: UPDATE ARTWORK!
+    // GeneralChannel.reloadArtPlaceholder(color);
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(primaryColorChangeDuration));
       App.rebuildAllChildren();

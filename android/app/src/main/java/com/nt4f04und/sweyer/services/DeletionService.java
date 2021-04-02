@@ -8,6 +8,7 @@ package com.nt4f04und.sweyer.services;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
@@ -20,7 +21,6 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.channels.GeneralChannel;
-import com.nt4f04und.sweyer.handlers.FetchHandler;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
 import com.nt4f04und.sweyer.player.Song;
 
@@ -58,7 +58,7 @@ public class DeletionService extends Service {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
             for (Song song : songs) {
-               uris.add(FetchHandler.getSongUri(song.id));
+               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.id));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
                     GeneralChannel.instance.activity.getContentResolver(),

@@ -145,7 +145,7 @@ class _SongTileState extends SelectableState<SongTile> {
       if (widget.onTap != null) {
         widget.onTap();
       }
-      await MusicPlayer.handleSongClick(
+      await MusicPlayer.instance.handleSongClick(
         context,
         widget.song,
         behavior: widget.clickBehavior,

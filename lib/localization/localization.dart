@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:flutter/material.dart';
 import 'package:multiple_localization/multiple_localization.dart';
+import 'package:devicelocale/devicelocale.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
@@ -15,9 +16,22 @@ import 'gen/messages_all.dart';
 /// Gets [AppLocalizations].
 AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context);
 
+/// Gets [AppLocalizations] without context.
+/// If you want to use [AppLocalizations] without flutter app mounting,
+/// you have to [AppLocalizations.init] first.
+AppLocalizations get staticl10n => AppLocalizations.instance;
+
 class AppLocalizations {
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  AppLocalizations._();
+  static final instance = AppLocalizations._();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+
+  /// Can be used to load the delegate before/without flutter app mounting
+  /// by using the current system locale.
+  static Future<void> init() async {
+    final preferredLocales = await Devicelocale.preferredLanguagesAsLocales;
+    await load(preferredLocales[0]);
+  }
 
   static Future<AppLocalizations> load(Locale locale) async {
     final systemLocale = await findSystemLocale();
@@ -25,7 +39,7 @@ class AppLocalizations {
     return MultipleLocalizations.load(
       initializeMessages,
       locale,
-      (locale) => AppLocalizations(),
+      (locale) => AppLocalizations.instance,
       setDefaultLocale: Intl.systemLocale != Intl.defaultLocale,
     );
   }

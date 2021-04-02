@@ -46,12 +46,6 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
       child: StreamBuilder(
         stream: ContentControl.state.onSongListChange,
         builder: (context, snapshot) {
-          if (!ContentControl.playReady) {
-            _animateNotMainUi();
-            return Container(
-              color: ThemeControl.theme.colorScheme.background,
-            );
-          }
           if (Permissions.notGranted) {
             _animateNotMainUi();
             return const _NoPermissionsScreen();

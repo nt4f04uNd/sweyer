@@ -53,7 +53,8 @@ class DevRoute extends StatelessWidget {
               children: <Widget>[
                 NFListTile(
                   title: Text(l10n.devStopService),
-                  onTap: GeneralChannel.stopService,
+                  // todo: STOP SERVICE!
+                  // onTap: GeneralChannel.stopService,
                 ),
                 NFListTile(
                   title: Text(l10n.devTestToast),

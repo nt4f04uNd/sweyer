@@ -8,13 +8,8 @@ package com.nt4f04und.sweyer.handlers;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 
 import com.nt4f04und.sweyer.Constants;
-import com.nt4f04und.sweyer.channels.PlayerChannel;
-
-import org.jetbrains.annotations.NotNull;
-
 import android.util.Log;
 
 /**
@@ -35,10 +30,6 @@ public abstract class GeneralHandler {
         return appContext;
     }
 
-    public static boolean activityExists() {
-        return PlayerChannel.instance.channel != null;
-    }
-
     /**
      * Check for if Intent action is VIEW
      */
@@ -46,24 +37,4 @@ public abstract class GeneralHandler {
         Intent intent = activity.getIntent();
         return Intent.ACTION_VIEW.equals(intent.getAction());
     }
-
-    /**
-     * Checks system theme and returns true if it's dark
-     */
-    public static boolean isSystemThemeDark() {
-        int nightModeFlags = appContext.getResources().getConfiguration().uiMode &
-                Configuration.UI_MODE_NIGHT_MASK;
-
-        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
-        // Else `Configuration.UI_MODE_NIGHT_NO` or `Configuration.UI_MODE_NIGHT_UNDEFINED`
-    }
-
-
-    /**
-     * A shortcut to a log function with set app log prefix
-     */
-    public static void print(@NotNull String msg) {
-        Log.w(Constants.LogTag, msg);
-    }
-
 }

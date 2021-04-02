@@ -87,10 +87,7 @@ class _Sorts {
 
 class _QueuePool {
   _QueuePool(Map<_PoolQueueType, Queue> map)
-      : assert(map != null),
-        assert(map[_PoolQueueType.custom] != null),
-        assert(map[_PoolQueueType.shuffled] != null),
-        _map = map;
+      : _map = map;
 
   final Map<_PoolQueueType, Queue> _map;
 
@@ -157,7 +154,7 @@ class _ContentState {
   // CancelableOperation _thiefOperation;
 
   final _QueuePool queues = _QueuePool({
-    _PoolQueueType.all: null,
+    _PoolQueueType.all: Queue([]),
     _PoolQueueType.custom: Queue([]),
     _PoolQueueType.shuffled: Queue([]),
   });
@@ -293,9 +290,6 @@ abstract class ContentControl {
   /// Represents songs fetch on app start
   static bool initFetching = true;
 
-  /// Whether queue control is ready to provide to player instance the sources to play tracks.
-  static bool get playReady => state.queues.all != null;
-
   /// The main data app initialization function, inits all queues.
   /// Also handles no-permissions situations.
   static Future<void> init() async {
@@ -314,41 +308,8 @@ abstract class ContentControl {
           refetch(contentType: contentType, updateQueues: false, emitChangeEvent: false),
       ]);
       await _restoreQueue();
-      await _restoreLastSong();
       initFetching = false;
-
-      // // Setting up the subscription to get the art color
-      // _songChangeSubscription = onSongChange.listen((event) async {
-      //   var prevArtColor = _artColor;
-      //   if (event.albumArtUri != null) {
-      //     // Cancel the operation if it didn't finish by that moment
-      //     if (_thiefOperation != null) _thiefOperation.cancel();
-
-      //     _thiefOperation = CancelableOperation.fromFuture(() async {
-      //       var prevArtColor = _artColor;
-      //       final image =
-      //           await getImageFromProvider(FileImage(File(event.albumArtUri)));
-      //       List<int> colorRGBList = await getColorFromImage(image, 1);
-      //       _artColor = Color.fromRGBO(
-      //           colorRGBList[0], colorRGBList[1], colorRGBList[2], 1.0);
-
-      //       if (prevArtColor != _artColor) emitArtColorChange(_artColor);
-      //       _thiefOperation = null;
-      //     }());
-      //   } else {
-      //     _artColor = null;
-      //     if (prevArtColor != _artColor) emitArtColorChange(_artColor);
-      //   }
-      // });
-
-      // _initialFetch();
-    } else {
-      // Init empty queue if no permission granted
-      if (!playReady) {
-        state.queues._all = Queue([]);
-      }
     }
-
     // Emit event to track change stream
     state.emitSongListChange();
   }
@@ -570,7 +531,6 @@ abstract class ContentControl {
         type != QueueType.arbitrary) {
       state.idMap.clear();
       idMapSerializer.save(state.idMap);
-      NativePlayer.clearIdMap();
     }
 
     if (emitChangeEvent) {
@@ -608,9 +568,10 @@ abstract class ContentControl {
     if (state.queues.current.isNotEmpty &&
         state._currentSongId != null &&
         state.queues.current.byId.getSongIndex(state._currentSongId) < 0) {
-      if (MusicPlayer.playerState == PlayerState.PLAYING) {
-        MusicPlayer.pause();
-        MusicPlayer.play(state.queues.current.songs[0], silent: true);
+      final player = MusicPlayer.instance;
+      if (player.playing) {
+        player.pause();
+        player.setSong(state.queues.current.songs[0]);
       }
     }
 
@@ -627,7 +588,7 @@ abstract class ContentControl {
       for (final contentType in Content.enumerate())
         refetch(contentType: contentType),
     ]);
-    return _restoreLastSong();
+    return MusicPlayer.instance.restoreLastSong();
   }
 
   /// Refetches content by the `T` content type.
@@ -891,24 +852,6 @@ abstract class ContentControl {
         modified: modified,
         songs: songs,
         save: false,
-      );
-    }
-  }
-
-  /// Function that fires right after json has fetched and when initial songs fetch has done.
-  ///
-  /// Its main purpose to setup player to work with queues.
-  static Future<void> _restoreLastSong() async {
-    final current = state.queues.current;
-    // songsEmpty condition is here to avoid errors when trying to get first song index
-    if (current.isNotEmpty) {
-      final int songId = await Prefs.songIdIntNullable.get();
-      // Set url of first track in player instance
-      await MusicPlayer.play(
-        songId == null
-            ? current.songs[0]
-            : current.byId.getSong(songId) ?? current.songs[0],
-        silent: true,
       );
     }
   }

@@ -105,18 +105,6 @@ public class FetchHandler {
            MediaStore.Audio.Albums.NUMBER_OF_SONGS
    };
 
-   public static Uri getSongUri(int songId) {
-      if (songId < 0) {
-         Integer id = QueueHandler.idMap.get(String.valueOf(songId));
-         if (id != null) {
-            songId = id;
-         } else {
-            Log.e(Constants.LogTag, "Map doesn't have this id to map, id: " + songId);
-         }
-      }
-      return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
-   }
-
    /// Will return null if there's no artwork.
    @Nullable
    public static byte[] getArtBytes(String path) {
