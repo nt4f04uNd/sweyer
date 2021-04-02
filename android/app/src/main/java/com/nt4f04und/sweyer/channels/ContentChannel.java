@@ -47,7 +47,7 @@ public enum ContentChannel {
                break;
             }
             case "retrieveAlbums": {
-               new FetchHandler.SearchSongsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               new FetchHandler.SearchAlbumsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
                break;
             }
             case "deleteSongs": {

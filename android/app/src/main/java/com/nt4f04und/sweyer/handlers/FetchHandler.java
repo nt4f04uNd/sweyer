@@ -45,7 +45,7 @@ public class FetchHandler {
       }
    }
 
-   public static class TaskSearchAlbums extends AsyncTask<MethodChannel.Result, Void, List<String>> {
+   public static class SearchAlbumsTask extends AsyncTask<MethodChannel.Result, Void, List<String>> {
       private MethodChannel.Result result;
 
       @Override
