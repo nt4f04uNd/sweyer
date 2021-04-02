@@ -51,6 +51,11 @@ class _PlayerRouteState extends State<PlayerRoute> {
       if (!_queueTabAnimation.isDismissed) {
         dontJump = true;
       }
+      if (tabController.index == 0) {
+        _queueTabKey.currentState.opened = false;
+      } else if (tabController.index == 1) {
+        _queueTabKey.currentState.opened = true;
+      }
     });
     controller = getPlayerRouteControllerProvider(context).controller;
     controller.addListener(_handleControllerChange);
@@ -158,8 +163,7 @@ class _QueueTab extends StatefulWidget {
 
 class _QueueTabState extends State<_QueueTab>
     with PlayerRouteControllerMixin,
-         SingleTickerProviderStateMixin,
-         SongSelectionMixin {
+         SingleTickerProviderStateMixin {
   /// Default scroll alignment.
   static const double scrollAlignment = 0.00;
   /// Scroll alignment for jumping to the end of the list.
@@ -190,7 +194,6 @@ class _QueueTabState extends State<_QueueTab>
     return ContentControl.state.queues.persistent as Album;
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -218,12 +221,6 @@ class _QueueTabState extends State<_QueueTab>
       }
     });
   }
-
-  @override
-  void handleSongSelection() {}
-
-  @override
-  void handleSongSelectionStatus(AnimationStatus status) {}
 
   @override
   void dispose() {

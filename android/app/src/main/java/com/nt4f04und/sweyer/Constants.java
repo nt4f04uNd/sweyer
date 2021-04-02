@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) nt4f04und. All rights reserved.
  *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+*--------------------------------------------------------------------------------------------*/
 
 package com.nt4f04und.sweyer;
 
@@ -28,10 +28,7 @@ public class Constants {
    }
 
    public static final class eventsChannel {
-      // Generalized events - these are e.g. next, prev.
-      // They are needed because I can call them from different places, i.e. notification or media session events
-      // Though events for notification and media session still exist to have access to them directly in dart side
-      public static final String GENERALIZED_PLAY_NEXT = "generalizedPlayNext";
-      public static final String GENERALIZED_PLAY_PREV = "generalizedPlayPrev";
+      public static final String PLAY_NEXT = "playNext";
+      public static final String PLAY_PREV = "playPrev";
    }
 }

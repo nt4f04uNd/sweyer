@@ -66,6 +66,3 @@ public class MainActivity extends FlutterActivity {
       ContentChannel.instance.kill();
    }
 }
-
-// TODO: probably? add launch intent broadcast receiver and get extra argument
-// that denotes that activity has been opened from notification

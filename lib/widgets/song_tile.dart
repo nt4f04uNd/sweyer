@@ -76,9 +76,7 @@ class SongNumber extends StatelessWidget {
 }
 
 /// A [SongTile] that can be selected.
-///
-/// todo: [Selectable] interface
-class SongTile extends StatefulWidget {
+class SongTile extends SelectableWidget<SelectionEntry> {
   SongTile({
     Key key,
     @required this.song,
@@ -87,27 +85,29 @@ class SongTile extends StatefulWidget {
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
     this.horizontalPadding = kSongTileHorizontalPadding,
-  })  : assert(song != null),
-        selected = null,
-        index = null,
-        selectionController = null,
-        super(key: key);
+  }) : assert(song != null),
+       index = null,
+       super(key: key);
 
   SongTile.selectable({
     Key key,
     @required this.song,
     @required this.index,
-    @required this.selectionController,
+    @required SelectionController<SelectionEntry> selectionController,
+    bool selected = false,
     this.currentTest,
     this.onTap,
-    this.selected = false,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
     this.horizontalPadding = kSongTileHorizontalPadding,
-  })  : assert(song != null),
-        assert(index != null),
-        assert(selectionController != null),
-        super(key: key);
+  }) : assert(song != null),
+       assert(index != null),
+       assert(selectionController != null),
+       super.selectable(
+         key: key,
+         selected: selected,
+         selectionController: selectionController,
+       );
 
   final Song song;
   final int index;
@@ -127,84 +127,21 @@ class SongTile extends StatefulWidget {
   final SongTileVariant variant;
   final double horizontalPadding;
 
-  /// Basically makes tiles aware whether they are selected in some global set.
-  /// This will be used on first build, after this tile will have internal selection state.
-  final bool selected;
-  final SelectionController<SongSelectionEntry> selectionController;
+  @override
+  SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
+    index: index,
+    data: song,
+  );
 
   @override
   _SongTileState createState() => _SongTileState();
 }
 
-class _SongTileState extends State<SongTile> with SingleTickerProviderStateMixin {
-  bool _selected;
-  AnimationController controller;
-  Animation scaleAnimation;
-
-  bool get selectable => widget.selectionController != null;
-
-  SongSelectionEntry get selectionEntry => SongSelectionEntry(
-        index: widget.index,
-        song: widget.song,
-      );
-
+class _SongTileState extends SelectableState<SongTile> {
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
 
-  @override
-  void initState() {
-    super.initState();
-    if (selectable) {
-      _selected = widget.selected ?? false;
-      controller = AnimationController(
-        vsync: this,
-        duration: kSelectionDuration,
-      );
-      scaleAnimation = Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Interval(0.0, 0.6, curve: Curves.easeOutCubic),
-        reverseCurve: Curves.easeInCubic,
-      ));
-      if (_selected) {
-        controller.value = 1;
-      }
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant SongTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (selectable) {
-      if (selectable && oldWidget.selected != widget.selected) {
-        _selected = widget.selected;
-        if (_selected) {
-          controller.forward();
-        } else {
-          controller.reverse();
-        }
-      } else if (widget.selectionController.notInSelection && _selected) {
-        /// We have to check if controller is 'closing', i.e. user pressed global close button to quit the selection.
-        _selected = false;
-        controller.value = widget.selectionController.animationController.value;
-        controller.reverse();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    if (controller != null) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  void _handleTap() async {
-    if (selectable && widget.selectionController.inSelection) {
-      _toggleSelection();
-    } else {
+  void _handleTap() {
+    super.handleTap(() async {
       if (widget.onTap != null) {
         widget.onTap();
       }
@@ -213,29 +150,7 @@ class _SongTileState extends State<SongTile> with SingleTickerProviderStateMixin
         widget.song,
         behavior: widget.clickBehavior,
       );
-    }
-  }
-
-  void _toggleSelection() {
-    if (!selectable)
-      return;
-    setState(() {
-      _selected = !_selected;
     });
-    if (_selected)
-      _select();
-    else
-      _unselect();
-  }
-
-  void _select() {
-    widget.selectionController.selectItem(selectionEntry);
-    controller.forward();
-  }
-
-  void _unselect() {
-    widget.selectionController.unselectItem(selectionEntry);
-    controller.reverse();
   }
 
   bool _performCurrentTest() {
@@ -276,7 +191,7 @@ class _SongTileState extends State<SongTile> with SingleTickerProviderStateMixin
         right: rightPadding,
       ),
       onTap: _handleTap,
-      onLongPress: selectable ? _toggleSelection : null,
+      onLongPress: toggleSelection,
       title: title,
       subtitle: subtitle,
       leading: albumArt,
@@ -300,13 +215,13 @@ class _SongTileState extends State<SongTile> with SingleTickerProviderStateMixin
     return Stack(
       children: [
         AnimatedBuilder(
-          animation: scaleAnimation,
+          animation: animation,
           builder: (context, child) {
             var rightPadding = widget.horizontalPadding;
             if (!showAlbumArt) {
-              if (scaleAnimation.status == AnimationStatus.forward ||
-                  scaleAnimation.status == AnimationStatus.completed ||
-                  scaleAnimation.value > 0.2) {
+              if (animation.status == AnimationStatus.forward ||
+                  animation.status == AnimationStatus.completed ||
+                  animation.value > 0.2) {
                 rightPadding += 40.0;
               }
             }
@@ -317,7 +232,7 @@ class _SongTileState extends State<SongTile> with SingleTickerProviderStateMixin
           left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
           right: showAlbumArt ? null : 10.0 + widget.horizontalPadding,
           bottom: showAlbumArt ? 2.0 : 20.0,
-          child: SelectionCheckmark(animation: scaleAnimation),
+          child: SelectionCheckmark(animation: animation),
         ),
       ],
     );

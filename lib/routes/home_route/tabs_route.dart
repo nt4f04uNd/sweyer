@@ -45,14 +45,14 @@ class _TabsRouteState extends State<TabsRoute> {
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<void> _songListChangeSubscription;
   TabController get tabController => widget.tabController;
-  SelectionControllers selectionControllers;
+  ContentSelectionControllersProvider controllersProvider;
 
   SelectionController get selectionController {
     switch (tabController.index) {
       case 0:
-        return selectionControllers.song;
+        return controllersProvider.song;
       case 1:
-        return selectionControllers.album;
+        return controllersProvider.album;
       default:
         throw UnimplementedError();
     }
@@ -61,8 +61,8 @@ class _TabsRouteState extends State<TabsRoute> {
   @override
   void initState() {
     super.initState();
-    selectionControllers = SelectionControllers.of(context);
-    for (final controller in selectionControllers.map.values) {
+    controllersProvider = ContentSelectionControllersProvider.of(context);
+    for (final controller in controllersProvider.map.values) {
       controller.addListener(_handleSelection);
       controller.addStatusListener(_handleSelectionStatus);
     }
@@ -90,7 +90,7 @@ class _TabsRouteState extends State<TabsRoute> {
 
   @override
   void dispose() {
-    for (final controller in selectionControllers.map.values) {
+    for (final controller in controllersProvider.map.values) {
       controller.removeListener(_handleSelection);
       controller.removeStatusListener(_handleSelectionStatus);
     }
@@ -108,10 +108,10 @@ class _TabsRouteState extends State<TabsRoute> {
   }
 
   void _handleDelete() {
-    final controller = selectionControllers.song;
+    final controller = controllersProvider.song;
     if (ContentControl.state.sdkInt >= 30) {
       // On Android R the deletion is performed with OS dialog.
-      ContentControl.deleteSongs(controller.data.map((e) => e.song.sourceId).toSet());
+      ContentControl.deleteSongs(controller.data.map((e) => e.data.sourceId).toSet());
       controller.close();
     } else {
       // On all versions below show in app dialog.
@@ -119,7 +119,7 @@ class _TabsRouteState extends State<TabsRoute> {
       final count = controller.data.length;
       Song song;
       if (count == 1) {
-        song = ContentControl.state.queues.all.byId.getSong(controller.data.first.song.sourceId);
+        song = ContentControl.state.queues.all.byId.getSong(controller.data.first.data.sourceId);
       }
       ShowFunctions.instance.showDialog(
         context,
@@ -148,7 +148,7 @@ class _TabsRouteState extends State<TabsRoute> {
           splashColor: Constants.AppTheme.glowSplashColor.auto,
           textStyle: const TextStyle(color: Constants.AppColors.red),
           onPressed: () {
-            ContentControl.deleteSongs(controller.data.map((e) => e.song.sourceId).toSet());
+            ContentControl.deleteSongs(controller.data.map((e) => e.data.sourceId).toSet());
             controller.close();
           },
         ),
@@ -326,7 +326,7 @@ class _SongsTabState extends State<_SongsTab> with AutomaticKeepAliveClientMixin
   Widget build(BuildContext context) {
     super.build(context);
     final songs = ContentControl.state.queues.all.songs;
-    final selectionController = SelectionControllers.of(context).song;
+    final controller = ContentSelectionControllersProvider.of(context).song;
     return RefreshIndicator(
       color: Colors.white,
       backgroundColor: ThemeControl.theme.colorScheme.primary,
@@ -336,19 +336,19 @@ class _SongsTabState extends State<_SongsTab> with AutomaticKeepAliveClientMixin
       notificationPredicate: (notification) {
         // Prevent pull to refresh when scrollbar is dragged.
         return !_scrollbarDragged &&
-            selectionController.notInSelection &&
+            controller.notInSelection &&
             notification.depth == 0;
       },
       child: SongListView(
         songs: songs,
         itemScrollController: itemScrollController,
-        selectionController: selectionController,
+        selectionController: controller,
         scrollbar: ScrollbarType.draggable,
         onScrollbarDragStart: _handleDragStart,
         onScrollbarDragEnd: _handleDragEnd,
         leading: SongSortListHeader(
           count: songs.length,
-          selectionController: selectionController,
+          selectionController: controller,
         ),
         onItemTap: () => ContentControl.setQueue(
           type: QueueType.all,
@@ -388,7 +388,7 @@ class _AlbumsTabState extends State<_AlbumsTab> with AutomaticKeepAliveClientMix
   Widget build(BuildContext context) {
     super.build(context);
     final albums = ContentControl.state.albums.values.toList();
-    final selectionController = SelectionControllers.of(context).album;
+    final controller = ContentSelectionControllersProvider.of(context).album;
     return RefreshIndicator(
       color: Colors.white,
       backgroundColor: ThemeControl.theme.colorScheme.primary,
@@ -398,19 +398,19 @@ class _AlbumsTabState extends State<_AlbumsTab> with AutomaticKeepAliveClientMix
       notificationPredicate: (notification) {
         // Prevent pull to refresh when scrollbar is dragged.
         return !_scrollbarDragged &&
-            selectionController.notInSelection &&
+            controller.notInSelection &&
             notification.depth == 0;
       },
       child: AlbumListView(
         albums: albums,
         itemScrollController: itemScrollController,
-        selectionController: selectionController,
+        selectionController: controller,
         scrollbar: ScrollbarType.draggable,
         onScrollbarDragStart: _handleDragStart,
         onScrollbarDragEnd: _handleDragEnd,
         leading: AlbumSortListHeader(
           count: albums.length,
-          selectionController: selectionController,
+          selectionController: controller,
         ),
       )
     );

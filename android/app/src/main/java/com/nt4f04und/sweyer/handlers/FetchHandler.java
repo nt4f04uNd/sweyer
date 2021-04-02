@@ -24,14 +24,13 @@ import com.nt4f04und.sweyer.player.Song;
 import com.nt4f04und.sweyer.services.DeletionService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import io.flutter.plugin.common.MethodChannel;
 
 public class FetchHandler {
 
-   public static class TaskSearchSongs extends AsyncTask<MethodChannel.Result, Void, List<String>> {
+   public static class SearchSongsTask extends AsyncTask<MethodChannel.Result, Void, List<String>> {
       private MethodChannel.Result result;
 
       @Override
@@ -119,9 +118,15 @@ public class FetchHandler {
    }
 
    /// Will return null if there's no artwork.
+   @Nullable
    public static byte[] getArtBytes(String path) {
       MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-      retriever.setDataSource(path);
+      try {
+         retriever.setDataSource(path);
+      } catch (IllegalArgumentException ex) {
+         // Catch when the content by specified path doesn't exist
+         return null;
+      }
       return retriever.getEmbeddedPicture();
    }
 

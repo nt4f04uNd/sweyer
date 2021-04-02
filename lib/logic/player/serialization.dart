@@ -50,8 +50,8 @@ abstract class JsonSerializer<R, S> {
 ///
 /// Saves only songs ids, so you have to search indexes in 'all' queue to restore.
 class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
-  QueueSerializer._internal();
-  static final QueueSerializer instance = QueueSerializer._internal();
+  QueueSerializer._();
+  static final instance = QueueSerializer._();
 
   @override
   String get fileName => 'queue.json';
@@ -93,8 +93,8 @@ class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
 /// Used to serialize song id map.
 class IdMapSerializer
     extends JsonSerializer<Map<String, int>, Map<String, int>> {
-  IdMapSerializer._internal();
-  static final IdMapSerializer instance = IdMapSerializer._internal();
+  IdMapSerializer._();
+  static final instance = IdMapSerializer._();
 
   @override
   String get fileName => 'id_map.json';

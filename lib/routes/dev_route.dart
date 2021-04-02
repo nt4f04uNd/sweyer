@@ -9,7 +9,6 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/api.dart' as API;
 import 'package:sweyer/constants.dart' as Constants;
 
 class DevRoute extends StatelessWidget {
@@ -54,7 +53,7 @@ class DevRoute extends StatelessWidget {
               children: <Widget>[
                 NFListTile(
                   title: Text(l10n.devStopService),
-                  onTap: API.GeneralHandler.stopService,
+                  onTap: GeneralChannel.stopService,
                 ),
                 NFListTile(
                   title: Text(l10n.devTestToast),

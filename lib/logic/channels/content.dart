@@ -7,27 +7,27 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
-abstract class ContentHandler {
-  static MethodChannel _contentChannel = const MethodChannel('contentChannel');
+abstract class ContentChannel {
+  static MethodChannel _channel = const MethodChannel('content_channel');
 
   static Future<List<String>> retrieveSongs() async {
-    return _contentChannel.invokeListMethod<String>('retrieveSongs');
+    return _channel.invokeListMethod<String>('retrieveSongs');
   }
 
   static Future<List<String>> retrieveAlbums() async {
-    return _contentChannel.invokeListMethod<String>('retrieveAlbums');
+    return _channel.invokeListMethod<String>('retrieveAlbums');
   }
 
   static Future<List<String>> retrievePlaylists() async {
-    return _contentChannel.invokeListMethod<String>('retrievePlaylists');
+    return _channel.invokeListMethod<String>('retrievePlaylists');
   }
 
   static Future<List<String>> retrieveArtists() async {
-    return _contentChannel.invokeListMethod<String>('retrieveArtists');
+    return _channel.invokeListMethod<String>('retrieveArtists');
   }
 
   static Future<bool> deleteSongs(Set<Song> songSet) async {
-    return _contentChannel.invokeMethod<bool>(
+    return _channel.invokeMethod<bool>(
       'deleteSongs',
       {'songs': jsonEncode(songSet.map((el) => el.toJson()).toList())},
     );

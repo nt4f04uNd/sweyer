@@ -13,15 +13,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
-import 'package:sweyer/api.dart' as API;
-
 /// Picks some value based on the provided `T` type of [Content].
 /// 
 /// Instead of `T`, you can explicitly specify [contentType].
+/// 
+/// The [fallback] can be specified in cases when the type is [Content].
+/// Generally, it's better never use it, but in some cases, like selection actions,
+/// that can react to [ContentSelectionController]s of mixed types, it is relevant to use it.
 V contentPick<T extends Content, V>({
   Type contentType,
   @required V song,
   @required V album,
+  V fallback,
 }) {
   assert(song != null && album != null);
   switch (contentType ?? T) {
@@ -29,6 +32,10 @@ V contentPick<T extends Content, V>({
       return song;
     case Album:
       return album;
+    case Content:
+      if (fallback != null)
+        return fallback;
+      throw UnimplementedError();
     default:
       throw UnimplementedError();
   }
@@ -161,7 +168,7 @@ class _ContentState {
   Map<int, String> albumArts = {};
 
   /// This is a map to store ids of duplicated songs in queue.
-  /// Its key is awlays negative, so when a song has negative id, you must
+  /// Its key is always negative, so when a song has negative id, you must
   /// look up for the mapping of its actual id in here.
   Map<String, int> idMap = {};
 
@@ -225,16 +232,13 @@ class _ContentState {
 
   //****************** Streams *****************************************************
   /// Controller for stream of queue changes.
-  StreamController<void> _songListChangeStreamController =
-      StreamController<void>.broadcast();
+  StreamController<void> _songListChangeStreamController = StreamController<void>.broadcast();
 
   /// Controller for stream of current song changes.
-  StreamController<Song> _songChangeStreamController =
-      StreamController<Song>.broadcast();
+  StreamController<Song> _songChangeStreamController = StreamController<Song>.broadcast();
 
   /// Controller for stream of song changes.
-  StreamController<Color> _artColorChangeStreamController =
-      StreamController<Color>.broadcast();
+  StreamController<Color> _artColorChangeStreamController = StreamController<Color>.broadcast();
 
   /// A stream of changes on queue.
   Stream<void> get onSongListChange => _songListChangeStreamController.stream;
@@ -436,6 +440,7 @@ abstract class ContentControl {
 
   /// todo: doc + doc differences with [playNext]
   static void playQueueNext(PersistentQueue queue) {
+    // assert(queue != null && queue.isNotEmpty);
     if (ContentControl.state.queues.type == QueueType.persistent) {
       final persistentQueue = ContentControl.state.queues.persistent;
       for (final song in persistentQueue.songs) {
@@ -458,6 +463,7 @@ abstract class ContentControl {
 
   /// todo: doc + doc differences with [addToQueue]
   static void addQueueToQueue(PersistentQueue queue) {
+    // assert(queue != null && queue.isNotEmpty);
     if (ContentControl.state.queues.type == QueueType.persistent) {
       final persistentQueue = ContentControl.state.queues.persistent;
       for (final song in persistentQueue.songs) {
@@ -564,7 +570,7 @@ abstract class ContentControl {
         type != QueueType.arbitrary) {
       state.idMap.clear();
       idMapSerializer.save(state.idMap);
-      NativeAudioPlayer.clearIdMap();
+      NativePlayer.clearIdMap();
     }
 
     if (emitChangeEvent) {
@@ -602,7 +608,7 @@ abstract class ContentControl {
     if (state.queues.current.isNotEmpty &&
         state._currentSongId != null &&
         state.queues.current.byId.getSongIndex(state._currentSongId) < 0) {
-      if (MusicPlayer.playerState == MusicPlayerState.PLAYING) {
+      if (MusicPlayer.playerState == PlayerState.PLAYING) {
         MusicPlayer.pause();
         MusicPlayer.play(state.queues.current.songs[0], silent: true);
       }
@@ -638,7 +644,7 @@ abstract class ContentControl {
     await contentPick<T, AsyncCallback>(
       contentType: contentType,
       song: () async {
-        final json = await API.ContentHandler.retrieveSongs();
+        final json = await ContentChannel.retrieveSongs();
         final List<Song> songs = [];
         for (String songStr in json) {
           songs.add(Song.fromJson(jsonDecode(songStr)));
@@ -653,7 +659,7 @@ abstract class ContentControl {
         }
       },
       album: () async {
-        final json = await API.ContentHandler.retrieveAlbums();
+        final json = await ContentChannel.retrieveAlbums();
         state.albums = {};
         for (String albumStr in json) {
           final albumJson = jsonDecode(albumStr);
@@ -784,7 +790,7 @@ abstract class ContentControl {
     }
 
     try {
-      final result = await API.ContentHandler.deleteSongs(songsSet);
+      final result = await ContentChannel.deleteSongs(songsSet);
       if (state._sdkInt >= 30 && result) {
         for (final id in idSet) {
           state.queues.all.byId.removeSong(id);

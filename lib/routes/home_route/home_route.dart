@@ -82,31 +82,6 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
   }
 }
 
-class SelectionControllers extends InheritedWidget {
-  const SelectionControllers({
-    Key key,
-    @required this.child,
-    @required this.map,
-  })  : assert(child != null),
-        assert(map != null),
-        super(key: key, child: child);
-
-  final Widget child;
-  final Map<Type, SelectionController<SelectionEntry>> map;
-
-  SelectionController<SongSelectionEntry> get song => map[Song];
-  SelectionController<AlbumSelectionEntry> get album => map[Album];
-
-  static SelectionControllers of(BuildContext context) {
-    return context.getElementForInheritedWidgetOfExactType<SelectionControllers>().widget;
-  }
-
-  @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
-    return false;
-  }
-}
-
 /// Main app route with song and album list tabs
 class MainScreen extends StatefulWidget {
   const MainScreen({Key key}) : super(key: key);
@@ -122,7 +97,7 @@ class _MainScreenState extends State<MainScreen>
         PlayerRouteControllerMixin {
   static const int _tabsLength = 2;
 
-  Map<Type, SelectionController<SelectionEntry>> selectionControllersMap;
+  Map<Type, ContentSelectionController> selectionControllersMap;
   TabController tabController;
   SlidableController playerRouteController;
   SlidableController drawerController;
@@ -142,18 +117,8 @@ class _MainScreenState extends State<MainScreen>
     });
 
     selectionControllersMap = {
-      Song: SelectionController<SongSelectionEntry>(
-        animationController: AnimationController(
-          vsync: this,
-          duration: kSelectionDuration,
-        ),
-      ),
-      Album: SelectionController<AlbumSelectionEntry>(
-        animationController: AnimationController(
-          vsync: this,
-          duration: kSelectionDuration,
-        ),
-      )
+      Song: ContentSelectionController.forContent<Song>(this),
+      Album: ContentSelectionController.forContent<Album>(this),
     };
 
     tabController = tabController = TabController(
@@ -192,10 +157,9 @@ class _MainScreenState extends State<MainScreen>
     final handled = _handleNecessaryPop();
     if (handled)
       return false;
-    if (selectionControllersMap.values.any((el) => el.inSelection)) {
-      for (final controller in selectionControllersMap.values) {
-        controller.close();
-      }
+    final activeSelectionController = ContentSelectionController.activeControllerNotifier.value;
+    if (activeSelectionController != null) {
+      activeSelectionController.close();
       return false;
     } else if (HomeRouter.instance.navigatorKey.currentState != null &&
                HomeRouter.instance.navigatorKey.currentState.canPop()) {
@@ -218,74 +182,34 @@ class _MainScreenState extends State<MainScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SelectionControllers(
+    HomeRouter.instance.home = TabsRoute(tabController);
+    return ContentSelectionControllersProvider(
       map: selectionControllersMap,
-      child: Builder(
-        builder: (context) {
-          final selectionControllers = SelectionControllers.of(context);
-          HomeRouter.instance.home = TabsRoute(tabController);
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: WillPopScope(
-              onWillPop: () => _handlePop(context),
-              child: Stack(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: kSongTileHeight),
-                    child: Router<HomeRoutes>(
-                      routerDelegate: HomeRouter.instance,
-                      routeInformationParser: HomeRouteInformationParser(),
-                      routeInformationProvider: HomeRouteInformationProvider(),
-                      backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                        parent: Router.of(context).backButtonDispatcher,
-                        necessaryPopHandler: _handleNecessaryPop,
-                      ),
-                    ),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: WillPopScope(
+          onWillPop: () => _handlePop(context),
+          child: Stack(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: kSongTileHeight),
+                child: Router<HomeRoutes>(
+                  routerDelegate: HomeRouter.instance,
+                  routeInformationParser: HomeRouteInformationParser(),
+                  routeInformationProvider: HomeRouteInformationProvider(),
+                  backButtonDispatcher: HomeRouteBackButtonDispatcher(
+                    parent: Router.of(context).backButtonDispatcher,
+                    necessaryPopHandler: _handleNecessaryPop,
                   ),
-                  const PlayerRoute(),
-                  SelectionBottomBar(
-                    controller: selectionControllers.song,
-                    left: [
-                      ActionsSelectionTitle(
-                        controller: selectionControllers.song,
-                      )
-                    ],
-                    right: [
-                      GoToAlbumSelectionAction(
-                        controller: selectionControllers.song,
-                      ),
-                      PlayNextSelectionAction<Song>(
-                        controller: selectionControllers.song,
-                      ),
-                      AddToQueueSelectionAction<Song>(
-                        controller: selectionControllers.song,
-                      ),
-                    ],
-                  ),
-                  SelectionBottomBar(
-                    controller: selectionControllers.album,
-                    left: [
-                      ActionsSelectionTitle(
-                        controller: selectionControllers.album,
-                      )
-                    ],
-                    right: [
-                      PlayNextSelectionAction<Album>(
-                        controller: selectionControllers.album,
-                      ),
-                      AddToQueueSelectionAction<Album>(
-                        controller: selectionControllers.album,
-                      ),
-                    ],
-                  ),
-                  DrawerWidget(
-                    canBeOpened: () => drawerCanBeOpened,
-                  ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+              const PlayerRoute(),
+              DrawerWidget(
+                canBeOpened: () => drawerCanBeOpened,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -11,7 +11,6 @@ package com.nt4f04und.sweyer.channels;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.handlers.NotificationHandler;
 import com.nt4f04und.sweyer.handlers.PlayerHandler;
 import com.nt4f04und.sweyer.handlers.QueueHandler;
@@ -19,9 +18,6 @@ import com.nt4f04und.sweyer.player.Song;
 import com.nt4f04und.sweyer.services.MusicService;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
-
-import java.util.HashMap;
 
 import androidx.annotation.Nullable;
 
@@ -34,7 +30,7 @@ public enum PlayerChannel {
 
    public void init(BinaryMessenger messenger) {
       if (channel == null) {
-         channel = new MethodChannel(messenger, "playerChannel");
+         channel = new MethodChannel(messenger, "player_channel");
          channel.setMethodCallHandler(this::onMethodCall);
       }
    }

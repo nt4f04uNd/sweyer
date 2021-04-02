@@ -25,9 +25,6 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.util.Log;
-
-/** Every time you use this class, don't forget to try...catch its method calls */
 public abstract class PlayerHandler {
 
     private static Player player;
@@ -118,7 +115,6 @@ public abstract class PlayerHandler {
         PrefsHandler.setSongId(song.id);
         NotificationHandler.updateNotification(true, PlayerHandler.isLooping());
 
-        player.setAwake(GeneralHandler.getAppContext(), true);
         setUri(song.id);
 
         if (AudioFocusHandler.focusState != AudioManager.AUDIOFOCUS_GAIN)
@@ -216,10 +212,8 @@ public abstract class PlayerHandler {
         player.play(GeneralHandler.getAppContext());
         MusicService.startService();
         MediaSessionHandler.updatePlaybackState();
-        PrefsHandler.setSongIsPlaying(true);
         callSetState(PlayerState.PLAYING);
         NotificationHandler.updateNotification(isPlaying(), isLooping());
-        player.setAwake(GeneralHandler.getAppContext(), true);
     }
 
     public static void barePause() {
@@ -228,7 +222,6 @@ public abstract class PlayerHandler {
         player.pause();
         MusicService.stopForeground();
         MediaSessionHandler.updatePlaybackState();
-        PrefsHandler.setSongIsPlaying(false);
         callSetState(PlayerState.PAUSED);
     }
 
@@ -238,7 +231,6 @@ public abstract class PlayerHandler {
         timeoutHandler.removeCallbacksAndMessages(null);
         player.pause();
         MediaSessionHandler.updatePlaybackState();
-        PrefsHandler.setSongIsPlaying(false);
         callSetState(PlayerState.PAUSED);
         NotificationHandler.updateNotification(false, isLooping());
     }
@@ -248,7 +240,6 @@ public abstract class PlayerHandler {
         timeoutHandler.removeCallbacksAndMessages(null);
         player.release();
         MediaSessionHandler.updatePlaybackState();
-        PrefsHandler.setSongIsPlaying(false);
         callSetState(PlayerState.PAUSED);
         NotificationHandler.updateNotification(false, isLooping());
         WakelockHandler.release();
@@ -258,67 +249,47 @@ public abstract class PlayerHandler {
 
     // ONLY NATIVE PART METHODS (add more extended playback handling and are called only on native part) ///////////////
     public static void playPause() {
-        try {
-            if (player.isUriNull())
-                if (GeneralHandler.activityExists()) {
-                    // Do nothing if activity exists, but url is null
-                    return;
-                } else {
-                    // Fetch current song if activity does not exists
-                    QueueHandler.initCurrentSong();
-                }
+        if (player.isUriNull())
+            if (GeneralHandler.activityExists()) {
+                // Do nothing if activity exists, but url is null
+                return;
+            } else {
+                // Fetch current song if activity does not exists
+                QueueHandler.initCurrentSong();
+            }
 
-            if (isPlaying())
-                pause();
-            else resume();
-
-        } catch (IllegalStateException e) {
-            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
-        }
+        if (isPlaying())
+            pause();
+        else
+            resume();
     }
 
     public static void playNext() {
-        try {
-            if (GeneralHandler.activityExists()) {
-                NativeEventsChannel.instance.success(Constants.eventsChannel.GENERALIZED_PLAY_NEXT);
-            } else {
-                QueueHandler.restoreQueue();
-                seek(0);
-                play(QueueHandler.getNextSong(),null);
-            }
-        } catch (IllegalStateException e) {
-            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        if (GeneralHandler.activityExists()) {
+            NativeEventsChannel.instance.success(Constants.eventsChannel.PLAY_NEXT);
+        } else {
+            QueueHandler.restoreQueue();
+            seek(0);
+            play(QueueHandler.getNextSong(),null);
         }
     }
 
     public static void playPrev() {
-        try {
-            if (GeneralHandler.activityExists()) {
-                NativeEventsChannel.instance.success(Constants.eventsChannel.GENERALIZED_PLAY_PREV);
-            } else {
-                QueueHandler.restoreQueue();
-                seek(0);
-                play(QueueHandler.getPrevSong(), null);
-            }
-        } catch (IllegalStateException e) {
-            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
+        if (GeneralHandler.activityExists()) {
+            NativeEventsChannel.instance.success(Constants.eventsChannel.PLAY_PREV);
+        } else {
+            QueueHandler.restoreQueue();
+            seek(0);
+            play(QueueHandler.getPrevSong(), null);
         }
     }
 
     public static void rewind() {
-        try {
-           player.seek(getPosition() - 3000);
-        } catch (IllegalStateException e) {
-            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
-        }
+        player.seek(getPosition() - 3000);
     }
 
     public static void fastForward() {
-        try {
-           player.seek(getPosition() + 3000);
-        } catch (IllegalStateException e) {
-            Log.e(Constants.LogTag, String.valueOf(e.getMessage()));
-        }
+        player.seek(getPosition() + 3000);
     }
 
     public static void switchLooping() {
@@ -355,9 +326,7 @@ public abstract class PlayerHandler {
         positionHandler.removeCallbacksAndMessages(null);
     }
 
-    /**
-     * Callback that is passed to handler to have a stream of position updates
-     */
+    /** Callback that is passed to handler to have a stream of position update */
     private static final class UpdatePositionRunnable implements Runnable {
         private final WeakReference<Handler> handlerRef;
 

@@ -31,13 +31,6 @@ abstract class Prefs {
   static final Pref<int> songIdIntNullable =
       Pref<int>(key: 'song_id', defaultValue: null);
 
-  /// Last playing track id.
-  /// Used on native side only to allow service be sticky
-  ///
-  /// todo: not used properly yet, and service is not sticky for now
-  static final Pref<bool> songIsPlayingBool =
-      Pref<bool>(key: 'song_is_playing', defaultValue: false);
-
   /// Loop mode. Used on native side.
   static final Pref<bool> loopModeBool =
       Pref<bool>(key: 'loop_mode', defaultValue: false);
@@ -93,8 +86,8 @@ abstract class Prefs {
 }
 
 class SearchHistory {
-  SearchHistory._internal();
-  static final SearchHistory instance = SearchHistory._internal();
+  SearchHistory._();
+  static final instance = SearchHistory._();
 
   List<String> history;
 

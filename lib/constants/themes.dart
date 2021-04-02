@@ -10,8 +10,6 @@ import 'package:sweyer/sweyer.dart';
 
 import 'colors.dart';
 
-// todo: nt4f04unds_widgets
-
 abstract class AppTheme {
   static const Color defaultPrimaryColor = AppColors.deepPurpleAccent;
 
@@ -74,7 +72,7 @@ abstract class AppTheme {
         onPrimary: Colors.white,
         secondary: AppColors.eee,
         secondaryVariant: Colors.white,
-        // todo: Temporarily used for text in [NFButtons]
+        // todo: temporarily used for text in [NFButtons], remove when it's removed
         onSecondary: defaultPrimaryColor,
         error: const Color(0xffed3b3b),
         onError: Colors.white,
@@ -202,7 +200,7 @@ abstract class AppTheme {
         onPrimary: AppColors.almostWhite,
         secondary: AppColors.grey,
         secondaryVariant: Colors.black,
-        // todo: Temporarily used for [NFButtons]
+        // todo: temporarily used for text in [NFButtons], remove when it's removed
         onSecondary: AppColors.almostWhite,
         error: const Color(0xffed3b3b),
         onError: AppColors.almostWhite,

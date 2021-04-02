@@ -94,8 +94,8 @@ public abstract class AudioFocusHandler {
             focusState = focusChange;
             try {
                 switch (focusChange) {
-                    // NOTE THAT WE CALL HERE BARE PLAYER FUNCTIONS
-                    // THIS IS BECAUSE IN PLAYER HANDLER `pause` AND `resume` FUNCTIONS CALL request AND abandon FOCUS METHODS
+                    // Note that we call here "bare" player functions
+                    // Thus is because in PlayerHandler `pause` and `resume` functions request and abandon focus
                     case AudioManager.AUDIOFOCUS_GAIN: {
                         PlayerHandler.bareResume();
                         break;
@@ -109,7 +109,7 @@ public abstract class AudioFocusHandler {
                         break;
                     }
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: {
-                        // TODO: [NR] implement volume change
+                        // TODO: implement volume change
                         PlayerHandler.barePause();
                         break;
                     }

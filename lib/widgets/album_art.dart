@@ -39,10 +39,10 @@ class AlbumArt extends StatelessWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-  })  : size = kSongTileArtSize,
-        highRes = false,
-        currentIndicatorScale = null,
-        super(key: key);
+  }) : size = kSongTileArtSize,
+       highRes = false,
+       currentIndicatorScale = null,
+       super(key: key);
 
   /// Creates an art for the [ALbumTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
@@ -53,10 +53,10 @@ class AlbumArt extends StatelessWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-  })  : size = kAlbumTileArtSize,
-        highRes = false,
-        currentIndicatorScale = 1.17,
-        super(key: key);
+  }) : size = kAlbumTileArtSize,
+       highRes = false,
+       currentIndicatorScale = 1.17,
+       super(key: key);
 
   /// Creates an art for the [PlayerRoute].
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.albumTile].
@@ -67,10 +67,10 @@ class AlbumArt extends StatelessWidget {
     this.size,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
-  })  : current = false,
-        highRes = true,
-        currentIndicatorScale = null,
-        super(key: key);
+  }) : current = false,
+       highRes = true,
+       currentIndicatorScale = null,
+       super(key: key);
 
   final String path;
 
@@ -174,8 +174,8 @@ class AlbumArt extends StatelessWidget {
   }
 }
 
-/// Widget that shows rotating album art
-/// Used in bottom track panel and starts rotating when track starts playing
+/// Widget that shows rotating album art.
+/// Used in bottom track panel and starts rotating when track starts playing.
 class AlbumArtRotating extends StatefulWidget {
   const AlbumArtRotating({
     Key key,
@@ -204,8 +204,7 @@ class AlbumArtRotating extends StatefulWidget {
   AlbumArtRotatingState createState() => AlbumArtRotatingState();
 }
 
-class AlbumArtRotatingState extends State<AlbumArtRotating>
-    with SingleTickerProviderStateMixin {
+class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerProviderStateMixin {
   AnimationController controller;
 
   @override

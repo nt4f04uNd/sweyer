@@ -14,7 +14,6 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
-import android.media.session.MediaSession;
 import android.os.Build;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
@@ -111,8 +110,10 @@ public class NotificationHandler {
       // Create the NotificationChannel, but only on API 26+ because
       // the NotificationChannel class is new and not in the support library
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-         CharSequence name = "Управление музыкой";
-         String description = "Канал уведомлений для управления фоновым воспроизведением музыки";
+         CharSequence name = Locale.getDefault().getLanguage().contentEquals("ru") ? "Музыка" : "Music";
+         String description = Locale.getDefault().getLanguage().contentEquals("ru")
+            ? "Уведомление для управления воспроизведением музыки"
+            : "Media playback control notification";
          int importance = NotificationManager.IMPORTANCE_LOW;
 
          NotificationChannel channel = new NotificationChannel(Constants.player.NOTIFICATION_CHANNEL_ID, name, importance);
@@ -138,7 +139,7 @@ public class NotificationHandler {
       String artist = song.artist;
 
       // Artist check
-      if (artist.equals("<unknown>"))
+      if (artist.equals("<unknown>")) // TODO: better handling of locales here
          artist = Locale.getDefault().getLanguage().contentEquals("ru") ? "Неизвестный исполнитель" : "Unknown artist";
 
       int icon_loop;

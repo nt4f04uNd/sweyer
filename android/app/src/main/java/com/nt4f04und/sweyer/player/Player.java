@@ -28,7 +28,6 @@ public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCom
     private boolean looping = false;
     private Uri uri;
     private double volume = 1.0;
-    private boolean stayAwake;
     private PlayerResourceState resourceState = PlayerResourceState.RELEASED;
     private boolean playing = false;
     private int shouldSeekTo = -1;
@@ -37,15 +36,6 @@ public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCom
 
     protected static boolean objectEquals(Object o1, Object o2) {
         return o1 == null && o2 == null || o1 != null && o1.equals(o2);
-    }
-
-    public void setAwake(Context context, boolean stayAwake) {
-        if (this.stayAwake != stayAwake) {
-            this.stayAwake = stayAwake;
-            if (resourceState != PlayerResourceState.RELEASED && this.stayAwake) {
-                player.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
-            }
-        }
     }
 
     /** Used to check cases when url is null (e.g. flutter hasn't setup it up for
@@ -202,19 +192,7 @@ public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCom
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        //Invoked when there has been an error during an asynchronous operation
-        switch (what) {
-            case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                Log.e("MediaPlayer Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
-                break;
-            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                Log.e("MediaPlayer Error", "MEDIA ERROR SERVER DIED " + extra);
-                break;
-            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                Log.e("MediaPlayer Error", "MEDIA ERROR UNKNOWN " + extra);
-                break;
-        }
-        PlayerHandler.handleError(new Exception("" + what));
+        PlayerHandler.handleError(new Exception("UNEXPECTED_ERROR"));
         return true;
     }
 
@@ -241,7 +219,7 @@ public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCom
         try {
             player.setDataSource(appContext, uri);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to access resource", e);
+            throw new RuntimeException("UNABLE_ACCESS_RESOURCE_ERROR", e);
         }
     }
 

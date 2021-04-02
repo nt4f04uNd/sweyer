@@ -20,6 +20,9 @@ import 'settings_route/settings_route.dart';
 import 'settings_route/licenses_route.dart';
 import 'dev_route.dart';
 
+final RouteObserver<Route> routeObserver = RouteObserver();
+final RouteObserver<Route> homeRouteObserver = RouteObserver();
+
 abstract class _Routes<T extends Object> extends Equatable {
   const _Routes(this.location, [this.arguments]);
 
@@ -135,7 +138,7 @@ class AppRouter extends RouterDelegate<AppRoutes>
        PopNavigatorRouterDelegateMixin {
 
   AppRouter._();
-  static final AppRouter instance = AppRouter._();
+  static final instance = AppRouter._();
 
   List<AppRoutes> __routes = [AppRoutes.home];
   @override
@@ -223,7 +226,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
        PopNavigatorRouterDelegateMixin {
 
   HomeRouter._();
-  static final HomeRouter instance = HomeRouter._();
+  static final instance = HomeRouter._();
 
   List<HomeRoutes> __routes = [HomeRoutes.tabs];
   @override
@@ -242,17 +245,17 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   static final defaultTransitionSetttings = StackFadeRouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto);
 
   Widget home;
-  AppSearchDelegate _searchDelegate;
+  SearchDelegate _searchDelegate;
 
   @override
   void goto(HomeRoutes route) {
     super.goto(route);
     if (route == HomeRoutes.search) {
       if (_searchDelegate == null)
-        _searchDelegate = AppSearchDelegate();
+        _searchDelegate = SearchDelegate();
       final SearchArguments arguments = route.arguments;
       _searchDelegate.query = arguments.query;
-      _searchDelegate.disableAutoKeyboard = !arguments.openKeyboard;
+      _searchDelegate.autoKeyboard = arguments.openKeyboard;
     }
   }
 
@@ -268,6 +271,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
+      observers: [homeRouteObserver],
       onPopPage: _handlePopPage,
       pages: <Page<void>>[
         for (final route in _routes)

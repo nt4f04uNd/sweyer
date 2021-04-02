@@ -5,12 +5,10 @@
 
 package com.nt4f04und.sweyer.handlers;
 
-import android.content.Context;
 import android.content.pm.PackageManager;
 
 import com.nt4f04und.sweyer.Constants;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;

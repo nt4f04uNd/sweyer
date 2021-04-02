@@ -11,7 +11,6 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:sweyer/api.dart' as API;
 import 'package:sweyer/constants.dart' as Constants;
 
 abstract class ThemeControl {
@@ -127,7 +126,7 @@ abstract class ThemeControl {
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
-    API.GeneralHandler.reloadArtPlaceholder(color);
+    GeneralChannel.reloadArtPlaceholder(color);
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(primaryColorChangeDuration));
       App.rebuildAllChildren();
@@ -144,7 +143,7 @@ abstract class ThemeControl {
         colorScheme: Constants.AppTheme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
-          // todo: Temporarily used for [NFButtons]
+          // todo: temporarily used for text in [NFButtons], remove when it's removed
         ),
         tooltipTheme: Constants.AppTheme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(

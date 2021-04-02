@@ -28,7 +28,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     with TickerProviderStateMixin {
   AnimationController controller;
-  StreamSubscription<MusicPlayerState> _playerStateSubscription;
+  StreamSubscription<PlayerState> _playerStateSubscription;
 
   String _animation;
   set animation(String value) {
@@ -44,7 +44,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    if (MusicPlayer.playerState == MusicPlayerState.PLAYING) {
+    if (MusicPlayer.playerState == PlayerState.PLAYING) {
       _animation = 'pause';
     } else {
       controller.value = 1.0;
@@ -52,11 +52,11 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     }
 
     _playerStateSubscription = MusicPlayer.onStateChange.listen((event) {
-      /// Do not handle [MusicPlayerState.PLAYING] as it's not the state the player will remain for long time.
+      /// Do not handle [PlayerState.PLAYING] as it's not the state the player will remain for long time.
       /// It will start playing next song immediately.
-      if (event == MusicPlayerState.PLAYING) {
+      if (event == PlayerState.PLAYING) {
         _pause();
-      } else if (event == MusicPlayerState.PAUSED) {
+      } else if (event == PlayerState.PAUSED) {
         _play();
       }
     });

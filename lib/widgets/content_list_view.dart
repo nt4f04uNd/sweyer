@@ -23,6 +23,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Key key,
     @required this.list,
     this.itemScrollController,
+    this.selectionController,
     this.onItemTap,
     this.contentType,
   }) : super(key: key);
@@ -30,6 +31,8 @@ class ContentListView<T extends Content> extends StatelessWidget {
 
   /// Content list.
   final List<Content> list;
+
+  final SelectionController<SelectionEntry<T>> selectionController;
 
   final ItemScrollController itemScrollController;
 
@@ -45,11 +48,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
       contentType: contentType,
       song: () => SongListView(
         songs: list,
+        selectionController: selectionController,
         onItemTap: onItemTap,
         itemScrollController: itemScrollController,
       ),
       album: () => AlbumListView(
         albums: list,
+        selectionController: selectionController,
         onItemTap: onItemTap,
         itemScrollController: itemScrollController,
       ),
@@ -108,7 +113,7 @@ class SongListView extends StatefulWidget {
 
   /// If specified, list will be built as [new SongTile.selectable],
   /// otherwise [new SongTile] is used. 
-  final SelectionController<SongSelectionEntry> selectionController;
+  final SelectionController<SelectionEntry> selectionController;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
@@ -196,7 +201,7 @@ class _SongListViewState extends State<SongListView> {
               clickBehavior: widget.songClickBehavior,
               variant: widget.songTileVariant,
               currentTest: currentTest,
-              selected: widget.selectionController.data.contains(SongSelectionEntry(index: index)),
+              selected: widget.selectionController.data.contains(SelectionEntry<Song>(index: index)),
               onTap: widget.onItemTap,
             );
           }
@@ -279,7 +284,7 @@ class AlbumListView extends StatefulWidget {
 
   /// If specified, list will be built as [new AlbumTile.selectable],
   /// otherwise [new AlbumTile] is used. 
-  final SelectionController<AlbumSelectionEntry> selectionController;
+  final SelectionController<SelectionEntry> selectionController;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
@@ -365,7 +370,7 @@ class _AlbumListViewState extends State<AlbumListView> {
               album: item,
               currentTest: currentTest,
               onTap: widget.onItemTap,
-              selected: widget.selectionController.data.contains(AlbumSelectionEntry(index: index)),
+              selected: widget.selectionController.data.contains(SelectionEntry<Album>(index: index)),
               selectionController: widget.selectionController,
             );
           }

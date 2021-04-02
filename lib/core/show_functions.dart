@@ -13,8 +13,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 class ShowFunctions extends NFShowFunctions {
   /// Empty constructor will allow enheritance.
   ShowFunctions();
-  ShowFunctions._internal();
-  static final ShowFunctions instance = ShowFunctions._internal();
+  ShowFunctions._();
+  static final instance = ShowFunctions._();
 
   /// Shows toast from [Fluttertoast] with already set [backgroundColor] to `Color.fromRGBO(18, 18, 18, 1)`
   Future<bool> showToast({

@@ -11,16 +11,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/api.dart' as API;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'routes/routes.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-
-final RouteObserver<Route> routeObserver = RouteObserver();
-final RouteObserver<Route> homeRouteObserver = RouteObserver();
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
@@ -90,7 +86,7 @@ void main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
-    API.EventsHandler.init();
+    EventsChannel.init();
     await ThemeControl.init();
     ThemeControl.initSystemUi();
     await Permissions.init();

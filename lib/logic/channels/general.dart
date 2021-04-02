@@ -7,20 +7,19 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart';
 
-abstract class GeneralHandler {
-  static MethodChannel _generalChannel = const MethodChannel('generalChannel');
+abstract class GeneralChannel {
+  static MethodChannel _channel = const MethodChannel('general_channel');
 
   /// Checks if open intent is view (user tried to open file with app)
   static Future<bool> isIntentActionView() async {
-    return _generalChannel.invokeMethod<bool>('isIntentActionView');
+    return _channel.invokeMethod<bool>('isIntentActionView');
   }
 
   static Future<bool> stopService() async {
-    return _generalChannel.invokeMethod<bool>('stopService');
+    return _channel.invokeMethod<bool>('stopService');
   }
 
   static Future<bool> reloadArtPlaceholder(Color color) async {
-    return _generalChannel.invokeMethod<bool>(
-        'reloadArtPlaceholder', color.value);
+    return _channel.invokeMethod<bool>('reloadArtPlaceholder', color.value);
   }
 }

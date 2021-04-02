@@ -8,7 +8,6 @@ package com.nt4f04und.sweyer.channels;
 import android.app.Activity;
 import android.util.Log;
 
-import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
 import com.nt4f04und.sweyer.handlers.QueueHandler;
 import com.nt4f04und.sweyer.services.MusicService;
@@ -27,7 +26,7 @@ public enum GeneralChannel {
     public void init(BinaryMessenger messenger, FlutterActivity activity) {
         if (channel == null) {
             this.activity = activity;
-            channel = new MethodChannel(messenger, "generalChannel");
+            channel = new MethodChannel(messenger, "general_channel");
             channel.setMethodCallHandler(this::onMethodCall);
         }
     }

@@ -113,13 +113,13 @@ class _Bar extends StatefulWidget {
 class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
   int index;
   Timer timer;
-  StreamSubscription<MusicPlayerState> _playerStateSubscription;
+  StreamSubscription<PlayerState> _playerStateSubscription;
 
   @override
   void initState() {
     super.initState();
     index = math.Random().nextInt(widget.values.length);
-    if (MusicPlayer.playerState == MusicPlayerState.PLAYING) {
+    if (MusicPlayer.playerState == PlayerState.PLAYING) {
       start();
     }
     _playerStateSubscription = MusicPlayer.onStateChange.listen(_handlePlayerStateChange);
@@ -127,11 +127,11 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
 
   void _handlePlayerStateChange(state) {
     switch (state) {
-      case MusicPlayerState.PLAYING:
+      case PlayerState.PLAYING:
         start();
         break;
-      case MusicPlayerState.PAUSED:
-      case MusicPlayerState.COMPLETED:
+      case PlayerState.PAUSED:
+      case PlayerState.COMPLETED:
       default:
         stop();
         break;

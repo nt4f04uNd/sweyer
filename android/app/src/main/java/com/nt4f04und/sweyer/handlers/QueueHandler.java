@@ -13,7 +13,6 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
@@ -35,8 +34,8 @@ import android.util.Log;
 import io.flutter.view.FlutterMain;
 
 /**
- * Contains all data and methods needed to play songs on service side
- * Like temporary container for queue, when activity is destroyed, for service to continue functioning as normal
+ * Holds songs data on service side.
+ * It's a temporary container for queue, when activity is destroyed, for service to continue functioning as normal.
  */
 public class QueueHandler {
 
@@ -45,7 +44,6 @@ public class QueueHandler {
    public static HashMap<String, Integer> idMap = null;
    /**
     * Normally, it will come on activity start from dart code
-    * But in service a have added additional check for cases when android restarts it (cause service is sticky)
     */
    private static Song currentSong;
    // Primary app color to blend it into album art mask
@@ -61,7 +59,7 @@ public class QueueHandler {
       protected byte[] doInBackground(Song... newSong) {
          byte[] bytes = null;
          Song song = newSong[0];
-         if(song == null) {
+         if (song == null) {
             song = currentSong;
          }
          if (song != null) {
@@ -79,7 +77,7 @@ public class QueueHandler {
       protected void onPostExecute(byte[] bytes) {
          super.onPostExecute(bytes);
          // Needed to not apply async task result for stale arts
-         if(songId != null && songId.equals(QueueHandler.currentSong.id)) {
+         if (songId != null && songId.equals(QueueHandler.currentSong.id)) {
             currentSongArtBytes = bytes;
             NotificationHandler.updateNotification(true, PlayerHandler.isLooping());
             artAsyncTask = null;

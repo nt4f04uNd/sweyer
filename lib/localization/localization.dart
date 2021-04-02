@@ -114,7 +114,7 @@ class AppLocalizations {
     );
   }
 
-  // todo: currently unused
+  // NOTE: currently unused
   String get shuffled {
     return Intl.message(
       "Shuffled",
@@ -122,7 +122,7 @@ class AppLocalizations {
     );
   }
 
-  // todo: currently unused
+  // NOTE: currently unused
   String get modified {
     return Intl.message(
       "Modified",

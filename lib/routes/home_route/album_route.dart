@@ -21,8 +21,7 @@ class AlbumRoute extends StatefulWidget {
   _AlbumRouteState createState() => _AlbumRouteState();
 }
 
-class _AlbumRouteState extends State<AlbumRoute>
-    with TickerProviderStateMixin, SongSelectionMixin {
+class _AlbumRouteState extends State<AlbumRoute> with SingleTickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
   AnimationController appBarController;
 
@@ -46,22 +45,8 @@ class _AlbumRouteState extends State<AlbumRoute>
     super.dispose();
   }
 
-  @override
-  void handleSongSelection() {
-    setState(() {
-      /*  update appbar and tiles on selection
-      primarily needed to update the selection number in [SelectionAppBar] */
-    });
-  }
-
-  @override
-  void handleSongSelectionStatus(AnimationStatus status) {
-    setState(() {/* update appbar and tiles on selection status */});
-  }
-
   void _handleScroll() {
-    appBarController.value =
-        1.0 - scrollController.offset / _albumSectionHeight;
+    appBarController.value = 1.0 - scrollController.offset / _albumSectionHeight;
   }
 
   Widget _buildAlbumInfo() {

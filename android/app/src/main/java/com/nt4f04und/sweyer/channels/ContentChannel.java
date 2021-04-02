@@ -9,10 +9,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.handlers.FetchHandler;
-import com.nt4f04und.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +24,7 @@ public enum ContentChannel {
 
    public void init(BinaryMessenger messenger) {
       if (channel == null) {
-         channel = new MethodChannel(messenger, "contentChannel");
+         channel = new MethodChannel(messenger, "content_channel");
          channel.setMethodCallHandler(this::onMethodCall);
       }
    }
@@ -46,11 +43,11 @@ public enum ContentChannel {
       try {
          switch (call.method) {
             case "retrieveSongs": {
-               new FetchHandler.TaskSearchSongs().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               new FetchHandler.SearchSongsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
                break;
             }
             case "retrieveAlbums": {
-               new FetchHandler.TaskSearchAlbums().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               new FetchHandler.SearchSongsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
                break;
             }
             case "deleteSongs": {

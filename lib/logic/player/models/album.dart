@@ -9,6 +9,8 @@ import 'package:sweyer/sweyer.dart';
 
 part 'album.g.dart';
 
+
+/// TODO: what do i do with methods from [Queue]? they are not quite valid here
 @JsonSerializable()
 class Album extends PersistentQueue implements Content {
   @override
@@ -24,7 +26,11 @@ class Album extends PersistentQueue implements Content {
   final int numberOfSongs;
 
   /// Gets album normalized year.
-  int get year => lastYear < 1000 ? DateTime.now().year : lastYear;
+  int get year {
+    return lastYear == null || lastYear < 1000
+      ? DateTime.now().year
+      : lastYear;
+  }
 
   /// Returns songs that belong to this album.
   @override

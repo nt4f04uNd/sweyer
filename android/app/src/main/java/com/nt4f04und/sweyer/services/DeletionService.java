@@ -26,11 +26,8 @@ import com.nt4f04und.sweyer.player.Song;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import androidx.annotation.Nullable;
-
-import org.json.JSONObject;
 
 public class DeletionService extends Service {
 
@@ -77,7 +74,7 @@ public class DeletionService extends Service {
                        0,
                        0);
             } catch (IntentSender.SendIntentException e) {
-               Log.e(Constants.LogTag, "deletion intent error: " + e.getMessage());
+               Log.e(Constants.LogTag, "DELETION_INTENT_ERROR: " + e.getMessage());
             }
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();

@@ -11,81 +11,66 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Self explanatory. Indicates the state of the audio player.
-enum MusicPlayerState {
+/// Indicates the state of the audio player.
+enum PlayerState {
   PLAYING,
   PAUSED,
   COMPLETED,
 }
 
-/// This represents an interface to communicate with native player methods
+/// A list of all error player can throw or emit to the [NativePlayer.onError] stream.
+abstract class NativePlayerErrors {
+  /// Resource can't be accessed.
+  /// Thrown from methods [play] and [setUri].
+  static const String UNABLE_ACCESS_RESOURCE_ERROR = 'UNABLE_ACCESS_RESOURCE_ERROR';
+
+  /// Player encountered unexpected playback error.
+  static const String UNEXPECTED_ERROR = 'UNEXPECTED_ERROR';
+}
+
+/// This represents an interface to communicate with native player.
 ///
 /// It holds methods to play, loop, pause, stop, seek the audio, and some useful
 /// hooks for handlers and callbacks.
 ///
 /// The initialization part is located at native side.
-abstract class NativeAudioPlayer {
-  static final MethodChannel _channel = const MethodChannel('playerChannel')
+abstract class NativePlayer {
+  static final MethodChannel _channel = const MethodChannel('player_channel')
     ..setMethodCallHandler(platformCallHandler);
+  static final StreamController<PlayerState> _playerStateController = StreamController<PlayerState>.broadcast();
+  static final StreamController<Duration> _positionController =  StreamController<Duration>.broadcast();
+  static final StreamController<Duration> _durationController = StreamController<Duration>.broadcast();
+  static final StreamController<PlatformException> _errorController = StreamController<PlatformException>.broadcast();
+  static final StreamController<bool> _loopController = StreamController<bool>.broadcast();
 
-  static final StreamController<MusicPlayerState> _playerStateController =
-      StreamController<MusicPlayerState>.broadcast();
-
-  static final StreamController<Duration> _positionController =
-      StreamController<Duration>.broadcast();
-
-  static final StreamController<Duration> _durationController =
-      StreamController<Duration>.broadcast();
-
-  static final StreamController<void> _completionController =
-      StreamController<void>.broadcast();
-
-  static final StreamController<PlatformException> _errorController =
-      StreamController<PlatformException>.broadcast();
-
-  static final StreamController<bool> _loopController =
-      StreamController<bool>.broadcast();
-
-  /// Enables more verbose logging.
-  static bool logEnabled = false;
-
-  static MusicPlayerState _internalState = MusicPlayerState.PAUSED;
-  static MusicPlayerState get state => _internalState;
+  static PlayerState _internalState = PlayerState.PAUSED;
+  static PlayerState get state => _internalState;
 
   static bool _looping = false;
   static bool get looping => _looping;
 
-  /// It is observable, that means on every set we emit event to [onStateChange] stream
-  static set state(MusicPlayerState value) {
+  /// Will emit event to [onStateChange] stream.
+  static set _state(PlayerState value) {
     _playerStateController.add(value);
     _internalState = value;
   }
 
-  /// It is observable, that means on every set we emit event to [onLoopSwitch] stream
-  static set loopMode(bool value) {
+  /// Will emit event to [onLoopSwitch] stream.
+  static set _loopMode(bool value) {
     _loopController.add(value);
     _looping = value;
   }
 
   /// Stream of changes on player state.
-  static Stream<MusicPlayerState> get onStateChange =>
-      _playerStateController.stream;
+  static Stream<PlayerState> get onStateChange => _playerStateController.stream;
 
   /// Stream of changes on audio position.
   ///
   /// Roughly fires every 500 milliseconds. Will continuously update the
-  /// position of the playback if the status is [MusicPlayerState.PLAYING].
+  /// position of the playback if the status is [PlayerState.PLAYING].
   ///
   /// You can use it on a progress bar, for instance.
   static Stream<Duration> get onPosition => _positionController.stream;
-
-  /// Stream of player completions.
-  ///
-  /// Events are sent every time an audio is finished, therefore no event is
-  /// sent when an audio is paused or stopped.
-  ///
-  /// If player is looping the events to this stream are not emitted.
-  static Stream<void> get onCompletion => _completionController.stream;
 
   /// Stream of loop mode changes.
   static Stream<void> get onLoopSwitch => _loopController.stream;
@@ -97,8 +82,8 @@ abstract class NativeAudioPlayer {
 
   /// Checks if player playing and if so, changes state to playing appropriately
   static Future<void> init() async {
-    if (await isPlaying()) state = MusicPlayerState.PLAYING;
-    loopMode = await isLooping();
+    if (await isPlaying()) _state = PlayerState.PLAYING;
+    _loopMode = await isLooping();
   }
 
   static Future<void> clearIdMap() {
@@ -189,67 +174,47 @@ abstract class NativeAudioPlayer {
   }
 
   static Future<void> platformCallHandler(MethodCall call) async {
-    try {
-      _platformCall(call);
-    } catch (ex) {
-      _log('Unexpected error: $ex');
-    }
+    _platformCall(call);
   }
 
   static void _platformCall(MethodCall call) {
-    final Map<dynamic, dynamic> callArgs = call.arguments as Map;
-    _log('_platformCallHandler call ${call.method} $callArgs');
-
-    final value = callArgs['value'];
-
+    final Map<dynamic, dynamic> args = call.arguments as Map;
+    final value = args['value'];
+    // _log('_platformCallHandler call ${call.method} $args');
     switch (call.method) {
       case 'audio.state.set':
-        {
-          switch (value) {
-            case 'PLAYING':
-              state = MusicPlayerState.PLAYING;
-              break;
-            case 'PAUSED':
-              state = MusicPlayerState.PAUSED;
-              break;
-            case 'COMPLETED':
-              state = MusicPlayerState.COMPLETED;
-              _completionController.add(null);
-          }
-          break;
+        switch (value) {
+          case 'PLAYING':
+            _state = PlayerState.PLAYING;
+            break;
+          case 'PAUSED':
+            _state = PlayerState.PAUSED;
+            break;
+          case 'COMPLETED':
+            _state = PlayerState.COMPLETED;
+            break;
+          default:
+            throw ArgumentError('Wrong state');
         }
+        break;
       case 'audio.onPosition':
-        {
-          Duration position = Duration(milliseconds: value);
-          if ((ContentControl.state.queues.current?.isNotEmpty ?? false) &&
-              position <=
-                  Duration(
-                    milliseconds: ContentControl.state.currentSong.duration,
-                  )) {
-            _positionController.add(position);
-          }
-          break;
+        Duration position = Duration(milliseconds: value);
+        // Make sure we never emit invalid positions.
+        final state = ContentControl.state;
+        if ((state.queues.current?.isNotEmpty ?? false) && 
+            position <= Duration(milliseconds: state.currentSong.duration)) {
+          _positionController.add(position);
         }
+        break;
       case 'audio.onError':
-        {
-          state = MusicPlayerState.PAUSED;
-          _errorController
-              .add(PlatformException(code: '0', message: value['message']));
-          break;
-        }
+        _state = PlayerState.PAUSED;
+        _errorController.add(PlatformException(code: '0', message: value['message']));
+        break;
       case 'audio.onLoopModeSwitch':
-        {
-          loopMode = value;
-          break;
-        }
+        _loopMode = value;
+        break;
       default:
-        _log('Unknown method ${call.method} ');
-    }
-  }
-
-  static void _log(String param) {
-    if (logEnabled) {
-      print(param);
+        throw ArgumentError('Wrong method');
     }
   }
 
@@ -259,7 +224,6 @@ abstract class NativeAudioPlayer {
       _playerStateController.close(),
       _positionController.close(),
       _durationController.close(),
-      _completionController.close(),
       _errorController.close()
     ]);
   }

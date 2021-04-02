@@ -141,7 +141,7 @@ class _RotatingAlbumArtWithProgressState
 
   StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<MusicPlayerState> _playerStateSubscription;
+  StreamSubscription<PlayerState> _playerStateSubscription;
   StreamSubscription<void> _songListChangeSubscription;
 
   GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
@@ -154,11 +154,11 @@ class _RotatingAlbumArtWithProgressState
 
     _playerStateSubscription = MusicPlayer.onStateChange.listen((event) {
       switch (event) {
-        case MusicPlayerState.PLAYING:
+        case PlayerState.PLAYING:
           _rotatingArtGlobalKey.currentState.rotate();
           break;
-        case MusicPlayerState.PAUSED:
-        case MusicPlayerState.COMPLETED:
+        case PlayerState.PAUSED:
+        case PlayerState.COMPLETED:
         default: // Can be null so don't throw, just stop animation
           _rotatingArtGlobalKey.currentState.stopRotating();
           break;
@@ -242,7 +242,7 @@ class _RotatingAlbumArtWithProgressState
           key: _rotatingArtGlobalKey,
           path: ContentControl.state.currentSong?.albumArt,
           initRotation: math.Random(DateTime.now().second).nextDouble(),
-          initRotating: MusicPlayer.playerState == MusicPlayerState.PLAYING,
+          initRotating: MusicPlayer.playerState == PlayerState.PLAYING,
         ),
       ),
     );

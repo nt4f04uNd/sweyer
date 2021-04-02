@@ -13,14 +13,12 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 
-import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.handlers.AudioFocusHandler;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
 import com.nt4f04und.sweyer.handlers.MediaSessionHandler;
 import com.nt4f04und.sweyer.handlers.NotificationHandler;
 import com.nt4f04und.sweyer.handlers.PlayerHandler;
 import com.nt4f04und.sweyer.handlers.QueueHandler;
-import com.nt4f04und.sweyer.handlers.PrefsHandler;
 import com.nt4f04und.sweyer.handlers.WakelockHandler;
 import com.nt4f04und.sweyer.receivers.BecomingNoisyReceiver;
 import com.nt4f04und.sweyer.receivers.NotificationReceiver;
@@ -49,16 +47,6 @@ public class MusicService extends Service {
       isRunning = true;
       QueueHandler.initCurrentSong();
 
-      Boolean savedPlaying = null;
-      if (!GeneralHandler.activityExists()) {
-         savedPlaying = PrefsHandler.getSongIsPlaying();
-         if (savedPlaying) {
-            // Start playing if flag is playing is set to true
-            // This is just a handling for sticky service
-            PlayerHandler.playPause();
-         }
-      }
-
       // Initializing handlers
       GeneralHandler.init(getApplicationContext());
       PlayerHandler.init();
@@ -74,13 +62,8 @@ public class MusicService extends Service {
 
       if (QueueHandler.getCurrentSong() != null)
          startForeground(
-                 NotificationHandler.NOTIFICATION_ID,
-                 NotificationHandler.getNotification(
-                         // If service is initially created then set true as start playing button, as service is meant to be started only together with playback
-                         // Else check saved playing
-                         savedPlaying == null ? true : savedPlaying,
-                         PlayerHandler.isLooping()
-                 )
+            NotificationHandler.NOTIFICATION_ID,
+            NotificationHandler.getNotification(true, PlayerHandler.isLooping())
          );
       else stopSelf();
    }
@@ -99,7 +82,6 @@ public class MusicService extends Service {
       } else if (extra == SERVICE_INTENT_EXTRA_KILL) {
          stopSelf();
       }
-      // todo: make sticky (and return START_NOT_STICKY from other extras then)
       return Service.START_NOT_STICKY;
    }
 

@@ -5,7 +5,6 @@
 
 package com.nt4f04und.sweyer.channels;
 
-import com.nt4f04und.sweyer.Constants;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
@@ -15,7 +14,7 @@ public enum NativeEventsChannel implements StreamHandler {
     instance;
     public void init(BinaryMessenger messenger) {
         if (channel == null) {
-            channel = new EventChannel(messenger, "eventsChannel");
+            channel = new EventChannel(messenger, "events_channel");
             channel.setStreamHandler(this);
         }
     }
