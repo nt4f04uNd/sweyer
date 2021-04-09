@@ -1,5 +1,40 @@
 {
-  "@@last_modified": "2021-02-09T05:01:56.488392",
+  "@@last_modified": "2021-04-03T19:08:00.033444",
+  "play": "Play",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Pause",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Stop",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Next",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Previous",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Loop off",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Loop on",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Unknown artist",
   "@artistUnknown": {
     "type": "text",

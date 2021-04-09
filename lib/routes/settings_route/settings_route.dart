@@ -3,6 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
+import 'dart:ui';
+import 'package:just_audio/just_audio.dart';
 import 'package:package_info/package_info.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -75,8 +78,9 @@ class _Footer extends StatefulWidget {
 
 class _FooterState extends State<_Footer> {
   /// The amount of clicks to enter the dev mode
-  static const int clicksForDevMode = 14;
+  static const int clicksForDevMode = 10;
 
+  int _clickCount = 0;
   String appVersion = '';
 
   String get appName {
@@ -87,8 +91,6 @@ class _FooterState extends State<_Footer> {
     return Constants.Config.APPLICATION_TITLE + postFix;
   }
 
-  int _clickCount = 0;
-
   @override
   void initState() {
     super.initState();
@@ -97,9 +99,10 @@ class _FooterState extends State<_Footer> {
 
   Future<void> _fetch() async {
     final info = await PackageInfo.fromPlatform();
-    appVersion = '${info.version}+${info.buildNumber}';
     if (mounted) {
-      setState(() {/* update ui after fetch */});
+      setState(() {
+        appVersion = '${info.version}+${info.buildNumber}';
+      });
     }
   }
 
@@ -113,64 +116,63 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleSecretLogoClick() {
-    if (!ContentControl.state.devMode.value) {
-      final int remainingClicks = clicksForDevMode - 1 - _clickCount;
-
-      final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-      final theme = Theme.of(context);
-      final textStyle = TextStyle(
-        fontSize: 15.0,
-        color: theme.colorScheme.onError,
+    if (ContentControl.state.devMode.value)
+      return;
+    final int remainingClicks = clicksForDevMode - 1 - _clickCount;
+    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final theme = Theme.of(context);
+    final textStyle = TextStyle(
+      fontSize: 15.0,
+      color: theme.colorScheme.onError,
+    );
+    final l10n = getl10n(context);
+    if (remainingClicks < 0) {
+      return;
+    } else if (remainingClicks == 0) {
+      ContentControl.setDevMode(true);
+      NFSnackbarController.showSnackbar(
+        NFSnackbarEntry(
+          important: true,
+          duration: const Duration(seconds: 7),
+          child: NFSnackbar(
+            leading: Icon(
+              Icons.adb_rounded,
+              color: Colors.white,
+              size: Constants.iconSize * textScaleFactor,
+            ),
+            title: Text(l10n.devModeGreet, style: textStyle),
+            color: Constants.AppColors.androidGreen,
+          ),
+        ),
       );
-      final l10n = getl10n(context);
-      if (remainingClicks < 0) {
-        return;
-      } else if (remainingClicks == 0) {
-        ContentControl.setDevMode(true);
-        NFSnackbarController.showSnackbar(
-          NFSnackbarEntry(
-            important: true,
-            duration: const Duration(seconds: 7),
-            child: NFSnackbar(
-              leading: Icon(
-                Icons.adb_rounded,
-                color: Colors.white,
-                size: Constants.iconSize * textScaleFactor,
-              ),
-              title: Text(l10n.devModeGreet, style: textStyle),
-              color: Constants.AppColors.androidGreen,
-            ),
+    } else if (_clickCount == 4) {
+      NFSnackbarController.showSnackbar(
+        NFSnackbarEntry(
+          important: true,
+          child: NFSnackbar(
+            title: Text(l10n.onThePathToDevMode, style: textStyle),
+            color: Constants.AppColors.androidGreen,
           ),
-        );
-      } else if (_clickCount == 4) {
-        NFSnackbarController.showSnackbar(
-          NFSnackbarEntry(
-            important: true,
-            child: NFSnackbar(
-              title: Text(l10n.onThePathToDevMode, style: textStyle),
-              color: Constants.AppColors.androidGreen,
+        ),
+      );
+    } else if (remainingClicks < 5) {
+      NFSnackbarController.showSnackbar(
+        NFSnackbarEntry(
+          important: true,
+          child: NFSnackbar(
+            title: Text(
+              l10n.almostThere + ', ' + (remainingClicks == 1
+                      ? l10n.onThePathToDevModeLastClick
+                      : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
+              style: textStyle,
             ),
+            color: Constants.AppColors.androidGreen,
           ),
-        );
-      } else if (remainingClicks < 5) {
-        NFSnackbarController.showSnackbar(
-          NFSnackbarEntry(
-            important: true,
-            child: NFSnackbar(
-              title: Text(
-                l10n.almostThere + ', ' + (remainingClicks == 1
-                        ? l10n.onThePathToDevModeLastClick
-                        : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
-                style: textStyle,
-              ),
-              color: Constants.AppColors.androidGreen,
-            ),
-          ),
-        );
-      }
-
-      _clickCount++;
+        ),
+      );
     }
+
+    _clickCount++;
   }
 
   @override

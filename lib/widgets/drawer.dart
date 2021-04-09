@@ -9,9 +9,7 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-/// Widget that builds drawer
-///
-/// todo: rewrite this and add to nt4f04unds_widgets
+/// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
   const DrawerWidget({
     Key key,

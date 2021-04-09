@@ -12,13 +12,6 @@
          "import 'package:sweyer/constants.dart' as Constants;"
       ],
    },
-   "Import API": {
-      "prefix": "_iapi",
-      "description": "Import a API module shortcut",
-      "body": [
-         "import 'package:sweyer/api.dart' as API;"
-      ],
-   },
    "Import application": {
       "prefix": "_iapp",
       "description": "Import a whole application module shortcut",

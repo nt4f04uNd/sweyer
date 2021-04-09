@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
+
 import 'package:intl/intl.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +50,57 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  //****************** Semantically general ******************
+  //* Used in notification
+  String get play {
+    return Intl.message(
+      'Play',
+      name: 'play',
+    );
+  }
+
+  String get pause {
+    return Intl.message(
+      'Pause',
+      name: 'pause',
+    );
+  }
+
+  String get stop {
+    return Intl.message(
+      'Stop',
+      name: 'stop',
+    );
+  }
+
+  String get next {
+    return Intl.message(
+      'Next',
+      name: 'next',
+    );
+  }
+
+  String get previous {
+    return Intl.message(
+      'Previous',
+      name: 'previous',
+    );
+  }
+
+  String get loopOff {
+    return Intl.message(
+      'Loop off',
+      name: 'loopOff',
+    );
+  }
+
+  String get loopOn {
+    return Intl.message(
+      'Loop on',
+      name: 'loopOn',
+    );
+  }
+  //*------------------------------------
+
   /// Label for unknown artist.
   String get artistUnknown {
     return Intl.message(
@@ -654,8 +706,7 @@ class AppLocalizations {
   }
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -664,7 +715,7 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  Future<AppLocalizations> load(Locale locale) {
+  Future<AppLocalizations> load(Locale locale) async {
     return AppLocalizations.load(locale);
   }
 

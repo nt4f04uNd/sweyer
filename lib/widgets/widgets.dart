@@ -18,6 +18,7 @@ export 'logo.dart';
 export 'play_pause_button.dart';
 export 'screens.dart';
 export 'scrollbar.dart';
+export 'seekbar.dart';
 export 'selection.dart';
 export 'settings_widgets.dart';
 export 'shared_axis_tab_view.dart';

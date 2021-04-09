@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
-class _AudioHandler extends BaseAudioHandler {
+class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
   _AudioHandler() {
     _init();
   }
@@ -24,14 +24,16 @@ class _AudioHandler extends BaseAudioHandler {
   final MusicPlayer player = MusicPlayer.instance;
 
   Future<void> _init() async {
-    // Load and broadcast the queue
+    WidgetsBinding.instance.addObserver(this);
     queue.add(ContentControl.state.queues.current.toMediaItems());
-    // Broadcast media item changes.
     ContentControl.state.onSongChange.listen((song) {
       mediaItem.add(song.toMediaItem());
+      // todo: this?
+      // _setState();
     });
-    // Propagate all events from the audio player to AudioService clients.
-    player.playbackEventStream.listen(_broadcastState);
+    player.onLoopingSwitch.listen((event) => _setState());
+    player.playingStream.listen((event) => _setState());
+    ContentControl.state.onSongChange.listen((event) => _setState());
   }
 
   @override
@@ -64,6 +66,15 @@ class _AudioHandler extends BaseAudioHandler {
   }
 
   @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) {
+    if (repeatMode == AudioServiceRepeatMode.one) {
+      return player.setLoopMode(LoopMode.one);
+    } else {
+      return player.setLoopMode(LoopMode.all);
+    }
+  }
+
+  @override
   Future<void> play() => player.play();
 
   @override
@@ -74,27 +85,77 @@ class _AudioHandler extends BaseAudioHandler {
 
   @override
   Future<void> stop() async {
-    await player.stop();
+    // TODO: change this to stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
+    // await player.stop();
+    await player.pause();
     await super.stop();
   }
 
+  @override
+  void didChangeLocales(List<Locale> locales) {
+    _setState();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    _setState();
+  }
+
   /// Broadcasts the current state to all clients.
-  void _broadcastState(PlaybackEvent event) {
+  void _setState() {
     final playing = player.playing;
+    final l10n = staticl10n;
+    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark ? 'white' : 'black';
     playbackState.add(playbackState.value.copyWith(
       controls: [
-        MediaControl.skipToPrevious,
-        if (playing) MediaControl.pause else MediaControl.play,
-        MediaControl.stop,
-        MediaControl.skipToNext,
+        // TODO: not working see https://github.com/ryanheise/audio_service/issues/633
+        if (player.looping)
+          MediaControl(
+            androidIcon: 'drawable/round_loop_on_${color}_24',
+            label: l10n.loopOn,
+            action: MediaAction.setRepeatMode,
+          )
+        else
+          MediaControl(
+            androidIcon: 'drawable/round_loop_${color}_24',
+            label: l10n.loopOff,
+            action: MediaAction.setRepeatMode,
+          ),
+        MediaControl(
+          androidIcon: 'drawable/round_skip_previous_${color}_36',
+          label: l10n.previous,
+          action: MediaAction.skipToPrevious,
+        ),
+        if (playing)
+          MediaControl(
+            androidIcon: 'drawable/round_pause_${color}_36',
+            label: l10n.pause,
+            action: MediaAction.pause,
+          )
+        else
+          MediaControl(
+            androidIcon: 'drawable/round_play_arrow_${color}_36',
+            label: l10n.play,
+            action: MediaAction.play,
+          ),
+        MediaControl(
+          androidIcon: 'drawable/round_skip_next_${color}_36',
+          label: l10n.next,
+          action: MediaAction.skipToNext,
+        ),
+        MediaControl(
+          androidIcon: 'drawable/round_close_next_${color}_36',
+          label: l10n.stop,
+          action: MediaAction.stop,
+        ),
       ],
       systemActions: {
         MediaAction.seek,
         MediaAction.seekForward,
         MediaAction.seekBackward,
       },
-      androidCompactActionIndices: [0, 1, 3],
-      processingState: {
+      androidCompactActionIndices: [1, 2, 3],
+      processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
         ProcessingState.buffering: AudioProcessingState.buffering,
@@ -105,11 +166,12 @@ class _AudioHandler extends BaseAudioHandler {
       updatePosition: player.position,
       bufferedPosition: player.bufferedPosition,
       speed: player.speed,
-      queueIndex: event.currentIndex,
+      queueIndex: ContentControl.state.currentSongIndex,
     ));
   }
 }
 
+/// Player that plays the content provided by provided [ContentControl].
 class MusicPlayer extends AudioPlayer {
   MusicPlayer._();
   static final instance = MusicPlayer._();
@@ -118,6 +180,7 @@ class MusicPlayer extends AudioPlayer {
 
   bool get looping => loopMode == LoopMode.all;
   Stream<bool> get onLoopingSwitch => loopModeStream.map((event) => event == LoopMode.all);
+  Duration get duration => Duration(milliseconds: ContentControl.state.currentSong?.duration);
 
   Future<void> init() async {
     _handler = await AudioService.init(builder: () {

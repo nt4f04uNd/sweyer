@@ -104,10 +104,8 @@ class TrackPanel extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).textScaleFactor *
-                                  50.0),
-                          child: AnimatedPlayPauseButton(
+                          constraints: BoxConstraints(maxWidth: textScaleFactor * 50.0),
+                          child: const AnimatedPlayPauseButton(
                             size: 40.0,
                             iconSize: 19.0,
                           ),
@@ -150,7 +148,8 @@ class _RotatingAlbumArtWithProgressState
   void initState() {
     super.initState();
 
-    _setInitialCurrentPosition();
+    _value = MusicPlayer.instance.position;
+    _duration = MusicPlayer.instance.duration;
 
     _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
       if (playing) {
@@ -193,14 +192,6 @@ class _RotatingAlbumArtWithProgressState
     _songChangeSubscription.cancel();
     _songListChangeSubscription.cancel();
     super.dispose();
-  }
-
-  void _setInitialCurrentPosition() {
-    final position = MusicPlayer.instance.position;
-    setState(() {
-      _value = position;
-      _duration = Duration(milliseconds: ContentControl.state.currentSong?.duration);
-    });
   }
 
   double _calcProgress() {

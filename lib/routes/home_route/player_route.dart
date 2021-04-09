@@ -12,7 +12,6 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final SpringDescription playerRouteSpringDescription = SpringDescription.withDampingRatio(
   mass: 0.01,
@@ -542,46 +541,6 @@ class _MainTab extends StatefulWidget {
 }
 
 class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
-  // Color _prevColor = ContentControl.currentArtColor;
-  // StreamSubscription<Color> _artColorChangeSubscription;
-  // AnimationController _animationController;
-  // Animation<Color> _colorAnimation;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   _animationController = AnimationController(
-  //       vsync: this, duration: const Duration(milliseconds: 550));
-  //   _animationController.addListener(() {
-  //     setState(() {});
-  //   });
-  // _colorAnimation = ColorTween(
-  //         begin: ContentControl.currentArtColor,
-  //         end: ContentControl.currentArtColor)
-  //     .animate(CurvedAnimation(
-  //         curve: Curves.easeOutCubic, parent: _animationController));
-
-  //   _artColorChangeSubscription =
-  //       ContentControl.onArtColorChange.listen((event) {
-  //     setState(() {
-  //       _animationController.value = 0;
-  //       _colorAnimation = ColorTween(begin: _prevColor, end: event).animate(
-  //           CurvedAnimation(
-  //               curve: Curves.easeOutCubic, parent: _animationController));
-  //       _prevColor = event;
-  //       _animationController.forward();
-  //     });
-  //   });
-  // }
-
-  // @override
-  // void dispose() {
-  //   _artColorChangeSubscription.cancel();
-  //   _animationController.dispose();
-  //   super.dispose();
-  // }
-
   @override
   Widget build(BuildContext context) {
     final animation = ColorTween(
@@ -633,10 +592,7 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: const _Seekbar(),
-                  ),
+                  const Seekbar(),
                   Padding(
                     padding: const EdgeInsets.only(
                       bottom: 40.0,
@@ -684,7 +640,7 @@ class _PlaybackButtons extends StatelessWidget {
           ),
           child: Material(
             color: Colors.transparent,
-            child: AnimatedPlayPauseButton(
+            child: const AnimatedPlayPauseButton(
               iconSize: 26.0,
               size: 70.0,
             ),
@@ -763,13 +719,11 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
   @override
   void initState() {
     super.initState();
-    _songChangeSubscription =
-        ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
       setState(() {/* update track in ui */});
     });
 
-    _songListChangeSubscription =
-        ContentControl.state.onSongListChange.listen((event) async {
+    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
       setState(() {
         /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
         /// So sometimes even though current song is being restored, its album art might still be fetching.
@@ -818,161 +772,6 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
           child: AlbumArt.playerRoute(path: currentSong.albumArt),
         ),
       ],
-    );
-  }
-}
-
-class _Seekbar extends StatefulWidget {
-  const _Seekbar({Key key}) : super(key: key);
-
-  _SeekbarState createState() => _SeekbarState();
-}
-
-class _SeekbarState extends State<_Seekbar> {
-  // Duration of playing track
-  Duration _duration = Duration(seconds: 0);
-
-  /// Actual track position value
-  double _value = 0.0;
-
-  /// Value to perform drag
-  double _localValue;
-
-  /// Is user dragging slider right now
-  bool _isDragging = false;
-
-  /// Value to work with, depends on [_isDragging] state, either [_value] or [_localValue]
-  double get workingValue => _isDragging ? _localValue : _value;
-
-  SharedPreferences prefs;
-
-  /// Subscription for audio position change stream
-  StreamSubscription<Duration> _positionSubscription;
-  StreamSubscription<Song> _songChangeSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _setInitialPosition();
-    // Handle track position movement
-    _positionSubscription = MusicPlayer.instance.positionStream.listen((position) {
-      if (!_isDragging) {
-        setState(() {
-          _value = _positionToValue(position);
-        });
-      }
-    });
-    // Handle track switch
-    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
-      setState(() {
-        _isDragging = false;
-        _localValue = 0.0;
-        _value = 0.0;
-        _duration = Duration(milliseconds: event.duration);
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _positionSubscription.cancel();
-    _songChangeSubscription.cancel();
-    super.dispose();
-  }
-
-  double _positionToValue(Duration position) {
-    return (position.inMilliseconds / math.max(_duration.inMilliseconds, 1.0)).clamp(0.0, 1.0);
-  }
-
-  void _setInitialPosition()  {
-    final position = MusicPlayer.instance.position;
-    if (mounted) {
-      setState(() {
-        _duration = Duration(milliseconds: ContentControl.state.currentSong?.duration);
-        _value = _positionToValue(position);
-      });
-    }
-  }
-
-  // Drag functions
-  void _handleChangeStart(double newValue) {
-    setState(() {
-      _isDragging = true;
-      _localValue = newValue;
-    });
-  }
-
-  void _handleChanged(double newValue) {
-    setState(() {
-      if (!_isDragging) _isDragging = true;
-      _localValue = newValue;
-    });
-  }
-
-  /// FIXME: https://github.com/nt4f04uNd/sweyer/issues/6
-  void _handleChangeEnd(double newValue) async {
-    await MusicPlayer.instance.seek(_duration * newValue);
-    if (mounted) {
-      setState(() {
-        _isDragging = false;
-        _value = newValue;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final scaleFactor = textScaleFactor == 1.0 ? 1.0 : textScaleFactor * 1.1;
-    return Container(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            width: 36.0 * scaleFactor,
-            transform: Matrix4.translationValues(5.0, 0.0, 0.0),
-            child: Text(
-              formatDuration(_duration * workingValue),
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6.color,
-              ),
-            ),
-          ),
-          Expanded(
-            child: SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 2.0,
-                activeTrackColor: ThemeControl.theme.colorScheme.primary,
-                inactiveTrackColor: Constants.AppTheme.sliderInactiveColor.auto,
-                thumbShape: const RoundSliderThumbShape(
-                  enabledThumbRadius: 7.5,
-                ),
-              ),
-              child: Slider(
-                value: _isDragging ? _localValue : _value,
-                onChangeStart: _handleChangeStart,
-                onChanged: _handleChanged,
-                onChangeEnd: _handleChangeEnd,
-              ),
-            ),
-          ),
-          Container(
-            width: 36.0 * scaleFactor,
-            transform: Matrix4.translationValues(-5.0, 0.0, 0.0),
-            child: Text(
-              formatDuration(_duration),
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6.color,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,6 +1,40 @@
 {
-  "@@locale": "en_us",
-  "@@last_modified": "2021-01-24T04:21:22.256772",
+  "@@last_modified": "2021-04-03T18:58:58.144162",
+  "play": "Play",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Pause",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Stop",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Next",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Previous",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Loop off",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Loop on",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Unknown artist",
   "@artistUnknown": {
     "type": "text",

@@ -1,6 +1,41 @@
 {
   "@@locale": "ru_ru",
   "@@last_modified": "2020-05-25T04:00:59.715314",
+  "play": "Играть",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Пауза",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Оставновить",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Далее",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Назад",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Зацикливание отключено",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Повторять этот трек",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Неизвестный исполнитель",
   "@artistUnknown": {
     "type": "text",

@@ -147,9 +147,6 @@ class _ContentState {
 
   PersistentQueue _currentSongOrigin;
 
-  /// A general art color change the UI.
-  Color _currentArtColor;
-
   /// Cancelable operation for getting the art color.
   // CancelableOperation _thiefOperation;
 
@@ -160,9 +157,6 @@ class _ContentState {
   });
 
   Map<int, Album> albums = {};
-
-  /// After initial albums are fetched, will contain song album arts by album ids.
-  Map<int, String> albumArts = {};
 
   /// This is a map to store ids of duplicated songs in queue.
   /// Its key is always negative, so when a song has negative id, you must
@@ -191,6 +185,7 @@ class _ContentState {
   ///
   /// NOTE: CAUTION - SHOULD NEVER BE USED OUTSIDE PLAYER ROUTE,
   /// AS THIS MAY LEAD TO WRONG RESULTS.
+  /// TODO: FIX IT
   int get currentSongIndex {
     var index = queues.current.byId.getSongIndex(_currentSongId);
     if (index < 0) {
@@ -204,12 +199,13 @@ class _ContentState {
   /// Id of currently playing song.
   int get currentSongId => _currentSongId;
 
-  /// Currently playing peristent queue when song is added via [ContentControl.playQueueNext] or [ContentControl.addQueueToQueue].
+  /// Currently playing peristent queue when song is added via [ContentControl.playQueueNext]
+  /// or [ContentControl.addQueueToQueue].
+  ///
   /// Used for showing [CurrentIndicator] for [PersistenQueue]s.
+  ///
   /// See [Song.origin] for more info.
   PersistentQueue get currentSongOrigin => _currentSongOrigin;
-
-  Color get currentArtColor => _currentArtColor;
 
   /// Changes current song id and emits change event.
   /// This allows to change the current id visually, separately from the player.
@@ -234,17 +230,11 @@ class _ContentState {
   /// Controller for stream of current song changes.
   StreamController<Song> _songChangeStreamController = StreamController<Song>.broadcast();
 
-  /// Controller for stream of song changes.
-  StreamController<Color> _artColorChangeStreamController = StreamController<Color>.broadcast();
-
   /// A stream of changes on queue.
   Stream<void> get onSongListChange => _songListChangeStreamController.stream;
 
   /// A stream of changes on song.
   Stream<Song> get onSongChange => _songChangeStreamController.stream;
-
-  /// A stream of changes on art color.
-  Stream<Color> get onArtColorChange => _artColorChangeStreamController.stream;
 
   /// Emit event to [onSongListChange].
   ///
@@ -258,14 +248,8 @@ class _ContentState {
     _songChangeStreamController.add(song);
   }
 
-  /// Emits art color change event.
-  void emitArtColorChange(Color color) {
-    _artColorChangeStreamController.add(color);
-  }
-
   void dispose() {
     _songListChangeStreamController.close();
-    _artColorChangeStreamController.close();
     _songChangeStreamController.close();
   }
 }
@@ -283,9 +267,6 @@ abstract class ContentControl {
   /// A helper to serialize the queue.
   static QueueSerializer queueSerializer = QueueSerializer.instance;
   static IdMapSerializer idMapSerializer = IdMapSerializer.instance;
-
-  /// A subscription to song changes, needed to get current art color.
-  // static StreamSubscription<Song> _songChangeSubscription;
 
   /// Represents songs fetch on app start
   static bool initFetching = true;
@@ -327,8 +308,7 @@ abstract class ContentControl {
     song.id = newId;
     state.changeSong(song);
     queueSerializer.save(state.queues.current.songs);
-    // don't call this here, rather on native side.
-    // idMapSerializer.save(state.idMap);
+    idMapSerializer.save(state.idMap);
   }
 
   //****************** Queue manipulation methods *****************************************************
@@ -336,10 +316,10 @@ abstract class ContentControl {
   /// If the [song] is next (or currently playing), will duplicate it and queue it to be played next,
   /// else will move it to be next. After that it can be duplicated to be played more.
   ///
-  /// Same as for [songAddToQueue]:
+  /// Same as for [addToQueue]:
   /// * if current queue is [QueueType.persistent] and the added [song] is present in it, will mark the queue as modified,
   /// else will traverse it into [QueueType.arbitrary]. All the other queues will be just marked as modified.
-  /// * if current queue is shuffled, it will copy all songs (thus saving the order of shufn fled songs), go back to be unshuffled,
+  /// * if current queue is shuffled, it will copy all songs (thus saving the order of shuffled songs), go back to be unshuffled,
   /// and add the [songs] there.
   static void playNext(List<Song> songs) {
     assert(songs != null && songs.isNotEmpty);
@@ -366,10 +346,10 @@ abstract class ContentControl {
       if (queues._type == QueueType.persistent && contains) {
         final persistentSongs = queues.persistent.songs;
         persistentSongs.firstWhere((el) => el.sourceId == songs[i].sourceId,
-            orElse: () {
-          contains = false;
-          return null;
-        });
+          orElse: () {
+            contains = false;
+            return null;
+          });
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
@@ -378,30 +358,49 @@ abstract class ContentControl {
 
   /// Queues the [song] to the last position in queue.
   ///
-  /// Same as for [songPlayNext]:
+  /// Same as for [playNext]:
   /// * if current queue is [QueueType.persistent] and the added [song] is present in it, will mark the queue as modified,
   /// else will traverse it into [QueueType.arbitrary]. All the other queues will be just marked as modified.
   /// * if current queue is shuffled, it will copy all songs (thus saving the order of shuffled songs), go back to be unshuffled,
   /// and add the [songs] there.
   static void addToQueue(List<Song> songs) {
     assert(songs != null && songs.isNotEmpty);
+    final queues = state.queues;
     setQueue(
       modified: true,
       shuffled: false,
-      songs: state.queues._shuffled && state.queues._type != QueueType.all
-          ? List.from(state.queues._shuffledQueue.songs)
+      songs: queues._shuffled && queues._type != QueueType.all
+          ? List.from(queues._shuffledQueue.songs)
           : null,
     );
+    bool contains = true;
     for (final song in songs) {
       state.queues.current.add(song);
+      if (queues._type == QueueType.persistent && contains) {
+        final persistentSongs = queues.persistent.songs;
+        persistentSongs.firstWhere((el) => el.sourceId == song.sourceId,
+          orElse: () {
+            contains = false;
+            return null;
+          });
+      }
     }
-    setQueue();
+    setQueue(type: contains ? null : QueueType.arbitrary);
     state.emitSongListChange();
   }
 
-  /// todo: doc + doc differences with [playNext]
+  /// Queues the persistent [queue] to be played next.
+  ///
+  /// Saves it to [Song.origin] in its items, and so when the item is played,
+  /// this peristent queue will be also shown as playing.
+  ///
+  /// If currently some persistent queue is already playing, will first save the current queue to
+  /// [Song.origin] in its items.
+  /// 
+  /// In difference with [playNext], always traverses the playlist into [QueueType.arbitrary].
   static void playQueueNext(PersistentQueue queue) {
     // assert(queue != null && queue.isNotEmpty);
+    // Adding origin to the songs in the current persistent playlist.
     if (ContentControl.state.queues.type == QueueType.persistent) {
       final persistentQueue = ContentControl.state.queues.persistent;
       for (final song in persistentQueue.songs) {
@@ -417,14 +416,22 @@ abstract class ContentControl {
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
     }
-    for (int i = 0; i < queue.length; i++) {}
     setQueue(type: QueueType.arbitrary);
     state.emitSongListChange();
   }
 
-  /// todo: doc + doc differences with [addToQueue]
+  /// Queues the persistent [queue] to the last position in queue.
+  ///
+  /// Saves it to [Song.origin] in its items, and so when the item is played,
+  /// this peristent queue will be also shown as playing.
+  ///
+  /// If currently some persistent queue is already playing, will first save the current queue to
+  /// [Song.origin] in its items.
+  ///
+  /// In difference with [addToQueue], always traverses the playlist into [QueueType.arbitrary].
   static void addQueueToQueue(PersistentQueue queue) {
     // assert(queue != null && queue.isNotEmpty);
+    // Adding origin to the songs in the current persistent playlist.
     if (ContentControl.state.queues.type == QueueType.persistent) {
       final persistentQueue = ContentControl.state.queues.persistent;
       for (final song in persistentQueue.songs) {
@@ -440,12 +447,26 @@ abstract class ContentControl {
     state.emitSongListChange();
   }
 
-  /// todo: doc on what parameters can make sense when call this method
-  /// The [save] parameter can be used to disable redundant writing to jsons when,
-  /// for example, when we restore the queue from this exact json.
+  /// Sets the queue with specified [type] and other parameters.
+  /// Most of the parameters are updated separately and almost can be omitted,
+  /// unless differently specified:
   ///
-  /// When [copied] is set to true that indicates that songs is already unique,
-  /// otherwise it will copy it with `List.from`.
+  /// * [shuffled] can be used to shuffle / unshuffle the queue
+  /// * [modified] can be used to mark current queue as modified
+  /// * [songs] is the songs list to set to the queue
+  /// * [persistentQueue] is the persistent queue being set,
+  ///   only applied when [type] is [QueueType.persistent].
+  ///   When [QueueType.persistent] is set and currently it's not persistent, this parameter is required.
+  ///   Otherwise it can be omitted and for updating other paramters only.
+  /// * [searchQuery] is the search query the playlist was searched by,
+  ///   only applied when [type] is [QueueType.searched].
+  ///   Similarly as for [persistentQueue], when [QueueType.searched] is set and currently it's not searched,
+  ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
+  /// * [emitChangeEvent] is whether to emit a song list change event
+  /// * [save] parameter can be used to disable redundant writing to JSONs when,
+  ///   for example, when we restore the queue from this exact json.
+  /// * [copied] is set to true that indicates that songs is already unique,
+  ///   otherwise it will copy it with [List.from]
   static void setQueue({
     QueueType type,
     bool shuffled,
@@ -466,7 +487,13 @@ abstract class ContentControl {
       type != QueueType.persistent ||
       queues._persistent != null ||
       persistentQueue != null,
-      'When you set persistent queue and currently none set, you must provide the `persistentQueue` paramenter',
+      'When you set `persistent` queue and currently none set, you must provide the `persistentQueue` paramenter',
+    );
+    assert(
+      type != QueueType.searched ||
+      queues._searchQuery != null ||
+      searchQuery != null,
+      'When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter',
     );
 
     type ??= queues._type;
@@ -783,12 +810,12 @@ abstract class ContentControl {
 
   /// Restores saved queue from json if [queueTypeInt] (saved [_queues.type]) is not [QueueType.all].
   ///
-  /// * Shuffled parameter is not restored, any [shuffled] queue, except for [QueueType.all], will be restored as [QueueType.arbitrary].
-  /// * [QueueType.all] can be restored as shuffled, if it's not modified.
+  /// * Shuffled parameter is not restored. Any [shuffled] queue will be restored as [QueueType.arbitrary].
+  ///   An exception from this is [QueueType.all], which can be, but only if it's not modified.
+  ///   Modified will become [QueueType.arbitrary].
   /// * If stored queue becomes empty after restoration (songs do not exist anymore), will fall back to not modified [QueueType.all].
+  /// * If saved persistent queue songs are restored successfully, but the playlist itself cannot be found, will fall back to [QueueType.arbitrary].
   /// * In all other cases it will restore as it was.
-  ///
-  /// todo: update docs
   static Future<void> _restoreQueue() async {
     final shuffled = await Prefs.queueShuffledBool.get();
     final modified = await Prefs.queueModifiedBool.get();

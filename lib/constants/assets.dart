@@ -9,12 +9,10 @@ abstract class Assets {
 
   /// Thumb for use with notification.
   /// Unused on the dart side.
-  static const ASSET_LOGO_THUMB_NOTIFICAITION =
-      'assets/images/logo_mask_thumb_notification.png';
+  static const ASSET_LOGO_THUMB_NOTIFICAITION = 'assets/images/logo_mask_thumb_notification.png';
 
   /// Thumb for in app usage.
-  static const ASSET_LOGO_THUMB_INAPP =
-      'assets/images/logo_mask_thumb_inapp.png';
+  static const ASSET_LOGO_THUMB_INAPP = 'assets/images/logo_mask_thumb_inapp.png';
 
   static const ASSET_ANIMATION_PLAY_PAUSE = 'assets/animations/play_pause.flr';
   static const ASSET_ANIMATION_CHECKMARK = 'assets/animations/checkmark.flr';

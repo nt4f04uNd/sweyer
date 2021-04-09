@@ -55,8 +55,6 @@ class ShowFunctions extends NFShowFunctions {
   /// [errorDetails] string to show in the alert
   void showError({ @required String errorDetails }) {
     final context = AppRouter.instance.navigatorKey.currentContext;
-    if (context == null) // TODO: REMOVE THIS
-    return;
     assert(context != null);
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;

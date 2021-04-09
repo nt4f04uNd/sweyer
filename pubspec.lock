@@ -55,7 +55,7 @@ packages:
     description:
       path: audio_service_platform_interface
       ref: one-isolate
-      resolved-ref: "9d0a2bdd0e1a57b366d1bff3ab1c728968555304"
+      resolved-ref: ccde6ee25893b9e2ab23735e8da003abae6ecfdb
       url: "https://github.com/ryanheise/audio_service.git"
     source: git
     version: "1.0.0"
@@ -64,7 +64,7 @@ packages:
     description:
       path: audio_service_web
       ref: one-isolate
-      resolved-ref: "9d0a2bdd0e1a57b366d1bff3ab1c728968555304"
+      resolved-ref: ccde6ee25893b9e2ab23735e8da003abae6ecfdb
       url: "https://github.com/ryanheise/audio_service.git"
     source: git
     version: "0.16.2"
