@@ -1,0 +1,4 @@
+-keepclassmembers class com.nt4f04und.sweyer.player.Album { *; }
+-keepclassmembers class com.nt4f04und.sweyer.player.Artist { *; }
+-keepclassmembers class com.nt4f04und.sweyer.player.Playlist { *; }
+-keepclassmembers class com.nt4f04und.sweyer.player.Song { *; }

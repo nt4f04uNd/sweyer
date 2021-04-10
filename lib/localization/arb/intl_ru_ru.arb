@@ -1,0 +1,415 @@
+{
+  "@@locale": "ru_ru",
+  "@@last_modified": "2020-05-25T04:00:59.715314",
+  "play": "Играть",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Пауза",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Оставновить",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Далее",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Назад",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Зацикливание отключено",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Повторять этот трек",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistUnknown": "Неизвестный исполнитель",
+  "@artistUnknown": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tracks": "Треки",
+  "@tracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "albums": "Альбомы",
+  "@albums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tracksPlural": "{count,plural, =0{Треков}=1{Трек}=2{Трека}few{Трека}many{Треков}other{Трека}}",
+  "@tracksPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "albumsPlural": "{count,plural, =0{Альбомов}=1{Альбом}=2{Альбома}few{Альбома}many{Альбомов}other{Альбома}}",
+  "@albumsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "allTracks": "Все треки",
+  "@allTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlist": "Плейлист",
+  "@playlist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "arbitraryQueue": "Произвольная очередь",
+  "@arbitraryQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffled": "Перемешано",
+  "@shuffled": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "modified": "Изменено",
+  "@modified": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "byQuery": "По запросу",
+  "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "debug": "Дебаг",
+  "@debug": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSure": "Вы уверены?",
+  "@areYouSure": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "reset": "Сбросить",
+  "@reset": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "save": "Сохранить",
+  "@save": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "secondsShorthand": "с",
+  "@secondsShorthand": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "minutesShorthand": "мин",
+  "@minutesShorthand": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "remove": "Убрать",
+  "@remove": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "delete": "Удалить",
+  "@delete": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletion": "Удаление",
+  "@deletion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionError": "Ошибка при удалении",
+  "@deletionError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "edit": "Редактировать",
+  "@edit": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "refresh": "Обновить",
+  "@refresh": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "grant": "Предоставить",
+  "@grant": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorMessage": "Упс! Произошла ошибка",
+  "@errorMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorDetails": "Информация об ошибке",
+  "@errorDetails": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackErrorMessage": "Произошла ошибка при воспроизведении, удаление трека",
+  "@playbackErrorMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "details": "Детали",
+  "@details": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "songInformation": "Информация о треке",
+  "@songInformation": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editMetadata": "Изменить информацию",
+  "@editMetadata": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "unknownRoute": "Неизвестная страница!",
+  "@unknownRoute": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "found": "Найдено",
+  "@found": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "upNext": "Далее",
+  "@upNext": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "almostThere": "Вы почти у цели",
+  "@almostThere": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pressOnceAgainToExit": "Нажмите еще раз для выхода",
+  "@pressOnceAgainToExit": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noMusic": "На вашем устройстве нету музыки",
+  "@noMusic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchingForTracks": "Ищем треки...",
+  "@searchingForTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allowAccessToExternalStorage": "Пожалуйста, предоставьте доступ к хранилищу",
+  "@allowAccessToExternalStorage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allowAccessToExternalStorageManually": "Предоставьте доступ к хранилищу вручную",
+   "@allowAccessToExternalStorageManually": {
+     "type": "text",
+     "placeholders": {}
+  },
+  "openAppSettingsError": "Произошла ошибка при открытии настроек приложения",
+  "@openAppSettingsError": {
+     "type": "text",
+     "placeholders": {}
+  },
+  "actions": "Действия",
+  "@actions": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "goToAlbum": "Открыть альбом",
+  "@goToAlbum": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playNext": "Включить следующим",
+  "@playNext": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToQueue": "Добавить в очередь",
+  "@addToQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sort": "Сортировка",
+  "@sort": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artist": "Исполнитель",
+  "@artist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "title": "Название",
+  "@title": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "dateModified": "Дата изменения",
+  "@dateModified": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "dateAdded": "Дата добавления",
+  "@dateAdded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "year": "Год",
+  "@year": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "numberOfTracks": "Количество треков",
+  "@numberOfTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionPromptDescriptionP1": "Вы точно хотите удалить ",
+  "@deletionPromptDescriptionP1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionPromptDescriptionP2": " выбранные треки?",
+  "@deletionPromptDescriptionP2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devModeGreet": "Готово! Теперь вы разработчик",
+  "@devModeGreet": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onThePathToDevMode": "Сейчас должно что-то произойти...",
+  "@onThePathToDevMode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onThePathToDevModeLastClick": "остался всего 1 клик...",
+  "@onThePathToDevModeLastClick": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onThePathToDevModeClicksRemaining": "осталось всего {remainingClicks} клика...",
+  "@onThePathToDevModeClicksRemaining": {
+    "type": "text",
+    "placeholders": {
+      "remainingClicks": {}
+    }
+  },
+  "devStopService": "Остановить сервис",
+  "@devStopService": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devTestToast": "Тестовый тост",
+  "@devTestToast": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devErrorSnackbar": "Показать снакбар с ошибкой",
+  "@devErrorSnackbar": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devImportantSnackbar": "Показать важный снакбар",
+  "@devImportantSnackbar": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devAnimationsSlowMo": "Замедление анимаций",
+  "@devAnimationsSlowMo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "quitDevMode": "Выйти из режима разработчика",
+  "@quitDevMode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "quitDevModeDescription": "Перестать быть разработчиком?",
+  "@quitDevModeDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "settings": "Настройки",
+  "@settings": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "general": "Общие",
+  "@general": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "theme": "Тема",
+  "@theme": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "settingLightMode": "Светлая тема",
+  "@settingLightMode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistory": "История поиска",
+  "@searchHistory": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistoryPlaceholder": "Здесь будет отображаться история вашего поиска",
+  "@searchHistoryPlaceholder": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchNothingFound": "Ничего не найдено",
+  "@searchNothingFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistoryRemoveEntryDescriptionP1": "Вы точно хотите убрать запрос ",
+  "@searchHistoryRemoveEntryDescriptionP1": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistoryRemoveEntryDescriptionP2": " из истории поиска?",
+  "@searchHistoryRemoveEntryDescriptionP2": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchClearHistory": "Очистить историю поиска?",
+  "@searchClearHistory": {
+    "type": "text",
+    "placeholders": {}
+  }
+}
