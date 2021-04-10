@@ -3,13 +3,11 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:equatable/equatable.dart';
-import 'package:sweyer/sweyer.dart';
-
-class SelectionEntry<T extends Content> extends Equatable {
-  SelectionEntry({this.index, this.data});
-  final int index;
-  final T data;
-  @override
-  List<Object> get props => [index];
-}
+export 'sql/sql.dart';
+export 'album.dart';
+// export 'artist.dart';
+// export 'playlist.dart';
+export 'content.dart';
+export 'selection_entry.dart';
+export 'song.dart';
+export 'sort.dart';

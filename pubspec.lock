@@ -53,20 +53,16 @@ packages:
   audio_service_platform_interface:
     dependency: transitive
     description:
-      path: audio_service_platform_interface
-      ref: one-isolate
-      resolved-ref: ccde6ee25893b9e2ab23735e8da003abae6ecfdb
-      url: "https://github.com/ryanheise/audio_service.git"
-    source: git
+      path: "../../audio_service/audio_service_platform_interface"
+      relative: true
+    source: path
     version: "1.0.0"
   audio_service_web:
     dependency: transitive
     description:
-      path: audio_service_web
-      ref: one-isolate
-      resolved-ref: ccde6ee25893b9e2ab23735e8da003abae6ecfdb
-      url: "https://github.com/ryanheise/audio_service.git"
-    source: git
+      path: "../../audio_service/audio_service_web"
+      relative: true
+    source: path
     version: "0.16.2"
   audio_session:
     dependency: "direct overridden"
@@ -618,7 +614,7 @@ packages:
     source: hosted
     version: "2.0.0"
   pedantic:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pedantic
       url: "https://pub.dartlang.org"

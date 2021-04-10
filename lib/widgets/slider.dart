@@ -89,18 +89,15 @@ class LabelledSlider extends StatelessWidget {
 
         //******** Slider ********
         Expanded(
-          child: Container(
+          child: SizedBox(
             height: 30.0,
             child: SliderTheme(
               data: SliderThemeData(
-                trackShape:
-                    themeData.trackShape ?? const TrackShapeWithMargin(),
-                valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+                trackShape: themeData.trackShape ?? const TrackShapeWithMargin(),
+                valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
                 overlayColor: Colors.transparent,
-                activeTrackColor:
-                    activeColor ?? ThemeControl.theme.colorScheme.primary,
-                inactiveTrackColor: inactiveColor ??
-                    Constants.AppTheme.sliderInactiveColor.auto,
+                activeTrackColor: activeColor ?? ThemeControl.theme.colorScheme.primary,
+                inactiveTrackColor: inactiveColor ?? Constants.AppTheme.sliderInactiveColor.auto,
               ),
               child: Slider(
                 value: value,

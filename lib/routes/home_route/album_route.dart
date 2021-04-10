@@ -79,7 +79,7 @@ class _AlbumRouteState extends State<AlbumRoute> with SingleTickerProviderStateM
                       widget.album.album,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         height: 1.1,
                         fontSize: 24.0,
@@ -169,7 +169,8 @@ class _AlbumRouteState extends State<AlbumRoute> with SingleTickerProviderStateM
                               kSongTileHeight * length -
                               AppBarBorder.height -
                               MediaQuery.of(context).padding.top;
-                          if (height <= 0) return const SizedBox.shrink();
+                          if (height <= 0)
+                            return const SizedBox.shrink();
                           return Container(height: height);
                         }
                         final song = widget.songs[index];

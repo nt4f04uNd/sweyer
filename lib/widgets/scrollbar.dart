@@ -73,6 +73,7 @@ class AppDraggableScrollbar extends StatelessWidget {
   final bool shouldAppear;
   final BorderRadius borderRadius;
 
+  @override
   Widget build(BuildContext context) {
     return NFDraggableScrollbar.rrect(
       barKey: barKey,
@@ -99,8 +100,7 @@ class AppDraggableScrollbar extends StatelessWidget {
   }
 }
 
-typedef Widget _JumpingLabelBuilder(
-    BuildContext context, double progress, double barPadHeight, int jumpIndex);
+typedef _JumpingLabelBuilder = Widget Function(BuildContext context, double progress, double barPadHeight, int jumpIndex);
 
 /// Implements the jump logic for [Song], [Album], etc. lists.
 ///
@@ -278,6 +278,7 @@ class _JumpingDraggableScrollbarState extends State<JumpingDraggableScrollbar> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return AppDraggableScrollbar(
       barKey: widget.barKey,

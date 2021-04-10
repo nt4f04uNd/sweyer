@@ -31,12 +31,13 @@ class Seekbar extends StatefulWidget {
   /// Predefined duration to use.
   final Duration duration;
 
+  @override
   _SeekbarState createState() => _SeekbarState();
 }
 
 class _SeekbarState extends State<Seekbar> {
   // Duration of playing track.
-  Duration _duration = Duration(seconds: 0);
+  Duration _duration = Duration.zero;
 
   /// Actual track position value.
   double _value = 0.0;
@@ -109,7 +110,7 @@ class _SeekbarState extends State<Seekbar> {
   }
 
   /// FIXME: https://github.com/nt4f04uNd/sweyer/issues/6
-  void _handleChangeEnd(double newValue) async {
+  Future<void> _handleChangeEnd(double newValue) async {
     await player.seek(_duration * newValue);
     if (mounted) {
       setState(() {

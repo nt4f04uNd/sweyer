@@ -48,7 +48,7 @@ class Song extends Equatable implements Content {
   List<Object> get props => [id];
 
   int get sourceId => getSourceId(id);
-  static getSourceId(int id) {
+  static int getSourceId(int id) {
     return id < 0 ? ContentControl.state.idMap[id.toString()] : id;
   }
 

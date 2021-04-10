@@ -92,7 +92,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
           controller: controller,
           barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
           hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
-          child:  Container(
+          child: SizedBox(
             height: screenHeight,
             width: screenWidth,
             child: Container(
@@ -167,7 +167,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
       child: Drawer(
         elevation: elevation,
         child: ListView(
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
           children: <Widget>[
             Container(
@@ -232,29 +232,27 @@ class MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: NFListTile(
-        dense: true,
-        leading: icon != null
-            ? Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Icon(
-                  icon,
-                  size: iconSize,
-                  color: ThemeControl.theme.iconTheme.color,
-                ),
-              )
-            : null,
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: fontSize,
-            color: Constants.AppTheme.menuItemColor.auto,
-          ),
+    return NFListTile(
+      dense: true,
+      leading: icon != null
+          ? Padding(
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Icon(
+                icon,
+                size: iconSize,
+                color: ThemeControl.theme.iconTheme.color,
+              ),
+            )
+          : null,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: Constants.AppTheme.menuItemColor.auto,
         ),
-        onTap: onTap,
-        onLongPress: onLongPress,
       ),
+      onTap: onTap,
+      onLongPress: onLongPress,
     );
   }
 }

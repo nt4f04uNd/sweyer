@@ -22,7 +22,7 @@ class DevRoute extends StatelessWidget {
     );
   }
 
-  void _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
+  Future<void> _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
     final res = await ShowFunctions.instance.showDialog(
       AppRouter.instance.navigatorKey.currentContext,
       title: Text(l10n.areYouSure),
@@ -49,7 +49,7 @@ class DevRoute extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: ListView(
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
                 NFListTile(
                   title: Text(l10n.devStopService),
@@ -77,6 +77,8 @@ class DevRoute extends StatelessWidget {
 
 class _TimeDilationSlider extends StatefulWidget {
   const _TimeDilationSlider({Key key}) : super(key: key);
+
+  @override
   _TimeDilationSliderState createState() => _TimeDilationSliderState();
 }
 

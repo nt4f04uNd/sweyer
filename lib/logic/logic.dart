@@ -7,8 +7,9 @@
 /// 
 /// API is not exported as you should use `as API`
 
-export 'player/music_player.dart';
 export 'channels/channels.dart';
+export 'models/models.dart';
+export 'player/music_player.dart';
 
 export 'exceptions.dart';
 export 'permissions.dart';

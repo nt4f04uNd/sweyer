@@ -140,7 +140,7 @@ class AppRouter extends RouterDelegate<AppRoutes>
   AppRouter._();
   static final instance = AppRouter._();
 
-  List<AppRoutes> __routes = [AppRoutes.home];
+  final List<AppRoutes> __routes = [AppRoutes.home];
   @override
   List<AppRoutes> get _routes => __routes;
 
@@ -228,7 +228,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   HomeRouter._();
   static final instance = HomeRouter._();
 
-  List<HomeRoutes> __routes = [HomeRoutes.tabs];
+  final List<HomeRoutes> __routes = [HomeRoutes.tabs];
   @override
   List<HomeRoutes> get _routes => __routes;
 
@@ -251,8 +251,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   void goto(HomeRoutes route) {
     super.goto(route);
     if (route == HomeRoutes.search) {
-      if (_searchDelegate == null)
-        _searchDelegate = SearchDelegate();
+      _searchDelegate ??= SearchDelegate();
       final SearchArguments arguments = route.arguments;
       _searchDelegate.query = arguments.query;
       _searchDelegate.autoKeyboard = arguments.openKeyboard;
@@ -308,7 +307,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
 
 class HomeRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   @override
-  RouteInformation value = RouteInformation(location: '/tabs');
+  RouteInformation value = RouteInformation(location: HomeRoutes.tabs.location);
 }
 
 class HomeRouteBackButtonDispatcher extends ChildBackButtonDispatcher {

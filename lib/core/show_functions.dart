@@ -25,7 +25,7 @@ class ShowFunctions extends NFShowFunctions {
     Color textColor,
     Color backgroundColor,
   }) async {
-    backgroundColor ??= Color.fromRGBO(18, 18, 18, 1);
+    backgroundColor ??= const Color.fromRGBO(18, 18, 18, 1);
 
     return Fluttertoast.showToast(
       msg: msg,
@@ -42,7 +42,7 @@ class ShowFunctions extends NFShowFunctions {
   void showSongsSearch({
     String query = '',
     bool openKeyboard = true,
-  }) async {
+  }) {
     HomeRouter.instance.goto(HomeRoutes.factory.search(SearchArguments(
       query: query,
       openKeyboard: openKeyboard,
@@ -58,7 +58,7 @@ class ShowFunctions extends NFShowFunctions {
     assert(context != null);
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
-    final GlobalKey<NFSnackbarEntryState> globalKey = GlobalKey();
+    final globalKey = GlobalKey<NFSnackbarEntryState>();
     NFSnackbarController.showSnackbar(
       NFSnackbarEntry(
         globalKey: globalKey,

@@ -30,7 +30,7 @@ class SearchDelegate {
 
   final _Notifier _setStateNotifier = _Notifier();
   /// Updates the search route.
-  setState() {
+  void setState() {
     _setStateNotifier.notify();
   }
 
@@ -189,7 +189,7 @@ class _SearchStateDelegate {
 }
 
 class SearchPage extends Page<void> {
-  SearchPage({
+  const SearchPage({
     LocalKey key,
     @required this.delegate,
     this.transitionSettings,
@@ -359,7 +359,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
       primaryColor: theme.backgroundColor,
       primaryColorBrightness: theme.appBarTheme.brightness,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         headline6: TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.w900,
@@ -378,17 +378,18 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
 
   List<Widget> buildActions() {
     return <Widget>[
-      widget.delegate.query.isEmpty
-        ? const SizedBox.shrink()
-        : Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: NFIconButton(
-              icon: const Icon(Icons.clear_rounded),
-              onPressed: () {
-                widget.delegate.query = '';
-              },
-            ),
+      if (widget.delegate.query.isEmpty)
+        const SizedBox.shrink()
+      else
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: NFIconButton(
+            icon: const Icon(Icons.clear_rounded),
+            onPressed: () {
+              widget.delegate.query = '';
+            },
           ),
+        ),
     ];
   }
 
@@ -471,8 +472,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
               child: SelectionAppBar(
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
-                titleSelection: Text('wow'),
-                actionsSelection: [],
+                titleSelection: const Text('wow'),
+                actionsSelection: const [],
                 elevationSelection: 0.0,
                 elevation: theme.appBarTheme.elevation,
                 backgroundColor: theme.primaryColor,
@@ -518,13 +519,12 @@ class _SearchPageState<T> extends State<_SearchPage<T>>
 }
 
 class _DelegateProvider extends InheritedWidget {
-  _DelegateProvider({
+  const _DelegateProvider({
     Key key, 
     @required this.delegate,
-    this.child,
+    Widget child,
   }) : super(key: key, child: child);
 
-  final Widget child;
   final _SearchStateDelegate delegate;
 
   static _DelegateProvider of(BuildContext context) {
@@ -572,8 +572,8 @@ class _DelegateBuilder extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8.0),
                   child: Icon(Icons.error_outline_rounded),
                 ),
                 Padding(
@@ -661,6 +661,8 @@ class _ContentChip extends StatefulWidget {
 }
 
 class _ContentChipState extends State<_ContentChip> with SingleTickerProviderStateMixin {
+  static const borderRadius = BorderRadius.all(Radius.circular(50.0));
+
   AnimationController controller;
   
   bool get active => widget.delegate.contentType == widget.contentType;
@@ -693,7 +695,6 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    const borderRadius = const BorderRadius.all(Radius.circular(50.0));
     final l10n = getl10n(context);
     final colorScheme =  ThemeControl.theme.colorScheme;
     final colorTween = ColorTween(
@@ -810,12 +811,12 @@ class _ContentSection<T extends Content> extends StatelessWidget {
               children: [
                 Text(
                   getHeaderText(context),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded),
+                const Icon(Icons.chevron_right_rounded),
               ],
             ), 
           ),
@@ -832,7 +833,7 @@ class _ContentSection<T extends Content> extends StatelessWidget {
 }
 
 class _Suggestions extends StatefulWidget {
-  const _Suggestions({Key key}) : super(key: key);
+  _Suggestions({Key key}) : super(key: key);
 
   @override
   _SuggestionsState createState() => _SuggestionsState();
@@ -854,13 +855,13 @@ class _SuggestionsState extends State<_Suggestions> {
       future: _loadFuture,
       builder: (context, snapshot) {
         if (SearchHistory.instance.history == null) {
-          return Center(
+          return const Center(
             child: Spinner(),
           );
         }
-        return Container(
+        return SizedBox(
           width: double.infinity,
-          child: SearchHistory.instance.history.length == 0
+          child: SearchHistory.instance.history.isEmpty
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.only(
@@ -917,7 +918,7 @@ class _SuggestionsHeader extends StatelessWidget {
       trailing: Padding(
         padding: const EdgeInsets.only(top: 5.0),
         child: NFIconButton(
-          icon: Icon(Icons.delete_sweep_rounded),
+          icon: const Icon(Icons.delete_sweep_rounded),
           color: ThemeControl.theme.hintColor,
           onPressed: () {
             ShowFunctions.instance.showDialog(
@@ -948,7 +949,7 @@ class _SuggestionTile extends StatelessWidget {
   final int index;
 
   /// Deletes item from search history by its index.
-  void _removeEntry(BuildContext context, int index) async {
+  void _removeEntry(BuildContext context, int index) {
     SearchHistory.instance.remove(index);
     _SearchStateDelegate._of(context).searchDelegate.setState();
   }

@@ -5,7 +5,6 @@
 
 import 'dart:async';
 import 'dart:ui';
-import 'package:just_audio/just_audio.dart';
 import 'package:package_info/package_info.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -42,7 +41,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
         children: <Widget>[
           Expanded(
             child: ListView(
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(top: 10.0),
               children: <Widget>[
                 // MenuItem(

@@ -165,7 +165,7 @@ class _TabsRouteState extends State<TabsRoute> {
     );
 
     /// Not letting to go less 1 to not play animation from 1 to 0.
-    final selectionCount = selectionController.data.length > 0 ? selectionController.data.length : 1;
+    final selectionCount = selectionController.data.isNotEmpty ? selectionController.data.length : 1;
     final appBar = PreferredSize(
       preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
       child: SelectionAppBar(
@@ -259,8 +259,8 @@ class _TabsRouteState extends State<TabsRoute> {
                           indicator: BoxDecoration(
                             color: ThemeControl.theme.colorScheme.primary,
                             borderRadius: const BorderRadius.only(
-                              topLeft: const Radius.circular(3.0),
-                              topRight: const Radius.circular(3.0),
+                              topLeft: Radius.circular(3.0),
+                              topRight: Radius.circular(3.0),
                             ),
                           ),
                           labelColor: ThemeControl.theme.textTheme.headline6.color,

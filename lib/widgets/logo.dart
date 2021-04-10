@@ -26,7 +26,7 @@ class SweyerLogo extends StatelessWidget {
       borderRadius: const BorderRadius.all(
         Radius.circular(8.0),
       ),
-      child: Container(
+      child: SizedBox(
         width: size ?? kSongTileArtSize,
         height: size ?? kSongTileArtSize,
         child: Stack(

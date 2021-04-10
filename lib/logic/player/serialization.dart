@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
 
-import 'models/song.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -63,7 +62,7 @@ class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
   Future<List<int>> read() async {
     try {
       final file = await getFile();
-      String jsonContent = await file.readAsString();
+      final jsonContent = await file.readAsString();
       return jsonDecode(jsonContent).cast<int>();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
@@ -74,8 +73,7 @@ class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
-      debugPrint(
-          '$fileName: Error reading songs json, setting to empty songs list');
+      debugPrint('$fileName: Error reading songs json, setting to empty songs list');
       return [];
     }
   }
@@ -84,15 +82,14 @@ class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
   @override
   Future<void> save(List<Song> data) async {
     final file = await getFile();
-    final lol = jsonEncode(data.map((el) => el.id).toList());
-    await file.writeAsString(lol);
+    final json = jsonEncode(data.map((el) => el.id).toList());
+    await file.writeAsString(json);
     debugPrint('$fileName: json saved');
   }
 }
 
 /// Used to serialize song id map.
-class IdMapSerializer
-    extends JsonSerializer<Map<String, int>, Map<String, int>> {
+class IdMapSerializer extends JsonSerializer<Map<String, int>, Map<String, int>> {
   IdMapSerializer._();
   static final instance = IdMapSerializer._();
 
@@ -105,7 +102,7 @@ class IdMapSerializer
   Future<Map<String, int>> read() async {
     try {
       final file = await getFile();
-      String jsonContent = await file.readAsString();
+      final jsonContent = await file.readAsString();
       return jsonDecode(jsonContent).cast<String, int>();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(

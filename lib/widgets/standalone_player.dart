@@ -25,7 +25,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   AudioPlayer player;
   AnimationController controller;
   Timer timer;
-  static const fadeDuration = const Duration(milliseconds: 300);
+  static const fadeDuration = Duration(milliseconds: 300);
 
   @override
   void initState() { 
@@ -86,7 +86,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
               padding: const EdgeInsets.only(top: 20.0),
               child: Stack(
                 children: [
-                  AlbumArt.playerRoute(path: null, borderRadius: 0),
+                  const AlbumArt.playerRoute(path: null, borderRadius: 0),
                   Positioned.fill(
                     child: GestureDetector(
                       onTap: _handleTap,
@@ -134,31 +134,31 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   }
 }
 
-
+// ignore: unused_element
 void _openStandalonePlayerRoute(BuildContext context) {
   var popped = false;
   Navigator.of(context).push(
     RouteTransitionBuilder(
-      transitionSettings: RouteTransitionSettings(opaque: false, transitionDuration: Duration(milliseconds: 500)),
+      transitionSettings: RouteTransitionSettings(opaque: false, transitionDuration: const Duration(milliseconds: 500)),
       builder: (context) => _StandalonePlayer(),
       animationBuilder: (context, animation, secondaryAnimation, child) {
           final fadeAnimation = CurvedAnimation(
           parent: animation,
-          curve: Interval(0.0, 0.8, curve: Curves.easeOutCubic), 
-          reverseCurve: Interval(0.0, 0.8, curve: Curves.easeInCubic), 
+          curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic), 
+          reverseCurve: const Interval(0.0, 0.8, curve: Curves.easeInCubic), 
         );
         final routeScaleAnimation = Tween(
           begin: 0.87,
           end: 1.0
         ).animate(CurvedAnimation(
           parent: animation,
-          curve: Interval(0.3, 1.0, curve: Curves.easeOutCubic), 
-          reverseCurve: Interval(0.3, 1.0, curve: Curves.easeInCubic), 
+          curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic), 
+          reverseCurve: const Interval(0.3, 1.0, curve: Curves.easeInCubic), 
         ));
         final routeFadeAnimation = CurvedAnimation(
           parent: animation,
-          curve: Interval(0.4, 1.0, curve: Curves.easeOutCubic), 
-          reverseCurve: Interval(0.4, 1.0, curve: Curves.easeInCubic), 
+          curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic), 
+          reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeInCubic), 
         );
         final value = fadeAnimation.value * 20.0;
         return AnimatedBuilder(

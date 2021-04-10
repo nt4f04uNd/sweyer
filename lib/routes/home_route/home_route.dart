@@ -93,8 +93,6 @@ class _MainScreenState extends State<MainScreen>
 
   Map<Type, ContentSelectionController> selectionControllersMap;
   TabController tabController;
-  SlidableController playerRouteController;
-  SlidableController drawerController;
 
   bool get drawerCanBeOpened =>
       playerRouteController.closed &&
@@ -160,10 +158,10 @@ class _MainScreenState extends State<MainScreen>
       HomeRouter.instance.navigatorKey.currentState.pop();
       return false;
     } else {
-      DateTime now = DateTime.now();
+      final now = DateTime.now();
       // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
       if (_lastBackPressTime == null ||
-          now.difference(_lastBackPressTime) > Duration(seconds: 2)) {
+          now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(
           msg: getl10n(context).pressOnceAgainToExit,

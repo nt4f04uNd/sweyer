@@ -3,8 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// This library should be imported `as Constants`
-
 export 'assets.dart';
 export 'colors.dart';
 export 'config.dart';

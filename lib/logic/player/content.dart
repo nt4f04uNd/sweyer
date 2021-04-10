@@ -140,8 +140,8 @@ class _ContentState {
   int _sdkInt;
   int get sdkInt => _sdkInt;
 
-  ValueNotifier<bool> _devMode = ValueNotifier(false);
   ValueNotifier<bool> get devMode => _devMode;
+  final ValueNotifier<bool> _devMode = ValueNotifier(false);
 
   int _currentSongId;
 
@@ -225,10 +225,10 @@ class _ContentState {
 
   //****************** Streams *****************************************************
   /// Controller for stream of queue changes.
-  StreamController<void> _songListChangeStreamController = StreamController<void>.broadcast();
+  final StreamController<void> _songListChangeStreamController = StreamController<void>.broadcast();
 
   /// Controller for stream of current song changes.
-  StreamController<Song> _songChangeStreamController = StreamController<Song>.broadcast();
+  final StreamController<Song> _songChangeStreamController = StreamController<Song>.broadcast();
 
   /// A stream of changes on queue.
   Stream<void> get onSongListChange => _songListChangeStreamController.stream;
@@ -634,7 +634,7 @@ abstract class ContentControl {
       song: () async {
         final json = await ContentChannel.retrieveSongs();
         final List<Song> songs = [];
-        for (String songStr in json) {
+        for (final songStr in json) {
           songs.add(Song.fromJson(jsonDecode(songStr)));
         }
         if (state.queues.all == null) {
@@ -649,7 +649,7 @@ abstract class ContentControl {
       album: () async {
         final json = await ContentChannel.retrieveAlbums();
         state.albums = {};
-        for (String albumStr in json) {
+        for (final albumStr in json) {
           final albumJson = jsonDecode(albumStr);
           state.albums[albumJson['id'] as int] = Album.fromJson(albumJson);
         }
@@ -670,13 +670,13 @@ abstract class ContentControl {
     final words = query.split(' ');
     final year = int.tryParse(words[0]);
     /// Splits string by spaces, or dashes, or bar, or paranthesis
-    final abbreviationRegexp = RegExp('[\\s\\-\\|\\(\\)]');
+    final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
     /// Checks whether a [string] is abbreviation.
     /// For example: "big baby tape - bbt"
     bool isAbbreviation(String string) {
       return string.toLowerCase()
             .split(abbreviationRegexp)
-            .map((word) => word.length > 0 ? word[0] : '')
+            .map((word) => word.isNotEmpty ? word[0] : '')
             .join()
             .contains(query);
     }
@@ -741,7 +741,7 @@ abstract class ContentControl {
         state.queues.all.songs.sort(comparator);
       },
       album: () {
-        AlbumSort _sort = sort as AlbumSort;
+        final _sort = sort as AlbumSort;
         sorts.setValue(_sort);
         Prefs.albumSortString.set(jsonEncode(_sort.toJson()));
         final comparator = _sort.comparator;
@@ -761,17 +761,21 @@ abstract class ContentControl {
   ///
   /// Ids must be source (not negative).
   static Future<void> deleteSongs(Set<int> idSet) async {
-    Set<Song> songsSet = {};
+    final Set<Song> songsSet = {};
     // On Android R the deletion is performed with OS dialog.
     if (state._sdkInt >= 30) {
       for (final id in idSet) {
         final song = state.queues.all.byId.getSong(id);
-        if (song != null) songsSet.add(song);
+        if (song != null) {
+          songsSet.add(song);
+        }
       }
     } else {
       for (final id in idSet) {
         final song = state.queues.all.byId.getSong(id);
-        if (song != null) songsSet.add(song);
+        if (song != null) {
+          songsSet.add(song);
+        }
         state.queues.all.byId.removeSong(id);
       }
       removeObsolete();
@@ -780,9 +784,7 @@ abstract class ContentControl {
     try {
       final result = await ContentChannel.deleteSongs(songsSet);
       if (state._sdkInt >= 30 && result) {
-        for (final id in idSet) {
-          state.queues.all.byId.removeSong(id);
-        }
+        idSet.forEach(state.queues.all.byId.removeSong);
         removeObsolete();
       }
     } catch (ex, stack) {
@@ -829,10 +831,12 @@ abstract class ContentControl {
     /// Get songs ids from json
     final songIds = await queueSerializer.read();
     final List<Song> songs = [];
-    songIds.forEach((id) {
+    for (final id in songIds) {
       final song = state.queues.all.byId.getSong(Song.getSourceId(id));
-      if (song != null) songs.add(song.copyWith(id: id));
-    });
+      if (song != null) {
+        songs.add(song.copyWith(id: id));
+      }
+    }
     final persistentQueueId = await Prefs.persistentQueueIdNullable.get();
     if (songs.isEmpty) {
       setQueue(

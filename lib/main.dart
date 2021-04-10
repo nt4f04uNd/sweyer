@@ -15,12 +15,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'routes/routes.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
+import 'routes/routes.dart';
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
-  return '''$ex
+  return '''
+$ex
                       
 $stack''';
 }
@@ -64,7 +66,7 @@ class _WidgetsBindingObserver extends WidgetsBindingObserver {
   }
 }
 
-void main() async {
+Future<void> main() async {
   // Disabling automatic system UI adjustment, which causes system nav bar
   // color to be reverted to black when the bottom player route is being expanded.
   //
@@ -92,11 +94,13 @@ void main() async {
     await Permissions.init();
     await ContentControl.init();
     await MusicPlayer.instance.init();
-    runApp(App());
+    runApp(const App());
   // }, reportError);
 }
 
 class App extends StatefulWidget {
+  const App({Key key}) : super(key: key);
+
   static NFThemeData nfThemeData = NFThemeData(
     systemUiStyle: Constants.UiTheme.black.auto,
     modalSystemUiStyle: Constants.UiTheme.modal.auto,
@@ -172,9 +176,9 @@ class _ScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return GlowingOverscrollIndicator(
-      child: child,
       axisDirection: axisDirection,
       color: ThemeControl.theme.colorScheme.background,
+      child: child,
     );
   }
 }

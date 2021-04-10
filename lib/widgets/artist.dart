@@ -25,12 +25,10 @@ class ArtistWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return Container(
-      child: Text(
-        formatArtist(artist, l10n),
-        overflow: overflow,
-        style: ThemeControl.theme.textTheme.subtitle2.merge(textStyle),
-      ),
+    return Text(
+      formatArtist(artist, l10n),
+      overflow: overflow,
+      style: ThemeControl.theme.textTheme.subtitle2.merge(textStyle),
     );
   }
 }

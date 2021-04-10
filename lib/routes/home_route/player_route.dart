@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -20,14 +19,14 @@ final SpringDescription playerRouteSpringDescription = SpringDescription.withDam
 );
 
 class PlayerRoute extends StatefulWidget {
-  const PlayerRoute();
+  const PlayerRoute({Key key}) : super(key: key);
 
   @override
   _PlayerRouteState createState() => _PlayerRouteState();
 }
 
 class _PlayerRouteState extends State<PlayerRoute> {
-  final GlobalKey<_QueueTabState> _queueTabKey = GlobalKey<_QueueTabState>();
+  final _queueTabKey = GlobalKey<_QueueTabState>();
   List<Widget> _tabs;
   SlidableController controller;
   SharedAxisTabController tabController;
@@ -39,7 +38,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
   void initState() {
     super.initState();
     _tabs = [
-      _MainTab(),
+      const _MainTab(),
       _QueueTab(key: _queueTabKey),
     ];
     tabController = SharedAxisTabController(length: 2);
@@ -154,7 +153,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
 }
 
 class _QueueTab extends StatefulWidget {
-  _QueueTab({Key key}) : super(key: key);
+  const _QueueTab({Key key}) : super(key: key);
 
   @override
   _QueueTabState createState() => _QueueTabState();
@@ -232,7 +231,7 @@ class _QueueTabState extends State<_QueueTab>
   ///
   /// If optional [index] is provided - scrolls to it.
   Future<void> scrollToSong([ int index, double alignment = scrollAlignment ]) async {
-    if (index == null) index = ContentControl.state.currentSongIndex;
+    index ??= ContentControl.state.currentSongIndex;
     return itemScrollController.scrollTo(
       index: index,
       duration: const Duration(milliseconds: 800),
@@ -245,8 +244,8 @@ class _QueueTabState extends State<_QueueTab>
   /// Jumps to current song.
   ///
   /// If optional [index] is provided - jumps to it.
-  void jumpToSong([ int index, double alignment = scrollAlignment ]) async {
-    if (index == null) index = ContentControl.state.currentSongIndex;
+  void jumpToSong([ int index, double alignment = scrollAlignment ]) {
+    index ??= ContentControl.state.currentSongIndex;
     itemScrollController.jumpTo(
       index: index,
       alignment: alignment,
@@ -257,7 +256,8 @@ class _QueueTabState extends State<_QueueTab>
   Future<void> performScrolling() async {
     final currentSongIndex = ContentControl.state.currentSongIndex;
     // Exit immediately if index didn't change
-    if (prevSongIndex == currentSongIndex) return;
+    if (prevSongIndex == currentSongIndex)
+      return;
     // If queue is longer than e.g. 10 tracks
     if (queueLength > songsPerScreen) {
       if (currentSongIndex < edgeScrollIndex) {
@@ -322,7 +322,7 @@ class _QueueTabState extends State<_QueueTab>
   }
 
   List<TextSpan> _getQueueType(AppLocalizations l10n) {
-    List<TextSpan> text = [];
+    final List<TextSpan> text = [];
     switch (ContentControl.state.queues.type) {
       case QueueType.all:
         text.add(TextSpan(text: l10n.allTracks));
@@ -451,17 +451,17 @@ class _QueueTabState extends State<_QueueTab>
                             ),
                           ),
                           if (ContentControl.state.queues.modified)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: const Icon(
+                            const Padding(
+                              padding: EdgeInsets.only(left: 5.0),
+                              child: Icon(
                                 Icons.edit_rounded,
                                 size: 18.0,
                               ),
                             ),
                           if (ContentControl.state.queues.shuffled)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 2.0),
-                              child: const Icon(
+                            const Padding(
+                              padding: EdgeInsets.only(left: 2.0),
+                              child: Icon(
                                 Icons.shuffle_rounded,
                                 size: 20.0,
                               ),
@@ -535,7 +535,8 @@ class _QueueTabState extends State<_QueueTab>
 }
 
 class _MainTab extends StatefulWidget {
-  const _MainTab();
+  const _MainTab({Key key}) : super(key: key);
+
   @override
   _MainTabState createState() => _MainTabState();
 }
@@ -561,7 +562,7 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
         backButton: FadeTransition(
           opacity: fadeAnimation,
           child: NFIconButton(
-            icon: Icon(Icons.keyboard_arrow_down_rounded),
+            icon: const Icon(Icons.keyboard_arrow_down_rounded),
             size: 40.0,
             onPressed: playerRouteController.close,
           ),
@@ -585,20 +586,20 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
+            children: [
               const _TrackShowcase(),
               Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  const Seekbar(),
+                children: const [
+                  Seekbar(),
                   Padding(
-                    padding: const EdgeInsets.only(
+                    padding: EdgeInsets.only(
                       bottom: 40.0,
                       top: 10.0,
                     ),
-                    child: const _PlaybackButtons(),
+                    child: _PlaybackButtons(),
                   ),
                 ],
               ),
@@ -613,6 +614,7 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
 class _PlaybackButtons extends StatelessWidget {
   const _PlaybackButtons({Key key}) : super(key: key);
   static const buttonMargin = 18.0;
+
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
@@ -638,9 +640,9 @@ class _PlaybackButtons extends StatelessWidget {
             color: ThemeControl.theme.colorScheme.secondary,
             borderRadius: BorderRadius.circular(100.0),
           ),
-          child: Material(
+          child: const Material(
             color: Colors.transparent,
-            child: const AnimatedPlayPauseButton(
+            child: AnimatedPlayPauseButton(
               iconSize: 26.0,
               size: 70.0,
             ),
@@ -674,7 +676,7 @@ class _InfoButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 5.0),
       child: NFIconButton(
-        icon: Icon(Icons.info_outline_rounded),
+        icon: const Icon(Icons.info_outline_rounded),
         size: 40.0,
         onPressed: () {
           String songInfo = ContentControl.state.currentSong?.toJson().toString().replaceAll(r', ', ',\n');
@@ -708,6 +710,7 @@ class _InfoButton extends StatelessWidget {
 /// A widget that displays all information about current song
 class _TrackShowcase extends StatefulWidget {
   const _TrackShowcase({Key key}) : super(key: key);
+
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }

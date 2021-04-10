@@ -240,7 +240,7 @@ class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerPro
   Widget build(BuildContext context) {
     Widget image;
     if (widget.path == null || !File(widget.path).existsSync()) {
-      image = Container(
+      image = SizedBox(
         width: kRotatingArtSize,
         height: kRotatingArtSize,
         child: Image.asset(

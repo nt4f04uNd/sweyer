@@ -26,7 +26,7 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
       name: l10n.general,
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        children: <Widget>[
+        children: const [
           // _MinFileDurationSlider(
           //   initValue: minFileDuration,
           // ),

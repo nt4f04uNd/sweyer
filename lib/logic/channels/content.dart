@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
 abstract class ContentChannel {
-  static MethodChannel _channel = const MethodChannel('content_channel');
+  static const MethodChannel _channel = MethodChannel('content_channel');
 
   static Future<List<String>> retrieveSongs() async {
     return _channel.invokeListMethod<String>('retrieveSongs');

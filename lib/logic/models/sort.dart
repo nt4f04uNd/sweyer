@@ -31,23 +31,23 @@ class SongSortFeature extends SortFeature<Song> {
 
   /// Sort by the [Song.dateModified].
   /// Default sort order is DESC.
-  static const dateModified = const SongSortFeature._('dateModified');
+  static const dateModified = SongSortFeature._('dateModified');
 
   /// Sort by the [Song.dateAdded].
   /// Default sort order is DESC.
-  static const dateAdded = const SongSortFeature._('dateAdded');
+  static const dateAdded = SongSortFeature._('dateAdded');
 
   /// Sort by the [Song.title].
   /// Default sort order is ASC.
-  static const title = const SongSortFeature._('title');
+  static const title = SongSortFeature._('title');
 
   /// Sort by the [Song.artist].
   /// Default sort order is ASC.
-  static const artist = const SongSortFeature._('artist');
+  static const artist = SongSortFeature._('artist');
 
   /// Sort by the [Song.album].
   /// Default sort order is ASC.
-  static const album = const SongSortFeature._('album');
+  static const album = SongSortFeature._('album');
 }
 
 /// Features to sort by a [Album] list.
@@ -57,6 +57,7 @@ class SongSortFeature extends SortFeature<Song> {
 class AlbumSortFeature extends SortFeature<Album> {
   const AlbumSortFeature._(String value) : super._(value);
 
+  @override
   bool get defaultOrderAscending => this != year;
 
   static List<AlbumSortFeature> get values {
@@ -65,19 +66,19 @@ class AlbumSortFeature extends SortFeature<Album> {
 
   /// Sort by the [Album.album].
   /// Default sort order is ASC.
-  static const title = const AlbumSortFeature._('title');
+  static const title = AlbumSortFeature._('title');
 
   /// Sort by the [Album.artist].
   /// Default sort order is ASC.
-  static const artist = const AlbumSortFeature._('artist');
+  static const artist = AlbumSortFeature._('artist');
 
   /// Sort by the [Album.lastYear].
   /// Default sort order is DESC.
-  static const year = const AlbumSortFeature._('year');
+  static const year = AlbumSortFeature._('year');
 
   /// Sort by the [Album.numberOfSongs].
   /// Default sort order is ASC.
-  static const numberOfSongs = const AlbumSortFeature._('numberOfSongs');
+  static const numberOfSongs = AlbumSortFeature._('numberOfSongs');
 }
 
 abstract class Sort<T extends Content> extends Equatable {
@@ -121,6 +122,7 @@ class SongSort extends Sort<Song> {
         orderAscending: json['orderAscending'],
       );
 
+  @override
   SongSort copyWith({
     covariant SongSortFeature feature,
     bool orderAscending,
@@ -131,8 +133,9 @@ class SongSort extends Sort<Song> {
     );
   }
 
+  @override
   SongSort get withDefaultOrder {
-    return this.copyWith(orderAscending: feature.defaultOrderAscending);
+    return copyWith(orderAscending: feature.defaultOrderAscending);
   }
 
   int _fallbackDateModified(Song a, Song b) {
@@ -150,38 +153,40 @@ class SongSort extends Sort<Song> {
       case SongSortFeature.dateModified:
         c = (a, b) {
           final compare = a.dateModified.compareTo(b.dateModified);
-          if (compare == 0) return _fallbackTitle(a, b);
+          if (compare == 0)
+            return _fallbackTitle(a, b);
           return compare;
         };
         break;
       case SongSortFeature.dateAdded:
         c = (a, b) {
           final compare = a.dateAdded.compareTo(b.dateAdded);
-          if (compare == 0) return _fallbackTitle(a, b);
+          if (compare == 0)
+            return _fallbackTitle(a, b);
           return compare;
         };
         break;
       case SongSortFeature.title:
         c = (a, b) {
-          final compare =
-              a.title.toLowerCase().compareTo(b.title.toLowerCase());
-          if (compare == 0) return _fallbackDateModified(a, b);
+          final compare = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+          if (compare == 0)
+            return _fallbackDateModified(a, b);
           return compare;
         };
         break;
       case SongSortFeature.artist:
         c = (a, b) {
-          final compare =
-              a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
-          if (compare == 0) return _fallbackTitle(a, b);
+          final compare = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+          if (compare == 0)
+            return _fallbackTitle(a, b);
           return compare;
         };
         break;
       case SongSortFeature.album:
         c = (a, b) {
-          final compare =
-              a.album.toLowerCase().compareTo(b.album.toLowerCase());
-          if (compare == 0) return _fallbackTitle(a, b);
+          final compare = a.album.toLowerCase().compareTo(b.album.toLowerCase());
+          if (compare == 0)
+            return _fallbackTitle(a, b);
           return compare;
         };
         break;
@@ -209,11 +214,14 @@ class AlbumSort extends Sort<Album> {
         ),
         orderAscending: json['orderAscending'],
       );
+
+  @override
   Map<String, dynamic> toJson() => {
         'feature': feature.value,
         'orderAscending': orderAscending,
       };
 
+  @override
   AlbumSort copyWith({
     covariant AlbumSortFeature feature,
     bool orderAscending,
@@ -224,8 +232,9 @@ class AlbumSort extends Sort<Album> {
     );
   }
 
+  @override
   AlbumSort get withDefaultOrder {
-    return this.copyWith(orderAscending: feature.defaultOrderAscending);
+    return copyWith(orderAscending: feature.defaultOrderAscending);
   }
 
   int _fallbackYear(Album a, Album b) {
@@ -242,31 +251,33 @@ class AlbumSort extends Sort<Album> {
     switch (feature) {
       case AlbumSortFeature.title:
         c = (a, b) {
-          final compare =
-              a.album.toLowerCase().compareTo(b.album.toLowerCase());
-          if (compare == 0) return _fallbackYear(a, b);
+          final compare = a.album.toLowerCase().compareTo(b.album.toLowerCase());
+          if (compare == 0)
+            return _fallbackYear(a, b);
           return compare;
         };
         break;
       case AlbumSortFeature.artist:
         c = (a, b) {
-          final compare =
-              a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
-          if (compare == 0) return _fallbackYear(a, b);
+          final compare = a.artist.toLowerCase().compareTo(b.artist.toLowerCase());
+          if (compare == 0)
+            return _fallbackYear(a, b);
           return compare;
         };
         break;
       case AlbumSortFeature.year:
         c = (a, b) {
           final compare = a.year.compareTo(b.year);
-          if (compare == 0) return _fallbackTitle(a, b);
+          if (compare == 0)
+            return _fallbackTitle(a, b);
           return compare;
         };
         break;
       case AlbumSortFeature.numberOfSongs:
         c = (a, b) {
           final compare = a.numberOfSongs.compareTo(b.numberOfSongs);
-          if (compare == 0) return _fallbackYear(a, b);
+          if (compare == 0)
+            return _fallbackYear(a, b);
           return compare;
         };
         break;

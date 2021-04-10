@@ -3,6 +3,15 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// This library should be imported `as Constants`
+import 'package:equatable/equatable.dart';
+import 'package:sweyer/sweyer.dart';
 
-export 'constants/constants.dart';
+class SelectionEntry<T extends Content> extends Equatable {
+  const SelectionEntry({this.index, this.data});
+
+  final int index;
+  final T data;
+
+  @override
+  List<Object> get props => [index];
+}

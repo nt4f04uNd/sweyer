@@ -29,6 +29,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
   final double size;
   final Color iconColor;
 
+  @override
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
 

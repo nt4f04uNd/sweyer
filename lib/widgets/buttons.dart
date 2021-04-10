@@ -17,11 +17,11 @@ class LoopButton extends StatelessWidget {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final player = MusicPlayer.instance;
     return StreamBuilder<bool>(
-      stream: player.onLoopingSwitch,
+      stream: player.loopingStream,
       initialData: player.looping,
       builder: (context, snapshot) {
         return AnimatedIconButton(
-          icon: Icon(Icons.loop_rounded),
+          icon: const Icon(Icons.loop_rounded),
           size: 40.0,
           iconSize: textScaleFactor * Constants.iconSize,
           active: snapshot.data,
@@ -40,7 +40,7 @@ class ShuffleButton extends StatelessWidget {
     return StreamBuilder(
       stream: ContentControl.state.onSongListChange,
       builder: (context, snap) => AnimatedIconButton(
-        icon: Icon(Icons.shuffle_rounded),
+        icon: const Icon(Icons.shuffle_rounded),
         color: ThemeControl.theme.colorScheme.onSurface,
         size: 40.0,
         iconSize: textScaleFactor * Constants.iconSize,
@@ -62,7 +62,7 @@ class SettingsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NFIconButton(
-      icon: Icon(Icons.settings_rounded),
+      icon: const Icon(Icons.settings_rounded),
       onPressed: () => AppRouter.instance.goto(AppRoutes.settings),
     );
   }

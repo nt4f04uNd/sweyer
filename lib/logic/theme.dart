@@ -69,7 +69,7 @@ abstract class ThemeControl {
   /// This is needed to show start up application animation.
   static Future<void> initSystemUi() async {
     // Show purple ui firstly.
-    SystemUiStyleController.setSystemUiOverlay(SystemUiOverlayStyle(
+    SystemUiStyleController.setSystemUiOverlay(const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.deepPurpleAccent,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
@@ -97,7 +97,7 @@ abstract class ThemeControl {
     _rebuildOperation?.cancel();
     _brightness = _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Settings.lightThemeBool.set(_brightness == Brightness.light);
-    App.nfThemeData =  App.nfThemeData.copyWith(
+    App.nfThemeData = App.nfThemeData.copyWith(
       systemUiStyle: Constants.UiTheme.black.auto,
       modalSystemUiStyle: Constants.UiTheme.modal.auto,
       bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,

@@ -447,7 +447,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       ..._licenses,
       if (!_loaded)
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 24.0),
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
           child: Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(

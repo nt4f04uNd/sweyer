@@ -42,6 +42,8 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   T toSelectionEntry();
 
   @override
+  // TODO: remove this ignore when https://github.com/dart-lang/linter/issues/2345 is resolved
+  // ignore: no_logic_in_create_state
   State<SelectableWidget<T>> createState();
 }
 
@@ -123,7 +125,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: animation,
-      curve: Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
       reverseCurve: Curves.easeInCubic,
     ));
   }
@@ -230,7 +232,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   /// Notifies when active controller changes.
   static ValueNotifier<ContentSelectionController> get activeControllerNotifier => _notifier;
-  static ValueNotifier<ContentSelectionController> _notifier = ValueNotifier(null);
+  static final ValueNotifier<ContentSelectionController> _notifier = ValueNotifier(null);
 
   OverlayEntry _overlayEntry;
 
@@ -275,11 +277,10 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
 class _ContentSelectionControllerProvider extends InheritedWidget {
   _ContentSelectionControllerProvider({
-    @required this.child,
+    @required Widget child,
     @required this.controller,
     }) : super(child: child);
 
-  final Widget child;
   final ContentSelectionController controller;
 
   @override
@@ -291,11 +292,10 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
 class ContentSelectionControllersProvider extends InheritedWidget {
   const ContentSelectionControllersProvider({
     Key key,
-    @required this.child,
+    @required Widget child,
     @required this.map,
   }) : super(key: key, child: child);
 
-  final Widget child;
   final Map<Type, ContentSelectionController<SelectionEntry>> map;
 
   ContentSelectionController<SelectionEntry<Song>> get song => map[Song];
@@ -314,9 +314,10 @@ class ContentSelectionControllersProvider extends InheritedWidget {
 
 class SelectionCheckmark extends StatefulWidget {
   const SelectionCheckmark({
+    Key key,
     @required this.animation,
     this.size = 21.0,
-  });
+  }) : super(key: key);
 
   final Animation animation;
   final double size;
@@ -359,9 +360,9 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
       child: Container(
         width: widget.size,
         height: widget.size,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Constants.AppColors.androidGreen,
-          borderRadius: const BorderRadius.all(Radius.circular(200.0)),
+          borderRadius: BorderRadius.all(Radius.circular(200.0)),
         ),
         child: FlareActor(
           Constants.Assets.ASSET_ANIMATION_CHECKMARK,
@@ -394,12 +395,12 @@ class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectionAnimation = controller.animationController;
     final fadeAnimation = CurvedAnimation(
-      curve: Interval(
+      curve: const Interval(
         0.0,
         0.7,
         curve: Curves.easeOutCubic,
       ),
-      reverseCurve: Interval(
+      reverseCurve: const Interval(
         0.0,
         0.5,
         curve: Curves.easeIn,
@@ -486,7 +487,7 @@ class _SelectionAnimation extends AnimatedWidget {
 
 /// Creates a selection title.
 class ActionsSelectionTitle extends StatelessWidget {
-  const ActionsSelectionTitle({ Key key }) : super(key: key);
+  const ActionsSelectionTitle({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +506,7 @@ class ActionsSelectionTitle extends StatelessWidget {
 /// 
 /// Can only be used with [Song]s.
 class GoToAlbumSelectionAction<T extends Content> extends StatefulWidget {
-  const GoToAlbumSelectionAction({ Key key }) : super(key: key);
+  const GoToAlbumSelectionAction({Key key}) : super(key: key);
 
   @override
   _GoToAlbumSelectionActionState createState() => _GoToAlbumSelectionActionState();
@@ -562,23 +563,23 @@ class _GoToAlbumSelectionActionState<T extends Content> extends State<GoToAlbumS
       child:
           data.length > 1 ||
           data.length == 1 && (data.first.data is! Song || (data.first.data as Song).albumId == null)
-              ? const SizedBox.shrink()
-              : _SelectionAnimation(
-                  animation: controller.animationController,
-                  child: NFIconButton(
-                    tooltip: l10n.goToAlbum,
-                    icon: const Icon(Icons.album_rounded),
-                    iconSize: 23.0,
-                    onPressed: _handleTap,
-                  ),
+            ? const SizedBox.shrink()
+            : _SelectionAnimation(
+                animation: controller.animationController,
+                child: NFIconButton(
+                  tooltip: l10n.goToAlbum,
+                  icon: const Icon(Icons.album_rounded),
+                  iconSize: 23.0,
+                  onPressed: _handleTap,
                 ),
+              ),
     );
   }
 }
 
 /// Action that queues a [Song] or [Album] to be played next.
 class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
-  const PlayNextSelectionAction({ Key key }) : super(key: key);
+  const PlayNextSelectionAction({Key key}) : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty)
@@ -643,7 +644,7 @@ class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
 
 /// Action that adds a [Song] or an [Album] to the end of the queue.
 class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
-  const AddToQueueSelectionAction({ Key key })
+  const AddToQueueSelectionAction({Key key})
       : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {

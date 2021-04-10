@@ -3,11 +3,11 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-export 'sql/sql.dart';
-export 'album.dart';
-// export 'artist.dart';
-// export 'playlist.dart';
-export 'selection_entry.dart';
-export 'song.dart';
-export 'content.dart';
-export 'sort.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sweyer/sweyer.dart';
+
+void main() {
+  test('QueueType serialization', () {
+    expect(QueueType.all.value,'all');
+  });
+}

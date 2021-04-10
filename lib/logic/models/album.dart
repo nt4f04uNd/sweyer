@@ -9,13 +9,8 @@ import 'package:sweyer/sweyer.dart';
 
 part 'album.g.dart';
 
-
-/// TODO: what do i do with methods from [Queue]? they are not quite valid here
 @JsonSerializable()
 class Album extends PersistentQueue implements Content {
-  @override
-  final int id;
-
   /// Album name.
   final String album;
   final String albumArt;
@@ -46,7 +41,7 @@ class Album extends PersistentQueue implements Content {
   int get length => numberOfSongs;
 
   Album({
-    @required this.id,
+    @required int id,
     @required this.album,
     @required this.albumArt,
     @required this.artist,
@@ -54,7 +49,7 @@ class Album extends PersistentQueue implements Content {
     @required this.firstYear,
     @required this.lastYear,
     @required this.numberOfSongs,
-  });
+  }) : super(id: id);
 
   factory Album.fromJson(Map<String, dynamic> json) => _$AlbumFromJson(json);
   Map<String, dynamic> toJson() => _$AlbumToJson(this);

@@ -3,10 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-export 'playlist.dart';
-export 'serialization.dart';
 export 'content.dart';
-export 'models/models.dart';
+export 'queue.dart';
+export 'serialization.dart';
 
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
@@ -16,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
-class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
+class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, WidgetsBindingObserver {
   _AudioHandler() {
     _init();
   }
@@ -31,7 +30,7 @@ class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
       // todo: this?
       // _setState();
     });
-    player.onLoopingSwitch.listen((event) => _setState());
+    player.loopingStream.listen((event) => _setState());
     player.playingStream.listen((event) => _setState());
     ContentControl.state.onSongChange.listen((event) => _setState());
   }
@@ -55,6 +54,9 @@ class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
         return ContentControl.state.onSongListChange.map((_) => {}) as ValueStream<Map<String, dynamic>>;
     }
   }
+
+  @override
+  Future<MediaItem> getMediaItem(String mediaId) async => null;
 
   @override
   Future<void> skipToQueueItem(int index) async {
@@ -85,7 +87,7 @@ class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
 
   @override
   Future<void> stop() async {
-    // TODO: change this to stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
+    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
     // await player.stop();
     await player.pause();
     await super.stop();
@@ -101,6 +103,19 @@ class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
     _setState();
   }
 
+  @override
+  Future<void> onNotificationAction(String action) async {
+    switch (action) {
+      case 'loop_on':
+      case 'loop_off': return player.switchLooping();
+      case 'play_prev': return player.playPrev();
+      case 'pause': return player.pause();
+      case 'play': return player.play();
+      case 'play_next': return player.playNext();
+      case 'stop': stop();
+    }
+  }
+
   /// Broadcasts the current state to all clients.
   void _setState() {
     final playing = player.playing;
@@ -108,45 +123,45 @@ class _AudioHandler extends BaseAudioHandler with WidgetsBindingObserver {
     final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark ? 'white' : 'black';
     playbackState.add(playbackState.value.copyWith(
       controls: [
-        // TODO: not working see https://github.com/ryanheise/audio_service/issues/633
+        // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
         if (player.looping)
           MediaControl(
             androidIcon: 'drawable/round_loop_on_${color}_24',
             label: l10n.loopOn,
-            action: MediaAction.setRepeatMode,
+            action: 'loop_on',
           )
         else
           MediaControl(
             androidIcon: 'drawable/round_loop_${color}_24',
             label: l10n.loopOff,
-            action: MediaAction.setRepeatMode,
+            action:'loop_off',
           ),
         MediaControl(
           androidIcon: 'drawable/round_skip_previous_${color}_36',
           label: l10n.previous,
-          action: MediaAction.skipToPrevious,
+          action: 'play_prev',
         ),
         if (playing)
           MediaControl(
             androidIcon: 'drawable/round_pause_${color}_36',
             label: l10n.pause,
-            action: MediaAction.pause,
+            action: 'pause',
           )
         else
           MediaControl(
             androidIcon: 'drawable/round_play_arrow_${color}_36',
             label: l10n.play,
-            action: MediaAction.play,
+            action: 'play',
           ),
         MediaControl(
           androidIcon: 'drawable/round_skip_next_${color}_36',
           label: l10n.next,
-          action: MediaAction.skipToNext,
+          action: 'play_next',
         ),
         MediaControl(
           androidIcon: 'drawable/round_close_next_${color}_36',
           label: l10n.stop,
-          action: MediaAction.stop,
+          action: 'stop',
         ),
       ],
       systemActions: {
@@ -179,8 +194,10 @@ class MusicPlayer extends AudioPlayer {
   _AudioHandler _handler;
 
   bool get looping => loopMode == LoopMode.all;
-  Stream<bool> get onLoopingSwitch => loopModeStream.map((event) => event == LoopMode.all);
-  Duration get duration => Duration(milliseconds: ContentControl.state.currentSong?.duration);
+  Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.all);
+
+  @override
+  Duration get duration => Duration(milliseconds: ContentControl.state.currentSong.duration);
 
   Future<void> init() async {
     _handler = await AudioService.init(builder: () {
@@ -267,10 +284,9 @@ class MusicPlayer extends AudioPlayer {
 
   /// The [index] parameter is made no-op.
   @override
-  Future<void> seek(Duration position, {index}) async {
+  Future<void> seek(Duration position, {void index}) async {
     return super.seek(position);
   }
-
 
   Future<void> playPause() async {
     if (playing) {

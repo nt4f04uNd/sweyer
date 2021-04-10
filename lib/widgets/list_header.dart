@@ -108,8 +108,8 @@ abstract class SortListHeader<T extends Content> extends StatelessWidget {
       ui: Constants.UiTheme.modalOverGrey.auto,
       title: Text(l10n.sort),
       titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
-      contentPadding: EdgeInsets.only(top: 5.0, bottom: 10.0),
-      acceptButton: SizedBox.shrink(),
+      contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
+      acceptButton: const SizedBox.shrink(),
       content: Column(
         children: contentPick<T, List<SortFeature> Function()>(
           song: () => SongSortFeature.values,
@@ -128,7 +128,7 @@ abstract class SortListHeader<T extends Content> extends StatelessWidget {
       fontWeight: FontWeight.w800,
     );
     final sort = getSort();
-    Widget child = ListHeader(
+    final child = ListHeader(
       margin: const EdgeInsets.only(
         top: 10.0,
         bottom: 4.0,

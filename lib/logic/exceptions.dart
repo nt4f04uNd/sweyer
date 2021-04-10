@@ -7,4 +7,4 @@
 /// 
 /// In difference with [UnimplementedError], this exception used to mark that
 /// given code path should never be reached.
-class InvalidCodePathError extends Error { }
+class InvalidCodePathError extends Error {}

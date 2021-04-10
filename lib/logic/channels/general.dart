@@ -6,7 +6,7 @@
 import 'package:flutter/services.dart';
 
 abstract class GeneralChannel {
-  static MethodChannel _channel = const MethodChannel('general_channel');
+  static const MethodChannel _channel = MethodChannel('general_channel');
 
   /// Checks if open intent is view (user tried to open file with app)
   static Future<bool> isIntentActionView() async {

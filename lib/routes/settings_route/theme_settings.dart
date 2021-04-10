@@ -50,7 +50,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
     super.dispose();
   }
 
-  void _handleThemeSwitch(bool value) async {
+  void _handleThemeSwitch(bool value) {
     ThemeControl.switchTheme();
     _handleThemeChange();
   }

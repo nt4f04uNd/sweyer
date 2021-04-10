@@ -156,9 +156,7 @@ class _SongListViewState extends State<SongListView> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.itemScrollController != widget.itemScrollController || oldWidget.scrollbar != widget.scrollbar) {
       if (widget.itemScrollController == null && widget.scrollbar == ScrollbarType.draggable) {
-        if (itemScrollController == null) { 
-          itemScrollController = ItemScrollController();
-        }
+        itemScrollController ??= ItemScrollController();
       } else {
         itemScrollController = null;
       }
@@ -327,9 +325,7 @@ class _AlbumListViewState extends State<AlbumListView> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.itemScrollController != widget.itemScrollController || oldWidget.scrollbar != widget.scrollbar) {
       if (widget.itemScrollController == null && widget.scrollbar == ScrollbarType.draggable) {
-        if (itemScrollController == null) { 
-          itemScrollController = ItemScrollController();
-        }
+        itemScrollController ??= ItemScrollController();
       } else {
         itemScrollController = null;
       }

@@ -92,9 +92,7 @@ class SearchHistory {
   List<String> history;
 
   Future<void> load() async {
-    if (history == null) {
-      history = await Prefs.searchHistoryStringList.get();
-    }
+    history ??= await Prefs.searchHistoryStringList.get();
   }
 
   Future<void> clear() async {

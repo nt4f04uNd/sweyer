@@ -22,15 +22,15 @@ abstract class AppTheme {
 
   static const _ThemeContainer<Color> appBarBorderColor = _ThemeContainer(
     light: AppColors.eee,
-    dark: const Color(0xff191b1a),
+    dark: Color(0xff191b1a),
   );
 
-  static final _ThemeContainer<Color> menuItemColor = _ThemeContainer(
-    light: const Color(0xff3d3e42),
+  static const  _ThemeContainer<Color> menuItemColor = _ThemeContainer(
+    light: Color(0xff3d3e42),
     dark: AppColors.almostWhite,
   );
 
-  static final _lightThemeSplashColor = const Color(0x40cccccc);
+  static const _lightThemeSplashColor = Color(0x40cccccc);
 
   /// Additional "glow" splash color aside of the one I put into the [ThemeData.splashColor],
   /// that is the primary splash of the application (see [app]).
@@ -62,7 +62,7 @@ abstract class AppTheme {
       unselectedWidgetColor: Colors.grey.shade400,
 
       //****************** Color scheme (preferable to colors) *********************
-      colorScheme: ColorScheme(
+      colorScheme: const ColorScheme(
         brightness: Brightness.light,
         background: Colors.white,
         onBackground: AppColors.greyText,
@@ -74,7 +74,7 @@ abstract class AppTheme {
         secondaryVariant: Colors.white,
         // todo: temporarily used for text in [NFButtons], remove when it's removed
         onSecondary: defaultPrimaryColor,
-        error: const Color(0xffed3b3b),
+        error: Color(0xffed3b3b),
         onError: Colors.white,
 
         /// For window headers (e.g. alert dialogs)
@@ -94,7 +94,7 @@ abstract class AppTheme {
       iconTheme: const IconThemeData(color: _lightIconColor),
       tooltipTheme: const TooltipThemeData(
         verticalOffset: 20.0,
-        textStyle: const TextStyle(
+        textStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
         ),
@@ -105,7 +105,7 @@ abstract class AppTheme {
           ),
         ),
       ),
-      textSelectionTheme: TextSelectionThemeData(
+      textSelectionTheme: const TextSelectionThemeData(
         cursorColor: defaultPrimaryColor,
         selectionColor: defaultPrimaryColor,
         selectionHandleColor: defaultPrimaryColor,
@@ -121,55 +121,55 @@ abstract class AppTheme {
           ),
         ),
       ),
-      buttonTheme: ButtonThemeData(
+      buttonTheme: const ButtonThemeData(
         textTheme: ButtonTextTheme.primary,
       ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        button: const TextStyle(fontWeight: FontWeight.w600),
-        headline1: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline2: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline3: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        button: TextStyle(fontWeight: FontWeight.w600),
+        headline1: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline2: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline3: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // For the app title
-        headline4: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline5: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline4: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headline5: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // Title in song tiles
-        headline6: const TextStyle(
+        headline6: TextStyle(
           fontWeight: FontWeight.w700,
           color: AppColors.greyText,
           fontSize: 15.0,
         ),
-        subtitle1: const TextStyle(
+        subtitle1: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.grey,
         ),
         // Artist widget
-        subtitle2: const TextStyle(
+        subtitle2: TextStyle(
           fontWeight: FontWeight.w600,
           color: Colors.black54,
           fontSize: 13.5,
           height: 0.9,
         ),
-        bodyText1: const TextStyle(fontWeight: FontWeight.w700),
-        bodyText2: const TextStyle(fontWeight: FontWeight.w600),
-        overline: const TextStyle(fontWeight: FontWeight.w600),
-        caption: const TextStyle(fontWeight: FontWeight.w600),
+        bodyText1: TextStyle(fontWeight: FontWeight.w700),
+        bodyText2: TextStyle(fontWeight: FontWeight.w600),
+        overline: TextStyle(fontWeight: FontWeight.w600),
+        caption: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
         elevation: 0.0,
         color: AppColors.eee,
         textTheme: TextTheme(
-          headline6: const TextStyle(
+          headline6: TextStyle(
             color: AppColors.greyText,
             fontWeight: FontWeight.w600,
             fontSize: 20.0,
           ),
         ),
       ),
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.only(
+          borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10),
             topRight: Radius.circular(10),
           ),
@@ -190,7 +190,7 @@ abstract class AppTheme {
       unselectedWidgetColor: Colors.grey.shade800,
 
       //****************** Color scheme (preferable to colors) *********************
-      colorScheme: ColorScheme(
+      colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         background: Colors.black,
         onBackground: AppColors.almostWhite,
@@ -202,7 +202,7 @@ abstract class AppTheme {
         secondaryVariant: Colors.black,
         // todo: temporarily used for text in [NFButtons], remove when it's removed
         onSecondary: AppColors.almostWhite,
-        error: const Color(0xffed3b3b),
+        error: Color(0xffed3b3b),
         onError: AppColors.almostWhite,
 
         /// For window headers (e.g. alert dialogs)
@@ -220,7 +220,7 @@ abstract class AppTheme {
       iconTheme: const IconThemeData(color: AppColors.whiteDarkened),
       tooltipTheme: const TooltipThemeData(
         verticalOffset: 20.0,
-        textStyle: const TextStyle(
+        textStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
         ),
@@ -231,47 +231,47 @@ abstract class AppTheme {
           ),
         ),
       ),
-      textSelectionTheme: TextSelectionThemeData(
+      textSelectionTheme: const TextSelectionThemeData(
         cursorColor: defaultPrimaryColor,
         selectionColor: defaultPrimaryColor,
         selectionHandleColor: defaultPrimaryColor,
       ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        button: const TextStyle(fontWeight: FontWeight.w600),
-        headline1: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline2: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline3: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline4: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline5: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline6: const TextStyle(
+        button: TextStyle(fontWeight: FontWeight.w600),
+        headline1: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline2: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline3: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline4: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline5: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline6: TextStyle(
           fontWeight: FontWeight.w700,
           color: AppColors.almostWhite,
           fontSize: 15.0,
         ),
         // Title in song tiles
-        subtitle1: const TextStyle(
+        subtitle1: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.almostWhite,
         ),
         // Artist widget
-        subtitle2: const TextStyle(
+        subtitle2: TextStyle(
           fontWeight: FontWeight.w600,
           color: Colors.white70,
           fontSize: 13.5,
           height: 0.9,
         ),
-        bodyText1: const TextStyle(fontWeight: FontWeight.w700),
-        bodyText2: const TextStyle(fontWeight: FontWeight.w600),
-        overline: const TextStyle(fontWeight: FontWeight.w600),
-        caption: const TextStyle(fontWeight: FontWeight.w600),
+        bodyText1: TextStyle(fontWeight: FontWeight.w700),
+        bodyText2: TextStyle(fontWeight: FontWeight.w600),
+        overline: TextStyle(fontWeight: FontWeight.w600),
+        caption: TextStyle(fontWeight: FontWeight.w600),
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         brightness: Brightness.dark,
         color: AppColors.grey,
         elevation: 0.0,
         textTheme: TextTheme(
-          headline6: const TextStyle(
+          headline6: TextStyle(
             color: AppColors.almostWhite,
             fontWeight: FontWeight.w600,
             fontSize: 20.0,
@@ -380,9 +380,9 @@ abstract class UiTheme {
 
 /// Class to wrap some values, so they will have [light] and [dark] variants.
 class _ThemeContainer<T> {
+  const _ThemeContainer({@required this.light, @required this.dark});
   final T light;
   final T dark;
-  const _ThemeContainer({@required this.light, @required this.dark});
 
   /// Checks theme and automatically [light] or [dark], depending on current brightness.
   T get auto => ThemeControl.isDark ? dark : light;

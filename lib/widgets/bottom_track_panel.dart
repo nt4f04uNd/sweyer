@@ -142,7 +142,7 @@ class _RotatingAlbumArtWithProgressState
   StreamSubscription<bool> _playingSubscription;
   StreamSubscription<void> _songListChangeSubscription;
 
-  GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
+  final _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
 
   @override
   void initState() {
@@ -210,24 +210,22 @@ class _RotatingAlbumArtWithProgressState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: CircularPercentIndicator(
-        percent: _calcProgress(),
-        animation: true,
-        animationDuration: 200,
-        curve: Curves.easeOutCubic,
-        animateFromLastPercent: true,
-        radius: kSongTileArtSize - progressLineHeight,
-        lineWidth: progressLineHeight,
-        circularStrokeCap: CircularStrokeCap.round,
-        progressColor: ThemeControl.theme.colorScheme.primary,
-        backgroundColor: Colors.transparent,
-        center: AlbumArtRotating(
-          key: _rotatingArtGlobalKey,
-          path: ContentControl.state.currentSong?.albumArt,
-          initRotation: math.Random(DateTime.now().second).nextDouble(),
-          initRotating: MusicPlayer.instance.playing,
-        ),
+    return CircularPercentIndicator(
+      percent: _calcProgress(),
+      animation: true,
+      animationDuration: 200,
+      curve: Curves.easeOutCubic,
+      animateFromLastPercent: true,
+      radius: kSongTileArtSize - progressLineHeight,
+      lineWidth: progressLineHeight,
+      circularStrokeCap: CircularStrokeCap.round,
+      progressColor: ThemeControl.theme.colorScheme.primary,
+      backgroundColor: Colors.transparent,
+      center: AlbumArtRotating(
+        key: _rotatingArtGlobalKey,
+        path: ContentControl.state.currentSong?.albumArt,
+        initRotation: math.Random(DateTime.now().second).nextDouble(),
+        initRotating: MusicPlayer.instance.playing,
       ),
     );
   }

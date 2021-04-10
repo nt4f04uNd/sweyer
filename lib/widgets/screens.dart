@@ -52,7 +52,7 @@ class CenterContentScreen extends StatelessWidget {
               preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
               child: AppBar(
                 backgroundColor: Colors.transparent,
-                leading: SettingsButton(),
+                leading: const SettingsButton(),
               ),
             ),
           ),
