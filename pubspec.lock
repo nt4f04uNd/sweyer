@@ -67,11 +67,9 @@ packages:
   audio_session:
     dependency: "direct overridden"
     description:
-      path: "."
-      ref: master
-      resolved-ref: e638b7c2ba13f0916f1a7f241fc7000792656ae8
-      url: "https://github.com/ryanheise/audio_session.git"
-    source: git
+      name: audio_session
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.1.0"
   auto_size_text:
     dependency: "direct main"
@@ -490,9 +488,9 @@ packages:
   just_audio:
     dependency: "direct main"
     description:
-      path: "C:\\dev\\projects\\native\\just_audio\\just_audio"
-      relative: false
-    source: path
+      name: just_audio
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.7.3"
   just_audio_platform_interface:
     dependency: transitive

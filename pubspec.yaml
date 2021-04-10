@@ -8,8 +8,7 @@ version: 1.0.2+3
  
 environment:
   sdk: ">=2.6.0<3.0.0"
-  # Commit 183f0e797a3bf8aa1b35b650150f7522d5d10377
-  # flutter: 1.24.0-8.0.pre.374
+  # flutter: 2.1.0-13.0.pre.386 # commit https://github.com/flutter/flutter/commit/66af44c9fe
 
 dependencies:
   # color_thief_flutter: ^1.0.2
@@ -39,10 +38,11 @@ dependencies:
   scrollable_positioned_list: ^0.1.10
   devicelocale: ^0.4.1
   just_audio:
-    path: C:\dev\projects\native\just_audio\just_audio
+    ^0.7.3
+    # path: C:\dev\projects\native\just_audio\just_audio
     # git: 
     #   url: C:\dev\projects\native\just_audio
-    #   ref: background
+    #   ref: master
     #   path: just_audio
   audio_service:
     # using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/notif
@@ -63,9 +63,10 @@ dependency_overrides:
   petitparser: ^4.0.0
   crypto: ^3.0.0
   audio_session:
-    git: 
-      url: https://github.com/ryanheise/audio_session.git
-      ref: master
+    ^0.1.0
+    # git: 
+    #   url: https://github.com/ryanheise/audio_session.git
+    #   ref: master
 
   flutter:
     sdk: flutter
