@@ -75,7 +75,6 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pedantic: 1.11.0
   build_runner: ^1.7.2
   json_serializable: ^3.2.5
   # intl_translation: ^0.17.10+1
