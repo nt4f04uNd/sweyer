@@ -38,7 +38,7 @@ class ShuffleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return StreamBuilder(
-      stream: ContentControl.state.onSongListChange,
+      stream: ContentControl.state.onContentChange,
       builder: (context, snap) => AnimatedIconButton(
         icon: const Icon(Icons.shuffle_rounded),
         color: ThemeControl.theme.colorScheme.onSurface,

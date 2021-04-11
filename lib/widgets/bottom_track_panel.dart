@@ -82,8 +82,7 @@ class TrackPanel extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               NFMarquee(
-                                key: ValueKey(
-                                    ContentControl.state.currentSongId),
+                                key: ValueKey(ContentControl.state.currentSong.id),
                                 fontWeight: FontWeight.w700,
                                 text: ContentControl.state.currentSong.title,
                                 fontSize: 16,
@@ -93,8 +92,7 @@ class TrackPanel extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4.0),
                                 child: ArtistWidget(
-                                  artist:
-                                      ContentControl.state.currentSong.artist,
+                                  artist: ContentControl.state.currentSong.artist,
                                 ),
                               ),
                             ],
@@ -140,7 +138,7 @@ class _RotatingAlbumArtWithProgressState
   StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<bool> _playingSubscription;
-  StreamSubscription<void> _songListChangeSubscription;
+  StreamSubscription<void> _contentChangeSubscription;
 
   final _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
 
@@ -177,7 +175,7 @@ class _RotatingAlbumArtWithProgressState
       });
     });
 
-    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
+    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
       setState(() {
         /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
         /// So sometimes even though current song is being restored, its album art might still be fetching.
@@ -190,7 +188,7 @@ class _RotatingAlbumArtWithProgressState
     _playingSubscription.cancel();
     _positionSubscription.cancel();
     _songChangeSubscription.cancel();
-    _songListChangeSubscription.cancel();
+    _contentChangeSubscription.cancel();
     super.dispose();
   }
 

@@ -3,10 +3,12 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// @dart = 2.12
+
 import 'package:audio_service/audio_service.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// The type of currently playing queue.
@@ -46,7 +48,7 @@ extension QueueTypeSerialization on QueueType {
 /// See also:
 /// * [QueueType] which is a type of currently playing queue.
 abstract class PersistentQueue with EquatableMixin {
-  PersistentQueue({ @required this.id });
+  PersistentQueue({ required this.id });
 
   /// A unique ID of this queue.
   final int id;
@@ -79,7 +81,7 @@ class Queue implements _QueueOperations<Song> {
   }
 
   /// Provides operations on queue by [Song.id].
-  _QueueOperationsById byId;
+  late final _QueueOperationsById byId;
 
   /// Returns a shuffled copy of songs.
   static List<Song> shuffleSongs(List<Song> songsToShuffle) {
@@ -132,7 +134,7 @@ class Queue implements _QueueOperations<Song> {
   }
 
   @override
-  Song getSong(Song song) {
+  Song? getSong(Song song) {
     return byId.getSong(song.id);
   }
 
@@ -142,12 +144,12 @@ class Queue implements _QueueOperations<Song> {
   }
 
   @override
-  Song getNextSong(Song song) {
+  Song? getNextSong(Song song) {
     return byId.getNextSong(song.id);
   }
 
   @override
-  Song getPrevSong(Song song) {
+  Song? getPrevSong(Song song) {
     return byId.getPrevSong(song.id);
   }
 
@@ -166,16 +168,16 @@ abstract class _QueueOperations<T> {
   void removeSong(T arg);
 
   /// Finds a song.
-  Song getSong(T arg);
+  Song? getSong(T arg);
 
   /// Returns song index.
   int getSongIndex(T arg);
 
   /// Finds a song and returns the one that goes after it.
-  Song getNextSong(T arg);
+  Song? getNextSong(T arg);
 
   /// Finds a song and returns the one that goes before it.
-  Song getPrevSong(T arg);
+  Song? getPrevSong(T arg);
 }
 
 /// Implements opertions on [queue] by IDs of the [Song]s.
@@ -189,8 +191,8 @@ class _QueueOperationsById implements _QueueOperations<int> {
   }
 
   @override
-  Song getSong(int id) {
-    return queue.songs.firstWhere((el) => el.id == id, orElse: () => null);
+  Song? getSong(int id) {
+    return queue.songs.firstWhereOrNull((el) => el.id == id);
   }
 
   @override
@@ -199,7 +201,7 @@ class _QueueOperationsById implements _QueueOperations<int> {
   }
 
   @override
-  Song getNextSong(int id) {
+  Song? getNextSong(int id) {
     final songIndex = getSongIndex(id);
     if (songIndex < 0) {
       return null;
@@ -212,7 +214,7 @@ class _QueueOperationsById implements _QueueOperations<int> {
   }
 
   @override
-  Song getPrevSong(int id) {
+  Song? getPrevSong(int id) {
     final songIndex = getSongIndex(id);
     if (songIndex < 0) {
       return null;

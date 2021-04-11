@@ -198,7 +198,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               onTap: _handleClickSettings,
             ),
             ValueListenableBuilder(
-              valueListenable: ContentControl.state.devMode,
+              valueListenable: ContentControl.devMode,
               builder: (context, value, child) => value ? child : const SizedBox.shrink(),
               child: MenuItem(
                 l10n.debug,

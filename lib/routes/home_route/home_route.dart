@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/routes/home_route/tabs_route.dart';
 import 'package:sweyer/sweyer.dart';
@@ -37,39 +38,46 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
   @override
   Widget build(BuildContext context) {
     return RouteAwareWidget(
-      onPushNext: () {
-        _onTop = false;
-      },
-      onPopNext: () {
-        _onTop = true;
-      },
+      onPushNext: () => _onTop = false,
+      onPopNext: () => _onTop = true,
       child: StreamBuilder(
-        stream: ContentControl.state.onSongListChange,
+        stream: ContentControl.onStateCreateRemove,
         builder: (context, snapshot) {
-          if (Permissions.notGranted) {
+          if (ContentControl.stateNullable == null) {
             _animateNotMainUi();
-            return const _NoPermissionsScreen();
-          }
-          if (ContentControl.state.queues.all.isNotEmpty && !ContentControl.initFetching) {
-            if (ThemeControl.ready && _onTop && playerRouteController.value == 0.0) {
-              SystemUiStyleController.animateSystemUiOverlay(
-                to: Constants.UiTheme.grey.auto,
-              );
-            }
-            return StreamBuilder<bool>(
-                stream: ThemeControl.onThemeChange,
-                builder: (context, snapshot) {
-                  if (snapshot.data == true)
-                    return const SizedBox.shrink();
-                  return const MainScreen();
+            return const _SongsEmptyScreen();
+          } else {
+            return StreamBuilder(
+              stream: ContentControl.state.onContentChange,
+              builder: (context, snapshot) {
+                if (Permissions.notGranted) {
+                  _animateNotMainUi();
+                  return const _NoPermissionsScreen();
                 }
-              );
+                if (ContentControl.initializing) {
+                  _animateNotMainUi();
+                  return const _SearchingSongsScreen();
+                }
+                if (ContentControl.state == null || ContentControl.state.queues.all.isEmpty) {
+                  _animateNotMainUi();
+                  return const _SongsEmptyScreen();
+                }
+                if (ThemeControl.ready && _onTop && playerRouteController.value == 0.0) {
+                  SystemUiStyleController.animateSystemUiOverlay(
+                    to: Constants.UiTheme.grey.auto,
+                  );
+                }
+                return StreamBuilder<bool>(
+                  stream: ThemeControl.onThemeChange,
+                  builder: (context, snapshot) {
+                    if (snapshot.data == true)
+                      return const SizedBox.shrink();
+                    return const MainScreen();
+                  }
+                );
+              },
+            );
           }
-          _animateNotMainUi();
-          if (ContentControl.initFetching) {
-            return const _SearchingSongsScreen();
-          }
-          return const _SongsEmptyScreen();
         },
       ),
     );
@@ -240,7 +248,7 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
     setState(() {
       _fetching = true;
     });
-    await ContentControl.refetchAll();
+    await ContentControl.init();
     if (mounted)
       setState(() {
         _fetching = false;
@@ -284,10 +292,11 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
       _fetching = true;
     });
     await Permissions.requestClick();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _fetching = false;
       });
+    }
   }
 
   @override

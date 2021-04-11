@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// @dart = 2.12
+
 import 'dart:convert';
 
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -28,14 +30,14 @@ abstract class Prefs {
       Pref<int>(key: 'song_position', defaultValue: 0);
 
   /// Last playing track id.
-  static final Pref<int> songIdIntNullable =
+  static final Pref<int?> songIdInt =
       Pref<int>(key: 'song_id', defaultValue: null);
 
   /// Loop mode. Used on native side.
   static final Pref<bool> loopModeBool =
       Pref<bool>(key: 'loop_mode', defaultValue: false);
 
-  //****************** Sorts *****************************************************
+  //****************** Sorts ***********************
 
   /// Sort feature used for song list.
   static final Pref<String> songSortString = Pref<String>(
@@ -60,19 +62,19 @@ abstract class Prefs {
   );
 
   /// Last persistent queue.
-  static final Pref<int> persistentQueueIdNullable =
+  static final Pref<int?> persistentQueueId =
       Pref<int>(key: 'persistent_queue_id', defaultValue: null);
 
   /// Last search query.
-  static final Pref<String> searchQueryStringNullable =
+  static final Pref<String?> searchQueryString =
       Pref<String>(key: 'search_query', defaultValue: null);
 
   /// Whether the saved queue is modified or not.
-  static final Pref<bool> queueModifiedBool =
+  static final Pref<bool?> queueModifiedBool =
       Pref<bool>(key: 'queue_modified', defaultValue: false);
 
   /// Whether the saved queue is shuffled or not.
-  static final Pref<bool> queueShuffledBool =
+  static final Pref<bool?> queueShuffledBool =
       Pref<bool>(key: 'queue_shuffled', defaultValue: false);
 
   /// Developer mode pref.
@@ -89,7 +91,7 @@ class SearchHistory {
   SearchHistory._();
   static final instance = SearchHistory._();
 
-  List<String> history;
+  List<String>? history;
 
   Future<void> load() async {
     history ??= await Prefs.searchHistoryStringList.get();
@@ -97,7 +99,7 @@ class SearchHistory {
 
   Future<void> clear() async {
     if (history != null) {
-      history.clear();
+      history!.clear();
     } else {
       history = [];
     }
@@ -106,8 +108,8 @@ class SearchHistory {
 
   Future<void> remove(int index) async {
     await load();
-    history.removeAt(index);
-    await Prefs.searchHistoryStringList.set(history);
+    history!.removeAt(index);
+    await Prefs.searchHistoryStringList.set(history!);
   }
 
   Future<void> save(String entry) async {
@@ -115,12 +117,12 @@ class SearchHistory {
     if (entry.isNotEmpty) {
       await load();
       // Remove if this input is in array
-      history.removeWhere((el) => el == entry);
-      history.insert(0, entry);
-      if (history.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
-        history.removeLast();
+      history!.removeWhere((el) => el == entry);
+      history!.insert(0, entry);
+      if (history!.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+        history!.removeLast();
       }
-      await Prefs.searchHistoryStringList.set(history);
+      await Prefs.searchHistoryStringList.set(history!);
     }
   }
 }

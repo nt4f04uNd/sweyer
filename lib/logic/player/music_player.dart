@@ -25,14 +25,16 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
   Future<void> _init() async {
     WidgetsBinding.instance.addObserver(this);
     queue.add(ContentControl.state.queues.current.toMediaItems());
-    ContentControl.state.onSongChange.listen((song) {
-      mediaItem.add(song.toMediaItem());
-      // todo: this?
-      // _setState();
-    });
     player.loopingStream.listen((event) => _setState());
     player.playingStream.listen((event) => _setState());
-    ContentControl.state.onSongChange.listen((event) => _setState());
+    ContentControl.state.onSongChange.listen((song) {
+      mediaItem.add(song.toMediaItem());
+      _setState();
+    });
+  }
+
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -51,7 +53,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
     switch (parentMediaId) {
       case AudioService.recentRootId:
       default: // In all cases return current queue.
-        return ContentControl.state.onSongListChange.map((_) => {}) as ValueStream<Map<String, dynamic>>;
+        return ContentControl.state.onContentChange.map((_) => {}) as ValueStream<Map<String, dynamic>>;
     }
   }
 
@@ -189,9 +191,12 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
 /// Player that plays the content provided by provided [ContentControl].
 class MusicPlayer extends AudioPlayer {
   MusicPlayer._();
-  static final instance = MusicPlayer._();
+  static MusicPlayer _instance;
+  static MusicPlayer get instance {
+    return _instance ??= MusicPlayer._();
+  }
 
-  _AudioHandler _handler;
+  static _AudioHandler _handler;
 
   bool get looping => loopMode == LoopMode.all;
   Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.all);
@@ -200,7 +205,8 @@ class MusicPlayer extends AudioPlayer {
   Duration get duration => Duration(milliseconds: ContentControl.state.currentSong.duration);
 
   Future<void> init() async {
-    _handler = await AudioService.init(builder: () {
+    await restoreLastSong();
+    _handler ??= await AudioService.init(builder: () {
       return _AudioHandler();
     });
 
@@ -215,8 +221,14 @@ class MusicPlayer extends AudioPlayer {
     // Restring seek from prefs.
     final songPosition = await Prefs.songPositionInt.get();
     await seek(Duration(seconds: songPosition));
+  }
 
-    await restoreLastSong();
+  @override
+  Future<void> dispose() {
+    _instance = null;
+    _handler?.stop();
+    _handler?.dispose();
+    return super.dispose();
   }
 
   /// Function that fires right after json has fetched and when initial songs fetch has done.
@@ -226,7 +238,7 @@ class MusicPlayer extends AudioPlayer {
     final current = ContentControl.state.queues.current;
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (current.isNotEmpty) {
-      final int songId = await Prefs.songIdIntNullable.get();
+      final int songId = await Prefs.songIdInt.get();
       await setSong(songId == null
         ? current.songs[0]
         : current.byId.getSong(songId) ?? current.songs[0]);
@@ -345,9 +357,8 @@ class MusicPlayer extends AudioPlayer {
     if (duplicate) {
       ContentControl.handleDuplicate(clickedSong);
       isSame = false;
-    } else {
-      isSame = clickedSong == ContentControl.state.currentSong;
     }
+    isSame = clickedSong == ContentControl.state.currentSong;
     if (behavior == SongClickBehavior.play) {
       getPlayerRouteControllerProvider(context).controller.open();
       await setSong(clickedSong, duplicate: duplicate, fromBeginning: true);

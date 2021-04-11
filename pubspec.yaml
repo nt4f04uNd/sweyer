@@ -13,6 +13,7 @@ environment:
 dependencies:
   # color_thief_flutter: ^1.0.2
   async: ^2.5.0
+  rxdart: ^0.26.0
   animations: ^2.0.0
   fluttertoast: ^8.0.3
   permission_handler: ^6.1.1

@@ -43,7 +43,7 @@ class TabsRoute extends StatefulWidget {
 
 class _TabsRouteState extends State<TabsRoute> {
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<void> _songListChangeSubscription;
+  StreamSubscription<void> _contentChangeSubscription;
   TabController get tabController => widget.tabController;
   ContentSelectionControllersProvider controllersProvider;
 
@@ -69,7 +69,7 @@ class _TabsRouteState extends State<TabsRoute> {
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
       setState(() {/* update current track indicator */});
     });
-    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) {
+    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) {
       setState(() {/* update to display possible changes in the list */});
     });
     tabController.addListener(() {
@@ -94,7 +94,7 @@ class _TabsRouteState extends State<TabsRoute> {
       controller.removeListener(_handleSelection);
       controller.removeStatusListener(_handleSelectionStatus);
     }
-    _songListChangeSubscription.cancel();
+    _contentChangeSubscription.cancel();
     _songChangeSubscription.cancel();
     super.dispose();
   }
@@ -109,7 +109,7 @@ class _TabsRouteState extends State<TabsRoute> {
 
   void _handleDelete() {
     final controller = controllersProvider.song;
-    if (ContentControl.state.sdkInt >= 30) {
+    if (ContentControl.sdkInt >= 30) {
       // On Android R the deletion is performed with OS dialog.
       ContentControl.deleteSongs(controller.data.map((e) => e.data.sourceId).toSet());
       controller.close();

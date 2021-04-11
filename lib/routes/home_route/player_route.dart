@@ -183,7 +183,7 @@ class _QueueTabState extends State<_QueueTab>
 
   /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<void> _songListChangeSubscription;
+  StreamSubscription<void> _contentChangeSubscription;
 
   QueueType get type => ContentControl.state.queues.type;
   bool get isAlbum => ContentControl.state.queues.persistent is Album;
@@ -197,7 +197,7 @@ class _QueueTabState extends State<_QueueTab>
     super.initState();
     songsPerScreen = (screenHeight / kSongTileHeight).ceil() - 2;
     edgeOffset = (screenHeight / kSongTileHeight / 2).ceil();
-    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
+    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
       if (ContentControl.state.queues.all.isNotEmpty) {
         // Reset value when queue changes
         prevSongIndex = ContentControl.state.currentSongIndex;
@@ -222,7 +222,7 @@ class _QueueTabState extends State<_QueueTab>
 
   @override
   void dispose() {
-    _songListChangeSubscription.cancel();
+    _contentChangeSubscription.cancel();
     _songChangeSubscription.cancel();
     super.dispose();
   }
@@ -569,7 +569,7 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
         ),
         actions: <Widget>[
           ValueListenableBuilder(
-            valueListenable: ContentControl.state.devMode,
+            valueListenable: ContentControl.devMode,
             builder: (context, value, child) => value ? child : const SizedBox.shrink(),
             child: FadeTransition(
               opacity: fadeAnimation,
@@ -717,7 +717,7 @@ class _TrackShowcase extends StatefulWidget {
 
 class _TrackShowcaseState extends State<_TrackShowcase> {
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<void> _songListChangeSubscription;
+  StreamSubscription<void> _contentChangeSubscription;
 
   @override
   void initState() {
@@ -726,7 +726,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
       setState(() {/* update track in ui */});
     });
 
-    _songListChangeSubscription = ContentControl.state.onSongListChange.listen((event) async {
+    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
       setState(() {
         /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
         /// So sometimes even though current song is being restored, its album art might still be fetching.
@@ -737,7 +737,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
   @override
   void dispose() {
     _songChangeSubscription.cancel();
-    _songListChangeSubscription.cancel();
+    _contentChangeSubscription.cancel();
     super.dispose();
   }
 
@@ -750,7 +750,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: NFMarquee(
-            key: ValueKey(ContentControl.state.currentSongId),
+            key: ValueKey(ContentControl.state.currentSong.id),
             fontWeight: FontWeight.w900,
             text: currentSong.title,
             fontSize: 20.0,

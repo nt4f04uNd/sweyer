@@ -93,7 +93,6 @@ Future<void> main() async {
     ThemeControl.initSystemUi();
     await Permissions.init();
     await ContentControl.init();
-    await MusicPlayer.instance.init();
     runApp(const App());
   // }, reportError);
 }

@@ -7,7 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sweyer/sweyer.dart';
 
 void main() {
-  test('QueueType serialization', () {
-    expect(QueueType.all.value,'all');
+  setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    // await ContentControl.init();
+  });
+
+  test('test', () async {
+    // print(ContentControl.state.sdkInt);
   });
 }
