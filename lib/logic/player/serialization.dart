@@ -128,33 +128,3 @@ class IdMapSerializer extends JsonSerializer<Map<String, int>, Map<String, int>>
     debugPrint('$fileName: json saved');
   }
 }
-
-/// Used to save ablum art placeholder.
-class AlbumArtPlaceholderSerializer extends JsonSerializer<void, Uint8List> {
-  AlbumArtPlaceholderSerializer._();
-  static final instance = AlbumArtPlaceholderSerializer._();
-
-  @override
-  String get fileName => 'album_art.png';
-  @override
-  Uint8List get initialValue => null;
-
-  @override
-  Future<void> init() async {
-    UnimplementedError();
-  }
-
-  @override
-  Future<void> read() async {
-    UnimplementedError();
-  }
-
-  /// Serializes provided map as id map.
-  /// Used on dart side to saved cleared map, in other cases used on native.
-  @override
-  Future<void> save(Uint8List data) async {
-    final file = await getFile();
-    await file.writeAsBytes(data);
-    debugPrint('$fileName: json saved');
-  }
-}
