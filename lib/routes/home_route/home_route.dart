@@ -5,9 +5,7 @@
 
 import 'dart:async';
 
-import 'package:async/async.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:sweyer/routes/home_route/tabs_route.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -17,13 +15,14 @@ export 'player_route.dart';
 export 'search_route.dart';
 export 'tabs_route.dart';
 
-class HomeRoute extends StatefulWidget {
-  const HomeRoute({Key key}) : super(key: key);
+class InitialRoute extends StatefulWidget {
+  const InitialRoute({Key key}) : super(key: key);
+
   @override
-  HomeRouteState createState() => HomeRouteState();
+  _InitialRouteState createState() => _InitialRouteState();
 }
 
-class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
+class _InitialRouteState extends State<InitialRoute> {
   bool _onTop = true;
 
   void _animateNotMainUi() {
@@ -72,7 +71,7 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
                   builder: (context, snapshot) {
                     if (snapshot.data == true)
                       return const SizedBox.shrink();
-                    return const MainScreen();
+                    return const Home();
                   }
                 );
               },
@@ -84,132 +83,52 @@ class HomeRouteState extends State<HomeRoute> with PlayerRouteControllerMixin {
   }
 }
 
-/// Main app route with song and album list tabs
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key key}) : super(key: key);
+/// Main app's content screen.
+/// Displayed only there's some content.
+class Home extends StatefulWidget {
+  const Home({Key key}) : super(key: key);
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  HomeState createState() => HomeState();
 }
 
-class _MainScreenState extends State<MainScreen>
-    with
-        TickerProviderStateMixin,
-        DrawerControllerMixin,
-        PlayerRouteControllerMixin {
-  static const int _tabsLength = 2;
-
-  Map<Type, ContentSelectionController> selectionControllersMap;
-  TabController tabController;
-
-  bool get drawerCanBeOpened =>
-      playerRouteController.closed &&
-      selectionControllersMap.values.every((el) => el.notInSelection) &&
-      HomeRouter.instance.routes.last != HomeRoutes.album &&
-      (tabController.animation.value == 0.0 || HomeRouter.instance.routes.length > 1);
+class HomeState extends State<Home> {
+  static GlobalKey<OverlayState> overlayKey;
+  final router = HomeRouter();
 
   @override
-  void initState() {
+  void initState() { 
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      AppRouter.instance.mainScreenShown = true;
-    });
-
-    selectionControllersMap = {
-      Song: ContentSelectionController.forContent<Song>(this),
-      Album: ContentSelectionController.forContent<Album>(this),
-    };
-
-    tabController = tabController = TabController(
-      vsync: this,
-      length: _tabsLength,
-    );
+    overlayKey = GlobalKey();
   }
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      AppRouter.instance.mainScreenShown = false;
-    });
-    for (final controller in selectionControllersMap.values) {
-      controller.dispose();
-    }
-    tabController.dispose();
+  void dispose() { 
+    overlayKey = null;
     super.dispose();
-  }
-
-  /// Handles pop before any other pops in the [HomeRouter].
-  bool _handleNecessaryPop() {
-    if (playerRouteController.opened) {
-      playerRouteController.close();
-      return true;
-    } else if (drawerController.opened) {
-      drawerController.close();
-      return true;
-    }
-    return false;
-  }
-
-  // Var to show exit toast
-  DateTime _lastBackPressTime;
-  Future<bool> _handlePop(BuildContext context) async {
-    final handled = _handleNecessaryPop();
-    if (handled)
-      return false;
-    final activeSelectionController = ContentSelectionController.activeControllerNotifier.value;
-    if (activeSelectionController != null) {
-      activeSelectionController.close();
-      return false;
-    } else if (HomeRouter.instance.navigatorKey.currentState != null &&
-               HomeRouter.instance.navigatorKey.currentState.canPop()) {
-      HomeRouter.instance.navigatorKey.currentState.pop();
-      return false;
-    } else {
-      final now = DateTime.now();
-      // Show toast when user presses back button on main route, that asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null ||
-          now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
-        _lastBackPressTime = now;
-        ShowFunctions.instance.showToast(
-          msg: getl10n(context).pressOnceAgainToExit,
-        );
-        return false;
-      }
-      return true;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    HomeRouter.instance.home = TabsRoute(tabController);
-    return ContentSelectionControllersProvider(
-      map: selectionControllersMap,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: WillPopScope(
-          onWillPop: () => _handlePop(context),
-          child: Stack(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(bottom: kSongTileHeight),
-                child: Router<HomeRoutes>(
-                  routerDelegate: HomeRouter.instance,
-                  routeInformationParser: HomeRouteInformationParser(),
-                  routeInformationProvider: HomeRouteInformationProvider(),
-                  backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                    parent: Router.of(context).backButtonDispatcher,
-                    necessaryPopHandler: _handleNecessaryPop,
-                  ),
-                ),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(bottom: kSongTileHeight),
+            child: Router<HomeRoutes>(
+              routerDelegate: router,
+              routeInformationParser: HomeRouteInformationParser(),
+              routeInformationProvider: HomeRouteInformationProvider(),
+              backButtonDispatcher: HomeRouteBackButtonDispatcher(
+                Router.of(context).backButtonDispatcher,
               ),
-              const PlayerRoute(),
-              DrawerWidget(
-                canBeOpened: () => drawerCanBeOpened,
-              ),
-            ],
+            ),
           ),
-        ),
+          const PlayerRoute(),
+          Overlay(key: overlayKey),
+          const DrawerWidget(),
+        ],
       ),
     );
   }
@@ -249,10 +168,11 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
       _fetching = true;
     });
     await ContentControl.init();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _fetching = false;
       });
+    }
   }
 
   @override

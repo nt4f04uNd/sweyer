@@ -7,7 +7,6 @@
 
 import 'package:audio_service/audio_service.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:equatable/equatable.dart';
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -36,33 +35,6 @@ extension QueueTypeSerialization on QueueType {
   String get value => EnumToString.convertToString(this);
 }
 
-/// Represents some persistent queue on user device that has 
-/// a unique [id].
-/// 
-/// May be:
-/// * album
-/// * playlist
-/// * favorites
-/// * etc.
-/// 
-/// See also:
-/// * [QueueType] which is a type of currently playing queue.
-abstract class PersistentQueue with EquatableMixin {
-  PersistentQueue({ required this.id });
-
-  /// A unique ID of this queue.
-  final int id;
-
-  /// List of songs.
-  List<Song> get songs;
-
-  /// Length of the queue.
-  int get length;
-
-  @override
-  List<Object> get props => [id];
-}
-
 /// Class, representing a queue in application
 ///
 /// It is more array-like, as it has shuffle methods and explicit indexing.
@@ -89,9 +61,6 @@ class Queue implements _QueueOperations<Song> {
     shuffledSongs.shuffle();
     return shuffledSongs;
   }
-
-  /// Converts the queue to a list of media items.
-  List<MediaItem> toMediaItems() => songs.map((el) => el.toMediaItem()).toList();
 
   int get length => songs.length;
   bool get isEmpty => songs.isEmpty;

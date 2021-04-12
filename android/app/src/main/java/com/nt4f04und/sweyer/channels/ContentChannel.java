@@ -29,7 +29,7 @@ public enum ContentChannel {
       }
    }
 
-   public void kill() {
+   public void destroy() {
       channel = null;
    }
 

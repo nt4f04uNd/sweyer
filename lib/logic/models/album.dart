@@ -10,7 +10,7 @@ import 'package:sweyer/sweyer.dart';
 part 'album.g.dart';
 
 @JsonSerializable()
-class Album extends PersistentQueue implements Content {
+class Album extends PersistentQueue {
   /// Album name.
   final String album;
   final String albumArt;

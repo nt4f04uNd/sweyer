@@ -13,5 +13,5 @@ class SelectionEntry<T extends Content> extends Equatable {
   final T data;
 
   @override
-  List<Object> get props => [index];
+  List<Object> get props => [data, index];
 }

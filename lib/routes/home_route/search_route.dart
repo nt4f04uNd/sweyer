@@ -75,7 +75,7 @@ class _SearchStateDelegate {
     @required this.searchDelegate,
   }) : scrollController = ScrollController(),
     itemScrollController = ItemScrollController(),
-    selectionController =  ContentSelectionController<SelectionEntry>(
+    selectionController = ContentSelectionController<SelectionEntry>(
       animationController: AnimationController(
         vsync: vsync,
         duration: kSelectionDuration,
@@ -256,9 +256,7 @@ class _SearchPage<T> extends StatefulWidget {
   State<StatefulWidget> createState() => _SearchPageState<T>();
 }
 
-class _SearchPageState<T> extends State<_SearchPage<T>>
-  with TickerProviderStateMixin,
-       PlayerRouteControllerMixin {
+class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderStateMixin {
   // This node is owned, but not hosted by, the search page. Hosting is done by
   // the text field.
   FocusNode focusNode = FocusNode();
@@ -595,7 +593,7 @@ class _DelegateBuilder extends StatelessWidget {
           final contentListContentType = single ? contentTypeEntries.single.key : contentType;
           final controller = delegate.itemScrollController;
           return BackButtonListener(
-            onPressed: () => _handlePop(delegate),
+            onBackButtonPressed: () => _handlePop(delegate),
             child: PageTransitionSwitcher(
               duration: const Duration(milliseconds: 300),
               reverse: !single && contentType == null,

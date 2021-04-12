@@ -26,12 +26,13 @@ public class MainActivity extends FlutterActivity {
    protected void onCreate(@Nullable Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       GeneralHandler.init(getApplicationContext());
-      GeneralChannel.instance.init(getFlutterView(), this);
-      ContentChannel.instance.init(getFlutterView());
+      BinaryMessenger messenger = getBinaryMessenger();
+      GeneralChannel.instance.init(messenger, this);
+      ContentChannel.instance.init(messenger);
    }
 
-   BinaryMessenger getFlutterView() {
-      return getFlutterEngine().getDartExecutor().getBinaryMessenger();
+   BinaryMessenger getBinaryMessenger() {
+      return provideFlutterEngine(getApplicationContext()).getDartExecutor().getBinaryMessenger();
    }
 
    @Override
@@ -46,5 +47,12 @@ public class MainActivity extends FlutterActivity {
          // Report deletion intent result on android R
          ContentChannel.instance.sendDeletionResult(resultCode == RESULT_OK);
       }
+   }
+
+   @Override
+   protected void onDestroy() {
+      GeneralChannel.instance.destroy();
+      ContentChannel.instance.destroy();
+      super.onDestroy();
    }
 }

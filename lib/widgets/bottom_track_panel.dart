@@ -29,7 +29,6 @@ class TrackPanel extends StatelessWidget {
     }
 
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final playerRouteController = getPlayerRouteControllerProvider(context).controller;
     final fadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         curve: const Interval(0.0, 0.5),

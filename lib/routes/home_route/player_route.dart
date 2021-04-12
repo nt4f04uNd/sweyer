@@ -25,37 +25,43 @@ class PlayerRoute extends StatefulWidget {
   _PlayerRouteState createState() => _PlayerRouteState();
 }
 
-class _PlayerRouteState extends State<PlayerRoute> {
+class _PlayerRouteState extends State<PlayerRoute>
+  with SingleTickerProviderStateMixin, SelectionHandler {
   final _queueTabKey = GlobalKey<_QueueTabState>();
   List<Widget> _tabs;
   SlidableController controller;
   SharedAxisTabController tabController;
+  ContentSelectionController<SelectionEntry<Song>> selectionController;
 
   Animation _queueTabAnimation;
-  bool dontJump = false;
+  SlideDirection slideDirection = SlideDirection.up;
 
   @override
   void initState() {
     super.initState();
+    selectionController = ContentSelectionController.forContent<Song>(
+      this,
+      counter: true,
+      closeButton: true,
+    )
+      ..addListener(handleSelection)
+      ..addStatusListener(handleSelectionStatus);
     _tabs = [
       const _MainTab(),
-      _QueueTab(key: _queueTabKey),
+      _QueueTab(
+        key: _queueTabKey,
+        selectionController: selectionController,
+      ),
     ];
     tabController = SharedAxisTabController(length: 2);
     tabController.addListener(() {
-      /// Don't jump when user swipes to right and the previous animation
-      /// didn't reach the main tab. If I don't do this, the unwanted jump will occur
-      /// and user will see it while on the queue tab.
-      if (!_queueTabAnimation.isDismissed) {
-        dontJump = true;
-      }
       if (tabController.index == 0) {
         _queueTabKey.currentState.opened = false;
       } else if (tabController.index == 1) {
         _queueTabKey.currentState.opened = true;
       }
     });
-    controller = getPlayerRouteControllerProvider(context).controller;
+    controller = playerRouteController;
     controller.addListener(_handleControllerChange);
     controller.addStatusListener(_handleControllerStatusChange);
   }
@@ -63,21 +69,29 @@ class _PlayerRouteState extends State<PlayerRoute> {
   @override
   void dispose() {
     tabController.dispose();
+    selectionController.dispose();
     controller.removeListener(_handleControllerChange);
     controller.removeStatusListener(_handleControllerStatusChange);
     super.dispose();
   }
 
-  void _handleControllerChange() {
-    // I need to check what the state of the tab and set the end colors of tweens accordingly.
-    // That will ensure the correct looking animation
-    // when the page is being swiped and the route is being collapesed/expanded at the same moment.
+  @override
+  void handleSelectionStatus(AnimationStatus status) {
+    if (status == AnimationStatus.forward) {
+      slideDirection = SlideDirection.none;
+      tabController.canChange = false;
+    } else if (status == AnimationStatus.reverse) {
+      slideDirection = SlideDirection.up;
+      tabController.canChange = true;
+    }
+    super.handleSelectionStatus(status);
+  }
 
+  void _handleControllerChange() {
     final systemNavigationBarColorTween = ColorTween(
       begin: Constants.UiTheme.grey.auto.systemNavigationBarColor,
       end: Constants.UiTheme.black.auto.systemNavigationBarColor,
     );
-
     // Change system UI on expanding/collapsing the player route.
     SystemUiStyleController.setSystemUiOverlay(
       SystemUiStyleController.lastUi.copyWith(
@@ -88,20 +102,16 @@ class _PlayerRouteState extends State<PlayerRoute> {
 
   void _handleControllerStatusChange(AnimationStatus status) {
     if (status == AnimationStatus.reverse) {
+      tabController.canChange = true;
       tabController.changeTab(0);
     }
   }
 
   void _handleQueueTabAnimationStatus(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed) {
-      if (dontJump) {
-        /// Don't jump.
-        dontJump = false;
-      } else {
-        /// When the main tab is fully visible and the queue tab is not,
-        /// reset the scroll controller.
-        _queueTabKey.currentState.jumpOnTabChange();
-      }
+    if (tabController.index == 0 && status == AnimationStatus.dismissed) {
+      /// When the main tab is fully visible and the queue tab is not,
+      /// reset the scroll controller.
+      _queueTabKey.currentState.jumpOnTabChange();
     }
   }
 
@@ -112,7 +122,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
       controller: controller,
       start: 1.0 - kSongTileHeight / screenHeight,
       end: 0.0,
-      direction: SlideDirection.up,
+      direction: slideDirection,
       barrier: Container(
         color: ThemeControl.isDark ? Colors.black : Colors.black26,
       ),
@@ -124,7 +134,7 @@ class _PlayerRouteState extends State<PlayerRoute> {
             SharedAxisTabView(
               children: _tabs,
               controller: tabController,
-              tabBuilder: (context, animation, secondayAnimation, child) {
+              tabBuilder: (context, animation, secondaryAnimation, child) {
                 if (child is _QueueTab) {
                   if (animation != _queueTabAnimation) {
                     if (_queueTabAnimation != null) {
@@ -153,15 +163,19 @@ class _PlayerRouteState extends State<PlayerRoute> {
 }
 
 class _QueueTab extends StatefulWidget {
-  const _QueueTab({Key key}) : super(key: key);
+  _QueueTab({
+    Key key,
+    @required this.selectionController,
+  }) : super(key: key);
+
+  final SelectionController selectionController;
 
   @override
   _QueueTabState createState() => _QueueTabState();
 }
 
 class _QueueTabState extends State<_QueueTab>
-    with PlayerRouteControllerMixin,
-         SingleTickerProviderStateMixin {
+  with SingleTickerProviderStateMixin, SelectionHandler {
   /// Default scroll alignment.
   static const double scrollAlignment = 0.00;
   /// Scroll alignment for jumping to the end of the list.
@@ -197,16 +211,23 @@ class _QueueTabState extends State<_QueueTab>
     super.initState();
     songsPerScreen = (screenHeight / kSongTileHeight).ceil() - 2;
     edgeOffset = (screenHeight / kSongTileHeight / 2).ceil();
+
+    widget.selectionController
+      ..addListener(handleSelection)
+      ..addStatusListener(handleSelectionStatus);
+
     _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
       if (ContentControl.state.queues.all.isNotEmpty) {
         // Reset value when queue changes
         prevSongIndex = ContentControl.state.currentSongIndex;
         setState(() {/* update ui list as data list may have changed */});
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          // Jump when tracklist changes (e.g. shuffle happened)
-          jumpToSong();
-          // Post framing it because we need to be sure that list gets updated before we jump.
-        });
+        if (!opened) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            // Jump when tracklist changes (e.g. shuffle happened)
+            jumpToSong();
+            // Post framing it because we need to be sure that list gets updated before we jump.
+          });
+        }
       }
     });
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
@@ -222,6 +243,9 @@ class _QueueTabState extends State<_QueueTab>
 
   @override
   void dispose() {
+    widget.selectionController
+      ..removeListener(handleSelection)
+      ..removeStatusListener(handleSelectionStatus);
     _contentChangeSubscription.cancel();
     _songChangeSubscription.cancel();
     super.dispose();
@@ -308,7 +332,6 @@ class _QueueTabState extends State<_QueueTab>
       case QueueType.persistent:
         if (isAlbum) {
           HomeRouter.instance.goto(HomeRoutes.factory.album(album));
-          playerRouteController.close();
         } else {
           throw InvalidCodePathError();
         }
@@ -508,18 +531,27 @@ class _QueueTabState extends State<_QueueTab>
         children: [
           Padding(
             padding: EdgeInsets.only(top: appBarHeightWithPadding),
-            child: SongListView(
-              scrollbar: ScrollbarType.notDraggable,
-              padding: const EdgeInsets.only(top: 4.0),
-              itemScrollController: itemScrollController,
-              songs: ContentControl.state.queues.current.songs,
-              initialScrollIndex: initialScrollIndex,
-              initialAlignment: initialAlignment,
-              songTileVariant: ContentControl.state.queues.persistent is Album
-                ? SongTileVariant.number
-                : SongTileVariant.albumArt,
-              songClickBehavior: SongClickBehavior.playPause,
-              currentTest: (index) => index == currentSongIndex,
+            child: ValueListenableBuilder<SelectionController>(
+              valueListenable: ContentControl.state.selectionNotifier,
+              builder: (context, value, child) {
+                return SongListView(
+                  selectionController: widget.selectionController,
+                  scrollbar: ScrollbarType.notDraggable,
+                  padding: EdgeInsets.only(
+                    top: 4.0,
+                    bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
+                  ),
+                  itemScrollController: itemScrollController,
+                  songs: ContentControl.state.queues.current.songs,
+                  initialScrollIndex: initialScrollIndex,
+                  initialAlignment: initialAlignment,
+                  songTileVariant: ContentControl.state.queues.persistent is Album
+                    ? SongTileVariant.number
+                    : SongTileVariant.albumArt,
+                  songClickBehavior: SongClickBehavior.playPause,
+                  currentTest: (index) => index == currentSongIndex,
+                );
+              },
             ),
           ),
           Positioned(
@@ -541,7 +573,7 @@ class _MainTab extends StatefulWidget {
   _MainTabState createState() => _MainTabState();
 }
 
-class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
+class _MainTabState extends State<_MainTab> {
   @override
   Widget build(BuildContext context) {
     final animation = ColorTween(
@@ -568,9 +600,11 @@ class _MainTabState extends State<_MainTab> with PlayerRouteControllerMixin {
           ),
         ),
         actions: <Widget>[
-          ValueListenableBuilder(
+          ValueListenableBuilder<bool>(
             valueListenable: ContentControl.devMode,
-            builder: (context, value, child) => value ? child : const SizedBox.shrink(),
+            builder: (context, value, child) => value
+              ? child
+              : const SizedBox.shrink(),
             child: FadeTransition(
               opacity: fadeAnimation,
               child: const _InfoButton(),

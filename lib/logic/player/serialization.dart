@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
@@ -113,8 +114,7 @@ class IdMapSerializer extends JsonSerializer<Map<String, int>, Map<String, int>>
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
-      debugPrint(
-          '$fileName: Error reading songs json, setting to empty songs list');
+      debugPrint('$fileName: Error reading songs json, setting to empty songs list');
       return {};
     }
   }
@@ -125,6 +125,36 @@ class IdMapSerializer extends JsonSerializer<Map<String, int>, Map<String, int>>
   Future<void> save(Map<String, int> data) async {
     final file = await getFile();
     await file.writeAsString(jsonEncode(data));
+    debugPrint('$fileName: json saved');
+  }
+}
+
+/// Used to save ablum art placeholder.
+class AlbumArtPlaceholderSerializer extends JsonSerializer<void, Uint8List> {
+  AlbumArtPlaceholderSerializer._();
+  static final instance = AlbumArtPlaceholderSerializer._();
+
+  @override
+  String get fileName => 'album_art.png';
+  @override
+  Uint8List get initialValue => null;
+
+  @override
+  Future<void> init() async {
+    UnimplementedError();
+  }
+
+  @override
+  Future<void> read() async {
+    UnimplementedError();
+  }
+
+  /// Serializes provided map as id map.
+  /// Used on dart side to saved cleared map, in other cases used on native.
+  @override
+  Future<void> save(Uint8List data) async {
+    final file = await getFile();
+    await file.writeAsBytes(data);
     debugPrint('$fileName: json saved');
   }
 }

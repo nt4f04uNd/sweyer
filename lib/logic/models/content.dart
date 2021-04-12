@@ -12,6 +12,9 @@ import 'package:sweyer/sweyer.dart';
 /// See also:
 /// * [ContentType], a list of all content types.
 abstract class Content {
+  /// A unique ID of the content.
+  int get id;
+
   /// Enumerates all the types of content (derived from this class).
   static List<Type> enumerate() => [Song, Album];
 }

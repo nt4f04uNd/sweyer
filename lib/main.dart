@@ -118,15 +118,18 @@ class App extends StatefulWidget {
   _AppState createState() => _AppState();
 }
 
+SlidableController _playerRouteController;
+SlidableController _drawerController;
+SlidableController get playerRouteController => _playerRouteController;
+SlidableController get drawerController => _drawerController;
+
 class _AppState extends State<App> with TickerProviderStateMixin {
-  AnimationController playerRouteController;
-  AnimationController drawerWidgetController;
 
   @override
   void initState() {
     super.initState();
-    drawerWidgetController = SlidableController(vsync: this);
-    playerRouteController = SlidableController(
+    _drawerController = SlidableController(vsync: this);
+    _playerRouteController = SlidableController(
       vsync: this,
       springDescription: playerRouteSpringDescription,
     );
@@ -138,35 +141,29 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SlidableControllerProvider<DrawerWidget>(
-      controller: drawerWidgetController,
-      child: SlidableControllerProvider<PlayerRoute>(
-        controller: playerRouteController,
-        child: StreamBuilder(
-          stream: ThemeControl.onThemeChange,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            return NFTheme(
-            data: App.nfThemeData,
-              child: MaterialApp.router(
-                // showPerformanceOverlay: true,
-                title: Constants.Config.APPLICATION_TITLE,
-                color: ThemeControl.theme.colorScheme.primary,
-                supportedLocales: Constants.Config.supportedLocales,
-                scrollBehavior: _ScrollBehavior(),
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  NFLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                ],
-                theme: ThemeControl.theme,
-                routerDelegate: AppRouter.instance,
-                routeInformationParser: AppRouteInformationParser(),
-              ),
-            );
-          },
-        ),
-      ),
+    return StreamBuilder(
+      stream: ThemeControl.onThemeChange,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return NFTheme(
+        data: App.nfThemeData,
+          child: MaterialApp.router(
+            // showPerformanceOverlay: true,
+            title: Constants.Config.APPLICATION_TITLE,
+            color: ThemeControl.theme.colorScheme.primary,
+            supportedLocales: Constants.Config.supportedLocales,
+            scrollBehavior: _ScrollBehavior(),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              NFLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            theme: ThemeControl.theme,
+            routerDelegate: AppRouter.instance,
+            routeInformationParser: AppRouteInformationParser(),
+          ),
+        );
+      },
     );
   }
 }
@@ -179,26 +176,5 @@ class _ScrollBehavior extends ScrollBehavior {
       color: ThemeControl.theme.colorScheme.background,
       child: child,
     );
-  }
-}
-
-SlidableControllerProvider<DrawerWidget> getDrawerControllerProvider(BuildContext context) => SlidableControllerProvider.of<DrawerWidget>(context);
-SlidableControllerProvider<PlayerRoute> getPlayerRouteControllerProvider(BuildContext context) => SlidableControllerProvider.of<PlayerRoute>(context);
-
-mixin DrawerControllerMixin<T extends StatefulWidget> on State<T> {
-  SlidableController drawerController;
-  @override
-  void initState() {
-    super.initState();
-    drawerController = getDrawerControllerProvider(context).controller;
-  }
-}
-
-mixin PlayerRouteControllerMixin<T extends StatefulWidget> on State<T> {
-  SlidableController playerRouteController;
-  @override
-  void initState() {
-    super.initState();
-    playerRouteController = getPlayerRouteControllerProvider(context).controller;
   }
 }

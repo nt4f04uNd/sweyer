@@ -921,8 +921,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
 
   StackFadeRouteTransition _detailPageRoute(Object? arguments) {
     return StackFadeRouteTransition(
-      // transitionSettings: RouteControl.defaultTransitionSetttings,
-      transitionSettings: AppRouter.defaultTransitionSetttings,
+      transitionSettings: AppRouter.instance.transitionSettings.dismissible,
       child: Builder(
         builder: (BuildContext context) {
           return WillPopScope(

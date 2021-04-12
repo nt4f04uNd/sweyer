@@ -13,7 +13,32 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Selection animation duration.
 const Duration kSelectionDuration = Duration(milliseconds: 350);
 
+/// The [SelectionWidget] need its parent updates him.
+///
+/// Mixin this to a parent of [SelectableWidget] and add [handleSelection]\
+/// and [handleSelectionStatus] as handlers to listeners to the controller(s).
+mixin SelectionHandler<T extends StatefulWidget> on State<T> {
+  /// Listens to [SelectionController.addListener].
+  /// By default just calls [setState].
+  @protected
+  void handleSelection() {
+    setState(() {
+      /* update appbar and tiles on selection */
+    });
+  }
+
+  /// Listens to [SelectionController.addStatusListener].
+  /// By default just calls [setState].
+  @protected
+  void handleSelectionStatus(AnimationStatus _) {
+    setState(() {/* update appbar and tiles on selection status */});
+  }
+}
+
 /// Mixin this to a widget state to make it support selection.
+///
+/// You also must mixin [SelectableWidget] to the parent of this widget,
+/// to properly update the selection state of this widget.
 abstract class SelectableWidget<T> extends StatefulWidget {
   /// Creates a widget, not selectable.
   const SelectableWidget({
@@ -180,22 +205,33 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     @required this.actionsBuilder,
     Set<T> data,
   }) : super(
-        animationController: animationController,
-        data: data,
-      );
+         animationController: animationController,
+         data: data,
+       );
 
   /// Will build selection controls overlay widget.
   final _ActionsBuilder actionsBuilder;
 
   /// Constucts a controller for particular `T` [Content] type.
+  /// 
+  /// If [counter] is `true`, will show a couter in the title.
+  /// 
+  /// If [closeButton] is  `true`, will show a selection close button in the title.
   @factory
-  static ContentSelectionController forContent<T extends Content>(TickerProvider vsync) {
+  static ContentSelectionController forContent<T extends Content>(
+    TickerProvider vsync, {
+    bool counter = false,
+    bool closeButton = false,
+  }) {
     final actionsBuilder = contentPick<T, _ActionsBuilder>(
       song: (context) {
         final controller = ContentSelectionController.of(context);
         return SelectionActionsBar(
           controller: controller,
-          left: const [ActionsSelectionTitle()],
+          left: [ActionsSelectionTitle(
+            counter: counter,
+            closeButton: closeButton,
+          )],
           right: const [
             GoToAlbumSelectionAction(),
             PlayNextSelectionAction<Song>(),
@@ -207,7 +243,10 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         final controller = ContentSelectionController.of(context);
         return SelectionActionsBar(
           controller: controller,
-          left: const [ActionsSelectionTitle()],
+          left: [ActionsSelectionTitle(
+            counter: counter,
+            closeButton: closeButton,
+          )],
           right: const [
             PlayNextSelectionAction<Album>(),
             AddToQueueSelectionAction<Album>(),
@@ -230,41 +269,72 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     return widget.controller;
   }
 
-  /// Notifies when active controller changes.
-  static ValueNotifier<ContentSelectionController> get activeControllerNotifier => _notifier;
-  static final ValueNotifier<ContentSelectionController> _notifier = ValueNotifier(null);
-
+  Color _lastNavColor;
   OverlayEntry _overlayEntry;
+  ValueNotifier<ContentSelectionController> get notifier => ContentControl.state.selectionNotifier;
 
   @override
   void notifyStatusListeners(AnimationStatus status) {
     if (status == AnimationStatus.forward) {
       assert(
-        _notifier.value == null || _notifier.value == this,
+        notifier.value == null || notifier.value == this,
         'There can only be one active controller'
       );
       _overlayEntry = OverlayEntry(
         builder: (context) => _ContentSelectionControllerProvider(
           controller: this,
           child: Builder(
-            builder: (_context) =>  Builder(
-            builder: (_contextt) =>actionsBuilder(_contextt),
+            builder: (_context) => Builder(
+            builder: (_context) => actionsBuilder(_context),
           ),
           ),
         ),
       );
-      AppRouter.instance.navigatorKey.currentState.overlay.insert(_overlayEntry);
-      _notifier.value = this;
+      HomeState.overlayKey.currentState.insert(_overlayEntry);
+      notifier.value = this;
+
+      /// Animate system UI.
+      final lastUi = SystemUiStyleController.lastUi;
+      _lastNavColor = lastUi.systemNavigationBarColor;
+      SystemUiStyleController.animateSystemUiOverlay(
+        to: lastUi.copyWith(
+          systemNavigationBarColor: Constants.UiTheme.grey.auto.systemNavigationBarColor
+        ),
+        duration: kSelectionDuration,
+        curve: SelectionActionsBar.forwardCurve,
+      );
+    } else if (status == AnimationStatus.reverse) {
+      _animateNavBack();
     } else if (status == AnimationStatus.dismissed) {
       _removeOverlay();
     }
     super.notifyStatusListeners(status);
   }
 
+  void _animateNavBack() {
+    if (_lastNavColor == null)
+      return;
+    SystemUiStyleController.animateSystemUiOverlay(
+      to: SystemUiStyleController.lastUi.copyWith(
+        systemNavigationBarColor: _lastNavColor,
+      ),
+      duration: kSelectionDuration,
+      /// This is corrected [SelectionActionsBar.reverseCurve]
+      curve: SelectionActionsBar.reverseCurve.flipped,
+      // curve: Interval(
+      //   0.5,
+      //   0.0,
+      //   curve: Curves.easeIn.flipped,
+      // ),
+    );
+    _lastNavColor = null;
+  }
+
   void _removeOverlay() {
-    if (_notifier.value != null) {
+    _animateNavBack();
+    if (notifier.value != null) {
       _overlayEntry.remove();
-      _notifier.value = null;
+      notifier.value = null;
     }
   }
 
@@ -391,20 +461,23 @@ class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
   final List<Widget> left;
   final List<Widget> right;
 
+  static const forwardCurve = Interval(
+    0.0,
+    0.7,
+    curve: Curves.easeOutCubic,
+  );
+  static const reverseCurve = Interval(
+    0.0,
+    0.5,
+    curve: Curves.easeIn,
+  );
+
   @override
   Widget build(BuildContext context) {
     final selectionAnimation = controller.animationController;
     final fadeAnimation = CurvedAnimation(
-      curve: const Interval(
-        0.0,
-        0.7,
-        curve: Curves.easeOutCubic,
-      ),
-      reverseCurve: const Interval(
-        0.0,
-        0.5,
-        curve: Curves.easeIn,
-      ),
+      curve: forwardCurve,
+      reverseCurve: reverseCurve,
       parent: selectionAnimation,
     );
     return Align(
@@ -453,9 +526,11 @@ class _SelectionAnimation extends AnimatedWidget {
     this.begin = const Offset(-1.0, 0.0),
     this.end = Offset.zero,
   }) : super(listenable: animation);
+
   final Widget child;
   final Offset begin;
   final Offset end;
+
   @override
   Widget build(BuildContext context) {
     final animation = Tween(
@@ -487,16 +562,108 @@ class _SelectionAnimation extends AnimatedWidget {
 
 /// Creates a selection title.
 class ActionsSelectionTitle extends StatelessWidget {
-  const ActionsSelectionTitle({Key key}) : super(key: key);
+  const ActionsSelectionTitle({
+    Key key,
+    this.counter = false,
+    this.closeButton = false,
+  }) : super(key: key);
+
+  /// If true, in place of "Actions" label, [SelectionCounter] will be shown.
+  final bool counter;
+
+  /// If true, will show a selection close button.
+  final bool closeButton;
 
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0, bottom: 2.0),
-      child: _SelectionAnimation(
-        animation: ContentSelectionController.of(context).animationController,
-        child: Text(l10n.actions),
+    final controller = ContentSelectionController.of(context);
+    return Row(
+      children: [
+        if (closeButton)
+          _SelectionAnimation(
+            animation: controller.animationController,
+            child: NFIconButton(
+              size: NFConstants.iconButtonSize,
+              iconSize: NFConstants.iconSize,
+              color: ThemeControl.theme.colorScheme.onSurface,
+              onPressed: () => controller.close(),
+              icon: const Icon(Icons.close),
+            ),
+          ),
+        Padding(
+          padding: EdgeInsets.only(
+            left: counter ? 10.0 : 8.0,
+            bottom: 2.0
+          ),
+          child: _SelectionAnimation(
+            animation: controller.animationController,
+            child: !counter
+              ? Text(l10n.actions)
+              : SelectionCounter(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Creates a counter that shows how many items are selected.
+class SelectionCounter extends StatefulWidget {
+  SelectionCounter({Key key, this.controller}) : super(key: key);
+
+  /// Selection controller, if none specified, will try to fetch it from context.
+  final ContentSelectionController controller;
+
+  @override
+  _SelectionCounterState createState() => _SelectionCounterState();
+}
+
+class _SelectionCounterState extends State<SelectionCounter> with SelectionHandler {
+  ContentSelectionController controller;
+
+  @override
+  void initState() { 
+    super.initState();
+    controller = widget.controller ?? ContentSelectionController.of(context);
+    controller.addListener(handleSelection);
+  }
+
+  @override
+  void didUpdateWidget(covariant SelectionCounter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.removeListener(handleSelection);
+      controller = widget.controller ?? ContentSelectionController.of(context);
+      controller.addListener(handleSelection);
+    }
+  }
+
+  @override
+  void dispose() { 
+    controller.removeListener(handleSelection);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// Not letting to go less 1 to not play animation from 1 to 0.
+    final selectionCount = controller.data.isNotEmpty
+      ? controller.data.length
+      : 1;
+    return CountSwitcher(
+      childKey: ValueKey(selectionCount),
+      valueIncreased: controller.lengthIncreased,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 5.0),
+        child: Text(
+          selectionCount.toString(),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: ThemeControl.theme.textTheme.headline6.color,
+            fontSize: 22.0,
+          ),
+        ),
       ),
     );
   }

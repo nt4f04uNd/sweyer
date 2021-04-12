@@ -103,8 +103,7 @@ abstract class ThemeControl {
       bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
     );
 
-    // Update the ui in home transition settings.
-    AppRouter.instance.updateHomeTransitionSettings();
+    AppRouter.instance.updateTransitionSettings(themeChanged: true);
 
     emitThemeChange(true);
     _rebuildOperation = CancelableOperation.fromFuture(() async {
@@ -126,8 +125,7 @@ abstract class ThemeControl {
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
-    // todo: UPDATE ARTWORK!
-    // GeneralChannel.reloadArtPlaceholder(color);
+    ContentControl.drawDefaultAlbumArt();
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(primaryColorChangeDuration));
       App.rebuildAllChildren();
@@ -137,6 +135,7 @@ abstract class ThemeControl {
   }
 
   static void _applyPrimaryColor(Color color) {
+    AppRouter.instance.updateTransitionSettings(themeChanged: true);
     _colorForBlend = getColorForBlend(color);
     Constants.AppTheme.app = Constants.AppTheme.app.copyWith(
       light: Constants.AppTheme.app.light.copyWith(

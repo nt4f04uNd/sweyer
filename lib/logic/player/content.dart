@@ -7,12 +7,17 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -47,7 +52,6 @@ V contentPick<T extends Content, V>({
 /// Enum used inside this file to have a pool of queues in a state-managment convenient form.
 enum _PoolQueueType {
   /// All songs.
-  /// Value `null` on app start indicates that songs are being fetched.
   /// Should not be modified in any way and should be used only for composing other queues (or displaying its copy).
   all,
 
@@ -105,7 +109,6 @@ class _QueuePool {
     return _PoolQueueType.custom;
   }
 
-  set _all(Queue value) => _map[_PoolQueueType.all] = value;
   /// All the songs of the application.
   Queue get all => _map[_PoolQueueType.all]!;
   Queue get current => _map[_internalType]!;
@@ -142,6 +145,9 @@ class _ContentState {
     _PoolQueueType.shuffled: Queue([]),
   });
 
+  /// The path to default album art to show it in notification.
+  late String defaultAlbumArtPath;
+
   Map<int, Album> albums = {};
 
   /// This is a map to store ids of duplicated songs in queue.
@@ -169,7 +175,6 @@ class _ContentState {
     if (index < 0) {
       final firstSong = queues.current.songs[0];
       changeSong(firstSong);
-      Prefs.songIdInt.set(firstSong.id);
       index = 0;
     }
     return index;
@@ -189,6 +194,7 @@ class _ContentState {
   ///
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
+    Prefs.songIdInt.set(song.id);
     if (song.origin == null) {
       _currentSongOrigin = null;
     } else {
@@ -206,6 +212,10 @@ class _ContentState {
   /// A stream of changes on song.
   Stream<Song> get onSongChange => _songSubject.stream;
   final BehaviorSubject<Song> _songSubject = BehaviorSubject();
+
+  /// Notifies when active selection controller changes.
+  /// Will receive null when selection closes.
+  ValueNotifier<ContentSelectionController?> selectionNotifier = ValueNotifier(null);
 
   /// Emit event to [onContentChange].
   ///
@@ -225,6 +235,8 @@ class _ContentState {
   void dispose() {
     assert(!_disposed);
     _disposed = true;
+    selectionNotifier.dispose();
+    // TODO: this might still deliver some pedning events to listeneres, see https://github.com/dart-lang/sdk/issues/45653
     _contentSubject.close();
     _songSubject.close();
   }
@@ -293,6 +305,7 @@ abstract class ContentControl {
       await Future.any([
         _initializeCompleter!.future,
         Future.wait([
+          _initDefaultAlbumArt(),
           for (final contentType in Content.enumerate())
             refetch(contentType: contentType, updateQueues: false, emitChangeEvent: false),
         ]),
@@ -305,6 +318,83 @@ abstract class ContentControl {
     }
     // Emit event to track change stream
     stateNullable?.emitContentChange();
+  }
+
+  /// Initializes default album art file.
+  static Future<void> _initDefaultAlbumArt() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/album_art_${ThemeControl.colorForBlend.value}.png';
+    state.defaultAlbumArtPath = path;
+    final albumArtFile = File(path);
+    if (!albumArtFile.existsSync()) {
+      drawDefaultAlbumArt();
+    }
+  }
+
+  /// Draws album art to file to later draw it in notification.
+  static Future<void> drawDefaultAlbumArt() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/album_art_${ThemeControl.colorForBlend.value}.png';
+    state.defaultAlbumArtPath = path;
+    final albumArtFile = File(path);
+    print(path);
+    final imageBytes = await _createImageFromWidget(
+      const AlbumArt.albumTile(
+        path: null, 
+        borderRadius: 0.0,
+      ),
+      imageSize: const Size.square(500.0),
+      logicalSize: const Size.square(kAlbumTileArtSize),
+    );
+    await albumArtFile.writeAsBytes(imageBytes);
+    if (MusicPlayer.instance != null) {
+      MusicPlayer.instance.updateServiceMediaItem();
+    }
+  }
+
+  /// Creates an image from the given widget by first spinning up a element and render tree,
+  /// and then creating an image via a [RepaintBoundary].
+  /// 
+  /// The final image will be of size [imageSize] and the the widget will be layout with the given [logicalSize].
+  static Future<Uint8List> _createImageFromWidget(Widget widget, {Size? logicalSize, Size? imageSize}) async {
+    final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
+
+    logicalSize ??= ui.window.physicalSize / ui.window.devicePixelRatio;
+    imageSize ??= ui.window.physicalSize;
+
+    assert(logicalSize.aspectRatio == imageSize.aspectRatio);
+
+    final RenderView renderView = RenderView(
+      window: null as dynamic,
+      child: RenderPositionedBox(alignment: Alignment.center, child: repaintBoundary),
+      configuration: ViewConfiguration(
+        size: logicalSize,
+        devicePixelRatio: 1.0,
+      ),
+    );
+
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
+
+    pipelineOwner.rootNode = renderView;
+    renderView.prepareInitialFrame();
+
+    final RenderObjectToWidgetElement<RenderBox> rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+      container: repaintBoundary,
+      child: widget,
+    ).attachToRenderTree(buildOwner);
+
+    buildOwner.buildScope(rootElement);
+    buildOwner.finalizeTree();
+
+    pipelineOwner.flushLayout();
+    pipelineOwner.flushCompositingBits();
+    pipelineOwner.flushPaint();
+
+    final ui.Image image = await repaintBoundary.toImage(pixelRatio: imageSize.width / logicalSize.width);
+    final ByteData byteData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+
+    return byteData.buffer.asUint8List();
   }
 
   /// Diposes the [state] and stops the currently going [init] process,
@@ -321,11 +411,13 @@ abstract class ContentControl {
 
   /// Should be called if played song is duplicated in the current queue.
   static void handleDuplicate(Song song) {
+    final originalSong = state.queues.all.songs.firstWhere((el) => el.id == song.id);
+    if (identical(originalSong, song))
+      return;
     final map = state.idMap;
     final newId = -(map.length + 1);
-    map[newId.toString()] = song.id;
+    map[newId.toString()] = originalSong.id;
     song.id = newId;
-    state.changeSong(song);
     queueSerializer.save(state.queues.current.songs);
     idMapSerializer.save(state.idMap);
   }
@@ -343,13 +435,8 @@ abstract class ContentControl {
   static void playNext(List<Song> songs) {
     assert(songs.isNotEmpty);
     final queues = state.queues;
-    setQueue(
-      modified: true,
-      shuffled: false,
-      songs: queues._shuffled && queues._type != QueueType.all
-          ? List.from(queues._shuffledQueue.songs)
-          : null,
-    );
+    // Save queue order
+    markQueueUnshuffled(emitChangeEvent: false);
     final currentQueue = queues.current;
     if (songs.length == 1) {
       final song = songs[0];
@@ -369,7 +456,6 @@ abstract class ContentControl {
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
-    state.emitContentChange();
   }
 
   /// Queues the [song] to the last position in queue.
@@ -382,10 +468,13 @@ abstract class ContentControl {
   static void addToQueue(List<Song> songs) {
     assert(songs.isNotEmpty);
     final queues = state.queues;
+    // Save queue order
+    markQueueUnshuffled(emitChangeEvent: false);
     setQueue(
+      emitChangeEvent: false,
       modified: true,
       shuffled: false,
-      songs: queues._shuffled && queues._type != QueueType.all
+      songs: queues._shuffled
           ? List.from(queues._shuffledQueue.songs)
           : null,
     );
@@ -399,7 +488,6 @@ abstract class ContentControl {
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
-    state.emitContentChange();
   }
 
   /// Queues the persistent [queue] to be played next.
@@ -412,7 +500,10 @@ abstract class ContentControl {
   /// 
   /// In difference with [playNext], always traverses the playlist into [QueueType.arbitrary].
   static void playQueueNext(PersistentQueue queue) {
-    // assert(queue.isNotEmpty);
+    final songs = queue.songs;
+    assert(songs.isNotEmpty);
+    // Save queue order
+    markQueueUnshuffled(emitChangeEvent: false);
     // Adding origin to the songs in the current persistent playlist.
     if (state.queues.type == QueueType.persistent) {
       final persistentQueue = state.queues.persistent;
@@ -424,13 +515,12 @@ abstract class ContentControl {
     final currentQueue = state.queues.current;
     final currentIndex = state.currentSongIndex;
     int i = 0;
-    for (final song in queue.songs) {
+    for (final song in songs) {
       song.origin = queue;
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
     }
     setQueue(type: QueueType.arbitrary);
-    state.emitContentChange();
   }
 
   /// Queues the persistent [queue] to the last position in queue.
@@ -443,7 +533,10 @@ abstract class ContentControl {
   ///
   /// In difference with [addToQueue], always traverses the playlist into [QueueType.arbitrary].
   static void addQueueToQueue(PersistentQueue queue) {
-    // assert(queue.isNotEmpty);
+    final songs = queue.songs;
+    assert(songs.isNotEmpty);
+    // Save queue order
+    markQueueUnshuffled(emitChangeEvent: false);
     // Adding origin to the songs in the current persistent playlist.
     if (state.queues.type == QueueType.persistent) {
       final persistentQueue = state.queues.persistent;
@@ -452,12 +545,101 @@ abstract class ContentControl {
       }
       state._currentSongOrigin = persistentQueue;
     }
-    for (final song in queue.songs) {
+    for (final song in songs) {
       song.origin = queue;
       state.queues.current.add(song);
     }
     setQueue(type: QueueType.arbitrary);
-    state.emitContentChange();
+  }
+
+  /// Inserts [song] at [index] in the queue.
+  static void insertToQueue(int index, Song song) {
+    // Save queue order
+    markQueueUnshuffled(emitChangeEvent: false);
+    final queues = state.queues;
+    bool contains = true;
+    if (queues._type == QueueType.persistent) {
+      final persistentSongs = queues.persistent!.songs;
+      final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
+      contains = index >= 1;
+    }
+    setQueue(type: contains ? null : QueueType.arbitrary);
+  }
+
+  /// Removes the [song] from the queue.
+  ///
+  /// If this was the last item in current queue, will:
+  /// * fall back to the first song in [QueueType.all]
+  /// * fall back to [QueueType.all]
+  /// * stop the playback
+  static void removeFromQueue(Song song) {
+    final queues = state.queues;
+    if (queues.current.length == 1) {
+      resetQueue();
+      MusicPlayer.instance.pause();
+    } else {
+      queues.current.removeSong(song);
+      setQueue(modified: true);
+    }
+  }
+
+  /// Removes a song at given [index] from the queue.
+  ///
+  /// If this was the last item in current queue, will:
+  /// * fall back to the first song in [QueueType.all]
+  /// * fall back to [QueueType.all]
+  /// * stop the playback
+  static void removeFromQueueAt(int index) {
+    final queues = state.queues;
+    if (queues.current.length == 1) {
+      resetQueue();
+      MusicPlayer.instance.pause();
+    } else {
+      queues.current.removeSongAt(index);
+      setQueue(modified: true);
+    }
+  }
+
+  /// Removes all items at given [indexes] from the queue.
+  ///
+  /// If the [indexes] list has length bigger than or equal to current queue
+  /// length, will:
+  /// * fall back to the first song in [QueueType.all]
+  /// * fall back to [QueueType.all]
+  /// * stop the playback
+  static void removeAllFromQueueAt(List<int> indexes) {
+    final queues = state.queues;
+    if (indexes.length >= queues.current.length) {
+      resetQueue();
+      MusicPlayer.instance.pause();
+    } else {
+      for (int i = indexes.length - 1; i >= 0; i--) {
+        queues.current.removeSongAt(indexes[i]);
+      }
+      setQueue(modified: true);
+    }
+  }
+
+  /// Makes queue unshuffled, but saves its queue order and
+  /// marks it as modified. 
+  static void markQueueUnshuffled({bool emitChangeEvent = true}) {
+    setQueue(
+      emitChangeEvent: emitChangeEvent,
+      modified: true,
+      shuffled: false,
+      songs: state.queues._shuffled
+          ? List.from(state.queues._shuffledQueue.songs)
+          : null,
+    );
+  }
+
+  /// Resets queue to all songs.
+  static void resetQueue() {
+    setQueue(
+      type: QueueType.all,
+      modified: false,
+      shuffled: false,
+    );
   }
 
   /// Sets the queue with specified [type] and other parameters.
@@ -478,8 +660,8 @@ abstract class ContentControl {
   /// * [emitChangeEvent] is whether to emit a song list change event
   /// * [save] parameter can be used to disable redundant writing to JSONs when,
   ///   for example, when we restore the queue from this exact json.
-  /// * [copied] is set to true that indicates that songs is already unique,
-  ///   otherwise it will copy it with [List.from]
+  /// * [copied] indicates that [songs] was already copied,
+  ///   by default set to `false` and will copy it with [List.from]
   static void setQueue({
     QueueType? type,
     bool? shuffled,

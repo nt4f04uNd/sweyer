@@ -52,7 +52,6 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
 
   void _handleThemeSwitch(bool value) {
     ThemeControl.switchTheme();
-    _handleThemeChange();
   }
 
   void _handleColorTap(Color color) {
@@ -60,17 +59,10 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
       begin: prevPrimaryColor,
       end: primaryColor,
     ).evaluate(controller);
+    ThemeControl.changePrimaryColor(color);
     primaryColor = color;
-    _handleThemeChange();
     controller.reset();
     controller.forward();
-  }
-
-  void _handleThemeChange() {
-    AppRouter.themeSettingsTransitionSetttings.dismissible = false;
-    Future.delayed(dilate(const Duration(milliseconds: 300)), () {
-      AppRouter.themeSettingsTransitionSetttings.dismissible = true;
-    });
   }
 
   Future<bool> _handlePop() {
@@ -191,10 +183,7 @@ class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMi
   }
 
   void _handleTap() {
-    ThemeControl.changePrimaryColor(widget.color);
-    if (widget.onTap != null) {
-      widget.onTap();
-    }
+    widget.onTap?.call();
   }
 
   @override

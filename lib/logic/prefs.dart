@@ -81,7 +81,7 @@ abstract class Prefs {
   /// 
   /// When `true`:
   /// * special dev menu in the drawer gets unlocked
-  /// * error snackbards are shown
+  /// * error snackbars are shown
   /// * song info button available in the top right menu of [PlayerRoute].
   static final Pref<bool> devModeBool =
       Pref<bool>(key: 'dev_mode', defaultValue: false);

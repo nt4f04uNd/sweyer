@@ -8,7 +8,7 @@ version: 1.0.2+3
  
 environment:
   sdk: ">=2.6.0<3.0.0"
-  # flutter: 2.1.0-13.0.pre.386 # commit https://github.com/flutter/flutter/commit/66af44c9fe
+  # flutter: 2.1.0-13.0.pre.574 # commit https://github.com/flutter/flutter/commit/02efffc
 
 dependencies:
   # color_thief_flutter: ^1.0.2

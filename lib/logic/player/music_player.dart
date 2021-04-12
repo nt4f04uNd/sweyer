@@ -24,9 +24,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
 
   Future<void> _init() async {
     WidgetsBinding.instance.addObserver(this);
-    queue.add(ContentControl.state.queues.current.toMediaItems());
+    player.playbackEventStream.listen((event) => _setState());
     player.loopingStream.listen((event) => _setState());
-    player.playingStream.listen((event) => _setState());
     ContentControl.state.onSongChange.listen((song) {
       mediaItem.add(song.toMediaItem());
       _setState();
@@ -38,13 +37,174 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
   }
 
   @override
+  Future<void> play() => player.play();
+
+  @override
+  Future<void> playFromMediaId(String mediaId, [Map<String, dynamic> extras]) async {
+    final song = ContentControl.state.queues.all.byId.getSong(int.parse(mediaId));
+    if (song != null) {
+      await player.setSong(song);
+      await player.play();
+    }
+  }
+
+  @override
+  Future<void> playFromSearch(String query, [Map<String, dynamic> extras]) async {
+    final songs = ContentControl.search<Song>(query);
+    if (songs.isNotEmpty) {
+      ContentControl.setQueue(
+        type: QueueType.searched,
+        searchQuery: query,
+        modified: false,
+        shuffled: false,
+        songs: songs,
+      );
+    }
+  }
+
+  @override
+  Future<void> playFromUri(Uri uri, [Map<String, dynamic> extras]) {
+    // TODO: implement playFromUri
+    throw UnimplementedError();
+    return super.playFromUri(uri, extras);
+  }
+
+  @override
+  Future<void> playMediaItem(MediaItem mediaItem) async {
+    final song = ContentControl.state.queues.all.byId.getSong(int.parse(mediaItem.id));
+    if (song != null) {
+      await player.setSong(song);
+      await player.play();
+    }
+  }
+
+  @override
+  Future<void> pause() => player.pause();
+
+  @override
+  Future<void> stop() async {
+    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
+    // await player.stop();
+    await player.pause();
+    await super.stop();
+  }
+
+  @override
+  Future<void> addQueueItem(MediaItem mediaItem) async {
+    final song = ContentControl.state.queues.all.byId.getSong(int.parse(mediaItem.id));
+    if (song != null) {
+      ContentControl.addToQueue([song]);
+    }
+  }
+
+  @override
+  Future<void> addQueueItems(List<MediaItem> mediaItems) async {
+    final songs = mediaItems.map((mediaItem) {
+      return ContentControl.state.queues.all.byId.getSong(int.parse(mediaItem.id));
+    });
+    if (songs.isNotEmpty) {
+      ContentControl.addToQueue(songs.toList());
+    }
+  }
+
+  @override
+  Future<void> insertQueueItem(int index, MediaItem mediaItem) async {
+    final song = ContentControl.state.queues.all.byId.getSong(int.parse(mediaItem.id));
+    if (song != null) {
+      ContentControl.insertToQueue(index, song);
+    }
+  }
+
+  @override
+  Future<void> updateQueue(List<MediaItem> queue) async {
+    ContentControl.setQueue(
+      // TODO: maybe introduce new queue type for this?
+      type: QueueType.arbitrary, 
+      songs: queue.map((e) {
+        return ContentControl.state.queues.all.byId.getSong(int.parse(e.id));
+      })
+    );
+  }
+
+  @override
+  Future<void> updateMediaItem(MediaItem mediaItem) {
+    // TODO: implement updateMediaItem
+    throw UnimplementedError();
+    return super.updateMediaItem(mediaItem);
+  }
+
+  @override
+  Future<void> removeQueueItem(MediaItem mediaItem) async {
+    ContentControl.removeFromQueue(
+      ContentControl.state.queues.all.byId.getSong(int.parse(mediaItem.id)),
+    );
+  }
+
+  @override
+  Future<void> removeQueueItemAt(int index) async {
+    ContentControl.removeFromQueueAt(index);
+  }
+
+  @override
+  Future<void> skipToQueueItem(int index) async {
+    final queue = ContentControl.state.queues.current;
+    if (index < 0 || index > queue.length) {
+      await player.setSong(queue.songs[index]);
+      await player.play();
+    }
+  }
+
+  @override
+  Future<void> seek(Duration position) {
+    return player.seek(position);
+  }
+
+  @override
+  Future<void> setRating(Rating rating, Map extras) {
+    // TODO: implement setRating
+    throw UnimplementedError();
+    return super.setRating(rating, extras);
+  }
+
+  @override
+  Future<void> setCaptioningEnabled(bool enabled) {
+    // TODO: implement setCaptioningEnabled
+    throw UnimplementedError();
+    return super.setCaptioningEnabled(enabled);
+  }
+
+  @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) {
+    if (repeatMode == AudioServiceRepeatMode.one) {
+      return player.setLoopMode(LoopMode.one);
+    } else {
+      return player.setLoopMode(LoopMode.all);
+    }
+  }
+
+  @override
+  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
+    ContentControl.setQueue(
+      shuffled: shuffleMode == AudioServiceShuffleMode.all ||
+                shuffleMode == AudioServiceShuffleMode.group,
+    );
+  }
+
+  @override
+  Future<void> setSpeed(double speed) {
+    return player.setSpeed(speed);
+  }
+
+  @override
   Future<List<MediaItem>> getChildren(String parentMediaId, [Map<String, dynamic> options]) async {
     switch (parentMediaId) {
       case AudioService.recentRootId:
       default:
         // Allow client to browse the media library.
         print('### get $parentMediaId children');
-        return ContentControl.state.queues.current.toMediaItems();
+        return ContentControl.state.queues.current.songs
+            .map((song) => song.toMediaItem())
+            .toList();
     }
   }
 
@@ -58,51 +218,15 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
   }
 
   @override
-  Future<MediaItem> getMediaItem(String mediaId) async => null;
-
-  @override
-  Future<void> skipToQueueItem(int index) async {
-    final queue = ContentControl.state.queues.current;
-    if (index < 0 || index > queue.length)
-      return;
-    await player.setSong(queue.songs[index]);
-    await player.play();
+  Future<MediaItem> getMediaItem(String mediaId) async {
+    return ContentControl.state.currentSong.toMediaItem();
   }
 
   @override
-  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) {
-    if (repeatMode == AudioServiceRepeatMode.one) {
-      return player.setLoopMode(LoopMode.one);
-    } else {
-      return player.setLoopMode(LoopMode.all);
-    }
-  }
-
-  @override
-  Future<void> play() => player.play();
-
-  @override
-  Future<void> pause() => player.pause();
-
-  @override
-  Future<void> seek(Duration position) => player.seek(position);
-
-  @override
-  Future<void> stop() async {
-    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
-    // await player.stop();
-    await player.pause();
-    await super.stop();
-  }
-
-  @override
-  void didChangeLocales(List<Locale> locales) {
-    _setState();
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    _setState();
+  Future<List<MediaItem>> search(String query, [Map<String, dynamic> extras]) async {
+    return ContentControl.search<Song>(query)
+      .map((song) => song.toMediaItem())
+      .toList();
   }
 
   @override
@@ -118,11 +242,23 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
     }
   }
 
+  @override
+  void didChangeLocales(List<Locale> locales) {
+    _setState();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    _setState();
+  }
+
   /// Broadcasts the current state to all clients.
   void _setState() {
     final playing = player.playing;
     final l10n = staticl10n;
-    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark ? 'white' : 'black';
+    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark
+      ? 'white'
+      : 'black';
     playbackState.add(playbackState.value.copyWith(
       controls: [
         // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
@@ -161,17 +297,23 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
           action: 'play_next',
         ),
         MediaControl(
-          androidIcon: 'drawable/round_close_next_${color}_36',
+          androidIcon: 'drawable/round_close_${color}_24',
           label: l10n.stop,
           action: 'stop',
         ),
       ],
-      systemActions: {
+      systemActions: const {
         MediaAction.seek,
         MediaAction.seekForward,
         MediaAction.seekBackward,
       },
-      androidCompactActionIndices: [1, 2, 3],
+      androidCompactActionIndices: const [1, 2, 3],
+      repeatMode: player.looping
+        ? AudioServiceRepeatMode.one
+        : AudioServiceRepeatMode.all,
+      shuffleMode: ContentControl.state.queues.shuffled
+        ? AudioServiceShuffleMode.all
+        : AudioServiceShuffleMode.none,
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
@@ -198,27 +340,40 @@ class MusicPlayer extends AudioPlayer {
 
   static _AudioHandler _handler;
 
-  bool get looping => loopMode == LoopMode.all;
-  Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.all);
-
-  @override
-  Duration get duration => Duration(milliseconds: ContentControl.state.currentSong.duration);
+  /// Updates service state media item.
+  void updateServiceMediaItem() {
+    final song = ContentControl.state.currentSong;
+    if (song != null) { 
+      _handler.mediaItem.add(song.toMediaItem());
+    }
+  }
 
   Future<void> init() async {
     await restoreLastSong();
     _handler ??= await AudioService.init(builder: () {
-      return _AudioHandler();
-    });
+        return _AudioHandler();
+      },
+      config: AudioServiceConfig(
+        // TODO: this
+        androidNotificationIcon: 'drawable/round_music_note_white_48',
+        fastForwardInterval: const Duration(seconds: 5),
+        rewindInterval: const Duration(seconds: 5),
+        androidEnableQueue: true,
+      ),
+    );
 
     processingStateStream.listen((state) {
-      if (state == ProcessingState.completed &&
-          loopMode == LoopMode.off) { // TODO: check if i need this condition
+      if (state == ProcessingState.completed) {
         // Play next track if not in loop mode, in loop mode this event is not triggered.
         playNext();
       }
     });
 
-    // Restring seek from prefs.
+    positionStream.listen((position) { 
+      Prefs.songPositionInt.set(position.inSeconds);
+    });
+
+    // Restore position from prefs.
     final songPosition = await Prefs.songPositionInt.get();
     await seek(Duration(seconds: songPosition));
   }
@@ -238,16 +393,31 @@ class MusicPlayer extends AudioPlayer {
     final current = ContentControl.state.queues.current;
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (current.isNotEmpty) {
-      final int songId = await Prefs.songIdInt.get();
+      final songId = await Prefs.songIdInt.get();
       await setSong(songId == null
         ? current.songs[0]
         : current.byId.getSong(songId) ?? current.songs[0]);
     }
   }
 
+  bool get looping => loopMode == LoopMode.one;
+  Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.one);
+
+  @override
+  Duration get duration => Duration(milliseconds: ContentControl.state.currentSong.duration);
+
+  @override
+  Future<void> setLoopMode(LoopMode mode) async {
+    if (mode == LoopMode.all) {
+      mode = LoopMode.off;
+    }
+    await super.setLoopMode(mode);
+    Prefs.loopModeBool.set(looping);
+  }
+
   /// Switches the [looping].
   Future<void> switchLooping() async {
-    return setLoopMode(looping ? LoopMode.off : LoopMode.all);
+    return setLoopMode(looping ? LoopMode.off : LoopMode.one);
   }
 
   static bool _hasDuplicates(Song song) {
@@ -352,28 +522,26 @@ class MusicPlayer extends AudioPlayer {
     Song clickedSong, {
     SongClickBehavior behavior = SongClickBehavior.play,
   }) async {
-    final duplicate = _hasDuplicates(clickedSong);
-    bool isSame;
-    if (duplicate) {
+    final hasDuplicates = _hasDuplicates(clickedSong);
+    if (hasDuplicates) {
       ContentControl.handleDuplicate(clickedSong);
-      isSame = false;
     }
-    isSame = clickedSong == ContentControl.state.currentSong;
+    final isSame = clickedSong == ContentControl.state.currentSong;
     if (behavior == SongClickBehavior.play) {
-      getPlayerRouteControllerProvider(context).controller.open();
-      await setSong(clickedSong, duplicate: duplicate, fromBeginning: true);
+      playerRouteController.open();
+      await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
       await play();
     } else {
       if (isSame) {
         if (!playing) {
-          getPlayerRouteControllerProvider(context).controller.open();
+          playerRouteController.open();
           await play();
         } else {
           await pause();
         }
       } else {
-        getPlayerRouteControllerProvider(context).controller.open();
-        await setSong(clickedSong, duplicate: duplicate , fromBeginning: true);
+        playerRouteController.open();
+        await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
         await play();
       }
     }

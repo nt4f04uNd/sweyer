@@ -29,7 +29,7 @@ public enum GeneralChannel {
         }
     }
 
-    public void kill() {
+    public void destroy() {
         channel = null;
         activity = null;
     }

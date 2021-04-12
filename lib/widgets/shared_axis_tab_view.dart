@@ -26,8 +26,14 @@ class SharedAxisTabController extends ChangeNotifier {
   /// The index of the previously selected tab.
   int get prevIndex => _prevIndex;
   int _prevIndex;
+
+  /// If true, the active tab cannot be changed, neither by [changeTab],
+  /// nor by user drag.
+  bool canChange = true;
   
   void changeTab(int value) {
+    if (!canChange)
+      return;
     assert(value >= 0 && (value < length || length == 0));
     _prevIndex = _index;
     _index = value;
@@ -89,7 +95,7 @@ class _SharedAxisTabViewState extends State<SharedAxisTabView> {
         canTransition = true;
       },
       onHorizontalDragUpdate: (details) {
-        if (canTransition) {
+        if (controller.canChange && canTransition) {
           dragDelta += details.delta.dx;
           if (dragDelta.abs() > 15.0) {
             if (dragDelta.sign > 0.0 && controller.index - 1 >= 0) {

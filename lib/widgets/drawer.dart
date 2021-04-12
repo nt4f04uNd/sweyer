@@ -11,13 +11,7 @@ import 'package:sweyer/constants.dart' as Constants;
 
 /// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
-  const DrawerWidget({
-    Key key,
-    this.canBeOpened = trueCallback,
-  }) : super(key: key);
-
-  /// Function that checks if drawer can be opened.
-  final BoolCallback canBeOpened;
+  const DrawerWidget({Key key}) : super(key: key);
 
   @override
   _DrawerWidgetState createState() => _DrawerWidgetState();
@@ -33,7 +27,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
   @override
   void initState() {
     super.initState();
-    controller = getDrawerControllerProvider(context).controller;
+    controller = drawerController;
     controller.addStatusListener(_handleControllerStatusChange);
   }
 
@@ -45,7 +39,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
 
   void _handleControllerStatusChange(AnimationStatus status) {
     // Change system UI on expanding/collapsing the drawer.
-    if (_onTop && widget.canBeOpened()) {
+    if (_onTop && HomeRouter.instance.drawerCanBeOpened) {
       if (status == AnimationStatus.dismissed) {
         SystemUiStyleController.animateSystemUiOverlay(
           to: Constants.UiTheme.grey.auto,
@@ -60,7 +54,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.canBeOpened() && controller.value > 0.0) {
+    if (!HomeRouter.instance.drawerCanBeOpened && controller.value > 0.0) {
       controller.reset();
     }
 
@@ -85,7 +79,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
                 // when on another drag on the right to next tab
                 (event.delta.dx < 0.0 ||
                  // when player route is opened, for example
-                 !widget.canBeOpened());
+                 !HomeRouter.instance.drawerCanBeOpened);
           },
           onBarrierTap: controller.close,
           barrier: Container(color: Colors.black26),
@@ -197,7 +191,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               icon: Icons.settings_rounded,
               onTap: _handleClickSettings,
             ),
-            ValueListenableBuilder(
+            ValueListenableBuilder<bool>(
               valueListenable: ContentControl.devMode,
               builder: (context, value, child) => value ? child : const SizedBox.shrink(),
               child: MenuItem(

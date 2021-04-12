@@ -18,7 +18,8 @@ part 'song.g.dart';
 /// JSON serialization logic to be generated.
 @JsonSerializable()
 // ignore: must_be_immutable
-class Song extends Equatable implements Content {
+class Song extends Content with EquatableMixin {
+  @override
   int id;
 
   /// Album name.
@@ -114,16 +115,13 @@ class Song extends Equatable implements Content {
       id: sourceId.toString(),
       album: getAlbum().album,
       title: title,
-      artist: artist,
+       // TODO: use displaySubtitle and pass raw artist here when https://github.com/ryanheise/audio_service/issues/651 is resolved
+      artist: formatArtist(artist, staticl10n),
       genre: null, // TODO: GENRE
       duration: Duration(milliseconds: duration),
-      // artUri: albumArt == null ? null : Uri.file(albumArt),
-      artUri: null,
+      artUri: Uri.file(albumArt ?? ContentControl.state.defaultAlbumArtPath),
       playable: true,
-      // displayTitle: formatArtist(artist, staticl10n),
-      displayTitle: 'displayTitle', // TODO: YO
-      displaySubtitle: 'displaySubtitle', // TODO: YO
-      displayDescription: 'displayDescription', // TODO: YO
+      // displaySubtitle: formatArtist(artist, staticl10n),
       rating: null,
       extras: null,
     );

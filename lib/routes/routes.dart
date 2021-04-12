@@ -39,7 +39,7 @@ abstract class _Routes<T extends Object> extends Equatable {
 class AppRoutes<T extends Object> extends _Routes<T> {
   const AppRoutes._(String location, [T arguments]) : super(location, arguments);
 
-  static const home = AppRoutes<void>._('/');
+  static const initial = AppRoutes<void>._('/');
   static const settings = AppRoutes<void>._('/settings');
   static const themeSettings = AppRoutes<void>._('/settings/theme');
   static const licenses = AppRoutes<void>._('/settings/licenses');
@@ -132,6 +132,27 @@ mixin _DelegateMixin<T extends _Routes> on RouterDelegate<T>, ChangeNotifier {
   }
 }
 
+class _TransitionSettings {
+  _TransitionSettings({
+    @required this.grey,
+    @required this.greyDismissible,
+    @required this.dismissible,
+    @required this.initial,
+    @required this.theme,
+  });
+  
+  /// Used on [HomeRouter] routes that cannot be dismissed.
+  final StackFadeRouteTransitionSettings grey;
+  /// Used on [HomeRouter] routes that can be dismissed.
+  final StackFadeRouteTransitionSettings greyDismissible;
+  /// Used by default on routes that can be dismissed.
+  final StackFadeRouteTransitionSettings dismissible;
+  /// Used on [InitialRoute] to switch its UI style.
+  final StackFadeRouteTransitionSettings initial;
+  /// Used on theme settings route to disable dimissing while theme is chaning.
+  final StackFadeRouteTransitionSettings theme;
+}
+
 class AppRouter extends RouterDelegate<AppRoutes>
   with ChangeNotifier,
        _DelegateMixin,
@@ -140,7 +161,7 @@ class AppRouter extends RouterDelegate<AppRoutes>
   AppRouter._();
   static final instance = AppRouter._();
 
-  final List<AppRoutes> __routes = [AppRoutes.home];
+  final List<AppRoutes> __routes = [AppRoutes.initial];
   @override
   List<AppRoutes> get _routes => __routes;
 
@@ -154,29 +175,54 @@ class AppRouter extends RouterDelegate<AppRoutes>
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
   
-  static StackFadeRouteTransitionSettings _createTransitionSetttings() {
-    return StackFadeRouteTransitionSettings(
+  final _TransitionSettings transitionSettings = _TransitionSettings(
+    grey: StackFadeRouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto),
+    greyDismissible: StackFadeRouteTransitionSettings(
       opaque: false,
       dismissible: true,
-      dismissBarrier: Container(color: ThemeControl.isDark ? Colors.black54 : Colors.black26),
-    );
-  }
-
-  static final defaultTransitionSetttings = _createTransitionSetttings();
-  static final themeSettingsTransitionSetttings = _createTransitionSetttings();
-  static final _homeTransitionSetttings = StackFadeRouteTransitionSettings();
+      dismissBarrier: _dismissBarrier,
+      uiStyle: Constants.UiTheme.grey.auto,
+    ),
+    dismissible: StackFadeRouteTransitionSettings(
+      opaque: false,
+      dismissible: true,
+      dismissBarrier: _dismissBarrier,
+    ),
+    initial: StackFadeRouteTransitionSettings(),
+    theme: StackFadeRouteTransitionSettings(
+      opaque: false,
+      dismissible: true,
+      dismissBarrier: _dismissBarrier,
+    ),
+  );
+  
+  static Widget get _dismissBarrier => Container(
+    color: ThemeControl.isDark ? Colors.black54 : Colors.black26,
+  );
 
   bool _mainScreenShown = false;
   /// Controls the ui style that will be applied to home screen.
   set mainScreenShown(bool value) {
     _mainScreenShown = value;
-    updateHomeTransitionSettings();
+    updateTransitionSettings();
   }
 
-  void updateHomeTransitionSettings() {
-    _homeTransitionSetttings.uiStyle = _mainScreenShown
+  void updateTransitionSettings({bool themeChanged = false}) {
+    final dismissBarrier = _dismissBarrier;
+    transitionSettings.grey.uiStyle = Constants.UiTheme.grey.auto;
+    transitionSettings.greyDismissible.uiStyle = Constants.UiTheme.grey.auto;
+    transitionSettings.greyDismissible.dismissBarrier = dismissBarrier;
+    transitionSettings.dismissible.dismissBarrier = dismissBarrier;
+    transitionSettings.initial.uiStyle = _mainScreenShown
       ? Constants.UiTheme.grey.auto
       : Constants.UiTheme.black.auto;
+    transitionSettings.theme.dismissBarrier = dismissBarrier;
+    if (themeChanged) {
+      transitionSettings.theme.dismissible = false;
+      Future.delayed(dilate(const Duration(milliseconds: 300)), () {
+        transitionSettings.theme.dismissible = true;
+      });
+    }
   }
 
   @override
@@ -187,33 +233,33 @@ class AppRouter extends RouterDelegate<AppRoutes>
       onPopPage: _handlePopPage,
       pages: <Page<void>>[
         StackFadePage(
-          key: AppRoutes.home.key,
-          child: const HomeRoute(),
-          transitionSettings: _homeTransitionSetttings,
+          key: AppRoutes.initial.key,
+          child: const InitialRoute(),
+          transitionSettings: transitionSettings.initial,
         ),
         if (_routes.length > 1 && _routes[1] == AppRoutes.settings)
           StackFadePage(
             key: AppRoutes.settings.key,
             child: const SettingsRoute(),
-            transitionSettings: defaultTransitionSetttings,
+            transitionSettings: transitionSettings.dismissible,
           ),
         if (_routes.length > 2 && _routes[2] == AppRoutes.themeSettings)
           StackFadePage(
             key: AppRoutes.themeSettings.key,
             child: const ThemeSettingsRoute(),
-            transitionSettings: themeSettingsTransitionSetttings,
+            transitionSettings: transitionSettings.theme,
           ),
         if (_routes.length > 2 && _routes[2] == AppRoutes.licenses)
           StackFadePage(
             key: AppRoutes.licenses.key,
             child: const LicensePage(),
-            transitionSettings: themeSettingsTransitionSetttings,
+            transitionSettings: transitionSettings.dismissible,
           ),
         if (_routes.length > 1 && _routes[1] == AppRoutes.dev)
           StackFadePage(
             key: AppRoutes.dev.key,
             child: const DevRoute(),
-            transitionSettings: defaultTransitionSetttings,
+            transitionSettings: transitionSettings.dismissible,
           ),
       ],
     );
@@ -225,8 +271,20 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
        _DelegateMixin,
        PopNavigatorRouterDelegateMixin {
 
-  HomeRouter._();
-  static final instance = HomeRouter._();
+  HomeRouter() {
+    AppRouter.instance.mainScreenShown = true;
+    _instance = this;
+  }
+
+  static HomeRouter _instance;
+  static HomeRouter get instance => _instance;
+
+  @override
+  void dispose() {
+    _instance = null;
+    AppRouter.instance.mainScreenShown = false;
+    super.dispose();
+  }
 
   final List<HomeRoutes> __routes = [HomeRoutes.tabs];
   @override
@@ -242,15 +300,47 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   @override
   Future<void> setNewRoutePath(HomeRoutes configuration) async { }
 
-  static final defaultTransitionSetttings = StackFadeRouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto);
-
-  Widget home;
+  final tabsRouteKey = GlobalKey<TabsRouteState>();
   SearchDelegate _searchDelegate;
+
+  /// Whether the drawer can be opened.
+  bool get drawerCanBeOpened =>
+      playerRouteController.closed &&
+      ContentControl.state.selectionNotifier.value == null &&
+      routes.last != HomeRoutes.album &&
+      (tabsRouteKey.currentState.tabController.animation.value == 0.0 || routes.length > 1);
+
+  /// Callback that must be called before any pop.
+  /// 
+  /// For example we want that player route would be closed first.
+  bool handleNecessaryPop() {
+    final selectionController = ContentControl.state.selectionNotifier?.value;
+    if (playerRouteController.opened) {
+      if (selectionController != null) {
+        selectionController.close();
+        return true;
+      }
+      playerRouteController.close();
+      return true;
+    } else if (drawerController.opened) {
+      drawerController.close();
+      return true;
+    } else if (selectionController != null) {
+      selectionController.close();
+      return true;
+    } else if (navigatorKey.currentState != null && navigatorKey.currentState.canPop()) {
+      navigatorKey.currentState.pop();
+      return true;
+    }
+    return false;
+  }
 
   @override
   void goto(HomeRoutes route) {
     super.goto(route);
-    if (route == HomeRoutes.search) {
+    if (route == HomeRoutes.album) {
+      playerRouteController.close();
+    } else if (route == HomeRoutes.search) {
       _searchDelegate ??= SearchDelegate();
       final SearchArguments arguments = route.arguments;
       _searchDelegate.query = arguments.query;
@@ -268,6 +358,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
 
   @override
   Widget build(BuildContext context) {
+    final transitionSettings = AppRouter.instance.transitionSettings;
     return Navigator(
       key: navigatorKey,
       observers: [homeRouteObserver],
@@ -277,25 +368,20 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
           if (route == HomeRoutes.tabs)
             StackFadePage(
               key: HomeRoutes.tabs.key,
-              child: home,
-              transitionSettings: defaultTransitionSetttings,
+              child: TabsRoute(key: tabsRouteKey),
+              transitionSettings: transitionSettings.grey,
             )
           else if (route == HomeRoutes.album)
             StackFadePage(
               key: HomeRoutes.album.key,
-              transitionSettings: StackFadeRouteTransitionSettings(
-                opaque: false,
-                dismissible: true,
-                uiStyle: Constants.UiTheme.grey.auto,
-                dismissBarrier: Container(color: ThemeControl.isDark ? Colors.black54 : Colors.black26),
-              ),
+              transitionSettings: transitionSettings.greyDismissible,
               child: AlbumRoute(album: route.arguments),
             )
           else if (route == HomeRoutes.search)
             SearchPage(
               key: HomeRoutes.search.key,
               delegate: _searchDelegate,
-              transitionSettings: RouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto),
+              transitionSettings: transitionSettings.grey,
             )
           else
             throw UnimplementedError()
@@ -311,20 +397,12 @@ class HomeRouteInformationProvider extends RouteInformationProvider with ChangeN
 }
 
 class HomeRouteBackButtonDispatcher extends ChildBackButtonDispatcher {
-  HomeRouteBackButtonDispatcher({
-    @required BackButtonDispatcher parent,
-    @required this.necessaryPopHandler,
-  }) : super(parent);
-
-  /// Callback that will be called before any pop.
-  /// 
-  /// For example we want that player route would be closed first.
-  final ValueGetter<bool> necessaryPopHandler;
+  HomeRouteBackButtonDispatcher(BackButtonDispatcher parent) : super(parent);
 
   @override
   Future<bool> invokeCallback(Future<bool> defaultValue) async {
-    final handaled = necessaryPopHandler();
-    if (handaled)
+    final handled = HomeRouter.instance.handleNecessaryPop();
+    if (handled)
       return true;
     return super.invokeCallback(defaultValue);
   }
