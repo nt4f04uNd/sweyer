@@ -342,8 +342,8 @@ class MusicPlayer extends AudioPlayer {
 
   /// Updates service state media item.
   void updateServiceMediaItem() {
-    final song = ContentControl.state.currentSong;
-    if (song != null) { 
+    final song = ContentControl.state.currentSongNullable;
+    if (song != null) {
       _handler.mediaItem.add(song.toMediaItem());
     }
   }

@@ -20,6 +20,7 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Picks some value based on the provided `T` type of [Content].
 /// 
@@ -164,6 +165,11 @@ class _ContentState {
   /// Get current playing song.
   Song get currentSong {
     return _songSubject.value!;
+  }
+
+  /// Get current playing song.
+  Song? get currentSongNullable {
+    return _songSubject.value;
   }
 
   /// Returns index of [currentSong] in the current queue.
@@ -323,33 +329,29 @@ abstract class ContentControl {
   /// Initializes default album art file.
   static Future<void> _initDefaultAlbumArt() async {
     final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/album_art_${ThemeControl.colorForBlend.value}.png';
+    final path = '${directory.path}/album_art.png';
     state.defaultAlbumArtPath = path;
     final albumArtFile = File(path);
     if (!albumArtFile.existsSync()) {
-      drawDefaultAlbumArt();
+      await drawDefaultAlbumArt();
     }
   }
 
   /// Draws album art to file to later draw it in notification.
   static Future<void> drawDefaultAlbumArt() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/album_art_${ThemeControl.colorForBlend.value}.png';
-    state.defaultAlbumArtPath = path;
-    final albumArtFile = File(path);
-    print(path);
+    final albumArtFile = File(state.defaultAlbumArtPath);
+    const size = 192.0;
     final imageBytes = await _createImageFromWidget(
-      const AlbumArt.albumTile(
-        path: null, 
-        borderRadius: 0.0,
+      Image.asset(
+        Constants.Assets.ASSET_LOGO_THUMB_NOTIFICATION,
+        height: size,
+        width: size,
       ),
-      imageSize: const Size.square(500.0),
-      logicalSize: const Size.square(kAlbumTileArtSize),
+      imageSize: const Size.square(size),
+      logicalSize: const Size.square(size),
     );
     await albumArtFile.writeAsBytes(imageBytes);
-    if (MusicPlayer.instance != null) {
-      MusicPlayer.instance.updateServiceMediaItem();
-    }
+    MusicPlayer.instance?.updateServiceMediaItem();
   }
 
   /// Creates an image from the given widget by first spinning up a element and render tree,
@@ -369,7 +371,7 @@ abstract class ContentControl {
       child: RenderPositionedBox(alignment: Alignment.center, child: repaintBoundary),
       configuration: ViewConfiguration(
         size: logicalSize,
-        devicePixelRatio: 1.0,
+        devicePixelRatio: WidgetsBinding.instance!.window.devicePixelRatio,
       ),
     );
 
