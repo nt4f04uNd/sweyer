@@ -1,7 +1,12 @@
 ## [1.0.2] - TODO: tbd
 
-- enhanced the searched route
-- fixed a few bugs
+- selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable
+- added play all/shuffle buttons to main screen and albums
+- enhanced the searched route by adding filtering by content category
+- optimized scrollbar and listviews
+- became media browser service
+- refactored a lot of code and fixed a lot of bugs
+- (non-ux) changed player backend
 
 ## [1.0.1] - february 08, 2021
 
