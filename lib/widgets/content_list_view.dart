@@ -4,9 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
+
+/// Signature used for the [ContentListView.currentTest].
+///
+/// The argument [index] is index of the song.
+typedef _CurrentTest = bool Function(int index);
 
 /// Renders a list of content.
 ///
@@ -14,6 +18,7 @@ import 'package:sweyer/sweyer.dart';
 ///
 /// Instead of `T`, you can explicitly specify [contentType].
 class ContentListView<T extends Content> extends StatelessWidget {
+  /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
     Key key,
     this.contentType,
@@ -35,22 +40,22 @@ class ContentListView<T extends Content> extends StatelessWidget {
   final Type contentType;
 
   /// Content list.
-  final List<Content> list;
+  final List<T> list;
   
   /// Viewport scroll controller.
   final ScrollController controller;
 
   /// If specified, list will be built as [SongTile.selectable],
   /// otherwise [SongTile] is used (in case if content is [Song]).
-  final SelectionController<SelectionEntry<T>> selectionController;
+  final ContentSelectionController<SelectionEntry<T>> selectionController;
 
   /// A widget to build before all items.
   final Widget leading;
 
   /// Passed to [SongTile.currentTest] (in case if content is [Song]).
   ///
-  /// The is [index] is index of the song.
-  final bool Function(int index) currentTest;
+  /// The argument [index] is index of the song.
+  final _CurrentTest currentTest;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -80,123 +85,125 @@ class ContentListView<T extends Content> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectable = selectionController != null;
     final localController = controller ?? ScrollController();
-    return Theme(
-      data: ThemeControl.theme.copyWith(
-        highlightColor: ThemeControl.isDark
-          ? const Color(0x40CCCCCC)
-          : const Color(0x66BCBCBC),
-      ),
-      child: MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ContentScrollbar<T>(
-          labelBuilder: !showScrollbarLabel
-            ? null
-            : (context) {
-              final item = list[
-                (localController.position.pixels / kSongTileHeight - 1)
-                .clamp(0.0, list.length - 1).round()
-              ];
-              return NFScrollLabel(
-                text: contentPick<T, String Function()>(
-                  song: () => (item as Song).title[0].toUpperCase(),
-                  album: () => (item as Album).album[0].toUpperCase(),
-                )(),
-              );
-            },
-          interactive: interactiveScrollbar,
-          controller: localController,
-          child: Theme(
-            data: ThemeControl.theme.copyWith(
-              highlightColor: Colors.transparent,
-            ),
-            child: CustomScrollView(
-              controller: localController,
-              physics: physics,
-              slivers: <Widget>[
-                SliverPadding(
-                  padding: padding,
-                  sliver: MultiSliver(
-                    children: [
-                      if (leading != null)
-                        leading,
-                      contentPick<T, Widget Function()>(
-                        contentType: contentType,
-                        song: () => SliverFixedExtentList(
-                          itemExtent: kSongTileHeight,
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final item = list[index];
-                              final localCurrentTest = currentTest != null
-                                ? () => currentTest(index)
-                                : null;
-                              if (selectable) {
-                                return SongTile.selectable(
-                                  index: index,
-                                  song: item,
-                                  selectionController: selectionController,
-                                  clickBehavior: songClickBehavior,
-                                  variant: songTileVariant,
-                                  currentTest: localCurrentTest,
-                                  selected: selectionController.data.contains(SelectionEntry<Song>(
-                                    data: item,
-                                    index: index,
-                                  )),
-                                  onTap: onItemTap,
-                                );
-                              }
-                              return SongTile(
-                                song: item,
-                                currentTest: localCurrentTest,
-                                clickBehavior: songClickBehavior,
-                                variant: songTileVariant,
-                                onTap: onItemTap,
-                              );
-                            },
-                            childCount: list.length,
-                          ),
-                        ),
-                        album: () => SliverFixedExtentList(
-                          itemExtent: kAlbumTileHeight,
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final item = list[index];
-                              final localCurrentTest = currentTest != null
-                                ? () => currentTest(index)
-                                : null;
-                              if (selectable) {
-                                return AlbumTile.selectable(
-                                  index: index,
-                                  album: item,
-                                  currentTest: localCurrentTest,
-                                  onTap: onItemTap,
-                                  selected: selectionController.data.contains(SelectionEntry<Album>(
-                                    data: item,
-                                    index: index,
-                                  )),
-                                  selectionController: selectionController,
-                                );
-                              }
-                              return AlbumTile(
-                                album: item,
-                                onTap: onItemTap,
-                                currentTest: localCurrentTest,
-                              );
-                            },
-                            childCount: list.length,
-                          ),
-                        ),
-                      )(),
-                    ],
-                  ),
-                ),
-              ],
+    return AppScrollbar.forContent<T>(
+      list: list,
+      controller: localController,
+      showLabel: showScrollbarLabel,
+      interactive: interactiveScrollbar,
+      child: CustomScrollView(
+        controller: localController,
+        physics: physics,
+        slivers: [
+          SliverPadding(
+            padding: padding,
+            sliver: sliver<T>(
+              contentType: contentType,
+              list: list,
+              selectionController: selectionController,
+              leading: leading,
+              currentTest: currentTest,
+              songTileVariant: songTileVariant,
+              songClickBehavior: songClickBehavior,
+              onItemTap: onItemTap,
             ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+
+  /// Returns a sliver list of content.
+  ///
+  /// There will be no scrollbar, since scrollbar is applied to [ScrollView],
+  /// not to slivers.
+  ///
+  /// Padding is also removed, since it's possible to just wrap it with [SliverPadding].
+  @factory
+  static MultiSliver sliver<T extends Content>({
+    Key key,
+    Type contentType,
+    @required List<T> list,
+    ContentSelectionController<SelectionEntry<T>> selectionController,
+    Widget leading,
+    _CurrentTest currentTest,
+    SongTileVariant songTileVariant = SongTileVariant.albumArt,
+    SongClickBehavior songClickBehavior = SongClickBehavior.play,
+    VoidCallback onItemTap,
+  }) {
+    final selectable = selectionController != null;
+    return MultiSliver(
+      children: [
+        if (leading != null)
+          leading,
+        contentPick<T, Widget Function()>(
+          contentType: contentType,
+          song: () => SliverFixedExtentList(
+            itemExtent: kSongTileHeight,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final item = list[index] as Song;
+                final localCurrentTest = currentTest != null
+                  ? () => currentTest(index)
+                  : null;
+                if (selectable) {
+                  return SongTile.selectable(
+                    index: index,
+                    song: item,
+                    selectionController: selectionController,
+                    clickBehavior: songClickBehavior,
+                    variant: songTileVariant,
+                    currentTest: localCurrentTest,
+                    selected: selectionController.data.contains(SelectionEntry<Song>(
+                      data: item,
+                      index: index,
+                    )),
+                    onTap: onItemTap,
+                  );
+                }
+                return SongTile(
+                  song: item,
+                  currentTest: localCurrentTest,
+                  clickBehavior: songClickBehavior,
+                  variant: songTileVariant,
+                  onTap: onItemTap,
+                );
+              },
+              childCount: list.length,
+            ),
+          ),
+          album: () => SliverFixedExtentList(
+            itemExtent: kAlbumTileHeight,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final item = list[index] as Album;
+                final localCurrentTest = currentTest != null
+                  ? () => currentTest(index)
+                  : null;
+                if (selectable) {
+                  return AlbumTile.selectable(
+                    index: index,
+                    album: item,
+                    currentTest: localCurrentTest,
+                    onTap: onItemTap,
+                    selected: selectionController.data.contains(SelectionEntry<Album>(
+                      data: item,
+                      index: index,
+                    )),
+                    selectionController: selectionController,
+                  );
+                }
+                return AlbumTile(
+                  album: item,
+                  onTap: onItemTap,
+                  currentTest: localCurrentTest,
+                );
+              },
+              childCount: list.length,
+            ),
+          ),
+        )(),
+      ],
     );
   }
 }

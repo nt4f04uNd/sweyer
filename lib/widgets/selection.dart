@@ -335,9 +335,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   @override
   void dispose() { 
-    if (notifier.value != null) {
-      notifier.value = null;
-    }
+    notifier.value = null;
     _removeOverlay();
     super.dispose();
   }
@@ -573,7 +571,10 @@ class ActionsSelectionTitle extends StatelessWidget {
             animation: controller.animationController,
             child: !counter
               ? Text(l10n.actions)
-              : SelectionCounter(),
+              : Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: SelectionCounter()
+                ),
           ),
         ),
       ],
@@ -698,7 +699,8 @@ class _GoToAlbumSelectionActionState<T extends Content> extends State<GoToAlbumS
       ),
       child:
           data.length > 1 ||
-          data.length == 1 && (data.first.data is! Song || (data.first.data as Song).albumId == null)
+          data.length == 1 && (data.first.data is! Song || (data.first.data as Song).albumId == null) ||
+          HomeRouter.instance.routes.last == HomeRoutes.album // disable action in album route
             ? const SizedBox.shrink()
             : _SelectionAnimation(
                 animation: controller.animationController,
@@ -917,10 +919,10 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
             ],
           ),
         ),
-        buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
+        buttonSplashColor: Constants.Theme.glowSplashColor.auto,
         acceptButton: NFButton.accept(
           text: l10n.delete,
-          splashColor: Constants.AppTheme.glowSplashColor.auto,
+          splashColor: Constants.Theme.glowSplashColor.auto,
           textStyle: const TextStyle(color: Constants.AppColors.red),
           onPressed: () {
             ContentControl.deleteSongs(songs.map((e) => e.data.sourceId).toSet());

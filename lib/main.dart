@@ -54,14 +54,28 @@ class _WidgetsBindingObserver extends WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // This fixes that sometimes the navbar and status bar contrast is not
-      // properly applied when app is resumed.
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarIconBrightness: ThemeControl.contrastBrightness,
-          systemNavigationBarIconBrightness: ThemeControl.contrastBrightness,
-        ),
-      );
+      /// This ensures that proper UI will be applied when activity is resumed.
+      /// 
+      /// See:
+      /// * https://github.com/flutter/flutter/issues/21265
+      /// * https://github.com/ryanheise/audio_service/issues/662
+      /// 
+      /// [SystemUiOverlayStyle.statusBarBrightness] is only honored on iOS,
+      /// so I can safely use that here.
+      final lastUi = SystemUiStyleController.lastUi;
+      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
+        statusBarBrightness:
+          lastUi.statusBarBrightness == null ||
+          lastUi.statusBarBrightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark
+      ));
+      /// Defensive programming if I some time later decide to add iOS support.
+      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
+        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark
+      ));
     }
   }
 }

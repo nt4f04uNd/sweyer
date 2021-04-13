@@ -51,19 +51,29 @@ class ListHeader extends StatelessWidget {
   }
 }
 
-class ContentListSortHeader<T extends Content> extends StatelessWidget {
-  const ContentListSortHeader({
+/// Displays content controls to sort content and content [count] at the trailing.
+class ContentListHeader<T extends Content> extends StatelessWidget {
+  const ContentListHeader({
     Key key,
     @required this.count,
     @required this.selectionController,
+    this.leading,
+    this.trailing,
   })  : assert(count != null),
         super(key: key);
 
+  /// Content count, will be displayed at the trailing.
   final int count;
 
   /// This needed to ignore the header sort buttons when the controller is in selection.
   /// This parameter can be `null`.
-  final SelectionController<SelectionEntry<T>> selectionController;
+  final ContentSelectionController<SelectionEntry<T>> selectionController;
+
+  /// Additional widget to place after sorting controls.
+  final Widget leading;
+
+  /// Additional widget to place before [count].
+  final Widget trailing;
 
   Sort<T> getSort() => ContentControl.state.sorts.getValue<T>();
 
@@ -135,12 +145,18 @@ class ContentListSortHeader<T extends Content> extends StatelessWidget {
         left: 10.0,
         right: 7.0,
       ),
-      trailing: Padding(
-        padding: const EdgeInsets.only(right: 10.0),
-        child: Text(
-          getContentCountText(l10n),
-          style: textStyle,
-        ),
+      trailing: Row(
+        children: [
+          if (trailing != null)
+            trailing,
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: Text(
+              getContentCountText(l10n),
+              style: textStyle,
+            ),
+          ),
+        ],
       ),
       leading: Theme(
         data: Theme.of(context).copyWith(
@@ -148,12 +164,10 @@ class ContentListSortHeader<T extends Content> extends StatelessWidget {
         ),
         child: Row(
           children: [
-            NFIconButton(
-              icon: _OrderSwitcher(
-                ascending: sort.orderAscending,
-              ),
-              size: 28.0,
-              iconSize: 20.0,
+            ContentListHeaderAction(
+              icon: Icon(sort.orderAscending 
+                ? Icons.north_rounded
+                : Icons.south_rounded),
               onPressed: () {
                 ContentControl.sort(
                   sort: sort.copyWith(orderAscending: !sort.orderAscending),
@@ -173,6 +187,8 @@ class ContentListSortHeader<T extends Content> extends StatelessWidget {
                 ),
               ),
             ),
+            if (leading != null)
+              leading
           ],
         ),
       ),
@@ -236,11 +252,24 @@ class _RadioListTile<T> extends StatelessWidget {
   }
 }
 
-class _OrderSwitcher extends StatelessWidget {
-  const _OrderSwitcher({Key key, this.ascending}) : super(key: key);
-  final bool ascending;
+/// A small button to be placed into [ContentListSortHeader].
+class ContentListHeaderAction extends StatelessWidget {
+  const ContentListHeaderAction({
+    Key key,
+    this.icon,
+    this.onPressed,
+  }) : super(key: key);
+
+  final Widget icon;
+  final VoidCallback onPressed;
+
   @override
   Widget build(BuildContext context) {
-    return Icon(ascending ? Icons.north_rounded : Icons.south_rounded);
+    return NFIconButton(
+      icon: icon,
+      size: 28.0,
+      iconSize: 20.0,
+      onPressed: onPressed,
+    );
   }
 }

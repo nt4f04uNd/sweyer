@@ -208,6 +208,10 @@ class _QueueTabState extends State<_QueueTab>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      jumpToSong(ContentControl.state.currentSongIndex);
+    });
+
     songsPerScreen = (screenHeight / kSongTileHeight).ceil() - 2;
     edgeOffset = (screenHeight / kSongTileHeight / 2).ceil();
 

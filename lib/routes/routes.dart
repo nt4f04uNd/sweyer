@@ -105,10 +105,17 @@ mixin _DelegateMixin<T extends _Routes> on RouterDelegate<T>, ChangeNotifier {
 
   /// Goes to some route.
   ///
-  /// If route already in the stack, removes all routes on top of it.
-  void goto(T route) {
-    final index = _routes.indexOf(route);
-    if (index > 0) {
+  /// By default, if route already in the stack, removes all routes on top of it.
+  ///
+  /// However, if [allowStackSimilar] is `true`, then if similar route is on top,
+  /// for example [HomeRoutes.album], and other one is pushed, it will be stacked on top.
+  void goto(T route, [bool allowStackSimilar = false]) {
+    final index = !allowStackSimilar
+      ? _routes.indexOf(route)
+      : _routes.lastIndexOf(route);
+    if (!allowStackSimilar
+          ? index > 0
+          : index > 0 && index != _routes.length - 1) {
       for (int i = index + 1; i < _routes.length; i++) {
         _routes.remove(_routes[i]);
       }
@@ -334,9 +341,10 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     return false;
   }
 
+  /// The [allowStackSimilar] parameter in this override is ignored and set automatically.
   @override
-  void goto(HomeRoutes route) {
-    super.goto(route);
+  void goto(HomeRoutes route, [bool allowStackSimilar = false]) {
+    super.goto(route, false);
     if (route == HomeRoutes.album) {
       playerRouteController.close();
     } else if (route == HomeRoutes.search) {
@@ -358,33 +366,49 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   @override
   Widget build(BuildContext context) {
     final transitionSettings = AppRouter.instance.transitionSettings;
+    final pages = <Page<void>>[];
+
+    for (int i = 0; i < _routes.length; i++) {
+      /// TODO: when i'll be adding artists and other contents, i should stack them together (including albums)
+      /// 
+      /// I can use this
+      /// 
+      /// ```dart
+      /// ValueKey('${HomeRoutes.album.location}/${(route.arguments as Album).id}_$i')
+      /// ```
+      /// 
+      /// Currently i don't enable it, since there's on reason for that, as the only possible way
+      /// to stack album routes is through selection action to go to album - but this is disabled
+      /// in albums
+
+      final route = _routes[i];
+      if (route == HomeRoutes.tabs) {
+        pages.add(StackFadePage(
+          key: HomeRoutes.tabs.key,
+          child: TabsRoute(key: tabsRouteKey),
+          transitionSettings: transitionSettings.grey,
+        ));
+      } else if (route == HomeRoutes.album) {
+        pages.add(StackFadePage(
+          key: HomeRoutes.album.key,
+          transitionSettings: transitionSettings.greyDismissible,
+          child: AlbumRoute(album: route.arguments),
+        ));
+      } else if (route == HomeRoutes.search) {
+        pages.add(SearchPage(
+          key: HomeRoutes.search.key,
+          delegate: _searchDelegate,
+          transitionSettings: transitionSettings.grey,
+        ));
+      } else {
+        throw UnimplementedError();
+      }
+    }
     return Navigator(
       key: navigatorKey,
       observers: [homeRouteObserver],
       onPopPage: _handlePopPage,
-      pages: <Page<void>>[
-        for (final route in _routes)
-          if (route == HomeRoutes.tabs)
-            StackFadePage(
-              key: HomeRoutes.tabs.key,
-              child: TabsRoute(key: tabsRouteKey),
-              transitionSettings: transitionSettings.grey,
-            )
-          else if (route == HomeRoutes.album)
-            StackFadePage(
-              key: HomeRoutes.album.key,
-              transitionSettings: transitionSettings.greyDismissible,
-              child: AlbumRoute(album: route.arguments),
-            )
-          else if (route == HomeRoutes.search)
-            SearchPage(
-              key: HomeRoutes.search.key,
-              delegate: _searchDelegate,
-              transitionSettings: transitionSettings.grey,
-            )
-          else
-            throw UnimplementedError()
-      ],
+      pages: pages,
     );
   }
 }

@@ -10,7 +10,7 @@ import 'package:sweyer/sweyer.dart';
 
 import 'colors.dart';
 
-abstract class AppTheme {
+abstract class Theme {
   static const Color defaultPrimaryColor = AppColors.deepPurpleAccent;
 
   //************************************** WIDGET SPECIFIC COLORS ******************************************
@@ -28,6 +28,13 @@ abstract class AppTheme {
   static const  _ThemeContainer<Color> menuItemColor = _ThemeContainer(
     light: Color(0xff3d3e42),
     dark: AppColors.almostWhite,
+  );
+
+  /// Color that contrasts with the [ColorScheme.background].
+  /// Black and white.
+  static const _ThemeContainer<Color> contrast = _ThemeContainer(
+    light: Colors.black,
+    dark: Colors.white,
   );
 
   static const _lightThemeSplashColor = Color(0x40cccccc);
@@ -76,10 +83,8 @@ abstract class AppTheme {
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
         onError: Colors.white,
-
         /// For window headers (e.g. alert dialogs)
         surface: Colors.white,
-
         /// For dimmed text (e.g. in appbar)
         onSurface: _lightIconColor,
       ),
@@ -203,10 +208,8 @@ abstract class AppTheme {
         onSecondary: AppColors.almostWhite,
         error: Color(0xffed3b3b),
         onError: AppColors.almostWhite,
-
         /// For window headers (e.g. alert dialogs)
         surface: AppColors.grey,
-
         /// For dimmed text (e.g. in appbar)
         onSurface: AppColors.whiteDarkened,
       ),
@@ -383,8 +386,11 @@ class _ThemeContainer<T> {
   final T light;
   final T dark;
 
-  /// Checks theme and automatically [light] or [dark], depending on current brightness.
+  /// Checks theme and automatically picks [light] or [dark] depending on current brightness.
   T get auto => ThemeControl.isDark ? dark : light;
+
+  /// Checks theme and automatically picks opposite value from the current brightness.
+  T get autoReverse => ThemeControl.isDark ? light : dark;
 
   _ThemeContainer<T> copyWith({T light, T dark}) {
     return _ThemeContainer(

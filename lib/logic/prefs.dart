@@ -139,6 +139,6 @@ abstract class Settings {
   /// Stores primary color int value.
   static final Pref<int> primaryColorInt = Pref<int>(
     key: 'setting_primary_color',
-    defaultValue: Constants.AppTheme.defaultPrimaryColor.value,
+    defaultValue: Constants.Theme.defaultPrimaryColor.value,
   );
 }

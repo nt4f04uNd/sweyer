@@ -36,7 +36,7 @@ abstract class ThemeControl {
   /// True if [brightness] is dark
   static bool get isDark => _brightness == Brightness.dark;
 
-  static ThemeData get theme => isLight ? Constants.AppTheme.app.light : Constants.AppTheme.app.dark;
+  static ThemeData get theme => isLight ? Constants.Theme.app.light : Constants.Theme.app.dark;
 
   /// Returns primary or onBackground color, depending on:
   /// * the current primary
@@ -137,15 +137,15 @@ abstract class ThemeControl {
   static void _applyPrimaryColor(Color color) {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
     _colorForBlend = getColorForBlend(color);
-    Constants.AppTheme.app = Constants.AppTheme.app.copyWith(
-      light: Constants.AppTheme.app.light.copyWith(
+    Constants.Theme.app = Constants.Theme.app.copyWith(
+      light: Constants.Theme.app.light.copyWith(
         primaryColor: color,
-        colorScheme: Constants.AppTheme.app.light.colorScheme.copyWith(
+        colorScheme: Constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
           // todo: temporarily used for text in [NFButtons], remove when it's removed
         ),
-        tooltipTheme: Constants.AppTheme.app.light.tooltipTheme.copyWith(
+        tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
             color: color,
             borderRadius: const BorderRadius.all(
@@ -153,20 +153,20 @@ abstract class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme: Constants.AppTheme.app.light.textSelectionTheme.copyWith(
+        textSelectionTheme: Constants.Theme.app.light.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
         ),
       ),
-      dark: Constants.AppTheme.app.dark.copyWith(
+      dark: Constants.Theme.app.dark.copyWith(
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,
-        colorScheme: Constants.AppTheme.app.dark.colorScheme.copyWith(
+        colorScheme: Constants.Theme.app.dark.colorScheme.copyWith(
           primary: color,
         ),
-        tooltipTheme: Constants.AppTheme.app.light.tooltipTheme.copyWith(
+        tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
             color: color,
             borderRadius: const BorderRadius.all(
@@ -174,7 +174,7 @@ abstract class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme: Constants.AppTheme.app.dark.textSelectionTheme.copyWith(
+        textSelectionTheme: Constants.Theme.app.dark.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,

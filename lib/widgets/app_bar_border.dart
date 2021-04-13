@@ -15,7 +15,7 @@ class AppBarBorder extends StatelessWidget {
 
   final bool shown;
 
-  static const height = 1.5;
+  static const height = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class AppBarBorder extends StatelessWidget {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 400),
       color: shown
-          ? Constants.AppTheme.appBarBorderColor.auto
+          ? Constants.Theme.appBarBorderColor.auto
           : theme.colorScheme.secondary.withOpacity(0.0),
       height: height,
     );

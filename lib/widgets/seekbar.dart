@@ -150,7 +150,7 @@ class _SeekbarState extends State<Seekbar> {
                 thumbColor: color,
                 overlayColor: color.withOpacity(0.12),
                 activeTrackColor:color,
-                inactiveTrackColor: Constants.AppTheme.sliderInactiveColor.auto,
+                inactiveTrackColor: Constants.Theme.sliderInactiveColor.auto,
                 thumbShape: const RoundSliderThumbShape(
                   enabledThumbRadius: 7.5,
                 ),

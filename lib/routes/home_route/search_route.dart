@@ -181,13 +181,7 @@ class _SearchStateDelegate {
       song: () {
         if (ContentControl.state.queues.type != QueueType.searched || query != ContentControl.state.queues.searchQuery) {
           onSubmit();
-          ContentControl.setQueue(
-            type: QueueType.searched,
-            searchQuery: query,
-            modified: false,
-            shuffled: false,
-            songs: results.songs,
-          );
+          ContentControl.setSearchedQueue(query, results.songs);
         }
       },
       album: onSubmit,
@@ -583,7 +577,7 @@ class _DelegateBuilder extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
+              children: [
                 const Padding(
                   padding: EdgeInsets.only(bottom: 8.0),
                   child: Icon(Icons.error_outline_rounded),
@@ -618,7 +612,7 @@ class _DelegateBuilder extends StatelessWidget {
                   child: child,
                 ),
               child: Container(
-                key: ValueKey("$single$contentType"),
+                key: ValueKey(contentType),
                 child: showSingleCategoryContentList
                     ? NotificationListener<ScrollNotification>(
                         onNotification: (notification) => _handleNotification(delegate, notification),
@@ -634,18 +628,22 @@ class _DelegateBuilder extends StatelessWidget {
                           ),
                         ),
                       )
-                    : ListView(
-                        controller: delegate.scrollController,
-                        children: [
-                          for (final entry in contentTypeEntries)
-                            if (entry.value.isNotEmpty)
-                              _ContentSection(
-                                contentType: entry.key,
-                                items: results.map[entry.key],
-                                onTap: () => delegate.contentType = entry.key,
-                              ),
-                        ],
-                      ),
+                    : 
+                    // AppScrollbar( // TODO: enable this when i have more content on search screen
+                    //     controller: delegate.scrollController,
+                    //     child: 
+                        ListView(
+                          controller: delegate.scrollController,
+                          children: [
+                            for (final entry in contentTypeEntries)
+                              if (entry.value.isNotEmpty)
+                                _ContentSection(
+                                  contentType: entry.key,
+                                  items: results.map[entry.key],
+                                  onTap: () => delegate.contentType = entry.key,
+                                ),
+                          ],
+                        ),
                 ),
               ),
             );
@@ -709,7 +707,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     final colorScheme =  ThemeControl.theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
-      end: colorScheme.onBackground,
+      end: Constants.Theme.contrast.auto,
     );
     final baseAnimation = CurvedAnimation(
       parent: controller,
@@ -717,10 +715,13 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       reverseCurve: Curves.easeIn,
     );
     final colorAnimation = colorTween.animate(baseAnimation);
-    final textColorAnimation = ReverseTween(colorTween).animate(baseAnimation);
+    final textColorAnimation = ColorTween(
+      begin: colorScheme.onBackground,
+      end: Constants.Theme.contrast.autoReverse,
+    ).animate(baseAnimation);
     final splashColorAnimation = ColorTween(
-      begin: ThemeControl.isLight ? Constants.AppTheme.glowSplashColor.light : Constants.AppTheme.glowSplashColor.dark,
-      end: ThemeControl.isLight ? Constants.AppTheme.glowSplashColor.dark :Constants.AppTheme.glowSplashColor.light,
+      begin: Constants.Theme.glowSplashColor.auto,
+      end: Constants.Theme.glowSplashColor.autoReverse,
     ).animate(baseAnimation);
     if (active) {
       controller.forward();
@@ -742,7 +743,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                 child: RawChip(
                   shape: StadiumBorder(
                     side: BorderSide(
-                      color: colorScheme.onBackground.withOpacity(0.05),
+                      color: Constants.Theme.contrast.auto.withOpacity(0.05),
                       width: 1.0
                     ),
                   ),
@@ -951,10 +952,10 @@ class _SuggestionsHeader extends StatelessWidget {
               context,
               ui: Constants.UiTheme.modalOverGrey.auto,
               title: Text(l10n.searchClearHistory),
-              buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
+              buttonSplashColor: Constants.Theme.glowSplashColor.auto,
               acceptButton: NFButton.accept(
                 text: l10n.delete,
-                splashColor: Constants.AppTheme.glowSplashColor.auto,
+                splashColor: Constants.Theme.glowSplashColor.auto,
                 textStyle: const TextStyle(color: Constants.AppColors.red),
                 onPressed: () => clearHistory(context),
               ),
@@ -1025,10 +1026,10 @@ class _SuggestionTile extends StatelessWidget {
               ],
             ),
           ),
-          buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
+          buttonSplashColor: Constants.Theme.glowSplashColor.auto,
           acceptButton: NFButton.accept(
             text: l10n.remove,
-            splashColor: Constants.AppTheme.glowSplashColor.auto,
+            splashColor: Constants.Theme.glowSplashColor.auto,
             textStyle: const TextStyle(color: Constants.AppColors.red),
             onPressed: () => _removeEntry(context, index)
           ),

@@ -39,6 +39,32 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
+  Future<void> prepare() {
+    return player.setSong(ContentControl.state.currentSong);
+  }
+
+  @override
+  Future<void> prepareFromMediaId(String mediaId, [Map<String, dynamic> extras]) {
+    return player.setSong(ContentControl.state.queues.all.byId.getSong(int.parse(mediaId)));
+  }
+
+  @override
+  Future<void> prepareFromSearch(String query, [Map<String, dynamic> extras]) {
+    final songs = ContentControl.search<Song>(query);
+    if (songs.isNotEmpty) {
+      ContentControl.setSearchedQueue(query, songs);
+      return player.setSong(ContentControl.state.queues.all.byId.getSong(songs[0].id));
+    }
+  }
+
+  @override
+  Future<void> prepareFromUri(Uri uri, [Map<String, dynamic> extras]) {
+    // TODO: implement prepareFromUri
+    throw UnimplementedError();
+    return super.prepareFromUri(uri, extras);
+  }
+
+  @override
   Future<void> play() {
     return player.play();
   }
@@ -56,13 +82,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   Future<void> playFromSearch(String query, [Map<String, dynamic> extras]) async {
     final songs = ContentControl.search<Song>(query);
     if (songs.isNotEmpty) {
-      ContentControl.setQueue(
-        type: QueueType.searched,
-        searchQuery: query,
-        modified: false,
-        shuffled: false,
-        songs: songs,
-      );
+      ContentControl.setSearchedQueue(query, songs);
     }
   }
 
@@ -84,6 +104,34 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> pause() => player.pause();
+
+  Timer hookTimer;
+  int hookPressedCount = 0;
+
+  @override
+  Future<void> click([MediaButton button = MediaButton.media]) async {
+    switch (button) {
+      case MediaButton.media:
+        hookPressedCount += 1;
+        hookTimer ??= Timer(const Duration(milliseconds: 800), () {
+          switch (hookPressedCount) {
+            case 1: player.playPause(); break;
+            case 2: player.playNext(); break;
+            case 3:
+            default: player.playPrev(); break;
+          }
+          hookPressedCount = 0;
+          hookTimer = null;
+        });
+        break;
+      case MediaButton.next:
+        await skipToNext();
+        break;
+      case MediaButton.previous:
+        await skipToPrevious();
+        break;
+    }
+  }
 
   @override
   Future<void> stop() async {
@@ -334,7 +382,11 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
         ProcessingState.buffering: AudioProcessingState.buffering,
         ProcessingState.ready: AudioProcessingState.ready,
         ProcessingState.completed: AudioProcessingState.completed,
-      }[player.processingState],
+      }[ // Excluding idle state because it makes notification to reappear.
+        player.processingState == ProcessingState.idle
+          ? AudioProcessingState.loading
+          : player.processingState
+      ],
       playing: playing,
       updatePosition: player.position,
       bufferedPosition: player.bufferedPosition,

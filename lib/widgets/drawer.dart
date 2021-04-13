@@ -242,7 +242,7 @@ class MenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: Constants.AppTheme.menuItemColor.auto,
+          color: Constants.Theme.menuItemColor.auto,
         ),
       ),
       onTap: onTap,

@@ -108,50 +108,27 @@ class HomeState extends State<Home> {
     super.dispose();
   }
 
-  DateTime _lastBackPressTime;
-  Future<bool> _handlePop() async {
-    final navigatorKey = HomeRouter.instance.navigatorKey;
-    if (navigatorKey.currentState != null && navigatorKey.currentState.canPop()) {
-      navigatorKey.currentState.pop();
-      return false;
-    } else {
-      final now = DateTime.now();
-      // Show toast when user presses back button on main route, that
-      // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null ||
-          now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
-        _lastBackPressTime = now;
-        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
-        return false;
-      }
-    }
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _handlePop,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(bottom: kSongTileHeight),
-              child: Router<HomeRoutes>(
-                routerDelegate: router,
-                routeInformationParser: HomeRouteInformationParser(),
-                routeInformationProvider: HomeRouteInformationProvider(),
-                backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                  Router.of(context).backButtonDispatcher,
-                ),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(bottom: kSongTileHeight),
+            child: Router<HomeRoutes>(
+              routerDelegate: router,
+              routeInformationParser: HomeRouteInformationParser(),
+              routeInformationProvider: HomeRouteInformationProvider(),
+              backButtonDispatcher: HomeRouteBackButtonDispatcher(
+                Router.of(context).backButtonDispatcher,
               ),
             ),
-            const PlayerRoute(),
-            Overlay(key: overlayKey),
-            const DrawerWidget(),
-          ],
-        ),
+          ),
+          const PlayerRoute(),
+          Overlay(key: overlayKey),
+          const DrawerWidget(),
+        ],
       ),
     );
   }

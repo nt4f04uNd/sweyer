@@ -17,6 +17,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
@@ -84,12 +85,22 @@ class ContentMap<V> {
   /// Returs a [Sort] per `T` [Content] from the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
-  V getValue<T extends Content>([Type? key]) => _map[key ?? T]!;
+  V getValue<T extends Content>([Type? key]) {
+    assert(
+      Content.enumerate().contains(typeOf<T>()),
+      "Specified type myst be a subtype of Content",
+    );
+    return _map[key ?? T]!;
+  }
 
   /// Puts a [Sort] typed with `T` into the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
   void setValue<T extends Content>(V value, {Type? key}) {
+    assert(
+      Content.enumerate().contains(typeOf<T>()),
+      "Specified type myst be a subtype of Content",
+    );
     _map[key ?? T] = value;
   }
 }
@@ -636,6 +647,37 @@ abstract class ContentControl {
     );
   }
 
+  /// A shorthand for setting [QueueType.searched].
+  static void setSearchedQueue(String query, List<Song> songs) {
+     ContentControl.setQueue(
+      type: QueueType.searched,
+      searchQuery: query,
+      modified: false,
+      shuffled: false,
+      songs: songs,
+    );
+  }
+
+  /// A shorthand for setting [QueueType.persistent].
+  /// 
+  /// By default sets [shuffled] queue.
+  static void setPersistentQueue({
+    required PersistentQueue queue,
+    required List<Song> songs,
+    bool shuffled = false,
+  }) {
+    if (shuffled) {
+      songs = Queue.shuffleSongs(songs);
+    }
+    ContentControl.setQueue(
+      type: QueueType.persistent,
+      persistentQueue: queue,
+      songs: songs,
+      modified: false,
+      shuffled: shuffled,
+    );
+  }
+
   /// Resets queue to all songs.
   static void resetQueue() {
     setQueue(
@@ -651,7 +693,11 @@ abstract class ContentControl {
   ///
   /// * [shuffled] can be used to shuffle / unshuffle the queue
   /// * [modified] can be used to mark current queue as modified
-  /// * [songs] is the songs list to set to the queue
+  /// * [songs] is the songs list to set to the queue.
+  /// This array will be copied (unless [copied] is true) and set
+  /// as a source to queue, that function is switching to.
+  /// For example that way when [shuffled] is `true`, this array
+  /// will be used as new queue, without being shuffled.
   /// * [persistentQueue] is the persistent queue being set,
   ///   only applied when [type] is [QueueType.persistent].
   ///   When [QueueType.persistent] is set and currently it's not persistent, this parameter is required.
@@ -684,16 +730,20 @@ abstract class ContentControl {
     }
 
     assert(
+      songs == null || songs.isNotEmpty,
+      "It's invalid to set empty songs queue",
+    );
+    assert(
       type != QueueType.persistent ||
       queues._persistent != null ||
       persistentQueue != null,
-      'When you set `persistent` queue and currently none set, you must provide the `persistentQueue` paramenter',
+      "When you set `persistent` queue and currently none set, you must provide the `persistentQueue` paramenter",
     );
     assert(
       type != QueueType.searched ||
       queues._searchQuery != null ||
       searchQuery != null,
-      'When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter',
+      "When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter",
     );
 
     type ??= queues._type;
@@ -883,6 +933,7 @@ abstract class ContentControl {
     final year = int.tryParse(words[0]);
     /// Splits string by spaces, or dashes, or bar, or paranthesis
     final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
+    final l10n = staticl10n;
     /// Checks whether a [string] is abbreviation.
     /// For example: "big baby tape - bbt"
     bool isAbbreviation(String string) {
@@ -900,7 +951,7 @@ abstract class ContentControl {
           bool fullQuery;
           final wordsTest = words.map<bool>((word) =>
             song.title.toLowerCase().contains(word) ||
-            song.artist.toLowerCase().contains(word) ||
+            formatArtist(song.artist, l10n).toLowerCase().contains(word) ||
             song.album.toLowerCase().contains(word)
           ).toList();
           // Exclude the year from query word tests
@@ -920,7 +971,7 @@ abstract class ContentControl {
           // Exact query search
           bool fullQuery;
           final wordsTest = words.map<bool>((word) =>
-            album.artist.toLowerCase().contains(word) ||
+            formatArtist(album.artist, l10n).toLowerCase().contains(word) ||
             album.album.toLowerCase().contains(word),
           ).toList();
           // Exclude the year from query word tests
@@ -954,7 +1005,7 @@ abstract class ContentControl {
       },
       album: () {
         final _sort = sort! as AlbumSort;
-        sorts.setValue(_sort);
+        sorts.setValue<Album>(_sort);
         Prefs.albumSortString.set(jsonEncode(_sort.toJson()));
         final comparator = _sort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()

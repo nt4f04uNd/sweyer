@@ -97,7 +97,7 @@ class LabelledSlider extends StatelessWidget {
                 valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
                 overlayColor: Colors.transparent,
                 activeTrackColor: activeColor ?? ThemeControl.theme.colorScheme.primary,
-                inactiveTrackColor: inactiveColor ?? Constants.AppTheme.sliderInactiveColor.auto,
+                inactiveTrackColor: inactiveColor ?? Constants.Theme.sliderInactiveColor.auto,
               ),
               child: Slider(
                 value: value,

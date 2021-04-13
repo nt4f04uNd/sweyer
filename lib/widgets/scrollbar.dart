@@ -27,9 +27,10 @@ const Radius _kScrollbarRadius = Radius.circular(8.0);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
-
-class ContentScrollbar<T extends Content> extends StatefulWidget {
-  const ContentScrollbar({
+/// Themed app scrollbar.
+class AppScrollbar extends StatefulWidget {
+  /// Creates a scrollbar, draggable by default.
+  const AppScrollbar({
     Key? key,
     this.labelBuilder,
     required this.child,
@@ -40,11 +41,58 @@ class ContentScrollbar<T extends Content> extends StatefulWidget {
     this.thickness,
     this.radius,
     this.notificationPredicate,
-    this.interactive,
+    this.interactive = true,
   }) : super(key: key);
 
-  final WidgetBuilder? labelBuilder;
+  /// Creates a scrollbar, draggable by default.
+  /// Automatically passes [labelBuilder] dependent on content type `T` and
+  /// uses passed content [list] in it.
+  /// 
+  /// It is also possible to disable the label with [showLabel].
+  @factory
+  static AppScrollbar forContent<T extends Content>({
+    Key? key,
+    required List<T> list,
+    required Widget child,
+    required ScrollController controller,
+    bool showLabel = true,
+    bool? isAlwaysShown,
+    bool? showTrackOnHover,
+    double? hoverThickness,
+    double? thickness,
+    Radius? radius,
+    ScrollNotificationPredicate? notificationPredicate,
+    bool? interactive,
+  }) {
+    return AppScrollbar(
+      key: key,
+      labelBuilder: !showLabel
+        ? null
+        : (context) {
+          final item = list[
+            (controller.position.pixels / kSongTileHeight - 1)
+            .clamp(0.0, list.length - 1).round()
+          ];
+          return NFScrollLabel(
+            text: contentPick<T, String Function()>(
+              song: () => (item as Song).title[0].toUpperCase(),
+              album: () => (item as Album).album[0].toUpperCase(),
+            )(),
+          );
+        },
+      child: child,
+      controller: controller,
+      isAlwaysShown: isAlwaysShown,
+      showTrackOnHover: showTrackOnHover,
+      hoverThickness: hoverThickness,
+      thickness: thickness,
+      radius: radius,
+      notificationPredicate: notificationPredicate,
+      interactive: interactive,
+    );
+  }
 
+  final WidgetBuilder? labelBuilder;
   final Widget child;
   final ScrollController? controller;
   final bool? isAlwaysShown;
@@ -52,49 +100,65 @@ class ContentScrollbar<T extends Content> extends StatefulWidget {
   final double? hoverThickness;
   final double? thickness;
   final Radius? radius;
-  final bool? interactive;
   final ScrollNotificationPredicate? notificationPredicate;
+  final bool? interactive;
 
   @override
-  _ContentScrollbarState<T> createState() => _ContentScrollbarState();
+  _AppScrollbarState createState() => _AppScrollbarState();
 }
 
-class _ContentScrollbarState<T extends Content> extends State<ContentScrollbar<T>> {
+class _AppScrollbarState extends State<AppScrollbar> {
   bool _dragIsActive = false;
 
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller ?? PrimaryScrollController.of(context)!;
-    return StackWithAllChildrenReceiveEvents(
-      children: [
-        _Scrollbar(
-          controller: controller,
-          child: widget.child,
-          isAlwaysShown: widget.isAlwaysShown,
-          showTrackOnHover: widget.showTrackOnHover,
-          hoverThickness: widget.hoverThickness,
-          thickness: widget.thickness,
-          radius: widget.radius,
-          notificationPredicate: widget.notificationPredicate,
-          interactive: widget.interactive,
-          onThumbPressStart: () => setState(() { _dragIsActive = true; }),
-          onThumbPressEnd: () => setState(() { _dragIsActive = false; }),
+    final theme = ThemeControl.theme;
+    final highlightColor = theme.highlightColor;
+    return Theme(
+      data: theme.copyWith(
+        highlightColor: ThemeControl.isDark
+          ? const Color(0x40CCCCCC)
+          : const Color(0x66BCBCBC),
+      ),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Stack(
+          children: [
+            _Scrollbar(
+              controller: controller,
+              child: Theme(
+                data: theme.copyWith(highlightColor: highlightColor),
+                child: widget.child,
+              ),
+              isAlwaysShown: widget.isAlwaysShown,
+              showTrackOnHover: widget.showTrackOnHover,
+              hoverThickness: widget.hoverThickness,
+              thickness: widget.thickness,
+              radius: widget.radius,
+              notificationPredicate: widget.notificationPredicate,
+              interactive: widget.interactive,
+              onThumbPressStart: () => setState(() { _dragIsActive = true; }),
+              onThumbPressEnd: () => setState(() { _dragIsActive = false; }),
+            ),
+            if (widget.labelBuilder != null)
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: !_dragIsActive
+                  ? const SizedBox.shrink()
+                  : Center(
+                      child: AnimatedBuilder(
+                        animation: controller,
+                        builder: (context, child) => widget.labelBuilder!(context),
+                      ),
+                    ),
+              ),
+          ],
         ),
-        if (widget.labelBuilder != null)
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            child: !_dragIsActive
-              ? const SizedBox.shrink()
-              : Center(
-                  child: AnimatedBuilder(
-                    animation: controller,
-                    builder: (context, child) => widget.labelBuilder!(context),
-                  ),
-                ),
-          ),
-      ],
+      ),
     );
   }
 }
