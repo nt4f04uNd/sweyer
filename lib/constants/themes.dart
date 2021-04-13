@@ -130,7 +130,6 @@ abstract class AppTheme {
         headline1: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headline2: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headline3: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        // For the app title
         headline4: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headline5: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // Title in song tiles

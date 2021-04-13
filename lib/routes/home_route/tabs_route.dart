@@ -8,9 +8,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
+
+/// Returns app style used for app bar title.
+TextStyle get appBarTitleTextStyle => TextStyle(
+  fontWeight: FontWeight.w700,
+  color: ThemeControl.theme.textTheme.headline6.color,
+  fontSize: 22.0,
+);
 
 /// Needed to change physics of the [TabBarView].
 class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
@@ -38,7 +44,7 @@ class TabsRoute extends StatefulWidget {
 
 class TabsRouteState extends State<TabsRoute>
   with TickerProviderStateMixin, SelectionHandler {
-  Map<Type, ContentSelectionController> selectionControllersMap;
+  ContentMap<ContentSelectionController> selectionControllersMap;
   TabController tabController;
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<void> _contentChangeSubscription;
@@ -46,21 +52,28 @@ class TabsRouteState extends State<TabsRoute>
   SelectionController get selectionController {
     switch (tabController.index) {
       case 0:
-        return selectionControllersMap[Song];
+        return selectionControllersMap.getValue<Song>();
       case 1:
-        return selectionControllersMap[Album];
+        return selectionControllersMap.getValue<Album>();
       default:
         throw UnimplementedError();
     }
   }
 
+  _ContentTab<T> buildContentTab<T extends Content>() {
+    return _ContentTab<T>(
+      selectionController: selectionControllersMap.getValue<T>()
+          as ContentSelectionController<SelectionEntry<T>>
+      );
+  }
+
   @override
   void initState() {
     super.initState();
-    selectionControllersMap = {
+    selectionControllersMap = ContentMap({
       Song: ContentSelectionController.forContent<Song>(this),
       Album: ContentSelectionController.forContent<Album>(this),
-    };
+    });
     tabController = TabController(
       vsync: this,
       length: 2,
@@ -99,83 +112,8 @@ class TabsRouteState extends State<TabsRoute>
     ];
   }
 
-  void _handleDelete() {
-    final controller = selectionController;
-    if (ContentControl.sdkInt >= 30) {
-      // On Android R the deletion is performed with OS dialog.
-      ContentControl.deleteSongs(controller.data.map((e) => e.data.sourceId).toSet());
-      controller.close();
-    } else {
-      // On all versions below show in app dialog.
-      final l10n = getl10n(context);
-      final count = controller.data.length;
-      Song song;
-      if (count == 1) {
-        song = ContentControl.state.queues.all.byId.getSong(controller.data.first.data.sourceId);
-      }
-      ShowFunctions.instance.showDialog(
-        context,
-        title: Text(
-          '${l10n.delete} ${count > 1 ? count.toString() + ' ' : ''}${l10n.tracksPlural(count).toLowerCase()}',
-        ),
-        content: Text.rich(
-          TextSpan(
-            style: const TextStyle(fontSize: 15.0),
-            children: [
-              TextSpan(text: l10n.deletionPromptDescriptionP1),
-              TextSpan(
-                text: song != null
-                    ? '${song.title}?'
-                    : l10n.deletionPromptDescriptionP2,
-                style: song != null
-                    ? const TextStyle(fontWeight: FontWeight.w700)
-                    : null,
-              ),
-            ],
-          ),
-        ),
-        buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
-        acceptButton: NFButton.accept(
-          text: l10n.delete,
-          splashColor: Constants.AppTheme.glowSplashColor.auto,
-          textStyle: const TextStyle(color: Constants.AppColors.red),
-          onPressed: () {
-            ContentControl.deleteSongs(controller.data.map((e) => e.data.sourceId).toSet());
-            controller.close();
-          },
-        ),
-      );
-    }
-  }
-    
-  DateTime _lastBackPressTime;
-  Future<bool> _handlePop(BuildContext context) async {
-    final handled = HomeRouter.instance.handleNecessaryPop();
-    if (handled)
-      return false;
-    final now = DateTime.now();
-    // Show toast when user presses back button on main route, that
-    // asks from user to press again to confirm that he wants to quit the app
-    if (_lastBackPressTime == null ||
-        now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
-      _lastBackPressTime = now;
-      ShowFunctions.instance.showToast(
-        msg: getl10n(context).pressOnceAgainToExit,
-      );
-      return true;
-    }
-    return false;
-  }
-
-
   @override
   Widget build(BuildContext context) {
-    final appBarTitleTextStyle = TextStyle(
-      fontWeight: FontWeight.w700,
-      color: ThemeControl.theme.textTheme.headline6.color,
-      fontSize: 22.0,
-    );
-
     final appBar = PreferredSize(
       preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
       child: SelectionAppBar(
@@ -195,10 +133,8 @@ class TabsRouteState extends State<TabsRoute>
           ),
         ],
         actionsSelection: [
-          NFIconButton(
-            icon: const Icon(Icons.delete_outline_rounded),
-            onPressed: _handleDelete,
-          ),
+          if (selectionController is ContentSelectionController<SelectionEntry<Song>>)
+            DeleteSongsAppBarAction<Song>(controller: selectionController),
         ],
         title: Padding(
           padding: const EdgeInsets.only(left: 15.0),
@@ -214,206 +150,133 @@ class TabsRouteState extends State<TabsRoute>
       ),
     );
 
-    return ContentSelectionControllersProvider(
-      map: selectionControllersMap,
-      child: BackButtonListener(
-        onBackButtonPressed: () => _handlePop(context),
-        child: Stack(
-          children: [
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: kNFAppBarPreferredSize + 4.0,
-                ),
-                child: Stack(
-                  children: [
-                    ScrollConfiguration(
-                      behavior: const GlowlessScrollBehavior(),
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          top: ContentControl.state.albums.isNotEmpty ? 44.0 : 0.0,
-                        ),
-                        child: ContentControl.state.albums.isEmpty
-                            ? _SongsTab()
-                            : TabBarView(
-                                controller: tabController,
-                                physics: selectionController.inSelection
-                                    ? const NeverScrollableScrollPhysics()
-                                    : const _TabsScrollPhysics(),
-                                children: [
-                                  _SongsTab(), 
-                                  _AlbumsTab(),
-                                ],
-                              ),
-                      ),
+    return Stack(
+      children: [
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: kNFAppBarPreferredSize + 4.0,
+            ),
+            child: Stack(
+              children: [
+                ScrollConfiguration(
+                  behavior: const GlowlessScrollBehavior(),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: ContentControl.state.albums.isNotEmpty ? 44.0 : 0.0,
                     ),
-                    if (ContentControl.state.albums.isNotEmpty)
-                      IgnorePointer(
-                        ignoring: selectionController.inSelection,
-                        child: Theme(
-                          data: ThemeControl.theme.copyWith(
-                            splashFactory: NFListTileInkRipple.splashFactory,
+                    child: ContentControl.state.albums.isEmpty
+                        ? buildContentTab<Song>()
+                        : TabBarView(
+                            controller: tabController,
+                            physics: selectionController.inSelection
+                                ? const NeverScrollableScrollPhysics()
+                                : const _TabsScrollPhysics(),
+                            children: [
+                              buildContentTab<Song>(),
+                              buildContentTab<Album>(),
+                            ],
                           ),
-                          child: Material(
-                            elevation: 2.0,
-                            color: ThemeControl.theme.appBarTheme.color,
-                            child: NFTabBar(
-                              controller: tabController,
-                              indicatorWeight: 5.0,
-                              indicator: BoxDecoration(
-                                color: ThemeControl.theme.colorScheme.primary,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(3.0),
-                                  topRight: Radius.circular(3.0),
-                                ),
-                              ),
-                              labelColor: ThemeControl.theme.textTheme.headline6.color,
-                              indicatorSize: TabBarIndicatorSize.label,
-                              unselectedLabelColor: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.6),
-                              labelStyle: ThemeControl.theme.textTheme.headline6.copyWith(
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w900,
-                              ),
-                              tabs: _buildTabs(),
+                  ),
+                ),
+                if (ContentControl.state.albums.isNotEmpty)
+                  IgnorePointer(
+                    ignoring: selectionController.inSelection,
+                    child: Theme(
+                      data: ThemeControl.theme.copyWith(
+                        splashFactory: NFListTileInkRipple.splashFactory,
+                      ),
+                      child: Material(
+                        elevation: 2.0,
+                        color: ThemeControl.theme.appBarTheme.color,
+                        child: NFTabBar(
+                          controller: tabController,
+                          indicatorWeight: 5.0,
+                          indicator: BoxDecoration(
+                            color: ThemeControl.theme.colorScheme.primary,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(3.0),
+                              topRight: Radius.circular(3.0),
                             ),
                           ),
+                          labelColor: ThemeControl.theme.textTheme.headline6.color,
+                          indicatorSize: TabBarIndicatorSize.label,
+                          unselectedLabelColor: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.6),
+                          labelStyle: ThemeControl.theme.textTheme.headline6.copyWith(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w900,
+                          ),
+                          tabs: _buildTabs(),
                         ),
                       ),
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+              ],
             ),
-            Positioned(
-              top: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: appBar,
-            ),
-          ],
+          ),
         ),
-      ),
+        Positioned(
+          top: 0.0,
+          left: 0.0,
+          right: 0.0,
+          child: appBar,
+        ),
+      ],
     );
   }
 }
 
 
-class _SongsTab extends StatefulWidget {
-  _SongsTab({Key key}) : super(key: key);
+class _ContentTab<T extends Content> extends StatefulWidget {
+  _ContentTab({Key key, @required this.selectionController}) : super(key: key);
+
+  final ContentSelectionController<SelectionEntry<T>> selectionController;
 
   @override
-  _SongsTabState createState() => _SongsTabState();
+  _ContentTabState<T> createState() => _ContentTabState();
 }
 
-class _SongsTabState extends State<_SongsTab> with AutomaticKeepAliveClientMixin<_SongsTab> {
+class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with AutomaticKeepAliveClientMixin<_ContentTab<T>> {
   @override
   bool get wantKeepAlive => true;
 
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  final ItemScrollController itemScrollController = ItemScrollController();
-  bool _scrollbarDragged = false;
+  final key = GlobalKey<RefreshIndicatorState>();
 
-  void _handleDragStart() {
-    _scrollbarDragged = true;
-  }
-
-  void _handleDragEnd() {
-    _scrollbarDragged = false;
-  }
-
-  /// Performs tracks refetch
-  Future<void> _handleRefreshSongs() async {
-    await Future.wait([
-      ContentControl.refetch<Song>(),
-      ContentControl.refetch<Album>(),
-    ]);
+  bool get showLabel {
+    final SortFeature feature = ContentControl.state.sorts.getValue<T>().feature;
+    return contentPick<T, bool>(
+      song: feature == SongSortFeature.title,
+      album: feature == AlbumSortFeature.title,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final songs = ContentControl.state.queues.all.songs;
-    final controller = ContentSelectionControllersProvider.of(context).song;
+    final list = ContentControl.getContent<T>();
+    final selectionController = widget.selectionController;
     return RefreshIndicator(
+      key: key,
+      strokeWidth: 2.5,
       color: Colors.white,
       backgroundColor: ThemeControl.theme.colorScheme.primary,
-      strokeWidth: 2.5,
-      key: _refreshIndicatorKey,
-      onRefresh: _handleRefreshSongs,
+      onRefresh: () => Future.wait([
+        ContentControl.refetch<Song>(),
+        ContentControl.refetch<Album>(),
+      ]),
       notificationPredicate: (notification) {
-        // Prevent pull to refresh when scrollbar is dragged.
-        return !_scrollbarDragged &&
-            controller.notInSelection &&
-            notification.depth == 0;
+        return selectionController.notInSelection &&
+               notification.depth == 0;
       },
-      child: SongListView(
-        songs: songs,
-        itemScrollController: itemScrollController,
-        selectionController: controller,
-        scrollbar: ScrollbarType.draggable,
-        onScrollbarDragStart: _handleDragStart,
-        onScrollbarDragEnd: _handleDragEnd,
-        leading: SongSortListHeader(
-          count: songs.length,
-          selectionController: controller,
+      child: ContentListView<T>(
+        list: list,
+        showScrollbarLabel: showLabel,
+        selectionController: selectionController,
+        leading: ContentListSortHeader<T>(
+          count: list.length,
+          selectionController: selectionController,
         ),
         onItemTap: ContentControl.resetQueue,
-      )
-    );
-  }
-}
-
-
-class _AlbumsTab extends StatefulWidget {
-  _AlbumsTab({Key key}) : super(key: key);
-
-  @override
-  _AlbumsTabState createState() => _AlbumsTabState();
-}
-
-class _AlbumsTabState extends State<_AlbumsTab> with AutomaticKeepAliveClientMixin<_AlbumsTab> {
-  @override
-  bool get wantKeepAlive => true;
-
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  final ItemScrollController itemScrollController = ItemScrollController();
-  bool _scrollbarDragged = false;
-
-  void _handleDragStart() {
-    _scrollbarDragged = true;
-  }
-
-  void _handleDragEnd() {
-    _scrollbarDragged = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    final albums = ContentControl.state.albums.values.toList();
-    final controller = ContentSelectionControllersProvider.of(context).album;
-    return RefreshIndicator(
-      color: Colors.white,
-      backgroundColor: ThemeControl.theme.colorScheme.primary,
-      strokeWidth: 2.5,
-      key: _refreshIndicatorKey,
-      onRefresh: () => ContentControl.refetch<Album>(),
-      notificationPredicate: (notification) {
-        // Prevent pull to refresh when scrollbar is dragged.
-        return !_scrollbarDragged &&
-            controller.notInSelection &&
-            notification.depth == 0;
-      },
-      child: AlbumListView(
-        albums: albums,
-        itemScrollController: itemScrollController,
-        selectionController: controller,
-        scrollbar: ScrollbarType.draggable,
-        onScrollbarDragStart: _handleDragStart,
-        onScrollbarDragEnd: _handleDragEnd,
-        leading: AlbumSortListHeader(
-          count: albums.length,
-          selectionController: controller,
-        ),
       )
     );
   }

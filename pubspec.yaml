@@ -14,6 +14,7 @@ dependencies:
   # color_thief_flutter: ^1.0.2
   async: ^2.5.0
   rxdart: ^0.26.0
+  sliver_tools: ^0.2.1
   animations: ^2.0.0
   fluttertoast: ^8.0.3
   permission_handler: ^6.1.1
@@ -36,19 +37,18 @@ dependencies:
   path: ^1.7.0
   flutter_sticky_header: ^0.5.0
   multiple_localization: ^0.2.1
-  scrollable_positioned_list: ^0.1.10
   devicelocale: ^0.4.1
   just_audio:
     ^0.7.3
-    # path: C:\dev\projects\native\just_audio\just_audio
+    # path: C:/dev/projects/native/just_audio/just_audio
     # git: 
-    #   url: C:\dev\projects\native\just_audio
+    #   url: C:/dev/projects/native/just_audio
     #   ref: master
     #   path: just_audio
   audio_service:
     # using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/notif
     # see https://github.com/ryanheise/audio_service/issues/633
-    path: C:\dev\projects\native\audio_service\audio_service
+    path: C:/dev/projects/native/audio_service/audio_service
     # git: 
     #   url: C:\dev\projects\native\audio_service
     #   ref: one-isolate

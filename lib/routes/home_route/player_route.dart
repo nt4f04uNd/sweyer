@@ -7,7 +7,6 @@ import 'dart:async';
 
 import 'package:flutter/physics.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
@@ -193,7 +192,7 @@ class _QueueTabState extends State<_QueueTab>
 
   /// This is set in parent via global key
   bool opened = false;
-  final ItemScrollController itemScrollController = ItemScrollController();
+  final ScrollController scrollController = ScrollController();
 
   /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
   StreamSubscription<Song> _songChangeSubscription;
@@ -256,12 +255,23 @@ class _QueueTabState extends State<_QueueTab>
   /// If optional [index] is provided - scrolls to it.
   Future<void> scrollToSong([ int index, double alignment = scrollAlignment ]) async {
     index ??= ContentControl.state.currentSongIndex;
-    return itemScrollController.scrollTo(
-      index: index,
+    final extent = index * kSongTileHeight;
+    final pixels = scrollController.position.pixels;
+    final min = scrollController.position.minScrollExtent;
+    final max = scrollController.position.maxScrollExtent;
+    final delta = (extent - pixels).abs();
+    if (delta >= screenHeight) {
+      final directionForward = extent > pixels;
+      if (directionForward) {
+        scrollController.jumpTo((extent - screenHeight * 2).clamp(min, max));
+      } else {
+        scrollController.jumpTo((extent + screenHeight * 2).clamp(min, max));
+      }
+    }
+    return scrollController.animateTo(
+      extent.clamp(min, max),
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeOutCubic,
-      opacityAnimationWeights: const [20, 20, 60],
-      alignment: alignment,
     );
   }
 
@@ -270,10 +280,9 @@ class _QueueTabState extends State<_QueueTab>
   /// If optional [index] is provided - jumps to it.
   void jumpToSong([ int index, double alignment = scrollAlignment ]) {
     index ??= ContentControl.state.currentSongIndex;
-    itemScrollController.jumpTo(
-      index: index,
-      alignment: alignment,
-    );
+    final min = scrollController.position.minScrollExtent;
+    final max = scrollController.position.maxScrollExtent;
+    scrollController.jumpTo((index * kSongTileHeight).clamp(min, max));
   }
 
   /// A more complex function with additional checks
@@ -410,16 +419,6 @@ class _QueueTabState extends State<_QueueTab>
   @override
   Widget build(BuildContext context) {
     final currentSongIndex = ContentControl.state.currentSongIndex;
-    var initialAlignment = scrollAlignment;
-    var initialScrollIndex = 0;
-    if (queueLength > songsPerScreen) {
-      if (currentSongIndex >= edgeScrollIndex) {
-        initialAlignment = endScrollAlignment;
-        initialScrollIndex = queueLength - 1;
-      } else {
-        initialScrollIndex = currentSongIndex;
-      }
-    }
     final l10n = getl10n(context);
     final horizontalPadding = isAlbum ? 12.0 : 20.0;
     final topScreenPadding = MediaQuery.of(context).padding.top;
@@ -534,17 +533,14 @@ class _QueueTabState extends State<_QueueTab>
             child: ValueListenableBuilder<SelectionController>(
               valueListenable: ContentControl.state.selectionNotifier,
               builder: (context, value, child) {
-                return SongListView(
+                return ContentListView<Song>(
+                  list: ContentControl.state.queues.current.songs,
+                  controller: scrollController,
                   selectionController: widget.selectionController,
-                  scrollbar: ScrollbarType.notDraggable,
                   padding: EdgeInsets.only(
                     top: 4.0,
                     bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
                   ),
-                  itemScrollController: itemScrollController,
-                  songs: ContentControl.state.queues.current.songs,
-                  initialScrollIndex: initialScrollIndex,
-                  initialAlignment: initialAlignment,
                   songTileVariant: ContentControl.state.queues.persistent is Album
                     ? SongTileVariant.number
                     : SongTileVariant.albumArt,

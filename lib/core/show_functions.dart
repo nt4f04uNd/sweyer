@@ -8,6 +8,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart'
     hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
@@ -25,7 +26,7 @@ class ShowFunctions extends NFShowFunctions {
     Color textColor,
     Color backgroundColor,
   }) async {
-    backgroundColor ??= const Color.fromRGBO(18, 18, 18, 1);
+    backgroundColor ??= Constants.AppColors.deepPurpleAccent;
 
     return Fluttertoast.showToast(
       msg: msg,

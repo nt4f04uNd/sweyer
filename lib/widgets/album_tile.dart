@@ -130,6 +130,7 @@ class _AlbumTileState extends SelectableState<AlbumTile> {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
                       widget.album.album,

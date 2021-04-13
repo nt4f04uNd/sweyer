@@ -65,30 +65,31 @@ enum _PoolQueueType {
   shuffled,
 }
 
-/// A [Map] container for the [Sort]s.
-/// 
-/// Initialazed with constant map that has to be replaced with actual data later.
-///
-/// Used to have a typed getter and setter, because [Map] uses [Object].
-class _Sorts {
-  /// Map that contains various [Sort]s of the application.
-  /// Sorts of specific [Queues] like [Album]s might be stored separately.
+/// A [Map] container for the [Content] as key, and `T` as value entry.
+class ContentMap<V> {
+  /// Creates a content map from initial value [map].
   ///
-  /// Values are restored in [ContentControl._restoreSorts].
-  Map<Type, Sort?> _map = {
-    Song: null,
-    Album: null,
-  };
+  /// If none specified, will initialize the map with `null`s.
+  ContentMap([Map<Type, V?>? map]) : 
+    _map = map ?? {
+      Song: null,
+      Album: null,
+    };
+
+  Map<Type, V?> _map;
+
+  /// Map values.
+  Iterable<V?> get values => _map.values;
 
   /// Returs a [Sort] per `T` [Content] from the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
-  Sort<T> getValue<T extends Content>([Type? key]) => _map[key ?? T]! as Sort<T>;
+  V getValue<T extends Content>([Type? key]) => _map[key ?? T]!;
 
   /// Puts a [Sort] typed with `T` into the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
-  void setValue<T extends Content>(Sort<T> value, {Type? key}) {
+  void setValue<T extends Content>(V value, {Type? key}) {
     _map[key ?? T] = value;
   }
 }
@@ -160,7 +161,7 @@ class _ContentState {
   /// Sorts of specific [Queues] like [Album]s are stored separately. // TODO: this is currently not implemented - remove this todo when it will be
   ///
   /// Values are restored in [ContentControl._restoreSorts].
-  final _Sorts sorts = _Sorts();
+  final ContentMap<Sort> sorts = ContentMap<Sort>();
 
   /// Get current playing song.
   Song get currentSong {
@@ -806,6 +807,15 @@ abstract class ContentControl {
   }
 
   //****************** Content manipulation methods *****************************************************
+  
+  /// Returns content of specified type.
+  static List<T> getContent<T extends Content>([Type? contentType]) {
+    return contentPick<T, List<T> Function()>(
+      contentType: contentType,
+      song: () => ContentControl.state.queues.all.songs as List<T>,
+      album: () => ContentControl.state.albums.values.toList() as List<T>,
+    )();
+  }
 
   /// Refetches all the content.
   static Future<void> refetchAll() async {
@@ -933,7 +943,7 @@ abstract class ContentControl {
   /// See [ContentState.sorts].
   static void sort<T extends Content>({ Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
-    sort ??= sorts.getValue<T>();
+    sort ??= sorts.getValue<T>() as Sort<T>;
     contentPick<T, VoidCallback>(
       song: () {
         final _sort = sort! as SongSort;

@@ -304,11 +304,13 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   SearchDelegate _searchDelegate;
 
   /// Whether the drawer can be opened.
-  bool get drawerCanBeOpened =>
-      playerRouteController.closed &&
-      ContentControl.state.selectionNotifier.value == null &&
+  bool get drawerCanBeOpened {
+    final selectionController = ContentControl.state.selectionNotifier.value;
+    return playerRouteController.closed &&
+      (selectionController?.notInSelection ?? true) &&
       routes.last != HomeRoutes.album &&
       (tabsRouteKey.currentState.tabController.animation.value == 0.0 || routes.length > 1);
+  }
 
   /// Callback that must be called before any pop.
   /// 
@@ -327,9 +329,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
       return true;
     } else if (selectionController != null) {
       selectionController.close();
-      return true;
-    } else if (navigatorKey.currentState != null && navigatorKey.currentState.canPop()) {
-      navigatorKey.currentState.pop();
       return true;
     }
     return false;

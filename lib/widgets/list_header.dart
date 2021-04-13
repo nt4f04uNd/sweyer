@@ -51,8 +51,8 @@ class ListHeader extends StatelessWidget {
   }
 }
 
-abstract class SortListHeader<T extends Content> extends StatelessWidget {
-  const SortListHeader({
+class ContentListSortHeader<T extends Content> extends StatelessWidget {
+  const ContentListSortHeader({
     Key key,
     @required this.count,
     @required this.selectionController,
@@ -243,20 +243,4 @@ class _OrderSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     return Icon(ascending ? Icons.north_rounded : Icons.south_rounded);
   }
-}
-
-class SongSortListHeader extends SortListHeader<Song> {
-  const SongSortListHeader({
-    Key key,
-    @required int count,
-    @required SelectionController selectionController,
-  }) : super(key: key, count: count, selectionController: selectionController);
-}
-
-class AlbumSortListHeader extends SortListHeader<Album> {
-  const AlbumSortListHeader({
-    Key key,
-    @required int count,
-    @required SelectionController selectionController,
-  }) : super(key: key, count: count, selectionController: selectionController);
 }

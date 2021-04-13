@@ -6,9 +6,9 @@
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
-
 
 /// Selection animation duration.
 const Duration kSelectionDuration = Duration(milliseconds: 350);
@@ -304,6 +304,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         curve: SelectionActionsBar.forwardCurve,
       );
     } else if (status == AnimationStatus.reverse) {
+      notifier.value = null;
       _animateNavBack();
     } else if (status == AnimationStatus.dismissed) {
       _removeOverlay();
@@ -319,27 +320,24 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         systemNavigationBarColor: _lastNavColor,
       ),
       duration: kSelectionDuration,
-      /// This is corrected [SelectionActionsBar.reverseCurve]
       curve: SelectionActionsBar.reverseCurve.flipped,
-      // curve: Interval(
-      //   0.5,
-      //   0.0,
-      //   curve: Curves.easeIn.flipped,
-      // ),
     );
     _lastNavColor = null;
   }
 
   void _removeOverlay() {
-    _animateNavBack();
-    if (notifier.value != null) {
+    if (_overlayEntry != null) {
+      _animateNavBack();
       _overlayEntry.remove();
-      notifier.value = null;
+      _overlayEntry = null;
     }
   }
 
   @override
   void dispose() { 
+    if (notifier.value != null) {
+      notifier.value = null;
+    }
     _removeOverlay();
     super.dispose();
   }
@@ -356,31 +354,6 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
 }
-
-
-/// Provides access to a [map] of [ContentSelectionController]s.
-class ContentSelectionControllersProvider extends InheritedWidget {
-  const ContentSelectionControllersProvider({
-    Key key,
-    @required Widget child,
-    @required this.map,
-  }) : super(key: key, child: child);
-
-  final Map<Type, ContentSelectionController<SelectionEntry>> map;
-
-  ContentSelectionController<SelectionEntry<Song>> get song => map[Song];
-  ContentSelectionController<SelectionEntry<Album>> get album => map[Album];
-
-  static ContentSelectionControllersProvider of(BuildContext context) {
-    return context.getElementForInheritedWidgetOfExactType<ContentSelectionControllersProvider>().widget;
-  }
-
-  @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
-    return false;
-  }
-}
-
 
 class SelectionCheckmark extends StatefulWidget {
   const SelectionCheckmark({
@@ -658,11 +631,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
         padding: const EdgeInsets.only(left: 5.0),
         child: Text(
           selectionCount.toString(),
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: ThemeControl.theme.textTheme.headline6.color,
-            fontSize: 22.0,
-          ),
+          style: appBarTitleTextStyle,
         ),
       ),
     );
@@ -870,6 +839,120 @@ class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
         iconSize: 30.0,
         onPressed: () => _handleTap(controller),
       ),
+    );
+  }
+}
+
+//*********** Appbar actions ***********
+
+/// Displays an action to delete songs.
+/// Only meant to be displayed in app bar.
+/// 
+/// Can receive either [controller] with [Song]s selection, or with gerenric [Content] type.
+/// With the lattter, will automatically check if selection contains only songs and hide the button, if not.
+class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
+  const DeleteSongsAppBarAction({
+    Key key,
+    @required this.controller
+  }) : super(key: key);
+
+  final ContentSelectionController<SelectionEntry<T>> controller;
+
+  @override
+  _DeleteSongsAppBarActionState<T> createState() => _DeleteSongsAppBarActionState();
+}
+
+class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandler {
+  Type type;
+  bool shown;
+
+  @override
+  void initState() { 
+    super.initState();
+    type = typeOf<T>();
+    assert(type == Song || type == Content, 'Only Song and Content types are supported');
+    widget.controller.addListener(handleSelection);
+    widget.controller.addStatusListener(handleSelectionStatus);
+  }
+
+  @override
+  void dispose() { 
+    widget.controller.removeListener(handleSelection);
+    widget.controller.removeStatusListener(handleSelectionStatus);
+    super.dispose();
+  }
+
+  void _handleDelete() {
+    final songs = widget.controller.data.cast<SelectionEntry<Song>>();
+    if (ContentControl.sdkInt >= 30) {
+      // On Android R the deletion is performed with OS dialog.
+      ContentControl.deleteSongs(songs.map((e) => e.data.sourceId).toSet());
+      widget.controller.close();
+    } else {
+      // On all versions below show in app dialog.
+      final l10n = getl10n(context);
+      final count = songs.length;
+      Song song;
+      if (count == 1) {
+        song = ContentControl.state.queues.all.byId.getSong(songs.first.data.sourceId);
+      }
+      ShowFunctions.instance.showDialog(
+        context,
+        title: Text(
+          '${l10n.delete} ${count > 1 ? count.toString() + ' ' : ''}${l10n.tracksPlural(count).toLowerCase()}',
+        ),
+        content: Text.rich(
+          TextSpan(
+            style: const TextStyle(fontSize: 15.0),
+            children: [
+              TextSpan(text: l10n.deletionPromptDescriptionP1),
+              TextSpan(
+                text: song != null
+                    ? '${song.title}?'
+                    : l10n.deletionPromptDescriptionP2,
+                style: song != null
+                    ? const TextStyle(fontWeight: FontWeight.w700)
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        buttonSplashColor: Constants.AppTheme.glowSplashColor.auto,
+        acceptButton: NFButton.accept(
+          text: l10n.delete,
+          splashColor: Constants.AppTheme.glowSplashColor.auto,
+          textStyle: const TextStyle(color: Constants.AppColors.red),
+          onPressed: () {
+            ContentControl.deleteSongs(songs.map((e) => e.data.sourceId).toSet());
+            widget.controller.close();
+          },
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.controller.status != AnimationStatus.reverse) {
+      /// The condition ensures animation will not play on close,
+      /// because [SelectionAppBar] has its own animation, and
+      /// combination of them both doesn't look good.
+      shown = type == Song ||
+            (type == Content &&
+            widget.controller.data.firstWhereOrNull((el) => el is SelectionEntry<Album>) == null);
+    }
+    return AnimatedSwitcher(
+      duration: kSelectionDuration,
+      transitionBuilder: (child, animation) => _SelectionAnimation(
+        animation: animation,
+        child: child,
+      ),
+      child: !shown
+        ? const SizedBox.shrink()
+        : NFIconButton(
+            icon: const Icon(Icons.delete_outline_rounded),
+            onPressed: _handleDelete,
+          ),
     );
   }
 }

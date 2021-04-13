@@ -46,7 +46,7 @@ packages:
   audio_service:
     dependency: "direct main"
     description:
-      path: "C:\\dev\\projects\\native\\audio_service\\audio_service"
+      path: "C:/dev/projects/native/audio_service/audio_service"
       relative: false
     source: path
     version: "0.16.2"
@@ -702,13 +702,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.26.0"
-  scrollable_positioned_list:
-    dependency: "direct main"
-    description:
-      name: scrollable_positioned_list
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.10"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -770,6 +763,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  sliver_tools:
+    dependency: "direct main"
+    description:
+      name: sliver_tools
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
   source_gen:
     dependency: transitive
     description:

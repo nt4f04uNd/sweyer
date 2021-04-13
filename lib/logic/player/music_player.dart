@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
-class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, WidgetsBindingObserver {
+class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
   _AudioHandler() {
     _init();
   }
@@ -24,7 +24,9 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
 
   Future<void> _init() async {
     WidgetsBinding.instance.addObserver(this);
-    player.playbackEventStream.listen((event) => _setState());
+    player.playbackEventStream
+      .debounceTime(const Duration(milliseconds: 200))
+      .listen((event) => _setState());
     player.loopingStream.listen((event) => _setState());
     ContentControl.state.onSongChange.listen((song) {
       mediaItem.add(song.toMediaItem());
@@ -37,7 +39,9 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
   }
 
   @override
-  Future<void> play() => player.play();
+  Future<void> play() {
+    return player.play();
+  }
 
   @override
   Future<void> playFromMediaId(String mediaId, [Map<String, dynamic> extras]) async {
@@ -146,11 +150,21 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, QueueHandler, Wid
   }
 
   @override
+  Future<void> skipToPrevious() {
+    return player.playPrev();
+  }
+
+  @override
+  Future<void> skipToNext() {
+    return player.playNext();
+  }
+
+  @override
   Future<void> skipToQueueItem(int index) async {
     final queue = ContentControl.state.queues.current;
     if (index < 0 || index > queue.length) {
       await player.setSong(queue.songs[index]);
-      await player.play();
+      await play();
     }
   }
 

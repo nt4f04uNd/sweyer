@@ -5,93 +5,52 @@
 
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Signature used for the [SongListView.currentTest] and others in this file.
+/// Renders a list of content.
 ///
-/// The is [index] is index of the song.
-typedef _CurrentTest = bool Function(int index);
-
-/// Creates a list of content.
-/// 
 /// Picks some value based on the provided `T` type of [Content].
-/// 
+///
 /// Instead of `T`, you can explicitly specify [contentType].
 class ContentListView<T extends Content> extends StatelessWidget {
   const ContentListView({
     Key key,
-    @required this.list,
-    this.itemScrollController,
-    this.selectionController,
-    this.onItemTap,
     this.contentType,
-  }) : super(key: key);
-
-
-  /// Content list.
-  final List<Content> list;
-
-  final SelectionController<SelectionEntry<T>> selectionController;
-
-  final ItemScrollController itemScrollController;
-
-  /// Callback to be called on item tap.
-  final VoidCallback onItemTap;
-
-  /// An explicit content type.
-  final Type contentType;
-
-  @override
-  Widget build(BuildContext context) {
-    return contentPick<T, Widget Function()>(
-      contentType: contentType,
-      song: () => SongListView(
-        songs: list,
-        selectionController: selectionController,
-        onItemTap: onItemTap,
-        itemScrollController: itemScrollController,
-      ),
-      album: () => AlbumListView(
-        albums: list,
-        selectionController: selectionController,
-        onItemTap: onItemTap,
-        itemScrollController: itemScrollController,
-      ),
-    )();
-  }
-}
-
-/// Renders a list view of [SongTile]s from provided [songs] array.
-class SongListView extends StatefulWidget {
-  const SongListView({
-    Key key,
-    @required this.songs,
-    this.itemScrollController,
+    @required this.list,
+    this.controller,
+    this.selectionController,
     this.leading,
     this.currentTest,
     this.songTileVariant = SongTileVariant.albumArt,
     this.songClickBehavior = SongClickBehavior.play,
     this.onItemTap,
-    this.onScrollbarDragStart,
-    this.onScrollbarDragEnd,
-    this.scrollbar = ScrollbarType.none,
-    this.selectionController,
-    this.padding,
+    this.interactiveScrollbar = true,
+    this.padding = EdgeInsets.zero,
     this.physics = const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-    this.initialScrollIndex = 0,
-    this.initialAlignment = 0,
+    this.showScrollbarLabel = false,
   }) : super(key: key);
 
-  final List<Song> songs;
+  /// An explicit content type.
+  final Type contentType;
+
+  /// Content list.
+  final List<Content> list;
   
-  final ItemScrollController itemScrollController;
+  /// Viewport scroll controller.
+  final ScrollController controller;
+
+  /// If specified, list will be built as [SongTile.selectable],
+  /// otherwise [SongTile] is used (in case if content is [Song]).
+  final SelectionController<SelectionEntry<T>> selectionController;
 
   /// A widget to build before all items.
   final Widget leading;
 
-  /// Passed to [SongTile.currentTest].
-  final _CurrentTest currentTest;
+  /// Passed to [SongTile.currentTest] (in case if content is [Song]).
+  ///
+  /// The is [index] is index of the song.
+  final bool Function(int index) currentTest;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -99,21 +58,11 @@ class SongListView extends StatefulWidget {
   /// Passed to [SongTile.clickBehavior].
   final SongClickBehavior songClickBehavior;
 
-  /// Called on item tap.
+  /// Callback to be called on item tap.
   final VoidCallback onItemTap;
 
-  /// Fires when user starts dragging [ScrollbarType.draggable].
-  final VoidCallback onScrollbarDragStart;
-
-  /// Fires when user starts dragging [ScrollbarType.draggable].
-  final VoidCallback onScrollbarDragEnd;
-
-  /// Indicates what scrollbar to use.
-  final ScrollbarType scrollbar;
-
-  /// If specified, list will be built as [new SongTile.selectable],
-  /// otherwise [new SongTile] is used. 
-  final SelectionController<SelectionEntry> selectionController;
+  /// Whether the scrollbar is interactive.
+  final bool interactiveScrollbar;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
@@ -126,280 +75,128 @@ class SongListView extends StatefulWidget {
   /// See [ScrollView.physics].
   final ScrollPhysics physics;
 
-  /// Index of an item to initially align within the viewport.
-  final int initialScrollIndex;
-
-  /// Determines where the leading edge of the item at [initialScrollIndex]
-  /// should be placed.
-  final double initialAlignment;
-
-  @override
-  _SongListViewState createState() => _SongListViewState();
-}
-
-class _SongListViewState extends State<SongListView> {
-  bool get selectable => widget.selectionController != null;
-
-  ItemScrollController itemScrollController;
-
-  @override
-  void initState() { 
-    super.initState();
-    itemScrollController = widget.itemScrollController;
-    if (itemScrollController == null && widget.scrollbar == ScrollbarType.draggable) {
-      itemScrollController = ItemScrollController();
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant SongListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.itemScrollController != widget.itemScrollController || oldWidget.scrollbar != widget.scrollbar) {
-      if (widget.itemScrollController == null && widget.scrollbar == ScrollbarType.draggable) {
-        itemScrollController ??= ItemScrollController();
-      } else {
-        itemScrollController = null;
-      }
-    }
-  }
-
-  void _handleDragStart(double progress, double barPadHeight) {
-    widget.onScrollbarDragStart?.call();
-  }
-
-  void _handleDragEnd(double progress, double barPadHeight) {
-    widget.onScrollbarDragEnd?.call();
-  }
+  /// Whether to draw a label when scrollbar is dragged.
+  final bool showScrollbarLabel;
 
   @override
   Widget build(BuildContext context) {
-    final items = widget.songs;
-    final child = SingleTouchRecognizerWidget(
-      child: ScrollablePositionedList.builder(
-        itemScrollController: widget.itemScrollController ?? itemScrollController,
-        itemCount: widget.leading != null ? items.length + 1 : items.length,
-        physics: widget.physics,
-        padding: widget.padding,
-        initialScrollIndex: widget.initialScrollIndex,
-        initialAlignment: widget.initialAlignment,
-        itemBuilder: (context, index) {
-          if (widget.leading != null) {
-            if (index == 0) {
-              return widget.leading;
-            }
-            index--;
-          }
-          final item = items[index];
-          final currentTest = widget.currentTest != null ? () => widget.currentTest(index): null;
-          if (selectable) {
-            return SongTile.selectable(
-              index: index,
-              song: item,
-              selectionController: widget.selectionController,
-              clickBehavior: widget.songClickBehavior,
-              variant: widget.songTileVariant,
-              currentTest: currentTest,
-              selected: widget.selectionController.data.contains(SelectionEntry<Song>(index: index)),
-              onTap: widget.onItemTap,
-            );
-          }
-          return SongTile(
-            song: item,
-            currentTest: currentTest,
-            clickBehavior: widget.songClickBehavior,
-            variant: widget.songTileVariant,
-            onTap: widget.onItemTap,
-          );
-        },
+    final selectable = selectionController != null;
+    final localController = controller ?? ScrollController();
+    return Theme(
+      data: ThemeControl.theme.copyWith(
+        highlightColor: ThemeControl.isDark
+          ? const Color(0x40CCCCCC)
+          : const Color(0x66BCBCBC),
+      ),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: ContentScrollbar<T>(
+          labelBuilder: !showScrollbarLabel
+            ? null
+            : (context) {
+              final item = list[
+                (localController.position.pixels / kSongTileHeight - 1)
+                .clamp(0.0, list.length - 1).round()
+              ];
+              return NFScrollLabel(
+                text: contentPick<T, String Function()>(
+                  song: () => (item as Song).title[0].toUpperCase(),
+                  album: () => (item as Album).album[0].toUpperCase(),
+                )(),
+              );
+            },
+          interactive: interactiveScrollbar,
+          controller: localController,
+          child: Theme(
+            data: ThemeControl.theme.copyWith(
+              highlightColor: Colors.transparent,
+            ),
+            child: CustomScrollView(
+              controller: localController,
+              physics: physics,
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: padding,
+                  sliver: MultiSliver(
+                    children: [
+                      if (leading != null)
+                        leading,
+                      contentPick<T, Widget Function()>(
+                        contentType: contentType,
+                        song: () => SliverFixedExtentList(
+                          itemExtent: kSongTileHeight,
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final item = list[index];
+                              final localCurrentTest = currentTest != null
+                                ? () => currentTest(index)
+                                : null;
+                              if (selectable) {
+                                return SongTile.selectable(
+                                  index: index,
+                                  song: item,
+                                  selectionController: selectionController,
+                                  clickBehavior: songClickBehavior,
+                                  variant: songTileVariant,
+                                  currentTest: localCurrentTest,
+                                  selected: selectionController.data.contains(SelectionEntry<Song>(
+                                    data: item,
+                                    index: index,
+                                  )),
+                                  onTap: onItemTap,
+                                );
+                              }
+                              return SongTile(
+                                song: item,
+                                currentTest: localCurrentTest,
+                                clickBehavior: songClickBehavior,
+                                variant: songTileVariant,
+                                onTap: onItemTap,
+                              );
+                            },
+                            childCount: list.length,
+                          ),
+                        ),
+                        album: () => SliverFixedExtentList(
+                          itemExtent: kAlbumTileHeight,
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final item = list[index];
+                              final localCurrentTest = currentTest != null
+                                ? () => currentTest(index)
+                                : null;
+                              if (selectable) {
+                                return AlbumTile.selectable(
+                                  index: index,
+                                  album: item,
+                                  currentTest: localCurrentTest,
+                                  onTap: onItemTap,
+                                  selected: selectionController.data.contains(SelectionEntry<Album>(
+                                    data: item,
+                                    index: index,
+                                  )),
+                                  selectionController: selectionController,
+                                );
+                              }
+                              return AlbumTile(
+                                album: item,
+                                onTap: onItemTap,
+                                currentTest: localCurrentTest,
+                              );
+                            },
+                            childCount: list.length,
+                          ),
+                        ),
+                      )(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
-    switch (widget.scrollbar) {
-      case ScrollbarType.none:
-        return child;
-      case ScrollbarType.notDraggable:
-        return NFScrollbar(child: child);
-      case ScrollbarType.draggable:
-        return JumpingDraggableScrollbar.songs(
-          onDragStart: _handleDragStart,
-          onDragEnd: _handleDragEnd,
-          itemCount: items.length,
-          itemScrollController: itemScrollController,
-          labelBuilder: (context, progress, barPadHeight, jumpIndex) {
-            return NFScrollLabel(
-              text: items[(jumpIndex - 1).clamp(0.0, items.length - 1).round()]
-                  .title[0]
-                  .toUpperCase(),
-            );
-          },
-          child: child,
-        );
-      default:
-        return null;
-    }
-  }
-}
-
-/// Renders a list view of [AlbumTiles]s from provided [albums] array.
-class AlbumListView extends StatefulWidget {
-  const AlbumListView({
-    Key key,
-    @required this.albums,
-    this.itemScrollController,
-    this.leading,
-    this.currentTest,
-    this.onItemTap,
-    this.onScrollbarDragStart,
-    this.onScrollbarDragEnd,
-    this.scrollbar = ScrollbarType.none,
-    this.selectionController,
-    this.padding,
-    this.physics = const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-    this.initialScrollIndex = 0,
-    this.initialAlignment = 0,
-  }) : super(key: key);
-
-  final List<Album> albums;
-  
-  final ItemScrollController itemScrollController;
-
-  /// A widget to build before all items.
-  final Widget leading;
-
-  /// Passed to [AlbumTile.currentTest].
-  final _CurrentTest currentTest;
-
-  /// Called on item tap.
-  final VoidCallback onItemTap;
-
-  /// Fires when user starts dragging [ScrollbarType.draggable].
-  final VoidCallback onScrollbarDragStart;
-
-  /// Fires when user starts dragging [ScrollbarType.draggable].
-  final VoidCallback onScrollbarDragEnd;
-
-  /// Indicates what scrollbar to use.
-  final ScrollbarType scrollbar;
-
-  /// If specified, list will be built as [new AlbumTile.selectable],
-  /// otherwise [new AlbumTile] is used. 
-  final SelectionController<SelectionEntry> selectionController;
-
-  /// The amount of space by which to inset the children.
-  final EdgeInsetsGeometry padding;
-
-  /// How the scroll view should respond to user input.
-  ///
-  /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view.
-  ///
-  /// See [ScrollView.physics].
-  final ScrollPhysics physics;
-
-  /// Index of an item to initially align within the viewport.
-  final int initialScrollIndex;
-
-  /// Determines where the leading edge of the item at [initialScrollIndex]
-  /// should be placed.
-  final double initialAlignment;
-
-  @override
-  _AlbumListViewState createState() => _AlbumListViewState();
-}
-
-class _AlbumListViewState extends State<AlbumListView> {
-  bool get selectable => widget.selectionController != null;
-
-  ItemScrollController itemScrollController;
-
-  @override
-  void initState() { 
-    super.initState();
-    itemScrollController = widget.itemScrollController;
-    if (itemScrollController == null && widget.scrollbar == ScrollbarType.draggable) {
-      itemScrollController = ItemScrollController();
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant AlbumListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.itemScrollController != widget.itemScrollController || oldWidget.scrollbar != widget.scrollbar) {
-      if (widget.itemScrollController == null && widget.scrollbar == ScrollbarType.draggable) {
-        itemScrollController ??= ItemScrollController();
-      } else {
-        itemScrollController = null;
-      }
-    }
-  }
-
-  void _handleDragStart(double progress, double barPadHeight) {
-    widget.onScrollbarDragStart?.call();
-  }
-
-  void _handleDragEnd(double progress, double barPadHeight) {
-    widget.onScrollbarDragEnd?.call();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final items = widget.albums;
-    final child = SingleTouchRecognizerWidget(
-      child: ScrollablePositionedList.builder(
-        itemScrollController: widget.itemScrollController ?? itemScrollController,
-        itemCount: widget.leading != null ? items.length + 1 : items.length,
-        physics: widget.physics,
-        padding: widget.padding,
-        initialScrollIndex: widget.initialScrollIndex,
-        initialAlignment: widget.initialAlignment,
-        itemBuilder: (context, index) {
-          if (widget.leading != null) {
-            if (index == 0) {
-              return widget.leading;
-            }
-            index--;
-          }
-          final item = items[index];
-          final currentTest = widget.currentTest != null ? () => widget.currentTest(index): null;
-          if (selectable) {
-            return AlbumTile.selectable(
-              index: index,
-              album: item,
-              currentTest: currentTest,
-              onTap: widget.onItemTap,
-              selected: widget.selectionController.data.contains(SelectionEntry<Album>(index: index)),
-              selectionController: widget.selectionController,
-            );
-          }
-          return AlbumTile(
-            album: item,
-            onTap: widget.onItemTap,
-            currentTest: currentTest,
-          );
-        },
-      ),
-    );
-    switch (widget.scrollbar) {
-      case ScrollbarType.none:
-        return child;
-      case ScrollbarType.notDraggable:
-        return NFScrollbar(child: child);
-      case ScrollbarType.draggable:
-        return JumpingDraggableScrollbar.albums(
-          onDragStart: _handleDragStart,
-          onDragEnd: _handleDragEnd,
-          itemCount: items.length,
-          itemScrollController: itemScrollController,
-           labelBuilder: (context, progress, barPadHeight, jumpIndex) {
-            return NFScrollLabel(
-              text: items[(jumpIndex - 1).clamp(0.0, items.length - 1).round()]
-                  .album[0]
-                  .toUpperCase(),
-            );
-          },
-          child: child,
-        );
-      default:
-        return null;
-    }
   }
 }

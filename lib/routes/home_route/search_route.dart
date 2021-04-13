@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide SearchDelegate;
 import 'package:flutter/services.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
@@ -74,7 +73,7 @@ class _SearchStateDelegate {
     @required TickerProvider vsync,
     @required this.searchDelegate,
   }) : scrollController = ScrollController(),
-    itemScrollController = ItemScrollController(),
+    singleListScrollController = ScrollController(),
     selectionController = ContentSelectionController<SelectionEntry>(
       animationController: AnimationController(
         vsync: vsync,
@@ -84,7 +83,7 @@ class _SearchStateDelegate {
         final controller = ContentSelectionController.of(context);
         return SelectionActionsBar(
           controller: controller,
-          left: const [ActionsSelectionTitle()],
+          left: const [ActionsSelectionTitle(closeButton: true)],
           right: const [
             GoToAlbumSelectionAction(),
             PlayNextSelectionAction(),
@@ -94,13 +93,18 @@ class _SearchStateDelegate {
       }
     ) {
     scrollController.addListener(() {
-      bodyScrolledNotifier.value = scrollController.offset != scrollController.position.minScrollExtent;
+      bodyScrolledNotifier.value =
+        scrollController.offset != scrollController.position.minScrollExtent;
+    });
+    singleListScrollController.addListener(() {
+      bodyScrolledNotifier.value =
+        singleListScrollController.offset != singleListScrollController.position.minScrollExtent;
     });
     selectionController.addListener(setState);
   }
 
   final ScrollController scrollController;
-  final ItemScrollController itemScrollController;
+  final ScrollController singleListScrollController;
   final ContentSelectionController selectionController;
   final SearchDelegate searchDelegate;
   /// Used to check whether the body is scrolled.
@@ -112,6 +116,9 @@ class _SearchStateDelegate {
 
   void dispose() {
     scrollController.dispose();
+    singleListScrollController.dispose();
+    bodyScrolledNotifier.dispose();
+    contentTypeNotifier.dispose();
     selectionController.dispose();
   }
 
@@ -161,8 +168,8 @@ class _SearchStateDelegate {
     if (scrollController?.hasClients ?? false) {
       scrollController.jumpTo(0);
     }
-    if (itemScrollController?.isAttached ?? false) {
-      itemScrollController.jumpTo(index: 0);
+    if (singleListScrollController?.hasClients ?? false) {
+      singleListScrollController.jumpTo(0);
     }
     results.search(trimmedQuery);
   }
@@ -369,6 +376,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   Widget buildLeading() {
     return NFBackButton(
       onPressed: () {
+        final selectionController = stateDelegate.selectionController;
+        if (selectionController.inSelection) {
+          selectionController.close();
+        }
         close(context, null);
       },
     );
@@ -470,8 +481,15 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
               child: SelectionAppBar(
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
-                titleSelection: const Text('wow'),
-                actionsSelection: const [],
+                titleSelection: Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: SelectionCounter(controller: stateDelegate.selectionController),
+                ),
+                actionsSelection: [
+                  DeleteSongsAppBarAction<Content>(
+                    controller: stateDelegate.selectionController,
+                  )
+                ],
                 elevationSelection: 0.0,
                 elevation: theme.appBarTheme.elevation,
                 backgroundColor: theme.primaryColor,
@@ -537,10 +555,6 @@ class _DelegateBuilder extends StatelessWidget {
   _DelegateBuilder({Key key}) : super(key: key);
 
   Future<bool> _handlePop(_SearchStateDelegate delegate) async {
-    if (delegate.selectionController.status == AnimationStatus.completed) {
-      delegate.selectionController.close();
-      return true;
-    }
     if (delegate.contentType != null) {
       delegate.contentType = null;
       return true;
@@ -591,8 +605,7 @@ class _DelegateBuilder extends StatelessWidget {
           final single = contentTypeEntries.length == 1;
           final showSingleCategoryContentList = single || contentType != null;
           final contentListContentType = single ? contentTypeEntries.single.key : contentType;
-          final controller = delegate.itemScrollController;
-          return BackButtonListener(
+          return NFBackButtonListener(
             onBackButtonPressed: () => _handlePop(delegate),
             child: PageTransitionSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -610,10 +623,9 @@ class _DelegateBuilder extends StatelessWidget {
                     ? NotificationListener<ScrollNotification>(
                         onNotification: (notification) => _handleNotification(delegate, notification),
                         child: ContentListView(
-                          // ItemScrollController can only be attached to one ScrollablePositionedList, see https://github.com/google/flutter.widgets/issues/219
-                          itemScrollController: controller.isAttached ? null : controller,
-                          selectionController: delegate.selectionController,
                           contentType: contentListContentType,
+                          controller: delegate.singleListScrollController,
+                          selectionController: delegate.selectionController,
                           onItemTap: delegate.getContentTileTapHandler(contentListContentType),
                           list: single ? contentTypeEntries.single.value : contentPick<Content, List<Content>>(
                             contentType: contentType,
@@ -623,17 +635,17 @@ class _DelegateBuilder extends StatelessWidget {
                         ),
                       )
                     : ListView(
-                      controller: delegate.scrollController,
-                      children: [
-                        for (final entry in contentTypeEntries)
-                          if (entry.value.isNotEmpty)
-                            _ContentSection(
-                              contentType: entry.key,
-                              items: results.map[entry.key],
-                              onTap: () => delegate.contentType = entry.key,
-                            ),
-                      ],
-                    ),
+                        controller: delegate.scrollController,
+                        children: [
+                          for (final entry in contentTypeEntries)
+                            if (entry.value.isNotEmpty)
+                              _ContentSection(
+                                contentType: entry.key,
+                                items: results.map[entry.key],
+                                onTap: () => delegate.contentType = entry.key,
+                              ),
+                        ],
+                      ),
                 ),
               ),
             );
@@ -684,8 +696,8 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     if (active) {
       widget.delegate.contentType = null;
     } else {
-      if (widget.delegate.itemScrollController.isAttached) {
-        widget.delegate.itemScrollController.jumpTo(index: 0);
+      if (widget.delegate.singleListScrollController.hasClients) {
+        widget.delegate.singleListScrollController.jumpTo(0);
       }
       widget.delegate.contentType = widget.contentType;
     }
@@ -781,23 +793,39 @@ class _ContentSection<T extends Content> extends StatelessWidget {
     final delegate = _SearchStateDelegate._of(context);
     final builder = contentPick<T, Widget Function(int)>(
       contentType: contentType,
-      song: (index) => SongTile.selectable(
-        index: index,
-        selected: delegate.selectionController.data.contains(SelectionEntry<Song>(index: index)),
-        song: items[index] as Song,
-        selectionController: delegate.selectionController,
-        horizontalPadding: 12.0,
-        onTap: delegate.getContentTileTapHandler<Song>(),
-      ),
-      album: (index) => AlbumTile.selectable(
-        index: 5 + index,
-        selected: delegate.selectionController.data.contains(SelectionEntry<Album>(index: 5 + index)),
-        album: items[index] as Album,
-        selectionController: delegate.selectionController,
-        small: false,
-        horizontalPadding: 12.0,
-        onTap: delegate.getContentTileTapHandler<Album>(),
-      ),
+      song: (index) {
+        final song = items[index] as Song;
+        return SongTile.selectable(
+          index: index,
+          selected: delegate.selectionController.data.contains(
+            SelectionEntry<Song>(
+              data: song,
+              index: 0,
+            ),
+          ),
+          song: song,
+          selectionController: delegate.selectionController,
+          horizontalPadding: 12.0,
+          onTap: delegate.getContentTileTapHandler<Song>(),
+        );
+      },
+      album: (index) {
+        final album = items[index] as Album;
+        return AlbumTile.selectable(
+          index: index,
+          selected: delegate.selectionController.data.contains(
+            SelectionEntry<Album>(
+              data: album,
+              index: 0,
+            ),
+          ),
+          album: items[index] as Album,
+          selectionController: delegate.selectionController,
+          small: false,
+          horizontalPadding: 12.0,
+          onTap: delegate.getContentTileTapHandler<Album>(),
+        );
+      },
     );
     return Column(
       children: [
