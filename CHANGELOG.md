@@ -2,7 +2,7 @@
 
 - selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable
 - added play all/shuffle buttons to main screen and albums
-- enhanced the searched route by adding filtering by content category
+- enhanced the searche route by adding filtering by content category
 - optimized scrollbar and listviews
 - became media browser service
 - refactored a lot of code and fixed a lot of bugs
