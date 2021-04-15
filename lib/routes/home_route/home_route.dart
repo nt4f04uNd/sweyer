@@ -57,7 +57,7 @@ class _InitialRouteState extends State<InitialRoute> {
                   _animateNotMainUi();
                   return const _SearchingSongsScreen();
                 }
-                if (ContentControl.state == null || ContentControl.state.queues.all.isEmpty) {
+                if (ContentControl.state == null || ContentControl.state.allSongs.isEmpty) {
                   _animateNotMainUi();
                   return const _SongsEmptyScreen();
                 }

@@ -1,12 +1,13 @@
 ## [1.0.2] - TODO: tbd
 
-- selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable
-- added play all/shuffle buttons to main screen and albums
-- enhanced the searche route by adding filtering by content category
-- optimized scrollbar and listviews
-- became media browser service
-- refactored a lot of code and fixed a lot of bugs
-- (non-ux) changed player backend
+- Selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable
+- Added play all/shuffle buttons to main screen and albums
+- Enhanced the searche route by adding filtering by content category
+- Now all queues are saved/restored. Prior in a lot of cases the queue was intentionally not restored
+- Optimized scrollbar and listviews
+- Became media browser service, support for Android Auto
+- Refactored a lot of code and fixed a lot of bugs
+- Changed player backend (non-ux)
 
 ## [1.0.1] - february 08, 2021
 

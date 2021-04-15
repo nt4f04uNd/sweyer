@@ -116,16 +116,19 @@ class TabsRouteState extends State<TabsRoute>
   
   DateTime _lastBackPressTime;
   Future<bool> _handlePop() async {
-    final navigatorKey = HomeRouter.instance.navigatorKey;
+    final navigatorKey = AppRouter.instance.navigatorKey;
+    final homeNavigatorKey = HomeRouter.instance.navigatorKey;
     if (navigatorKey.currentState != null && navigatorKey.currentState.canPop()) {
       navigatorKey.currentState.pop();
+      return true;
+    } else if (homeNavigatorKey.currentState != null && homeNavigatorKey.currentState.canPop()) {
+      homeNavigatorKey.currentState.pop();
       return true;
     } else {
       final now = DateTime.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null ||
-          now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
+      if (_lastBackPressTime == null || now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;
@@ -290,6 +293,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
     super.build(context);
     final list = ContentControl.getContent<T>();
     final selectionController = widget.selectionController;
+    final l10n = getl10n(context);
     return RefreshIndicator(
       key: key,
       strokeWidth: 2.5,
@@ -304,6 +308,11 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         list: list,
         showScrollbarLabel: showLabel,
         selectionController: selectionController,
+        onItemTap: contentPick<T , VoidCallback>(
+          song: ContentControl.resetQueue,
+          // TODO: when i fully migrate to safety, make this null instead of empty closure
+          album: () {},
+        ),
         leading: ContentListHeader<T>(
           count: list.length,
           selectionController: selectionController,
@@ -311,6 +320,39 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
             padding: const EdgeInsets.only(bottom: 1.0, right: 10.0),
             child: Row(
               children: [
+                ContentListHeaderAction(
+                  icon: const Icon(Icons.shuffle_rounded),
+                  onPressed: () {
+                     contentPick<T, VoidCallback>(
+                      song: () {
+                        ContentControl.setQueue(
+                          type: QueueType.all,
+                          modified: false,
+                          shuffled: true,
+                          shuffleFrom: ContentControl.state.allSongs.songs,
+                        );
+                      },
+                      album: () {
+                        final List<Song> songs = [];
+                        for (final album in ContentControl.state.albums.values.toList()) {
+                          for (final song in album.songs) {
+                            song.origin = album;
+                            songs.add(song);
+                          }
+                        }
+                        ContentControl.setQueue(
+                          type: QueueType.arbitrary,
+                          shuffled: true,
+                          shuffleFrom: songs,
+                          arbitraryQueueOrigin: ArbitraryQueueOrigin.allAlbums,
+                        );
+                      },
+                    )();
+                    MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                    MusicPlayer.instance.play();
+                    playerRouteController.open();
+                  },
+                ),
                 ContentListHeaderAction(
                   icon: const Icon(Icons.play_arrow_rounded),
                   onPressed: () {
@@ -329,37 +371,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                         ContentControl.setQueue(
                           type: QueueType.arbitrary,
                           songs: songs,
-                        );
-                      },
-                    )();
-                    MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
-                    MusicPlayer.instance.play();
-                    playerRouteController.open();
-                  },
-                ),
-                ContentListHeaderAction(
-                  icon: const Icon(Icons.shuffle_rounded),
-                  onPressed: () {
-                     contentPick<T, VoidCallback>(
-                      song: () {
-                        ContentControl.setQueue(
-                          type: QueueType.all,
-                          modified: false,
-                          shuffled: true,
-                        );
-                      },
-                      album: () {
-                        final List<Song> songs = [];
-                        for (final album in ContentControl.state.albums.values.toList()) {
-                          for (final song in album.songs) {
-                            song.origin = album;
-                            songs.add(song);
-                          }
-                        }
-                        ContentControl.setQueue(
-                          type: QueueType.arbitrary,
-                          songs: songs..shuffle(),
-                          shuffled: true,
+                          arbitraryQueueOrigin: ArbitraryQueueOrigin.allAlbums,
                         );
                       },
                     )();
@@ -372,7 +384,6 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
             ),
           ),
         ),
-        onItemTap: ContentControl.resetQueue,
       )
     );
   }

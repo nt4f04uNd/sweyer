@@ -6,10 +6,8 @@
 import 'dart:async';
 
 import 'package:intl/intl.dart';
-import 'package:intl/intl_standalone.dart';
 import 'package:flutter/material.dart';
 import 'package:multiple_localization/multiple_localization.dart';
-import 'package:devicelocale/devicelocale.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
@@ -24,25 +22,27 @@ AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context);
 AppLocalizations get staticl10n => AppLocalizations.instance;
 
 class AppLocalizations {
-  AppLocalizations._();
-  static final instance = AppLocalizations._();
+  AppLocalizations._(this.localeName);
+  static AppLocalizations _instance;
+  static AppLocalizations get instance => _instance;
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
-  /// Can be used to load the delegate before/without flutter app mounting
+  final String localeName;
+
+    /// Can be used to load the delegate before/without flutter app mounting
   /// by using the current system locale.
   static Future<void> init() async {
-    final preferredLocales = await Devicelocale.preferredLanguagesAsLocales;
-    await load(preferredLocales[0]);
+    await load(WidgetsBinding.instance.window.locale);
   }
 
   static Future<AppLocalizations> load(Locale locale) async {
-    final systemLocale = await findSystemLocale();
-    Intl.systemLocale = systemLocale;
     return MultipleLocalizations.load(
       initializeMessages,
       locale,
-      (locale) => AppLocalizations.instance,
-      setDefaultLocale: Intl.systemLocale != Intl.defaultLocale,
+      (locale) {
+        _instance = AppLocalizations._(locale);
+        return AppLocalizations.instance;
+      },
     );
   }
 
@@ -55,6 +55,7 @@ class AppLocalizations {
     return Intl.message(
       'Play',
       name: 'play',
+      locale: localeName,
     );
   }
 
@@ -62,6 +63,7 @@ class AppLocalizations {
     return Intl.message(
       'Pause',
       name: 'pause',
+      locale: localeName,
     );
   }
 
@@ -69,6 +71,7 @@ class AppLocalizations {
     return Intl.message(
       'Stop',
       name: 'stop',
+      locale: localeName,
     );
   }
 
@@ -76,6 +79,7 @@ class AppLocalizations {
     return Intl.message(
       'Next',
       name: 'next',
+      locale: localeName,
     );
   }
 
@@ -83,6 +87,7 @@ class AppLocalizations {
     return Intl.message(
       'Previous',
       name: 'previous',
+      locale: localeName,
     );
   }
 
@@ -90,6 +95,7 @@ class AppLocalizations {
     return Intl.message(
       'Loop off',
       name: 'loopOff',
+      locale: localeName,
     );
   }
 
@@ -97,6 +103,7 @@ class AppLocalizations {
     return Intl.message(
       'Loop on',
       name: 'loopOn',
+      locale: localeName,
     );
   }
   //*------------------------------------
@@ -106,6 +113,7 @@ class AppLocalizations {
     return Intl.message(
       'Unknown artist',
       name: 'artistUnknown',
+      locale: localeName,
     );
   }
 
@@ -121,6 +129,7 @@ class AppLocalizations {
     return Intl.message(
       'Tracks',
       name: 'tracks',
+      locale: localeName,
     );
   }
 
@@ -128,6 +137,7 @@ class AppLocalizations {
     return Intl.message(
       'Albums',
       name: 'albums',
+      locale: localeName,
     );
   }
 
@@ -142,6 +152,7 @@ class AppLocalizations {
       other: 'Tracks',
       args: [count],
       name: 'tracksPlural',
+      locale: localeName,
     );
   }
 
@@ -156,6 +167,7 @@ class AppLocalizations {
       other: 'Albums',
       args: [count],
       name: 'albumsPlural',
+      locale: localeName,
     );
   }
 
@@ -163,6 +175,7 @@ class AppLocalizations {
     return Intl.message(
       "All tracks",
       name: 'allTracks',
+      locale: localeName,
     );
   }
 
@@ -170,6 +183,7 @@ class AppLocalizations {
     return Intl.message(
       "Playlist",
       name: 'playlist',
+      locale: localeName,
     );
   }
 
@@ -177,7 +191,27 @@ class AppLocalizations {
     return Intl.message(
       'Arbitrary queue',
       name: 'arbitraryQueue',
+      locale: localeName,
     );
+  }
+
+  String get allAlbums {
+    return Intl.message(
+      'All albums',
+      name: 'allAlbums',
+      locale: localeName,
+    );
+  }
+
+  /// Converts [ArbitraryQueueOrigin] to human readable text.
+  /// Returns `null` from `null` argument.
+  String arbitraryQueueOrigin(ArbitraryQueueOrigin origin) {
+    if (origin == null)
+      return null;
+    switch (origin) {
+      case ArbitraryQueueOrigin.allAlbums: return allAlbums;
+      default: throw UnimplementedError();
+    }
   }
 
   // NOTE: currently unused
@@ -185,6 +219,7 @@ class AppLocalizations {
     return Intl.message(
       "Shuffled",
       name: 'shuffled',
+      locale: localeName,
     );
   }
 
@@ -193,6 +228,7 @@ class AppLocalizations {
     return Intl.message(
       "Modified",
       name: 'modified',
+      locale: localeName,
     );
   }
 
@@ -200,6 +236,25 @@ class AppLocalizations {
     return Intl.message(
       "By query",
       name: 'byQuery',
+      locale: localeName,
+    );
+  }
+
+  /// Displayed in list headers in button to play it.
+  String get playContentList {
+    return Intl.message(
+      "Play",
+      name: 'playContentList',
+      locale: localeName,
+    );
+  }
+
+  /// Displayed in list headers in button to shuffle it.
+  String get shuffleContentList {
+    return Intl.message(
+      "Shuffle",
+      name: 'shuffleContentList',
+      locale: localeName,
     );
   }
 
@@ -207,6 +262,7 @@ class AppLocalizations {
     return Intl.message(
       'Debug',
       name: 'debug',
+      locale: localeName,
     );
   }
 
@@ -214,6 +270,7 @@ class AppLocalizations {
     return Intl.message(
       'Are you sure?',
       name: 'areYouSure',
+      locale: localeName,
     );
   }
 
@@ -221,6 +278,7 @@ class AppLocalizations {
     return Intl.message(
       'Reset',
       name: 'reset',
+      locale: localeName,
     );
   }
 
@@ -228,6 +286,7 @@ class AppLocalizations {
     return Intl.message(
       'Save',
       name: 'save',
+      locale: localeName,
     );
   }
 
@@ -236,6 +295,7 @@ class AppLocalizations {
     return Intl.message(
       's',
       name: 'secondsShorthand',
+      locale: localeName,
     );
   }
 
@@ -244,6 +304,7 @@ class AppLocalizations {
     return Intl.message(
       'min',
       name: 'minutesShorthand',
+      locale: localeName,
     );
   }
 
@@ -251,6 +312,7 @@ class AppLocalizations {
     return Intl.message(
       'Remove',
       name: 'remove',
+      locale: localeName,
     );
   }
 
@@ -258,6 +320,7 @@ class AppLocalizations {
     return Intl.message(
       'Delete',
       name: 'delete',
+      locale: localeName,
     );
   }
 
@@ -265,6 +328,7 @@ class AppLocalizations {
     return Intl.message(
       'Deletion',
       name: 'deletion',
+      locale: localeName,
     );
   }
 
@@ -272,6 +336,7 @@ class AppLocalizations {
     return Intl.message(
       'Deletion error',
       name: 'deletionError',
+      locale: localeName,
     );
   }
 
@@ -279,6 +344,7 @@ class AppLocalizations {
     return Intl.message(
       'Edit',
       name: 'edit',
+      locale: localeName,
     );
   }
 
@@ -286,6 +352,7 @@ class AppLocalizations {
     return Intl.message(
       'Refresh',
       name: 'refresh',
+      locale: localeName,
     );
   }
 
@@ -293,6 +360,7 @@ class AppLocalizations {
     return Intl.message(
       'Grant',
       name: 'grant',
+      locale: localeName,
     );
   }
 
@@ -300,6 +368,7 @@ class AppLocalizations {
     return Intl.message(
       'Oops! An error occurred',
       name: 'errorMessage',
+      locale: localeName,
     );
   }
 
@@ -307,6 +376,7 @@ class AppLocalizations {
     return Intl.message(
       'Error details',
       name: 'errorDetails',
+      locale: localeName,
     );
   }
 
@@ -314,6 +384,7 @@ class AppLocalizations {
     return Intl.message(
       'An error occurred during the playback, removing the track',
       name: 'playbackErrorMessage',
+      locale: localeName,
     );
   }
 
@@ -321,6 +392,7 @@ class AppLocalizations {
     return Intl.message(
       'Details',
       name: 'details',
+      locale: localeName,
     );
   }
 
@@ -328,6 +400,7 @@ class AppLocalizations {
     return Intl.message(
       'Track information',
       name: 'songInformation',
+      locale: localeName,
     );
   }
 
@@ -335,6 +408,7 @@ class AppLocalizations {
     return Intl.message(
       'Edit metadata',
       name: 'editMetadata',
+      locale: localeName,
     );
   }
 
@@ -342,6 +416,7 @@ class AppLocalizations {
     return Intl.message(
       'Unknown route!',
       name: 'unknownRoute',
+      locale: localeName,
     );
   }
 
@@ -349,6 +424,7 @@ class AppLocalizations {
     return Intl.message(
       'Found',
       name: 'found',
+      locale: localeName,
     );
   }
 
@@ -356,6 +432,7 @@ class AppLocalizations {
     return Intl.message(
       'Up next',
       name: 'upNext',
+      locale: localeName,
     );
   }
 
@@ -363,6 +440,7 @@ class AppLocalizations {
     return Intl.message(
       "You're almost there",
       name: 'almostThere',
+      locale: localeName,
     );
   }
 
@@ -370,6 +448,7 @@ class AppLocalizations {
     return Intl.message(
       "Press once again to exit",
       name: 'pressOnceAgainToExit',
+      locale: localeName,
     );
   }
 
@@ -377,6 +456,7 @@ class AppLocalizations {
     return Intl.message(
       "There's no music on your device",
       name: 'noMusic',
+      locale: localeName,
     );
   }
 
@@ -384,6 +464,7 @@ class AppLocalizations {
     return Intl.message(
       "Searching for tracks...",
       name: 'searchingForTracks',
+      locale: localeName,
     );
   }
 
@@ -391,6 +472,7 @@ class AppLocalizations {
     return Intl.message(
       "Please, allow access to storage",
       name: 'allowAccessToExternalStorage',
+      locale: localeName,
     );
   }
 
@@ -398,6 +480,7 @@ class AppLocalizations {
     return Intl.message(
       "Allow access to storage manually",
       name: 'allowAccessToExternalStorageManually',
+      locale: localeName,
     );
   }
 
@@ -405,6 +488,7 @@ class AppLocalizations {
     return Intl.message(
       "Error opening the app settings",
       name: 'openAppSettingsError',
+      locale: localeName,
     );
   }
 
@@ -412,6 +496,7 @@ class AppLocalizations {
     return Intl.message(
       "Actions",
       name: 'actions',
+      locale: localeName,
     );
   }
 
@@ -419,6 +504,7 @@ class AppLocalizations {
     return Intl.message(
       "Go to album",
       name: 'goToAlbum',
+      locale: localeName,
     );
   }
 
@@ -426,6 +512,7 @@ class AppLocalizations {
     return Intl.message(
       "Play next",
       name: 'playNext',
+      locale: localeName,
     );
   }
 
@@ -433,6 +520,7 @@ class AppLocalizations {
     return Intl.message(
       "Add to queue",
       name: 'addToQueue',
+      locale: localeName,
     );
   }
 
@@ -440,6 +528,7 @@ class AppLocalizations {
     return Intl.message(
       'Sort',
       name: 'sort',
+      locale: localeName,
     );
   }
 
@@ -447,6 +536,7 @@ class AppLocalizations {
     return Intl.message(
       'Artist',
       name: 'artist',
+      locale: localeName,
     );
   }
 
@@ -454,6 +544,7 @@ class AppLocalizations {
     return Intl.message(
       'Title',
       name: 'title',
+      locale: localeName,
     );
   }
 
@@ -461,6 +552,7 @@ class AppLocalizations {
     return Intl.message(
       'Date modified',
       name: 'dateModified',
+      locale: localeName,
     );
   }
 
@@ -468,6 +560,7 @@ class AppLocalizations {
     return Intl.message(
       'Date added',
       name: 'dateAdded',
+      locale: localeName,
     );
   }
 
@@ -475,6 +568,7 @@ class AppLocalizations {
     return Intl.message(
       'Year',
       name: 'year',
+      locale: localeName,
     );
   }
 
@@ -482,6 +576,7 @@ class AppLocalizations {
     return Intl.message(
       'Number of tracks',
       name: 'numberOfTracks',
+      locale: localeName,
     );
   }
 
@@ -537,6 +632,7 @@ class AppLocalizations {
     return Intl.message(
       'Are you sure you want to delete ',
       name: 'deletionPromptDescriptionP1',
+      locale: localeName,
     );
   }
 
@@ -544,6 +640,7 @@ class AppLocalizations {
     return Intl.message(
       ' selected tracks?',
       name: 'deletionPromptDescriptionP2',
+      locale: localeName,
     );
   }
 
@@ -552,6 +649,7 @@ class AppLocalizations {
     return Intl.message(
       'Done! You are now a developer',
       name: 'devModeGreet',
+      locale: localeName,
     );
   }
 
@@ -560,6 +658,7 @@ class AppLocalizations {
     return Intl.message(
       'Something should happen now...',
       name: 'onThePathToDevMode',
+      locale: localeName,
     );
   }
 
@@ -568,6 +667,7 @@ class AppLocalizations {
     return Intl.message(
       "only 1 click remaining...",
       name: 'onThePathToDevModeLastClick',
+      locale: localeName,
     );
   }
 
@@ -577,6 +677,7 @@ class AppLocalizations {
       "only $remainingClicks clicks remaining...",
       name: 'onThePathToDevModeClicksRemaining',
       args: [remainingClicks],
+      locale: localeName,
     );
   }
 
@@ -584,6 +685,7 @@ class AppLocalizations {
     return Intl.message(
       'Stop the service',
       name: 'devStopService',
+      locale: localeName,
     );
   }
 
@@ -591,6 +693,7 @@ class AppLocalizations {
     return Intl.message(
       'Test toast',
       name: 'devTestToast',
+      locale: localeName,
     );
   }
 
@@ -598,6 +701,7 @@ class AppLocalizations {
     return Intl.message(
       'Show error snackbar',
       name: 'devErrorSnackbar',
+      locale: localeName,
     );
   }
 
@@ -605,6 +709,7 @@ class AppLocalizations {
     return Intl.message(
       'Show important snackbar',
       name: 'devImportantSnackbar',
+      locale: localeName,
     );
   }
 
@@ -612,6 +717,7 @@ class AppLocalizations {
     return Intl.message(
       'Slow down animations',
       name: 'devAnimationsSlowMo',
+      locale: localeName,
     );
   }
 
@@ -619,6 +725,7 @@ class AppLocalizations {
     return Intl.message(
       'Quit the developer mode',
       name: 'quitDevMode',
+      locale: localeName,
     );
   }
 
@@ -626,6 +733,7 @@ class AppLocalizations {
     return Intl.message(
       'Stop being a developer?',
       name: 'quitDevModeDescription',
+      locale: localeName,
     );
   }
 
@@ -635,6 +743,7 @@ class AppLocalizations {
     return Intl.message(
       'Settings',
       name: 'settings',
+      locale: localeName,
     );
   }
 
@@ -642,6 +751,7 @@ class AppLocalizations {
     return Intl.message(
       'General',
       name: 'general',
+      locale: localeName,
     );
   }
 
@@ -649,6 +759,7 @@ class AppLocalizations {
     return Intl.message(
       'Theme',
       name: 'theme',
+      locale: localeName,
     );
   }
 
@@ -656,6 +767,7 @@ class AppLocalizations {
     return Intl.message(
       'Light mode',
       name: 'settingLightMode',
+      locale: localeName,
     );
   }
 
@@ -665,6 +777,7 @@ class AppLocalizations {
     return Intl.message(
       'Search history',
       name: 'searchHistory',
+      locale: localeName,
     );
   }
 
@@ -672,6 +785,7 @@ class AppLocalizations {
     return Intl.message(
       'Your search history will be displayed here',
       name: 'searchHistoryPlaceholder',
+      locale: localeName,
     );
   }
 
@@ -679,6 +793,7 @@ class AppLocalizations {
     return Intl.message(
       'Nothing found',
       name: 'searchNothingFound',
+      locale: localeName,
     );
   }
 
@@ -688,6 +803,7 @@ class AppLocalizations {
     return Intl.message(
       'Are you sure you want to remove ',
       name: 'searchHistoryRemoveEntryDescriptionP1',
+      locale: localeName,
     );
   }
 
@@ -695,6 +811,7 @@ class AppLocalizations {
     return Intl.message(
       ' from your search history?',
       name: 'searchHistoryRemoveEntryDescriptionP2',
+      locale: localeName,
     );
   }
 
@@ -702,6 +819,7 @@ class AppLocalizations {
     return Intl.message(
       'Clear search history?',
       name: 'searchClearHistory',
+      locale: localeName,
     );
   }
 }

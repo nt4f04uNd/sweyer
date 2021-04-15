@@ -5,7 +5,6 @@
 
 // @dart = 2.12
 
-import 'package:audio_service/audio_service.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';

@@ -18,6 +18,8 @@ import 'package:path_provider/path_provider.dart';
 /// [R] denotes type that is returned from [read] method.
 /// [S] denotes type that has to be provided to the [save] method.
 abstract class JsonSerializer<R, S> {
+  const JsonSerializer();
+
   String get fileName;
 
   /// Value that will be written in [init] method.
@@ -50,11 +52,10 @@ abstract class JsonSerializer<R, S> {
 ///
 /// Saves only songs ids, so you have to search indexes in 'all' queue to restore.
 class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
-  QueueSerializer._();
-  static final instance = QueueSerializer._();
+  const QueueSerializer(this.fileName);
 
   @override
-  String get fileName => 'queue.json';
+  final String fileName;
   @override
   List<Song> get initialValue => [];
 

@@ -18,7 +18,6 @@ class DevRoute extends StatelessWidget {
     ShowFunctions.instance.showToast(
       msg: 'Test',
       toastLength: Toast.LENGTH_LONG,
-      backgroundColor: ThemeControl.theme.colorScheme.primary,
     );
   }
 

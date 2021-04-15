@@ -220,7 +220,7 @@ class _QueueTabState extends State<_QueueTab>
       ..addStatusListener(handleSelectionStatus);
 
     _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
-      if (ContentControl.state.queues.all.isNotEmpty) {
+      if (ContentControl.state.allSongs.isNotEmpty) {
         // Reset value when queue changes
         prevSongIndex = ContentControl.state.currentSongIndex;
         setState(() {/* update ui list as data list may have changed */});
@@ -392,7 +392,10 @@ class _QueueTabState extends State<_QueueTab>
         }
         break;
       case QueueType.arbitrary:
-        text.add(TextSpan(text: l10n.arbitraryQueue));
+        text.add(TextSpan(text:
+          l10n.arbitraryQueueOrigin(ContentControl.state.queues.arbitraryQueueOrigin)
+            ?? l10n.arbitraryQueue,
+        ));
         break;
       default:
         throw InvalidCodePathError();
@@ -751,7 +754,6 @@ class _TrackShowcase extends StatefulWidget {
 
 class _TrackShowcaseState extends State<_TrackShowcase> {
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<void> _contentChangeSubscription;
 
   @override
   void initState() {
@@ -759,19 +761,11 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
       setState(() {/* update track in ui */});
     });
-
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
-      setState(() {
-        /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
-        /// So sometimes even though current song is being restored, its album art might still be fetching.
-      });
-    });
   }
 
   @override
   void dispose() {
     _songChangeSubscription.cancel();
-    _contentChangeSubscription.cancel();
     super.dispose();
   }
 

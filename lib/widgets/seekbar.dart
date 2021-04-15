@@ -75,7 +75,9 @@ class _SeekbarState extends State<Seekbar> {
         setState(() {
           _isDragging = false;
           _localValue = 0.0;
-          _value = 0.0;
+          // Not setting to 0, because even though I'm intializing player in proper order, i.e.
+          // set song and then seek to needed position, it still fires in reverse, not sure why.
+          _value = _positionToValue(MusicPlayer.instance.position);
           _duration = Duration(milliseconds: song.duration);
         });
       });

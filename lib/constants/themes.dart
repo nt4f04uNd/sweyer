@@ -54,6 +54,12 @@ abstract class Theme {
     dark: Colors.white.withOpacity(0.1),
   );
 
+  /// A [glowSplashColor] to draw over [contrast].
+  static final _ThemeContainer<Color> glowSplashColorOnContrast = _ThemeContainer(
+    light: Colors.white.withOpacity(0.13),
+    dark: const Color(0x80cccccc),
+  );
+
   static const Color _lightIconColor = Color(0xff616266);
 
   static _ThemeContainer<ThemeData> app = _ThemeContainer(

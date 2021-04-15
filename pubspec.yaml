@@ -37,7 +37,6 @@ dependencies:
   path: ^1.7.0
   flutter_sticky_header: ^0.5.0
   multiple_localization: ^0.2.1
-  devicelocale: ^0.4.1
   just_audio:
     ^0.7.3
     # path: C:/dev/projects/native/just_audio/just_audio
@@ -48,7 +47,13 @@ dependencies:
   audio_service:
     # using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/notif
     # see https://github.com/ryanheise/audio_service/issues/633
-    path: C:/dev/projects/native/audio_service/audio_service
+    # path: C:/dev/projects/native/audio_service/audio_service
+
+    git: 
+      url: https://github.com/nt4f04uNd/audio_service/
+      ref: notif
+      path: audio_service
+
     # git: 
     #   url: C:\dev\projects\native\audio_service
     #   ref: one-isolate

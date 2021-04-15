@@ -195,15 +195,8 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     );
     if (selectionController == null)
       return child;
-    return AnimatedBuilder(
-      animation: selectionController.animationController,
-      builder: (context, child) => IgnorePointer(
-        ignoring: const IgnoringStrategy(
-          forward: true,
-          completed: true,
-        ).evaluate(selectionController.animationController),
-        child: child,
-      ),
+    return IgnoreInSelection(
+      controller: selectionController,
       child: child,
     );
   }

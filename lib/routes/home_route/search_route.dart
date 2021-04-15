@@ -101,6 +101,8 @@ class _SearchStateDelegate {
         singleListScrollController.offset != singleListScrollController.position.minScrollExtent;
     });
     selectionController.addListener(setState);
+    /// Initalize [prevQuery] and [trimmedQuery] values.
+    onQueryChange();
   }
 
   final ScrollController scrollController;
@@ -111,8 +113,8 @@ class _SearchStateDelegate {
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<Type> contentTypeNotifier = ValueNotifier(null);
   _Results results = _Results();
-  String prevQuery = '';
-  String trimmedQuery = '';
+  String prevQuery;
+  String trimmedQuery;
 
   void dispose() {
     scrollController.dispose();
@@ -179,10 +181,8 @@ class _SearchStateDelegate {
     return contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
-        if (ContentControl.state.queues.type != QueueType.searched || query != ContentControl.state.queues.searchQuery) {
-          onSubmit();
-          ContentControl.setSearchedQueue(query, results.songs);
-        }
+        onSubmit();
+        ContentControl.setSearchedQueue(query, results.songs);
       },
       album: onSubmit,
     );
@@ -721,7 +721,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     ).animate(baseAnimation);
     final splashColorAnimation = ColorTween(
       begin: Constants.Theme.glowSplashColor.auto,
-      end: Constants.Theme.glowSplashColor.autoReverse,
+      end: Constants.Theme.glowSplashColorOnContrast.auto,
     ).animate(baseAnimation);
     if (active) {
       controller.forward();

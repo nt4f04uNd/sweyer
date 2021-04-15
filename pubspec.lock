@@ -46,23 +46,29 @@ packages:
   audio_service:
     dependency: "direct main"
     description:
-      path: "C:/dev/projects/native/audio_service/audio_service"
-      relative: false
-    source: path
+      path: audio_service
+      ref: notif
+      resolved-ref: "6c5cba9c223011f859bb1189ac191705b6d8e1f1"
+      url: "https://github.com/nt4f04uNd/audio_service/"
+    source: git
     version: "0.16.2"
   audio_service_platform_interface:
     dependency: transitive
     description:
-      path: "../../audio_service/audio_service_platform_interface"
-      relative: true
-    source: path
+      path: audio_service_platform_interface
+      ref: notif
+      resolved-ref: "6c5cba9c223011f859bb1189ac191705b6d8e1f1"
+      url: "https://github.com/nt4f04und/audio_service.git"
+    source: git
     version: "1.0.0"
   audio_service_web:
     dependency: transitive
     description:
-      path: "../../audio_service/audio_service_web"
-      relative: true
-    source: path
+      path: audio_service_web
+      ref: notif
+      resolved-ref: "6c5cba9c223011f859bb1189ac191705b6d8e1f1"
+      url: "https://github.com/nt4f04und/audio_service.git"
+    source: git
     version: "0.16.2"
   audio_session:
     dependency: "direct overridden"
@@ -225,13 +231,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
-  devicelocale:
-    dependency: "direct main"
-    description:
-      name: devicelocale
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.1"
   enum_to_string:
     dependency: "direct main"
     description:

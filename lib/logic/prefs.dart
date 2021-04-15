@@ -69,12 +69,16 @@ abstract class Prefs {
   static final Pref<String?> searchQueryString =
       Pref<String>(key: 'search_query', defaultValue: null);
 
+  /// Last [ArbitraryQueueOrigin].
+  static final Pref<String?> arbitraryQueueOrigin =
+      Pref<String>(key: 'arbitrary_queue_origin', defaultValue: null);
+
   /// Whether the saved queue is modified or not.
-  static final Pref<bool?> queueModifiedBool =
+  static final Pref<bool> queueModifiedBool =
       Pref<bool>(key: 'queue_modified', defaultValue: false);
 
   /// Whether the saved queue is shuffled or not.
-  static final Pref<bool?> queueShuffledBool =
+  static final Pref<bool> queueShuffledBool =
       Pref<bool>(key: 'queue_shuffled', defaultValue: false);
 
   /// Developer mode pref.

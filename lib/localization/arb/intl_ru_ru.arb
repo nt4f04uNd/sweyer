@@ -80,6 +80,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "allAlbums": "Все альбомы",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
   "shuffled": "Перемешано",
   "@shuffled": {
     "type": "text",
@@ -92,6 +97,16 @@
   },
   "byQuery": "По запросу",
   "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playContentList": "Включить",
+  "@playContentList": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleContentList": "Перемешать",
+  "@shuffleContentList": {
     "type": "text",
     "placeholders": {}
   },

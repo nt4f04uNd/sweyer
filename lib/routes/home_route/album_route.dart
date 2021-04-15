@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -32,7 +34,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
   static const _albumSectionBottomPadding = 24.0;
   static const _albumSectionHeight = _albumArtSize + _albumSectionTopPadding + _albumSectionBottomPadding;
 
-  static const _buttonSectionButtonHeight = 36.0;
+  static const _buttonSectionButtonHeight = 38.0;
   static const _buttonSectionBottomPadding = 12.0;
   static const _buttonSectionHeight = _buttonSectionButtonHeight + _buttonSectionBottomPadding;
 
@@ -143,17 +145,22 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
               height: _buttonSectionButtonHeight,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
                     child: _AlbumPlayButton(
-                      text: 'Включить',
-                      icon: const Icon(Icons.play_arrow_rounded),
+                      text: l10n.shuffleContentList,
+                      icon: const Icon(Icons.shuffle_rounded, size: 22.0),
                       color: Constants.Theme.contrast.auto,
                       textColor: ThemeControl.theme.colorScheme.background,
-                      splashColor: Constants.Theme.glowSplashColor.autoReverse,
+                      splashColor: Constants.Theme.glowSplashColorOnContrast.auto,
                       onPressed: () {
-                        ContentControl.setPersistentQueue(queue: widget.album, songs: songs);
-                        MusicPlayer.instance.setSong(songs[0]);
+                         ContentControl.setPersistentQueue(
+                          queue: widget.album,
+                          songs: songs,
+                          shuffled: true,
+                        );
+                        MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
                         MusicPlayer.instance.play();
                         playerRouteController.open();
                       },
@@ -162,11 +169,11 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: _AlbumPlayButton(
-                      text: 'Перемешать',
-                      icon: const Icon(Icons.shuffle_rounded),
+                      text: l10n.playContentList,
+                      icon: const Icon(Icons.play_arrow_rounded, size: 28.0),
                       onPressed: () {
-                        ContentControl.setPersistentQueue(queue: widget.album, songs: songs, shuffled: true);
-                        MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                        ContentControl.setPersistentQueue(queue: widget.album, songs: songs);
+                        MusicPlayer.instance.setSong(songs[0]);
                         MusicPlayer.instance.play();
                         playerRouteController.open();
                       },
@@ -204,7 +211,12 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                 slivers: [
                   AnimatedBuilder(
                     animation: appBarController,
-                    child: const NFBackButton(),
+                    child: NFBackButton(
+                      onPressed: () {
+                        selectionController.close();
+                        Navigator.of(context).pop();
+                      },
+                    ),
                     builder: (context, child) => SliverAppBar(
                       pinned: true,
                       elevation: 0.0,
@@ -225,7 +237,13 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                       ),
                     ),
                   ),
-                  SliverToBoxAdapter(child: _buildAlbumInfo()),
+
+                  SliverToBoxAdapter(
+                    child: IgnoreInSelection(
+                      controller: selectionController,
+                      child: _buildAlbumInfo()
+                    ),
+                  ),
 
                   SliverStickyHeader(
                     overlapsContent: false,
@@ -242,12 +260,9 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                       currentTest: (index) => ContentControl.state.queues.persistent == widget.album &&
                                     songs[index].sourceId == ContentControl.state.currentSong.sourceId,
                       songTileVariant: SongTileVariant.number,
-                      onItemTap: () => ContentControl.setQueue(
-                        type: QueueType.persistent,
-                        persistentQueue: widget.album,
+                      onItemTap: () => ContentControl.setPersistentQueue(
+                        queue: widget.album,
                         songs: songs,
-                        modified: false,
-                        shuffled: false,
                       ),
                     ),
                   ),
@@ -300,13 +315,22 @@ class _AlbumPlayButton extends StatelessWidget {
           foregroundColor: MaterialStateProperty.all(textColor),
           overlayColor: MaterialStateProperty.resolveWith((_) => splashColor ?? Constants.Theme.glowSplashColor.auto),
           splashFactory: NFListTileInkRipple.splashFactory,
+          shadowColor: MaterialStateProperty.all(Colors.transparent),
+          textStyle: MaterialStateProperty.resolveWith((_) => TextStyle(
+            fontFamily: ThemeControl.theme.textTheme.headline1.fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 15.0,
+          )),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children:  [
+          children: [
             icon,
-            const SizedBox(width: 8.0),
-            Text(text),
+            const SizedBox(width: 6.0),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 1.0),
+              child: Text(text),
+            ),
             const SizedBox(width: 8.0),
           ],
         ),

@@ -24,7 +24,7 @@ class TrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (ContentControl.state.queues.all.isEmpty) {
+    if (ContentControl.state.allSongs.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -137,7 +137,6 @@ class _RotatingAlbumArtWithProgressState
   StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<bool> _playingSubscription;
-  StreamSubscription<void> _contentChangeSubscription;
 
   final _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
 
@@ -173,13 +172,6 @@ class _RotatingAlbumArtWithProgressState
         _duration = Duration(milliseconds: event.duration);
       });
     });
-
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
-      setState(() {
-        /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
-        /// So sometimes even though current song is being restored, its album art might still be fetching.
-      });
-    });
   }
 
   @override
@@ -187,7 +179,6 @@ class _RotatingAlbumArtWithProgressState
     _playingSubscription.cancel();
     _positionSubscription.cancel();
     _songChangeSubscription.cancel();
-    _contentChangeSubscription.cancel();
     super.dispose();
   }
 

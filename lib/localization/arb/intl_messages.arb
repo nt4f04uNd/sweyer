@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-04-03T19:08:00.033444",
+  "@@last_modified": "2021-04-14T21:32:25.868129",
   "play": "Play",
   "@play": {
     "type": "text",
@@ -79,6 +79,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "allAlbums": "All albums",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
   "shuffled": "Shuffled",
   "@shuffled": {
     "type": "text",
@@ -91,6 +96,16 @@
   },
   "byQuery": "By query",
   "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playContentList": "Play",
+  "@playContentList": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleContentList": "Shuffle",
+  "@shuffleContentList": {
     "type": "text",
     "placeholders": {}
   },

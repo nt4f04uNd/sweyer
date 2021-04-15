@@ -26,7 +26,7 @@ abstract class Permissions {
     if (_permissionStorageStatus == PermissionStatus.granted) {
       await ContentControl.init();
     } else if (_permissionStorageStatus == PermissionStatus.permanentlyDenied) {
-      final l10n = getl10n(AppRouter.instance.navigatorKey.currentContext);
+      final l10n = staticl10n;
       await ShowFunctions.instance.showToast(
         msg: l10n.allowAccessToExternalStorageManually,
       );

@@ -334,10 +334,16 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   @override
-  void dispose() { 
-    notifier.value = null;
-    _removeOverlay();
-    super.dispose();
+  void dispose() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      notifier.value = null;
+      clearListeners();
+      clearStatusListeners();
+      if (inSelection)
+        await close();
+      _removeOverlay();
+      super.dispose();
+    });
   }
 } 
 
@@ -415,6 +421,33 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
             });
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Ignores its subtree when selection controller is in selection.
+class IgnoreInSelection extends StatelessWidget {
+  const IgnoreInSelection({
+    Key key,
+    @required this.controller,
+    this.child,
+  }) : super(key: key);
+
+  final Widget child;
+  final SelectionController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller.animationController,
+      child: child,
+      builder: (context, child) => IgnorePointer(
+        ignoring: const IgnoringStrategy(
+          forward: true,
+          completed: true,
+        ).evaluate(controller.animationController),
+        child: child
       ),
     );
   }
@@ -700,7 +733,7 @@ class _GoToAlbumSelectionActionState<T extends Content> extends State<GoToAlbumS
       child:
           data.length > 1 ||
           data.length == 1 && (data.first.data is! Song || (data.first.data as Song).albumId == null) ||
-          HomeRouter.instance.routes.last == HomeRoutes.album // disable action in album route
+          HomeRouter.instance.routes.last == HomeRoutes.album && playerRouteController.closed // disable action in album route
             ? const SizedBox.shrink()
             : _SelectionAnimation(
                 animation: controller.animationController,
@@ -896,7 +929,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
       final count = songs.length;
       Song song;
       if (count == 1) {
-        song = ContentControl.state.queues.all.byId.getSong(songs.first.data.sourceId);
+        song = ContentControl.state.allSongs.byId.getSong(songs.first.data.sourceId);
       }
       ShowFunctions.instance.showDialog(
         context,

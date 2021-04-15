@@ -26,7 +26,7 @@ class ShowFunctions extends NFShowFunctions {
     Color textColor,
     Color backgroundColor,
   }) async {
-    backgroundColor ??= Constants.AppColors.deepPurpleAccent;
+    backgroundColor ??= ThemeControl.theme.colorScheme.primary;
 
     return Fluttertoast.showToast(
       msg: msg,
