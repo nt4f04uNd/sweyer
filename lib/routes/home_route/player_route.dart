@@ -460,7 +460,10 @@ class _QueueTabState extends State<_QueueTab>
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
                     child: AlbumArt(
-                      path: album.albumArt,
+                      source: AlbumArtSource.path(
+                        album.albumArt,
+                        albumId: album.id,
+                      ),
                       borderRadius: 8,
                       size: kSongTileArtSize - 8.0,
                     ),
@@ -553,6 +556,7 @@ class _QueueTabState extends State<_QueueTab>
                     : SongTileVariant.albumArt,
                   songClickBehavior: SongClickBehavior.playPause,
                   currentTest: (index) => index == currentSongIndex,
+                  alwaysShowScrollbar: true,
                 );
               },
             ),
@@ -716,7 +720,10 @@ class _InfoButton extends StatelessWidget {
         icon: const Icon(Icons.info_outline_rounded),
         size: 40.0,
         onPressed: () {
-          String songInfo = ContentControl.state.currentSong?.toJson().toString().replaceAll(r', ', ',\n');
+          String songInfo = ContentControl.state.currentSong
+            ?.toMap()
+            .toString()
+            .replaceAll(r', ', ',\n');
           if (songInfo != null) {
             songInfo = songInfo.substring(1, songInfo.length - 1);
           }
@@ -800,7 +807,12 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             right: 60.0,
             top: 10.0,
           ),
-          child: AlbumArt.playerRoute(path: currentSong.albumArt),
+          child: AlbumArt.playerRoute(
+            source: AlbumArtSource.path(
+              currentSong.albumArt,
+              albumId: currentSong.albumId,
+            ),
+          ),
         ),
       ],
     );

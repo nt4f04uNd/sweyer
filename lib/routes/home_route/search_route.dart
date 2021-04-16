@@ -69,29 +69,14 @@ class _Results {
 }
 
 class _SearchStateDelegate {
-  _SearchStateDelegate({
-    @required TickerProvider vsync,
-    @required this.searchDelegate,
-  }) : scrollController = ScrollController(),
+  _SearchStateDelegate(this.searchDelegate)
+    : scrollController = ScrollController(),
     singleListScrollController = ScrollController(),
-    selectionController = ContentSelectionController<SelectionEntry>(
-      animationController: AnimationController(
-        vsync: vsync,
-        duration: kSelectionDuration,
-      ),
-      actionsBuilder: (context) {
-        final controller = ContentSelectionController.of(context);
-        return SelectionActionsBar(
-          controller: controller,
-          left: const [ActionsSelectionTitle(closeButton: true)],
-          right: const [
-            GoToAlbumSelectionAction(),
-            PlayNextSelectionAction(),
-            AddToQueueSelectionAction(),
-          ],
-        );
-      }
-    ) {
+    selectionController = ContentSelectionController.forContent(
+      AppRouter.instance.navigatorKey.currentState,
+      closeButton: true,
+    )
+  {
     scrollController.addListener(() {
       bodyScrolledNotifier.value =
         scrollController.offset != scrollController.position.minScrollExtent;
@@ -266,10 +251,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   @override
   void initState() {
     super.initState();
-    stateDelegate = _SearchStateDelegate(
-      vsync: this,
-      searchDelegate: widget.delegate,
-    );
+    stateDelegate = _SearchStateDelegate(widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
@@ -476,7 +458,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
                 titleSelection: Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
+                  padding: const EdgeInsets.only(top: 15.0),
                   child: SelectionCounter(controller: stateDelegate.selectionController),
                 ),
                 actionsSelection: [

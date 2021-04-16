@@ -125,7 +125,7 @@ abstract class ThemeControl {
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
-    ContentControl.drawDefaultAlbumArt();
+    MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(primaryColorChangeDuration));
       App.rebuildAllChildren();

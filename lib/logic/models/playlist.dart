@@ -3,15 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
+// import 'package:flutter/material.dart';\
 // import 'package:sweyer/sweyer.dart';
 
-part 'playlist.g.dart';
-
-@JsonSerializable()
 class Playlist { // todo: implements Content
   Playlist();
-  factory Playlist.fromJson(Map<String, dynamic> json) => _$PlaylistFromJson(json);
-  Map<String, dynamic> toJson() => _$PlaylistToJson(this);
 }

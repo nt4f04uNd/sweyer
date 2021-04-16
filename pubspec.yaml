@@ -16,11 +16,9 @@ dependencies:
   rxdart: ^0.26.0
   sliver_tools: ^0.2.1
   animations: ^2.0.0
-  fluttertoast: ^8.0.3
   permission_handler: ^6.1.1
   shared_preferences: ^2.0.5
   path_provider: ^2.0.1
-  json_annotation: ^3.1.1
   percent_indicator: ^3.0.1
   firebase_core: ^1.0.2
   firebase_crashlytics: ^1.0.0
@@ -37,6 +35,18 @@ dependencies:
   path: ^1.7.0
   flutter_sticky_header: ^0.5.0
   multiple_localization: ^0.2.1
+  # fluttertoast: ^8.0.3
+  fluttertoast:
+    # path: C:/dev/projects/native/FlutterToast
+
+    # Using this branch for changing font family
+    git: 
+      url: https://github.com/nt4f04uNd/fluttertoast/
+      ref: f753a91591569acece70a9e8748745efa9faabfb # patch
+  # flutter_media_metadata:
+  #   path: C:/dev/projects/native/flutter_media_metadata
+
+  #   # git: https://github.com/alexmercerind/flutter_media_metadata
   just_audio:
     ^0.7.3
     # path: C:/dev/projects/native/just_audio/just_audio
@@ -45,14 +55,15 @@ dependencies:
     #   ref: master
     #   path: just_audio
   audio_service:
-    # using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/notif
-    # see https://github.com/ryanheise/audio_service/issues/633
-    # path: C:/dev/projects/native/audio_service/audio_service
+    # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
+    # See https://github.com/ryanheise/audio_service/issues/633
+    path: C:/dev/projects/native/audio_service/audio_service
 
-    git: 
-      url: https://github.com/nt4f04uNd/audio_service/
-      ref: notif
-      path: audio_service
+    # NOTE: this is not working for some reason
+    # git:
+    #   url: https://github.com/nt4f04uNd/audio_service/
+    #   ref: c8e99b6b061557ad610f06da2fa706e7205657c0 # sweyer
+    #   path: audio_service
 
     # git: 
     #   url: C:\dev\projects\native\audio_service
@@ -83,7 +94,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^1.7.2
-  json_serializable: ^3.2.5
   # intl_translation: ^0.17.10+1
   intl_translation:
     git:

@@ -29,7 +29,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     DateTime _lastEvent;
     player.positionStream.listen((event) {
       final now = DateTime.now();
-      if (_lastEvent == null || now.difference(_lastEvent) > const Duration(milliseconds: 400)) {
+      if (_lastEvent == null || now.difference(_lastEvent) > const Duration(milliseconds: 1000)) {
         _lastEvent = now;
         _setState();
       }
@@ -524,12 +524,9 @@ class MusicPlayer extends AudioPlayer {
       if (_duplicate && duplicate == null) {
         ContentControl.handleDuplicate(song);
       }
-      // await setUrl('https://s3.amazonaws.com/scifri-segments/scifri201711241.mp');
+
       await setAudioSource(
-        ProgressiveAudioSource(
-          Uri.parse('content://media/external/audio/media/${song.sourceId}')
-          // Uri.parse('https://s3.amazonaws.com/scifri-segments/scifri201711241.mp3')
-        ),
+        ProgressiveAudioSource(Uri.parse(song.contentUri)),
         initialPosition: fromBeginning ? const Duration() : null,
       );
     } on PlatformException catch (e) {

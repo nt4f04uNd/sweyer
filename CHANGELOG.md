@@ -2,12 +2,12 @@
 
 - Selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable
 - Added play all/shuffle buttons to main screen and albums
-- Enhanced the searche route by adding filtering by content category
+- Enhanced the search route by adding filtering by content category
 - Now all queues are saved/restored. Prior in a lot of cases the queue was intentionally not restored
 - Optimized scrollbar and listviews
 - Became media browser service, support for Android Auto
 - Refactored a lot of code and fixed a lot of bugs
-- Changed player backend (non-ux)
+- Changed player backend (non-UX)
 
 ## [1.0.1] - february 08, 2021
 

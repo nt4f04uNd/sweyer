@@ -30,9 +30,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.songTileVariant = SongTileVariant.albumArt,
     this.songClickBehavior = SongClickBehavior.play,
     this.onItemTap,
-    this.interactiveScrollbar = true,
     this.padding = EdgeInsets.zero,
     this.physics = const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+    this.interactiveScrollbar = true,
+    this.alwaysShowScrollbar = false,
     this.showScrollbarLabel = false,
   }) : super(key: key);
 
@@ -47,7 +48,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
 
   /// If specified, list will be built as [SongTile.selectable],
   /// otherwise [SongTile] is used (in case if content is [Song]).
-  final ContentSelectionController<SelectionEntry<T>> selectionController;
+  final ContentSelectionController<SelectionEntry> selectionController;
 
   /// A widget to build before all items.
   final Widget leading;
@@ -66,9 +67,6 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Callback to be called on item tap.
   final VoidCallback onItemTap;
 
-  /// Whether the scrollbar is interactive.
-  final bool interactiveScrollbar;
-
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
 
@@ -80,8 +78,15 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// See [ScrollView.physics].
   final ScrollPhysics physics;
 
+  /// Whether the scrollbar is interactive.
+  final bool interactiveScrollbar;
+
+  /// Whether to always show the scrollbar.
+  final bool alwaysShowScrollbar;
+
   /// Whether to draw a label when scrollbar is dragged.
   final bool showScrollbarLabel;
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +96,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
       controller: localController,
       showLabel: showScrollbarLabel,
       interactive: interactiveScrollbar,
+      isAlwaysShown: alwaysShowScrollbar,
       child: CustomScrollView(
         controller: localController,
         physics: physics,
@@ -124,7 +130,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Key key,
     Type contentType,
     @required List<T> list,
-    ContentSelectionController<SelectionEntry<T>> selectionController,
+    ContentSelectionController<SelectionEntry> selectionController,
     Widget leading,
     _CurrentTest currentTest,
     SongTileVariant songTileVariant = SongTileVariant.albumArt,

@@ -5,15 +5,30 @@
 
 package com.nt4f04und.sweyer.channels;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.nt4f04und.sweyer.handlers.FetchHandler;
+import com.nt4f04und.sweyer.player.Album;
+import com.nt4f04und.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.Nullable;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
@@ -39,15 +54,57 @@ public enum ContentChannel {
    private MethodChannel.Result result;
 
    public void onMethodCall(MethodCall call, @NotNull MethodChannel.Result result) {
-      // Note: this method is invoked on the main thread.
       try {
          switch (call.method) {
+            case "fixAlbumArt": {
+               ExecutorService executor = Executors.newSingleThreadExecutor();
+               Handler handler = new Handler(Looper.getMainLooper());
+               executor.execute(() -> {
+                  Object rawId = call.argument("id");
+                  Long id;
+                  if (rawId instanceof Long) {
+                     id = (Long) rawId;
+                  } else if (rawId instanceof Integer) {
+                     id = Long.valueOf((Integer) rawId);
+                  } else {
+                     throw new IllegalArgumentException();
+                  }
+                  Uri songCover = Uri.parse("content://media/external/audio/albumart");
+                  Uri uriSongCover = ContentUris.withAppendedId(songCover, id);
+                  ContentResolver res = GeneralChannel.instance.activity.getContentResolver();
+                  try {
+                     InputStream is = res.openInputStream(uriSongCover);
+                     is.close();
+                  } catch (Exception ex) {
+                     // do nothing
+                     ex.printStackTrace();
+                  }
+                  handler.post(() -> {
+                     result.success(null);
+                  });
+               });
+               break;
+            }
             case "retrieveSongs": {
-               new FetchHandler.SearchSongsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               ExecutorService executor = Executors.newSingleThreadExecutor();
+               Handler handler = new Handler(Looper.getMainLooper());
+               executor.execute(() -> {
+                  ArrayList<HashMap<?, ?>> res = FetchHandler.retrieveSongs();
+                  handler.post(() -> {
+                     result.success(res);
+                  });
+               });
                break;
             }
             case "retrieveAlbums": {
-               new FetchHandler.SearchAlbumsTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, result);
+               ExecutorService executor = Executors.newSingleThreadExecutor();
+               Handler handler = new Handler(Looper.getMainLooper());
+               executor.execute(() -> {
+                  ArrayList<HashMap<?, ?>> res = FetchHandler.retrieveAlbums();
+                  handler.post(() -> {
+                     result.success(res);
+                  });
+               });
                break;
             }
             case "deleteSongs": {

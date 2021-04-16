@@ -5,12 +5,8 @@
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:sweyer/sweyer.dart';
 
-part 'album.g.dart';
-
-@JsonSerializable()
 class Album extends PersistentQueue {
   /// Album name.
   final String album;
@@ -52,22 +48,40 @@ class Album extends PersistentQueue {
     @required this.numberOfSongs,
   }) : super(id: id);
 
-  factory Album.fromJson(Map<String, dynamic> json) => _$AlbumFromJson(json);
-  Map<String, dynamic> toJson() => _$AlbumToJson(this);
-
   MediaItem toMediaItem() {
     return MediaItem(
       id: id.toString(),
       album: null,
+      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      artUri: albumArt == null ? null : Uri.file(albumArt),
       title: album,
-       // TODO: use displaySubtitle and pass raw artist here when https://github.com/ryanheise/audio_service/issues/651 is resolved
       artist: formatArtist(artist, staticl10n),
       genre: null, // TODO: GENRE
-      // duration: Duration(milliseconds: duration),
-      artUri: Uri.file(albumArt ?? ContentControl.state.defaultAlbumArtPath),
-      // displaySubtitle: formatArtist(artist, staticl10n),
       rating: null,
       extras: null,
     );
   }
+
+  factory Album.fromJson(Map<String, dynamic> json) {
+    return Album(
+      id: json['id'] as int,
+      album: json['album'] as String,
+      albumArt: json['albumArt'] as String,
+      artist: json['artist'] as String,
+      artistId: json['artistId'] as int,
+      firstYear: json['firstYear'] as int,
+      lastYear: json['lastYear'] as int,
+      numberOfSongs: json['numberOfSongs'] as int,
+    );
+  }
+  Map<String, dynamic> toMap() => <String, dynamic>{
+      'id': id,
+      'album': album,
+      'albumArt': albumArt,
+      'artist': artist,
+      'artistId': artistId,
+      'firstYear': firstYear,
+      'lastYear': lastYear,
+      'numberOfSongs': numberOfSongs,
+    };
 }

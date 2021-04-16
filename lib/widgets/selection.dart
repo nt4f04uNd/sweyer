@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:math';
+
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -213,6 +215,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   final _ActionsBuilder actionsBuilder;
 
   /// Constucts a controller for particular `T` [Content] type.
+  ///
+  /// Generally, it's recommended to pass navigator state to [vsync], so controller can
+  /// safely make deferred disposal.
   /// 
   /// If [counter] is `true`, will show a couter in the title.
   /// 
@@ -250,6 +255,21 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
           right: const [
             PlayNextSelectionAction<Album>(),
             AddToQueueSelectionAction<Album>(),
+          ],
+        );
+      },
+      fallback: (context) {
+        final controller = ContentSelectionController.of(context);
+        return SelectionActionsBar(
+          controller: controller,
+          left: [ActionsSelectionTitle(
+            counter: counter,
+            closeButton: closeButton,
+          )],
+          right: const [
+            GoToAlbumSelectionAction(),
+            PlayNextSelectionAction(),
+            AddToQueueSelectionAction(),
           ],
         );
       }
@@ -604,8 +624,8 @@ class ActionsSelectionTitle extends StatelessWidget {
             animation: controller.animationController,
             child: !counter
               ? Text(l10n.actions)
-              : Padding(
-                  padding: const EdgeInsets.only(top: 2.0),
+              : const Padding(
+                  padding: EdgeInsets.only(top: 2.0),
                   child: SelectionCounter()
                 ),
           ),
@@ -617,7 +637,7 @@ class ActionsSelectionTitle extends StatelessWidget {
 
 /// Creates a counter that shows how many items are selected.
 class SelectionCounter extends StatefulWidget {
-  SelectionCounter({Key key, this.controller}) : super(key: key);
+  const SelectionCounter({Key key, this.controller}) : super(key: key);
 
   /// Selection controller, if none specified, will try to fetch it from context.
   final ContentSelectionController controller;
@@ -628,12 +648,14 @@ class SelectionCounter extends StatefulWidget {
 
 class _SelectionCounterState extends State<SelectionCounter> with SelectionHandler {
   ContentSelectionController controller;
+  int selectionCount;
 
   @override
   void initState() { 
     super.initState();
     controller = widget.controller ?? ContentSelectionController.of(context);
     controller.addListener(handleSelection);
+    selectionCount = max(1, controller.data.length);
   }
 
   @override
@@ -654,14 +676,19 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 
   @override
   Widget build(BuildContext context) {
-    /// Not letting to go less 1 to not play animation from 1 to 0.
-    final selectionCount = controller.data.isNotEmpty
-      ? controller.data.length
-      : 1;
+    // This will prevent animation when controller is closing
+    if (controller.inSelection) {
+      // Not letting to go less 1 to not play animation from 1 to 0
+      selectionCount = max(1, controller.data.length);
+    }
     return CountSwitcher(
+      // Prevents animation we enter the selection
+      key: ValueKey(controller.status == AnimationStatus.dismissed),
       childKey: ValueKey(selectionCount),
       valueIncreased: controller.lengthIncreased,
-      child: Padding(
+      child: Container(
+        /// Line up width with other actions, so they animate identically with [_SelectionAnimation]
+        constraints: const BoxConstraints(minWidth: NFConstants.iconButtonSize),
         padding: const EdgeInsets.only(left: 5.0),
         child: Text(
           selectionCount.toString(),
@@ -673,17 +700,15 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 }
 
 /// Action that leads to the song album.
-/// 
-/// Can only be used with [Song]s.
-class GoToAlbumSelectionAction<T extends Content> extends StatefulWidget {
+class GoToAlbumSelectionAction extends StatefulWidget {
   const GoToAlbumSelectionAction({Key key}) : super(key: key);
 
   @override
   _GoToAlbumSelectionActionState createState() => _GoToAlbumSelectionActionState();
 }
 
-class _GoToAlbumSelectionActionState<T extends Content> extends State<GoToAlbumSelectionAction<T>> {
-  ContentSelectionController<SelectionEntry<T>> controller;
+class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
+  ContentSelectionController<SelectionEntry> controller;
 
   @override
   void initState() {
@@ -899,7 +924,7 @@ class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
 
 class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandler {
   Type type;
-  bool shown;
+  bool shown = false;
 
   @override
   void initState() { 
@@ -917,11 +942,11 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
     super.dispose();
   }
 
-  void _handleDelete() {
+  Future<void> _handleDelete() async {
     final songs = widget.controller.data.cast<SelectionEntry<Song>>();
     if (ContentControl.sdkInt >= 30) {
       // On Android R the deletion is performed with OS dialog.
-      ContentControl.deleteSongs(songs.map((e) => e.data.sourceId).toSet());
+      await ContentControl.deleteSongs(songs.map((e) => e.data.sourceId).toSet());
       widget.controller.close();
     } else {
       // On all versions below show in app dialog.
@@ -968,15 +993,16 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
 
   @override
   Widget build(BuildContext context) {
-    if (widget.controller.status != AnimationStatus.reverse) {
-      /// The condition ensures animation will not play on close,
-      /// because [SelectionAppBar] has its own animation, and
-      /// combination of them both doesn't look good.
+    if (widget.controller.inSelection) {
+      /// The condition ensures animation will not play on close, because [SelectionAppBar]
+      /// has its own animation, and combination of them both doesn't look good.
       shown = type == Song ||
-            (type == Content &&
-            widget.controller.data.firstWhereOrNull((el) => el is SelectionEntry<Album>) == null);
+              (type == Content &&
+              widget.controller.data.firstWhereOrNull((el) => el is SelectionEntry<Album>) == null);
     }
     return AnimatedSwitcher(
+      // Prevents animation we enter the selection
+      key: ValueKey(widget.controller.status == AnimationStatus.dismissed),
       duration: kSelectionDuration,
       transitionBuilder: (child, animation) => _SelectionAnimation(
         animation: animation,

@@ -67,7 +67,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
 
   /// This needed to ignore the header sort buttons when the controller is in selection.
   /// This parameter can be `null`.
-  final ContentSelectionController<SelectionEntry<T>> selectionController;
+  final ContentSelectionController<SelectionEntry> selectionController;
 
   /// Additional widget to place after sorting controls.
   final Widget leading;

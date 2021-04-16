@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -18,10 +19,19 @@ const double kArtBorderRadius = 10.0;
 /// `2` is border width
 const double kRotatingArtSize = kSongTileArtSize - 6 - 3 - 2;
 
-class AlbumArt extends StatelessWidget {
+class AlbumArtSource {
+  const AlbumArtSource._(this.data, this.albumId);
+  const AlbumArtSource.none(String data, {@required int albumId}) : this._(data, albumId);
+  const AlbumArtSource.path(String data, {@required int albumId}) : this._(data, albumId);
+  const AlbumArtSource.memory(Uint8List data, {@required int albumId}) : this._(data, albumId);
+  final Object data;
+  final int albumId;
+}
+
+class AlbumArt extends StatefulWidget {
   const AlbumArt({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.size,
     this.assetScale = 1.0,
@@ -34,7 +44,7 @@ class AlbumArt extends StatelessWidget {
   /// Creates an art for the [SongTile] or [SelectableSongTile].
   const AlbumArt.songTile({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
@@ -48,7 +58,7 @@ class AlbumArt extends StatelessWidget {
   /// It has the same image contents scale as [AlbumArt.songTile].
   const AlbumArt.albumTile({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
@@ -62,7 +72,7 @@ class AlbumArt extends StatelessWidget {
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.albumTile].
   const AlbumArt.playerRoute({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.size,
     this.assetScale = 1.0,
@@ -72,7 +82,7 @@ class AlbumArt extends StatelessWidget {
        currentIndicatorScale = null,
        super(key: key);
 
-  final String path;
+  final AlbumArtSource source;
 
   /// Background color for the album art.
   /// By default will use [ThemeControl.colorForBlend].
@@ -102,60 +112,106 @@ class AlbumArt extends StatelessWidget {
 
   final double currentIndicatorScale;
 
+
+  @override
+  _AlbumArtState createState() => _AlbumArtState();
+}
+
+class _AlbumArtState extends State<AlbumArt> {
   Widget _buildCurrentIndicator() {
-    return currentIndicatorScale == null
+    return widget.currentIndicatorScale == null
         ? const CurrentIndicator()
         : Transform.scale(
-            scale: currentIndicatorScale,
+            scale: widget.currentIndicatorScale,
             child: const CurrentIndicator(),
           );
+  }
+
+  bool recreated = false;
+  Future<void> _recreateArt() async {
+    recreated = true;
+    await ContentChannel.fixAlbumArt(widget.source.albumId);
+    if (mounted) {
+      setState(() { });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (path == null || !File(path).existsSync()) {
-      if (current) {
+    File file;
+    Uint8List bytes;
+    bool showDefault;
+    if (widget.source == null || widget.source.data == null) {
+      showDefault = true;
+    } else {
+      final data = widget.source.data;
+      if (data is String) {
+        file = File(data);
+        final exists = file.existsSync();
+        showDefault = !exists;
+        if (!exists && !recreated) {
+          _recreateArt();
+        }
+      } else if (data is Uint8List) {
+        bytes = data;
+        showDefault = bytes.isEmpty;
+      } else {
+        throw UnimplementedError();
+      }
+    }
+    if (showDefault) {
+      if (widget.current) {
         child = Container(
           alignment: Alignment.center,
           color: ThemeControl.theme.colorScheme.primary,
-          width: size,
-          height: size,
+          width: widget.size,
+          height: widget.size,
           child: _buildCurrentIndicator(),
         );
       } else {
         child = Image.asset(
-          highRes
+          widget.highRes
               ? Constants.Assets.ASSET_LOGO_MASK
               : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
-          width: size,
-          height: size,
-          color: color != null
-              ? getColorForBlend(color)
+          width: widget.size,
+          height: widget.size,
+          color: widget.color != null
+              ? getColorForBlend(widget.color)
               : ThemeControl.colorForBlend,
           colorBlendMode: BlendMode.plus,
           fit: BoxFit.cover,
         );
-        if (assetScale != 1.0) {
-          child = Transform.scale(scale: assetScale, child: child);
+        if (widget.assetScale != 1.0) {
+          child = Transform.scale(scale: widget.assetScale, child: child);
         }
       }
     } else {
-      final image = Image.file(
-        File(path),
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      );
-      if (current) {
+      Image image;
+      if (file != null) {
+        image = Image.file(
+          file,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
+        );
+      } else if (bytes != null) {
+        image = Image.memory(
+          bytes,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
+        );
+      }
+      if (widget.current) {
         child = Stack(
           children: [
             image,
             Container(
               alignment: Alignment.center,
               color: Colors.black.withOpacity(0.5),
-              width: size,
-              height: size,
+              width: widget.size,
+              height: widget.size,
               child: _buildCurrentIndicator(),
             ),
           ],
@@ -167,7 +223,7 @@ class AlbumArt extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.all(
-        Radius.circular(borderRadius),
+        Radius.circular(widget.borderRadius),
       ),
       child: child,
     );

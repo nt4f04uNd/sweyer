@@ -45,7 +45,10 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
   void initState() {
     super.initState();
     songs = widget.album.songs;
-    appBarController = AnimationController(vsync: this, value: 1.0);
+    appBarController = AnimationController(
+      vsync: AppRouter.instance.navigatorKey.currentState,
+      value: 1.0,
+    );
     scrollController.addListener(_handleScroll);
     selectionController = ContentSelectionController.forContent<Song>(
       this,
@@ -91,7 +94,10 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                     size: 130.0,
                     highRes: true,
                     assetScale: 1.4,
-                    path: widget.album.albumArt,
+                    source: AlbumArtSource.path(
+                      widget.album.albumArt,
+                      albumId: widget.album.id,
+                    ),
                   ),
                   Expanded(
                     child: Padding(
@@ -256,7 +262,6 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                     sliver: ContentListView.sliver<Song>(
                       list: songs,
                       selectionController: selectionController,
-                      // TODO: leading: leading,
                       currentTest: (index) => ContentControl.state.queues.persistent == widget.album &&
                                     songs[index].sourceId == ContentControl.state.currentSong.sourceId,
                       songTileVariant: SongTileVariant.number,

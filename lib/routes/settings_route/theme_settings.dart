@@ -55,14 +55,18 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   }
 
   void _handleColorTap(Color color) {
-    prevPrimaryColor = ColorTween(
-      begin: prevPrimaryColor,
-      end: primaryColor,
-    ).evaluate(controller);
-    ThemeControl.changePrimaryColor(color);
-    primaryColor = color;
-    controller.reset();
-    controller.forward();
+    if (color != primaryColor) {
+      setState(() {
+        prevPrimaryColor = ColorTween(
+          begin: prevPrimaryColor,
+          end: primaryColor,
+        ).evaluate(controller);
+      });
+      primaryColor = color;
+      ThemeControl.changePrimaryColor(color);
+      controller.reset();
+      controller.forward();
+    }
   }
 
   Future<bool> _handlePop() {

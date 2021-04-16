@@ -4,6 +4,8 @@
 # TODO: move this to nt4f04unds_widgets
 
 analyzer:
+  errors:
+    import_of_legacy_library_into_null_safe: ignore
   exclude:
     - "lib/localization/gen/**"
 

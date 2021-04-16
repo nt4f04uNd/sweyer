@@ -8,7 +8,6 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart'
     hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
@@ -17,11 +16,11 @@ class ShowFunctions extends NFShowFunctions {
   ShowFunctions._();
   static final instance = ShowFunctions._();
 
-  /// Shows toast from [Fluttertoast] with already set [backgroundColor] to `Color.fromRGBO(18, 18, 18, 1)`
+  /// Shows toast from `fluttertoast` plugin.
   Future<bool> showToast({
     @required String msg,
     Toast toastLength,
-    double fontSize = 14.0,
+    double fontSize = 15.0,
     ToastGravity gravity,
     Color textColor,
     Color backgroundColor,
@@ -35,6 +34,7 @@ class ShowFunctions extends NFShowFunctions {
       gravity: gravity,
       textColor: textColor,
       backgroundColor: backgroundColor,
+      fontAsset: 'assets/fonts/Manrope/manrope-semibold.ttf',
       timeInSecForIosWeb: 20000,
     );
   }

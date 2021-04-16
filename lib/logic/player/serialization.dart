@@ -5,7 +5,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';

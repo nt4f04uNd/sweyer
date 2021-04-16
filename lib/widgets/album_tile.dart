@@ -40,6 +40,8 @@ class AlbumTile extends SelectableWidget<SelectionEntry> {
   })  : assert(album != null),
         assert(index != null),
         assert(selectionController != null),
+        assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+               selectionController is SelectionController<SelectionEntry<Song>>),
         horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
         super.selectable(
           key: key,
@@ -117,11 +119,17 @@ class _AlbumTileState extends SelectableState<AlbumTile> {
               padding: const EdgeInsets.only(right: 8.0),
               child: widget.small
                 ? AlbumArt.songTile(
-                    path: widget.album.albumArt,
+                    source: AlbumArtSource.path(
+                      widget.album.albumArt,
+                      albumId: widget.album.id,
+                    ),
                     current: current,
                   )
                 : AlbumArt.albumTile(
-                  path: widget.album.albumArt,
+                  source: AlbumArtSource.path(
+                    widget.album.albumArt,
+                    albumId: widget.album.id,
+                  ),
                   current: current,
                 ),
             ),

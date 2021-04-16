@@ -6,17 +6,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// This allows the [Song] class to access private members in
-/// the generated file. The value for this is *.g.dart, where
-/// the star denotes the source file name.
-part 'song.g.dart';
-
-/// An annotation for the code generator to know that this class needs the
-/// JSON serialization logic to be generated.
-@JsonSerializable()
 // ignore: must_be_immutable
 class Song extends Content with EquatableMixin {
   @override
@@ -58,6 +49,9 @@ class Song extends Content with EquatableMixin {
 
   /// Returns the album art for this (if any).
   String get albumArt => getAlbum()?.albumArt;
+
+
+  String get contentUri => 'content://media/external/audio/media/$sourceId';
 
   Song({
     @required this.id,
@@ -107,23 +101,52 @@ class Song extends Content with EquatableMixin {
     );
   }
 
-  factory Song.fromJson(Map<String, dynamic> json) => _$SongFromJson(json);
-  Map<String, dynamic> toJson() => _$SongToJson(this);
-
   MediaItem toMediaItem() {
     return MediaItem(
       id: sourceId.toString(),
+      uri: contentUri,
+      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      // artUri: albumArt == null ? null : Uri.file(albumArt),
+      artUri: null,
       album: getAlbum().album,
       title: title,
-       // TODO: use displaySubtitle and pass raw artist here when https://github.com/ryanheise/audio_service/issues/651 is resolved
       artist: formatArtist(artist, staticl10n),
       genre: null, // TODO: GENRE
       duration: Duration(milliseconds: duration),
-      artUri: Uri.file(albumArt ?? ContentControl.state.defaultAlbumArtPath),
       playable: true,
-      // displaySubtitle: formatArtist(artist, staticl10n),
       rating: null,
       extras: null,
     );
   }
+
+  factory Song.fromMap(Map<String, dynamic> json) {
+    return Song(
+      id: json['id'] as int,
+      album: json['album'] as String,
+      albumId: json['albumId'] as int,
+      artist: json['artist'] as String,
+      artistId: json['artistId'] as int,
+      title: json['title'] as String,
+      track: json['track'] as String,
+      dateAdded: json['dateAdded'] as int,
+      dateModified: json['dateModified'] as int,
+      duration: json['duration'] as int,
+      size: json['size'] as int,
+      data: json['data'] as String,
+    );
+  }
+  Map<String, dynamic> toMap() => <String, dynamic>{
+      'id': id,
+      'album': album,
+      'albumId': albumId,
+      'artist': artist,
+      'artistId': artistId,
+      'title': title,
+      'track': track,
+      'dateAdded': dateAdded,
+      'dateModified': dateModified,
+      'duration': duration,
+      'size': size,
+      'data': data,
+    };
 }

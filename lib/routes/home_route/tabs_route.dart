@@ -43,46 +43,22 @@ class TabsRoute extends StatefulWidget {
   TabsRouteState createState() => TabsRouteState();
 }
 
-class TabsRouteState extends State<TabsRoute>
-  with TickerProviderStateMixin, SelectionHandler {
-  ContentMap<ContentSelectionController> selectionControllersMap;
+class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, SelectionHandler {
+  ContentSelectionController selectionController;
   TabController tabController;
   StreamSubscription<Song> _songChangeSubscription;
   StreamSubscription<void> _contentChangeSubscription;
 
-  SelectionController get selectionController {
-    switch (tabController.index) {
-      case 0:
-        return selectionControllersMap.getValue<Song>();
-      case 1:
-        return selectionControllersMap.getValue<Album>();
-      default:
-        throw UnimplementedError();
-    }
-  }
-
-  _ContentTab<T> buildContentTab<T extends Content>() {
-    return _ContentTab<T>(
-      selectionController: selectionControllersMap.getValue<T>()
-          as ContentSelectionController<SelectionEntry<T>>
-      );
-  }
-
   @override
   void initState() {
     super.initState();
-    selectionControllersMap = ContentMap({
-      Song: ContentSelectionController.forContent<Song>(this),
-      Album: ContentSelectionController.forContent<Album>(this),
-    });
+    selectionController = ContentSelectionController.forContent(this)
+      ..addListener(handleSelection)
+      ..addStatusListener(handleSelectionStatus);
     tabController = TabController(
       vsync: this,
       length: 2,
     );
-    for (final controller in selectionControllersMap.values) {
-      controller.addListener(handleSelection);
-      controller.addStatusListener(handleSelectionStatus);
-    }
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
       setState(() {/* update current track indicator */});
     });
@@ -96,9 +72,7 @@ class TabsRouteState extends State<TabsRoute>
 
   @override
   void dispose() {
-    for (final controller in selectionControllersMap.values) {
-      controller.dispose();
-    }
+    selectionController.dispose();
     tabController.dispose();
     _contentChangeSubscription.cancel();
     _songChangeSubscription.cancel();
@@ -158,8 +132,7 @@ class TabsRouteState extends State<TabsRoute>
           ),
         ],
         actionsSelection: [
-          if (selectionController is ContentSelectionController<SelectionEntry<Song>>)
-            DeleteSongsAppBarAction<Song>(controller: selectionController),
+          DeleteSongsAppBarAction<Content>(controller: selectionController),
         ],
         title: Padding(
           padding: const EdgeInsets.only(left: 15.0),
@@ -193,15 +166,13 @@ class TabsRouteState extends State<TabsRoute>
                         top: ContentControl.state.albums.isNotEmpty ? 44.0 : 0.0,
                       ),
                       child: ContentControl.state.albums.isEmpty
-                          ? buildContentTab<Song>()
+                          ? _ContentTab<Song>(selectionController: selectionController)
                           : TabBarView(
                               controller: tabController,
-                              physics: selectionController.inSelection
-                                  ? const NeverScrollableScrollPhysics()
-                                  : const _TabsScrollPhysics(),
+                              physics: const _TabsScrollPhysics(),
                               children: [
-                                buildContentTab<Song>(),
-                                buildContentTab<Album>(),
+                                _ContentTab<Song>(selectionController: selectionController),
+                                _ContentTab<Album>(selectionController: selectionController)
                               ],
                             ),
                     ),
@@ -258,7 +229,7 @@ class TabsRouteState extends State<TabsRoute>
 class _ContentTab<T extends Content> extends StatefulWidget {
   _ContentTab({Key key, @required this.selectionController}) : super(key: key);
 
-  final ContentSelectionController<SelectionEntry<T>> selectionController;
+  final ContentSelectionController<SelectionEntry> selectionController;
 
   @override
   _ContentTabState<T> createState() => _ContentTabState();
@@ -293,7 +264,6 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
     super.build(context);
     final list = ContentControl.getContent<T>();
     final selectionController = widget.selectionController;
-    final l10n = getl10n(context);
     return RefreshIndicator(
       key: key,
       strokeWidth: 2.5,

@@ -214,6 +214,7 @@ class AppRouter extends RouterDelegate<AppRoutes>
     updateTransitionSettings();
   }
 
+  VoidCallback setState;
   void updateTransitionSettings({bool themeChanged = false}) {
     final dismissBarrier = _dismissBarrier;
     transitionSettings.grey.uiStyle = Constants.UiTheme.grey.auto;
@@ -225,8 +226,10 @@ class AppRouter extends RouterDelegate<AppRoutes>
       : Constants.UiTheme.black.auto;
     transitionSettings.theme.dismissBarrier = dismissBarrier;
     if (themeChanged) {
+      setState?.call();
       transitionSettings.theme.dismissible = false;
       Future.delayed(dilate(const Duration(milliseconds: 300)), () {
+        setState?.call();
         transitionSettings.theme.dismissible = true;
       });
     }
@@ -234,41 +237,46 @@ class AppRouter extends RouterDelegate<AppRoutes>
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      observers: [routeObserver],
-      onPopPage: _handlePopPage,
-      pages: <Page<void>>[
-        StackFadePage(
-          key: AppRoutes.initial.key,
-          child: const InitialRoute(),
-          transitionSettings: transitionSettings.initial,
-        ),
-        if (_routes.length > 1 && _routes[1] == AppRoutes.settings)
-          StackFadePage(
-            key: AppRoutes.settings.key,
-            child: const SettingsRoute(),
-            transitionSettings: transitionSettings.dismissible,
-          ),
-        if (_routes.length > 2 && _routes[2] == AppRoutes.themeSettings)
-          StackFadePage(
-            key: AppRoutes.themeSettings.key,
-            child: const ThemeSettingsRoute(),
-            transitionSettings: transitionSettings.theme,
-          ),
-        if (_routes.length > 2 && _routes[2] == AppRoutes.licenses)
-          StackFadePage(
-            key: AppRoutes.licenses.key,
-            child: const LicensePage(),
-            transitionSettings: transitionSettings.dismissible,
-          ),
-        if (_routes.length > 1 && _routes[1] == AppRoutes.dev)
-          StackFadePage(
-            key: AppRoutes.dev.key,
-            child: const DevRoute(),
-            transitionSettings: transitionSettings.dismissible,
-          ),
-      ],
+    return StatefulBuilder(
+      builder: (BuildContext context, setState) {
+        this.setState = () => setState(() { });
+        return Navigator(
+          key: navigatorKey,
+          observers: [routeObserver],
+          onPopPage: _handlePopPage,
+          pages: <Page<void>>[
+            StackFadePage(
+              key: AppRoutes.initial.key,
+              child: const InitialRoute(),
+              transitionSettings: transitionSettings.initial,
+            ),
+            if (_routes.length > 1 && _routes[1] == AppRoutes.settings)
+              StackFadePage(
+                key: AppRoutes.settings.key,
+                child: const SettingsRoute(),
+                transitionSettings: transitionSettings.dismissible,
+              ),
+            if (_routes.length > 2 && _routes[2] == AppRoutes.themeSettings)
+              StackFadePage(
+                key: AppRoutes.themeSettings.key,
+                child: const ThemeSettingsRoute(),
+                transitionSettings: transitionSettings.theme,
+              ),
+            if (_routes.length > 2 && _routes[2] == AppRoutes.licenses)
+              StackFadePage(
+                key: AppRoutes.licenses.key,
+                child: const LicensePage(),
+                transitionSettings: transitionSettings.dismissible,
+              ),
+            if (_routes.length > 1 && _routes[1] == AppRoutes.dev)
+              StackFadePage(
+                key: AppRoutes.dev.key,
+                child: const DevRoute(),
+                transitionSettings: transitionSettings.dismissible,
+              ),
+          ],
+        );
+      },
     );
   }
 }

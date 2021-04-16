@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
@@ -103,6 +105,8 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   }) : assert(song != null),
        assert(index != null),
        assert(selectionController != null),
+       assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+              selectionController is SelectionController<SelectionEntry<Song>>),
        super.selectable(
          key: key,
          selected: selected,
@@ -139,6 +143,18 @@ class SongTile extends SelectableWidget<SelectionEntry> {
 
 class _SongTileState extends SelectableState<SongTile> {
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
+
+  Uint8List bytes;
+
+  @override
+  void initState() { 
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    
+  }
 
   void _handleTap() {
     super.handleTap(() async {
@@ -203,7 +219,11 @@ class _SongTileState extends SelectableState<SongTile> {
     final current = _performCurrentTest();
     final albumArt = showAlbumArt
         ? AlbumArt.songTile(
-            path: widget.song.albumArt,
+            // source: AlbumArtSource.path(bytes),
+            source: AlbumArtSource.path(
+              widget.song.albumArt,
+              albumId:  widget.song.albumId,
+            ),
             current: current,
           )
         : SongNumber(

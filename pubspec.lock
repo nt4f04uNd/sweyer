@@ -46,29 +46,23 @@ packages:
   audio_service:
     dependency: "direct main"
     description:
-      path: audio_service
-      ref: notif
-      resolved-ref: "6c5cba9c223011f859bb1189ac191705b6d8e1f1"
-      url: "https://github.com/nt4f04uNd/audio_service/"
-    source: git
+      path: "C:/dev/projects/native/audio_service/audio_service"
+      relative: false
+    source: path
     version: "0.16.2"
   audio_service_platform_interface:
     dependency: transitive
     description:
-      path: audio_service_platform_interface
-      ref: notif
-      resolved-ref: "6c5cba9c223011f859bb1189ac191705b6d8e1f1"
-      url: "https://github.com/nt4f04und/audio_service.git"
-    source: git
+      path: "../../audio_service/audio_service_platform_interface"
+      relative: true
+    source: path
     version: "1.0.0"
   audio_service_web:
     dependency: transitive
     description:
-      path: audio_service_web
-      ref: notif
-      resolved-ref: "6c5cba9c223011f859bb1189ac191705b6d8e1f1"
-      url: "https://github.com/nt4f04und/audio_service.git"
-    source: git
+      path: "../../audio_service/audio_service_web"
+      relative: true
+    source: path
     version: "0.16.2"
   audio_session:
     dependency: "direct overridden"
@@ -394,9 +388,11 @@ packages:
   fluttertoast:
     dependency: "direct main"
     description:
-      name: fluttertoast
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: f753a91591569acece70a9e8748745efa9faabfb
+      resolved-ref: f753a91591569acece70a9e8748745efa9faabfb
+      url: "https://github.com/nt4f04uNd/fluttertoast/"
+    source: git
     version: "8.0.3"
   glob:
     dependency: transitive
@@ -471,19 +467,12 @@ packages:
     source: hosted
     version: "0.6.3"
   json_annotation:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.1"
-  json_serializable:
-    dependency: "direct dev"
-    description:
-      name: json_serializable
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.5.1"
   just_audio:
     dependency: "direct main"
     description:
@@ -769,13 +758,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.1"
-  source_gen:
-    dependency: transitive
-    description:
-      name: source_gen
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.9.10+3"
   source_span:
     dependency: transitive
     description:

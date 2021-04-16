@@ -18,7 +18,6 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.channels.GeneralChannel;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
@@ -26,6 +25,7 @@ import com.nt4f04und.sweyer.player.Song;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import androidx.annotation.Nullable;
 
@@ -46,9 +46,8 @@ public class DeletionService extends Service {
    @Override
    public int onStartCommand(Intent intent, int flags, int startId) {
       AsyncTask.execute(() -> {
-         Song[] songs = new Gson().fromJson((String) (String) intent.getSerializableExtra("songs"), Song[].class);
+         ArrayList<HashMap<String, Object>> songs = (ArrayList<HashMap<String, Object>>) intent.getSerializableExtra("songs");
          ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
-         Gson gson = new Gson();
 
          // I'm setting `android:requestLegacyExternalStorage="true"`, because there's no consistent way
          // to delete a bulk of music files in scoped storage in Android Q, or at least I didn't find it
@@ -57,8 +56,8 @@ public class DeletionService extends Service {
          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
-            for (Song song : songs) {
-               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.id));
+            for (HashMap<String, Object> song : songs) {
+               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, (long) song.get("id")));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
                     GeneralChannel.instance.activity.getContentResolver(),
@@ -79,21 +78,22 @@ public class DeletionService extends Service {
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();
             // Delete files and populate `songListSuccessful` with successful uris
-            for (Song song : songs) {
-               File file = new File(song.data);
+            for (HashMap<String, Object> song : songs) {
+               String data = (String) song.get("data");
+               File file = new File(data);
 
                if (file.exists()) {
                   // Delete the actual file
                   if (file.delete()) {
-                     songListSuccessful.add(song.data);
+                     songListSuccessful.add(data);
                   } else {
-                     Log.e(Constants.LogTag, "file not deleted: " + song.data);
+                     Log.e(Constants.LogTag, "file not deleted: " + data);
                   }
                }
             }
 
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            String where = buildWhereClauseForDeletion(songs.length);
+            String where = buildWhereClauseForDeletion(songs.size());
             String[] selectionArgs = songListSuccessful.toArray(new String[0]);
             // Delete file from `MediaStore`
             resolver.delete(uri, where, selectionArgs);
