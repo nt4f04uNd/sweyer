@@ -12,7 +12,7 @@ import 'dart:math' as math;
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide SearchDelegate;
-import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -77,14 +77,6 @@ class _SearchStateDelegate {
       closeButton: true,
     )
   {
-    scrollController.addListener(() {
-      bodyScrolledNotifier.value =
-        scrollController.offset != scrollController.position.minScrollExtent;
-    });
-    singleListScrollController.addListener(() {
-      bodyScrolledNotifier.value =
-        singleListScrollController.offset != singleListScrollController.position.minScrollExtent;
-    });
     selectionController.addListener(setState);
     /// Initalize [prevQuery] and [trimmedQuery] values.
     onQueryChange();
@@ -98,8 +90,8 @@ class _SearchStateDelegate {
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<Type> contentTypeNotifier = ValueNotifier(null);
   _Results results = _Results();
-  String prevQuery;
-  String trimmedQuery;
+  String prevQuery = '';
+  String trimmedQuery = '';
 
   void dispose() {
     scrollController.dispose();
@@ -135,30 +127,20 @@ class _SearchStateDelegate {
   void onQueryChange() {
     trimmedQuery = query.trim();
     // Update results if previous query is distinct from current.
-    if (trimmedQuery.isEmpty) {
-      _onClear();
-    } else if (prevQuery != query) {
-      _onInput();
+    if (prevQuery != query) {
+      if (trimmedQuery.isEmpty) {
+        results.clear();
+        contentType = null;
+      } else {
+        bodyScrolledNotifier.value = false;
+        results.search(trimmedQuery);
+      }
+      if (scrollController?.hasClients ?? false)
+        scrollController.jumpTo(0);
+      if (singleListScrollController?.hasClients ?? false)
+        singleListScrollController.jumpTo(0);
     }
     prevQuery = trimmedQuery;
-  }
-  
-  void _onClear() {
-    results.clear();
-    contentType = null;
-    // Scroll is reset when content type changes
-    bodyScrolledNotifier.value = false;
-  }
-
-  void _onInput() {
-    bodyScrolledNotifier.value = false;
-    if (scrollController?.hasClients ?? false) {
-      scrollController.jumpTo(0);
-    }
-    if (singleListScrollController?.hasClients ?? false) {
-      singleListScrollController.jumpTo(0);
-    }
-    results.search(trimmedQuery);
   }
 
   /// Handles tap to different content tiles.
@@ -539,7 +521,8 @@ class _DelegateBuilder extends StatelessWidget {
   }
 
   bool _handleNotification(_SearchStateDelegate delegate, ScrollNotification notification) {
-    delegate.bodyScrolledNotifier.value = notification.metrics.pixels != notification.metrics.minScrollExtent;
+    delegate.bodyScrolledNotifier.value =
+      notification.metrics.pixels != notification.metrics.minScrollExtent;
     return false;
   }
 
@@ -548,89 +531,96 @@ class _DelegateBuilder extends StatelessWidget {
     final delegate = _SearchStateDelegate._of(context);
     final results = delegate.results;
     final l10n = getl10n(context);
-    return ValueListenableBuilder<Type>(
-      valueListenable: delegate.contentTypeNotifier,
-      builder: (context, contentType, child) {
-        if (delegate.trimmedQuery.isEmpty) {
-          return _Suggestions();
-        } else if (results.empty) {
-          // Displays a message that there's nothing found
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8.0),
-                  child: Icon(Icons.error_outline_rounded),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 80.0),
-                  child: Text(
-                    l10n.searchNothingFound,
-                    textAlign: TextAlign.center,
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) => _handleNotification(delegate, notification),
+      child: ValueListenableBuilder<Type>(
+        valueListenable: delegate.contentTypeNotifier,
+        builder: (context, contentType, child) {
+          if (delegate.trimmedQuery.isEmpty) {
+            return _Suggestions();
+          } else if (results.empty) {
+            // Displays a message that there's nothing found
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8.0),
+                    child: Icon(Icons.error_outline_rounded),
                   ),
-                ),
-              ],
-            ),
-          );
-        } else {
-          final contentTypeEntries = results.map.entries
-            .where((el) => el.value.isNotEmpty)
-            .toList();
-          final single = contentTypeEntries.length == 1;
-          final showSingleCategoryContentList = single || contentType != null;
-          final contentListContentType = single ? contentTypeEntries.single.key : contentType;
-          return NFBackButtonListener(
-            onBackButtonPressed: () => _handlePop(delegate),
-            child: PageTransitionSwitcher(
-              duration: const Duration(milliseconds: 300),
-              reverse: !single && contentType == null,
-              transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                  transitionType: SharedAxisTransitionType.vertical,
-                  animation: animation,
-                  secondaryAnimation: secondaryAnimation,
-                  fillColor: Colors.transparent,
-                  child: child,
-                ),
-              child: Container(
-                key: ValueKey(contentType),
-                child: showSingleCategoryContentList
-                    ? NotificationListener<ScrollNotification>(
-                        onNotification: (notification) => _handleNotification(delegate, notification),
-                        child: ContentListView(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 80.0),
+                    child: Text(
+                      l10n.searchNothingFound,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            final contentTypeEntries = results.map.entries
+              .where((el) => el.value.isNotEmpty)
+              .toList();
+            final single = contentTypeEntries.length == 1;
+            final showSingleCategoryContentList = single || contentType != null;
+            final contentListContentType = single ? contentTypeEntries.single.key : contentType;
+            return NFBackButtonListener(
+              onBackButtonPressed: () => _handlePop(delegate),
+              child: PageTransitionSwitcher(
+                duration: const Duration(milliseconds: 300),
+                reverse: !single && contentType == null,
+                transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                    transitionType: SharedAxisTransitionType.vertical,
+                    animation: animation,
+                    secondaryAnimation: secondaryAnimation,
+                    fillColor: Colors.transparent,
+                    child: child,
+                  ),
+                child: Container(
+                  key: ValueKey(contentType),
+                  child: showSingleCategoryContentList
+                      ? () {
+                        final list = single
+                          ? contentTypeEntries.single.value
+                          : contentPick<Content, List<Content>>(
+                              contentType: contentType,
+                              song: delegate.results.songs,
+                              album: delegate.results.albums,
+                            );
+                        return ContentListView(
                           contentType: contentListContentType,
                           controller: delegate.singleListScrollController,
                           selectionController: delegate.selectionController,
+                          selectedTest: (index) =>delegate.selectionController.data
+                            .firstWhereOrNull((el) => el.data == list[index]) != null,
                           onItemTap: delegate.getContentTileTapHandler(contentListContentType),
-                          list: single ? contentTypeEntries.single.value : contentPick<Content, List<Content>>(
-                            contentType: contentType,
-                            song: delegate.results.songs,
-                            album: delegate.results.albums,
+                          list: list,
+                        );
+                      } ()
+                      : 
+                      // AppScrollbar( // TODO: enable this when i have more content on search screen
+                      //     controller: delegate.scrollController,
+                      //     child: 
+                          ListView(
+                            controller: delegate.scrollController,
+                            children: [
+                              for (final entry in contentTypeEntries)
+                                if (entry.value.isNotEmpty)
+                                  _ContentSection(
+                                    contentType: entry.key,
+                                    items: results.map[entry.key],
+                                    onTap: () => delegate.contentType = entry.key,
+                                  ),
+                            ],
                           ),
-                        ),
-                      )
-                    : 
-                    // AppScrollbar( // TODO: enable this when i have more content on search screen
-                    //     controller: delegate.scrollController,
-                    //     child: 
-                        ListView(
-                          controller: delegate.scrollController,
-                          children: [
-                            for (final entry in contentTypeEntries)
-                              if (entry.value.isNotEmpty)
-                                _ContentSection(
-                                  contentType: entry.key,
-                                  items: results.map[entry.key],
-                                  onTap: () => delegate.contentType = entry.key,
-                                ),
-                          ],
-                        ),
+                  ),
                 ),
-              ),
-            );
-        }
-      },
+              );
+          }
+        },
+      ),
     );
   }
 }
@@ -780,12 +770,8 @@ class _ContentSection<T extends Content> extends StatelessWidget {
         final song = items[index] as Song;
         return SongTile.selectable(
           index: index,
-          selected: delegate.selectionController.data.contains(
-            SelectionEntry<Song>(
-              data: song,
-              index: 0,
-            ),
-          ),
+          selected: delegate.selectionController.data
+            .firstWhereOrNull((el) => el.data == song) != null,
           song: song,
           selectionController: delegate.selectionController,
           horizontalPadding: 12.0,
@@ -796,12 +782,8 @@ class _ContentSection<T extends Content> extends StatelessWidget {
         final album = items[index] as Album;
         return AlbumTile.selectable(
           index: index,
-          selected: delegate.selectionController.data.contains(
-            SelectionEntry<Album>(
-              data: album,
-              index: 0,
-            ),
-          ),
+          selected: delegate.selectionController.data
+            .firstWhereOrNull((el) => el.data == album) != null,
           album: items[index] as Album,
           selectionController: delegate.selectionController,
           small: false,
@@ -902,7 +884,7 @@ class _SuggestionsState extends State<_Suggestions> {
                       return _SuggestionTile(index: index);
                     },
                   ),
-                )
+                ),
         );
       },
     );

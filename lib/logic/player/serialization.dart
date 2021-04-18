@@ -50,7 +50,7 @@ abstract class JsonSerializer<R, S> {
 /// Used to serialize queue.
 ///
 /// Saves only songs ids, so you have to search indexes in 'all' queue to restore.
-class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
+class QueueSerializer extends JsonSerializer<List<Map<String, dynamic>>, List<Song>> {
   const QueueSerializer(this.fileName);
 
   @override
@@ -60,11 +60,20 @@ class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
 
   /// Returns a list of song ids.
   @override
-  Future<List<int>> read() async {
+  Future<List<Map<String, dynamic>>> read() async {
     try {
       final file = await getFile();
       final jsonContent = await file.readAsString();
-      return jsonDecode(jsonContent).cast<int>();
+      final list = jsonDecode(jsonContent) as List;
+      if (list.isNotEmpty) {
+        // Initially the queue was saved as list of ids.
+        // This ensures there will be no errors in case someone migrates from
+        // the old version.
+        if (list[0] is int) {
+          return [];
+        }
+      }
+      return list.cast<Map<String, dynamic>>();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
         ex,
@@ -79,13 +88,34 @@ class QueueSerializer extends JsonSerializer<List<int>, List<Song>> {
     }
   }
 
-  /// Serializes provided songs into queue
+  /// Serializes provided songs into json as array of such entries:
+  ///
+  /// ```ts
+  /// {
+  ///   "id": number,
+  ///   "origin_type": null | "album",
+  ///   "origin_id": null | number,
+  /// }
+  /// ```
+  /// 
+  /// * `id` is song id
+  /// * `origin_type` is the persistent queue type (if any)
+  /// * `origin_id` is the persistent queue type (if any)
   @override
   Future<void> save(List<Song> data) async {
     final file = await getFile();
-    final json = jsonEncode(data.map((el) => el.id).toList());
+    final json = jsonEncode(data.map((song) {
+      final origin = song.origin;
+      return {
+        'id': song.id,
+        if (origin != null)
+          'origin_type': origin is Album ? 'album' : throw UnimplementedError(),
+        if (origin != null)
+          'origin_id': origin.id,
+      };
+    }).toList());
     await file.writeAsString(json);
-    debugPrint('$fileName: json saved');
+    // debugPrint('$fileName: json saved');
   }
 }
 
@@ -125,6 +155,6 @@ class IdMapSerializer extends JsonSerializer<Map<String, int>, Map<String, int>>
   Future<void> save(Map<String, int> data) async {
     final file = await getFile();
     await file.writeAsString(jsonEncode(data));
-    debugPrint('$fileName: json saved');
+    // debugPrint('$fileName: json saved');
   }
 }

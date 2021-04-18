@@ -520,20 +520,7 @@ class _QueueTabState extends State<_QueueTab>
         ),
       ),
     );
-    // TODO: THIS for the queue SongListView
-    // return SongTile.selectable(
-    //   song: songs[index],
-    //   index: index,
-    //   selectionController: widget.selectionController,
-    //   variant: ContentControl.state.queues.persistent is Album
-    //       ? SongTileVariant.number
-    //       : SongTileVariant.albumArt,
-    //   selected: widget.selectionController.data.contains(
-    //     SongSelectionEntry(index: index),
-    //   ),
-    //   current: index == currentSongIndex,
-    //   clickBehavior: SongClickBehavior.playPause,
-    // );
+    final list = ContentControl.state.queues.current.songs;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -544,7 +531,7 @@ class _QueueTabState extends State<_QueueTab>
               valueListenable: ContentControl.state.selectionNotifier,
               builder: (context, value, child) {
                 return ContentListView<Song>(
-                  list: ContentControl.state.queues.current.songs,
+                  list: list,
                   controller: scrollController,
                   selectionController: widget.selectionController,
                   padding: EdgeInsets.only(

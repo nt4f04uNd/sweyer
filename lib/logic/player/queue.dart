@@ -70,16 +70,6 @@ class Queue implements _QueueOperations<Song> {
     songs.clear();
   }
 
-  /// Checks if queue contains song.
-  bool contains(Song song) {
-    for (final _song in _songs) {
-      if (_song == song) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   /// Adds the [song] (a copy of it) to a queue.
   void add(Song song) {
     songs.add(song.copyWith());
@@ -92,60 +82,68 @@ class Queue implements _QueueOperations<Song> {
 
   /// Removes a song from the queue at given [index] and returns
   /// the removed object.
-  Song removeSongAt(int index) {
+  Song removeAt(int index) {
     return songs.removeAt(index);
   }
 
   @override
-  void removeSong(Song song) {
-    byId.removeSong(song.id);
+  bool contains(Song song) {
+    return byId.contains(song.id);
   }
 
   @override
-  Song? getSong(Song song) {
-    return byId.getSong(song.id);
+  void remove(Song song) {
+    byId.remove(song.id);
   }
 
   @override
-  int getSongIndex(Song song) {
-    return byId.getSongIndex(song.id);
+  Song? get(Song song) {
+    return byId.get(song.id);
   }
 
   @override
-  Song? getNextSong(Song song) {
-    return byId.getNextSong(song.id);
+  int getIndex(Song song) {
+    return byId.getIndex(song.id);
   }
 
   @override
-  Song? getPrevSong(Song song) {
-    return byId.getPrevSong(song.id);
+  Song? getNext(Song song) {
+    return byId.getNext(song.id);
+  }
+
+  @override
+  Song? getPrev(Song song) {
+    return byId.getPrev(song.id);
   }
 
   /// Searches each song of this queue in another [queue] and removes
   /// it if doesn't find it.
   void compareAndRemoveObsolete(Queue queue) {
     songs.removeWhere((song) {
-      return queue.getSong(song) == null;
+      return queue.get(song) == null;
     });
   }
 }
 
 /// Describes generic operations on the song queue.
 abstract class _QueueOperations<T> {
-  /// Removes song.
-  void removeSong(T arg);
+  /// Checks if queue contains song.
+  bool contains(T arg);
 
-  /// Finds a song.
-  Song? getSong(T arg);
+  /// Removes song.
+  void remove(T arg);
+
+  /// Retruns song.
+  Song? get(T arg);
 
   /// Returns song index.
-  int getSongIndex(T arg);
+  int getIndex(T arg);
 
-  /// Finds a song and returns the one that goes after it.
-  Song? getNextSong(T arg);
+  /// Returns next song.
+  Song? getNext(T arg);
 
-  /// Finds a song and returns the one that goes before it.
-  Song? getPrevSong(T arg);
+  /// Returns prev song.
+  Song? getPrev(T arg);
 }
 
 /// Implements opertions on [queue] by IDs of the [Song]s.
@@ -154,23 +152,28 @@ class _QueueOperationsById implements _QueueOperations<int> {
   final Queue queue;
 
   @override
-  void removeSong(int id) {
+  bool contains(int id) {
+    return queue.songs.firstWhereOrNull((el) => el.id == id) != null;
+  }
+
+  @override
+  void remove(int id) {
     queue.songs.removeWhere((el) => el.id == id);
   }
 
   @override
-  Song? getSong(int id) {
+  Song? get(int id) {
     return queue.songs.firstWhereOrNull((el) => el.id == id);
   }
 
   @override
-  int getSongIndex(int id) {
+  int getIndex(int id) {
     return queue.songs.indexWhere((el) => el.id == id);
   }
 
   @override
-  Song? getNextSong(int id) {
-    final songIndex = getSongIndex(id);
+  Song? getNext(int id) {
+    final songIndex = getIndex(id);
     if (songIndex < 0) {
       return null;
     }
@@ -182,8 +185,8 @@ class _QueueOperationsById implements _QueueOperations<int> {
   }
 
   @override
-  Song? getPrevSong(int id) {
-    final songIndex = getSongIndex(id);
+  Song? getPrev(int id) {
+    final songIndex = getIndex(id);
     if (songIndex < 0) {
       return null;
     }

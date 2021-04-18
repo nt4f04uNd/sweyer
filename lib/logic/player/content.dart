@@ -224,7 +224,7 @@ class _ContentState {
   /// If current song cannot be found for some reason, will fallback the state
   /// to the index `0` and return it.
   int get currentSongIndex {
-    var index = queues.current.byId.getSongIndex(currentSong.id);
+    var index = queues.current.byId.getIndex(currentSong.id);
     if (index < 0) {
       final firstSong = queues.current.songs[0];
       changeSong(firstSong);
@@ -239,8 +239,7 @@ class _ContentState {
   /// Used for showing [CurrentIndicator] for [PersistenQueue]s.
   ///
   /// See [Song.origin] for more info.
-  PersistentQueue? get currentSongOrigin => _currentSongOrigin;
-  PersistentQueue? _currentSongOrigin;
+  PersistentQueue? get currentSongOrigin => currentSong.origin;
 
   /// Changes current song id and emits change event.
   /// This allows to change the current id visually, separately from the player.
@@ -248,11 +247,6 @@ class _ContentState {
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
     Prefs.songIdInt.set(song.id);
-    if (song.origin == null) {
-      _currentSongOrigin = null;
-    } else {
-      _currentSongOrigin = song.origin;
-    }
     // Song id saved to prefs in the native play method.
     emitSongChange(song);
   }
@@ -384,7 +378,7 @@ abstract class ContentControl {
 
   /// Should be called if played song is duplicated in the current queue.
   static void handleDuplicate(Song song) {
-    final originalSong = state.allSongs.getSong(song)!;
+    final originalSong = state.allSongs.get(song)!;
     if (identical(originalSong, song))
       return;
     final map = state.idMap;
@@ -415,11 +409,11 @@ abstract class ContentControl {
   static void _setOrigins() {
     // Adding origin to the songs in the current persistent playlist.
     if (state.queues.type == QueueType.persistent) {
-      final persistentQueue = state.queues.persistent;
-      for (final song in persistentQueue!.songs) {
+      final songs = state.queues.current.songs;
+      final persistentQueue = state.queues.persistent!;
+      for (final song in songs) {
         song.origin = persistentQueue;
       }
-      state._currentSongOrigin = persistentQueue;
     }
   }
 
@@ -441,9 +435,9 @@ abstract class ContentControl {
     if (songs.length == 1) {
       final song = songs[0];
       if (song != state.currentSong &&
-          song != currentQueue.getNextSong(state.currentSong) &&
+          song != currentQueue.getNext(state.currentSong) &&
           state.currentSongIndex != currentQueue.length - 1) {
-        currentQueue.removeSong(song);
+        currentQueue.remove(song);
       }
     }
     bool contains = true;
@@ -557,7 +551,7 @@ abstract class ContentControl {
       resetQueue();
       MusicPlayer.instance.pause();
     } else {
-      queues.current.removeSong(song);
+      queues.current.remove(song);
       setQueue(modified: true);
     }
   }
@@ -574,7 +568,7 @@ abstract class ContentControl {
       resetQueue();
       MusicPlayer.instance.pause();
     } else {
-      queues.current.removeSongAt(index);
+      queues.current.removeAt(index);
       setQueue(modified: true);
     }
   }
@@ -593,7 +587,7 @@ abstract class ContentControl {
       MusicPlayer.instance.pause();
     } else {
       for (int i = indexes.length - 1; i >= 0; i--) {
-        queues.current.removeSongAt(indexes[i]);
+        queues.current.removeAt(indexes[i]);
       }
       setQueue(modified: true);
     }
@@ -1001,18 +995,18 @@ abstract class ContentControl {
     // On Android R the deletion is performed with OS dialog.
     if (_sdkInt >= 30) {
       for (final id in idSet) {
-        final song = state.allSongs.byId.getSong(id);
+        final song = state.allSongs.byId.get(id);
         if (song != null) {
           songsSet.add(song);
         }
       }
     } else {
       for (final id in idSet) {
-        final song = state.allSongs.byId.getSong(id);
+        final song = state.allSongs.byId.get(id);
         if (song != null) {
           songsSet.add(song);
         }
-        state.allSongs.byId.removeSong(id);
+        state.allSongs.byId.remove(id);
       }
       removeObsolete();
     }
@@ -1020,7 +1014,7 @@ abstract class ContentControl {
     try {
       final result = await ContentChannel.deleteSongs(songsSet);
       if (sdkInt >= 30 && result) {
-        idSet.forEach(state.allSongs.byId.removeSong);
+        idSet.forEach(state.allSongs.byId.remove);
         removeObsolete();
       }
     } catch (ex, stack) {
@@ -1062,21 +1056,41 @@ abstract class ContentControl {
     state.idMap = await idMapSerializer.read();
 
     final List<Song> queueSongs = [];
-    final queueIds = await state.queues._queueSerializer.read();
-    for (final id in queueIds) {
-      final song = state.allSongs.byId.getSong(Song.getSourceId(id));
+    final rawQueue = await state.queues._queueSerializer.read();
+    for (final item in rawQueue) {
+      final id = item['id'];
+      var song = state.allSongs.byId.get(Song.getSourceId(id));
       if (song != null) {
-        queueSongs.add(song.copyWith(id: id));
+        song = song.copyWith(id: id);
+        final origin = item['origin_type'];
+        if (origin != null) {
+          if (origin == 'album') {
+            song.origin = state.albums[item['origin_id']];
+          } else {
+            assert(false);
+          }
+        }
+        queueSongs.add(song);
       }
     }
 
     final List<Song> shuffledSongs = [];
     if (shuffled == true) {
-      final shuffledIds = await state.queues._shuffledSerializer.read();
-      for (final id in shuffledIds) {
-        final song = state.allSongs.byId.getSong(Song.getSourceId(id));
+      final rawShuffledQueue = await state.queues._shuffledSerializer.read();
+      for (final item in rawShuffledQueue) {
+        final id = item['id'];
+        var song = state.allSongs.byId.get(Song.getSourceId(id));
         if (song != null) {
-          shuffledSongs.add(song.copyWith(id: id));
+          song = song.copyWith(id: id);
+          final origin = item['origin_type'];
+          if (origin != null) {
+            if (origin == 'album') {
+              song.origin = state.albums[item['origin_id']];
+            } else {
+              assert(false);
+            }
+          }
+          shuffledSongs.add(song);
         }
       }
     }

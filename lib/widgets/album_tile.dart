@@ -17,7 +17,7 @@ class AlbumTile extends SelectableWidget<SelectionEntry> {
     Key key,
     @required this.album,
     this.trailing,
-    this.currentTest,
+    this.current,
     this.onTap,
     this.small = false,
     double horizontalPadding,
@@ -33,7 +33,7 @@ class AlbumTile extends SelectableWidget<SelectionEntry> {
     @required SelectionController<SelectionEntry> selectionController,
     bool selected = false,
     this.trailing,
-    this.currentTest,
+    this.current,
     this.onTap,
     this.small = false,
     double horizontalPadding,
@@ -55,17 +55,17 @@ class AlbumTile extends SelectableWidget<SelectionEntry> {
   /// Widget to be rendered at the end of the tile.
   final Widget trailing;
 
-  /// Checks whether this album is currently playing, if so, enables animated
+  /// Whether this album is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
   /// 
-  /// If not specified, by default checks if album is `currentSongOrigin` or
+  /// If not specified, by default true if album is `currentSongOrigin` or
   /// if it's currently playing persistent playlist:
   /// 
   /// ```dart
   /// return album == ContentControl.state.currentSongOrigin ||
   ///        album == ContentControl.state.queues.persistent;
   /// ```
-  final ValueGetter<bool> currentTest;
+  final bool current;
   final VoidCallback onTap;
 
   /// Creates a small variant of the tile with the sizes of [SelectableTile].
@@ -92,16 +92,15 @@ class _AlbumTileState extends SelectableState<AlbumTile> {
     });
   }
 
-  bool _performCurrentTest() {
-    if (widget.currentTest != null)
-      return widget.currentTest();
+  bool get current {
+    if (widget.current != null)
+      return widget.current;
     final album = widget.album;
     return album == ContentControl.state.currentSongOrigin ||
            album == ContentControl.state.queues.persistent;
   }
 
   Widget _buildTile() {
-    final current = _performCurrentTest();
     return InkWell(
       onTap: _handleTap,
       onLongPress: toggleSelection,

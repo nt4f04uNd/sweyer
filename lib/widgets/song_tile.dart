@@ -82,7 +82,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   SongTile({
     Key key,
     @required this.song,
-    this.currentTest,
+    this.current,
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
@@ -97,7 +97,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     @required this.index,
     @required SelectionController<SelectionEntry> selectionController,
     bool selected = false,
-    this.currentTest,
+    this.current,
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
@@ -116,16 +116,16 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   final Song song;
   final int index;
 
-  /// Checks whether this song is current, if so, enables animated
+  /// Whether this song is current, if yes, enables animated
   /// [CurrentIndicator] over the ablum art/instead song number.
   /// 
-  /// If not specified, by default checks for equality of [Song.sourceId]
+  /// If not specified, by default true for equality of [Song.sourceId]
   /// of song with given [index] and current song:
   /// 
   /// ```dart
   /// song.sourceId == ContentControl.state.currentSong.sourceId
   /// ```
-  final ValueGetter<bool> currentTest;
+  final bool current;
   final VoidCallback onTap;
   final SongClickBehavior clickBehavior;
   final SongTileVariant variant;
@@ -169,9 +169,9 @@ class _SongTileState extends SelectableState<SongTile> {
     });
   }
 
-  bool _performCurrentTest() {
-    if (widget.currentTest != null)
-      return widget.currentTest();
+  bool get current {
+    if (widget.current != null)
+      return widget.current;
     return widget.song.sourceId == ContentControl.state.currentSong.sourceId;
   }
 
@@ -216,7 +216,6 @@ class _SongTileState extends SelectableState<SongTile> {
 
   @override
   Widget build(BuildContext context) {
-    final current = _performCurrentTest();
     final albumArt = showAlbumArt
         ? AlbumArt.songTile(
             // source: AlbumArtSource.path(bytes),

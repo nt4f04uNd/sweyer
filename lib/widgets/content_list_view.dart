@@ -7,10 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Signature used for the [ContentListView.currentTest].
+/// Signature used for [ContentListView.currentTest] and [ContentListView.selected].
 ///
-/// The argument [index] is index of the song.
-typedef _CurrentTest = bool Function(int index);
+/// The argument [index] is index of the item.
+typedef _ItemTest = bool Function(int index);
+
+/// Signature used for [ContentListView.itemBuilder].
+///
+/// The [item] is the prebuilt item tile widget.
+typedef _ItemBuilder = Widget Function(BuildContext context, int index, Widget item);
 
 /// Renders a list of content.
 ///
@@ -23,10 +28,12 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Key key,
     this.contentType,
     @required this.list,
+    this.itemBuilder,
     this.controller,
     this.selectionController,
     this.leading,
     this.currentTest,
+    this.selectedTest,
     this.songTileVariant = SongTileVariant.albumArt,
     this.songClickBehavior = SongClickBehavior.play,
     this.onItemTap,
@@ -43,6 +50,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Content list.
   final List<T> list;
   
+  /// Builder that allows to wrap the prebuilt item tile tile.
+  /// For example can be used to add [Dismissible].
+  final _ItemBuilder itemBuilder;
+
   /// Viewport scroll controller.
   final ScrollController controller;
 
@@ -53,10 +64,15 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// A widget to build before all items.
   final Widget leading;
 
-  /// Passed to [SongTile.currentTest] (in case if content is [Song]).
+  /// Returned value is passed to [SongTile.current] (in case if content is [Song]).
   ///
   /// The argument [index] is index of the song.
-  final _CurrentTest currentTest;
+  final _ItemTest currentTest;
+
+  /// Returned values is passed to [SongTile.selected] (in case if content is [Song]).
+  /// 
+  /// The argument [index] is index of the song.
+  final _ItemTest selectedTest;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -87,7 +103,6 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Whether to draw a label when scrollbar is dragged.
   final bool showScrollbarLabel;
 
-
   @override
   Widget build(BuildContext context) {
     final localController = controller ?? ScrollController();
@@ -106,9 +121,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
             sliver: sliver<T>(
               contentType: contentType,
               list: list,
+              itemBuilder: itemBuilder,
               selectionController: selectionController,
               leading: leading,
               currentTest: currentTest,
+              selectedTest: selectedTest,
               songTileVariant: songTileVariant,
               songClickBehavior: songClickBehavior,
               onItemTap: onItemTap,
@@ -130,9 +147,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Key key,
     Type contentType,
     @required List<T> list,
+    _ItemBuilder itemBuilder,
     ContentSelectionController<SelectionEntry> selectionController,
     Widget leading,
-    _CurrentTest currentTest,
+    _ItemTest currentTest,
+    _ItemTest selectedTest,
     SongTileVariant songTileVariant = SongTileVariant.albumArt,
     SongClickBehavior songClickBehavior = SongClickBehavior.play,
     VoidCallback onItemTap,
@@ -149,31 +168,34 @@ class ContentListView<T extends Content> extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final item = list[index] as Song;
-                final localCurrentTest = currentTest != null
-                  ? () => currentTest(index)
-                  : null;
+                final localSelected = selectedTest != null
+                  ? selectedTest(index)
+                  : selectionController.data.contains(SelectionEntry<Song>(
+                      data: item,
+                      index: index,
+                    ));
+                Widget child;
                 if (selectable) {
-                  return SongTile.selectable(
+                  child = SongTile.selectable(
                     index: index,
                     song: item,
                     selectionController: selectionController,
                     clickBehavior: songClickBehavior,
                     variant: songTileVariant,
-                    currentTest: localCurrentTest,
-                    selected: selectionController.data.contains(SelectionEntry<Song>(
-                      data: item,
-                      index: index,
-                    )),
+                    current: currentTest?.call(index),
+                    selected: localSelected,
+                    onTap: onItemTap,
+                  );
+                } else {
+                  child = SongTile(
+                    song: item,
+                    current: currentTest?.call(index),
+                    clickBehavior: songClickBehavior,
+                    variant: songTileVariant,
                     onTap: onItemTap,
                   );
                 }
-                return SongTile(
-                  song: item,
-                  currentTest: localCurrentTest,
-                  clickBehavior: songClickBehavior,
-                  variant: songTileVariant,
-                  onTap: onItemTap,
-                );
+                return itemBuilder?.call(context, index, child) ?? child;
               },
               childCount: list.length,
             ),
@@ -183,27 +205,30 @@ class ContentListView<T extends Content> extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final item = list[index] as Album;
-                final localCurrentTest = currentTest != null
-                  ? () => currentTest(index)
-                  : null;
-                if (selectable) {
-                  return AlbumTile.selectable(
-                    index: index,
-                    album: item,
-                    currentTest: localCurrentTest,
-                    onTap: onItemTap,
-                    selected: selectionController.data.contains(SelectionEntry<Album>(
+                final localSelected = selectedTest != null
+                  ? selectedTest(index)
+                  : selectionController.data.contains(SelectionEntry<Album>(
                       data: item,
                       index: index,
-                    )),
+                    ));
+                Widget child;
+                if (selectable) {
+                  child = AlbumTile.selectable(
+                    index: index,
+                    album: item,
+                    current: currentTest?.call(index),
+                    onTap: onItemTap,
+                    selected: localSelected,
                     selectionController: selectionController,
                   );
+                } else {
+                  child = AlbumTile(
+                    album: item,
+                    onTap: onItemTap,
+                    current: currentTest?.call(index),
+                  );
                 }
-                return AlbumTile(
-                  album: item,
-                  onTap: onItemTap,
-                  currentTest: localCurrentTest,
-                );
+                return itemBuilder?.call(context, index, child) ?? child;
               },
               childCount: list.length,
             ),

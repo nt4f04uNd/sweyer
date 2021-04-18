@@ -21,7 +21,6 @@ import android.util.Log;
 import com.nt4f04und.sweyer.Constants;
 import com.nt4f04und.sweyer.channels.GeneralChannel;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
-import com.nt4f04und.sweyer.player.Song;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -33,7 +33,7 @@ abstract class Prefs {
   static final Pref<int?> songIdInt =
       Pref<int>(key: 'song_id', defaultValue: null);
 
-  /// Loop mode. Used on native side.
+  /// Loop mode.
   static final Pref<bool> loopModeBool =
       Pref<bool>(key: 'loop_mode', defaultValue: false);
 

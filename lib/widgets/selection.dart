@@ -954,7 +954,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
       final count = songs.length;
       Song song;
       if (count == 1) {
-        song = ContentControl.state.allSongs.byId.getSong(songs.first.data.sourceId);
+        song = ContentControl.state.allSongs.byId.get(songs.first.data.sourceId);
       }
       ShowFunctions.instance.showDialog(
         context,

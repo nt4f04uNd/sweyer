@@ -53,12 +53,14 @@ class Album extends PersistentQueue {
       id: id.toString(),
       album: null,
       defaultArtBlendColor: ThemeControl.colorForBlend.value,
-      artUri: albumArt == null ? null : Uri.file(albumArt),
+      // artUri: albumArt == null ? null :  Uri(scheme:'', path: albumArt),
+      artUri: null,
       title: album,
       artist: formatArtist(artist, staticl10n),
       genre: null, // TODO: GENRE
       rating: null,
       extras: null,
+      playable: false,
     );
   }
 

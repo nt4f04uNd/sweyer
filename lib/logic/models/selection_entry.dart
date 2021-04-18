@@ -12,7 +12,6 @@ class SelectionEntry<T extends Content> extends Equatable {
   const SelectionEntry({
     @required this.index,
     @required this.data,
-    this.comapareWithIndex = true,
   });
 
   /// Used for comparison and for sorting when content is being
@@ -21,13 +20,6 @@ class SelectionEntry<T extends Content> extends Equatable {
 
   /// The content data.
   final T data;
-
-  /// By default entries are compared with respect to their [index], if
-  /// this is set to `false`, only [data] will be used.
-  /// 
-  /// We can't just throw away the [index] because it used for sorting
-  /// when content is being inserted to queue.
-  final bool comapareWithIndex;
 
   @override
   List<Object> get props => [data, index];

@@ -31,9 +31,7 @@ class Song extends Content with EquatableMixin {
   final String data;
 
   /// The [PersistentQueue] this song comes from.
-  /// This will help determining where the song comes from and allows to show [CurrentIndicator] for [PersistenQueue]s.
-  ///
-  /// This is not stored in any way.
+  /// This will help determining where the song comes from to show [CurrentIndicator]s.
   PersistentQueue origin;
 
   @override
@@ -106,7 +104,7 @@ class Song extends Content with EquatableMixin {
       id: sourceId.toString(),
       uri: contentUri,
       defaultArtBlendColor: ThemeControl.colorForBlend.value,
-      // artUri: albumArt == null ? null : Uri.file(albumArt),
+      // artUri: albumArt == null ? null : Uri(scheme: '', path: albumArt),
       artUri: null,
       album: getAlbum().album,
       title: title,

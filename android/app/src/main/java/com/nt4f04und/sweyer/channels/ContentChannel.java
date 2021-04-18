@@ -8,22 +8,17 @@ package com.nt4f04und.sweyer.channels;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
 import com.nt4f04und.sweyer.handlers.FetchHandler;
-import com.nt4f04und.sweyer.player.Album;
-import com.nt4f04und.sweyer.player.Song;
 
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.Nullable;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -58,7 +57,7 @@ abstract class ContentChannel {
   static Future<bool> deleteSongs(Set<Song> songSet) async {
     return _channel.invokeMethod<bool>(
       'deleteSongs',
-      {'songs': jsonEncode(songSet.map((song) => song.toMap()).toList())},
+      {'songs': songSet.map((song) => song.toMap()).toList()},
     );
   }
 }

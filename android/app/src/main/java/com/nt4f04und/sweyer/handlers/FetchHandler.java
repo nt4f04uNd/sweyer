@@ -8,13 +8,8 @@ package com.nt4f04und.sweyer.handlers;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
 import android.provider.MediaStore;
 
-import androidx.annotation.Nullable;
-
-import com.nt4f04und.sweyer.player.Album;
-import com.nt4f04und.sweyer.player.Song;
 import com.nt4f04und.sweyer.services.DeletionService;
 
 import java.util.ArrayList;
