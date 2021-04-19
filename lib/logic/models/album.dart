@@ -40,7 +40,7 @@ class Album extends PersistentQueue {
   /// Returns content URI of the first item in the album.
   String get contentUri {
     final song = ContentControl.state.allSongs.songs.firstWhere((el) => el.albumId == id);
-    return 'content://media/external/audio/albums/${song.sourceId}';
+    return song.contentUri;
   }
 
   Album({

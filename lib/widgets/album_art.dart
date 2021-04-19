@@ -212,7 +212,7 @@ class _AlbumArtState extends State<AlbumArt> {
                        widget.source._none ||
                        !useBytes && widget.source.path == null ||
                        useBytes && loaded && bytes == null;
-    if (!showDefault) {
+    if (!showDefault && !useBytes) {
       file = File(widget.source.path);
       final exists = file.existsSync();
       showDefault = !exists;
@@ -429,7 +429,7 @@ class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerPro
                        widget.source._none ||
                        !useBytes && widget.source.path == null ||
                        useBytes && loaded && bytes == null;
-    if (!showDefault) {
+    if (!showDefault && !useBytes) {
       file = File(widget.source.path);
       final exists = file.existsSync();
       showDefault = !exists;
@@ -442,7 +442,7 @@ class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerPro
         width: kRotatingArtSize,
         height: kRotatingArtSize,
       );
-    } else if (showDefault || useBytes && loaded && bytes == null) {
+    } else if (showDefault) {
       image = SizedBox(
         width: kRotatingArtSize,
         height: kRotatingArtSize,

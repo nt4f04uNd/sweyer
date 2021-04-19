@@ -165,7 +165,7 @@ static const _baseTopPadding = 24.0;
       child: Drawer(
         elevation: elevation,
         child: Padding(
-          padding: EdgeInsets.only(top: max(0, _baseTopPadding - MediaQuery.of(context).padding.top)),
+          padding: EdgeInsets.only(top: max(0, MediaQuery.of(context).padding.top - _baseTopPadding)),
           child: ListView(
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,

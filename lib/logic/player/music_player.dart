@@ -293,6 +293,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> seek(Duration position) {
+    _setState();
     return player.seek(position);
   }
 
