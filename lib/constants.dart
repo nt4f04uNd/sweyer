@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// Module for more convenient import of constants
-/// You should import this module `as Constants`
+/// This library should be imported `as Constants`
 
 export 'constants/constants.dart';

@@ -9,7 +9,6 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/api.dart' as API;
 import 'package:sweyer/constants.dart' as Constants;
 
 class DevRoute extends StatelessWidget {
@@ -19,25 +18,24 @@ class DevRoute extends StatelessWidget {
     ShowFunctions.instance.showToast(
       msg: 'Test',
       toastLength: Toast.LENGTH_LONG,
-      backgroundColor: ThemeControl.theme.colorScheme.primary,
     );
   }
 
-  void _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
+  Future<void> _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
     final res = await ShowFunctions.instance.showDialog(
-      App.navigatorKey.currentContext,
+      AppRouter.instance.navigatorKey.currentContext,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
-      buttonSplashColor: Constants.AppTheme.dialogButtonSplash.auto,
+      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
       acceptButton: NFButton.accept(
         text: nfl10n.accept,
-        splashColor: Constants.AppTheme.dialogButtonSplash.auto,
+        splashColor: Constants.Theme.glowSplashColor.auto,
         textStyle: const TextStyle(color: Constants.AppColors.red),
       ),
     );
     if (res != null && res) {
       ContentControl.setDevMode(false);
-      App.navigatorKey.currentState.pop();
+      AppRouter.instance.navigatorKey.currentState.pop();
     }
   }
 
@@ -50,12 +48,8 @@ class DevRoute extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: ListView(
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
-                NFListTile(
-                  title: Text(l10n.devStopService),
-                  onTap: API.GeneralHandler.stopService,
-                ),
                 NFListTile(
                   title: Text(l10n.devTestToast),
                   onTap: _testToast,
@@ -77,6 +71,8 @@ class DevRoute extends StatelessWidget {
 
 class _TimeDilationSlider extends StatefulWidget {
   const _TimeDilationSlider({Key key}) : super(key: key);
+
+  @override
   _TimeDilationSliderState createState() => _TimeDilationSliderState();
 }
 
@@ -121,7 +117,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        inactiveColor: Constants.AppTheme.sliderInactive.auto,
+        inactiveColor: Constants.Theme.sliderInactiveColor.auto,
         min: 0.001,
         max: 10,
         divisions: 100,

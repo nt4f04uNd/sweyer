@@ -20,17 +20,15 @@ class TrackPanel extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  final Function onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    if (ContentControl.state.queues.all.isEmpty) {
+    if (ContentControl.state.allSongs.isEmpty) {
       return const SizedBox.shrink();
     }
 
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final playerRouteController =
-        getPlayerRouteControllerProvider(context).controller;
     final fadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         curve: const Interval(0.0, 0.5),
@@ -83,8 +81,7 @@ class TrackPanel extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               NFMarquee(
-                                key: ValueKey(
-                                    ContentControl.state.currentSongId),
+                                key: ValueKey(ContentControl.state.currentSong.id),
                                 fontWeight: FontWeight.w700,
                                 text: ContentControl.state.currentSong.title,
                                 fontSize: 16,
@@ -94,8 +91,7 @@ class TrackPanel extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4.0),
                                 child: ArtistWidget(
-                                  artist:
-                                      ContentControl.state.currentSong.artist,
+                                  artist: ContentControl.state.currentSong.artist,
                                 ),
                               ),
                             ],
@@ -105,10 +101,8 @@ class TrackPanel extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).textScaleFactor *
-                                  50.0),
-                          child: AnimatedPlayPauseButton(
+                          constraints: BoxConstraints(maxWidth: textScaleFactor * 50.0),
+                          child: const AnimatedPlayPauseButton(
                             size: 40.0,
                             iconSize: 19.0,
                           ),
@@ -130,96 +124,69 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
   const RotatingAlbumArtWithProgress({Key key}) : super(key: key);
 
   @override
-  _RotatingAlbumArtWithProgressState createState() =>
-      _RotatingAlbumArtWithProgressState();
+  _RotatingAlbumArtWithProgressState createState() => _RotatingAlbumArtWithProgressState();
 }
 
 class _RotatingAlbumArtWithProgressState
     extends State<RotatingAlbumArtWithProgress> {
   /// Actual track position value
-  Duration _value = Duration(seconds: 0);
+  Duration _value = const Duration(seconds: 0);
   // Duration of playing track
-  Duration _duration = Duration(seconds: 0);
+  Duration _duration = const Duration(seconds: 0);
 
   StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<MusicPlayerState> _playerStateSubscription;
-  StreamSubscription<void> _songListChangeSubscription;
+  StreamSubscription<bool> _playingSubscription;
 
-  GlobalKey<AlbumArtRotatingState> _rotatingArtGlobalKey =
-      GlobalKey<AlbumArtRotatingState>();
+  final _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
 
   @override
   void initState() {
     super.initState();
 
-    _setInitialCurrentPosition();
+    _value = MusicPlayer.instance.position;
+    _duration = MusicPlayer.instance.duration;
 
-    _playerStateSubscription = MusicPlayer.onStateChange.listen((event) {
-      switch (event) {
-        case MusicPlayerState.PLAYING:
-          _rotatingArtGlobalKey.currentState.rotate();
-          break;
-        case MusicPlayerState.PAUSED:
-        case MusicPlayerState.COMPLETED:
-        default: // Can be null so don't throw, just stop animation
-          _rotatingArtGlobalKey.currentState.stopRotating();
-          break;
+    _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
+      if (playing) {
+        _rotatingArtGlobalKey.currentState.rotate();
+      } else {
+        _rotatingArtGlobalKey.currentState.stopRotating();
       }
     });
 
     // Handle track position movement
-    _positionSubscription = MusicPlayer.onPosition.listen((event) {
-      if (event.inSeconds != _value.inSeconds) {
+    _positionSubscription = MusicPlayer.instance.positionStream.listen((position) {
+      if (position.inSeconds != _value.inSeconds) {
         // Prevent waste updates
         setState(() {
-          _value = event;
+          _value = position;
         });
       }
     });
 
     // Handle song change
-    _songChangeSubscription =
-        ContentControl.state.onSongChange.listen((event) async {
-      _value = await MusicPlayer.position;
-      if (mounted)
-        setState(() {
-          _duration = Duration(milliseconds: event.duration);
-        });
-    });
-
-    _songListChangeSubscription =
-        ContentControl.state.onSongListChange.listen((event) async {
+    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
+      _value = MusicPlayer.instance.position;
       setState(() {
-        /// This needed to keep sync with album arts, because they are fetched with [ContentControl.refetchAlbums], which runs without `await` in [ContentControl.init]
-        /// So sometimes even though current song is being restored, its album art might still be fetching.
+        _duration = Duration(milliseconds: event.duration);
       });
     });
   }
 
   @override
   void dispose() {
-    _playerStateSubscription.cancel();
+    _playingSubscription.cancel();
     _positionSubscription.cancel();
     _songChangeSubscription.cancel();
-    _songListChangeSubscription.cancel();
     super.dispose();
-  }
-
-  _setInitialCurrentPosition() async {
-    var position = await MusicPlayer.position;
-    setState(() {
-      _value = position;
-      _duration =
-          Duration(milliseconds: ContentControl.state.currentSong?.duration);
-    });
   }
 
   double _calcProgress() {
     if (_value.inMilliseconds == 0.0 || _duration.inMilliseconds == 0.0) {
       return 0.001;
     }
-    // Additional safety checkS
+    // Additional safety checks
     var result = _value.inMilliseconds / _duration.inMilliseconds;
     if (result < 0) {
       result = 0;
@@ -231,24 +198,27 @@ class _RotatingAlbumArtWithProgressState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: CircularPercentIndicator(
-        percent: _calcProgress(),
-        animation: true,
-        animationDuration: 200,
-        curve: Curves.easeOutCubic,
-        animateFromLastPercent: true,
-        radius: kSongTileArtSize - progressLineHeight,
-        lineWidth: progressLineHeight,
-        circularStrokeCap: CircularStrokeCap.round,
-        progressColor: ThemeControl.theme.colorScheme.primary,
-        backgroundColor: Colors.transparent,
-        center: AlbumArtRotating(
-          key: _rotatingArtGlobalKey,
-          path: ContentControl.state.currentSong?.albumArt,
-          initRotation: math.Random(DateTime.now().second).nextDouble(),
-          initRotating: MusicPlayer.playerState == MusicPlayerState.PLAYING,
+    final song = ContentControl.state.currentSong;
+    return CircularPercentIndicator(
+      percent: _calcProgress(),
+      animation: true,
+      animationDuration: 200,
+      curve: Curves.easeOutCubic,
+      animateFromLastPercent: true,
+      radius: kSongTileArtSize - progressLineHeight,
+      lineWidth: progressLineHeight,
+      circularStrokeCap: CircularStrokeCap.round,
+      progressColor: ThemeControl.theme.colorScheme.primary,
+      backgroundColor: Colors.transparent,
+      center: AlbumArtRotating(
+        key: _rotatingArtGlobalKey,
+        source: AlbumArtSource(
+          path: song.albumArt,
+          contentUri: song.contentUri,
+          albumId: song.albumId,
         ),
+        initRotation: math.Random(DateTime.now().second).nextDouble(),
+        initRotating: MusicPlayer.instance.playing,
       ),
     );
   }

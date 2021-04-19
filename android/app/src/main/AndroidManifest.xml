@@ -9,7 +9,6 @@
           additional functionality it is fine to subclass or reimplement
           FlutterApplication and put your custom class here. -->
     <application
-        android:name="com.nt4f04und.sweyer.Application"
         android:icon="@mipmap/ic_launcher"
         android:label="Sweyer"
         android:requestLegacyExternalStorage="true"
@@ -61,6 +60,12 @@
             <!--         </intent-filter>-->
         </activity>
 
+        <meta-data android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc"/>
+
+        <meta-data android:name="com.google.android.gms.car.notification.SmallIcon"
+            android:resource="@drawable/round_music_note_white_48" />
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
@@ -72,13 +77,22 @@
             android:foregroundServiceType="mediaPlayback">
         </service>
 
-        <!-- <service android:name=".services.MusicService">
+        <service android:name="com.ryanheise.audioservice.AudioService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
-        </service> -->
+        </service>
+    
+        <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver> 
 
-        <service android:enabled="true" android:name="com.nt4f04und.sweyer.services.DeletionService"/>
+        <service
+            android:enabled="true"
+            android:name="com.nt4f04und.sweyer.services.DeletionService">
+        </service>
     </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

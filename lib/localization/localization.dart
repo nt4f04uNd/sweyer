@@ -3,8 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
+
 import 'package:intl/intl.dart';
-import 'package:intl/intl_standalone.dart';
 import 'package:flutter/material.dart';
 import 'package:multiple_localization/multiple_localization.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -15,18 +16,30 @@ import 'gen/messages_all.dart';
 /// Gets [AppLocalizations].
 AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context);
 
+/// Gets [AppLocalizations] without context.
+/// If you want to use [AppLocalizations] without flutter app mounting,
+/// you have to [AppLocalizations.init] first.
+AppLocalizations get staticl10n => AppLocalizations.instance;
+
 class AppLocalizations {
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  AppLocalizations._();
+  static final instance = AppLocalizations._();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+
+  /// Can be used to load the delegate before/without flutter app mounting
+  /// by using the current system locale.
+  static Future<void> init() async {
+    await load(WidgetsBinding.instance.window.locale);
+  }
 
   static Future<AppLocalizations> load(Locale locale) async {
-    final systemLocale = await findSystemLocale();
-    Intl.systemLocale = systemLocale;
     return MultipleLocalizations.load(
       initializeMessages,
       locale,
-      (locale) => AppLocalizations(),
-      setDefaultLocale: Intl.systemLocale != Intl.defaultLocale,
+      (locale) => AppLocalizations.instance,
+      /// I chosen to override `defaultLocale` because of this issue
+      /// https://github.com/dart-lang/intl_translation/issues/141
+      setDefaultLocale: true,
     );
   }
 
@@ -34,7 +47,98 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  //****************** Semantically general ******************
+  //* Used in notification
+  
+  /// Used as notification channel name.
+  String get playback {
+    return Intl.message(
+      'Playback',
+      name: 'playback',
+    );
+  }
+
+  /// Used as notification channel description.
+  String get playbackControls {
+    return Intl.message(
+      'Playback controls',
+      name: 'playbackControls',
+    );
+  }
+
+  String get play {
+    return Intl.message(
+      'Play',
+      name: 'play',
+    );
+  }
+
+  String get pause {
+    return Intl.message(
+      'Pause',
+      name: 'pause',
+    );
+  }
+
+  String get stop {
+    return Intl.message(
+      'Stop',
+      name: 'stop',
+    );
+  }
+
+  String get next {
+    return Intl.message(
+      'Next',
+      name: 'next',
+    );
+  }
+
+  String get previous {
+    return Intl.message(
+      'Previous',
+      name: 'previous',
+    );
+  }
+
+  String get loopOff {
+    return Intl.message(
+      'Loop off',
+      name: 'loopOff',
+    );
+  }
+
+  String get loopOn {
+    return Intl.message(
+      'Loop on',
+      name: 'loopOn',
+    );
+  }
+  //*------------------------------------
+
+  //* Quick actions
+  
+  String get search {
+    return Intl.message(
+      'Search',
+      name: 'search',
+    );
+  }
+
+  String get shuffleAll {
+    return Intl.message(
+      'Shuffle all',
+      name: 'shuffleAll',
+    );
+  }
+
+  String get playRecent {
+    return Intl.message(
+      'Play recent',
+      name: 'playRecent',
+    );
+  }
+  //*------------------------------------
+
   /// Label for unknown artist.
   String get artistUnknown {
     return Intl.message(
@@ -114,7 +218,25 @@ class AppLocalizations {
     );
   }
 
-  // todo: currently unused
+  String get allAlbums {
+    return Intl.message(
+      'All albums',
+      name: 'allAlbums',
+    );
+  }
+
+  /// Converts [ArbitraryQueueOrigin] to human readable text.
+  /// Returns `null` from `null` argument.
+  String arbitraryQueueOrigin(ArbitraryQueueOrigin origin) {
+    if (origin == null)
+      return null;
+    switch (origin) {
+      case ArbitraryQueueOrigin.allAlbums: return allAlbums;
+      default: throw UnimplementedError();
+    }
+  }
+
+  // NOTE: currently unused
   String get shuffled {
     return Intl.message(
       "Shuffled",
@@ -122,7 +244,7 @@ class AppLocalizations {
     );
   }
 
-  // todo: currently unused
+  // NOTE: currently unused
   String get modified {
     return Intl.message(
       "Modified",
@@ -134,6 +256,22 @@ class AppLocalizations {
     return Intl.message(
       "By query",
       name: 'byQuery',
+    );
+  }
+
+  /// Displayed in list headers in button to play it.
+  String get playContentList {
+    return Intl.message(
+      "Play",
+      name: 'playContentList',
+    );
+  }
+
+  /// Displayed in list headers in button to shuffle it.
+  String get shuffleContentList {
+    return Intl.message(
+      "Shuffle",
+      name: 'shuffleContentList',
     );
   }
 
@@ -419,10 +557,20 @@ class AppLocalizations {
     );
   }
 
-  String sortFeature<T extends Sort>(SortFeature feature) {
-    return sortPick<T, Function>(
+  /// Picks a string of a [Content] in plural form.
+  /// For example "tracks".
+  String contents<T extends Content>([Type contentType]) {
+    return contentPick<T, String Function()>(
+      contentType: contentType,
+      song: () => tracks,
+      album: () => albums,
+    )();
+  }
+
+  String sortFeature<T extends Content>(SortFeature<T> feature) {
+    return contentPick<T, String Function()>(
       song: () {
-        switch (feature) {
+        switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
             return dateModified;
           case SongSortFeature.dateAdded:
@@ -434,12 +582,11 @@ class AppLocalizations {
           case SongSortFeature.album:
             return albumsPlural(1);
           default:
-            assert(false);
-            return '';
+            throw UnimplementedError();
         }
       },
       album: () {
-        switch (feature) {
+        switch (feature as AlbumSortFeature) {
           case AlbumSortFeature.title:
             return title;
           case AlbumSortFeature.artist:
@@ -449,8 +596,7 @@ class AppLocalizations {
           case AlbumSortFeature.numberOfSongs:
             return numberOfTracks;
           default:
-            assert(false);
-            return '';
+            throw UnimplementedError();
         }
       },
     )();
@@ -503,13 +649,6 @@ class AppLocalizations {
       "only $remainingClicks clicks remaining...",
       name: 'onThePathToDevModeClicksRemaining',
       args: [remainingClicks],
-    );
-  }
-
-  String get devStopService {
-    return Intl.message(
-      'Stop the service',
-      name: 'devStopService',
     );
   }
 
@@ -632,8 +771,7 @@ class AppLocalizations {
   }
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -642,7 +780,7 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  Future<AppLocalizations> load(Locale locale) {
+  Future<AppLocalizations> load(Locale locale) async {
     return AppLocalizations.load(locale);
   }
 

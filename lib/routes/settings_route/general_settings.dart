@@ -24,10 +24,9 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
     final l10n = getl10n(context);
     return NFPageBase(
       name: l10n.general,
-      backButton: const NFBackButton(),
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        children: <Widget>[
+        children: const [
           // _MinFileDurationSlider(
           //   initValue: minFileDuration,
           // ),
@@ -84,7 +83,7 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
 //       title: l10n.settingMinFileDuration,
 //       description: l10n.settingHideFilesShorterThan + _calcLabel(),
 //       content: LabelledSlider(
-//         inactiveColor: Constants.AppTheme.sliderInactive.auto,
+//         inactiveColor: Constants.Theme.sliderInactive.auto,
 //         min: 0,
 //         max: 60 * 5.0,
 //         divisions: 60,

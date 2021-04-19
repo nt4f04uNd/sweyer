@@ -1,6 +1,66 @@
 {
   "@@locale": "en_us",
-  "@@last_modified": "2021-01-24T04:21:22.256772",
+  "@@last_modified": "2021-04-14T21:30:55.342088",
+  "playback": "Playback",
+  "@playback": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackControls": "Playback controls",
+  "@playbackControls": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "play": "Play",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Pause",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Stop",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Next",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Previous",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Loop off",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Loop on",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "search": "Search",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleAll": "Shuffle all",
+  "@shuffleAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playRecent": "Play recent",
+  "@playRecent": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Unknown artist",
   "@artistUnknown": {
     "type": "text",
@@ -45,6 +105,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "allAlbums": "All albums",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
   "shuffled": "Shuffled",
   "@shuffled": {
     "type": "text",
@@ -57,6 +122,16 @@
   },
   "byQuery": "By query",
   "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playContentList": "Play",
+  "@playContentList": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleContentList": "Shuffle",
+  "@shuffleContentList": {
     "type": "text",
     "placeholders": {}
   },
@@ -291,11 +366,6 @@
     "placeholders": {
       "remainingClicks": {}
     }
-  },
-  "devStopService": "Stop the service",
-  "@devStopService": {
-    "type": "text",
-    "placeholders": {}
   },
   "devTestToast": "Test toast",
   "@devTestToast": {

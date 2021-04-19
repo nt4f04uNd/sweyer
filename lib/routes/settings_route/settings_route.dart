@@ -3,29 +3,17 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
+import 'dart:ui';
 import 'package:package_info/package_info.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:flutter/material.dart' hide LicensePage;
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // import 'general_settings.dart';
-import 'licenses_route.dart';
-import 'theme_settings.dart';
-
-void _pushRoute(
-  Widget route, {
-  StackFadeRouteTransitionSettings transitionSettings,
-}) {
-  App.navigatorKey.currentState.push(
-    StackFadeRouteTransition(
-      route: route,
-      transitionSettings:
-          transitionSettings ?? RouteControl.defaultTransitionSetttings,
-    ),
-  );
-}
+// import 'licenses_route.dart';
 
 class SettingsRoute extends StatefulWidget {
   const SettingsRoute({Key key}) : super(key: key);
@@ -39,10 +27,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
   // }
 
   void _handleClickThemeSettings() {
-    _pushRoute(
-      const ThemeSettingsRoute(),
-      transitionSettings: themeSettingsTransitionSetttings,
-    );
+    AppRouter.instance.goto(AppRoutes.themeSettings);
   }
 
   @override
@@ -50,14 +35,13 @@ class _SettingsRouteState extends State<SettingsRoute> {
     final l10n = getl10n(context);
     return NFPageBase(
       name: l10n.settings,
-      backButton: const NFBackButton(),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Expanded(
             child: ListView(
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(top: 10.0),
               children: <Widget>[
                 // MenuItem(
@@ -93,8 +77,9 @@ class _Footer extends StatefulWidget {
 
 class _FooterState extends State<_Footer> {
   /// The amount of clicks to enter the dev mode
-  static const int clicksForDevMode = 14;
+  static const int clicksForDevMode = 10;
 
+  int _clickCount = 0;
   String appVersion = '';
 
   String get appName {
@@ -105,8 +90,6 @@ class _FooterState extends State<_Footer> {
     return Constants.Config.APPLICATION_TITLE + postFix;
   }
 
-  int _clickCount = 0;
-
   @override
   void initState() {
     super.initState();
@@ -115,9 +98,10 @@ class _FooterState extends State<_Footer> {
 
   Future<void> _fetch() async {
     final info = await PackageInfo.fromPlatform();
-    appVersion = '${info.version}+${info.buildNumber}';
     if (mounted) {
-      setState(() {/* update ui after fetch */});
+      setState(() {
+        appVersion = '${info.version}+${info.buildNumber}';
+      });
     }
   }
 
@@ -127,65 +111,67 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleLicenseTap() {
-    _pushRoute(const LicensePage());
+    AppRouter.instance.goto(AppRoutes.licenses);
   }
 
   void _handleSecretLogoClick() {
-    if (!ContentControl.state.devMode.value) {
-      final int remainingClicks = clicksForDevMode - 1 - _clickCount;
-
-      final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-      final l10n = getl10n(context);
-      if (remainingClicks < 0) {
-        return;
-      } else if (remainingClicks == 0) {
-        ContentControl.setDevMode(true);
-        NFSnackbarControl.showSnackbar(
-          NFSnackbarSettings(
-            important: true,
-            duration: const Duration(seconds: 7),
-            child: NFSnackbar(
-              leading: Icon(
-                Icons.adb_rounded,
-                color: Colors.white,
-                size: Constants.iconSize * textScaleFactor,
-              ),
-              message: l10n.devModeGreet,
-              color: Constants.AppColors.androidGreen,
+    if (ContentControl.devMode.value)
+      return;
+    final int remainingClicks = clicksForDevMode - 1 - _clickCount;
+    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final theme = Theme.of(context);
+    final textStyle = TextStyle(
+      fontSize: 15.0,
+      color: theme.colorScheme.onError,
+    );
+    final l10n = getl10n(context);
+    if (remainingClicks < 0) {
+      return;
+    } else if (remainingClicks == 0) {
+      ContentControl.setDevMode(true);
+      NFSnackbarController.showSnackbar(
+        NFSnackbarEntry(
+          important: true,
+          duration: const Duration(seconds: 7),
+          child: NFSnackbar(
+            leading: Icon(
+              Icons.adb_rounded,
+              color: Colors.white,
+              size: Constants.iconSize * textScaleFactor,
             ),
+            title: Text(l10n.devModeGreet, style: textStyle),
+            color: Constants.AppColors.androidGreen,
           ),
-        );
-      } else if (_clickCount == 4) {
-        NFSnackbarControl.showSnackbar(
-          NFSnackbarSettings(
-            important: true,
-            child: NFSnackbar(
-              message: l10n.onThePathToDevMode,
-              color: Constants.AppColors.androidGreen,
+        ),
+      );
+    } else if (_clickCount == 4) {
+      NFSnackbarController.showSnackbar(
+        NFSnackbarEntry(
+          important: true,
+          child: NFSnackbar(
+            title: Text(l10n.onThePathToDevMode, style: textStyle),
+            color: Constants.AppColors.androidGreen,
+          ),
+        ),
+      );
+    } else if (remainingClicks < 5) {
+      NFSnackbarController.showSnackbar(
+        NFSnackbarEntry(
+          important: true,
+          child: NFSnackbar(
+            title: Text(
+              l10n.almostThere + ', ' + (remainingClicks == 1
+                      ? l10n.onThePathToDevModeLastClick
+                      : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
+              style: textStyle,
             ),
+            color: Constants.AppColors.androidGreen,
           ),
-        );
-      } else if (remainingClicks < 5) {
-        NFSnackbarControl.showSnackbar(
-          NFSnackbarSettings(
-            important: true,
-            child: NFSnackbar(
-              message: (() {
-                return l10n.almostThere +
-                    ', ' +
-                    (remainingClicks == 1
-                        ? l10n.onThePathToDevModeLastClick
-                        : l10n.onThePathToDevModeClicksRemaining(
-                            remainingClicks));
-              })(),
-              color: Constants.AppColors.androidGreen,
-            ),
-          ),
-        );
-      }
-
-      _clickCount++;
+        ),
+      );
     }
+
+    _clickCount++;
   }
 
   @override

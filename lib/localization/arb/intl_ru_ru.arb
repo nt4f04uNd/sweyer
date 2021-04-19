@@ -1,6 +1,66 @@
 {
   "@@locale": "ru_ru",
   "@@last_modified": "2020-05-25T04:00:59.715314",
+  "playback": "Воспроизведение",
+  "@playback": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackControls": "Управление воспроизвединем",
+  "@playbackControls": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "play": "Играть",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Пауза",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Оставновить",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Далее",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Назад",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Зацикливание отключено",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Повторять этот трек",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "search": "Искать",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleAll": "Перемешать все",
+  "@shuffleAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playRecent": "Играть текущую очередь",
+  "@playRecent": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Неизвестный исполнитель",
   "@artistUnknown": {
     "type": "text",
@@ -45,6 +105,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "allAlbums": "Все альбомы",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
   "shuffled": "Перемешано",
   "@shuffled": {
     "type": "text",
@@ -57,6 +122,16 @@
   },
   "byQuery": "По запросу",
   "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playContentList": "Включить",
+  "@playContentList": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleContentList": "Перемешать",
+  "@shuffleContentList": {
     "type": "text",
     "placeholders": {}
   },
@@ -291,11 +366,6 @@
     "placeholders": {
       "remainingClicks": {}
     }
-  },
-  "devStopService": "Остановить сервис",
-  "@devStopService": {
-    "type": "text",
-    "placeholders": {}
   },
   "devTestToast": "Тестовый тост",
   "@devTestToast": {

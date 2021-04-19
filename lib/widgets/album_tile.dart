@@ -6,153 +6,108 @@
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// Needed for scrollbar computations.
 const double kAlbumTileHeight = kAlbumTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
+const double _horizontalPadding = 16.0;
 
-/// todo: [Selectable] interface
-class AlbumTile extends StatefulWidget {
+class AlbumTile extends SelectableWidget<SelectionEntry> {
   const AlbumTile({
     Key key,
     @required this.album,
-    this.current = false,
+    this.trailing,
+    this.current,
+    this.onTap,
+    this.small = false,
+    double horizontalPadding,
   })  : assert(album != null),
+        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
         index = null,
-        selected = null,
-        selectionController = null,
         super(key: key);
 
   const AlbumTile.selectable({
     Key key,
     @required this.album,
     @required this.index,
-    @required this.selectionController,
-    this.current = false,
-    this.selected = false,
+    @required SelectionController<SelectionEntry> selectionController,
+    bool selected = false,
+    this.trailing,
+    this.current,
+    this.onTap,
+    this.small = false,
+    double horizontalPadding,
   })  : assert(album != null),
         assert(index != null),
         assert(selectionController != null),
-        super(key: key);
+        assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+               selectionController is SelectionController<SelectionEntry<Song>>),
+        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+        super.selectable(
+          key: key,
+          selected: selected,
+          selectionController: selectionController,
+        );
 
   final Album album;
   final int index;
 
-  /// Whether this album is currently playing.
-  /// Enables animated indicator at the end of the tile.
+  /// Widget to be rendered at the end of the tile.
+  final Widget trailing;
+
+  /// Whether this album is currently playing, if yes, enables animated
+  /// [CurrentIndicator] over the ablum art.
+  /// 
+  /// If not specified, by default true if album is `currentSongOrigin` or
+  /// if it's currently playing persistent playlist:
+  /// 
+  /// ```dart
+  /// return album == ContentControl.state.currentSongOrigin ||
+  ///        album == ContentControl.state.queues.persistent;
+  /// ```
   final bool current;
-  final bool selected;
-  final NFSelectionController<AlbumSelectionEntry> selectionController;
+  final VoidCallback onTap;
+
+  /// Creates a small variant of the tile with the sizes of [SelectableTile].
+  final bool small;
+  final double horizontalPadding;
+
+  @override
+  SelectionEntry<Album> toSelectionEntry() => SelectionEntry<Album>(
+    index: index,
+    data: album,
+  );
 
   @override
   _AlbumTileState createState() => _AlbumTileState();
 }
 
-class _AlbumTileState extends State<AlbumTile>
-    with SingleTickerProviderStateMixin {
-  bool _selected;
-  AnimationController controller;
-  Animation scaleAnimation;
-
-  bool get selectable => widget.selectionController != null;
-
-  AlbumSelectionEntry get selectionEntry => AlbumSelectionEntry(
-        index: widget.index,
-        album: widget.album,
-      );
-
-  @override
-  void initState() {
-    super.initState();
-    if (selectable) {
-      _selected = widget.selected ?? false;
-      controller = AnimationController(
-        vsync: this,
-        duration: kSelectionDuration,
-      );
-      scaleAnimation = Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Interval(0.0, 0.6, curve: Curves.easeOutCubic),
-        reverseCurve: Curves.easeInCubic,
-      ));
-      if (_selected) {
-        controller.value = 1;
+class _AlbumTileState extends SelectableState<AlbumTile> {
+  void _handleTap() {
+    super.handleTap(() {
+      if (widget.onTap != null) {
+        widget.onTap();
       }
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant AlbumTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (selectable) {
-      if (selectable && oldWidget.selected != widget.selected) {
-        _selected = widget.selected;
-        if (_selected) {
-          controller.forward();
-        } else {
-          controller.reverse();
-        }
-      } else if (widget.selectionController.notInSelection && _selected) {
-        /// We have to check if controller is 'closing', i.e. user pressed global close button to quit the selection.
-        _selected = false;
-        controller.value = widget.selectionController.animationController.value;
-        controller.reverse();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    if (controller != null) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  void _handleTap() async {
-    if (selectable && widget.selectionController.inSelection) {
-      _toggleSelection();
-    } else {
-      Navigator.of(context).pushNamed(
-        Constants.HomeRoutes.album.value,
-        arguments: widget.album,
-      );
-    }
-  }
-
-  void _toggleSelection() {
-    if (!selectable) return;
-    setState(() {
-      _selected = !_selected;
+      HomeRouter.instance.goto(HomeRoutes.factory.album(widget.album));
     });
-    if (_selected) {
-      _select();
-    } else
-      _unselect();
   }
 
-  void _select() {
-    widget.selectionController.selectItem(selectionEntry);
-    controller.forward();
-  }
-
-  void _unselect() {
-    widget.selectionController.unselectItem(selectionEntry);
-    controller.reverse();
+  bool get current {
+    if (widget.current != null)
+      return widget.current;
+    final album = widget.album;
+    return album == ContentControl.state.currentSongOrigin ||
+           album == ContentControl.state.queues.persistent;
   }
 
   Widget _buildTile() {
     return InkWell(
       onTap: _handleTap,
-      onLongPress: _toggleSelection,
+      onLongPress: toggleSelection,
       splashFactory: NFListTileInkRipple.splashFactory,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
+        padding: EdgeInsets.symmetric(
+          horizontal: widget.horizontalPadding,
           vertical: _tileVerticalPadding,
         ),
         child: Row(
@@ -161,16 +116,30 @@ class _AlbumTileState extends State<AlbumTile>
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
-              child: AlbumArt.albumTile(
-                path: widget.album.albumArt,
-                current: widget.current,
-              ),
+              child: widget.small
+                ? AlbumArt.songTile(
+                    source: AlbumArtSource(
+                      path: widget.album.albumArt,
+                      contentUri: widget.album.contentUri,
+                      albumId: widget.album.id,
+                    ),
+                    current: current,
+                  )
+                : AlbumArt.albumTile(
+                    source: AlbumArtSource(
+                      path: widget.album.albumArt,
+                      contentUri: widget.album.contentUri,
+                      albumId: widget.album.id,
+                    ),
+                    current: current,
+                  ),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
                       widget.album.album,
@@ -186,6 +155,11 @@ class _AlbumTileState extends State<AlbumTile>
                 ),
               ),
             ),
+            if (widget.trailing != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: widget.trailing,
+              ),
           ],
         ),
       ),
@@ -194,14 +168,15 @@ class _AlbumTileState extends State<AlbumTile>
 
   @override
   Widget build(BuildContext context) {
-    if (!selectable) return _buildTile();
+    if (!selectable)
+      return _buildTile();
     return Stack(
       children: [
         _buildTile(),
         Positioned(
-          left: 72.0,
+          left: kAlbumTileArtSize + 2.0,
           bottom: 2.0,
-          child: SelectionCheckmark(animation: scaleAnimation),
+          child: SelectionCheckmark(animation: animation),
         ),
       ],
     );

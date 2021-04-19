@@ -11,13 +11,6 @@ import 'package:sweyer/constants.dart' as Constants;
 const double _colorItemSize = 36.0;
 const double _colorItemActiveBorderWidth = 2.5;
 
-StackFadeRouteTransitionSettings themeSettingsTransitionSetttings =
-    StackFadeRouteTransitionSettings(
-  opaque: false,
-  dismissible: true,
-  dismissBarrier: RouteControl.barrier,
-);
-
 class ThemeSettingsRoute extends StatefulWidget {
   const ThemeSettingsRoute({Key key}) : super(key: key);
   @override
@@ -57,27 +50,23 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
     super.dispose();
   }
 
-  void _handleThemeSwitch(bool value) async {
+  void _handleThemeSwitch(bool value) {
     ThemeControl.switchTheme();
-    _handleThemeChange();
   }
 
   void _handleColorTap(Color color) {
-    prevPrimaryColor = ColorTween(
-      begin: prevPrimaryColor,
-      end: primaryColor,
-    ).evaluate(controller);
-    primaryColor = color;
-    _handleThemeChange();
-    controller.reset();
-    controller.forward();
-  }
-
-  void _handleThemeChange() {
-    themeSettingsTransitionSetttings.dismissible = false;
-    Future.delayed(dilate(kNFRouteTransitionDuration), () {
-      themeSettingsTransitionSetttings.dismissible = true;
-    });
+    if (color != primaryColor) {
+      setState(() {
+        prevPrimaryColor = ColorTween(
+          begin: prevPrimaryColor,
+          end: primaryColor,
+        ).evaluate(controller);
+      });
+      primaryColor = color;
+      ThemeControl.changePrimaryColor(color);
+      controller.reset();
+      controller.forward();
+    }
   }
 
   Future<bool> _handlePop() {
@@ -159,14 +148,13 @@ class _ColorItem extends StatefulWidget {
   }) : super(key: key);
   final Color color;
   final bool active;
-  final Function onTap;
+  final VoidCallback onTap;
 
   @override
   _ColorItemState createState() => _ColorItemState();
 }
 
-class _ColorItemState extends State<_ColorItem>
-    with SingleTickerProviderStateMixin {
+class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMixin {
   AnimationController controller;
   @override
   void initState() {
@@ -199,10 +187,7 @@ class _ColorItemState extends State<_ColorItem>
   }
 
   void _handleTap() {
-    ThemeControl.changePrimaryColor(widget.color);
-    if (widget.onTap != null) {
-      widget.onTap();
-    }
+    widget.onTap?.call();
   }
 
   @override

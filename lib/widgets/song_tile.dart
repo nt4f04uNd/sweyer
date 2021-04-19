@@ -3,15 +3,13 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// Needed for scrollbar label computations
 const double kSongTileHeight = 64.0;
-const double _horizontalPadding = 10.0;
+const double kSongTileHorizontalPadding = 10.0;
 
 /// Describes what to draw in the tile leading.
 enum SongTileVariant {
@@ -31,8 +29,10 @@ class SongNumber extends StatelessWidget {
   })  : assert(current != null),
         number = int.tryParse(number ?? ''),
         super(key: key);
+
   final int number;
   final bool current;
+
   @override
   Widget build(BuildContext context) {
     Widget child;
@@ -76,160 +76,96 @@ class SongNumber extends StatelessWidget {
 }
 
 /// A [SongTile] that can be selected.
-///
-/// todo: [Selectable] interface
-class SongTile extends StatefulWidget {
+class SongTile extends SelectableWidget<SelectionEntry> {
   SongTile({
     Key key,
     @required this.song,
-    this.current = false,
+    this.current,
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
-  })  : assert(song != null),
-        selected = null,
-        index = null,
-        selectionController = null,
-        super(key: key);
+    this.horizontalPadding = kSongTileHorizontalPadding,
+  }) : assert(song != null),
+       index = null,
+       super(key: key);
 
   SongTile.selectable({
     Key key,
     @required this.song,
     @required this.index,
-    @required this.selectionController,
-    this.current = false,
+    @required SelectionController<SelectionEntry> selectionController,
+    bool selected = false,
+    this.current,
     this.onTap,
-    this.selected = false,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
-  })  : assert(song != null),
-        assert(index != null),
-        assert(selectionController != null),
-        super(key: key);
+    this.horizontalPadding = kSongTileHorizontalPadding,
+  }) : assert(song != null),
+       assert(index != null),
+       assert(selectionController != null),
+       assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+              selectionController is SelectionController<SelectionEntry<Song>>),
+       super.selectable(
+         key: key,
+         selected: selected,
+         selectionController: selectionController,
+       );
 
   final Song song;
   final int index;
 
-  /// Whether this song is current.
-  /// Enables animated indicator at the end of the tile.
+  /// Whether this song is current, if yes, enables animated
+  /// [CurrentIndicator] over the ablum art/instead song number.
+  /// 
+  /// If not specified, by default true for equality of [Song.sourceId]
+  /// of song with given [index] and current song:
+  /// 
+  /// ```dart
+  /// song.sourceId == ContentControl.state.currentSong.sourceId
+  /// ```
   final bool current;
-  final Function onTap;
+  final VoidCallback onTap;
   final SongClickBehavior clickBehavior;
   final SongTileVariant variant;
+  final double horizontalPadding;
 
-  /// Basically makes tiles aware whether they are selected in some global set.
-  /// This will be used on first build, after this tile will have internal selection state.
-  final bool selected;
-  final NFSelectionController<SongSelectionEntry> selectionController;
+  @override
+  SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
+    index: index,
+    data: song,
+  );
 
   @override
   _SongTileState createState() => _SongTileState();
 }
 
-class _SongTileState extends State<SongTile>
-    with SingleTickerProviderStateMixin {
-  bool _selected;
-  AnimationController controller;
-  Animation scaleAnimation;
-
-  bool get selectable => widget.selectionController != null;
-
-  SongSelectionEntry get selectionEntry => SongSelectionEntry(
-        index: widget.index,
-        song: widget.song,
-      );
-
+class _SongTileState extends SelectableState<SongTile> {
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
 
-  @override
-  void initState() {
-    super.initState();
-    if (selectable) {
-      _selected = widget.selected ?? false;
-      controller = AnimationController(
-        vsync: this,
-        duration: kSelectionDuration,
-      );
-      scaleAnimation = Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ).animate(CurvedAnimation(
-        parent: controller,
-        curve: Interval(0.0, 0.6, curve: Curves.easeOutCubic),
-        reverseCurve: Curves.easeInCubic,
-      ));
-      if (_selected) {
-        controller.value = 1;
+  void _handleTap() {
+    super.handleTap(() async {
+      if (widget.onTap != null) {
+        widget.onTap();
       }
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant SongTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (selectable) {
-      if (selectable && oldWidget.selected != widget.selected) {
-        _selected = widget.selected;
-        if (_selected) {
-          controller.forward();
-        } else {
-          controller.reverse();
-        }
-      } else if (widget.selectionController.notInSelection && _selected) {
-        /// We have to check if controller is 'closing', i.e. user pressed global close button to quit the selection.
-        _selected = false;
-        controller.value = widget.selectionController.animationController.value;
-        controller.reverse();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    if (controller != null) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  void _handleTap() async {
-    if (selectable && widget.selectionController.inSelection) {
-      _toggleSelection();
-    } else {
-      if (widget.onTap != null) widget.onTap();
-      await MusicPlayer.handleSongClick(
+      await MusicPlayer.instance.handleSongClick(
         context,
         widget.song,
         behavior: widget.clickBehavior,
       );
-    }
-  }
-
-  void _toggleSelection() {
-    if (!selectable) return;
-    setState(() {
-      _selected = !_selected;
     });
-    if (_selected) {
-      _select();
-    } else
-      _unselect();
   }
 
-  void _select() {
-    widget.selectionController.selectItem(selectionEntry);
-    controller.forward();
-  }
-
-  void _unselect() {
-    widget.selectionController.unselectItem(selectionEntry);
-    controller.reverse();
+  bool get current {
+    if (widget.current != null)
+      return widget.current;
+    return widget.song.sourceId == ContentControl.state.currentSong.sourceId;
   }
 
   Widget _buildTile(
     Widget albumArt, [
-    double rightPadding = _horizontalPadding,
+    double rightPadding,
   ]) {
+    rightPadding ??= widget.horizontalPadding;
     final theme = ThemeControl.theme;
     Widget title = Text(
       widget.song.title,
@@ -253,11 +189,11 @@ class _SongTileState extends State<SongTile>
       dense: true,
       isThreeLine: false,
       contentPadding: EdgeInsets.only(
-        left: _horizontalPadding,
+        left: widget.horizontalPadding,
         right: rightPadding,
       ),
       onTap: _handleTap,
-      onLongPress: selectable ? _toggleSelection : null,
+      onLongPress: toggleSelection,
       title: title,
       subtitle: subtitle,
       leading: albumArt,
@@ -266,38 +202,45 @@ class _SongTileState extends State<SongTile>
 
   @override
   Widget build(BuildContext context) {
-    final albumArt = showAlbumArt
-        ? AlbumArt.songTile(
-            path: widget.song.albumArt,
-            current: widget.current,
-          )
-        : SongNumber(
-            number: widget.song.track,
-            current: widget.current,
-          );
-    if (!selectable) return _buildTile(albumArt);
+    Widget albumArt;
+    if (showAlbumArt) {
+      albumArt = AlbumArt.songTile(
+        source: AlbumArtSource(
+          path: widget.song.albumArt,
+          contentUri: widget.song.contentUri,
+          albumId: widget.song.albumId,
+        ),
+        current: current,
+      );
+    } else {
+      albumArt = SongNumber(
+        number: widget.song.track,
+        current: current,
+      );
+    }
+    if (!selectable)
+      return _buildTile(albumArt);
     return Stack(
       children: [
         AnimatedBuilder(
-          animation: scaleAnimation,
+          animation: animation,
           builder: (context, child) {
-            var rightPadding = _horizontalPadding;
-            if (!showAlbumArt)
-              rightPadding +=
-                  (scaleAnimation.status == AnimationStatus.forward ||
-                          scaleAnimation.status == AnimationStatus.completed
-                      ? 40.0
-                      : scaleAnimation.value > 0.2
-                          ? 40.0
-                          : 0.0);
+            var rightPadding = widget.horizontalPadding;
+            if (!showAlbumArt) {
+              if (animation.status == AnimationStatus.forward ||
+                  animation.status == AnimationStatus.completed ||
+                  animation.value > 0.2) {
+                rightPadding += 40.0;
+              }
+            }
             return _buildTile(albumArt, rightPadding);
           },
         ),
         Positioned(
-          left: showAlbumArt ? 44.0 : null,
-          right: showAlbumArt ? null : 20.0,
+          left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
+          right: showAlbumArt ? null : 10.0 + widget.horizontalPadding,
           bottom: showAlbumArt ? 2.0 : 20.0,
-          child: SelectionCheckmark(animation: scaleAnimation),
+          child: SelectionCheckmark(animation: animation),
         ),
       ],
     );

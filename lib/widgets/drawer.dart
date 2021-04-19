@@ -3,7 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -11,21 +11,9 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-/// Widget that builds drawer
-///
-/// todo: rewrite this and add to nt4f04unds_widgets
+/// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
-  const DrawerWidget({
-    Key key,
-    this.swipeGesture = trueFunc,
-    this.canBeOpened = trueFunc,
-  }) : super(key: key);
-
-  /// Function that checks if drawer swipe gesture is enabled.
-  final BoolFunction swipeGesture;
-
-  /// Function that checks if drawer can be opened.
-  final BoolFunction canBeOpened;
+  const DrawerWidget({Key key}) : super(key: key);
 
   @override
   _DrawerWidgetState createState() => _DrawerWidgetState();
@@ -41,7 +29,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
   @override
   void initState() {
     super.initState();
-    controller = getDrawerControllerProvider(context).controller;
+    controller = drawerController;
     controller.addStatusListener(_handleControllerStatusChange);
   }
 
@@ -53,13 +41,13 @@ class _DrawerWidgetState extends State<DrawerWidget>
 
   void _handleControllerStatusChange(AnimationStatus status) {
     // Change system UI on expanding/collapsing the drawer.
-    if (_onTop && widget.canBeOpened()) {
+    if (_onTop && HomeRouter.instance.drawerCanBeOpened) {
       if (status == AnimationStatus.dismissed) {
-        NFSystemUiControl.animateSystemUiOverlay(
+        SystemUiStyleController.animateSystemUiOverlay(
           to: Constants.UiTheme.grey.auto,
         );
       } else {
-        NFSystemUiControl.animateSystemUiOverlay(
+        SystemUiStyleController.animateSystemUiOverlay(
           to: Constants.UiTheme.drawerScreen.auto,
         );
       }
@@ -68,7 +56,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.canBeOpened() && controller.value > 0.0) {
+    if (!HomeRouter.instance.drawerCanBeOpened && controller.value > 0.0) {
       controller.reset();
     }
 
@@ -85,36 +73,29 @@ class _DrawerWidgetState extends State<DrawerWidget>
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) => Slidable(
-          startOffset: Offset(-304.0 / screenWidth, 0.0),
-          endOffset: Offset.zero,
-          direction: SlideDirection.startToEnd,
+          direction: SlideDirection.right,
+          start: -304.0 / screenWidth,
+          end: 0.0,
           shouldGiveUpGesture: (event) {
             return controller.value == 0.0 &&
                 // when on another drag on the right to next tab
                 (event.delta.dx < 0.0 ||
-                    // when on another tab
-                    !widget.swipeGesture() ||
-                    // when player route is opened, for example
-                    !widget.canBeOpened());
+                 // when player route is opened, for example
+                 !HomeRouter.instance.drawerCanBeOpened);
           },
           onBarrierTap: controller.close,
-          barrier: Container(
-            color: Colors.black26,
-          ),
+          barrier: Container(color: Colors.black26),
           controller: controller,
-          barrierIgnoringStrategy: const IgnoringStrategy(
-            dismissed: true,
-          ),
-          hitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
-            dismissed: HitTestBehavior.translucent,
-          ),
-          draggedHitTestBehaviorStrategy: HitTestBehaviorStrategy.opaque(
-            dismissed: HitTestBehavior.translucent,
-          ),
-          child: Container(
-            width: 304.0,
-            alignment: Alignment.centerLeft,
-            child: _DrawerWidgetContent(controller: controller),
+          barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
+          hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
+          child: SizedBox(
+            height: screenHeight,
+            width: screenWidth,
+            child: Container(
+              width: 304.0,
+              alignment: Alignment.centerLeft,
+              child: _DrawerWidgetContent(controller: controller),
+            ),
           ),
         ),
       ),
@@ -131,6 +112,8 @@ class _DrawerWidgetContent extends StatefulWidget {
 }
 
 class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
+  /// Status bar height on my phone.
+static const _baseTopPadding = 24.0;
   double elevation = 0.0;
 
   @override
@@ -161,15 +144,14 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
     }
   }
 
-  Future<void> _handleClickSettings() {
+  void _handleClickSettings() {
     widget.controller.close();
-    return App.navigatorKey.currentState
-        .pushNamed(Constants.Routes.settings.value);
+    AppRouter.instance.goto(AppRoutes.settings);
   }
 
-  Future<void> _handleClickDebug() async {
+  void _handleClickDebug() {
     widget.controller.close();
-    return App.navigatorKey.currentState.pushNamed(Constants.Routes.dev.value);
+    AppRouter.instance.goto(AppRoutes.dev);
   }
 
   @override
@@ -182,51 +164,50 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
       ),
       child: Drawer(
         elevation: elevation,
-        child: ListView(
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Container(
-              padding:
-                  const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const SweyerLogo(),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Text(
-                      Constants.Config.APPLICATION_TITLE,
-                      style: TextStyle(
-                        fontSize: 30.0,
-                        fontWeight: FontWeight.w800,
-                        color: ThemeControl.theme.textTheme.headline6.color,
+        child: Padding(
+          padding: EdgeInsets.only(top: max(0, MediaQuery.of(context).padding.top - _baseTopPadding)),
+          child: ListView(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const SweyerLogo(),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: Text(
+                        Constants.Config.APPLICATION_TITLE,
+                        style: TextStyle(
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.w800,
+                          color: ThemeControl.theme.textTheme.headline6.color,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Divider(),
-            const SizedBox(
-              height: 7.0,
-            ),
-            MenuItem(
-              l10n.settings,
-              icon: Icons.settings_rounded,
-              onTap: _handleClickSettings,
-            ),
-            ValueListenableBuilder(
-              valueListenable: ContentControl.state.devMode,
-              builder: (context, value, child) =>
-                  value ? child : const SizedBox.shrink(),
-              child: MenuItem(
-                l10n.debug,
-                icon: Icons.adb_rounded,
-                onTap: _handleClickDebug,
+              const Divider(),
+              const SizedBox(height: 7.0),
+              MenuItem(
+                l10n.settings,
+                icon: Icons.settings_rounded,
+                onTap: _handleClickSettings,
               ),
-            ),
-          ],
+              ValueListenableBuilder<bool>(
+                valueListenable: ContentControl.devMode,
+                builder: (context, value, child) => value ? child : const SizedBox.shrink(),
+                child: MenuItem(
+                  l10n.debug,
+                  icon: Icons.adb_rounded,
+                  onTap: _handleClickDebug,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -236,8 +217,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
 class MenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
-  final Function onTap;
-  final Function onLongPress;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final double iconSize;
   final double fontSize;
   const MenuItem(
@@ -252,29 +233,27 @@ class MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: NFListTile(
-        dense: true,
-        leading: icon != null
-            ? Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Icon(
-                  icon,
-                  size: iconSize,
-                  color: ThemeControl.theme.iconTheme.color,
-                ),
-              )
-            : null,
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: fontSize,
-            color: Constants.AppTheme.menuItem.auto,
-          ),
+    return NFListTile(
+      dense: true,
+      leading: icon != null
+          ? Padding(
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Icon(
+                icon,
+                size: iconSize,
+                color: ThemeControl.theme.iconTheme.color,
+              ),
+            )
+          : null,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: Constants.Theme.menuItemColor.auto,
         ),
-        onTap: onTap,
-        onLongPress: onLongPress,
       ),
+      onTap: onTap,
+      onLongPress: onLongPress,
     );
   }
 }

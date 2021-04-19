@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// @dart = 2.12
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -11,65 +13,173 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+// import 'package:quick_actions/quick_actions.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
-import 'package:sweyer/api.dart' as API;
+enum QuickAction {
+  search,
+  shuffleAll,
+  playRecent,
+}
 
-/// Main content types in the application, all of them are sortable.
-enum ContentType { song, album }
+extension QuickActionSerialization on QuickAction {
+  String get value => EnumToString.convertToString(this);
+} 
+
+/// The description where the [QueueType.arbitrary] originates from.
+/// 
+/// Can be Cconverted to human readable text with [AppLocalizations.arbitraryQueueOrigin].
+enum ArbitraryQueueOrigin {
+  /// Correspnods
+  allAlbums,
+}
+
+extension ArbitraryQueueOriginSerialization on ArbitraryQueueOrigin {
+  String get value => EnumToString.convertToString(this);
+}
+
+/// Picks some value based on the provided `T` type of [Content].
+/// 
+/// Instead of `T`, you can explicitly specify [contentType].
+/// 
+/// The [fallback] can be specified in cases when the type is [Content].
+/// Generally, it's better never use it, but in some cases, like selection actions,
+/// that can react to [ContentSelectionController]s of mixed types, it is relevant to use it.
+V contentPick<T extends Content, V>({
+  Type? contentType,
+  required V song,
+  required V album,
+  V? fallback,
+}) {
+  // TODO: when i fully migrate to safety, remove this assert and allow passing nulls here
+  assert(song != null && album != null);
+  switch (contentType ?? T) {
+    case Song:
+      return song;
+    case Album:
+      return album;
+    case Content:
+      if (fallback != null)
+        return fallback;
+      throw UnimplementedError();
+    default:
+      throw UnimplementedError();
+  }
+}
+
+/// A [Map] container for the [Content] as key, and `T` as value entry.
+class ContentMap<V> {
+  /// Creates a content map from initial value [map].
+  ///
+  /// If none specified, will initialize the map with `null`s.
+  ContentMap([Map<Type, V?>? map]) : 
+    _map = map ?? {
+      Song: null,
+      Album: null,
+    };
+
+  Map<Type, V?> _map;
+
+  /// Map values.
+  Iterable<V?> get values => _map.values;
+
+  /// Returs a [Sort] per `T` [Content] from the map.
+  /// 
+  /// If [key] was explicitly provided, will use it instead.
+  V getValue<T extends Content>([Type? key]) {
+    assert(
+      Content.enumerate().contains(typeOf<T>()),
+      "Specified type must be a subtype of Content",
+    );
+    return _map[key ?? T]!;
+  }
+
+  /// Puts a [Sort] typed with `T` into the map.
+  /// 
+  /// If [key] was explicitly provided, will use it instead.
+  void setValue<T extends Content>(V value, {Type? key}) {
+    assert(
+      Content.enumerate().contains(typeOf<T>()),
+      "Specified type must be a subtype of Content",
+    );
+    _map[key ?? T] = value;
+  }
+}
+
 
 /// Enum used inside this file to have a pool of queues in a state-managment convenient form.
 enum _PoolQueueType {
-  /// All songs.
-  /// Value `null` on app start indicates that songs are being fetched.
-  /// Should not be modified in any way and should be used only for composing other queues (or displaying its copy).
-  all,
-
   /// Any queue type to be displayed (searched or album or etc.).
-  /// Must never be null.
-  custom,
+  queue,
 
   /// This queue is always produced from the other two.
-  /// Must never be null.
   shuffled,
 }
 
 class _QueuePool {
   _QueuePool(Map<_PoolQueueType, Queue> map)
-      : assert(map != null),
-        assert(map[_PoolQueueType.custom] != null),
-        assert(map[_PoolQueueType.shuffled] != null),
-        _map = map;
+      : _map = map;
 
   final Map<_PoolQueueType, Queue> _map;
+
+  /// Serializes [_PoolQueueType.queue].
+  final QueueSerializer _queueSerializer = const QueueSerializer('queue.json');
+  /// Serializes [_PoolQueueType.shuffled].
+  final QueueSerializer _shuffledSerializer = const QueueSerializer('shuffled_queue.json');
+
+  Future<void> init() {
+    return Future.wait([
+      _queueSerializer.init(),
+      _shuffledSerializer.init(),
+    ]);
+  }
+
+  Future<void> _saveCurrentQueue() {
+    if (shuffled) {
+      return Future.wait([
+        _queueSerializer.save(_map[_PoolQueueType.queue]!.songs),
+        _shuffledSerializer.save(_map[_PoolQueueType.shuffled]!.songs),
+      ]);
+    }
+    return _queueSerializer.save(current.songs);
+  }
 
   /// Actual type of the queue, that can be displayed to the user.
   QueueType get type => _type;
   QueueType _type = QueueType.all;
+
   _PoolQueueType get _internalType {
     if (shuffled) {
       return _PoolQueueType.shuffled;
     }
-    return _PoolQueueType.custom;
+    return _PoolQueueType.queue;
   }
 
-  /// All the songs of the application.
-  Queue get all => _map[_PoolQueueType.all];
-  Queue get current => _map[_internalType];
+  Queue get current => _map[_internalType]!;
+  Queue get _queue => _map[_PoolQueueType.queue]!;
+  Queue get _shuffledQueue => _map[_PoolQueueType.shuffled]!;
 
-  PersistentQueue _persistent;
-  String _searchQuery;
+  /// Current queue for [QueueType.persistent].
+  /// If [type] is not [QueueType.persistent], will return `null`.
+  PersistentQueue? get persistent => _persistent;
+  PersistentQueue? _persistent;
 
-  /// Returns current queue for [QueueType.persistent].
-  /// If [type] is not [QueueType.persistent], will return null.
-  PersistentQueue get persistent => _persistent;
+  /// A search query for [QueueType.searched].
+  /// If [type] is not [QueueType.searched], will return `null`.
+  String? get searchQuery => _searchQuery;
+  String? _searchQuery;
 
-  /// Returns a search query for [QueueType.searched].
-  /// If [type] is not [QueueType.searched], will return null.
-  String get searchQuery => _searchQuery;
-
-  bool _modified = false;
-  bool _shuffled = false;
+  /// A description where the [QueueType.arbitrary] originates from.
+  ///
+  /// May be `null`, then by default instead of description, in the interface queue should be just
+  /// marked as [AppLocalizations.arbitraryQueue].
+  ///
+  /// If [type] is not [QueueType.arbitrary], will return `null`.
+  ArbitraryQueueOrigin? get arbitraryQueueOrigin => _arbitraryQueueOrigin;
+  ArbitraryQueueOrigin? _arbitraryQueueOrigin;
 
   /// Whether the current queue is modified.
   ///
@@ -77,156 +187,127 @@ class _QueuePool {
   /// or reorders songs in the queue.
   /// [QueueType.custom] cannot be modified.
   bool get modified => _modified;
+  bool _modified = false;
 
   /// Whether the current queue is shuffled.
   bool get shuffled => _shuffled;
-
-  Queue get _custom => _map[_PoolQueueType.custom];
-  Queue get _shuffledQueue => _map[_PoolQueueType.shuffled];
-
-  set _all(Queue value) => _map[_PoolQueueType.all] = value;
+  bool _shuffled = false;
 }
 
 class _ContentState {
-  /// Android SDK integer.
-  int _sdkInt;
-  int get sdkInt => _sdkInt;
-
-  ValueNotifier<bool> _devMode = ValueNotifier(false);
-  ValueNotifier<bool> get devMode => _devMode;
-
-  int _currentSongId;
-
-  PersistentQueue _currentSongOrigin;
-
-  /// A general art color change the UI.
-  Color _currentArtColor;
-
-  /// Cancelable operation for getting the art color.
-  // CancelableOperation _thiefOperation;
-
   final _QueuePool queues = _QueuePool({
-    _PoolQueueType.all: null,
-    _PoolQueueType.custom: Queue([]),
+    _PoolQueueType.queue: Queue([]),
     _PoolQueueType.shuffled: Queue([]),
   });
 
+  /// The path to default album art to show it in notification.
+  late String defaultAlbumArtPath;
+
+  /// All songs in the application.
+  /// This list should be modified in any way, except for sorting.
+  Queue allSongs = Queue([]);
+
   Map<int, Album> albums = {};
 
-  /// After initial albums are fetched, will contain song album arts by album ids.
-  Map<int, String> albumArts = {};
-
   /// This is a map to store ids of duplicated songs in queue.
-  /// Its key is awlays negative, so when a song has negative id, you must
+  /// Its key is always negative, so when a song has negative id, you must
   /// look up for the mapping of its actual id in here.
   Map<String, int> idMap = {};
 
-  /// Map that contains various [Sort]s of the application.
-  /// Sorts of specific [Queues] like [Album]s might be stored separately.
+  /// Contains various [Sort]s of the application.
+  /// Sorts of specific [Queues] like [Album]s are stored separately. // TODO: this is currently not implemented - remove this todo when it will be
   ///
-  /// Values will be restored in
-  Map<Type, Sort> sorts = {
-    SongSort: null,
-    AlbumSort: null,
-  };
+  /// Values are restored in [_restoreSorts].
+  final ContentMap<Sort> sorts = ContentMap<Sort>();
 
   /// Get current playing song.
-  /// Will never return `null`.
   Song get currentSong {
-    var queue = queues.current;
-    if (queue.isEmpty) {
-      assert(false);
-      queue = queues.all;
-    }
-    return queue.byId.getSong(_currentSongId) ?? queue.songs[0];
+    return _songSubject.value!;
   }
 
-  /// Returns a [currentSong] index in current queue.
-  /// Will never return `-1`.
+  /// Get current playing song.
+  Song? get currentSongNullable {
+    return _songSubject.value;
+  }
+
+  /// Returns index of [currentSong] in the current queue.
   ///
-  /// NOTE: CAUTION - SHOULD NEVER BE USED OUTSIDE PLAYER ROUTE,
-  /// AS THIS MAY LEAD TO WRONG RESULTS.
+  /// If current song cannot be found for some reason, will fallback the state
+  /// to the index `0` and return it.
   int get currentSongIndex {
-    var index = queues.current.byId.getSongIndex(_currentSongId);
+    var index = queues.current.byId.getIndex(currentSong.id);
     if (index < 0) {
-      _currentSongId = queues.current.songs[0].id;
-      Prefs.songIdIntNullable.set(_currentSongId);
+      final firstSong = queues.current.songs[0];
+      changeSong(firstSong);
       index = 0;
     }
     return index;
   }
 
-  /// Id of currently playing song.
-  int get currentSongId => _currentSongId;
-
-  /// Currently playing peristent queue when song is added via [ContentControl.playQueueNext] or [ContentControl.addQueueToQueue].
+  /// Currently playing peristent queue when song is added via [playQueueNext]
+  /// or [addQueueToQueue].
+  ///
   /// Used for showing [CurrentIndicator] for [PersistenQueue]s.
+  ///
   /// See [Song.origin] for more info.
-  PersistentQueue get currentSongOrigin => _currentSongOrigin;
-
-  Color get currentArtColor => _currentArtColor;
+  PersistentQueue? get currentSongOrigin => currentSong.origin;
 
   /// Changes current song id and emits change event.
   /// This allows to change the current id visually, separately from the player.
   ///
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
-    assert(song != null);
-    _currentSongId = song.id;
-    if (song.origin == null) {
-      _currentSongOrigin = null;
-    } else {
-      _currentSongOrigin = song.origin;
-    }
+    Prefs.songIdInt.set(song.id);
     // Song id saved to prefs in the native play method.
-    emitSongChange(currentSong);
+    emitSongChange(song);
   }
 
-  //****************** Streams *****************************************************
-  /// Controller for stream of queue changes.
-  StreamController<void> _songListChangeStreamController =
-      StreamController<void>.broadcast();
-
-  /// Controller for stream of current song changes.
-  StreamController<Song> _songChangeStreamController =
-      StreamController<Song>.broadcast();
-
-  /// Controller for stream of song changes.
-  StreamController<Color> _artColorChangeStreamController =
-      StreamController<Color>.broadcast();
-
-  /// A stream of changes on queue.
-  Stream<void> get onSongListChange => _songListChangeStreamController.stream;
+  /// A stream of changes over content.
+  /// Called whenever [Content] (queues, songs, albums, etc. changes).
+  Stream<void> get onContentChange => _contentSubject.stream;
+  final PublishSubject<void> _contentSubject = PublishSubject();
 
   /// A stream of changes on song.
-  Stream<Song> get onSongChange => _songChangeStreamController.stream;
+  Stream<Song> get onSongChange => _songSubject.stream;
+  final BehaviorSubject<Song> _songSubject = BehaviorSubject();
 
-  /// A stream of changes on art color.
-  Stream<Color> get onArtColorChange => _artColorChangeStreamController.stream;
+  /// Notifies when active selection controller changes.
+  /// Will receive null when selection closes.
+  ValueNotifier<ContentSelectionController?> selectionNotifier = ValueNotifier(null);
 
-  /// Emit event to [onSongListChange].
+  /// Emit event to [onContentChange].
   ///
   /// Includes updates to queue and any other song list.
-  void emitSongListChange() {
-    _songListChangeStreamController.add(null);
+  void emitContentChange() {
+    assert(!_disposed);
+    _contentSubject.add(null);
   }
 
   /// Emits song change event.
   void emitSongChange(Song song) {
-    _songChangeStreamController.add(song);
+    assert(!_disposed);
+    _songSubject.add(song);
   }
 
-  /// Emits art color change event.
-  void emitArtColorChange(Color color) {
-    _artColorChangeStreamController.add(color);
-  }
-
+  bool _disposed = false;
   void dispose() {
-    _songListChangeStreamController.close();
-    _artColorChangeStreamController.close();
-    _songChangeStreamController.close();
+    assert(!_disposed);
+    _disposed = true;
+    // TODO: this might still deliver some pedning events to listeneres, see https://github.com/dart-lang/sdk/issues/45653
+    _contentSubject.close();
+    _songSubject.close();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      selectionNotifier.dispose();
+    });
   }
 }
+
+// class _WidgetsBindingObserver extends WidgetsBindingObserver {
+//   @override
+//   void didChangeLocales(List<Locale>? locales) {
+//     ContentControl._setQuickActions();
+//   }
+// }
 
 /// A class to any content-related actions, e.g.:
 /// 1. Fetch songs
@@ -236,252 +317,514 @@ class _ContentState {
 ///
 /// etc.
 abstract class ContentControl {
-  static _ContentState state = _ContentState();
+  /// Content state.
+  ///
+  /// This getter only can be called when it's known for sure
+  /// that this will be not `null`,  otherwise it will throw.
+  static _ContentState get state => _stateSubject.value!;
+  /// Same as [state], but can be `null`, which means that the state was disposed.
+  static _ContentState? get stateNullable => _stateSubject.value;
 
-  /// A helper to serialize the queue.
-  static QueueSerializer queueSerializer = QueueSerializer.instance;
-  static IdMapSerializer idMapSerializer = IdMapSerializer.instance;
+  /// Notifies when [state] is changed created or disposed.
+  static Stream<_ContentState?> get onStateCreateRemove => _stateSubject.stream;
+  static final BehaviorSubject<_ContentState?> _stateSubject = BehaviorSubject();
 
-  /// A subscription to song changes, needed to get current art color.
-  // static StreamSubscription<Song> _songChangeSubscription;
+  // /// Recently pressed quick action.
+  // static final quickAction = BehaviorSubject<QuickAction>();
+  // static final QuickActions _quickActions = QuickActions();
+  // static final bindingObserver = _WidgetsBindingObserver();
+
+  static final IdMapSerializer _idMapSerializer = IdMapSerializer.instance;
 
   /// Represents songs fetch on app start
-  static bool initFetching = true;
+  static bool get initializing => _initializeCompleter != null;
+  static Completer<void>? _initializeCompleter;
 
-  /// Whether queue control is ready to provide to player instance the sources to play tracks.
-  static bool get playReady => state.queues.all != null;
+  static bool get _empty => stateNullable?.allSongs.isEmpty ?? true;
+  static bool get disposed => stateNullable == null;
+
+  /// Android SDK integer.
+  static late int _sdkInt;
+  static int get sdkInt => _sdkInt;
+
+  static ValueNotifier<bool> get devMode => _devMode;
+  static late ValueNotifier<bool> _devMode;
+  /// Sets dev mode.
+  static void setDevMode(bool value) {
+    devMode.value = value;
+    Prefs.devModeBool.set(value);
+  }
 
   /// The main data app initialization function, inits all queues.
   /// Also handles no-permissions situations.
   static Future<void> init() async {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    state._sdkInt = androidInfo.version.sdkInt;
-    state.devMode.value = await Prefs.devModeBool.get();
-    if (Permissions.granted) {
-      initFetching = true;
-      await queueSerializer.init();
-      await idMapSerializer.init();
-      await _restoreSorts();
-      state.queues._all = Queue([]);
-      state.emitSongListChange(); // update ui to show "Searching songs screen"
-      await refetchSongs(updateQueues: false, emitChangeEvent: false);
-      await refetchAlbums(emitChangeEvent: false);
-      await _restoreQueue();
-      await _restoreLastSong();
-      initFetching = false;
-
-      // // Setting up the subscription to get the art color
-      // _songChangeSubscription = onSongChange.listen((event) async {
-      //   var prevArtColor = _artColor;
-      //   if (event.albumArtUri != null) {
-      //     // Cancel the operation if it didn't finish by that moment
-      //     if (_thiefOperation != null) _thiefOperation.cancel();
-
-      //     _thiefOperation = CancelableOperation.fromFuture(() async {
-      //       var prevArtColor = _artColor;
-      //       final image =
-      //           await getImageFromProvider(FileImage(File(event.albumArtUri)));
-      //       List<int> colorRGBList = await getColorFromImage(image, 1);
-      //       _artColor = Color.fromRGBO(
-      //           colorRGBList[0], colorRGBList[1], colorRGBList[2], 1.0);
-
-      //       if (prevArtColor != _artColor) emitArtColorChange(_artColor);
-      //       _thiefOperation = null;
-      //     }());
-      //   } else {
-      //     _artColor = null;
-      //     if (prevArtColor != _artColor) emitArtColorChange(_artColor);
-      //   }
-      // });
-
-      // _initialFetch();
-    } else {
-      // Init empty queue if no permission granted
-      if (!playReady) {
-        state.queues._all = Queue([]);
-      }
+    if (stateNullable == null) {
+      _stateSubject.add(_ContentState());
     }
-
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    _sdkInt = androidInfo.version.sdkInt;
+    _devMode = ValueNotifier(await Prefs.devModeBool.get());
+    if (Permissions.granted) {
+      _initializeCompleter = Completer();
+      state.emitContentChange(); // update ui to show "Searching songs screen"
+      await Future.wait([
+        state.queues.init(),
+        _idMapSerializer.init(),
+        _restoreSorts(),
+      ]);
+      await Future.any([
+        _initializeCompleter!.future,
+        Future.wait([
+          for (final contentType in Content.enumerate())
+            refetch(contentType: contentType, updateQueues: false, emitChangeEvent: false),
+        ]),
+      ]);
+      if (!_empty && _initializeCompleter != null && !_initializeCompleter!.isCompleted) {
+        // _initQuickActions();
+        await _restoreQueue();
+        await MusicPlayer.instance.init();
+      }
+      _initializeCompleter = null;
+    }
     // Emit event to track change stream
-    state.emitSongListChange();
+    stateNullable?.emitContentChange();
   }
 
-  static void setDevMode(bool value) {
-    state.devMode.value = value;
-    Prefs.devModeBool.set(value);
+  /// Disposes the [state] and stops the currently going [init] process,
+  /// if any.
+  static void dispose() {
+    if (!disposed) {
+      // WidgetsBinding.instance!.removeObserver(bindingObserver);
+      // _quickActions.clearShortcutItems();
+      _initializeCompleter?.complete();
+      _initializeCompleter = null;
+      stateNullable!.dispose();
+      _stateSubject.add(null);
+      MusicPlayer.instance.dispose();
+    }
   }
+
+  // static void _initQuickActions() {
+  //   WidgetsBinding.instance!.addObserver(bindingObserver);
+  //   _quickActions.initialize((stringAction) {
+  //     final action = EnumToString.fromString(QuickAction.values, stringAction)!;
+  //     quickAction.add(action);
+  //     // switch (action) {
+  //     //   case QuickAction.search:
+  //     //     break;
+  //     //   case QuickAction.shuffleAll:
+  //     //     break;
+  //     //   case QuickAction.playRecent:
+  //     //     break;
+  //     //   default:
+  //     //     throw UnimplementedError();
+  //     // }
+  //   });
+  //   _setQuickActions();
+  // }
+
+  // static Future<void> _setQuickActions() {
+  //   return _quickActions.setShortcutItems(<ShortcutItem>[
+  //     ShortcutItem(type: QuickAction.search.value, localizedTitle: staticl10n.search, icon: 'round_search_white_36'),
+  //     ShortcutItem(type: QuickAction.shuffleAll.value, localizedTitle: staticl10n.shuffleAll, icon: 'round_shuffle_white_36'),
+  //     ShortcutItem(type: QuickAction.playRecent.value, localizedTitle: staticl10n.playRecent, icon: 'round_play_arrow_white_36')
+  //   ]);
+  // }
 
   /// Should be called if played song is duplicated in the current queue.
   static void handleDuplicate(Song song) {
+    final originalSong = state.allSongs.byId.get(song.sourceId);
+    if (originalSong == null) {
+      removeFromQueue(song);
+      return;
+    }
+    if (identical(originalSong, song))
+      return;
     final map = state.idMap;
     final newId = -(map.length + 1);
-    map[newId.toString()] = song.id;
+    map[newId.toString()] = originalSong.id;
     song.id = newId;
-    state.changeSong(song);
-    queueSerializer.save(state.queues.current.songs);
-    // don't call this here, rather on native side.
-    // idMapSerializer.save(state.idMap);
+    state.queues._saveCurrentQueue();
+    _idMapSerializer.save(state.idMap);
   }
 
   //****************** Queue manipulation methods *****************************************************
 
+  /// Marks queues modified and traverses it to be unshuffled, preseving the shuffled
+  /// queue contents.
+  static void _unshuffle() {
+    setQueue(
+      emitChangeEvent: false,
+      modified: true,
+      shuffled: false,
+      songs: state.queues._shuffled
+          ? List.from(state.queues._shuffledQueue.songs)
+          : null,
+    );
+  }
+
+  /// Cheks if current queue is persistent, if yes, adds this queue as origin
+  /// to all its songs. This is a required actions for each addition to the queue. 
+  static void _setOrigins() {
+    // Adding origin to the songs in the current persistent playlist.
+    if (state.queues.type == QueueType.persistent) {
+      final songs = state.queues.current.songs;
+      final persistentQueue = state.queues.persistent!;
+      for (final song in songs) {
+        song.origin = persistentQueue;
+      }
+    }
+  }
+
   /// If the [song] is next (or currently playing), will duplicate it and queue it to be played next,
   /// else will move it to be next. After that it can be duplicated to be played more.
   ///
-  /// Same as for [songAddToQueue]:
+  /// Same as for [addToQueue]:
   /// * if current queue is [QueueType.persistent] and the added [song] is present in it, will mark the queue as modified,
   /// else will traverse it into [QueueType.arbitrary]. All the other queues will be just marked as modified.
-  /// * if current queue is shuffled, it will copy all songs (thus saving the order of shufn fled songs), go back to be unshuffled,
+  /// * if current queue is shuffled, it will copy all songs (thus saving the order of shuffled songs), go back to be unshuffled,
   /// and add the [songs] there.
   static void playNext(List<Song> songs) {
-    assert(songs != null && songs.isNotEmpty);
+    assert(songs.isNotEmpty);
     final queues = state.queues;
-    setQueue(
-      modified: true,
-      shuffled: false,
-      songs: queues._shuffled && queues._type != QueueType.all
-          ? List.from(queues._shuffledQueue.songs)
-          : null,
-    );
+    // Save queue order
+    _unshuffle();
+    _setOrigins();
     final currentQueue = queues.current;
     if (songs.length == 1) {
       final song = songs[0];
       if (song != state.currentSong &&
-          song != currentQueue.getNextSong(state.currentSong) &&
+          song != currentQueue.getNext(state.currentSong) &&
           state.currentSongIndex != currentQueue.length - 1) {
-        currentQueue.removeSong(song);
+        currentQueue.remove(song);
       }
     }
     bool contains = true;
     for (int i = 0; i < songs.length; i++) {
       currentQueue.insert(state.currentSongIndex + i + 1, songs[i]);
       if (queues._type == QueueType.persistent && contains) {
-        final persistentSongs = queues.persistent.songs;
-        persistentSongs.firstWhere((el) => el.sourceId == songs[i].sourceId,
-            orElse: () {
-          contains = false;
-          return null;
-        });
+        final persistentSongs = queues.persistent!.songs;
+        final index = persistentSongs.indexWhere((el) => el.sourceId == songs[i].sourceId);
+        contains = index >= 0;
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
-    state.emitSongListChange();
   }
 
   /// Queues the [song] to the last position in queue.
   ///
-  /// Same as for [songPlayNext]:
+  /// Same as for [playNext]:
   /// * if current queue is [QueueType.persistent] and the added [song] is present in it, will mark the queue as modified,
   /// else will traverse it into [QueueType.arbitrary]. All the other queues will be just marked as modified.
   /// * if current queue is shuffled, it will copy all songs (thus saving the order of shuffled songs), go back to be unshuffled,
   /// and add the [songs] there.
   static void addToQueue(List<Song> songs) {
-    assert(songs != null && songs.isNotEmpty);
-    setQueue(
-      modified: true,
-      shuffled: false,
-      songs: state.queues._shuffled && state.queues._type != QueueType.all
-          ? List.from(state.queues._shuffledQueue.songs)
-          : null,
-    );
+    assert(songs.isNotEmpty);
+    final queues = state.queues;
+    // Save queue order
+    _unshuffle();
+    _setOrigins();
+    bool contains = true;
     for (final song in songs) {
       state.queues.current.add(song);
+      if (queues._type == QueueType.persistent && contains) {
+        final persistentSongs = queues.persistent!.songs;
+        final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
+        contains = index >= 0;
+      }
     }
-    setQueue();
-    state.emitSongListChange();
+    setQueue(type: contains ? null : QueueType.arbitrary);
   }
 
-  /// todo: doc + doc differences with [playNext]
+  /// Queues the persistent [queue] to be played next.
+  ///
+  /// Saves it to [Song.origin] in its items, and so when the item is played,
+  /// this peristent queue will be also shown as playing.
+  ///
+  /// If currently some persistent queue is already playing, will first save the current queue to
+  /// [Song.origin] in its items.
+  /// 
+  /// In difference with [playNext], always traverses the playlist into [QueueType.arbitrary].
   static void playQueueNext(PersistentQueue queue) {
-    if (ContentControl.state.queues.type == QueueType.persistent) {
-      final persistentQueue = ContentControl.state.queues.persistent;
-      for (final song in persistentQueue.songs) {
-        song.origin = persistentQueue;
-      }
-      state._currentSongOrigin = persistentQueue;
-    }
-    final currentQueue = ContentControl.state.queues.current;
+    final songs = queue.songs;
+    assert(songs.isNotEmpty);
+    // Save queue order
+    _unshuffle();
+    _setOrigins();
+    final currentQueue = state.queues.current;
     final currentIndex = state.currentSongIndex;
     int i = 0;
-    for (final song in queue.songs) {
+    for (final song in songs) {
       song.origin = queue;
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
     }
-    for (int i = 0; i < queue.length; i++) {}
     setQueue(type: QueueType.arbitrary);
-    state.emitSongListChange();
   }
 
-  /// todo: doc + doc differences with [addToQueue]
+  /// Queues the persistent [queue] to the last position in queue.
+  ///
+  /// Saves it to [Song.origin] in its items, and so when the item is played,
+  /// this peristent queue will be also shown as playing.
+  ///
+  /// If currently some persistent queue is already playing, will first save the current queue to
+  /// [Song.origin] in its items.
+  ///
+  /// In difference with [addToQueue], always traverses the playlist into [QueueType.arbitrary].
   static void addQueueToQueue(PersistentQueue queue) {
-    if (ContentControl.state.queues.type == QueueType.persistent) {
-      final persistentQueue = ContentControl.state.queues.persistent;
-      for (final song in persistentQueue.songs) {
-        song.origin = persistentQueue;
-      }
-      state._currentSongOrigin = persistentQueue;
-    }
-    for (final song in queue.songs) {
+    final songs = queue.songs;
+    assert(songs.isNotEmpty);
+    // Save queue order
+    _unshuffle();
+    _setOrigins();
+    for (final song in songs) {
       song.origin = queue;
       state.queues.current.add(song);
     }
     setQueue(type: QueueType.arbitrary);
-    state.emitSongListChange();
   }
 
-  /// todo: doc on what parameters can make sense when call this method
-  /// The [save] parameter can be used to disable redundant writing to jsons when,
-  /// for example, when we restore the queue from this exact json.
+  /// Inserts [song] at [index] in the queue.
+  static void insertToQueue(int index, Song song) {
+    // Save queue order
+    _unshuffle();
+    final queues = state.queues;
+    bool contains = true;
+    if (queues._type == QueueType.persistent) {
+      final persistentSongs = queues.persistent!.songs;
+      final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
+      contains = index >= 0;
+    }
+    setQueue(type: contains ? null : QueueType.arbitrary);
+  }
+
+  /// Removes the [song] from the queue.
   ///
-  /// When [copied] is set to true that indicates that songs is already unique,
-  /// otherwise it will copy it with `List.from`.
+  /// If this was the last item in current queue, will:
+  /// * fall back to the first song in [QueueType.all]
+  /// * fall back to [QueueType.all]
+  /// * stop the playback
+  static void removeFromQueue(Song song) {
+    final queues = state.queues;
+    if (queues.current.length == 1) {
+      resetQueue();
+      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
+      MusicPlayer.instance.pause();
+    } else {
+      if (song == state.currentSong) {
+        MusicPlayer.instance.setSong(state.queues.current.getPrev(song));
+        MusicPlayer.instance.pause();
+      }
+      queues.current.remove(song);
+      setQueue(modified: true);
+    }
+  }
+
+  /// Removes a song at given [index] from the queue.
+  ///
+  /// If this was the last item in current queue, will:
+  /// * fall back to the first song in [QueueType.all]
+  /// * fall back to [QueueType.all]
+  /// * stop the playback
+  static void removeFromQueueAt(int index) {
+    final queues = state.queues;
+    if (queues.current.length == 1) {
+      resetQueue();
+      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
+      MusicPlayer.instance.pause();
+    } else {
+      if (index == state.currentSongIndex) {
+        MusicPlayer.instance.setSong(state.queues.current.getNextAt(index));
+        MusicPlayer.instance.pause();
+      }
+      queues.current.removeAt(index);
+      setQueue(modified: true);
+    }
+  }
+
+  /// Removes all items at given [indexes] from the queue.
+  ///
+  /// If the [indexes] list has length bigger than or equal to current queue
+  /// length, will:
+  /// * fall back to the first song in [QueueType.all]
+  /// * fall back to [QueueType.all]
+  /// * stop the playback
+  static void removeAllFromQueueAt(List<int> indexes) {
+    final queues = state.queues;
+    if (indexes.length >= queues.current.length) {
+      resetQueue();
+      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
+      MusicPlayer.instance.pause();
+    } else {
+      final containsCurrent = indexes.contains(state.currentSongIndex);
+      if (containsCurrent) {
+        MusicPlayer.instance.pause();
+      }
+      for (int i = indexes.length - 1; i >= 0; i--) {
+        queues.current.removeAt(indexes[i]);
+      }
+      if (containsCurrent) {
+        /// TODO: add to [Queue] something like relative indexing, that allows negative indexes
+        /// and imporvie this
+        MusicPlayer.instance.setSong(state.queues.current.songs[0]);
+      }
+      setQueue(modified: true);
+    }
+  }
+
+  /// A shorthand for setting [QueueType.searched].
+  static void setSearchedQueue(String query, List<Song> songs) {
+     setQueue(
+      type: QueueType.searched,
+      searchQuery: query,
+      modified: false,
+      shuffled: false,
+      songs: songs,
+    );
+  }
+
+  /// A shorthand for setting [QueueType.persistent].
+  /// 
+  /// By default sets [shuffled] queue.
+  static void setPersistentQueue({
+    required PersistentQueue queue,
+    required List<Song> songs,
+    bool shuffled = false,
+  }) {
+    List<Song>? shuffledSongs;
+    if (shuffled) {
+      shuffledSongs = Queue.shuffleSongs(songs);
+    }
+    setQueue(
+      type: QueueType.persistent,
+      persistentQueue: queue,
+      modified: false,
+      shuffled: shuffled,
+      songs: shuffledSongs ?? songs,
+      shuffleFrom: songs,
+    );
+  }
+
+  /// Resets queue to all songs.
+  static void resetQueue() {
+    setQueue(
+      type: QueueType.all,
+      modified: false,
+      shuffled: false,
+    );
+  }
+
+  /// Sets the queue with specified [type] and other parameters.
+  /// Most of the parameters are updated separately and almost can be omitted,
+  /// unless differently specified:
+  ///
+  /// * [shuffled] can be used to shuffle / unshuffle the queue
+  /// * [modified] can be used to mark current queue as modified
+  /// * [songs] is the songs list to set to the queue.
+  ///   This array will be copied (unless [copied] is true) and set
+  ///   as a source to queue, that function is switching to.
+  ///   For example that way when [shuffled] is `true`, this array
+  ///   will be used as new queue, without being shuffled.
+  /// * [shuffleFrom] is a list of songs to fall back when [shuffle]
+  ///   thereafter will be set to `false`.
+  ///   
+  ///   By default it will also be shuffled and set to shuffled queue,
+  ///   unless [songs] are specified, which will override this value.
+  ///
+  ///   If both [songs] and [shuffleFrom] is not specified, will shuffle
+  ///   from current queue.
+  /// * [persistentQueue] is the persistent queue being set,
+  ///   only applied when [type] is [QueueType.persistent].
+  ///   When [QueueType.persistent] is set and currently it's not persistent, this parameter is required.
+  ///   Otherwise it can be omitted and for updating other paramters only.
+  /// * [searchQuery] is the search query the playlist was searched by,
+  ///   only applied when [type] is [QueueType.searched].
+  ///   Similarly as for [persistentQueue], when [QueueType.searched] is set and currently it's not searched,
+  ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
+  /// * [arbitraryQueueOrigin] is the description where the [QueueType.arbitrary] originates from,
+  ///   ignored with other types of queues. If none specified, by default instead of description,
+  ///   queue is just marked as [AppLocalizations.arbitraryQueue].
+  ///   It always must be localized, so [AppLocalizations] getter must be returned from this function.
+  /// 
+  ///   Because this parameter can be null with [QueueType.arbitrary], to reset to back to `null`
+  ///   after it's set, you need to pass [type] explicitly.
+  /// * [emitChangeEvent] is whether to emit a song list change event
+  /// * [save] parameter can be used to disable redundant writing to JSONs when,
+  ///   for example, when we restore the queue from this exact json.
+  /// * [copied] indicates that [songs] was already copied,
+  ///   by default set to `false` and will copy it with [List.from]
   static void setQueue({
-    QueueType type,
-    bool shuffled,
-    bool modified,
-    List<Song> songs,
-    PersistentQueue persistentQueue,
-    String searchQuery,
-    bool emitChangeEvent = true,
+    QueueType? type,
+    bool? shuffled,
+    bool? modified,
+    List<Song>? songs,
+    List<Song>? shuffleFrom,
+    PersistentQueue? persistentQueue,
+    String? searchQuery,
+    ArbitraryQueueOrigin? arbitraryQueueOrigin,
     bool save = true,
     bool copied = false,
+    bool emitChangeEvent = true,
   }) {
     final queues = state.queues;
-    List<Song> copySongs() {
-      return copied ? songs : List.from(songs);
+
+    @pragma('vm:prefer-inline')
+    List<Song> copySongs(List<Song> _songs) {
+      return copied ? _songs : List.from(_songs);
     }
 
     assert(
+      songs == null || songs.isNotEmpty,
+      "It's invalid to set empty songs queue",
+    );
+    assert(
       type != QueueType.persistent ||
-          queues._persistent != null ||
-          persistentQueue != null,
-      'When you set persistent queue and currently none set, you must provide the `persistentQueue` paramenter',
+      queues._persistent != null ||
+      persistentQueue != null,
+      "When you set `persistent` queue and currently none set, you must provide the `persistentQueue` paramenter",
+    );
+    assert(
+      type != QueueType.searched ||
+      queues._searchQuery != null ||
+      searchQuery != null,
+      "When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter",
     );
 
+    final typeArg = type;
     type ??= queues._type;
     if (type == QueueType.arbitrary) {
       modified = false;
+      if (arbitraryQueueOrigin != null) {
+        // Set once and don't change thereafter until type is passed explicitly.
+        state.queues._arbitraryQueueOrigin = arbitraryQueueOrigin;
+        Prefs.arbitraryQueueOrigin.set(arbitraryQueueOrigin.value);
+      }
+    }
+    if (type != QueueType.arbitrary ||
+        // Reset when queue type is passed explicitly.
+        typeArg == QueueType.arbitrary && arbitraryQueueOrigin == null) {  
+      state.queues._arbitraryQueueOrigin = null;
+      Prefs.arbitraryQueueOrigin.delete();
     }
 
     if (type == QueueType.persistent) {
       if (persistentQueue != null) {
         queues._persistent = persistentQueue;
-        Prefs.persistentQueueIdNullable.set(persistentQueue.id);
+        Prefs.persistentQueueId.set(persistentQueue.id);
       }
     } else {
       queues._persistent = null;
-      Prefs.persistentQueueIdNullable.set(null);
+      Prefs.persistentQueueId.delete();
     }
 
     if (type == QueueType.searched) {
       if (searchQuery != null) {
         queues._searchQuery = searchQuery;
-        Prefs.searchQueryStringNullable.set(searchQuery);
+        Prefs.searchQueryString.set(searchQuery);
       }
     } else {
       queues._searchQuery = null;
-      Prefs.searchQueryStringNullable.set(null);
+      Prefs.searchQueryString.delete();
     }
 
     modified ??= queues._modified;
@@ -495,24 +838,28 @@ abstract class ContentControl {
 
     if (shuffled) {
       queues._shuffledQueue.setSongs(
-        songs != null ? copySongs() : Queue.shuffleSongs(queues.current.songs),
+        songs != null
+          ? copySongs(songs)
+          : Queue.shuffleSongs(shuffleFrom ?? queues.current.songs),
       );
-      if (save) {
-        queueSerializer.save(queues._shuffledQueue.songs);
+      if (shuffleFrom != null) {
+        queues._queue.setSongs(copySongs(shuffleFrom));
       }
     } else {
       queues._shuffledQueue.clear();
       if (songs != null) {
-        queues._custom.setSongs(copySongs());
+        queues._queue.setSongs(copySongs(songs));
       } else if (type == QueueType.all && !modified) {
-        queues._custom.setSongs(List.from(queues.all.songs));
-      }
-      if (save) {
-        queueSerializer.save(queues._custom.songs);
+        queues._queue.setSongs(List.from(state.allSongs.songs));
       }
     }
+
     queues._shuffled = shuffled;
     Prefs.queueShuffledBool.set(shuffled);
+
+    if (save) {
+      state.queues._saveCurrentQueue();
+    }
 
     if (state.idMap.isNotEmpty &&
         !modified &&
@@ -520,19 +867,18 @@ abstract class ContentControl {
         type != QueueType.persistent &&
         type != QueueType.arbitrary) {
       state.idMap.clear();
-      idMapSerializer.save(state.idMap);
-      NativeAudioPlayer.clearIdMap();
+      _idMapSerializer.save(state.idMap);
     }
 
     if (emitChangeEvent) {
-      state.emitSongListChange();
+      state.emitContentChange();
     }
   }
 
   /// Checks queue pool and removes obsolete songs - that are no longer on all songs data.
-  static void removeObsolete({bool emitChangeEvent = true}) {
-    state.queues._custom.compareAndRemoveObsolete(state.queues.all);
-    state.queues._shuffledQueue.compareAndRemoveObsolete(state.queues.all);
+  static void removeObsolete({ bool emitChangeEvent = true }) {
+    state.queues._queue.compareAndRemoveObsolete(state.allSongs);
+    state.queues._shuffledQueue.compareAndRemoveObsolete(state.allSongs);
 
     if (state.queues.current.isEmpty) {
       //  Set queue to global if searched or shuffled are happened to be zero-length
@@ -543,133 +889,185 @@ abstract class ContentControl {
         emitChangeEvent: false,
       );
     } else {
-      switch (state.queues._internalType) {
-        case _PoolQueueType.custom:
-          queueSerializer.save(state.queues._custom.songs);
-          break;
-        case _PoolQueueType.shuffled:
-          queueSerializer.save(state.queues._shuffledQueue.songs);
-          break;
-        default:
-          assert(false);
-      }
+      state.queues._saveCurrentQueue();
+    }
+
+    if (_empty) {
+      dispose();
+      return;
     }
 
     // Update current song
-    if (state.queues.current.isNotEmpty &&
-        state._currentSongId != null &&
-        state.queues.current.byId.getSongIndex(state._currentSongId) < 0) {
-      if (MusicPlayer.playerState == MusicPlayerState.PLAYING) {
-        MusicPlayer.pause();
-        MusicPlayer.play(state.queues.current.songs[0], silent: true);
+    if (state.queues.current.get(state.currentSong) == null) {
+      final player = MusicPlayer.instance;
+      if (player.playing) {
+        player.pause();
+        player.setSong(state.queues.current.songs[0]);
       }
     }
-
+  
     if (emitChangeEvent) {
-      state.emitSongListChange();
+      state.emitContentChange();
     }
   }
 
   //****************** Content manipulation methods *****************************************************
+  
+  /// Returns content of specified type.
+  static List<T> getContent<T extends Content>([Type? contentType]) {
+    return contentPick<T, List<T> Function()>(
+      contentType: contentType,
+      song: () => state.allSongs.songs as List<T>,
+      album: () => state.albums.values.toList() as List<T>,
+    )();
+  }
 
   /// Refetches all the content.
   static Future<void> refetchAll() async {
     await Future.wait([
-      refetchAlbums(),
-      refetchSongs(),
+      for (final contentType in Content.enumerate())
+        refetch(contentType: contentType),
     ]);
-    return _restoreLastSong();
+    return MusicPlayer.instance.restoreLastSong();
   }
 
-  /// Refetches songs.
+  /// Refetches content by the `T` content type.
   ///
-  /// todo: doc [updateQueues]
-  static Future<void> refetchSongs({
-    bool emitChangeEvent = true,
+  /// Instead of `T`, you can explicitly specify [contentType].
+  ///
+  /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling [removeObsolete].
+  /// (only works with [Song]s).
+  static Future<void> refetch<T extends Content>({
+    Type? contentType,
     bool updateQueues = true,
+    bool emitChangeEvent = true,
   }) async {
-    final json = await API.ContentHandler.retrieveSongs();
-    final List<Song> songs = [];
-    for (String songStr in json) {
-      songs.add(Song.fromJson(jsonDecode(songStr)));
-    }
-    if (state.queues.all == null) {
-      state.queues._all = Queue([]);
-    }
-    state.queues.all.setSongs(songs);
-    sort<SongSort>(emitChangeEvent: false);
-    if (updateQueues) {
-      removeObsolete(emitChangeEvent: false);
-    }
+    await contentPick<T, AsyncCallback>(
+      contentType: contentType,
+      song: () async {
+        state.allSongs.setSongs(await ContentChannel.retrieveSongs());
+        if (_empty) {
+          dispose();
+          return;
+        }
+        sort<Song>(emitChangeEvent: false);
+        if (updateQueues) {
+          removeObsolete(emitChangeEvent: false);
+        }
+      },
+      album: () async {
+        if (disposed)
+          return;
+        state.albums = await ContentChannel.retrieveAlbums();
+        if (disposed)
+          return;
+        sort<Album>(emitChangeEvent: false);
+      }
+    )();
     if (emitChangeEvent) {
-      state.emitSongListChange();
+      stateNullable?.emitContentChange();
     }
   }
 
-  /// Refetches albums.
-  static Future<void> refetchAlbums({bool emitChangeEvent = true}) async {
-    final json = await API.ContentHandler.retrieveAlbums();
-    state.albums = {};
-    for (String albumStr in json) {
-      final albumJson = jsonDecode(albumStr);
-      state.albums[albumJson['id'] as int] = Album.fromJson(albumJson);
-    }
-    sort<AlbumSort>(emitChangeEvent: false);
-    if (emitChangeEvent) {
-      state.emitSongListChange();
-    }
-  }
-
-  /// Searches for song by specified [query].
-  static Iterable<Song> searchSongs(String query) {
+  /// Searches for content by given [query] and the `T` content type.
+  ///
+  /// Instead of `T`, you can explicitly specify [contentType]..
+  static List<T> search<T extends Content>(String query, { Type? contentType }) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
-    final split = query.split(' ');
-    return state.queues.all.songs.where((el) {
-      return split
-              .map<bool>((word) => // Words search
-                  el.title.toLowerCase().contains(word) ||
-                  el.artist.toLowerCase().contains(word) ||
-                  el.album.toLowerCase().contains(word))
-              .every((e) => e) ||
-          RegExp('\\b\\w')
-              // Find abbreviations (big baby tape - bbt)
-              // FIXME: this is not working as expected for cyrillic
-              .allMatches(el.title.toLowerCase())
-              .fold('', (a, b) => a += b.group(0))
-              .contains(query);
-    });
+    final words = query.split(' ');
+    // TODO: add filter by year, and perhaps make a whole filter system, so it would be easy to filter by any parameter
+    // this should be some option in the UI like "Search by year",
+    // i disabled it because it filtered out searches like "28 days later soundtrack".
+    //
+    // final year = int.tryParse(words[0]);
+    const year = null;
+    /// Splits string by spaces, or dashes, or bar, or paranthesis
+    final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
+    final l10n = staticl10n;
+    /// Checks whether a [string] is abbreviation.
+    /// For example: "big baby tape - bbt"
+    bool isAbbreviation(String string) {
+      return string.toLowerCase()
+            .split(abbreviationRegexp)
+            .map((word) => word.isNotEmpty ? word[0] : '')
+            .join()
+            .contains(query);
+    }
+    final contentInterable = contentPick<T, Iterable<T> Function()>(
+      contentType: contentType,
+      song: () {
+        return state.allSongs.songs.where((song) {
+          // Exact query search
+          bool fullQuery;
+          final wordsTest = words.map<bool>((word) =>
+            song.title.toLowerCase().contains(word) ||
+            formatArtist(song.artist, l10n).toLowerCase().contains(word) ||
+            song.album.toLowerCase().contains(word)
+          ).toList();
+          // Exclude the year from query word tests
+          if (year != null) {
+            wordsTest.removeAt(0);
+          }
+          fullQuery = wordsTest.every((e) => e);
+          final abbreviation = isAbbreviation(song.title);
+          // Filter by year
+          if (year != null && year != song.getAlbum().year)
+            return false;
+          return fullQuery || abbreviation;
+        }).cast<T>();
+      },
+      album: () {
+        return state.albums.values.where((album) {
+          // Exact query search
+          bool fullQuery;
+          final wordsTest = words.map<bool>((word) =>
+            formatArtist(album.artist, l10n).toLowerCase().contains(word) ||
+            album.album.toLowerCase().contains(word),
+          ).toList();
+          // Exclude the year from query word tests
+          if (year != null) {
+            wordsTest.removeAt(0);
+          }
+          fullQuery = wordsTest.every((e) => e);
+          final abbreviation = isAbbreviation(album.album);
+          // Filter by year
+          if (year != null && year != album.year)
+            return false;
+          return fullQuery || abbreviation;
+        }).cast<T>();
+      },
+    )();
+    return contentInterable.toList();
   }
 
   /// Sorts songs, albums, etc.
   /// See [ContentState.sorts].
-  static void sort<T extends Sort>({
-    T sort,
-    bool emitChangeEvent = true,
-  }) {
+  static void sort<T extends Content>({ Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
-    sort ??= sorts[T];
-    if (T == SongSort) {
-      SongSort _sort = sort as SongSort;
-      sorts[T] = _sort;
-      Prefs.songSortString.set(jsonEncode(_sort.toJson()));
-      final comparator = _sort.comparator;
-      state.queues.all.songs.sort(comparator);
-    } else if (T == AlbumSort) {
-      AlbumSort _sort = sort as AlbumSort;
-      sorts[T] = _sort;
-      Prefs.albumSortString.set(jsonEncode(_sort.toJson()));
-      final comparator = _sort.comparator;
-      state.albums = Map.fromEntries(state.albums.entries.toList()
-        ..sort((a, b) {
-          return comparator(a.value, b.value);
-        }));
-    } else {
-      assert(false);
-    }
+    sort ??= sorts.getValue<T>() as Sort<T>;
+    contentPick<T, VoidCallback>(
+      song: () {
+        final _sort = sort! as SongSort;
+        sorts.setValue<Song>(_sort);
+        Prefs.songSortString.set(jsonEncode(sort.toJson()));
+        final comparator = _sort.comparator;
+        state.allSongs.songs.sort(comparator);
+      },
+      album: () {
+        final _sort = sort! as AlbumSort;
+        sorts.setValue<Album>(_sort);
+        Prefs.albumSortString.set(jsonEncode(_sort.toJson()));
+        final comparator = _sort.comparator;
+        state.albums = Map.fromEntries(state.albums.entries.toList()
+          ..sort((a, b) {
+            return comparator(a.value, b.value);
+          }));
+      }
+    )();
     // Emit event to track change stream
     if (emitChangeEvent) {
-      state.emitSongListChange();
+      state.emitContentChange();
     }
   }
 
@@ -677,28 +1075,31 @@ abstract class ContentControl {
   ///
   /// Ids must be source (not negative).
   static Future<void> deleteSongs(Set<int> idSet) async {
-    Set<Song> songsSet = {};
+    final Set<Song> songsSet = {};
     // On Android R the deletion is performed with OS dialog.
-    if (state._sdkInt >= 30) {
+    if (_sdkInt >= 30) {
       for (final id in idSet) {
-        final song = state.queues.all.byId.getSong(id);
-        if (song != null) songsSet.add(song);
+        final song = state.allSongs.byId.get(id);
+        if (song != null) {
+          songsSet.add(song);
+        }
       }
     } else {
       for (final id in idSet) {
-        final song = state.queues.all.byId.getSong(id);
-        if (song != null) songsSet.add(song);
-        state.queues.all.byId.removeSong(id);
+        final song = state.allSongs.byId.get(id);
+        if (song != null) {
+          songsSet.add(song);
+        }
+        state.allSongs.byId.remove(id);
       }
       removeObsolete();
     }
 
     try {
-      final result = await API.ContentHandler.deleteSongs(songsSet);
-      if (state._sdkInt >= 30 && result) {
-        for (final id in idSet) {
-          state.queues.all.byId.removeSong(id);
-        }
+      final result = await ContentChannel.deleteSongs(songsSet);
+      await refetchAll();
+      if (sdkInt >= 30 && result) {
+        idSet.forEach(state.allSongs.byId.remove);
         removeObsolete();
       }
     } catch (ex, stack) {
@@ -708,7 +1109,7 @@ abstract class ContentControl {
         reason: 'in deleteSongs',
       );
       ShowFunctions.instance.showToast(
-        msg: getl10n(App.navigatorKey.currentContext).deletionError,
+        msg: staticl10n.deletionError,
       );
       print('Deletion error: $ex');
     }
@@ -718,102 +1119,112 @@ abstract class ContentControl {
 
   /// Restores [sorts] from [Prefs].
   static Future<void> _restoreSorts() async {
-    state.sorts = {
-      SongSort: SongSort.fromJson(jsonDecode(await Prefs.songSortString.get())),
-      AlbumSort:
-          AlbumSort.fromJson(jsonDecode(await Prefs.albumSortString.get())),
+    state.sorts._map = {
+      Song: SongSort.fromJson(jsonDecode(await Prefs.songSortString.get())),
+      Album: AlbumSort.fromJson(jsonDecode(await Prefs.albumSortString.get())),
     };
   }
 
-  /// Restores saved queue from json if [queueTypeInt] (saved [_queues.type]) is not [QueueType.all].
+  /// Restores saved queues.
   ///
-  /// * Shuffled parameter is not restored, any [shuffled] queue, except for [QueueType.all], will be restored as [QueueType.arbitrary].
-  /// * [QueueType.all] can be restored as shuffled, if it's not modified.
   /// * If stored queue becomes empty after restoration (songs do not exist anymore), will fall back to not modified [QueueType.all].
+  /// * If saved persistent queue songs are restored successfully, but the playlist itself cannot be found, will fall back to [QueueType.arbitrary].
   /// * In all other cases it will restore as it was.
-  ///
-  /// todo: update docs
   static Future<void> _restoreQueue() async {
     final shuffled = await Prefs.queueShuffledBool.get();
     final modified = await Prefs.queueModifiedBool.get();
+    final persistentQueueId = await Prefs.persistentQueueId.get();
     final type = EnumToString.fromString(
       QueueType.values,
       await Prefs.queueTypeString.get(),
-    );
-    state.queues._type = type;
-    state.idMap = await idMapSerializer.read();
+    )!;
+    state.idMap = await _idMapSerializer.read();
 
-    /// Get songs ids from json
-    final songIds = await queueSerializer.read();
-    final List<Song> songs = [];
-    songIds.forEach((id) {
-      final song = state.queues.all.byId.getSong(Song.getSourceId(id));
-      if (song != null) songs.add(song.copyWith(id: id));
-    });
-    final persistentQueueId = await Prefs.persistentQueueIdNullable.get();
+    final List<Song> queueSongs = [];
+    final rawQueue = await state.queues._queueSerializer.read();
+    for (final item in rawQueue) {
+      final id = item['id'];
+      var song = state.allSongs.byId.get(Song.getSourceId(id));
+      if (song != null) {
+        song = song.copyWith(id: id);
+        final origin = item['origin_type'];
+        if (origin != null) {
+          if (origin == 'album') {
+            song.origin = state.albums[item['origin_id']];
+          } else {
+            assert(false);
+          }
+        }
+        queueSongs.add(song);
+      }
+    }
+
+    final List<Song> shuffledSongs = [];
+    if (shuffled == true) {
+      final rawShuffledQueue = await state.queues._shuffledSerializer.read();
+      for (final item in rawShuffledQueue) {
+        final id = item['id'];
+        var song = state.allSongs.byId.get(Song.getSourceId(id));
+        if (song != null) {
+          song = song.copyWith(id: id);
+          final origin = item['origin_type'];
+          if (origin != null) {
+            if (origin == 'album') {
+              song.origin = state.albums[item['origin_id']];
+            } else {
+              assert(false);
+            }
+          }
+          shuffledSongs.add(song);
+        }
+      }
+    }
+
+    final songs = shuffled && shuffledSongs.isNotEmpty ? shuffledSongs : queueSongs;
+
     if (songs.isEmpty) {
       setQueue(
         type: QueueType.all,
         modified: false,
         // we must save it, so do not `save: false`
       );
-    } else if (shuffled) {
-      if (type == QueueType.all && !modified) {
-        setQueue(
-          type: QueueType.all,
-          shuffled: shuffled,
-          songs: songs,
-          save: false,
-        );
-      } else {
-        setQueue(
-          type: QueueType.arbitrary,
-          songs: songs,
-          save: false,
-        );
-      }
     } else if (type == QueueType.persistent) {
       if (persistentQueueId != null &&
           state.albums[persistentQueueId] != null) {
         setQueue(
           type: type,
           modified: modified,
-          persistentQueue: state.albums[persistentQueueId],
+          shuffled: shuffled,
           songs: songs,
+          shuffleFrom: queueSongs,
+          persistentQueue: state.albums[persistentQueueId],
           save: false,
         );
       } else {
         setQueue(
           type: QueueType.arbitrary,
+          shuffled: shuffled,
           songs: songs,
+          shuffleFrom: queueSongs,
           save: false,
         );
       }
     } else {
+      final arbitraryQueueOrigin = await Prefs.arbitraryQueueOrigin.get();
       setQueue(
         type: type,
-        searchQuery: await Prefs.searchQueryStringNullable.get(),
+        shuffled: shuffled,
         modified: modified,
         songs: songs,
+        shuffleFrom: queueSongs,
+        searchQuery: await Prefs.searchQueryString.get(),
+        arbitraryQueueOrigin: arbitraryQueueOrigin == null
+          ? null
+          : EnumToString.fromString(
+              ArbitraryQueueOrigin.values,
+              arbitraryQueueOrigin,
+            ),
         save: false,
-      );
-    }
-  }
-
-  /// Function that fires right after json has fetched and when initial songs fetch has done.
-  ///
-  /// Its main purpose to setup player to work with queues.
-  static Future<void> _restoreLastSong() async {
-    final current = state.queues.current;
-    // songsEmpty condition is here to avoid errors when trying to get first song index
-    if (current.isNotEmpty) {
-      final int songId = await Prefs.songIdIntNullable.get();
-      // Set url of first track in player instance
-      await MusicPlayer.play(
-        songId == null
-            ? current.songs[0]
-            : current.byId.getSong(songId) ?? current.songs[0],
-        silent: true,
       );
     }
   }

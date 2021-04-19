@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// @dart = 2.12
+
 import 'dart:convert';
 
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -28,21 +30,14 @@ abstract class Prefs {
       Pref<int>(key: 'song_position', defaultValue: 0);
 
   /// Last playing track id.
-  static final Pref<int> songIdIntNullable =
+  static final Pref<int?> songIdInt =
       Pref<int>(key: 'song_id', defaultValue: null);
 
-  /// Last playing track id.
-  /// Used on native side only to allow service be sticky
-  ///
-  /// todo: not used properly yet, and service is not sticky for now
-  static final Pref<bool> songIsPlayingBool =
-      Pref<bool>(key: 'song_is_playing', defaultValue: false);
-
-  /// Loop mode. Used on native side.
+  /// Loop mode.
   static final Pref<bool> loopModeBool =
       Pref<bool>(key: 'loop_mode', defaultValue: false);
 
-  //****************** Sorts *****************************************************
+  //****************** Sorts ***********************
 
   /// Sort feature used for song list.
   static final Pref<String> songSortString = Pref<String>(
@@ -67,12 +62,16 @@ abstract class Prefs {
   );
 
   /// Last persistent queue.
-  static final Pref<int> persistentQueueIdNullable =
+  static final Pref<int?> persistentQueueId =
       Pref<int>(key: 'persistent_queue_id', defaultValue: null);
 
   /// Last search query.
-  static final Pref<String> searchQueryStringNullable =
+  static final Pref<String?> searchQueryString =
       Pref<String>(key: 'search_query', defaultValue: null);
+
+  /// Last [ArbitraryQueueOrigin].
+  static final Pref<String?> arbitraryQueueOrigin =
+      Pref<String>(key: 'arbitrary_queue_origin', defaultValue: null);
 
   /// Whether the saved queue is modified or not.
   static final Pref<bool> queueModifiedBool =
@@ -86,34 +85,35 @@ abstract class Prefs {
   /// 
   /// When `true`:
   /// * special dev menu in the drawer gets unlocked
-  /// * error snackbards are shown
+  /// * error snackbars are shown
   /// * song info button available in the top right menu of [PlayerRoute].
   static final Pref<bool> devModeBool =
       Pref<bool>(key: 'dev_mode', defaultValue: false);
 }
 
 class SearchHistory {
-  SearchHistory._internal();
-  static final SearchHistory _instance = SearchHistory._internal();
-  static SearchHistory get instance => _instance;
+  SearchHistory._();
+  static final instance = SearchHistory._();
 
-  List<String> history;
+  List<String>? history;
 
   Future<void> load() async {
-    if (history == null) {
-      history = await Prefs.searchHistoryStringList.get();
-    }
+    history ??= await Prefs.searchHistoryStringList.get();
   }
 
   Future<void> clear() async {
-    history = null;
+    if (history != null) {
+      history!.clear();
+    } else {
+      history = [];
+    }
     await Prefs.searchHistoryStringList.set(const []);
   }
 
   Future<void> remove(int index) async {
     await load();
-    history.removeAt(index);
-    await Prefs.searchHistoryStringList.set(history);
+    history!.removeAt(index);
+    await Prefs.searchHistoryStringList.set(history!);
   }
 
   Future<void> save(String entry) async {
@@ -121,12 +121,12 @@ class SearchHistory {
     if (entry.isNotEmpty) {
       await load();
       // Remove if this input is in array
-      history.removeWhere((el) => el == entry);
-      history.insert(0, entry);
-      if (history.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
-        history.removeLast();
+      history!.removeWhere((el) => el == entry);
+      history!.insert(0, entry);
+      if (history!.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+        history!.removeLast();
       }
-      await Prefs.searchHistoryStringList.set(history);
+      await Prefs.searchHistoryStringList.set(history!);
     }
   }
 }
@@ -143,6 +143,6 @@ abstract class Settings {
   /// Stores primary color int value.
   static final Pref<int> primaryColorInt = Pref<int>(
     key: 'setting_primary_color',
-    defaultValue: Constants.AppTheme.defaultPrimaryColor.value,
+    defaultValue: Constants.Theme.defaultPrimaryColor.value,
   );
 }

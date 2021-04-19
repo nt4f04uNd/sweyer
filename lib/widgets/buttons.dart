@@ -15,16 +15,17 @@ class LoopButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final player = MusicPlayer.instance;
     return StreamBuilder<bool>(
-      stream: MusicPlayer.onLoopSwitch,
-      initialData: MusicPlayer.looping,
+      stream: player.loopingStream,
+      initialData: player.looping,
       builder: (context, snapshot) {
-        return NFAnimatedIconButton(
-          icon: Icon(Icons.loop_rounded),
+        return AnimatedIconButton(
+          icon: const Icon(Icons.loop_rounded),
           size: 40.0,
           iconSize: textScaleFactor * Constants.iconSize,
-          enabled: snapshot.data,
-          onPressed: MusicPlayer.switchLooping,
+          active: snapshot.data,
+          onPressed: player.switchLooping,
         );
       },
     );
@@ -37,13 +38,13 @@ class ShuffleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return StreamBuilder(
-      stream: ContentControl.state.onSongListChange,
-      builder: (context, snap) => NFAnimatedIconButton(
-        icon: Icon(Icons.shuffle_rounded),
+      stream: ContentControl.state.onContentChange,
+      builder: (context, snap) => AnimatedIconButton(
+        icon: const Icon(Icons.shuffle_rounded),
         color: ThemeControl.theme.colorScheme.onSurface,
         size: 40.0,
         iconSize: textScaleFactor * Constants.iconSize,
-        enabled: ContentControl.state.queues.shuffled,
+        active: ContentControl.state.queues.shuffled,
         onPressed: () {
           ContentControl.setQueue(
             shuffled: !ContentControl.state.queues.shuffled,
@@ -54,16 +55,15 @@ class ShuffleButton extends StatelessWidget {
   }
 }
 
+/// Icon button that opens settings page.
 class SettingsButton extends StatelessWidget {
   const SettingsButton({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return NFIconButton(
-      icon: Icon(Icons.settings_rounded),
-      onPressed: () => App.navigatorKey.currentState.pushNamed(
-        Constants.Routes.settings.value,
-      ),
+      icon: const Icon(Icons.settings_rounded),
+      onPressed: () => AppRouter.instance.goto(AppRoutes.settings),
     );
   }
 }

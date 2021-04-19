@@ -11,7 +11,6 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:sweyer/api.dart' as API;
 import 'package:sweyer/constants.dart' as Constants;
 
 abstract class ThemeControl {
@@ -29,8 +28,7 @@ abstract class ThemeControl {
   static Brightness get brightness => _brightness;
 
   /// Returns a brightness, opposite to the main brightness
-  static Brightness get contrastBrightness =>
-      isDark ? Brightness.light : Brightness.dark;
+  static Brightness get contrastBrightness => isDark ? Brightness.light : Brightness.dark;
 
   /// True if [brightness] is light
   static bool get isLight => _brightness == Brightness.light;
@@ -38,8 +36,7 @@ abstract class ThemeControl {
   /// True if [brightness] is dark
   static bool get isDark => _brightness == Brightness.dark;
 
-  static ThemeData get theme =>
-      isLight ? Constants.AppTheme.app.light : Constants.AppTheme.app.dark;
+  static ThemeData get theme => isLight ? Constants.Theme.app.light : Constants.Theme.app.dark;
 
   /// Returns primary or onBackground color, depending on:
   /// * the current primary
@@ -72,7 +69,7 @@ abstract class ThemeControl {
   /// This is needed to show start up application animation.
   static Future<void> initSystemUi() async {
     // Show purple ui firstly.
-    NFSystemUiControl.setSystemUiOverlay(SystemUiOverlayStyle(
+    SystemUiStyleController.setSystemUiOverlay(const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.deepPurpleAccent,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
@@ -81,14 +78,12 @@ abstract class ThemeControl {
       statusBarIconBrightness: Brightness.light,
     ));
     await Future.delayed(const Duration(milliseconds: 500));
-    if (NFSystemUiControl.lastUi.systemNavigationBarColor != Colors.black) {
+    if (SystemUiStyleController.lastUi.systemNavigationBarColor != Colors.black) {
       final ui = Constants.UiTheme.grey.auto;
-      await NFSystemUiControl.animateSystemUiOverlay(
+      await SystemUiStyleController.animateSystemUiOverlay(
         to: ui,
         curve: Curves.easeOut,
-        settings: NFAnimationControllerSettings(
-          duration: const Duration(milliseconds: 550),
-        ),
+        duration: const Duration(milliseconds: 550),
       );
     }
     _ready = true;
@@ -98,16 +93,18 @@ abstract class ThemeControl {
   ///
   /// By default performs an animation of system ui to [Constants.UiTheme.topGrey].
   /// Optional [systemUiOverlayStyle] allows change that behavior.
-  static Future<void> switchTheme(
-      {NFSystemUiControl systemUiOverlayStyle}) async {
+  static Future<void> switchTheme({ SystemUiStyleController systemUiOverlayStyle }) async {
     _rebuildOperation?.cancel();
-    _brightness =
-        _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
+    _brightness = _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Settings.lightThemeBool.set(_brightness == Brightness.light);
-    NFWidgets.defaultSystemUiStyle = Constants.UiTheme.black.auto;
-    NFWidgets.defaultModalSystemUiStyle = Constants.UiTheme.modal.auto;
-    NFWidgets.defaultBottomSheetSystemUiStyle =
-        Constants.UiTheme.bottomSheet.auto;
+    App.nfThemeData = App.nfThemeData.copyWith(
+      systemUiStyle: Constants.UiTheme.black.auto,
+      modalSystemUiStyle: Constants.UiTheme.modal.auto,
+      bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+    );
+
+    AppRouter.instance.updateTransitionSettings(themeChanged: true);
+
     emitThemeChange(true);
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(const Duration(milliseconds: 300)));
@@ -115,12 +112,10 @@ abstract class ThemeControl {
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
       emitThemeChange(false);
     }());
-    await NFSystemUiControl.animateSystemUiOverlay(
+    await SystemUiStyleController.animateSystemUiOverlay(
       to: systemUiOverlayStyle ?? Constants.UiTheme.black.auto,
       curve: Curves.easeIn,
-      settings: NFAnimationControllerSettings(
-        duration: const Duration(milliseconds: 160),
-      ),
+      duration: const Duration(milliseconds: 160),
     );
   }
 
@@ -130,7 +125,7 @@ abstract class ThemeControl {
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
-    API.GeneralHandler.reloadArtPlaceholder(color);
+    MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation.fromFuture(() async {
       await Future.delayed(dilate(primaryColorChangeDuration));
       App.rebuildAllChildren();
@@ -140,16 +135,17 @@ abstract class ThemeControl {
   }
 
   static void _applyPrimaryColor(Color color) {
+    AppRouter.instance.updateTransitionSettings(themeChanged: true);
     _colorForBlend = getColorForBlend(color);
-    Constants.AppTheme.app = Constants.AppTheme.app.copyWith(
-      light: Constants.AppTheme.app.light.copyWith(
+    Constants.Theme.app = Constants.Theme.app.copyWith(
+      light: Constants.Theme.app.light.copyWith(
         primaryColor: color,
-        colorScheme: Constants.AppTheme.app.light.colorScheme.copyWith(
+        colorScheme: Constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
-          // todo: Temporarily used for [NFButtons]
+          // todo: temporarily used for text in [NFButtons], remove when it's removed
         ),
-        tooltipTheme: Constants.AppTheme.app.light.tooltipTheme.copyWith(
+        tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
             color: color,
             borderRadius: const BorderRadius.all(
@@ -157,21 +153,20 @@ abstract class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme:
-            Constants.AppTheme.app.light.textSelectionTheme.copyWith(
+        textSelectionTheme: Constants.Theme.app.light.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
         ),
       ),
-      dark: Constants.AppTheme.app.dark.copyWith(
+      dark: Constants.Theme.app.dark.copyWith(
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,
-        colorScheme: Constants.AppTheme.app.dark.colorScheme.copyWith(
+        colorScheme: Constants.Theme.app.dark.colorScheme.copyWith(
           primary: color,
         ),
-        tooltipTheme: Constants.AppTheme.app.light.tooltipTheme.copyWith(
+        tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
             color: color,
             borderRadius: const BorderRadius.all(
@@ -179,8 +174,7 @@ abstract class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme:
-            Constants.AppTheme.app.dark.textSelectionTheme.copyWith(
+        textSelectionTheme: Constants.Theme.app.dark.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
@@ -189,10 +183,8 @@ abstract class ThemeControl {
     );
   }
 
-  static final StreamController<bool> _controller =
-      StreamController<bool>.broadcast();
-  static const Duration primaryColorChangeDuration =
-      Duration(milliseconds: 240);
+  static final StreamController<bool> _controller = StreamController<bool>.broadcast();
+  static const Duration primaryColorChangeDuration = Duration(milliseconds: 240);
   static CancelableOperation _rebuildOperation;
 
   /// Gets stream of changes on theme.

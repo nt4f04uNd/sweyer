@@ -3,278 +3,776 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-export 'native_player.dart';
-export 'playlist.dart';
-export 'serialization.dart';
 export 'content.dart';
-export 'models/models.dart';
+export 'queue.dart';
+export 'serialization.dart';
 
 import 'dart:async';
+import 'package:audio_service/audio_service.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
-
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
-abstract class MusicPlayer {
-  // Getters
+class _BrowseParent extends Enum {
+  const _BrowseParent(String value, [this.id]) : super(value);
 
-  /// Get stream of changes on audio position.
-  static Stream<Duration> get onPosition => NativeAudioPlayer.onPosition;
+  /// This property is non-null for entries that have id, for currently only for albums.
+  final int id;
+  bool get hasId => id != null;
 
-  /// Get stream of changes on player state.
-  static Stream<MusicPlayerState> get onStateChange =>
-      NativeAudioPlayer.onStateChange;
+  static const root = _BrowseParent('root');
+  static const tracks = _BrowseParent('tracks');
+  static const albums = _BrowseParent('albums');
 
-  /// Get stream of player completions
-  static Stream<void> get onCompletion => NativeAudioPlayer.onCompletion;
+  _BrowseParent withId(int id) {
+    assert(this == albums, 'This parent cannot have id');
+    return _BrowseParent(value, id); 
+  }
+}
 
-  /// Get stream of player errors
-  static Stream<PlatformException> get onError => NativeAudioPlayer.onError;
+class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
+  _AudioHandler() {
+    _init();
+  }
 
-  /// Get stream of loop mode changes
-  static Stream<bool> get onLoopSwitch => NativeAudioPlayer.onLoopSwitch;
-  static MusicPlayerState get playerState => NativeAudioPlayer.state;
-  static bool get looping => NativeAudioPlayer.looping;
+  bool _disposed = false;
+  MusicPlayer player = MusicPlayer.instance;
+  final BehaviorSubject<void> contentChangeSubject = BehaviorSubject();
 
-  /// Get current position
-  static Future<Duration> get position async {
-    try {
-      return Duration(milliseconds: await NativeAudioPlayer.getPosition());
-    } catch (e) {
-      return Duration(seconds: 0);
+  Future<void> _init() async {
+    WidgetsBinding.instance.addObserver(this);
+    
+    DateTime _lastEvent;
+    player.positionStream.listen((event) {
+      final now = DateTime.now();
+      if (_lastEvent == null || now.difference(_lastEvent) > const Duration(milliseconds: 1000)) {
+        _lastEvent = now;
+        _setState();
+      }
+    });
+    player.playingStream.listen((playing) {
+      _setState();
+      _lastEvent = DateTime.now();
+    });
+    player.loopingStream.listen((event) => _setState());
+    ContentControl.state.onSongChange.listen((song) {
+      mediaItem.add(song.toMediaItem());
+      _setState();
+    });
+    ContentControl.state.onContentChange.listen((_) {
+      contentChangeSubject.add(null);
+      queue.add(
+        ContentControl.state.queues.current.songs
+          .map((el) => el.toMediaItem())
+          .toList());
+      _setState();
+    });
+  }
+
+  void dispose() {
+    _disposed = true;
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  
+  T _parentWithIdPick<T>({ @required T albums }) {
+    assert(parent.hasId);
+    switch(parent.value) {
+      case 'albums':
+        return albums;
+      default:
+        throw UnimplementedError();
     }
   }
 
-  /// Get duration of current song
-  static Future<Duration> get duration async {
-    try {
-      return Duration(milliseconds: await NativeAudioPlayer.getDuration());
-    } catch (e) {
-      return Duration(seconds: 0);
+  void _handleMediaItemChange() {
+    if (!parent.hasId) {
+      ContentControl.resetQueue();
+    } else {
+      _parentWithIdPick<VoidCallback>(
+        albums: () {
+          final album = ContentControl.state.albums[parent.id];
+          if (album != null) {
+            ContentControl.setPersistentQueue(queue: album, songs: album.songs);
+          }
+        },
+      )();
     }
   }
 
-  /// Init whole music instance
-  ///
-  static Future<void> init() async {
-    NativeAudioPlayer.init();
+  @override
+  Future<void> prepare() {
+    return player.setSong(ContentControl.state.currentSong);
+  }
 
-    onCompletion.listen((event) {
-      // Play next track if not in loop mode, as in loop mode this event is not triggered
-      playNext();
+  @override
+  Future<void> prepareFromMediaId(String mediaId, [Map<String, dynamic> extras]) async {
+    _handleMediaItemChange();
+    final song = ContentControl.state.allSongs.byId.get(int.parse(mediaId));
+    if (song != null) {
+      await player.setSong(song);
+    }
+  }
+
+  @override
+  Future<void> prepareFromSearch(String query, [Map<String, dynamic> extras]) async {
+    final songs = ContentControl.search<Song>(query);
+    if (songs.isNotEmpty) {
+      ContentControl.setSearchedQueue(query, songs);
+      await player.setSong(ContentControl.state.allSongs.byId.get(songs[0].id));
+    }
+  }
+
+  @override
+  Future<void> prepareFromUri(Uri uri, [Map<String, dynamic> extras]) {
+    // TODO: implement prepareFromUri
+    throw UnimplementedError();
+    return super.prepareFromUri(uri, extras);
+  }
+
+  @override
+  Future<void> play() {
+    return player.play();
+  }
+
+  @override
+  Future<void> playFromMediaId(String mediaId, [Map<String, dynamic> extras]) async {
+    _handleMediaItemChange();
+    final song = ContentControl.state.allSongs.byId.get(int.parse(mediaId));
+    if (song != null) {
+      await player.setSong(song);
+      await player.play();
+    }
+  }
+
+  @override
+  Future<void> playFromSearch(String query, [Map<String, dynamic> extras]) async {
+    final songs = ContentControl.search<Song>(query);
+    if (songs.isNotEmpty) {
+      ContentControl.setSearchedQueue(query, songs);
+      await player.setSong(ContentControl.state.allSongs.byId.get(songs[0].id));
+      await player.play();
+    }
+  }
+
+  @override
+  Future<void> playFromUri(Uri uri, [Map<String, dynamic> extras]) {
+    // TODO: implement playFromUri
+    throw UnimplementedError();
+    return super.playFromUri(uri, extras);
+  }
+
+  @override
+  Future<void> playMediaItem(MediaItem mediaItem) async {
+    final song = ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
+    if (song != null) {
+      await player.setSong(song);
+      await player.play();
+    }
+  }
+
+  @override
+  Future<void> pause() => player.pause();
+
+  Timer hookTimer;
+  int hookPressedCount = 0;
+
+  @override
+  Future<void> click([MediaButton button = MediaButton.media]) async {
+    switch (button) {
+      case MediaButton.media:
+        hookPressedCount += 1;
+        hookTimer ??= Timer(const Duration(milliseconds: 600), () {
+          switch (hookPressedCount) {
+            case 1: player.playPause(); break;
+            case 2: player.playNext(); break;
+            case 3:
+            default: player.playPrev(); break;
+          }
+          hookPressedCount = 0;
+          hookTimer = null;
+        });
+        break;
+      case MediaButton.next:
+        await skipToNext();
+        break;
+      case MediaButton.previous:
+        await skipToPrevious();
+        break;
+    }
+  }
+
+  @override
+  Future<void> stop() async {
+    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
+    // await player.stop();
+    await player.pause();
+    await super.stop();
+  }
+
+  @override
+  Future<void> addQueueItem(MediaItem mediaItem) async {
+    final song = ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
+    if (song != null) {
+      ContentControl.addToQueue([song]);
+    }
+  }
+
+  @override
+  Future<void> addQueueItems(List<MediaItem> mediaItems) async {
+    final songs = mediaItems.map((mediaItem) {
+      return ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
+    });
+    if (songs.isNotEmpty) {
+      ContentControl.addToQueue(songs.toList());
+    }
+  }
+
+  @override
+  Future<void> insertQueueItem(int index, MediaItem mediaItem) async {
+    final song = ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
+    if (song != null) {
+      ContentControl.insertToQueue(index, song);
+    }
+  }
+
+  @override
+  Future<void> updateQueue(List<MediaItem> queue) async {
+    if (queue.isNotEmpty) {
+      final songs = queue.map((el) {
+        return ContentControl.state.allSongs.byId.get(int.parse(el.id));
+      }).toList();
+      ContentControl.setQueue(
+        type: QueueType.arbitrary,
+        songs: songs,
+      );
+      if (!songs.contains(ContentControl.state.currentSong)) {
+        MusicPlayer.instance.setSong(songs[0]);
+      }
+    }
+  }
+
+  @override
+  Future<void> updateMediaItem(MediaItem mediaItem) {
+    // TODO: implement updateMediaItem
+    throw UnimplementedError();
+    return super.updateMediaItem(mediaItem);
+  }
+
+  @override
+  Future<void> removeQueueItem(MediaItem mediaItem) async {
+    ContentControl.removeFromQueue(
+      ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id)),
+    );
+  }
+
+  @override
+  Future<void> removeQueueItemAt(int index) async {
+    ContentControl.removeFromQueueAt(index);
+  }
+
+  @override
+  Future<void> skipToPrevious() {
+    return player.playPrev();
+  }
+
+  @override
+  Future<void> skipToNext() {
+    return player.playNext();
+  }
+
+  @override
+  Future<void> skipToQueueItem(int index) async {
+    final queue = ContentControl.state.queues.current;
+    if (index >= 0 && index < queue.length) {
+      await player.setSong(queue.songs[index]);
+      await play();
+    }
+  }
+
+  @override
+  Future<void> seek(Duration position) {
+    _setState();
+    return player.seek(position);
+  }
+
+  @override
+  Future<void> setRating(Rating rating, Map extras) {
+    // TODO: implement setRating
+    throw UnimplementedError();
+    return super.setRating(rating, extras);
+  }
+
+  @override
+  Future<void> setCaptioningEnabled(bool enabled) {
+    // TODO: implement setCaptioningEnabled
+    throw UnimplementedError();
+    return super.setCaptioningEnabled(enabled);
+  }
+
+  @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) {
+    if (repeatMode == AudioServiceRepeatMode.one) {
+      return player.setLoopMode(LoopMode.one);
+    } else {
+      return player.setLoopMode(LoopMode.all);
+    }
+  }
+
+  @override
+  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
+    ContentControl.setQueue(
+      shuffled: shuffleMode == AudioServiceShuffleMode.all ||
+                shuffleMode == AudioServiceShuffleMode.group,
+    );
+  }
+
+  @override
+  Future<void> setSpeed(double speed) {
+    return player.setSpeed(speed);
+  }
+
+  /// Current parent.
+  _BrowseParent parent = _BrowseParent.root;
+
+  @override
+  Future<List<MediaItem>> getChildren(String parentMediaId, [Map<String, dynamic> options]) async {
+    if (parentMediaId != AudioService.recentRootId) {
+      final id = int.tryParse(parentMediaId);
+      if (id != null) {
+        parent = _BrowseParent.albums.withId(id);
+      } else {
+        switch (parentMediaId) {
+          case AudioService.browsableRootId:
+            parent = _BrowseParent.root;
+            break;
+          case 'tracks':
+            parent = _BrowseParent.tracks;
+            break;
+          case 'albums':
+            parent = _BrowseParent.albums;
+            break;
+          default:
+            throw ArgumentError();
+        }
+      }
+    }
+    switch (parentMediaId) {
+      case AudioService.recentRootId:
+        return ContentControl.state.queues.current
+            .songs
+            .map((song) => song.toMediaItem())
+            .toList();
+      case AudioService.browsableRootId:
+        return [
+          MediaItem(
+            id: 'tracks',
+            album: '',
+            title: staticl10n.tracks,
+            playable: false,
+          ),
+          MediaItem(
+            id: 'albums',
+            album: '',
+            title: staticl10n.albums,
+            playable: false,
+          ),
+        ];
+      case 'tracks':
+        return ContentControl.state.allSongs
+            .songs
+            .map((song) => song.toMediaItem())
+            .toList();
+      case 'albums':
+        return ContentControl.state.albums.values
+            .map((album) => album.toMediaItem())
+            .toList();
+      default:
+        return ContentControl.state.albums[int.parse(parentMediaId)]
+            .songs
+            .map((song) => song.toMediaItem())
+            .toList();
+    }
+  }
+
+  @override
+  ValueStream<Map<String, dynamic>> subscribeToChildren(String parentMediaId) {
+    super.subscribeToChildren(parentMediaId);
+    switch (parentMediaId) {
+      case AudioService.recentRootId:
+      default: // I have a single event stream for all updates of the  library
+        return contentChangeSubject.map<Map<String, dynamic>>((_) => {});
+    }
+  }
+
+  @override
+  Future<MediaItem> getMediaItem(String mediaId) async {
+    return ContentControl.state.allSongs.byId.get(int.parse(mediaId)).toMediaItem();
+  }
+
+  @override
+  Future<List<MediaItem>> search(String query, [Map<String, dynamic> extras]) async {
+    return ContentControl.search<Song>(query)
+      .map((song) => song.toMediaItem())
+      .toList();
+  }
+
+  @override
+  Future<void> onNotificationAction(String action) async {
+    switch (action) {
+      case 'loop_on':
+      case 'loop_off': return player.switchLooping();
+      case 'play_prev': return player.playPrev();
+      case 'pause':
+      case 'play': return player.playPause();
+      case 'play_next': return player.playNext();
+      case 'stop': stop();
+    }
+  }
+
+  @override
+  Future<void> didChangeLocales(List<Locale> locales) async {
+    await AppLocalizations.init();
+    mediaItem.add(ContentControl.state.currentSong.toMediaItem());
+    queue.add(ContentControl.state.queues.current
+      .songs
+      .map((el) => el.toMediaItem())
+      .toList(),
+    );
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    _setState();
+  }
+
+  /// Broadcasts the current state to all clients.
+  void _setState() {
+    if (_disposed)
+      return;
+    final playing = player.playing;
+    final l10n = staticl10n;
+    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark
+      ? 'white'
+      : 'black';
+    playbackState.add(playbackState.value.copyWith(
+      controls: [
+        // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
+        if (player.looping)
+          MediaControl(
+            androidIcon: 'drawable/round_loop_on_${color}_24',
+            label: l10n.loopOn,
+            action: 'loop_on',
+          )
+        else
+          MediaControl(
+            androidIcon: 'drawable/round_loop_${color}_24',
+            label: l10n.loopOff,
+            action:'loop_off',
+          ),
+        MediaControl(
+          androidIcon: 'drawable/round_skip_previous_${color}_36',
+          label: l10n.previous,
+          action: 'play_prev',
+        ),
+        if (playing)
+          MediaControl(
+            androidIcon: 'drawable/round_pause_${color}_36',
+            label: l10n.pause,
+            action: 'pause',
+          )
+        else
+          MediaControl(
+            androidIcon: 'drawable/round_play_arrow_${color}_36',
+            label: l10n.play,
+            action: 'play',
+          ),
+        MediaControl(
+          androidIcon: 'drawable/round_skip_next_${color}_36',
+          label: l10n.next,
+          action: 'play_next',
+        ),
+        MediaControl(
+          androidIcon: 'drawable/round_close_${color}_24',
+          label: l10n.stop,
+          action: 'stop',
+        ),
+      ],
+      systemActions: const {
+        MediaAction.stop,
+        MediaAction.pause,
+        MediaAction.play,
+        MediaAction.rewind,
+        MediaAction.skipToPrevious,
+        MediaAction.skipToNext,
+        MediaAction.fastForward,
+        // MediaAction.setRating,
+        MediaAction.seek,
+        MediaAction.playPause,
+        MediaAction.playFromMediaId,
+        MediaAction.playFromSearch,
+        MediaAction.skipToQueueItem,
+        // MediaAction.playFromUri,
+        MediaAction.prepare,
+        MediaAction.prepareFromMediaId,
+        MediaAction.prepareFromSearch,
+        // MediaAction.prepareFromUri,
+        MediaAction.setRepeatMode,
+        // MediaAction.unused_1,
+        // MediaAction.unused_2,
+        MediaAction.setShuffleMode,
+        MediaAction.seekBackward,
+        MediaAction.seekForward,
+      },
+      androidCompactActionIndices: const [1, 2, 3],
+      repeatMode: player.looping
+        ? AudioServiceRepeatMode.one
+        : AudioServiceRepeatMode.all,
+      shuffleMode: ContentControl.state.queues.shuffled
+        ? AudioServiceShuffleMode.all
+        : AudioServiceShuffleMode.none,
+      processingState: const {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[ // Excluding idle state because it makes notification to reappear.
+        player.processingState == ProcessingState.idle
+          ? AudioProcessingState.loading
+          : player.processingState
+      ],
+      playing: playing,
+      updatePosition: player.position,
+      bufferedPosition: player.bufferedPosition,
+      speed: player.speed,
+      queueIndex: ContentControl.state.currentSongIndex,
+    ));
+  }
+}
+
+/// Player that plays the content provided by provided [ContentControl].
+class MusicPlayer extends AudioPlayer {
+  MusicPlayer._();
+  static MusicPlayer _instance;
+  static MusicPlayer get instance {
+    return _instance ??= MusicPlayer._();
+  }
+
+  static _AudioHandler _handler;
+
+  /// Updates service state media item.
+  void updateServiceMediaItem() {
+    final song = ContentControl.state.currentSongNullable;
+    if (song != null) {
+      _handler.mediaItem.add(song.toMediaItem());
+    }
+  }
+
+  Future<void> init() async {
+    await restoreLastSong();
+    _handler ??= await AudioService.init(builder: () {
+        return _AudioHandler();
+      },
+      config: AudioServiceConfig(
+        androidResumeOnClick: true,
+        androidNotificationChannelName: staticl10n.playback,
+        androidNotificationChannelDescription: staticl10n.playbackControls,
+        // notificationColor,
+        androidNotificationIcon: 'drawable/round_music_note_white_48',
+        androidShowNotificationBadge: false,
+        androidNotificationClickStartsActivity: true,
+        androidNotificationOngoing: false,
+        androidStopForegroundOnPause: true,
+        // artDownscaleWidth,
+        // artDownscaleHeight,
+        fastForwardInterval: const Duration(seconds: 5),
+        rewindInterval: const Duration(seconds: 5),
+        androidEnableQueue: true,
+        preloadArtwork: false,
+        // androidBrowsableRootExtras,
+      ),
+    );
+
+    processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
+        // Play next track if not in loop mode, in loop mode this event is not triggered.
+        playNext();
+      }
     });
 
-    //******** RESTORE BY PREFS ***************
+    positionStream.listen((position) { 
+      Prefs.songPositionInt.set(position.inSeconds);
+    });
 
-    int songPosition;
-    // Disable restoring position if native player is actually playing right now
-    if (!(await NativeAudioPlayer.isPlaying())) {
-      songPosition = await Prefs.songPositionInt.get();
-    }
+    // Restore from prefs.
+    await Future.wait([
+      seek(Duration(seconds: await Prefs.songPositionInt.get())),
+      setLoopMode(await Prefs.loopModeBool.get()
+        ? LoopMode.one
+        : LoopMode.off),
+    ]);
+  }
 
-    // Seek to saved position
-    if (songPosition != null) {
-      await MusicPlayer.seek(Duration(seconds: songPosition));
+  @override
+  Future<void> dispose() {
+    _instance = null;
+    _handler?.stop();
+    return super.dispose();
+  }
+
+  /// Function that fires right after json has fetched and when initial songs fetch has done.
+  ///
+  /// Its main purpose to setup player to work with queues.
+  Future<void> restoreLastSong() async {
+    final current = ContentControl.state.queues.current;
+    // songsEmpty condition is here to avoid errors when trying to get first song index
+    if (current.isNotEmpty) {
+      final songId = await Prefs.songIdInt.get();
+      await setSong(songId == null
+        ? current.songs[0]
+        : current.byId.get(songId) ?? current.songs[0]);
     }
   }
 
-  static Future<void> switchLooping() async {
-    return NativeAudioPlayer.setLooping(!looping);
+  bool get looping => loopMode == LoopMode.one;
+  Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.one);
+
+  @override
+  Duration get duration => Duration(milliseconds: ContentControl.state.currentSong.duration);
+
+  @override
+  Future<void> setLoopMode(LoopMode mode) async {
+    if (mode == LoopMode.all) {
+      mode = LoopMode.off;
+    }
+    await super.setLoopMode(mode);
+    Prefs.loopModeBool.set(looping);
+  }
+
+  /// Switches the [looping].
+  Future<void> switchLooping() async {
+    return setLoopMode(looping ? LoopMode.off : LoopMode.one);
   }
 
   static bool _hasDuplicates(Song song) {
-    return (ContentControl.state.queues.type != QueueType.all ||
-            ContentControl.state.queues.modified) &&
-        ContentControl.state.queues.current.songs
-                .where((el) => el.id == song.id)
-                .length >
-            1;
+    final queues = ContentControl.state.queues;
+    return (queues.type != QueueType.all || queues.modified) &&
+            queues.current.songs.where((el) => el.id == song.id).length > 1;
   }
 
-  /// Plays the [song].
-  ///
-  /// If [silent] is true, won't play track, but just switch to it.
-  static Future<void> play(
-    Song song, {
-    bool silent = false,
-    bool duplicate,
-  }) async {
-    song ??= ContentControl.state.queues.all.songs[0];
+  /// Prepare the [song] to be played.
+  Future<void> setSong(Song song, { bool fromBeginning = false, bool duplicate }) async {
+    song ??= ContentControl.state.allSongs.songs[0];
     ContentControl.state.changeSong(song);
     try {
       final _duplicate = duplicate ?? _hasDuplicates(song);
-      final copiedSong = song.copyWith(
-        id: song.id < 0
-            ? ContentControl.state.idMap[song.id.toString()]
-            : song.id,
-      );
-      var res;
-      if (!silent) {
-        res = NativeAudioPlayer.play(copiedSong, _duplicate);
-      } else {
-        res = NativeAudioPlayer.setUri(copiedSong, _duplicate);
-      }
       if (_duplicate && duplicate == null) {
         ContentControl.handleDuplicate(song);
       }
-      await res;
-    } on PlatformException catch (e) {
-      if (e.code == 'error') {
-        if (e.message == Constants.Errors.UNABLE_ACCESS_RESOURCE) {
-          ShowFunctions.instance.showToast(
-            msg: getl10n(App.navigatorKey.currentContext).playbackErrorMessage,
-          );
-          // The order of these calls matters
-          // Play next song after broken one
-          await playNext(
-            song: song,
-            silent: silent,
-          );
-          // Remove broken song
-          ContentControl.state.queues.all.removeSong(song);
-          ContentControl.state.emitSongListChange();
-          ContentControl.refetchSongs(); // perform fetching
-        } else if (e.message == Constants.Errors.NATIVE_PLAYER_ILLEGAL_STATE) {
-          // ...
-        }
+
+      await setAudioSource(
+        ProgressiveAudioSource(Uri.parse(song.contentUri)),
+        initialPosition: fromBeginning ? const Duration() : null,
+      );
+    } catch (e) {
+      if (e is PlayerInterruptedException) {
+
+      } else if (e is PlayerException) {
+        final message = getl10n(AppRouter.instance.navigatorKey.currentContext).playbackErrorMessage;
+        ShowFunctions.instance.showToast(msg: message);
+        playNext(song: song);
+        ContentControl.state.allSongs.remove(song);
+        ContentControl.refetch<Song>();
+      } else {
+        // Other exceptions are not expected, rethrow.
+        rethrow;
       }
-    } catch (e) {
-      // Do not handle this, because other exceptions are not expected
-      rethrow;
     }
   }
 
-  /// Resume player
-  static Future<void> resume([int songId]) async {
-    // If [songId] hasn't been provided then use playing id state
-    if (songId == null) songId = ContentControl.state.currentSongId;
-    try {
-      return NativeAudioPlayer.resume();
-    } catch (e) {
-      rethrow;
-    }
+  /// The [index] parameter is made no-op.
+  @override
+  Future<void> seek(Duration position, {void index}) async {
+    return super.seek(position);
   }
 
-  /// Pause player
-  static Future<void> pause() async {
-    return NativeAudioPlayer.pause();
-  }
-
-  /// Seek
-  static Future<void> seek(Duration position) async {
-    return NativeAudioPlayer.seek(position);
-  }
-
-  /// Seeks by [interval] forward, by default `3` seconds.
-  static Future<void> fastForward([Duration interval]) async {
-    if (interval == null) interval = Duration(seconds: 3);
-    return NativeAudioPlayer.seek(((await position) + interval));
-  }
-
-  /// Seeks by [interval] backwards, by default `3` seconds.
-  static Future<void> rewind([Duration interval]) async {
-    if (interval == null) interval = Duration(seconds: 3);
-    return NativeAudioPlayer.seek(((await position) - interval));
-  }
-
-  /// Function that fires when pause/play button got clicked
-  static Future<void> playPause() async {
-    switch (playerState) {
-      case MusicPlayerState.PLAYING:
-        await pause();
-        break;
-      case MusicPlayerState.PAUSED:
-        await resume();
-        break;
-      case MusicPlayerState.COMPLETED:
-        await play(ContentControl.state.currentSong);
-        break;
-      default: // Can be null, so don't throw
-        break;
+  Future<void> playPause() async {
+    if (playing) {
+      return pause();
+    } else {
+      return play();
     }
   }
 
   /// Plays the song after current, or if speceified, then after [song].
-  static Future<void> playNext({Song song, bool silent = false}) async {
-    song ??= ContentControl.state.queues.current.getNextSong(
+  Future<void> playNext({ Song song }) async {
+    song = ContentControl.state.queues.current.getNext(
       song ?? ContentControl.state.currentSong,
     );
-    var res;
-
     if (song != null) {
-      play(song, silent: silent);
+      await setSong(song, fromBeginning: true);
+      await play();
     } else {
-      final songs = ContentControl.state.queues.all.songs;
+      final songs = ContentControl.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
-        play(song, silent: silent);
+        await setSong(song, fromBeginning: true);
+        await play();
       }
     }
-    seek(const Duration());
-    await res;
   }
 
   /// Plays the song before current, or if speceified, then before [song].
-  static Future<void> playPrev({Song song, bool silent = false}) async {
-    song ??= ContentControl.state.queues.current.getPrevSong(
+  Future<void> playPrev({ Song song }) async {
+    song = ContentControl.state.queues.current.getPrev(
       song ?? ContentControl.state.currentSong,
     );
-    var res;
     if (song != null) {
-      res = play(song, silent: silent);
+      await setSong(song, fromBeginning: true);
+      await play();
     } else {
-      final songs = ContentControl.state.queues.all.songs;
+      final songs = ContentControl.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
-        res = play(song, silent: silent);
+        await setSong(song, fromBeginning: true);
+        await play();
       }
     }
-    seek(const Duration());
-    await res;
   }
 
   /// Function that handles click on track tile.
+  ///
   /// Opens player route.
-  /// Default click [behaviour] is [SongClickBehavior.play].
-  static Future<void> handleSongClick(
+  Future<void> handleSongClick(
     BuildContext context,
     Song clickedSong, {
     SongClickBehavior behavior = SongClickBehavior.play,
   }) async {
-    final duplicate = _hasDuplicates(clickedSong);
-    bool isSame;
-    if (duplicate) {
+    final hasDuplicates = _hasDuplicates(clickedSong);
+    if (hasDuplicates) {
       ContentControl.handleDuplicate(clickedSong);
-      isSame = false;
-    } else {
-      isSame = clickedSong == ContentControl.state.currentSong;
     }
+    final isSame = clickedSong == ContentControl.state.currentSong;
     if (behavior == SongClickBehavior.play) {
-      getPlayerRouteControllerProvider(context).controller.open();
-      final res = play(clickedSong, duplicate: duplicate);
-
-      /// I'm doing this in this order because for some reason on
-      /// the VERY FIRST seek it will be ignored. Just ignored,
-      /// it will seek and after it will start playing, it will be just restored
-      /// back for some reason. In other places the same applies.
-      seek(const Duration());
-      await res;
+      playerRouteController.open();
+      await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
+      await play();
     } else {
       if (isSame) {
-        if (playerState == MusicPlayerState.PAUSED ||
-            playerState == MusicPlayerState.COMPLETED) {
-          getPlayerRouteControllerProvider(context).controller.open();
-          await resume();
+        if (!playing) {
+          playerRouteController.open();
+          await play();
         } else {
           await pause();
         }
       } else {
-        getPlayerRouteControllerProvider(context).controller.open();
-        final res = play(clickedSong, duplicate: duplicate);
-        seek(const Duration());
-        await res;
+        playerRouteController.open();
+        await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
+        await play();
       }
     }
   }
@@ -282,9 +780,9 @@ abstract class MusicPlayer {
 
 /// Describes how to respond to song tile clicks.
 enum SongClickBehavior {
-  /// Behavior to always start the clicked song from the beginning.
+  /// Always start the clicked song from the beginning.
   play,
 
-  /// Behavior to allow play/pause on the clicked song.
+  /// Allow play/pause on the clicked song.
   playPause
 }

@@ -75,10 +75,8 @@ flutter {
 }
 
 dependencies {
-    implementation 'androidx.core:core:1.2.0-rc01'
-    implementation 'androidx.media:media:1.2.0-alpha01'
+    implementation 'androidx.core:core:1.6.0-alpha02'
     implementation 'org.jetbrains:annotations:15.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
-    implementation 'com.google.firebase:firebase-analytics:18.0.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.firebase:firebase-crashlytics:17.4.1'
+    implementation 'com.google.firebase:firebase-analytics:18.0.3'
 }

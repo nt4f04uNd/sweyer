@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flare_flutter/flare_actor.dart';
@@ -15,20 +16,27 @@ const double _kIconSize = 22.0;
 const double _kButtonSize = 66.0;
 
 class AnimatedPlayPauseButton extends StatefulWidget {
-  AnimatedPlayPauseButton({Key key, this.iconSize, this.size, this.iconColor})
-      : super(key: key);
+  const AnimatedPlayPauseButton({
+    Key key,
+    this.player,
+    this.iconSize,
+    this.size,
+    this.iconColor,
+  }) : super(key: key);
 
+  final AudioPlayer player;
   final double iconSize;
   final double size;
   final Color iconColor;
 
+  @override
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
 
-class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
-    with TickerProviderStateMixin {
+class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with TickerProviderStateMixin {
   AnimationController controller;
-  StreamSubscription<MusicPlayerState> _playerStateSubscription;
+  StreamSubscription<bool> _playingSubscription;
+  AudioPlayer get player => widget.player ?? MusicPlayer.instance;
 
   String _animation;
   set animation(String value) {
@@ -44,31 +52,44 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    if (MusicPlayer.playerState == MusicPlayerState.PLAYING) {
+    _update();
+  }
+
+  void _update() {
+    if (player.playing) {
       _animation = 'pause';
     } else {
       controller.value = 1.0;
       _animation = 'play';
     }
-
-    _playerStateSubscription = MusicPlayer.onStateChange.listen((event) {
-      /// Do not handle [MusicPlayerState.PLAYING] as it's not the state the player will remain for long time.
+    _playingSubscription?.cancel();
+    _playingSubscription = player.playingStream.listen((playing) {
+      /// Do not handle [PlayerState.PLAYING] as it's not the state the player will remain for long time.
       /// It will start playing next song immediately.
-      if (event == MusicPlayerState.PLAYING) {
+      if (playing) {
         _pause();
-      } else if (event == MusicPlayerState.PAUSED) {
+      } else {
         _play();
       }
     });
   }
 
   @override
+  void didUpdateWidget(covariant AnimatedPlayPauseButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.player != widget.player) {
+      _update();
+    }
+  }
+
+  @override
   void dispose() {
-    _playerStateSubscription.cancel();
+    _playingSubscription.cancel();
     controller.dispose();
     super.dispose();
   }
 
+ /// Animates to state where it shows "play" button.
   void _play() {
     if (_animation != 'pause_play' && _animation != 'play') {
       controller.forward();
@@ -76,6 +97,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
     }
   }
 
+  /// Animates to state where it shows "pause" button.
   void _pause() {
     if (_animation != 'play_pause' && _animation != 'pause') {
       controller.reverse();
@@ -84,12 +106,20 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton>
   }
 
   void _handlePress() {
-    MusicPlayer.playPause();
+    if (player.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final baseAnimation = NFDefaultAnimation(parent: controller);
+    final baseAnimation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
     final slideAnimation = Tween(
       begin: Offset.zero,
       end: const Offset(0.05, 0.0),

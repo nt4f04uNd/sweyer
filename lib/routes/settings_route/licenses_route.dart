@@ -9,21 +9,21 @@
 // @dart = 2.12
 
 /// ###########################################################################################
-/// copied this on flutter master 183f0e797a3bf8aa1b35b650150f7522d5d10377
+/// copied this from flutter https://github.com/flutter/flutter/commit/183f0e797a3bf8aa1b35b650150f7522d5d10377
 /// ###########################################################################################
 
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
 
+// TODO: remove all ignores when migrate to nnbd
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Flow;
 import 'package:flutter/scheduler.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:sweyer/sweyer.dart';
-
-/// The amount of vertical space to separate chunks of text.
-const double _textVerticalSeparation = 18.0;
 
 /// A page that shows licenses for software used by the application.
 ///
@@ -123,6 +123,7 @@ class _PackagesView extends StatefulWidget {
     Key? key,
     required this.isLateral,
     required this.selectedId,
+  // ignore: unnecessary_null_comparison
   })   : assert(isLateral != null),
         super(key: key);
 
@@ -166,12 +167,8 @@ class _PackagesViewState extends State<_PackagesView> {
                   },
                 );
               default:
-                return Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(
-                      ThemeControl.theme.colorScheme.primary,
-                    ),
-                  ),
+                return const Center(
+                  child: Spinner(),
                 );
             }
           },
@@ -200,32 +197,35 @@ class _PackagesViewState extends State<_PackagesView> {
     final _LicenseData data,
     final bool drawSelection,
   ) {
-    return ListView(
-      children: <Widget>[
-        ...data.packages
-            .asMap()
-            .entries
-            .map<Widget>((MapEntry<int, String> entry) {
-          final String packageName = entry.value;
-          final int index = entry.key;
-          final List<int> bindings = data.packageLicenseBindings[packageName]!;
-          return _PackageListTile(
-            packageName: packageName,
-            index: index,
-            isSelected: drawSelection && entry.key == (selectedId ?? 0),
-            numberLicenses: bindings.length,
-            onTap: () {
-              widget.selectedId.value = index;
-              _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
-                packageName,
-                bindings
-                    .map((int i) => data.licenses[i])
-                    .toList(growable: false),
-              ));
-            },
-          );
-        }),
-      ],
+    return AppScrollbar(
+      child: ListView(
+        itemExtent: 64,
+        children: <Widget>[
+          ...data.packages
+              .asMap()
+              .entries
+              .map<Widget>((MapEntry<int, String> entry) {
+            final String packageName = entry.value;
+            final int index = entry.key;
+            final List<int> bindings = data.packageLicenseBindings[packageName]!;
+            return _PackageListTile(
+              packageName: packageName,
+              index: index,
+              isSelected: drawSelection && entry.key == (selectedId ?? 0),
+              numberLicenses: bindings.length,
+              onTap: () {
+                widget.selectedId.value = index;
+                _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+                  packageName,
+                  bindings
+                      .map((int i) => data.licenses[i])
+                      .toList(growable: false),
+                ));
+              },
+            );
+          }),
+        ],
+      ),
     );
   }
 }
@@ -445,14 +445,10 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final List<Widget> listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)
-        Padding(
+        const Padding(
           padding: EdgeInsets.symmetric(vertical: 24.0),
           child: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(
-                ThemeControl.theme.colorScheme.primary,
-              ),
-            ),
+            child: Spinner(),
           ),
         ),
     ];
@@ -461,7 +457,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     if (widget.scrollController == null) {
       page = Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+          preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
           child: AppBar(
             elevation: 2.0,
             leading: NFBackButton(
@@ -478,12 +474,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         body: Center(
           child: Container(
             constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
-            child: Localizations.override(
-              locale: const Locale('en', 'US'),
-              context: context,
-              child: NFScrollbar(
-                child: ListView(padding: padding, children: listWidgets),
-              ),
+            child: AppScrollbar(
+              child: ListView(padding: padding, children: listWidgets),
             ),
           ),
         ),
@@ -493,7 +485,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         controller: widget.scrollController,
         slivers: <Widget>[
           PreferredSize(
-            preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
             child: SliverAppBar(
               automaticallyImplyLeading: false,
               titleSpacing: 0.0,
@@ -539,40 +531,21 @@ class _PackageLicensePageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(title, style: theme.headline6),
-        Text(
-          subtitle,
-          style: theme.subtitle2 ?? const TextStyle(fontSize: 15.0),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(title, style: theme.headline6),
+          Text(
+            subtitle,
+            style: theme.subtitle2 ?? const TextStyle(fontSize: 15.0),
+          ),
+        ],
+      ),
     );
   }
-}
-
-String _defaultApplicationName(BuildContext context) {
-  // This doesn't handle the case of the application's title dynamically
-  // changing. In theory, we should make Title expose the current application
-  // title using an InheritedWidget, and so forth. However, in practice, if
-  // someone really wants their application title to change dynamically, they
-  // can provide an explicit applicationName to the widgets defined in this
-  // file, instead of relying on the default.
-  final Title? ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
-  return ancestorTitle?.title ??
-      Platform.resolvedExecutable.split(Platform.pathSeparator).last;
-}
-
-String _defaultApplicationVersion(BuildContext context) {
-  // TODO(ianh): Get this from the embedder somehow.
-  return '';
-}
-
-Widget? _defaultApplicationIcon(BuildContext context) {
-  // TODO(ianh): Get this from the embedder somehow.
-  return null;
 }
 
 const int _materialGutterThreshold = 720;
@@ -609,6 +582,7 @@ enum _ActionLevel {
   top,
 
   /// Indicates the master view app bar in the lateral UI.
+  // ignore: unused_field
   view,
 
   /// Indicates the master page app bar in the nested UI.
@@ -661,9 +635,13 @@ class _MasterDetailFlow extends StatefulWidget {
     this.masterPageBuilder,
     this.masterViewWidth,
     this.title,
+  // ignore: unnecessary_null_comparison
   })  : assert(masterViewBuilder != null),
+        // ignore: unnecessary_null_comparison
         assert(automaticallyImplyLeading != null),
+        // ignore: unnecessary_null_comparison
         assert(detailPageBuilder != null),
+        // ignore: unnecessary_null_comparison
         assert(displayMode != null),
         super(key: key);
 
@@ -937,15 +915,15 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
 
   StackFadeRouteTransition _detailPageRoute(Object? arguments) {
     return StackFadeRouteTransition(
-      transitionSettings: RouteControl.defaultTransitionSetttings,
-      route: Builder(
+      transitionSettings: AppRouter.instance.transitionSettings.dismissible,
+      child: Builder(
         builder: (BuildContext context) {
-          return WillPopScope(
-            onWillPop: () async {
+          return NFBackButtonListener(
+            onBackButtonPressed: () async {
               // No need for setState() as rebuild happens on navigation pop.
               focus = _Focus.master;
               Navigator.of(context).pop();
-              return false;
+              return true;
             },
             child: BlockSemantics(
                 child: widget.detailPageBuilder(context, arguments, null)),
@@ -1007,7 +985,7 @@ class _MasterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+        preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
         child: AppBar(
           elevation: 2.0,
           titleSpacing: 0.0,
@@ -1049,7 +1027,9 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
     this.masterViewWidth,
+  // ignore: unnecessary_null_comparison
   })  : assert(detailPageBuilder != null),
+        // ignore: unnecessary_null_comparison
         assert(masterViewBuilder != null),
         super(key: key);
 
@@ -1123,7 +1103,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           body: _masterPanel(context),
           floatingActionButton: widget.floatingActionButton,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
             child: AppBar(
               titleSpacing: 0.0,
               elevation: 2.0,
@@ -1213,7 +1193,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               backgroundColor: Colors.red,
               body: widget.masterViewBuilder(context, true),
               appBar: PreferredSize(
-                preferredSize: Size.fromHeight(kNFAppBarPreferredSize),
+                preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
                 child: AppBar(
                   titleSpacing: 0.0,
                   elevation: 2.0,
@@ -1235,6 +1215,7 @@ class _DetailView extends StatelessWidget {
     Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
+  // ignore: unnecessary_null_comparison
   })  : assert(builder != null),
         _builder = builder,
         _arguments = arguments,
@@ -1258,7 +1239,6 @@ class _DetailView extends StatelessWidget {
       expand: false,
       builder: (BuildContext context, ScrollController controller) {
         return MouseRegion(
-          // TODO(TonicArtos): Remove MouseRegion workaround for pointer hover events passing through DraggableScrollableSheet once https://github.com/flutter/flutter/issues/59741 is resolved.
           child: Card(
             color: ThemeControl.theme.colorScheme.secondary,
             elevation: _kCardElevation,

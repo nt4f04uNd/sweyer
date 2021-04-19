@@ -1,12 +1,4 @@
 {
-   "java.configuration.updateBuildConfiguration": "disabled",
-   "cSpell.words": [
-      "BACKSCROLLCONTROLLER",
-      "Exif",
-      "RGBO",
-      "cupertino",
-      "microtask"
-   ],
    "workbench.colorCustomizations": {
       "activityBar.activeBackground": "#a280ff",
       "activityBar.activeBorder": "#ffd0bf",
@@ -23,5 +15,8 @@
       "titleBar.inactiveBackground": "#7c4dff99",
       "titleBar.inactiveForeground": "#e7e7e799"
    },
-   "peacock.color": "#7c4dff"
+   "peacock.color": "#7c4dff",
+   "[dart]": {
+      "editor.defaultFormatter": "Dart-Code.flutter",
+   },
 }

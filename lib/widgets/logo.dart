@@ -14,6 +14,7 @@ class SweyerLogo extends StatelessWidget {
     this.size,
     this.color,
   }) : super(key: key);
+
   final double size;
 
   /// Background color to be used instead of [ThemeControl.colorForBlend],
@@ -26,7 +27,7 @@ class SweyerLogo extends StatelessWidget {
       borderRadius: const BorderRadius.all(
         Radius.circular(8.0),
       ),
-      child: Container(
+      child: SizedBox(
         width: size ?? kSongTileArtSize,
         height: size ?? kSongTileArtSize,
         child: Stack(

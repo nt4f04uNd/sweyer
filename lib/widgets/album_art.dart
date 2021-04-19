@@ -4,13 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
 const double kSongTileArtSize = 48.0;
-const double kAlbumTileArtSize = 70.0;
+const double kAlbumTileArtSize = 64.0;
 const double kArtBorderRadius = 10.0;
 
 /// `3` is the [CircularPercentIndicator.lineWidth] doubled and additional 3 spacing
@@ -18,10 +19,32 @@ const double kArtBorderRadius = 10.0;
 /// `2` is border width
 const double kRotatingArtSize = kSongTileArtSize - 6 - 3 - 2;
 
-class AlbumArt extends StatelessWidget {
+const Duration _kLoadAnimationDuration = Duration(milliseconds: 340);
+
+//  TODO: comments
+class AlbumArtSource {
+  const AlbumArtSource({
+    @required this.path,
+    @required this.contentUri,
+    @required this.albumId,
+  }) : _none = false;
+
+  const AlbumArtSource.none()
+    : _none = true,
+      path = null,
+      contentUri = null,
+      albumId = null;
+
+  final bool _none;
+  final String path;
+  final String contentUri;
+  final int albumId;
+}
+
+class AlbumArt extends StatefulWidget {
   const AlbumArt({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.size,
     this.assetScale = 1.0,
@@ -29,50 +52,54 @@ class AlbumArt extends StatelessWidget {
     this.current = false,
     this.highRes = false,
     this.currentIndicatorScale,
+    this.loadAnimationDuration = _kLoadAnimationDuration,
   }) : super(key: key);
 
   /// Creates an art for the [SongTile] or [SelectableSongTile].
   const AlbumArt.songTile({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-  })  : size = kSongTileArtSize,
-        highRes = false,
-        currentIndicatorScale = null,
-        super(key: key);
+    this.loadAnimationDuration = _kLoadAnimationDuration,
+  }) : size = kSongTileArtSize,
+       highRes = false,
+       currentIndicatorScale = null,
+       super(key: key);
 
   /// Creates an art for the [ALbumTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
   const AlbumArt.albumTile({
     Key key,
-    @required this.path,
+    @required this.source,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-  })  : size = kAlbumTileArtSize,
-        highRes = false,
-        currentIndicatorScale = 1.17,
-        super(key: key);
+    this.loadAnimationDuration = _kLoadAnimationDuration,
+  }) : size = kAlbumTileArtSize,
+       highRes = false,
+       currentIndicatorScale = 1.17,
+       super(key: key);
 
   /// Creates an art for the [PlayerRoute].
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.albumTile].
   const AlbumArt.playerRoute({
     Key key,
-    @required this.path,
+    @required this.source,
+    @required this.size,
     this.color,
-    this.size,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
-  })  : current = false,
-        highRes = true,
-        currentIndicatorScale = null,
-        super(key: key);
+    this.loadAnimationDuration = _kLoadAnimationDuration,
+  }) : current = false,
+       highRes = true,
+       currentIndicatorScale = null,
+       super(key: key);
 
-  final String path;
+  final AlbumArtSource source;
 
   /// Background color for the album art.
   /// By default will use [ThemeControl.colorForBlend].
@@ -96,66 +123,169 @@ class AlbumArt extends StatelessWidget {
   /// Whether the album art is should be rendered with hight resolution (like it does in [AlbumArtPlayerRoute]).
   /// Defaults to `false`.
   ///
-  /// NOTE that this changes image placeholder contents, so size of not might be different and you probably
+  /// This changes image placeholder contents, so size of it might be different and you probably
   /// want to change [assetScale].
   final bool highRes;
 
+  // TODO: doc
   final double currentIndicatorScale;
 
+  /// Above Android Q and above album art loads from bytes, and performns an animation on load.
+  /// This defines the duration of this animation.
+  final Duration loadAnimationDuration;
+
+  @override
+  _AlbumArtState createState() => _AlbumArtState();
+}
+
+class _AlbumArtState extends State<AlbumArt> {
+  // TODO: dedup this code to a separate base class
+
+  bool get useBytes => ContentControl.sdkInt >= 29;
+  CancellationSignal signal;
+  Uint8List bytes;
+  bool loaded = false;
+
+  @override
+  void initState() { 
+    super.initState();
+    _load();
+  }
+
+  void _load() {
+    if (useBytes) {
+      final uri =  widget.source.contentUri;
+      assert(uri != null);
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        signal = CancellationSignal();
+        bytes = await ContentChannel.loadAlbumArt(
+          uri: uri,
+          size: Size.square(widget.size) * MediaQuery.of(context).devicePixelRatio,
+          signal: signal,
+        );
+        if (mounted) {
+          setState(() {
+            loaded = true;
+          });
+        }
+      });
+    }
+  } 
+
+  @override
+  void didUpdateWidget(covariant AlbumArt oldWidget) {
+    if (oldWidget.source?.contentUri != widget.source?.contentUri) {
+      _load();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() { 
+    signal?.cancel();
+    super.dispose();
+  }
+
   Widget _buildCurrentIndicator() {
-    return currentIndicatorScale == null
+    return widget.currentIndicatorScale == null
         ? const CurrentIndicator()
         : Transform.scale(
-            scale: currentIndicatorScale,
+            scale: widget.currentIndicatorScale,
             child: const CurrentIndicator(),
           );
+  }
+
+  bool recreated = false;
+  Future<void> _recreateArt() async {
+    recreated = true;
+    await ContentChannel.fixAlbumArt(widget.source.albumId);
+    if (mounted) {
+      setState(() { });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (path == null || !File(path).existsSync()) {
-      if (current) {
+    File file; 
+    bool showDefault = widget.source == null ||
+                       widget.source._none ||
+                       !useBytes && widget.source.path == null ||
+                       useBytes && loaded && bytes == null;
+    if (!showDefault && !useBytes) {
+      file = File(widget.source.path);
+      final exists = file.existsSync();
+      showDefault = !exists;
+      if (!exists && !recreated) {
+        _recreateArt();
+      }
+    }
+    if (useBytes && !loaded) {
+      if (widget.current) {
+        child = Container(
+          alignment: Alignment.center,
+          width: widget.size,
+          height: widget.size,
+          child: _buildCurrentIndicator(),
+        );
+      } else {
+        child = SizedBox(
+          width: widget.size,
+          height: widget.size,
+        );
+      }
+    } else if (showDefault) {
+      if (widget.current) {
         child = Container(
           alignment: Alignment.center,
           color: ThemeControl.theme.colorScheme.primary,
-          width: size,
-          height: size,
+          width: widget.size,
+          height: widget.size,
           child: _buildCurrentIndicator(),
         );
       } else {
         child = Image.asset(
-          highRes
+          widget.highRes
               ? Constants.Assets.ASSET_LOGO_MASK
               : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
-          width: size,
-          height: size,
-          color: color != null
-              ? getColorForBlend(color)
+          width: widget.size,
+          height: widget.size,
+          color: widget.color != null
+              ? getColorForBlend(widget.color)
               : ThemeControl.colorForBlend,
           colorBlendMode: BlendMode.plus,
           fit: BoxFit.cover,
         );
-        if (assetScale != 1.0) {
-          child = Transform.scale(scale: assetScale, child: child);
+        if (widget.assetScale != 1.0) {
+          child = Transform.scale(scale: widget.assetScale, child: child);
         }
       }
     } else {
-      final image = Image.file(
-        File(path),
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-      );
-      if (current) {
+      Image image;
+      if (useBytes) {
+        image = Image.memory(
+          bytes,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
+        );
+      } else {
+        image = Image.file(
+          file,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
+        );
+      }
+      if (widget.current) {
         child = Stack(
           children: [
             image,
             Container(
               alignment: Alignment.center,
               color: Colors.black.withOpacity(0.5),
-              width: size,
-              height: size,
+              width: widget.size,
+              height: widget.size,
               child: _buildCurrentIndicator(),
             ),
           ],
@@ -165,21 +295,32 @@ class AlbumArt extends StatelessWidget {
       }
     }
 
-    return ClipRRect(
+    child = ClipRRect(
       borderRadius: BorderRadius.all(
-        Radius.circular(borderRadius),
+        Radius.circular(widget.borderRadius),
       ),
       child: child,
+    );
+
+    if (!useBytes)
+      return child;
+    return AnimatedSwitcher(
+      duration: widget.loadAnimationDuration,
+      switchInCurve: Curves.easeOut,
+      child: Container(
+        key: ValueKey("${widget.source?.contentUri}_$loaded"),
+        child: child
+      ),
     );
   }
 }
 
-/// Widget that shows rotating album art
-/// Used in bottom track panel and starts rotating when track starts playing
+/// Widget that shows rotating album art.
+/// Used in bottom track panel and starts rotating when track starts playing.
 class AlbumArtRotating extends StatefulWidget {
   const AlbumArtRotating({
     Key key,
-    @required this.path,
+    @required this.source,
     @required this.initRotating,
     this.color,
     this.initRotation = 0.0,
@@ -187,7 +328,7 @@ class AlbumArtRotating extends StatefulWidget {
         assert(initRotation >= 0 && initRotation <= 1.0),
         super(key: key);
 
-  final String path;
+  final AlbumArtSource source;
 
   /// Background color for the album art.
   /// By default will use [ThemeControl.colorForBlend].
@@ -204,9 +345,13 @@ class AlbumArtRotating extends StatefulWidget {
   AlbumArtRotatingState createState() => AlbumArtRotatingState();
 }
 
-class AlbumArtRotatingState extends State<AlbumArtRotating>
-    with SingleTickerProviderStateMixin {
+class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerProviderStateMixin {
   AnimationController controller;
+
+  bool get useBytes => ContentControl.sdkInt >= 29;
+  CancellationSignal signal;
+  Uint8List bytes;
+  bool loaded = false;
 
   @override
   void initState() {
@@ -219,11 +364,41 @@ class AlbumArtRotatingState extends State<AlbumArtRotating>
     if (widget.initRotating) {
       rotate();
     }
+     _load();
+  }
+
+  void _load() {
+    if (useBytes) {
+      final uri =  widget.source.contentUri;
+      assert(uri != null);
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        signal = CancellationSignal();
+        bytes = await ContentChannel.loadAlbumArt(
+          uri: uri,
+          size: const Size.square(kRotatingArtSize) * MediaQuery.of(context).devicePixelRatio,
+          signal: signal,
+        );
+        if (mounted) {
+          setState(() {
+            loaded = true;
+          });
+        }
+      });
+    }
+  } 
+
+  @override
+  void didUpdateWidget(covariant AlbumArtRotating oldWidget) {
+    if (oldWidget.source?.contentUri != widget.source?.contentUri) {
+      _load();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
     controller.dispose();
+    signal?.cancel();
     super.dispose();
   }
 
@@ -237,11 +412,38 @@ class AlbumArtRotatingState extends State<AlbumArtRotating>
     controller.stop();
   }
 
+  bool recreated = false;
+  Future<void> _recreateArt() async {
+    recreated = true;
+    await ContentChannel.fixAlbumArt(widget.source.albumId);
+    if (mounted) {
+      setState(() { });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget image;
-    if (widget.path == null || !File(widget.path).existsSync()) {
-      image = Container(
+    File file;
+    bool showDefault = widget.source == null ||
+                       widget.source._none ||
+                       !useBytes && widget.source.path == null ||
+                       useBytes && loaded && bytes == null;
+    if (!showDefault && !useBytes) {
+      file = File(widget.source.path);
+      final exists = file.existsSync();
+      showDefault = !exists;
+      if (!exists && !recreated) {
+        _recreateArt();
+      }
+    }
+    if (useBytes && !loaded) {
+      image = const SizedBox(
+        width: kRotatingArtSize,
+        height: kRotatingArtSize,
+      );
+    } else if (showDefault) {
+      image = SizedBox(
         width: kRotatingArtSize,
         height: kRotatingArtSize,
         child: Image.asset(
@@ -254,14 +456,24 @@ class AlbumArtRotatingState extends State<AlbumArtRotating>
         ),
       );
     } else {
-      image = Image.file(
-        File(widget.path),
-        width: kRotatingArtSize,
-        height: kRotatingArtSize,
-        fit: BoxFit.cover,
-      );
+      if (useBytes) {
+        image = Image.memory(
+          bytes,
+          width: kRotatingArtSize,
+          height: kRotatingArtSize,
+          fit: BoxFit.cover,
+        );
+      } else {
+        image = Image.file(
+          file,
+          width: kRotatingArtSize,
+          height: kRotatingArtSize,
+          fit: BoxFit.cover,
+        );
+      }
     }
-    return AnimatedBuilder(
+
+    image = AnimatedBuilder(
       child: ClipRRect(
         borderRadius: const BorderRadius.all(
           Radius.circular(kRotatingArtSize),
@@ -272,6 +484,16 @@ class AlbumArtRotatingState extends State<AlbumArtRotating>
       builder: (context, child) => RotationTransition(
         turns: controller,
         child: child,
+      ),
+    );
+    if (!useBytes)
+      return image;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 340),
+      switchInCurve: Curves.easeOut,
+      child: Container(
+        key: ValueKey("${widget.source?.contentUri}_$loaded"),
+        child: image,
       ),
     );
   }

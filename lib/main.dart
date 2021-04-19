@@ -11,20 +11,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/api.dart' as API;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'routes/routes.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
-final RouteObserver<Route> routeObserver = RouteObserver();
-final RouteObserver<Route> homeRouteObserver = RouteObserver();
+import 'routes/routes.dart';
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
-  return '''$ex
+  return '''
+$ex
                       
 $stack''';
 }
@@ -50,7 +48,39 @@ Future<void> reportFlutterError(FlutterErrorDetails details) async {
   await FirebaseCrashlytics.instance.recordFlutterError(details);
 }
 
-void main() async {
+
+class _WidgetsBindingObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      /// This ensures that proper UI will be applied when activity is resumed.
+      /// 
+      /// See:
+      /// * https://github.com/flutter/flutter/issues/21265
+      /// * https://github.com/ryanheise/audio_service/issues/662
+      /// 
+      /// [SystemUiOverlayStyle.statusBarBrightness] is only honored on iOS,
+      /// so I can safely use that here.
+      final lastUi = SystemUiStyleController.lastUi;
+      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
+        statusBarBrightness:
+          lastUi.statusBarBrightness == null ||
+          lastUi.statusBarBrightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark
+      ));
+      /// Defensive programming if I some time later decide to add iOS support.
+      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
+        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark
+      ));
+    }
+  }
+}
+
+Future<void> main() async {
   // Disabling automatic system UI adjustment, which causes system nav bar
   // color to be reverted to black when the bottom player route is being expanded.
   //
@@ -70,133 +100,95 @@ void main() async {
   }).sendPort);
   FlutterError.onError = reportFlutterError;
   runZonedGuarded<Future<void>>(() async {
-    // Add callback to stop service when app is destroyed, temporary
-    WidgetsBinding.instance.addObserver(
-      NFWidgetsBindingObserver(
-        // ignore: missing_return
-        onResumed: () {
-          SystemChrome.setSystemUIOverlayStyle(
-            SystemUiOverlayStyle(
-              statusBarIconBrightness: ThemeControl.contrastBrightness,
-              systemNavigationBarIconBrightness:
-                  ThemeControl.contrastBrightness,
-            ),
-          );
-        },
-      ),
-    );
+    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
-    API.EventsHandler.init();
+    await AppLocalizations.init();
     await ThemeControl.init();
     ThemeControl.initSystemUi();
     await Permissions.init();
-    await Future.wait([
-      ContentControl.init(),
-      MusicPlayer.init(),
-    ]);
-    runApp(App());
+    await ContentControl.init();
+    runApp(const App());
   }, reportError);
 }
 
 class App extends StatefulWidget {
-  /// A global key to obtain the roote navigator.
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+  const App({Key key}) : super(key: key);
 
-  /// A global key to obtain sub navigator on home page.
-  static final GlobalKey<NavigatorState> homeNavigatorKey = GlobalKey();
+  static NFThemeData nfThemeData = NFThemeData(
+    systemUiStyle: Constants.UiTheme.black.auto,
+    modalSystemUiStyle: Constants.UiTheme.modal.auto,
+    bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+  );
 
   static void rebuildAllChildren() {
     void rebuild(Element el) {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
-
-    (navigatorKey.currentContext as Element).visitChildren(rebuild);
+    (AppRouter.instance.navigatorKey.currentContext as Element).visitChildren(rebuild);
   }
 
   @override
   _AppState createState() => _AppState();
 }
 
+SlidableController _playerRouteController;
+SlidableController _drawerController;
+SlidableController get playerRouteController => _playerRouteController;
+SlidableController get drawerController => _drawerController;
+
 class _AppState extends State<App> with TickerProviderStateMixin {
-  AnimationController playerRouteController;
-  AnimationController drawerWidgetController;
 
   @override
   void initState() {
     super.initState();
-    drawerWidgetController = SlidableController(vsync: this);
-    playerRouteController = SlidableController(
+    _drawerController = SlidableController(vsync: this);
+    _playerRouteController = SlidableController(
       vsync: this,
       springDescription: playerRouteSpringDescription,
     );
     NFWidgets.init(
-      navigatorKey: App.navigatorKey,
+      navigatorKey: AppRouter.instance.navigatorKey,
       routeObservers: [routeObserver, homeRouteObserver],
-      defaultSystemUiStyle: Constants.UiTheme.black.auto,
-      defaultModalSystemUiStyle: Constants.UiTheme.modal.auto,
-      defaultBottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SlidableControllerProvider<DrawerWidget>(
-      controller: drawerWidgetController,
-      child: SlidableControllerProvider<PlayerRoute>(
-        controller: playerRouteController,
-        child: StreamBuilder(
-          stream: ThemeControl.onThemeChange,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            return MaterialApp(
-              // showPerformanceOverlay: true,
-              title: Constants.Config.APPLICATION_TITLE,
-              navigatorKey: App.navigatorKey,
-              color: ThemeControl.theme.colorScheme.primary,
-              supportedLocales: Constants.Config.supportedLocales,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                NFLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              theme: ThemeControl.theme,
-              initialRoute: Constants.Routes.home.value,
-              navigatorObservers: [routeObserver],
-              onGenerateRoute: RouteControl.handleOnGenerateRoute,
-              onGenerateInitialRoutes:
-                  RouteControl.handleOnGenerateInitialRoutes,
-              onUnknownRoute: RouteControl.handleOnUnknownRoute,
-            );
-          },
-        ),
-      ),
+    return StreamBuilder(
+      stream: ThemeControl.onThemeChange,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return NFTheme(
+        data: App.nfThemeData,
+          child: MaterialApp.router(
+            // showPerformanceOverlay: true,
+            title: Constants.Config.APPLICATION_TITLE,
+            color: ThemeControl.theme.colorScheme.primary,
+            supportedLocales: Constants.Config.supportedLocales,
+            scrollBehavior: _ScrollBehavior(),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              NFLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            theme: ThemeControl.theme,
+            routerDelegate: AppRouter.instance,
+            routeInformationParser: AppRouteInformationParser(),
+          ),
+        );
+      },
     );
   }
 }
 
-SlidableControllerProvider<DrawerWidget> getDrawerControllerProvider(
-        BuildContext context) =>
-    SlidableControllerProvider.of<DrawerWidget>(context);
-SlidableControllerProvider<PlayerRoute> getPlayerRouteControllerProvider(
-        BuildContext context) =>
-    SlidableControllerProvider.of<PlayerRoute>(context);
-
-mixin DrawerControllerMixin<T extends StatefulWidget> on State<T> {
-  SlidableController drawerController;
+class _ScrollBehavior extends ScrollBehavior {
   @override
-  void initState() {
-    super.initState();
-    drawerController = getDrawerControllerProvider(context).controller;
-  }
-}
-
-mixin PlayerRouteControllerMixin<T extends StatefulWidget> on State<T> {
-  SlidableController playerRouteController;
-  @override
-  void initState() {
-    super.initState();
-    playerRouteController =
-        getPlayerRouteControllerProvider(context).controller;
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return GlowingOverscrollIndicator(
+      axisDirection: axisDirection,
+      color: ThemeControl.theme.colorScheme.background,
+      child: child,
+    );
   }
 }
