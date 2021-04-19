@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -110,6 +112,8 @@ class _DrawerWidgetContent extends StatefulWidget {
 }
 
 class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
+  /// Status bar height on my phone.
+static const _baseTopPadding = 24.0;
   double elevation = 0.0;
 
   @override
@@ -160,47 +164,50 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
       ),
       child: Drawer(
         elevation: elevation,
-        child: ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const SweyerLogo(),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Text(
-                      Constants.Config.APPLICATION_TITLE,
-                      style: TextStyle(
-                        fontSize: 30.0,
-                        fontWeight: FontWeight.w800,
-                        color: ThemeControl.theme.textTheme.headline6.color,
+        child: Padding(
+          padding: EdgeInsets.only(top: max(0, _baseTopPadding - MediaQuery.of(context).padding.top)),
+          child: ListView(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const SweyerLogo(),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: Text(
+                        Constants.Config.APPLICATION_TITLE,
+                        style: TextStyle(
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.w800,
+                          color: ThemeControl.theme.textTheme.headline6.color,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const Divider(),
-            const SizedBox(height: 7.0),
-            MenuItem(
-              l10n.settings,
-              icon: Icons.settings_rounded,
-              onTap: _handleClickSettings,
-            ),
-            ValueListenableBuilder<bool>(
-              valueListenable: ContentControl.devMode,
-              builder: (context, value, child) => value ? child : const SizedBox.shrink(),
-              child: MenuItem(
-                l10n.debug,
-                icon: Icons.adb_rounded,
-                onTap: _handleClickDebug,
+              const Divider(),
+              const SizedBox(height: 7.0),
+              MenuItem(
+                l10n.settings,
+                icon: Icons.settings_rounded,
+                onTap: _handleClickSettings,
               ),
-            ),
-          ],
+              ValueListenableBuilder<bool>(
+                valueListenable: ContentControl.devMode,
+                builder: (context, value, child) => value ? child : const SizedBox.shrink(),
+                child: MenuItem(
+                  l10n.debug,
+                  icon: Icons.adb_rounded,
+                  onTap: _handleClickDebug,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

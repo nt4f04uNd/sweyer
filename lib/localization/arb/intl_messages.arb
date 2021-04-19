@@ -1,5 +1,15 @@
 {
-  "@@last_modified": "2021-04-14T21:32:25.868129",
+  "@@last_modified": "2021-04-19T00:38:50.898464",
+  "playback": "Playback",
+  "@playback": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackControls": "Playback controls",
+  "@playbackControls": {
+    "type": "text",
+    "placeholders": {}
+  },
   "play": "Play",
   "@play": {
     "type": "text",

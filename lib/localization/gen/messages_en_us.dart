@@ -79,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "play" : MessageLookupByLibrary.simpleMessage("Play"),
     "playContentList" : MessageLookupByLibrary.simpleMessage("Play"),
     "playNext" : MessageLookupByLibrary.simpleMessage("Play next"),
+    "playback" : MessageLookupByLibrary.simpleMessage("Playback"),
+    "playbackControls" : MessageLookupByLibrary.simpleMessage("Playback controls"),
     "playbackErrorMessage" : MessageLookupByLibrary.simpleMessage("An error occurred during the playback, removing the track"),
     "playlist" : MessageLookupByLibrary.simpleMessage("Playlist"),
     "pressOnceAgainToExit" : MessageLookupByLibrary.simpleMessage("Press once again to exit"),

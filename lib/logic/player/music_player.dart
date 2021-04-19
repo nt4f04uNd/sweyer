@@ -239,12 +239,18 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> updateQueue(List<MediaItem> queue) async {
-    ContentControl.setQueue(
-      type: QueueType.arbitrary,
-      songs: queue.map((el) {
+    if (queue.isNotEmpty) {
+      final songs = queue.map((el) {
         return ContentControl.state.allSongs.byId.get(int.parse(el.id));
-      })
-    );
+      }).toList();
+      ContentControl.setQueue(
+        type: QueueType.arbitrary,
+        songs: songs,
+      );
+      if (!songs.contains(ContentControl.state.currentSong)) {
+        MusicPlayer.instance.setSong(songs[0]);
+      }
+    }
   }
 
   @override
@@ -561,31 +567,22 @@ class MusicPlayer extends AudioPlayer {
         return _AudioHandler();
       },
       config: AudioServiceConfig(
-        // TODO: this
-        // preloadArtwork: true,
-        // artDownscaleHeight: 200,
-        // artDownscaleWidth: 200,
+        androidResumeOnClick: true,
+        androidNotificationChannelName: staticl10n.playback,
+        androidNotificationChannelDescription: staticl10n.playbackControls,
+        // notificationColor,
         androidNotificationIcon: 'drawable/round_music_note_white_48',
+        androidShowNotificationBadge: false,
+        androidNotificationClickStartsActivity: true,
+        androidNotificationOngoing: false,
+        androidStopForegroundOnPause: true,
+        // artDownscaleWidth,
+        // artDownscaleHeight,
         fastForwardInterval: const Duration(seconds: 5),
         rewindInterval: const Duration(seconds: 5),
         androidEnableQueue: true,
-
-        androidResumeOnClick: true,
-        androidNotificationChannelName: 'Notifications',
-        androidNotificationChannelDescription: 'TEST',
-        // notificationColor: ,
-    // this.androidNotificationIcon = 'mipmap/ic_launcher',
-    // this.androidShowNotificationBadge = false,
-    // this.androidNotificationClickStartsActivity = true,
-    // this.androidNotificationOngoing = false,
-    // this.androidStopForegroundOnPause = true,
-    // this.artDownscaleWidth,
-    // this.artDownscaleHeight,
-    // this.fastForwardInterval = const Duration(seconds: 10),
-    // this.rewindInterval = const Duration(seconds: 10),
-    // this.androidEnableQueue = false,
-    // this.preloadArtwork = false,
-    // this.androidBrowsableRootExtras,
+        preloadArtwork: false,
+        // androidBrowsableRootExtras,
       ),
     );
 
@@ -670,24 +667,19 @@ class MusicPlayer extends AudioPlayer {
         ProgressiveAudioSource(Uri.parse(song.contentUri)),
         initialPosition: fromBeginning ? const Duration() : null,
       );
-    } on PlatformException catch (e) {
-      // TODO: handle errors
-      // if (e.code == 'error') {
-      //   if (e.message == NativePlayerErrors.UNABLE_ACCESS_RESOURCE_ERROR) {
-      //     final message = getl10n(AppRouter.instance.navigatorKey.currentContext).playbackErrorMessage;
-      //     ShowFunctions.instance.showToast(msg: message,);
-      //     // The order of these calls matters
-      //     // Play next song after broken one
-      //     playNext(song: song, silent: silent);
-      //     // Remove broken song
-      //     ContentControl.state.allSongs.removeSong(song);
-      //     ContentControl.state.emitSongListChange();
-      //     ContentControl.refetch<Song>();
-      //   }
-      // }
     } catch (e) {
-      // Other exceptions are not expected, rethrow.
-      rethrow;
+      if (e is PlayerInterruptedException) {
+
+      } else if (e is PlayerException) {
+        final message = getl10n(AppRouter.instance.navigatorKey.currentContext).playbackErrorMessage;
+        ShowFunctions.instance.showToast(msg: message);
+        playNext(song: song);
+        ContentControl.state.allSongs.remove(song);
+        ContentControl.refetch<Song>();
+      } else {
+        // Other exceptions are not expected, rethrow.
+        rethrow;
+      }
     }
   }
 
@@ -707,7 +699,7 @@ class MusicPlayer extends AudioPlayer {
 
   /// Plays the song after current, or if speceified, then after [song].
   Future<void> playNext({ Song song }) async {
-    song ??= ContentControl.state.queues.current.getNext(
+    song = ContentControl.state.queues.current.getNext(
       song ?? ContentControl.state.currentSong,
     );
     if (song != null) {
@@ -725,7 +717,7 @@ class MusicPlayer extends AudioPlayer {
 
   /// Plays the song before current, or if speceified, then before [song].
   Future<void> playPrev({ Song song }) async {
-    song ??= ContentControl.state.queues.current.getPrev(
+    song = ContentControl.state.queues.current.getPrev(
       song ?? ContentControl.state.currentSong,
     );
     if (song != null) {

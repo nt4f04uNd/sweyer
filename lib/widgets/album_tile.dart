@@ -118,19 +118,21 @@ class _AlbumTileState extends SelectableState<AlbumTile> {
               padding: const EdgeInsets.only(right: 8.0),
               child: widget.small
                 ? AlbumArt.songTile(
-                    source: AlbumArtSource.path(
-                      widget.album.albumArt,
+                    source: AlbumArtSource(
+                      path: widget.album.albumArt,
+                      contentUri: widget.album.contentUri,
                       albumId: widget.album.id,
                     ),
                     current: current,
                   )
                 : AlbumArt.albumTile(
-                  source: AlbumArtSource.path(
-                    widget.album.albumArt,
-                    albumId: widget.album.id,
+                    source: AlbumArtSource(
+                      path: widget.album.albumArt,
+                      contentUri: widget.album.contentUri,
+                      albumId: widget.album.id,
+                    ),
+                    current: current,
                   ),
-                  current: current,
-                ),
             ),
             Expanded(
               child: Padding(
@@ -172,7 +174,7 @@ class _AlbumTileState extends SelectableState<AlbumTile> {
       children: [
         _buildTile(),
         Positioned(
-          left: 72.0,
+          left: kAlbumTileArtSize + 2.0,
           bottom: 2.0,
           child: SelectionCheckmark(animation: animation),
         ),

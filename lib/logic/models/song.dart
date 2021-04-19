@@ -48,7 +48,6 @@ class Song extends Content with EquatableMixin {
   /// Returns the album art for this (if any).
   String get albumArt => getAlbum()?.albumArt;
 
-
   String get contentUri => 'content://media/external/audio/media/$sourceId';
 
   Song({

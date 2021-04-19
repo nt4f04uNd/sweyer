@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 public class FetchHandler {
    /// Accepts json string of array of songs
-   public static void deleteSongs(String songs) {
+   public static void deleteSongs(ArrayList<HashMap<?, ?>> songs) {
       Intent serviceIntent = new Intent(GeneralHandler.getAppContext(), DeletionService.class);
       serviceIntent.putExtra("songs", songs);
       GeneralHandler.getAppContext().startService(serviceIntent);

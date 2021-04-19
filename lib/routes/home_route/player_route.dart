@@ -239,7 +239,7 @@ class _QueueTabState extends State<_QueueTab>
       });
       if (!opened) {
         // Scroll when track changes
-        await performScrolling();
+        await scrollToSong();
       }
     });
   }
@@ -257,7 +257,7 @@ class _QueueTabState extends State<_QueueTab>
   /// Scrolls to current song.
   ///
   /// If optional [index] is provided - scrolls to it.
-  Future<void> scrollToSong([ int index, double alignment = scrollAlignment ]) async {
+  Future<void> scrollToSong([int index]) async {
     index ??= ContentControl.state.currentSongIndex;
     final extent = index * kSongTileHeight;
     final pixels = scrollController.position.pixels;
@@ -282,50 +282,16 @@ class _QueueTabState extends State<_QueueTab>
   /// Jumps to current song.
   ///
   /// If optional [index] is provided - jumps to it.
-  void jumpToSong([ int index, double alignment = scrollAlignment ]) {
+  void jumpToSong([int index]) {
     index ??= ContentControl.state.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
     scrollController.jumpTo((index * kSongTileHeight).clamp(min, max));
   }
 
-  /// A more complex function with additional checks
-  Future<void> performScrolling() async {
-    final currentSongIndex = ContentControl.state.currentSongIndex;
-    // Exit immediately if index didn't change
-    if (prevSongIndex == currentSongIndex)
-      return;
-    // If queue is longer than e.g. 10 tracks
-    if (queueLength > songsPerScreen) {
-      if (currentSongIndex < edgeScrollIndex) {
-        prevSongIndex = currentSongIndex;
-        // Scroll to current song and tapped track is in between range [0:queueLength - offset]
-        await scrollToSong();
-      } else if (prevSongIndex > edgeScrollIndex) {
-        /// Do nothing when it is already scrolled to [edgeScrollIndex]
-        return;
-      } else if (currentSongIndex >= edgeScrollIndex) {
-        prevSongIndex = currentSongIndex;
-        await scrollToSong(queueLength - 1, endScrollAlignment);
-      } else {
-        prevSongIndex = currentSongIndex;
-        scrollToSong();
-      }
-    }
-  }
-
-  /// Jump to song when changing tab to `0`
-  Future<void> jumpOnTabChange() async {
-    final currentSongIndex = ContentControl.state.currentSongIndex;
-    // If queue is longer than e.g. 6
-    if (queueLength > songsPerScreen) {
-      if (currentSongIndex < edgeScrollIndex) {
-        jumpToSong();
-      } else {
-        // If at the end of the list
-        jumpToSong(queueLength - 1, endScrollAlignment);
-      }
-    }
+  /// Jump to song when changing tab to main.
+  void jumpOnTabChange() {
+    jumpToSong();
   }
 
   void _handleTitleTap() {
@@ -460,8 +426,9 @@ class _QueueTabState extends State<_QueueTab>
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
                     child: AlbumArt(
-                      source: AlbumArtSource.path(
-                        album.albumArt,
+                      source: AlbumArtSource(
+                        path: album.albumArt,
+                        contentUri: album.contentUri,
                         albumId: album.id,
                       ),
                       borderRadius: 8,
@@ -608,31 +575,28 @@ class _MainTabState extends State<_MainTab> {
         child: child,
       ),
       child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints.loose(const Size(500.0, 800.0)),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const _TrackShowcase(),
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Seekbar(),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      bottom: 40.0,
-                      top: 10.0,
-                    ),
-                    child: _PlaybackButtons(),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const _TrackShowcase(),
+            Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: const [
+                Seekbar(),
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: 40.0,
+                    top: 10.0,
                   ),
-                ],
-              ),
-            ],
-          ),
+                  child: _PlaybackButtons(),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -794,10 +758,15 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             right: 60.0,
             top: 10.0,
           ),
-          child: AlbumArt.playerRoute(
-            source: AlbumArtSource.path(
-              currentSong.albumArt,
-              albumId: currentSong.albumId,
+          child: LayoutBuilder(
+            builder: (context, constraints) => AlbumArt.playerRoute(
+              size: constraints.maxWidth,
+              loadAnimationDuration: const Duration(milliseconds: 500),
+              source: AlbumArtSource(
+                path: currentSong.albumArt,
+                contentUri: currentSong.contentUri,
+                albumId: currentSong.albumId,
+              ),
             ),
           ),
         ),

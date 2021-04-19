@@ -94,8 +94,9 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                     size: 130.0,
                     highRes: true,
                     assetScale: 1.4,
-                    source: AlbumArtSource.path(
-                      widget.album.albumArt,
+                    source: AlbumArtSource(
+                      path: widget.album.albumArt,
+                      contentUri: widget.album.contentUri,
                       albumId: widget.album.id,
                     ),
                   ),

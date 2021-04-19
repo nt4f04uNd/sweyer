@@ -1,6 +1,16 @@
 {
   "@@locale": "en_us",
   "@@last_modified": "2021-04-14T21:30:55.342088",
+  "playback": "Playback",
+  "@playback": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackControls": "Playback controls",
+  "@playbackControls": {
+    "type": "text",
+    "placeholders": {}
+  },
   "play": "Play",
   "@play": {
     "type": "text",

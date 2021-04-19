@@ -1,6 +1,16 @@
 {
   "@@locale": "ru_ru",
   "@@last_modified": "2020-05-25T04:00:59.715314",
+  "playback": "Воспроизведение",
+  "@playback": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackControls": "Управление воспроизвединем",
+  "@playbackControls": {
+    "type": "text",
+    "placeholders": {}
+  },
   "play": "Играть",
   "@play": {
     "type": "text",

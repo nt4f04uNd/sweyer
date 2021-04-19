@@ -167,12 +167,8 @@ class _PackagesViewState extends State<_PackagesView> {
                   },
                 );
               default:
-                return Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(
-                      ThemeControl.theme.colorScheme.primary,
-                    ),
-                  ),
+                return const Center(
+                  child: Spinner(),
                 );
             }
           },
@@ -201,32 +197,35 @@ class _PackagesViewState extends State<_PackagesView> {
     final _LicenseData data,
     final bool drawSelection,
   ) {
-    return ListView(
-      children: <Widget>[
-        ...data.packages
-            .asMap()
-            .entries
-            .map<Widget>((MapEntry<int, String> entry) {
-          final String packageName = entry.value;
-          final int index = entry.key;
-          final List<int> bindings = data.packageLicenseBindings[packageName]!;
-          return _PackageListTile(
-            packageName: packageName,
-            index: index,
-            isSelected: drawSelection && entry.key == (selectedId ?? 0),
-            numberLicenses: bindings.length,
-            onTap: () {
-              widget.selectedId.value = index;
-              _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
-                packageName,
-                bindings
-                    .map((int i) => data.licenses[i])
-                    .toList(growable: false),
-              ));
-            },
-          );
-        }),
-      ],
+    return AppScrollbar(
+      child: ListView(
+        itemExtent: 64,
+        children: <Widget>[
+          ...data.packages
+              .asMap()
+              .entries
+              .map<Widget>((MapEntry<int, String> entry) {
+            final String packageName = entry.value;
+            final int index = entry.key;
+            final List<int> bindings = data.packageLicenseBindings[packageName]!;
+            return _PackageListTile(
+              packageName: packageName,
+              index: index,
+              isSelected: drawSelection && entry.key == (selectedId ?? 0),
+              numberLicenses: bindings.length,
+              onTap: () {
+                widget.selectedId.value = index;
+                _MasterDetailFlow.of(context)!.openDetailPage(_DetailArguments(
+                  packageName,
+                  bindings
+                      .map((int i) => data.licenses[i])
+                      .toList(growable: false),
+                ));
+              },
+            );
+          }),
+        ],
+      ),
     );
   }
 }
@@ -446,14 +445,10 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final List<Widget> listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 24.0),
           child: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(
-                ThemeControl.theme.colorScheme.primary,
-              ),
-            ),
+            child: Spinner(),
           ),
         ),
     ];
@@ -479,12 +474,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
         body: Center(
           child: Container(
             constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
-            child: Localizations.override(
-              locale: const Locale('en', 'US'),
-              context: context,
-              child: NFScrollbar(
-                child: ListView(padding: padding, children: listWidgets),
-              ),
+            child: AppScrollbar(
+              child: ListView(padding: padding, children: listWidgets),
             ),
           ),
         ),
@@ -540,16 +531,19 @@ class _PackageLicensePageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(title, style: theme.headline6),
-        Text(
-          subtitle,
-          style: theme.subtitle2 ?? const TextStyle(fontSize: 15.0),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(title, style: theme.headline6),
+          Text(
+            subtitle,
+            style: theme.subtitle2 ?? const TextStyle(fontSize: 15.0),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -924,12 +918,12 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       transitionSettings: AppRouter.instance.transitionSettings.dismissible,
       child: Builder(
         builder: (BuildContext context) {
-          return WillPopScope(
-            onWillPop: () async {
+          return NFBackButtonListener(
+            onBackButtonPressed: () async {
               // No need for setState() as rebuild happens on navigation pop.
               focus = _Focus.master;
               Navigator.of(context).pop();
-              return false;
+              return true;
             },
             child: BlockSemantics(
                 child: widget.detailPageBuilder(context, arguments, null)),

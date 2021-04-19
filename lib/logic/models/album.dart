@@ -37,6 +37,12 @@ class Album extends PersistentQueue {
   @override
   int get length => numberOfSongs;
 
+  /// Returns content URI of the first item in the album.
+  String get contentUri {
+    final song = ContentControl.state.allSongs.songs.firstWhere((el) => el.albumId == id);
+    return 'content://media/external/audio/albums/${song.sourceId}';
+  }
+
   Album({
     @required int id,
     @required this.album,

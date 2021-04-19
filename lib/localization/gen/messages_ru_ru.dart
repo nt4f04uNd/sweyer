@@ -79,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "play" : MessageLookupByLibrary.simpleMessage("Играть"),
     "playContentList" : MessageLookupByLibrary.simpleMessage("Включить"),
     "playNext" : MessageLookupByLibrary.simpleMessage("Включить следующим"),
+    "playback" : MessageLookupByLibrary.simpleMessage("Воспроизведение"),
+    "playbackControls" : MessageLookupByLibrary.simpleMessage("Управление воспроизвединем"),
     "playbackErrorMessage" : MessageLookupByLibrary.simpleMessage("Произошла ошибка при воспроизведении, удаление трека"),
     "playlist" : MessageLookupByLibrary.simpleMessage("Плейлист"),
     "pressOnceAgainToExit" : MessageLookupByLibrary.simpleMessage("Нажмите еще раз для выхода"),

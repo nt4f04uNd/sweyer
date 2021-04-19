@@ -144,18 +144,6 @@ class SongTile extends SelectableWidget<SelectionEntry> {
 class _SongTileState extends SelectableState<SongTile> {
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
 
-  Uint8List bytes;
-
-  @override
-  void initState() { 
-    super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    
-  }
-
   void _handleTap() {
     super.handleTap(() async {
       if (widget.onTap != null) {
@@ -216,19 +204,22 @@ class _SongTileState extends SelectableState<SongTile> {
 
   @override
   Widget build(BuildContext context) {
-    final albumArt = showAlbumArt
-        ? AlbumArt.songTile(
-            // source: AlbumArtSource.path(bytes),
-            source: AlbumArtSource.path(
-              widget.song.albumArt,
-              albumId:  widget.song.albumId,
-            ),
-            current: current,
-          )
-        : SongNumber(
-            number: widget.song.track,
-            current: current,
-          );
+    Widget albumArt;
+    if (showAlbumArt) {
+      albumArt = AlbumArt.songTile(
+        source: AlbumArtSource(
+          path: widget.song.albumArt,
+          contentUri: widget.song.contentUri,
+          albumId: widget.song.albumId,
+        ),
+        current: current,
+      );
+    } else {
+      albumArt = SongNumber(
+        number: widget.song.track,
+        current: current,
+      );
+    }
     if (!selectable)
       return _buildTile(albumArt);
     return Stack(

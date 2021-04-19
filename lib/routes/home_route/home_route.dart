@@ -143,11 +143,7 @@ class _SearchingSongsScreen extends StatelessWidget {
     final l10n = getl10n(context);
     return CenterContentScreen(
       text: l10n.searchingForTracks,
-      widget: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(
-          ThemeControl.theme.colorScheme.onBackground,
-        ),
-      ),
+      widget: const Spinner(),
     );
   }
 }

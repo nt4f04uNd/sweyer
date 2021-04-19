@@ -198,6 +198,7 @@ class _RotatingAlbumArtWithProgressState
 
   @override
   Widget build(BuildContext context) {
+    final song = ContentControl.state.currentSong;
     return CircularPercentIndicator(
       percent: _calcProgress(),
       animation: true,
@@ -211,7 +212,11 @@ class _RotatingAlbumArtWithProgressState
       backgroundColor: Colors.transparent,
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,
-        path: ContentControl.state.currentSong?.albumArt,
+        source: AlbumArtSource(
+          path: song.albumArt,
+          contentUri: song.contentUri,
+          albumId: song.albumId,
+        ),
         initRotation: math.Random(DateTime.now().second).nextDouble(),
         initRotating: MusicPlayer.instance.playing,
       ),

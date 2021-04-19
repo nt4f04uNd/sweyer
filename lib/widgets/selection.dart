@@ -416,30 +416,30 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.animation,
-      builder: (context, child) => IgnorePointer(
-        child: ScaleTransition(
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: widget.animation,
+        builder: (context, child) => ScaleTransition(
           scale: widget.animation,
           child: child,
         ),
-      ),
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: const BoxDecoration(
-          color: Constants.AppColors.androidGreen,
-          borderRadius: BorderRadius.all(Radius.circular(200.0)),
-        ),
-        child: FlareActor(
-          Constants.Assets.ASSET_ANIMATION_CHECKMARK,
-          animation: _flareAnimation,
-          color: ThemeControl.theme.colorScheme.secondaryVariant,
-          callback: (name) {
-            setState(() {
-              _flareAnimation = 'stop';
-            });
-          },
+        child: Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: const BoxDecoration(
+            color: Constants.AppColors.androidGreen,
+            borderRadius: BorderRadius.all(Radius.circular(200.0)),
+          ),
+          child: FlareActor(
+            Constants.Assets.ASSET_ANIMATION_CHECKMARK,
+            animation: _flareAnimation,
+            color: ThemeControl.theme.colorScheme.secondaryVariant,
+            callback: (name) {
+              setState(() {
+                _flareAnimation = 'stop';
+              });
+            },
+          ),
         ),
       ),
     );

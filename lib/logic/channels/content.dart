@@ -3,11 +3,45 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:uuid/uuid.dart';
+
+const _uuid = Uuid();
+
+/// Class to cancel the [ContentChannel.loadAlbumArt].
+class CancellationSignal {
+  CancellationSignal() : _id = _uuid.v4();
+  final String _id;
+
+  /// Cancel loading of an album art.
+  Future<void> cancel() {
+    return ContentChannel._channel.invokeMethod<void>(
+      'cancelAlbumArtLoading',
+      {'id': _id}
+    );
+  } 
+}
 
 abstract class ContentChannel {
   static const MethodChannel _channel = MethodChannel('content_channel');
+
+  /// Loads album art on Android Q (SDK 29) and above.
+  /// Calling this on versions below with throw.
+  static Future<Uint8List> loadAlbumArt({ @required String uri, @required Size size, @required CancellationSignal signal }) async {
+    return _channel.invokeMethod<Uint8List>(
+      'loadAlbumArt',
+      {
+        'id': signal._id,
+        'uri': uri, 
+        'width': size.width.toInt(),
+        'height': size.height.toInt(),
+      },
+    );
+  }
 
   /// Tries to tell system to recreate album art by [albumId].
   ///

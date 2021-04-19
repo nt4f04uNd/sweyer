@@ -8,10 +8,11 @@ version: 1.0.2+3
  
 environment:
   sdk: ">=2.6.0<3.0.0"
-  # flutter: 2.1.0-13.0.pre.574 # commit https://github.com/flutter/flutter/commit/02efffc
+  flutter: 2.2.0-11.0.pre.158 # https://github.com/nt4f04uNd/flutter/tree/sweyer
 
 dependencies:
   # color_thief_flutter: ^1.0.2
+  uuid: ^3.0.4
   async: ^2.5.0
   rxdart: ^0.26.0
   sliver_tools: ^0.2.1
