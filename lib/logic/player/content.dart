@@ -15,8 +15,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+// import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
+
+enum QuickAction {
+  search,
+  shuffleAll,
+  playRecent,
+}
+
+extension QuickActionSerialization on QuickAction {
+  String get value => EnumToString.convertToString(this);
+} 
 
 /// The description where the [QueueType.arbitrary] originates from.
 /// 
@@ -206,7 +217,7 @@ class _ContentState {
   /// Contains various [Sort]s of the application.
   /// Sorts of specific [Queues] like [Album]s are stored separately. // TODO: this is currently not implemented - remove this todo when it will be
   ///
-  /// Values are restored in [ContentControl._restoreSorts].
+  /// Values are restored in [_restoreSorts].
   final ContentMap<Sort> sorts = ContentMap<Sort>();
 
   /// Get current playing song.
@@ -233,8 +244,8 @@ class _ContentState {
     return index;
   }
 
-  /// Currently playing peristent queue when song is added via [ContentControl.playQueueNext]
-  /// or [ContentControl.addQueueToQueue].
+  /// Currently playing peristent queue when song is added via [playQueueNext]
+  /// or [addQueueToQueue].
   ///
   /// Used for showing [CurrentIndicator] for [PersistenQueue]s.
   ///
@@ -282,12 +293,21 @@ class _ContentState {
   void dispose() {
     assert(!_disposed);
     _disposed = true;
-    selectionNotifier.dispose();
     // TODO: this might still deliver some pedning events to listeneres, see https://github.com/dart-lang/sdk/issues/45653
     _contentSubject.close();
     _songSubject.close();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      selectionNotifier.dispose();
+    });
   }
 }
+
+// class _WidgetsBindingObserver extends WidgetsBindingObserver {
+//   @override
+//   void didChangeLocales(List<Locale>? locales) {
+//     ContentControl._setQuickActions();
+//   }
+// }
 
 /// A class to any content-related actions, e.g.:
 /// 1. Fetch songs
@@ -309,14 +329,19 @@ abstract class ContentControl {
   static Stream<_ContentState?> get onStateCreateRemove => _stateSubject.stream;
   static final BehaviorSubject<_ContentState?> _stateSubject = BehaviorSubject();
 
-  static IdMapSerializer idMapSerializer = IdMapSerializer.instance;
+  // /// Recently pressed quick action.
+  // static final quickAction = BehaviorSubject<QuickAction>();
+  // static final QuickActions _quickActions = QuickActions();
+  // static final bindingObserver = _WidgetsBindingObserver();
+
+  static final IdMapSerializer _idMapSerializer = IdMapSerializer.instance;
 
   /// Represents songs fetch on app start
   static bool get initializing => _initializeCompleter != null;
   static Completer<void>? _initializeCompleter;
 
   static bool get _empty => stateNullable?.allSongs.isEmpty ?? true;
-  static bool get _disposed => stateNullable == null;
+  static bool get disposed => stateNullable == null;
 
   /// Android SDK integer.
   static late int _sdkInt;
@@ -344,7 +369,7 @@ abstract class ContentControl {
       state.emitContentChange(); // update ui to show "Searching songs screen"
       await Future.wait([
         state.queues.init(),
-        idMapSerializer.init(),
+        _idMapSerializer.init(),
         _restoreSorts(),
       ]);
       await Future.any([
@@ -355,6 +380,7 @@ abstract class ContentControl {
         ]),
       ]);
       if (!_empty && _initializeCompleter != null && !_initializeCompleter!.isCompleted) {
+        // _initQuickActions();
         await _restoreQueue();
         await MusicPlayer.instance.init();
       }
@@ -364,21 +390,54 @@ abstract class ContentControl {
     stateNullable?.emitContentChange();
   }
 
-  /// Diposes the [state] and stops the currently going [init] process,
+  /// Disposes the [state] and stops the currently going [init] process,
   /// if any.
   static void dispose() {
-    if (!_disposed) {
+    if (!disposed) {
+      // WidgetsBinding.instance!.removeObserver(bindingObserver);
+      // _quickActions.clearShortcutItems();
       _initializeCompleter?.complete();
       _initializeCompleter = null;
-      stateNullable?.dispose();
+      stateNullable!.dispose();
       _stateSubject.add(null);
       MusicPlayer.instance.dispose();
     }
   }
 
+  // static void _initQuickActions() {
+  //   WidgetsBinding.instance!.addObserver(bindingObserver);
+  //   _quickActions.initialize((stringAction) {
+  //     final action = EnumToString.fromString(QuickAction.values, stringAction)!;
+  //     quickAction.add(action);
+  //     // switch (action) {
+  //     //   case QuickAction.search:
+  //     //     break;
+  //     //   case QuickAction.shuffleAll:
+  //     //     break;
+  //     //   case QuickAction.playRecent:
+  //     //     break;
+  //     //   default:
+  //     //     throw UnimplementedError();
+  //     // }
+  //   });
+  //   _setQuickActions();
+  // }
+
+  // static Future<void> _setQuickActions() {
+  //   return _quickActions.setShortcutItems(<ShortcutItem>[
+  //     ShortcutItem(type: QuickAction.search.value, localizedTitle: staticl10n.search, icon: 'round_search_white_36'),
+  //     ShortcutItem(type: QuickAction.shuffleAll.value, localizedTitle: staticl10n.shuffleAll, icon: 'round_shuffle_white_36'),
+  //     ShortcutItem(type: QuickAction.playRecent.value, localizedTitle: staticl10n.playRecent, icon: 'round_play_arrow_white_36')
+  //   ]);
+  // }
+
   /// Should be called if played song is duplicated in the current queue.
   static void handleDuplicate(Song song) {
-    final originalSong = state.allSongs.get(song)!;
+    final originalSong = state.allSongs.byId.get(song.sourceId);
+    if (originalSong == null) {
+      removeFromQueue(song);
+      return;
+    }
     if (identical(originalSong, song))
       return;
     final map = state.idMap;
@@ -386,7 +445,7 @@ abstract class ContentControl {
     map[newId.toString()] = originalSong.id;
     song.id = newId;
     state.queues._saveCurrentQueue();
-    idMapSerializer.save(state.idMap);
+    _idMapSerializer.save(state.idMap);
   }
 
   //****************** Queue manipulation methods *****************************************************
@@ -549,8 +608,13 @@ abstract class ContentControl {
     final queues = state.queues;
     if (queues.current.length == 1) {
       resetQueue();
+      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
       MusicPlayer.instance.pause();
     } else {
+      if (song == state.currentSong) {
+        MusicPlayer.instance.setSong(state.queues.current.getPrev(song));
+        MusicPlayer.instance.pause();
+      }
       queues.current.remove(song);
       setQueue(modified: true);
     }
@@ -566,8 +630,13 @@ abstract class ContentControl {
     final queues = state.queues;
     if (queues.current.length == 1) {
       resetQueue();
+      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
       MusicPlayer.instance.pause();
     } else {
+      if (index == state.currentSongIndex) {
+        MusicPlayer.instance.setSong(state.queues.current.getNextAt(index));
+        MusicPlayer.instance.pause();
+      }
       queues.current.removeAt(index);
       setQueue(modified: true);
     }
@@ -584,10 +653,20 @@ abstract class ContentControl {
     final queues = state.queues;
     if (indexes.length >= queues.current.length) {
       resetQueue();
+      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
       MusicPlayer.instance.pause();
     } else {
+      final containsCurrent = indexes.contains(state.currentSongIndex);
+      if (containsCurrent) {
+        MusicPlayer.instance.pause();
+      }
       for (int i = indexes.length - 1; i >= 0; i--) {
         queues.current.removeAt(indexes[i]);
+      }
+      if (containsCurrent) {
+        /// TODO: add to [Queue] something like relative indexing, that allows negative indexes
+        /// and imporvie this
+        MusicPlayer.instance.setSong(state.queues.current.songs[0]);
       }
       setQueue(modified: true);
     }
@@ -595,7 +674,7 @@ abstract class ContentControl {
 
   /// A shorthand for setting [QueueType.searched].
   static void setSearchedQueue(String query, List<Song> songs) {
-     ContentControl.setQueue(
+     setQueue(
       type: QueueType.searched,
       searchQuery: query,
       modified: false,
@@ -616,7 +695,7 @@ abstract class ContentControl {
     if (shuffled) {
       shuffledSongs = Queue.shuffleSongs(songs);
     }
-    ContentControl.setQueue(
+    setQueue(
       type: QueueType.persistent,
       persistentQueue: queue,
       modified: false,
@@ -788,7 +867,7 @@ abstract class ContentControl {
         type != QueueType.persistent &&
         type != QueueType.arbitrary) {
       state.idMap.clear();
-      idMapSerializer.save(state.idMap);
+      _idMapSerializer.save(state.idMap);
     }
 
     if (emitChangeEvent) {
@@ -813,16 +892,20 @@ abstract class ContentControl {
       state.queues._saveCurrentQueue();
     }
 
+    if (_empty) {
+      dispose();
+      return;
+    }
+
     // Update current song
-    if (state.queues.current.isNotEmpty &&
-        state.currentSongIndex < 0) {
+    if (state.queues.current.get(state.currentSong) == null) {
       final player = MusicPlayer.instance;
       if (player.playing) {
         player.pause();
         player.setSong(state.queues.current.songs[0]);
       }
     }
-
+  
     if (emitChangeEvent) {
       state.emitContentChange();
     }
@@ -834,8 +917,8 @@ abstract class ContentControl {
   static List<T> getContent<T extends Content>([Type? contentType]) {
     return contentPick<T, List<T> Function()>(
       contentType: contentType,
-      song: () => ContentControl.state.allSongs.songs as List<T>,
-      album: () => ContentControl.state.albums.values.toList() as List<T>,
+      song: () => state.allSongs.songs as List<T>,
+      album: () => state.albums.values.toList() as List<T>,
     )();
   }
 
@@ -873,10 +956,11 @@ abstract class ContentControl {
         }
       },
       album: () async {
-        if (_disposed) {
+        if (disposed)
           return;
-        }
         state.albums = await ContentChannel.retrieveAlbums();
+        if (disposed)
+          return;
         sort<Album>(emitChangeEvent: false);
       }
     )();
@@ -892,7 +976,7 @@ abstract class ContentControl {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
     final words = query.split(' ');
-    // TODO: add filter by year
+    // TODO: add filter by year, and perhaps make a whole filter system, so it would be easy to filter by any parameter
     // this should be some option in the UI like "Search by year",
     // i disabled it because it filtered out searches like "28 days later soundtrack".
     //
@@ -1013,6 +1097,7 @@ abstract class ContentControl {
 
     try {
       final result = await ContentChannel.deleteSongs(songsSet);
+      await refetchAll();
       if (sdkInt >= 30 && result) {
         idSet.forEach(state.allSongs.byId.remove);
         removeObsolete();
@@ -1053,7 +1138,7 @@ abstract class ContentControl {
       QueueType.values,
       await Prefs.queueTypeString.get(),
     )!;
-    state.idMap = await idMapSerializer.read();
+    state.idMap = await _idMapSerializer.read();
 
     final List<Song> queueSongs = [];
     final rawQueue = await state.queues._queueSerializer.read();

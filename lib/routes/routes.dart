@@ -8,6 +8,8 @@ export 'home_route/home_route.dart';
 export 'settings_route/settings_route.dart';
 export 'dev_route.dart';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide LicensePage, SearchDelegate;
 import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
@@ -289,6 +291,11 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   HomeRouter() {
     AppRouter.instance.mainScreenShown = true;
     _instance = this;
+    // _quickActionsSub = ContentControl.quickAction.listen((action) {
+    //   if (action == QuickAction.search) {
+    //     ShowFunctions.instance.showSongsSearch();
+    //   }
+    // });
   }
 
   static HomeRouter _instance;
@@ -298,8 +305,11 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   void dispose() {
     _instance = null;
     AppRouter.instance.mainScreenShown = false;
+    _quickActionsSub.cancel();
     super.dispose();
   }
+
+  StreamSubscription<QuickAction> _quickActionsSub;
 
   final List<HomeRoutes> __routes = [HomeRoutes.tabs];
   @override
@@ -324,7 +334,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     return playerRouteController.closed &&
       (selectionController?.notInSelection ?? true) &&
       routes.last != HomeRoutes.album &&
-      (tabsRouteKey.currentState.tabController.animation.value == 0.0 || routes.length > 1);
+      ((tabsRouteKey.currentState?.tabController?.animation?.value ?? -1) == 0.0 || routes.length > 1);
   }
 
   /// Callback that must be called before any pop.

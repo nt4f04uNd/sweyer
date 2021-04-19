@@ -54,6 +54,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
       this,
       closeButton: true,
       counter: true,
+      ignoreWhen: () => playerRouteController.opened,
     )
       ..addListener(handleSelection)
       ..addStatusListener(handleSelectionStatus);

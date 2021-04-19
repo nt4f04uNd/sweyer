@@ -205,6 +205,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ContentSelectionController({
     @required AnimationController animationController,
     @required this.actionsBuilder,
+    this.ignoreWhen,
     Set<T> data,
   }) : super(
          animationController: animationController,
@@ -213,6 +214,14 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   /// Will build selection controls overlay widget.
   final _ActionsBuilder actionsBuilder;
+
+  /// Before entering selection, controller will check this getter, and if it
+  /// returns `true`, selection will be cancelled out.
+  ///
+  /// This is needed, beucase in lists I allow multiple gestures at once, and if user holds one finger
+  /// and then taps tile with another finger, this will cause the selection menu to
+  /// be displayed over player route, which is not wanted.
+  final ValueGetter<bool> ignoreWhen;
 
   /// Constucts a controller for particular `T` [Content] type.
   ///
@@ -225,6 +234,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   @factory
   static ContentSelectionController forContent<T extends Content>(
     TickerProvider vsync, {
+    ValueGetter<bool> ignoreWhen,
     bool counter = false,
     bool closeButton = false,
   }) {
@@ -276,6 +286,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     );
     return ContentSelectionController<SelectionEntry<T>>(
       actionsBuilder: actionsBuilder,
+      ignoreWhen: ignoreWhen,
       animationController: AnimationController(
         vsync: vsync,
         duration: kSelectionDuration,
@@ -291,15 +302,21 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   Color _lastNavColor;
   OverlayEntry _overlayEntry;
-  ValueNotifier<ContentSelectionController> get notifier => ContentControl.state.selectionNotifier;
+  ValueNotifier<ContentSelectionController> get _notifier => ContentControl.state.selectionNotifier;
+
 
   @override
   void notifyStatusListeners(AnimationStatus status) {
     if (status == AnimationStatus.forward) {
-      assert(
-        notifier.value == null || notifier.value == this,
-        'There can only be one active controller'
-      );
+      if (ignoreWhen?.call() ?? false) {
+        close();
+        return;
+      }
+      if (_notifier.value != null && _notifier.value != this) {
+        /// Close previous selection.
+        _notifier.value.close();
+        assert(false, 'There can only be one active controller');
+      }
       _overlayEntry = OverlayEntry(
         builder: (context) => _ContentSelectionControllerProvider(
           controller: this,
@@ -311,7 +328,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         ),
       );
       HomeState.overlayKey.currentState.insert(_overlayEntry);
-      notifier.value = this;
+      _notifier.value = this;
 
       /// Animate system UI.
       final lastUi = SystemUiStyleController.lastUi;
@@ -324,7 +341,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         curve: SelectionActionsBar.forwardCurve,
       );
     } else if (status == AnimationStatus.reverse) {
-      notifier.value = null;
+      if (!ContentControl.disposed)
+        _notifier.value = null;
       _animateNavBack();
     } else if (status == AnimationStatus.dismissed) {
       _removeOverlay();
@@ -355,15 +373,20 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   @override
   void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      notifier.value = null;
-      clearListeners();
-      clearStatusListeners();
-      if (inSelection)
-        await close();
+    if (ContentControl.disposed) {
       _removeOverlay();
       super.dispose();
-    });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        _notifier.value = null;
+        clearListeners();
+        clearStatusListeners();
+        if (inSelection)
+          await close();
+        _removeOverlay();
+        super.dispose();
+      });
+    }
   }
 } 
 

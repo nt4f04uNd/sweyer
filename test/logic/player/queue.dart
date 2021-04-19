@@ -3,14 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sweyer/sweyer.dart';
 
 void main() {

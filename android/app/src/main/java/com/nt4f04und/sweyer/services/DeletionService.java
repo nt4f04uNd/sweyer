@@ -56,7 +56,16 @@ public class DeletionService extends Service {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
             for (HashMap<String, Object> song : songs) {
-               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, (long) song.get("id")));
+               Object rawId = song.get("id");
+               Long id;
+               if (rawId instanceof Long) {
+                  id = (Long) rawId;
+               } else if (rawId instanceof Integer) {
+                  id = Long.valueOf((Integer) rawId);
+               } else {
+                  throw new IllegalArgumentException();
+               }
+               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
                     GeneralChannel.instance.activity.getContentResolver(),

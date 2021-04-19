@@ -1,4 +1,4 @@
-## [1.0.2] - TODO: tbd
+## 1.0.2
 
 - Selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable
 - Added play all/shuffle buttons to main screen and albums
@@ -13,7 +13,7 @@
 - Refactored a lot of code and fixed a lot of other bugs
 - Changed player backend (non-UX)
 
-## [1.0.1] - february 08, 2021
+## 1.0.1
 
 - localization (ru, en)
 - revamped design, changed logo, some fancy animations
@@ -24,7 +24,7 @@
 - queue system
 - deleting songs
 
-## [1.0.0] - april 06, 2020
+## 1.0.0
 
 - basic playback
 - dark and light theme

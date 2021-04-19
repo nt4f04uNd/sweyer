@@ -75,6 +75,7 @@ class _SearchStateDelegate {
     selectionController = ContentSelectionController.forContent(
       AppRouter.instance.navigatorKey.currentState,
       closeButton: true,
+      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.routes.last != HomeRoutes.search,
     )
   {
     selectionController.addListener(setState);
@@ -82,6 +83,9 @@ class _SearchStateDelegate {
     onQueryChange();
   }
 
+  // This node is owned, but not hosted by, the search page. Hosting is done by
+  // the text field.
+  FocusNode focusNode = FocusNode();
   final ScrollController scrollController;
   final ScrollController singleListScrollController;
   final ContentSelectionController selectionController;
@@ -94,6 +98,7 @@ class _SearchStateDelegate {
   String trimmedQuery = '';
 
   void dispose() {
+    focusNode.dispose();
     scrollController.dispose();
     singleListScrollController.dispose();
     bodyScrolledNotifier.dispose();
@@ -225,10 +230,8 @@ class _SearchPage<T> extends StatefulWidget {
 }
 
 class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderStateMixin {
-  // This node is owned, but not hosted by, the search page. Hosting is done by
-  // the text field.
-  FocusNode focusNode = FocusNode();
   _SearchStateDelegate stateDelegate;
+  FocusNode get focusNode => stateDelegate.focusNode;
 
   @override
   void initState() {
@@ -243,7 +246,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
 
   @override
   void dispose() {
-    focusNode.dispose();
     stateDelegate.dispose();
     widget.delegate._setStateNotifier.removeListener(_handleSetState);
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
@@ -948,6 +950,7 @@ class _SuggestionTile extends StatelessWidget {
   void _handleTap(context) {
     final delegate = _SearchStateDelegate._of(context);
     delegate.searchDelegate.query = SearchHistory.instance.history[index];
+    delegate.focusNode.unfocus();
   }
 
   @override

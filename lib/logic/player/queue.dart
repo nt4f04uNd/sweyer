@@ -61,6 +61,29 @@ class Queue implements _QueueOperations<Song> {
     return shuffledSongs;
   }
 
+    // TODO: docs
+  int? _nextIndex(int index) {
+    if (index < 0) {
+      return null;
+    }
+    final nextIndex = index + 1;
+    if (nextIndex >= songs.length) {
+      return 0;
+    }
+    return nextIndex;
+  }
+
+  int? _prevIndex(int index) {
+    if (index < 0) {
+      return null;
+    }
+    final prevIndex = index - 1;
+    if (prevIndex < 0) {
+      return songs.length - 1;
+    }
+    return prevIndex;
+  }
+
   int get length => songs.length;
   bool get isEmpty => songs.isEmpty;
   bool get isNotEmpty => songs.isNotEmpty;
@@ -111,9 +134,18 @@ class Queue implements _QueueOperations<Song> {
     return byId.getNext(song.id);
   }
 
+  // TODO: docs
+  Song getNextAt(int index) {
+    return songs[_nextIndex(index)!];
+  }
+
   @override
   Song? getPrev(Song song) {
     return byId.getPrev(song.id);
+  }
+
+  Song getPrevAt(int index) {
+    return songs[_prevIndex(index)!];
   }
 
   /// Searches each song of this queue in another [queue] and removes
@@ -173,27 +205,13 @@ class _QueueOperationsById implements _QueueOperations<int> {
 
   @override
   Song? getNext(int id) {
-    final songIndex = getIndex(id);
-    if (songIndex < 0) {
-      return null;
-    }
-    final nextSongIndex = songIndex + 1;
-    if (nextSongIndex >= queue.songs.length) {
-      return queue.songs[0];
-    }
-    return queue.songs[nextSongIndex];
+    final index = queue._nextIndex(getIndex(id));
+    return index == null ? null : queue.songs[index];
   }
 
   @override
   Song? getPrev(int id) {
-    final songIndex = getIndex(id);
-    if (songIndex < 0) {
-      return null;
-    }
-    final int prevSongIndex = songIndex - 1;
-    if (prevSongIndex < 0) {
-      return queue.songs.last;
-    }
-    return queue.songs[prevSongIndex];
+    final index = queue._prevIndex(getIndex(id));
+    return index == null ? null : queue.songs[index];
   }
 }

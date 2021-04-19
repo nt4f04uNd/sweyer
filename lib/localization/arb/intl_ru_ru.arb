@@ -46,6 +46,21 @@
     "type": "text",
     "placeholders": {}
   },
+  "search": "Искать",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleAll": "Перемешать все",
+  "@shuffleAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playRecent": "Играть текущую очередь",
+  "@playRecent": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Неизвестный исполнитель",
   "@artistUnknown": {
     "type": "text",
@@ -351,11 +366,6 @@
     "placeholders": {
       "remainingClicks": {}
     }
-  },
-  "devStopService": "Остановить сервис",
-  "@devStopService": {
-    "type": "text",
-    "placeholders": {}
   },
   "devTestToast": "Тестовый тост",
   "@devTestToast": {

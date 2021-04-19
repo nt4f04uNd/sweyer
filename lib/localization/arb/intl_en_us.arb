@@ -46,6 +46,21 @@
     "type": "text",
     "placeholders": {}
   },
+  "search": "Search",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleAll": "Shuffle all",
+  "@shuffleAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playRecent": "Play recent",
+  "@playRecent": {
+    "type": "text",
+    "placeholders": {}
+  },
   "artistUnknown": "Unknown artist",
   "@artistUnknown": {
     "type": "text",
@@ -351,11 +366,6 @@
     "placeholders": {
       "remainingClicks": {}
     }
-  },
-  "devStopService": "Stop the service",
-  "@devStopService": {
-    "type": "text",
-    "placeholders": {}
   },
   "devTestToast": "Test toast",
   "@devTestToast": {

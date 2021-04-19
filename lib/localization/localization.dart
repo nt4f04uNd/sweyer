@@ -115,6 +115,30 @@ class AppLocalizations {
   }
   //*------------------------------------
 
+  //* Quick actions
+  
+  String get search {
+    return Intl.message(
+      'Search',
+      name: 'search',
+    );
+  }
+
+  String get shuffleAll {
+    return Intl.message(
+      'Shuffle all',
+      name: 'shuffleAll',
+    );
+  }
+
+  String get playRecent {
+    return Intl.message(
+      'Play recent',
+      name: 'playRecent',
+    );
+  }
+  //*------------------------------------
+
   /// Label for unknown artist.
   String get artistUnknown {
     return Intl.message(
@@ -625,13 +649,6 @@ class AppLocalizations {
       "only $remainingClicks clicks remaining...",
       name: 'onThePathToDevModeClicksRemaining',
       args: [remainingClicks],
-    );
-  }
-
-  String get devStopService {
-    return Intl.message(
-      'Stop the service',
-      name: 'devStopService',
     );
   }
 

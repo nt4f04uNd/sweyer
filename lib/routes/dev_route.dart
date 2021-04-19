@@ -51,11 +51,6 @@ class DevRoute extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
                 NFListTile(
-                  title: Text(l10n.devStopService),
-                  // todo: STOP SERVICE!
-                  // onTap: GeneralChannel.stopService,
-                ),
-                NFListTile(
                   title: Text(l10n.devTestToast),
                   onTap: _testToast,
                 ),

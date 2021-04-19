@@ -38,6 +38,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     _init();
   }
 
+  bool _disposed = false;
   MusicPlayer player = MusicPlayer.instance;
   final BehaviorSubject<void> contentChangeSubject = BehaviorSubject();
 
@@ -72,6 +73,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   void dispose() {
+    _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
   }
 
@@ -183,7 +185,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     switch (button) {
       case MediaButton.media:
         hookPressedCount += 1;
-        hookTimer ??= Timer(const Duration(milliseconds: 700), () {
+        hookTimer ??= Timer(const Duration(milliseconds: 600), () {
           switch (hookPressedCount) {
             case 1: player.playPause(); break;
             case 2: player.playNext(); break;
@@ -424,7 +426,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       case 'loop_on':
       case 'loop_off': return player.switchLooping();
       case 'play_prev': return player.playPrev();
-      case 'pause': return player.playPause();
+      case 'pause':
       case 'play': return player.playPause();
       case 'play_next': return player.playNext();
       case 'stop': stop();
@@ -432,8 +434,14 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  void didChangeLocales(List<Locale> locales) {
-    _setState();
+  Future<void> didChangeLocales(List<Locale> locales) async {
+    await AppLocalizations.init();
+    mediaItem.add(ContentControl.state.currentSong.toMediaItem());
+    queue.add(ContentControl.state.queues.current
+      .songs
+      .map((el) => el.toMediaItem())
+      .toList(),
+    );
   }
 
   @override
@@ -443,6 +451,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   /// Broadcasts the current state to all clients.
   void _setState() {
+    if (_disposed)
+      return;
     final playing = player.playing;
     final l10n = staticl10n;
     final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark

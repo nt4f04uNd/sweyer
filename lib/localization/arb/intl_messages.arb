@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-04-19T00:38:50.898464",
+  "@@last_modified": "2021-04-19T17:48:08.138682",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -42,6 +42,21 @@
   },
   "loopOn": "Loop on",
   "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "search": "Search",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleAll": "Shuffle all",
+  "@shuffleAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playRecent": "Play recent",
+  "@playRecent": {
     "type": "text",
     "placeholders": {}
   },
@@ -350,11 +365,6 @@
     "placeholders": {
       "remainingClicks": {}
     }
-  },
-  "devStopService": "Stop the service",
-  "@devStopService": {
-    "type": "text",
-    "placeholders": {}
   },
   "devTestToast": "Test toast",
   "@devTestToast": {

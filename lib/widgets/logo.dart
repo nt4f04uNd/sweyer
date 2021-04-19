@@ -14,6 +14,7 @@ class SweyerLogo extends StatelessWidget {
     this.size,
     this.color,
   }) : super(key: key);
+
   final double size;
 
   /// Background color to be used instead of [ThemeControl.colorForBlend],

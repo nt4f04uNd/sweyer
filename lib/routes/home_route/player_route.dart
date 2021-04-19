@@ -175,10 +175,7 @@ class _QueueTab extends StatefulWidget {
 
 class _QueueTabState extends State<_QueueTab>
   with SingleTickerProviderStateMixin, SelectionHandler {
-  /// Default scroll alignment.
-  static const double scrollAlignment = 0.00;
-  /// Scroll alignment for jumping to the end of the list.
-  static const double endScrollAlignment = 0.9;
+
   static const double appBarHeight = 81.0;
 
   /// How much tracks to list end to apply [endScrollAlignment]
@@ -449,22 +446,34 @@ class _QueueTabState extends State<_QueueTab>
                               height: 1.2,
                             ),
                           ),
-                          if (ContentControl.state.queues.modified)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 5.0),
-                              child: Icon(
-                                Icons.edit_rounded,
-                                size: 18.0,
-                              ),
-                            ),
-                          if (ContentControl.state.queues.shuffled)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 2.0),
-                              child: Icon(
-                                Icons.shuffle_rounded,
-                                size: 20.0,
-                              ),
-                            ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeInCubic,
+                            child: !ContentControl.state.queues.modified
+                                ? const SizedBox.shrink()
+                                : const Padding(
+                                    padding: EdgeInsets.only(left: 5.0),
+                                    child: Icon(
+                                      Icons.edit_rounded,
+                                      size: 18.0,
+                                    ),
+                                  ),
+                          ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeInCubic,
+                            child: !ContentControl.state.queues.shuffled
+                                ? const SizedBox.shrink()
+                                : const Padding(
+                                    padding: EdgeInsets.only(left: 2.0),
+                                    child: Icon(
+                                      Icons.shuffle_rounded,
+                                      size: 20.0,
+                                    ),
+                                  ),
+                          ),
                         ],
                       ),
                       Row(
