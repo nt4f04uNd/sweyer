@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Fix issue with current song not updated on search route
+
 ## 1.0.2
 
 - Selection is now everywhere - all songs, all albums, queue, search route - every content entry is now selectable

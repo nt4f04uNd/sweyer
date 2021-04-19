@@ -570,53 +570,61 @@ class _DelegateBuilder extends StatelessWidget {
             final contentListContentType = single ? contentTypeEntries.single.key : contentType;
             return NFBackButtonListener(
               onBackButtonPressed: () => _handlePop(delegate),
-              child: PageTransitionSwitcher(
-                duration: const Duration(milliseconds: 300),
-                reverse: !single && contentType == null,
-                transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                    transitionType: SharedAxisTransitionType.vertical,
-                    animation: animation,
-                    secondaryAnimation: secondaryAnimation,
-                    fillColor: Colors.transparent,
-                    child: child,
-                  ),
-                child: Container(
-                  key: ValueKey(contentType),
-                  child: showSingleCategoryContentList
-                      ? () {
-                        final list = single
-                          ? contentTypeEntries.single.value
-                          : contentPick<Content, List<Content>>(
-                              contentType: contentType,
-                              song: delegate.results.songs,
-                              album: delegate.results.albums,
-                            );
-                        return ContentListView(
-                          contentType: contentListContentType,
-                          controller: delegate.singleListScrollController,
-                          selectionController: delegate.selectionController,
-                          selectedTest: (index) =>delegate.selectionController.data
-                            .firstWhereOrNull((el) => el.data == list[index]) != null,
-                          onItemTap: delegate.getContentTileTapHandler(contentListContentType),
-                          list: list,
-                        );
-                      } ()
-                      : 
-                      // AppScrollbar( // TODO: enable this when i have more content on search screen
-                      //     controller: delegate.scrollController,
-                      //     child: 
-                          ListView(
-                            controller: delegate.scrollController,
-                            children: [
-                              for (final entry in contentTypeEntries)
-                                if (entry.value.isNotEmpty)
-                                  _ContentSection(
-                                    contentType: entry.key,
-                                    items: results.map[entry.key],
-                                    onTap: () => delegate.contentType = entry.key,
-                                  ),
-                            ],
-                          ),
+              child:
+              StreamBuilder(
+                stream: ContentControl.state.onSongChange,
+                builder: (context, snapshot) =>
+              StreamBuilder(stream: ContentControl.state.onContentChange,
+                builder: (context, snapshot) =>
+                PageTransitionSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  reverse: !single && contentType == null,
+                  transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                      transitionType: SharedAxisTransitionType.vertical,
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      fillColor: Colors.transparent,
+                      child: child,
+                    ),
+                  child: Container(
+                    key: ValueKey(contentType),
+                    child: showSingleCategoryContentList
+                        ? () {
+                          final list = single
+                            ? contentTypeEntries.single.value
+                            : contentPick<Content, List<Content>>(
+                                contentType: contentType,
+                                song: delegate.results.songs,
+                                album: delegate.results.albums,
+                              );
+                          return ContentListView(
+                            contentType: contentListContentType,
+                            controller: delegate.singleListScrollController,
+                            selectionController: delegate.selectionController,
+                            selectedTest: (index) =>delegate.selectionController.data
+                              .firstWhereOrNull((el) => el.data == list[index]) != null,
+                            onItemTap: delegate.getContentTileTapHandler(contentListContentType),
+                            list: list,
+                          );
+                        } ()
+                        : 
+                        // AppScrollbar( // TODO: enable this when i have more content on search screen
+                        //     controller: delegate.scrollController,
+                        //     child: 
+                            ListView(
+                                controller: delegate.scrollController,
+                                children: [
+                                  for (final entry in contentTypeEntries)
+                                    if (entry.value.isNotEmpty)
+                                      _ContentSection(
+                                        contentType: entry.key,
+                                        items: results.map[entry.key],
+                                        onTap: () => delegate.contentType = entry.key,
+                                      ),
+                                ],
+                              ),
+                            ),
+                    ),
                   ),
                 ),
               );

@@ -46,8 +46,6 @@ class TabsRoute extends StatefulWidget {
 class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, SelectionHandler {
   ContentSelectionController selectionController;
   TabController tabController;
-  StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<void> _contentChangeSubscription;
 
   @override
   void initState() {
@@ -62,23 +60,12 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       vsync: this,
       length: 2,
     );
-    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) {
-      setState(() {/* update current track indicator */});
-    });
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) {
-      setState(() {/* update to display possible changes in the list */});
-    });
-    tabController.addListener(() {
-      setState(() {/* update to change currently used selection controller */});
-    });
   }
 
   @override
   void dispose() {
     selectionController.dispose();
     tabController.dispose();
-    _contentChangeSubscription.cancel();
-    _songChangeSubscription.cancel();
     super.dispose();
   }
 
@@ -162,6 +149,12 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
               ),
               child: Stack(
                 children: [
+                  StreamBuilder(
+                    stream: ContentControl.state.onSongChange,
+                    builder: (context, snapshot) => 
+                  StreamBuilder(
+                    stream: ContentControl.state.onContentChange,
+                    builder: (context, snapshot) => 
                   ScrollConfiguration(
                     behavior: const GlowlessScrollBehavior(),
                     child: Padding(
@@ -179,7 +172,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                               ],
                             ),
                     ),
-                  ),
+                  ))),
                   if (ContentControl.state.albums.isNotEmpty)
                     IgnorePointer(
                       ignoring: selectionController.inSelection,
