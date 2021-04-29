@@ -43,7 +43,7 @@ abstract class Prefs {
   static final Pref<String> songSortString = Pref<String>(
     key: 'songs_sort',
     defaultValue: jsonEncode(
-      SongSort.defaultOrder(SongSortFeature.dateModified).toJson(),
+      SongSort.defaultOrder(SongSortFeature.dateModified).toMap(),
     ),
   );
 
@@ -51,7 +51,23 @@ abstract class Prefs {
   static final Pref<String> albumSortString = Pref<String>(
     key: 'album_sort',
     defaultValue: jsonEncode(
-      AlbumSort.defaultOrder(AlbumSortFeature.year).toJson(),
+      AlbumSort.defaultOrder(AlbumSortFeature.year).toMap(),
+    ),
+  );
+
+  /// Sort feature used for playlist list.
+  static final Pref<String> playlistSortString = Pref<String>(
+    key: 'playlist_sort',
+    defaultValue: jsonEncode(
+      PlaylistSort.defaultOrder(PlaylistSortFeature.dateAdded).toMap(),
+    ),
+  );
+
+  /// Sort feature used for artist list.
+  static final Pref<String> artistSortString = Pref<String>(
+    key: 'artist_sort',
+    defaultValue: jsonEncode(
+      ArtistSort.defaultOrder(ArtistSortFeature.name).toMap(),
     ),
   );
 

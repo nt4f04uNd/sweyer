@@ -21,28 +21,43 @@ const double kRotatingArtSize = kSongTileArtSize - 6 - 3 - 2;
 
 const Duration _kLoadAnimationDuration = Duration(milliseconds: 340);
 
-//  TODO: comments
-class AlbumArtSource {
-  const AlbumArtSource({
-    @required this.path,
-    @required this.contentUri,
-    @required this.albumId,
-  }) : _none = false;
+/// Whether to use bytes to load album arts from `MediaStore`.
+bool get _useBytes => ContentControl.sdkInt >= 29;
 
-  const AlbumArtSource.none()
-    : _none = true,
-      path = null,
-      contentUri = null,
-      albumId = null;
+/// Source to load an [ContentArt].
+class ContentArtSource {
+  /// Creates art for song.
+  const ContentArtSource.song(Song song)
+    : _content = song;
 
-  final bool _none;
-  final String path;
-  final String contentUri;
-  final int albumId;
+  const ContentArtSource.album(Album album)
+    : _content = album;
+  
+  const ContentArtSource.playlist(Playlist playlist)
+    : _content = playlist;
+
+  // const ContentArtSource.artist(Artist artist)
+  //   : _content = artist;
+
+  final Content _content;
 }
 
-class AlbumArt extends StatefulWidget {
-  const AlbumArt({
+/// Image that represents the content art.
+/// It can be an album art, placeholder, or some other image.
+///
+/// How arts are displayed:
+/// * [ContentArtSource.song] - just the song art 
+/// * [ContentArtSource.album] - the art of the first song in album
+/// * [ContentArtSource.playlist] - grid of 4 arts, when playlist length is:
+///    * 1 - 4 identical arts
+///    * 2 - two arts in the first row, and same two arts on the second, though reversed
+///    * 3 - arts of 3 songs, and the last one is of the first song
+///    * 4 - just 4 arts of 4 songs
+/// 
+/// See also:
+/// * [_ArtLoader], which loads arts from `MediaStore`
+class ContentArt extends StatefulWidget {
+  const ContentArt({
     Key key,
     @required this.source,
     this.color,
@@ -56,7 +71,7 @@ class AlbumArt extends StatefulWidget {
   }) : super(key: key);
 
   /// Creates an art for the [SongTile] or [SelectableSongTile].
-  const AlbumArt.songTile({
+  const ContentArt.songTile({
     Key key,
     @required this.source,
     this.color,
@@ -71,7 +86,7 @@ class AlbumArt extends StatefulWidget {
 
   /// Creates an art for the [ALbumTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
-  const AlbumArt.albumTile({
+  const ContentArt.albumTile({
     Key key,
     @required this.source,
     this.color,
@@ -86,10 +101,10 @@ class AlbumArt extends StatefulWidget {
 
   /// Creates an art for the [PlayerRoute].
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.albumTile].
-  const AlbumArt.playerRoute({
+  const ContentArt.playerRoute({
     Key key,
     @required this.source,
-    @required this.size,
+    this.size,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
@@ -99,7 +114,7 @@ class AlbumArt extends StatefulWidget {
        currentIndicatorScale = null,
        super(key: key);
 
-  final AlbumArtSource source;
+  final ContentArtSource source;
 
   /// Background color for the album art.
   /// By default will use [ThemeControl.colorForBlend].
@@ -127,7 +142,7 @@ class AlbumArt extends StatefulWidget {
   /// want to change [assetScale].
   final bool highRes;
 
-  // TODO: doc
+  /// SCale for the [CurrentIndicator].
   final double currentIndicatorScale;
 
   /// Above Android Q and above album art loads from bytes, and performns an animation on load.
@@ -135,54 +150,198 @@ class AlbumArt extends StatefulWidget {
   final Duration loadAnimationDuration;
 
   @override
-  _AlbumArtState createState() => _AlbumArtState();
+  _ContentArtState createState() => _ContentArtState();
 }
 
-class _AlbumArtState extends State<AlbumArt> {
-  // TODO: dedup this code to a separate base class
+/// Loads local album art for a song.
+///
+/// Lower Android Q album arts ared displayed directly from the file path
+/// of album art from [Song.albumArt].Above though, this path was deprecated due to
+/// scoped storage, and now album arts should be fetched with special method in `MediaStore.loadThumbnail`.
+/// The [_useBytes] indicates that we are on scoped storage and should use this
+/// new method.
+/// 
+/// Also, sometimes below Android Q, album arts files sometimes become unaccessible,
+/// even though they should not. Loader will try to restore them with [Song.albumId]
+/// and [ContentChannel.fixAlbumArt].
+class _ArtLoader {
+  _ArtLoader({
+    @required this.context,
+    @required this.song,
+    @required this.size,
+    @required this.onUpdate,
+  });
 
-  bool get useBytes => ContentControl.sdkInt >= 29;
-  CancellationSignal signal;
-  Uint8List bytes;
+  final BuildContext context;
+  final Song song;
+  final double size;
+  final VoidCallback onUpdate;
+
+  CancellationSignal _signal;
+  Uint8List _bytes;
+  File _file;
   bool loaded = false;
+  bool _broken = false;
+
+  bool get showDefault => _broken ? _broken : song == null ||
+                          !_useBytes && song.albumArt == null ||
+                          _useBytes && loaded && _bytes == null;
+
+  void load() {
+    if (_useBytes) {
+      final uri = song.contentUri;
+      assert(uri != null);
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        _signal = CancellationSignal();
+        _bytes = await ContentChannel.loadAlbumArt(
+          uri: uri,
+          size: Size.square(size) * MediaQuery.of(context).devicePixelRatio,
+          signal: _signal,
+        );
+        loaded = true;
+        onUpdate();
+      });
+    } else {
+      loaded = true;
+      if (song.albumArt != null) {
+        _file = File(song.albumArt);
+        // TODO: make it async and enable lint regarding expensive operations
+        final exists = _file.existsSync();
+        _broken = !exists;
+        if (_broken) {
+          _recreateArt();
+        }
+      }
+    }
+  }
+
+  Future<void> _recreateArt() async {
+    await ContentChannel.fixAlbumArt(song.albumId);
+    _broken = true;
+    onUpdate();
+  }
+
+  Image getImage() {
+    if (_useBytes) {
+      return Image.memory(
+        _bytes,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.file(
+      _file,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+    );
+  }
+
+  void cancel() {
+    _signal?.cancel();
+  }
+}
+
+class _ContentArtState extends State<ContentArt> {
+  List<_ArtLoader> _loaders;
+
+  bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
+  bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
 
   @override
   void initState() { 
     super.initState();
-    _load();
+    _init();
   }
 
-  void _load() {
-    if (useBytes) {
-      final uri =  widget.source.contentUri;
-      assert(uri != null);
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-        signal = CancellationSignal();
-        bytes = await ContentChannel.loadAlbumArt(
-          uri: uri,
-          size: Size.square(widget.size) * MediaQuery.of(context).devicePixelRatio,
-          signal: signal,
-        );
-        if (mounted) {
-          setState(() {
-            loaded = true;
-          });
-        }
-      });
+  void _init() {
+    final content = widget.source._content;
+    if (content is Song) {
+      _loaders = [
+        _ArtLoader(
+          context: context,
+          song: content,
+          size: widget.size,
+          onUpdate: _onUpdate,
+        ),
+      ];
+    } else if (content is Album) {
+      _loaders = [
+        _ArtLoader(
+          context: context,
+          song: content.firstSong,
+          size: widget.size,
+          onUpdate: _onUpdate,
+        ),
+      ];
+    } else if (content is Playlist) {
+      final songs = content.songs;
+      switch (songs.length) {
+        case 0:
+          _loaders = [];
+          break;
+        case 1:
+          final loader = _ArtLoader(
+            context: context,
+            song: songs.first,
+            size: widget.size,
+            onUpdate: _onUpdate,
+          );
+          List.generate(4, (index) => loader);
+          break;
+        case 2: 
+          _loaders = List.generate(2, (index) => _ArtLoader(
+            context: context,
+            song: songs[index],
+            size: widget.size,
+            onUpdate: _onUpdate,
+          ));
+          _loaders.addAll(_loaders.reversed.toList());
+          break;
+        case 3:
+          _loaders = List.generate(3, (index) => _ArtLoader(
+            context: context,
+            song: songs[index],
+            size: widget.size,
+            onUpdate: _onUpdate,
+          ));
+          _loaders.add(_loaders[0]);
+          break;
+        case 4:
+          _loaders = List.generate(4, (index) => _ArtLoader(
+            context: context,
+            song: songs[index],
+            size: widget.size,
+            onUpdate: _onUpdate,
+          ));
+          break;
+      }
     }
-  } 
+    for (final loader in _loaders) {
+      loader.load();
+    }
+  }
+
+  void _onUpdate() {
+    if (mounted) {
+      setState(() { });
+    }
+  }
 
   @override
-  void didUpdateWidget(covariant AlbumArt oldWidget) {
-    if (oldWidget.source?.contentUri != widget.source?.contentUri) {
-      _load();
+  void didUpdateWidget(covariant ContentArt oldWidget) {
+    if (oldWidget.source?._content != widget.source?._content) {
+      _init();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() { 
-    signal?.cancel();
+    for (final loader in _loaders) {
+      loader.cancel();
+    }
     super.dispose();
   }
 
@@ -195,32 +354,11 @@ class _AlbumArtState extends State<AlbumArt> {
           );
   }
 
-  bool recreated = false;
-  Future<void> _recreateArt() async {
-    recreated = true;
-    await ContentChannel.fixAlbumArt(widget.source.albumId);
-    if (mounted) {
-      setState(() { });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    assert(_loaders.isEmpty || _loaders.length == 1 || _loaders.length == 4);
     Widget child;
-    File file; 
-    bool showDefault = widget.source == null ||
-                       widget.source._none ||
-                       !useBytes && widget.source.path == null ||
-                       useBytes && loaded && bytes == null;
-    if (!showDefault && !useBytes) {
-      file = File(widget.source.path);
-      final exists = file.existsSync();
-      showDefault = !exists;
-      if (!exists && !recreated) {
-        _recreateArt();
-      }
-    }
-    if (useBytes && !loaded) {
+    if (!loaded) {
       if (widget.current) {
         child = Container(
           alignment: Alignment.center,
@@ -261,26 +399,31 @@ class _AlbumArtState extends State<AlbumArt> {
         }
       }
     } else {
-      Image image;
-      if (useBytes) {
-        image = Image.memory(
-          bytes,
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.cover,
-        );
+      Widget arts;
+      if (_loaders.length == 1) {
+        arts = _loaders.first.getImage();
       } else {
-        image = Image.file(
-          file,
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.cover,
+        arts = Column(
+          children: [
+            Row(
+              children: [
+                _loaders[0].getImage(),
+                _loaders[1].getImage(),
+              ],
+            ),
+            Row(
+              children: [
+                _loaders[2].getImage(),
+                _loaders[3].getImage(),
+              ],
+            ),
+          ],
         );
       }
       if (widget.current) {
         child = Stack(
           children: [
-            image,
+            arts,
             Container(
               alignment: Alignment.center,
               color: Colors.black.withOpacity(0.5),
@@ -291,7 +434,7 @@ class _AlbumArtState extends State<AlbumArt> {
           ],
         );
       } else {
-        child = image;
+        child = arts;
       }
     }
 
@@ -302,13 +445,13 @@ class _AlbumArtState extends State<AlbumArt> {
       child: child,
     );
 
-    if (!useBytes)
+    if (!_useBytes)
       return child;
     return AnimatedSwitcher(
       duration: widget.loadAnimationDuration,
       switchInCurve: Curves.easeOut,
       child: Container(
-        key: ValueKey("${widget.source?.contentUri}_$loaded"),
+        key: ValueKey(loaded),
         child: child
       ),
     );
@@ -322,17 +465,12 @@ class AlbumArtRotating extends StatefulWidget {
     Key key,
     @required this.source,
     @required this.initRotating,
-    this.color,
     this.initRotation = 0.0,
   })  : assert(initRotating != null),
         assert(initRotation >= 0 && initRotation <= 1.0),
         super(key: key);
 
-  final AlbumArtSource source;
-
-  /// Background color for the album art.
-  /// By default will use [ThemeControl.colorForBlend].
-  final Color color;
+  final ContentArtSource source;
 
   /// Should widget start rotate on mount or not
   final bool initRotating;
@@ -348,11 +486,6 @@ class AlbumArtRotating extends StatefulWidget {
 class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerProviderStateMixin {
   AnimationController controller;
 
-  bool get useBytes => ContentControl.sdkInt >= 29;
-  CancellationSignal signal;
-  Uint8List bytes;
-  bool loaded = false;
-
   @override
   void initState() {
     super.initState();
@@ -364,41 +497,11 @@ class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerPro
     if (widget.initRotating) {
       rotate();
     }
-     _load();
-  }
-
-  void _load() {
-    if (useBytes) {
-      final uri =  widget.source.contentUri;
-      assert(uri != null);
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-        signal = CancellationSignal();
-        bytes = await ContentChannel.loadAlbumArt(
-          uri: uri,
-          size: const Size.square(kRotatingArtSize) * MediaQuery.of(context).devicePixelRatio,
-          signal: signal,
-        );
-        if (mounted) {
-          setState(() {
-            loaded = true;
-          });
-        }
-      });
-    }
-  } 
-
-  @override
-  void didUpdateWidget(covariant AlbumArtRotating oldWidget) {
-    if (oldWidget.source?.contentUri != widget.source?.contentUri) {
-      _load();
-    }
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
     controller.dispose();
-    signal?.cancel();
     super.dispose();
   }
 
@@ -412,88 +515,18 @@ class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerPro
     controller.stop();
   }
 
-  bool recreated = false;
-  Future<void> _recreateArt() async {
-    recreated = true;
-    await ContentChannel.fixAlbumArt(widget.source.albumId);
-    if (mounted) {
-      setState(() { });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    Widget image;
-    File file;
-    bool showDefault = widget.source == null ||
-                       widget.source._none ||
-                       !useBytes && widget.source.path == null ||
-                       useBytes && loaded && bytes == null;
-    if (!showDefault && !useBytes) {
-      file = File(widget.source.path);
-      final exists = file.existsSync();
-      showDefault = !exists;
-      if (!exists && !recreated) {
-        _recreateArt();
-      }
-    }
-    if (useBytes && !loaded) {
-      image = const SizedBox(
-        width: kRotatingArtSize,
-        height: kRotatingArtSize,
-      );
-    } else if (showDefault) {
-      image = SizedBox(
-        width: kRotatingArtSize,
-        height: kRotatingArtSize,
-        child: Image.asset(
-          Constants.Assets.ASSET_LOGO_THUMB_INAPP,
-          color: widget.color != null
-              ? getColorForBlend(widget.color)
-              : ThemeControl.colorForBlend,
-          colorBlendMode: BlendMode.plus,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else {
-      if (useBytes) {
-        image = Image.memory(
-          bytes,
-          width: kRotatingArtSize,
-          height: kRotatingArtSize,
-          fit: BoxFit.cover,
-        );
-      } else {
-        image = Image.file(
-          file,
-          width: kRotatingArtSize,
-          height: kRotatingArtSize,
-          fit: BoxFit.cover,
-        );
-      }
-    }
-
-    image = AnimatedBuilder(
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(kRotatingArtSize),
-        ),
-        child: image,
+    return AnimatedBuilder(
+      child: ContentArt(
+        source: widget.source,
+        size: kRotatingArtSize,
+        borderRadius: kRotatingArtSize,
       ),
       animation: controller,
       builder: (context, child) => RotationTransition(
         turns: controller,
         child: child,
-      ),
-    );
-    if (!useBytes)
-      return image;
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 340),
-      switchInCurve: Curves.easeOut,
-      child: Container(
-        key: ValueKey("${widget.source?.contentUri}_$loaded"),
-        child: image,
       ),
     );
   }

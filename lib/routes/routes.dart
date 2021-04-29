@@ -334,7 +334,8 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     return playerRouteController.closed &&
       (selectionController?.notInSelection ?? true) &&
       routes.last != HomeRoutes.album &&
-      ((tabsRouteKey.currentState?.tabController?.animation?.value ?? -1) == 0.0 || routes.length > 1);
+      ((tabsRouteKey.currentState?.tabController?.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
+      !(tabsRouteKey.currentState?.tabBarDragged ?? false);
   }
 
   /// Callback that must be called before any pop.

@@ -77,6 +77,8 @@ class AppScrollbar extends StatefulWidget {
             text: contentPick<T, String Function()>(
               song: () => (item as Song).title[0].toUpperCase(),
               album: () => (item as Album).album[0].toUpperCase(),
+              playlist: () => (item as Playlist).name[0].toUpperCase(),
+              artist: () => (item as Artist).artist[0].toUpperCase(),
             )(),
           );
         },

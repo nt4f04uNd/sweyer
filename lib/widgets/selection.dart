@@ -24,9 +24,7 @@ mixin SelectionHandler<T extends StatefulWidget> on State<T> {
   /// By default just calls [setState].
   @protected
   void handleSelection() {
-    setState(() {
-      /* update appbar and tiles on selection */
-    });
+    setState(() {/* tiles on selection */});
   }
 
   /// Listens to [SelectionController.addStatusListener].
@@ -304,7 +302,6 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   OverlayEntry _overlayEntry;
   ValueNotifier<ContentSelectionController> get _notifier => ContentControl.state.selectionNotifier;
 
-
   @override
   void notifyStatusListeners(AnimationStatus status) {
     if (status == AnimationStatus.forward) {
@@ -341,8 +338,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         curve: SelectionActionsBar.forwardCurve,
       );
     } else if (status == AnimationStatus.reverse) {
-      if (!ContentControl.disposed)
+      if (!ContentControl.disposed) {
         _notifier.value = null;
+      }
       _animateNavBack();
     } else if (status == AnimationStatus.dismissed) {
       _removeOverlay();

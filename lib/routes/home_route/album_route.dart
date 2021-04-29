@@ -28,7 +28,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
   ContentSelectionController<SelectionEntry<Song>> selectionController;
   List<Song> songs;
 
-  static const _appBarHeight = kNFAppBarPreferredSize - 8.0;
+  static const _appBarHeight = NFConstants.toolbarHeight - 8.0;
   static const _albumArtSize = 130.0;
   static const _albumSectionTopPadding = 10.0;
   static const _albumSectionBottomPadding = 24.0;
@@ -91,15 +91,11 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AlbumArt(
+                  ContentArt(
                     size: 130.0,
                     highRes: true,
                     assetScale: 1.4,
-                    source: AlbumArtSource(
-                      path: widget.album.albumArt,
-                      contentUri: widget.album.contentUri,
-                      albumId: widget.album.id,
-                    ),
+                    source: ContentArtSource.album(widget.album),
                   ),
                   Expanded(
                     child: Padding(
@@ -199,7 +195,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
   @override
   Widget build(BuildContext context) {
     final theme = ThemeControl.theme;
-  
+
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {

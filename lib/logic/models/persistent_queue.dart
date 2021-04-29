@@ -5,7 +5,6 @@
 
 // @dart = 2.12
 
-import 'package:equatable/equatable.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Represents some persistent queue on user device that has 
@@ -19,12 +18,15 @@ import 'package:sweyer/sweyer.dart';
 /// 
 /// See also:
 /// * [QueueType] which is a type of currently playing queue.
-abstract class PersistentQueue extends Content with EquatableMixin {
-  PersistentQueue({ required this.id });
+abstract class PersistentQueue extends Content {
+  const PersistentQueue({ required this.id });
 
   /// A unique ID of this queue.
   @override
   final int id;
+
+  /// Title of this queue.
+  String get title;
 
   /// List of songs.
   List<Song> get songs;

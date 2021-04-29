@@ -42,9 +42,12 @@ class DevRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return NFPageBase(
-      name: l10n.debug,
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.debug),
+        leading: const NFBackButton(),
+      ),
+      body: Column(
         children: <Widget>[
           Expanded(
             child: ListView(

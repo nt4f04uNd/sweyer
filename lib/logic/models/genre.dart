@@ -7,36 +7,44 @@
 
 import 'package:sweyer/sweyer.dart';
 
-class Artist extends Content {
+class Genre extends Content {
   @override
   final int id;
-  final String artist;
-  final int numberOfAlbums;
-  final int numberOfTracks;
+  final String name;
+  final List<int> songIds;
 
   @override
   List<Object> get props => [id];
 
-  const Artist({
+  const Genre({
     required this.id,
-    required this.artist,
-    required this.numberOfAlbums,
-    required this.numberOfTracks,
+    required this.name,
+    required this.songIds,
   });
 
-  factory Artist.fromMap(Map map) {
-    return Artist(
+  Genre copyWith({
+    int? id,
+    String? name,
+    List<int>? songIds,
+  }) {
+    return Genre(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      songIds: songIds ?? this.songIds,
+    );
+  }
+
+  factory Genre.fromMap(Map map) {
+    return Genre(
       id: map['id'] as int,
-      artist: map['artist'] as String,
-      numberOfAlbums: map['numberOfAlbums'] as int,
-      numberOfTracks: map['numberOfTracks'] as int,
+      name: map['name'] as String,
+      songIds: map['songIds'].cast<int>(),
     );
   }
 
   Map<String, dynamic> toMap() => {
     'id': id,
-    'artist': artist,
-    'numberOfAlbums': numberOfAlbums,
-    'numberOfTracks': numberOfTracks,
+    'name': name,
+    'songIds': songIds,
   };
 }

@@ -422,12 +422,8 @@ class _QueueTabState extends State<_QueueTab>
                 if (isAlbum)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
-                    child: AlbumArt(
-                      source: AlbumArtSource(
-                        path: album.albumArt,
-                        contentUri: album.contentUri,
-                        albumId: album.id,
-                      ),
+                    child: ContentArt(
+                      source: ContentArtSource.album(album),
                       borderRadius: 8,
                       size: kSongTileArtSize - 8.0,
                     ),
@@ -556,32 +552,34 @@ class _MainTabState extends State<_MainTab> {
     );
     return AnimatedBuilder(
       animation: playerRouteController,
-      builder: (context, child) => NFPageBase(
+      builder: (context, child) => Scaffold(
+        body: child,
         resizeToAvoidBottomInset: false,
-        enableElevation: false,
         backgroundColor: animation.value,
-        appBarBackgroundColor: Colors.transparent,
-        backButton: FadeTransition(
-          opacity: fadeAnimation,
-          child: NFIconButton(
-            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-            size: 40.0,
-            onPressed: playerRouteController.close,
-          ),
-        ),
-        actions: <Widget>[
-          ValueListenableBuilder<bool>(
-            valueListenable: ContentControl.devMode,
-            builder: (context, value, child) => value
-              ? child
-              : const SizedBox.shrink(),
-            child: FadeTransition(
-              opacity: fadeAnimation,
-              child: const _InfoButton(),
+        appBar: AppBar(
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          leading: FadeTransition(
+            opacity: fadeAnimation,
+            child: NFIconButton(
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+              size: 40.0,
+              onPressed: playerRouteController.close,
             ),
           ),
-        ],
-        child: child,
+          actions: <Widget>[
+            ValueListenableBuilder<bool>(
+              valueListenable: ContentControl.devMode,
+              builder: (context, value, child) => value
+                ? child
+                : const SizedBox.shrink(),
+              child: FadeTransition(
+                opacity: fadeAnimation,
+                child: const _InfoButton(),
+              ),
+            ),
+          ],
+        ),
       ),
       child: Center(
         child: Column(
@@ -768,14 +766,10 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             top: 10.0,
           ),
           child: LayoutBuilder(
-            builder: (context, constraints) => AlbumArt.playerRoute(
+            builder: (context, constraints) => ContentArt.playerRoute(
               size: constraints.maxWidth,
               loadAnimationDuration: const Duration(milliseconds: 500),
-              source: AlbumArtSource(
-                path: currentSong.albumArt,
-                contentUri: currentSong.contentUri,
-                albumId: currentSong.albumId,
-              ),
+              source: ContentArtSource.song(currentSong),
             ),
           ),
         ),

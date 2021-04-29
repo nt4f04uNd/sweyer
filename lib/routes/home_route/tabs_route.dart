@@ -44,8 +44,11 @@ class TabsRoute extends StatefulWidget {
 }
 
 class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, SelectionHandler {
+  static const tabBarHeight = 44.0;
   ContentSelectionController selectionController;
   TabController tabController;
+  /// Used in [HomeRouter.drawerCanBeOpened].
+  bool tabBarDragged = false;
 
   @override
   void initState() {
@@ -58,8 +61,9 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       ..addStatusListener(handleSelectionStatus);
     tabController = TabController(
       vsync: this,
-      length: 2,
-    );
+      length: 4,
+    )
+      ..addListener(handleSelection);
   }
 
   @override
@@ -69,11 +73,33 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     super.dispose();
   }
 
-  List<NFTab> _buildTabs() {
+  List<Widget> _buildTabs() {
     final l10n = getl10n(context);
     return [
-      NFTab(text: l10n.tracks),
-      NFTab(text: l10n.albums),
+      _TabCollapse(
+        index: 0,
+        tabController: tabController,
+        icon: const Icon(Icons.music_note_rounded),
+        label: l10n.tracks,
+      ),
+      _TabCollapse(
+        index: 1,
+        tabController: tabController,
+        icon: const Icon(Icons.album_rounded),
+        label: l10n.albums,
+      ),
+      _TabCollapse(
+        index: 2,
+        tabController: tabController,
+        icon: const Icon(Icons.queue_music_rounded),
+        label: l10n.playlists,
+      ),
+      _TabCollapse(
+        index: 3,
+        tabController: tabController,
+        icon: const Icon(Icons.person_rounded),
+        label: l10n.artists,
+      ),
     ];
   }
 
@@ -103,38 +129,38 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 
   @override
   Widget build(BuildContext context) {
-    final appBar = PreferredSize(
-      preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-      child: SelectionAppBar(
-        titleSpacing: 0.0,
-        elevation: 0.0,
-        elevationSelection: 0.0,
-        selectionController: selectionController,
-        onMenuPressed: () {
-          drawerController.open();
-        },
-        actions: [
-          NFIconButton(
-            icon: const Icon(Icons.search_rounded),
-            onPressed: () {
-              ShowFunctions.instance.showSongsSearch();
-            },
-          ),
-        ],
-        actionsSelection: [
-          DeleteSongsAppBarAction<Content>(controller: selectionController),
-        ],
-        title: Padding(
-          padding: const EdgeInsets.only(left: 15.0),
-          child: Text(
-            Constants.Config.APPLICATION_TITLE,
-            style: appBarTitleTextStyle,
-          ),
+    final theme = ThemeControl.theme;
+
+    final appBar = SelectionAppBar(
+      titleSpacing: 0.0,
+      elevation: 2.0,
+      elevationSelection: 2.0,
+      selectionController: selectionController,
+      toolbarHeight: kToolbarHeight,
+      onMenuPressed: () {
+        drawerController.open();
+      },
+      actions: [
+        NFIconButton(
+          icon: const Icon(Icons.search_rounded),
+          onPressed: () {
+            ShowFunctions.instance.showSongsSearch();
+          },
         ),
-        titleSelection: Padding(
-          padding: const EdgeInsets.only(left: 10.0),
-          child: SelectionCounter(controller: selectionController),
+      ],
+      actionsSelection: [
+        DeleteSongsAppBarAction<Content>(controller: selectionController),
+      ],
+      title: Padding(
+        padding: const EdgeInsets.only(left: 15.0),
+        child: Text(
+          Constants.Config.APPLICATION_TITLE,
+          style: appBarTitleTextStyle,
         ),
+      ),
+      titleSelection: Padding(
+        padding: const EdgeInsets.only(left: 10.0),
+        child: SelectionCounter(controller: selectionController),
       ),
     );
 
@@ -144,9 +170,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         children: [
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(
-                top: kNFAppBarPreferredSize + 4.0,
-              ),
+              padding: const EdgeInsets.only(top: kToolbarHeight),
               child: Stack(
                 children: [
                   StreamBuilder(
@@ -158,53 +182,75 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                   ScrollConfiguration(
                     behavior: const GlowlessScrollBehavior(),
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        top: ContentControl.state.albums.isNotEmpty ? 44.0 : 0.0,
+                      padding: const EdgeInsets.only(bottom: tabBarHeight),
+                      child: TabBarView(
+                        controller: tabController,
+                        physics: const _TabsScrollPhysics(),
+                        children: [
+                          _ContentTab<Song>(selectionController: selectionController),
+                          _ContentTab<Album>(selectionController: selectionController),
+                          Container(),
+                          Container(),
+                        ],
                       ),
-                      child: ContentControl.state.albums.isEmpty
-                          ? _ContentTab<Song>(selectionController: selectionController)
-                          : TabBarView(
-                              controller: tabController,
-                              physics: const _TabsScrollPhysics(),
-                              children: [
-                                _ContentTab<Song>(selectionController: selectionController),
-                                _ContentTab<Album>(selectionController: selectionController)
-                              ],
-                            ),
                     ),
                   ))),
-                  if (ContentControl.state.albums.isNotEmpty)
-                    IgnorePointer(
-                      ignoring: selectionController.inSelection,
-                      child: Theme(
-                        data: ThemeControl.theme.copyWith(
-                          splashFactory: NFListTileInkRipple.splashFactory,
-                        ),
-                        child: Material(
-                          elevation: 2.0,
-                          color: ThemeControl.theme.appBarTheme.color,
-                          child: NFTabBar(
-                            controller: tabController,
-                            indicatorWeight: 5.0,
-                            indicator: BoxDecoration(
-                              color: ThemeControl.theme.colorScheme.primary,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(3.0),
-                                topRight: Radius.circular(3.0),
+                  Positioned(
+                    bottom: 0.0,
+                    left: 0.0,
+                    right: 0.0,
+                    child: Theme(
+                      data: theme.copyWith(
+                        splashFactory: NFListTileInkRipple.splashFactory,
+                        canvasColor:theme.colorScheme.secondary,
+                      ),
+                      child: ScrollConfiguration(
+                        behavior: const GlowlessScrollBehavior(),
+                        child: SizedBox(
+                          height: tabBarHeight,
+                          width: screenWidth,
+                          child: Material(
+                            elevation: 4.0,
+                            color: theme.colorScheme.background,
+                            child: GestureDetector(
+                              onPanDown: (_) {
+                                tabBarDragged = true;
+                              },
+                              onPanCancel: () {
+                                tabBarDragged = false;
+                              },
+                              onPanEnd: (_) {
+                                tabBarDragged = false;
+                              },
+                              child: Center(
+                                child: NFTabBar(         
+                                  isScrollable: true,
+                                  controller: tabController,
+                                  indicatorWeight: 5.0,
+                                  indicator: BoxDecoration(
+                                    color: theme.colorScheme.primary,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(3.0),
+                                      topRight: Radius.circular(3.0),
+                                    ),
+                                  ),
+                                  labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  labelColor: theme.textTheme.headline6.color,
+                                  indicatorSize: TabBarIndicatorSize.label,
+                                  unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  labelStyle: theme.textTheme.headline6.copyWith(
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                  tabs: _buildTabs(),
+                                ),
                               ),
                             ),
-                            labelColor: ThemeControl.theme.textTheme.headline6.color,
-                            indicatorSize: TabBarIndicatorSize.label,
-                            unselectedLabelColor: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.6),
-                            labelStyle: ThemeControl.theme.textTheme.headline6.copyWith(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            tabs: _buildTabs(),
                           ),
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
@@ -274,10 +320,8 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         list: list,
         showScrollbarLabel: showLabel,
         selectionController: selectionController,
-        onItemTap: contentPick<T , VoidCallback>(
+        onItemTap: contentPick<T, VoidCallback>(
           song: ContentControl.resetQueue,
-          // TODO: when i fully migrate to safety, make this null instead of empty closure
-          album: () {},
         ),
         leading: ContentListHeader<T>(
           count: list.length,
@@ -351,6 +395,84 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
           ),
         ),
       )
+    );
+  }
+}
+
+class _TabCollapse extends StatelessWidget {
+  const _TabCollapse({
+    Key key,
+    this.index,
+    this.tabController,
+    this.label,
+    this.icon,
+  }) : super(key: key);
+
+  final int index;
+  final TabController tabController;
+  final String label; 
+  final Icon icon; 
+
+  @override
+  Widget build(BuildContext context) {
+    return NFTab(
+      child: AnimatedBuilder(
+        animation: tabController.animation,
+        builder: (context, child) {
+          final tabValue = tabController.animation.value;
+          final indexIsChanging = tabController.indexIsChanging;
+          double value = 0.0;
+          if (tabValue > index - 1 && tabValue <= index) {
+            if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+              // Animation for next tab.
+              value = 1 + (tabController.animation.value - index);
+            }
+          } else if (tabValue <= index + 1 && tabValue > index) {
+            if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+              // Animation for previos tab.
+              value = 1 - (tabController.animation.value - index);
+            }
+          }
+          value = value.clamp(0.0, 1.0);
+          return Row(
+            children: [
+              ClipRRect(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  heightFactor: 1.0 - value,
+                  widthFactor: 1.0 - value,
+                  child: icon,
+                ),
+              ),
+              // Create a space while animating in-between icon and label, but don't keep it,
+              // otherwise symmetry is ruined.
+              SizedBox( 
+                width: 4 * TweenSequence([
+                  TweenSequenceItem(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    weight: 1,
+                  ),
+                  TweenSequenceItem(
+                    tween: ConstantTween(1.0),
+                    weight: 2,
+                  ),
+                  TweenSequenceItem(
+                    tween: Tween(begin: 1.0, end: 0.0),
+                    weight: 1,
+                  ),
+                ]).transform(value),
+              ),
+              ClipRRect(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: value,
+                  child: Text(label),
+                ),
+              ),
+            ],
+          );
+        }
+      ),
     );
   }
 }

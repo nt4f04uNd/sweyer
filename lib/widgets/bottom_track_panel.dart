@@ -212,11 +212,7 @@ class _RotatingAlbumArtWithProgressState
       backgroundColor: Colors.transparent,
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,
-        source: AlbumArtSource(
-          path: song.albumArt,
-          contentUri: song.contentUri,
-          albumId: song.albumId,
-        ),
+        source: ContentArtSource.song(song),
         initRotation: math.Random(DateTime.now().second).nextDouble(),
         initRotating: MusicPlayer.instance.playing,
       ),

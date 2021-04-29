@@ -33,9 +33,12 @@ class _SettingsRouteState extends State<SettingsRoute> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return NFPageBase(
-      name: l10n.settings,
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.settings),
+        leading: const NFBackButton(),
+      ),
+      body: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[

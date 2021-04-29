@@ -22,9 +22,11 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return NFPageBase(
-      name: l10n.general,
-      child: ListView(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.general),
+      ),
+      body: ListView(
         physics: const NeverScrollableScrollPhysics(),
         children: const [
           // _MinFileDurationSlider(

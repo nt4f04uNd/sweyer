@@ -76,6 +76,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "playlists": "Playlists",
+  "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artists": "Artists",
+  "@artists": {
+    "type": "text",
+    "placeholders": {}
+  },
   "tracksPlural": "{count,plural, =0{Tracks}=1{Track}=2{Tracks}few{Tracks}many{Tracks}other{Tracks}}",
   "@tracksPlural": {
     "type": "text",
@@ -85,6 +95,20 @@
   },
   "albumsPlural": "{count,plural, =0{Albums}=1{Album}=2{Albums}few{Albums}many{Albums}other{Albums}}",
   "@albumsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "playlistsPlural": "{count,plural, =0{Playlists}=1{Playlist}=2{Playlists}few{Playlists}many{Playlists}other{Playlists}}",
+  "@playlistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artistsPlural": "{count,plural, =0{Artists}=1{Artist}=2{Artists}few{Artists}many{Artists}other{Artists}}",
+  "@artistsPlural": {
     "type": "text",
     "placeholders": {
       "count": {}
@@ -210,7 +234,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "playbackErrorMessage": "An error occurred during the playback, removing the track",
+  "playbackErrorMessage": "An error occurred during the playback",
   "@playbackErrorMessage": {
     "type": "text",
     "placeholders": {}
@@ -315,6 +339,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "name": "Name",
+  "@name": {
+    "type": "text",
+    "placeholders": {}
+  },
   "dateModified": "Date modified",
   "@dateModified": {
     "type": "text",
@@ -332,6 +361,11 @@
   },
   "numberOfTracks": "Number of tracks",
   "@numberOfTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "numberOfAlbums": "Number of albums",
+  "@numberOfAlbums": {
     "type": "text",
     "placeholders": {}
   },

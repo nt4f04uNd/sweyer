@@ -86,7 +86,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
               padding: const EdgeInsets.only(top: 20.0),
               child: Stack(
                 children: [
-                  const AlbumArt.playerRoute(
+                  const ContentArt.playerRoute(
                     source: null,
                     borderRadius: 0,
                   ),

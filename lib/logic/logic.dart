@@ -3,11 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// This module contains all pure app logic classes 
-/// 
-/// API is not exported as you should use `as API`
+/// This module contains all app logic classes.
 
-export 'channels/channels.dart';
 export 'models/models.dart';
 export 'player/music_player.dart';
 

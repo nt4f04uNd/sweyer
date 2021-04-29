@@ -437,7 +437,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
             resizeToAvoidBottomInset: false,
             extendBodyBehindAppBar: true,
             appBar: PreferredSize(
-              preferredSize: Size.fromHeight(kNFAppBarPreferredSize + bottom.preferredSize.height),
+              preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
               child: SelectionAppBar(
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
@@ -452,6 +452,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
                 ],
                 elevationSelection: 0.0,
                 elevation: theme.appBarTheme.elevation,
+                toolbarHeight: kToolbarHeight,
                 backgroundColor: theme.primaryColor,
                 iconTheme: theme.primaryIconTheme,
                 textTheme: theme.primaryTextTheme,

@@ -82,13 +82,15 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
     ).animate(controller);
     return WillPopScope(
       onWillPop: _handlePop,
-      child: NFPageBase(
-        name: l10n.theme,
-        backButton: IgnorePointer(
-          ignoring: !canPop,
-          child: const NFBackButton(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.theme),
+          leading: IgnorePointer(
+            ignoring: !canPop,
+            child: const NFBackButton(),
+          ),
         ),
-        child: ScrollConfiguration(
+        body: ScrollConfiguration(
           behavior: const GlowlessScrollBehavior(),
           child: AnimatedBuilder(
             animation: controller,

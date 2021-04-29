@@ -52,15 +52,19 @@ V contentPick<T extends Content, V>({
   Type? contentType,
   required V song,
   required V album,
+  required V playlist,
+  required V artist,
   V? fallback,
 }) {
-  // TODO: when i fully migrate to safety, remove this assert and allow passing nulls here
-  assert(song != null && album != null);
   switch (contentType ?? T) {
     case Song:
       return song;
     case Album:
       return album;
+    case Playlist:
+      return playlist;
+    case Artist:
+      return artist;
     case Content:
       if (fallback != null)
         return fallback;
@@ -209,10 +213,17 @@ class _ContentState {
 
   Map<int, Album> albums = {};
 
+  List<Playlist> playlists = [];
+
+  List<Artist> artists = [];
+
   /// This is a map to store ids of duplicated songs in queue.
   /// Its key is always negative, so when a song has negative id, you must
   /// look up for the mapping of its actual id in here.
   Map<String, int> idMap = {};
+
+  /// When true, [idMap] will be saved in the next [setQueue] call.
+  bool idMapDirty = false;
 
   /// Contains various [Sort]s of the application.
   /// Sorts of specific [Queues] like [Album]s are stored separately. // TODO: this is currently not implemented - remove this todo when it will be
@@ -366,7 +377,7 @@ abstract class ContentControl {
     _devMode = ValueNotifier(await Prefs.devModeBool.get());
     if (Permissions.granted) {
       _initializeCompleter = Completer();
-      state.emitContentChange(); // update ui to show "Searching songs screen"
+      state.emitContentChange(); // update ui to show "Searching songs" screen
       await Future.wait([
         state.queues.init(),
         _idMapSerializer.init(),
@@ -431,24 +442,24 @@ abstract class ContentControl {
   //   ]);
   // }
 
-  /// Should be called if played song is duplicated in the current queue.
-  static void handleDuplicate(Song song) {
-    final originalSong = state.allSongs.byId.get(song.sourceId);
-    if (originalSong == null) {
-      removeFromQueue(song);
-      return;
-    }
-    if (identical(originalSong, song))
-      return;
+  //****************** Queue manipulation methods *****************************************************
+
+  /// Should be called whenever song is added to queue.
+  /// Sets [ContentState.idMapDirty] to `true`, so id map will be saved in the next call of [setQueue].
+  static void _handleDuplicate(Song song) {
+    assert(() {
+      final originalSong = state.allSongs.byId.get(song.sourceId);
+      if (identical(originalSong, song)) {
+        throw ArgumentError('Tried to handle duplicate on the original song');
+      }
+      return true;
+    }());
     final map = state.idMap;
     final newId = -(map.length + 1);
-    map[newId.toString()] = originalSong.id;
+    map[newId.toString()] = song.sourceId;
     song.id = newId;
-    state.queues._saveCurrentQueue();
-    _idMapSerializer.save(state.idMap);
+    state.idMapDirty = true;
   }
-
-  //****************** Queue manipulation methods *****************************************************
 
   /// Marks queues modified and traverses it to be unshuffled, preseving the shuffled
   /// queue contents.
@@ -501,10 +512,12 @@ abstract class ContentControl {
     }
     bool contains = true;
     for (int i = 0; i < songs.length; i++) {
-      currentQueue.insert(state.currentSongIndex + i + 1, songs[i]);
+      final song = songs[i].copyWith();
+      _handleDuplicate(song);
+      currentQueue.insert(state.currentSongIndex + i + 1, song);
       if (queues._type == QueueType.persistent && contains) {
         final persistentSongs = queues.persistent!.songs;
-        final index = persistentSongs.indexWhere((el) => el.sourceId == songs[i].sourceId);
+        final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
         contains = index >= 0;
       }
     }
@@ -525,7 +538,9 @@ abstract class ContentControl {
     _unshuffle();
     _setOrigins();
     bool contains = true;
-    for (final song in songs) {
+    for (var song in songs) {
+      song = song.copyWith();
+      _handleDuplicate(song);
       state.queues.current.add(song);
       if (queues._type == QueueType.persistent && contains) {
         final persistentSongs = queues.persistent!.songs;
@@ -554,7 +569,9 @@ abstract class ContentControl {
     final currentQueue = state.queues.current;
     final currentIndex = state.currentSongIndex;
     int i = 0;
-    for (final song in songs) {
+    for (var song in songs) {
+      song = song.copyWith();
+      _handleDuplicate(song);
       song.origin = queue;
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
@@ -577,7 +594,9 @@ abstract class ContentControl {
     // Save queue order
     _unshuffle();
     _setOrigins();
-    for (final song in songs) {
+    for (var song in songs) {
+      song = song.copyWith();
+      _handleDuplicate(song);
       song.origin = queue;
       state.queues.current.add(song);
     }
@@ -588,7 +607,11 @@ abstract class ContentControl {
   static void insertToQueue(int index, Song song) {
     // Save queue order
     _unshuffle();
+    _setOrigins();
     final queues = state.queues;
+    song = song.copyWith();
+    _handleDuplicate(song);
+    queues.current.insert(index, song);
     bool contains = true;
     if (queues._type == QueueType.persistent) {
       final persistentSongs = queues.persistent!.songs;
@@ -868,6 +891,10 @@ abstract class ContentControl {
         type != QueueType.arbitrary) {
       state.idMap.clear();
       _idMapSerializer.save(state.idMap);
+    } else if (state.idMapDirty) {
+      state.idMapDirty = false;
+      _idMapSerializer.save(state.idMap);
+      print(state.idMap);
     }
 
     if (emitChangeEvent) {
@@ -919,6 +946,8 @@ abstract class ContentControl {
       contentType: contentType,
       song: () => state.allSongs.songs as List<T>,
       album: () => state.albums.values.toList() as List<T>,
+      playlist: () => state.playlists as List<T>,
+      artist: () => state.artists as List<T>,
     )();
   }
 
@@ -942,6 +971,8 @@ abstract class ContentControl {
     bool updateQueues = true,
     bool emitChangeEvent = true,
   }) async {
+    if (disposed)
+      return;
     await contentPick<T, AsyncCallback>(
       contentType: contentType,
       song: () async {
@@ -956,13 +987,23 @@ abstract class ContentControl {
         }
       },
       album: () async {
-        if (disposed)
-          return;
         state.albums = await ContentChannel.retrieveAlbums();
         if (disposed)
           return;
         sort<Album>(emitChangeEvent: false);
-      }
+      },
+      playlist: () async {
+        state.playlists = await ContentChannel.retrievePlaylists();
+        if (disposed)
+          return;
+        sort<Playlist>(emitChangeEvent: false);
+      },
+      artist: () async {
+        state.artists = await ContentChannel.retrieveArtists();
+        if (disposed)
+          return;
+        sort<Artist>(emitChangeEvent: false);
+      },
     )();
     if (emitChangeEvent) {
       stateNullable?.emitContentChange();
@@ -976,16 +1017,18 @@ abstract class ContentControl {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
     final words = query.split(' ');
+
     // TODO: add filter by year, and perhaps make a whole filter system, so it would be easy to filter by any parameter
     // this should be some option in the UI like "Search by year",
     // i disabled it because it filtered out searches like "28 days later soundtrack".
     //
     // final year = int.tryParse(words[0]);
+
     const year = null;
     /// Splits string by spaces, or dashes, or bar, or paranthesis
     final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
     final l10n = staticl10n;
-    /// Checks whether a [string] is abbreviation.
+    /// Checks whether a [string] is abbreviation for the [query].
     /// For example: "big baby tape - bbt"
     bool isAbbreviation(String string) {
       return string.toLowerCase()
@@ -999,41 +1042,51 @@ abstract class ContentControl {
       song: () {
         return state.allSongs.songs.where((song) {
           // Exact query search
-          bool fullQuery;
           final wordsTest = words.map<bool>((word) =>
             song.title.toLowerCase().contains(word) ||
             formatArtist(song.artist, l10n).toLowerCase().contains(word) ||
             song.album.toLowerCase().contains(word)
           ).toList();
-          // Exclude the year from query word tests
-          if (year != null) {
-            wordsTest.removeAt(0);
-          }
-          fullQuery = wordsTest.every((e) => e);
+          final fullQuery = wordsTest.every((e) => e);
+          // Abbreviation search
           final abbreviation = isAbbreviation(song.title);
-          // Filter by year
-          if (year != null && year != song.getAlbum().year)
-            return false;
           return fullQuery || abbreviation;
         }).cast<T>();
       },
       album: () {
         return state.albums.values.where((album) {
           // Exact query search
-          bool fullQuery;
           final wordsTest = words.map<bool>((word) =>
             formatArtist(album.artist, l10n).toLowerCase().contains(word) ||
             album.album.toLowerCase().contains(word),
           ).toList();
-          // Exclude the year from query word tests
-          if (year != null) {
-            wordsTest.removeAt(0);
-          }
-          fullQuery = wordsTest.every((e) => e);
+          final fullQuery = wordsTest.every((e) => e);
+          // Abbreviation search
           final abbreviation = isAbbreviation(album.album);
-          // Filter by year
-          if (year != null && year != album.year)
-            return false;
+          return fullQuery || abbreviation;
+        }).cast<T>();
+      },
+      playlist: () {
+        return state.playlists.where((playlist) {
+          // Exact query search
+          final wordsTest = words.map<bool>((word) =>
+            playlist.name.toLowerCase().contains(word),
+          ).toList();
+          final fullQuery = wordsTest.every((e) => e);
+          // Abbreviation search
+          final abbreviation = isAbbreviation(playlist.name);
+          return fullQuery || abbreviation;
+        }).cast<T>();
+      },
+      artist: () {
+        return state.artists.where((artist) {
+          // Exact query search
+          final wordsTest = words.map<bool>((word) =>
+            artist.artist.toLowerCase().contains(word),
+          ).toList();
+          final fullQuery = wordsTest.every((e) => e);
+          // Abbreviation search
+          final abbreviation = isAbbreviation(artist.artist);
           return fullQuery || abbreviation;
         }).cast<T>();
       },
@@ -1050,20 +1103,34 @@ abstract class ContentControl {
       song: () {
         final _sort = sort! as SongSort;
         sorts.setValue<Song>(_sort);
-        Prefs.songSortString.set(jsonEncode(sort.toJson()));
+        Prefs.songSortString.set(jsonEncode(sort.toMap()));
         final comparator = _sort.comparator;
         state.allSongs.songs.sort(comparator);
       },
       album: () {
         final _sort = sort! as AlbumSort;
         sorts.setValue<Album>(_sort);
-        Prefs.albumSortString.set(jsonEncode(_sort.toJson()));
+        Prefs.albumSortString.set(jsonEncode(_sort.toMap()));
         final comparator = _sort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()
           ..sort((a, b) {
             return comparator(a.value, b.value);
           }));
-      }
+      },
+      playlist: () {
+        final _sort = sort! as PlaylistSort;
+        sorts.setValue<Playlist>(_sort);
+        Prefs.playlistSortString.set(jsonEncode(sort.toMap()));
+        final comparator = _sort.comparator;
+        state.playlists.sort(comparator);
+      },
+      artist: () {
+        final _sort = sort! as ArtistSort;
+        sorts.setValue<Artist>(_sort);
+        Prefs.artistSortString.set(jsonEncode(sort.toMap()));
+        final comparator = _sort.comparator;
+        state.artists.sort(comparator);
+      },
     )();
     // Emit event to track change stream
     if (emitChangeEvent) {
@@ -1077,7 +1144,7 @@ abstract class ContentControl {
   static Future<void> deleteSongs(Set<int> idSet) async {
     final Set<Song> songsSet = {};
     // On Android R the deletion is performed with OS dialog.
-    if (_sdkInt >= 30) {
+    if (sdkInt >= 30) {
       for (final id in idSet) {
         final song = state.allSongs.byId.get(id);
         if (song != null) {
@@ -1120,8 +1187,10 @@ abstract class ContentControl {
   /// Restores [sorts] from [Prefs].
   static Future<void> _restoreSorts() async {
     state.sorts._map = {
-      Song: SongSort.fromJson(jsonDecode(await Prefs.songSortString.get())),
-      Album: AlbumSort.fromJson(jsonDecode(await Prefs.albumSortString.get())),
+      Song: SongSort.fromMap(jsonDecode(await Prefs.songSortString.get())),
+      Album: AlbumSort.fromMap(jsonDecode(await Prefs.albumSortString.get())),
+      Playlist: PlaylistSort.fromMap(jsonDecode(await Prefs.playlistSortString.get())),
+      Artist: ArtistSort.fromMap(jsonDecode(await Prefs.artistSortString.get())),
     };
   }
 

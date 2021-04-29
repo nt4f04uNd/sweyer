@@ -113,7 +113,7 @@ class _DrawerWidgetContent extends StatefulWidget {
 
 class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   /// Status bar height on my phone.
-static const _baseTopPadding = 24.0;
+  static const _baseTopPadding = 24.0;
   double elevation = 0.0;
 
   @override

@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:sweyer/sweyer.dart';
+import 'package:equatable/equatable.dart';
 
 /// Represents some content in the app (songs, album, etc).
 ///
@@ -11,7 +12,9 @@ import 'package:sweyer/sweyer.dart';
 ///
 /// See also:
 /// * [ContentType], a list of all content types.
-abstract class Content {
+abstract class Content with EquatableMixin {
+  const Content();
+
   /// A unique ID of the content.
   int get id;
 

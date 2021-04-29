@@ -155,6 +155,14 @@ class AppLocalizations {
     return albumsPlural(1);
   }
 
+  String get playlist {
+    return playlistsPlural(1);
+  }
+
+  String get artist {
+    return artistsPlural(1);
+  }
+
   String get tracks {
     return Intl.message(
       'Tracks',
@@ -166,6 +174,20 @@ class AppLocalizations {
     return Intl.message(
       'Albums',
       name: 'albums',
+    );
+  }
+
+  String get playlists {
+    return Intl.message(
+      'Playlists',
+      name: 'playlists',
+    );
+  }
+
+  String get artists {
+    return Intl.message(
+      'Artists',
+      name: 'artists',
     );
   }
 
@@ -197,17 +219,38 @@ class AppLocalizations {
     );
   }
 
+  String playlistsPlural(int count) {
+    return Intl.plural(
+      count,
+      zero: 'Playlists',
+      one: 'Playlist',
+      two: 'Playlists',
+      few: 'Playlists',
+      many: 'Playlists',
+      other: 'Playlists',
+      args: [count],
+      name: 'playlistsPlural',
+    );
+  }
+
+  String artistsPlural(int count) {
+    return Intl.plural(
+      count,
+      zero: 'Artists',
+      one: 'Artist',
+      two: 'Artists',
+      few: 'Artists',
+      many: 'Artists',
+      other: 'Artists',
+      args: [count],
+      name: 'artistsPlural',
+    );
+  }
+
   String get allTracks {
     return Intl.message(
       "All tracks",
       name: 'allTracks',
-    );
-  }
-
-  String get playlist {
-    return Intl.message(
-      "Playlist",
-      name: 'playlist',
     );
   }
 
@@ -384,7 +427,7 @@ class AppLocalizations {
 
   String get playbackErrorMessage {
     return Intl.message(
-      'An error occurred during the playback, removing the track',
+      'An error occurred during the playback',
       name: 'playbackErrorMessage',
     );
   }
@@ -514,18 +557,18 @@ class AppLocalizations {
       name: 'sort',
     );
   }
-
-  String get artist {
-    return Intl.message(
-      'Artist',
-      name: 'artist',
-    );
-  }
-
+  
   String get title {
     return Intl.message(
       'Title',
       name: 'title',
+    );
+  }
+
+  String get name {
+    return Intl.message(
+      'Name',
+      name: 'name',
     );
   }
 
@@ -557,6 +600,13 @@ class AppLocalizations {
     );
   }
 
+  String get numberOfAlbums {
+    return Intl.message(
+      'Number of albums',
+      name: 'numberOfAlbums',
+    );
+  }
+
   /// Picks a string of a [Content] in plural form.
   /// For example "tracks".
   String contents<T extends Content>([Type contentType]) {
@@ -564,6 +614,8 @@ class AppLocalizations {
       contentType: contentType,
       song: () => tracks,
       album: () => albums,
+      playlist: () => playlist,
+      artist: () => artist,
     )();
   }
 
@@ -599,10 +651,34 @@ class AppLocalizations {
             throw UnimplementedError();
         }
       },
+      playlist: () {
+        switch (feature as PlaylistSortFeature) {
+          case PlaylistSortFeature.dateModified:
+            return dateModified;
+          case PlaylistSortFeature.dateAdded:
+            return artist;
+          case PlaylistSortFeature.name:
+            return title;
+          default:
+            throw UnimplementedError();
+        }
+      },
+      artist: () {
+        switch (feature as ArtistSortFeature) {
+          case ArtistSortFeature.name:
+            return name;
+          case ArtistSortFeature.numberOfAlbums:
+            return numberOfAlbums;
+          case ArtistSortFeature.numberOfTracks:
+            return numberOfTracks;
+          default:
+            throw UnimplementedError();
+        }
+      },
     )();
   }
 
-  //****************** Prompts ******************
+  //* Prompts ******************
   // Specific section for prompts localizations that are not concretely tied with some route
   /// The description is being splitted into rich text there.
   String get deletionPromptDescriptionP1 {
@@ -619,7 +695,7 @@ class AppLocalizations {
     );
   }
 
-  //****************** Dev route ******************
+  //* Dev route ******************
   String get devModeGreet {
     return Intl.message(
       'Done! You are now a developer',
@@ -694,7 +770,7 @@ class AppLocalizations {
     );
   }
 
-  //****************** Settings routes (extended is also included) ******************
+  //* Settings routes ******************
 
   String get settings {
     return Intl.message(

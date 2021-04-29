@@ -456,19 +456,15 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final Widget page;
     if (widget.scrollController == null) {
       page = Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-          child: AppBar(
-            elevation: 2.0,
-            leading: NFBackButton(
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            titleSpacing: 0.0,
-            title: _PackageLicensePageTitle(
-              title,
-              subtitle,
-              theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
-            ),
+        appBar: AppBar(
+          leading: NFBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: _PackageLicensePageTitle(
+            title: title,
+            subtitle: subtitle,
+            titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(fontSize: 20.0),
+            subtitleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(fontSize: 15.0),
           ),
         ),
         body: Center(
@@ -484,25 +480,23 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       page = CustomScrollView(
         controller: widget.scrollController,
         slivers: <Widget>[
-          PreferredSize(
-            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-            child: SliverAppBar(
-              automaticallyImplyLeading: false,
-              titleSpacing: 0.0,
-              pinned: true,
-              backgroundColor: theme.colorScheme.secondary,
-              title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            titleSpacing: 0.0,
+            pinned: true,
+            backgroundColor: theme.colorScheme.secondary,
+            title: _PackageLicensePageTitle(
+              title: title,
+              subtitle: subtitle,
+              titleTextStyle: theme.textTheme.headline6,
+              subtitleTextStyle: theme.textTheme.subtitle2,
             ),
           ),
           SliverPadding(
             padding: padding,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Localizations.override(
-                  locale: const Locale('en', 'US'),
-                  context: context,
-                  child: listWidgets[index],
-                ),
+                (BuildContext context, int index) => listWidgets[index],
                 childCount: listWidgets.length,
               ),
             ),
@@ -518,16 +512,18 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
 }
 
 class _PackageLicensePageTitle extends StatelessWidget {
-  const _PackageLicensePageTitle(
-    this.title,
-    this.subtitle,
-    this.theme, {
+  const _PackageLicensePageTitle({
     Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.titleTextStyle,
+    required this.subtitleTextStyle,
   }) : super(key: key);
 
   final String title;
   final String subtitle;
-  final TextTheme theme;
+  final TextStyle? titleTextStyle;
+  final TextStyle? subtitleTextStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -537,11 +533,8 @@ class _PackageLicensePageTitle extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(title, style: theme.headline6),
-          Text(
-            subtitle,
-            style: theme.subtitle2 ?? const TextStyle(fontSize: 15.0),
-          ),
+          Text(title, style: titleTextStyle),
+          Text(subtitle, style: subtitleTextStyle),
         ],
       ),
     );
@@ -984,20 +977,15 @@ class _MasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-        child: AppBar(
-          elevation: 2.0,
-          titleSpacing: 0.0,
-          title: title,
-          leading: leading,
-          actions: actionBuilder == null
-              ? const <Widget>[]
-              : actionBuilder!(context, _ActionLevel.composite),
-          centerTitle: centerTitle,
-          flexibleSpace: flexibleSpace,
-          automaticallyImplyLeading: automaticallyImplyLeading,
-        ),
+      appBar: AppBar(
+        title: title,
+        leading: leading,
+        actions: actionBuilder == null
+            ? const <Widget>[]
+            : actionBuilder!(context, _ActionLevel.composite),
+        centerTitle: centerTitle,
+        flexibleSpace: flexibleSpace,
+        automaticallyImplyLeading: automaticallyImplyLeading,
       ),
       body: masterViewBuilder!(context, false),
       floatingActionButton: floatingActionButton,
@@ -1102,36 +1090,33 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           floatingActionButtonLocation: floatingActionButtonLocation,
           body: _masterPanel(context),
           floatingActionButton: widget.floatingActionButton,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-            child: AppBar(
-              titleSpacing: 0.0,
-              elevation: 2.0,
-              title: widget.title,
-              actions: widget.actionBuilder!(context, _ActionLevel.top),
-              leading: widget.leading,
-              automaticallyImplyLeading: widget.automaticallyImplyLeading,
-              centerTitle: widget.centerTitle,
-              // bottom: PreferredSize(
-              //   preferredSize: const Size.fromHeight(kToolbarHeight),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.start,
-              //     children: <Widget>[
-              //       ConstrainedBox(
-              //         constraints:
-              //             BoxConstraints.tightFor(width: masterViewWidth),
-              //         child: IconTheme(
-              //           data: Theme.of(context).primaryIconTheme,
-              //           child: ButtonBar(
-              //             children:
-              //                 widget.actionBuilder!(context, _ActionLevel.view),
-              //           ),
-              //         ),
-              //       )
-              //     ],
-              //   ),
-              // ),
-            ),
+          appBar: AppBar(
+            titleSpacing: 0.0,
+            elevation: 2.0,
+            title: widget.title,
+            actions: widget.actionBuilder!(context, _ActionLevel.top),
+            leading: widget.leading,
+            automaticallyImplyLeading: widget.automaticallyImplyLeading,
+            centerTitle: widget.centerTitle,
+            // bottom: PreferredSize(
+            //   preferredSize: const Size.fromHeight(kToolbarHeight),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.start,
+            //     children: <Widget>[
+            //       ConstrainedBox(
+            //         constraints:
+            //             BoxConstraints.tightFor(width: masterViewWidth),
+            //         child: IconTheme(
+            //           data: Theme.of(context).primaryIconTheme,
+            //           child: ButtonBar(
+            //             children:
+            //                 widget.actionBuilder!(context, _ActionLevel.view),
+            //           ),
+            //         ),
+            //       )
+            //     ],
+            //   ),
+            // ),
           ),
         ),
         // Detail view stacked above main scaffold and master view.
@@ -1192,17 +1177,14 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           ? Scaffold(
               backgroundColor: Colors.red,
               body: widget.masterViewBuilder(context, true),
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-                child: AppBar(
-                  titleSpacing: 0.0,
-                  elevation: 2.0,
-                  title: widget.title,
-                  actions: widget.actionBuilder!(context, _ActionLevel.top),
-                  leading: widget.leading,
-                  automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                  centerTitle: widget.centerTitle,
-                ),
+              appBar: AppBar(
+                titleSpacing: 0.0,
+                elevation: 2.0,
+                title: widget.title,
+                actions: widget.actionBuilder!(context, _ActionLevel.top),
+                leading: widget.leading,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                centerTitle: widget.centerTitle,
               ),
             )
           : widget.masterViewBuilder(context, true),

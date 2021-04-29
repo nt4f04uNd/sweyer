@@ -4,26 +4,30 @@ homepage: https://github.com/nt4f04uNd/sweyer
 repository: https://github.com/nt4f04uNd/sweyer
 issue_tracker: https://github.com/nt4f04uNd/sweyer/issues
 publish_to: none
-version: 1.0.3+5
+version: 1.0.4+6
  
 environment:
   sdk: ">=2.6.0<3.0.0"
   flutter: 2.2.0-11.0.pre.158 # https://github.com/nt4f04uNd/flutter/tree/sweyer
 
 dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   # color_thief_flutter: ^1.0.2
   uuid: ^3.0.4
   async: ^2.5.0
   rxdart: ^0.26.0
   sliver_tools: ^0.2.1
   animations: ^2.0.0
-  permission_handler: ^6.1.1
+  permission_handler: ^7.0.0
   shared_preferences: ^2.0.5
   path_provider: ^2.0.1
   percent_indicator: ^3.0.1
   firebase_core: ^1.0.3
-  firebase_crashlytics: ^2.0.0
-  firebase_analytics: ^8.0.0
+  firebase_crashlytics: ^2.0.1
+  firebase_analytics: ^8.0.1
   package_info: ^2.0.0
   url_launcher: ^6.0.3
   flare_flutter: ^2.0.6 # TODO: update to 3.0.0 when https://github.com/2d-inc/Flare-Flutter/issues/301 is resolved
@@ -65,7 +69,7 @@ dependencies:
 
     git:
       url: https://github.com/nt4f04uNd/audio_service/
-      ref: 67944252c2484272562078b3168fa30f4a6f6505 # sweyer
+      ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d # sweyer
       path: audio_service
 
     # git: 
@@ -73,36 +77,20 @@ dependencies:
     #   ref: one-isolate
     #   path: audio_service
   nt4f04unds_widgets:
-    # path: c:/dev/projects/native/nt4f04unds_widgets/
+    path: c:/dev/projects/native/nt4f04unds_widgets/
 
-    git:
-      url: https://github.com/nt4f04uNd/nt4f04unds_widgets/
-      ref: 1.1.3
-
-dependency_overrides:
-  analyzer: ^1.0.0
-  petitparser: ^4.0.0
-  crypto: ^3.0.0
-  audio_session:
-    ^0.1.0
-    # git: 
-    #   url: https://github.com/ryanheise/audio_session.git
-    #   ref: master
-
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
+    # git:
+    #   url: https://github.com/nt4f04uNd/nt4f04unds_widgets/
+    #   ref: 1.1.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^1.7.2
   # intl_translation: ^0.17.10+1
   intl_translation:
     git:
       url: https://github.com/nt4f04uNd/intl_translation
-      ref: 198ba30710a7aeba94813389dac47c9092d11e6c
+      ref: 01600ef565707e59dd24f99590b7da1edb6f9ca4
 
 flutter:
   uses-material-design: true

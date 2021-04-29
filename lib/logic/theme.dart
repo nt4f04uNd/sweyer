@@ -78,7 +78,7 @@ abstract class ThemeControl {
       statusBarIconBrightness: Brightness.light,
     ));
     await Future.delayed(const Duration(milliseconds: 500));
-    if (SystemUiStyleController.lastUi.systemNavigationBarColor != Colors.black) {
+    if (SystemUiStyleController.lastUi.systemNavigationBarColor != Constants.UiTheme.black.auto.systemNavigationBarColor) {
       final ui = Constants.UiTheme.grey.auto;
       await SystemUiStyleController.animateSystemUiOverlay(
         to: ui,

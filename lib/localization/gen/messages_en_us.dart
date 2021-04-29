@@ -21,9 +21,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m0(count) => "${Intl.plural(count, zero: 'Albums', one: 'Album', two: 'Albums', few: 'Albums', many: 'Albums', other: 'Albums')}";
 
-  static m1(remainingClicks) => "only ${remainingClicks} clicks remaining...";
+  static m1(count) => "${Intl.plural(count, zero: 'Artists', one: 'Artist', two: 'Artists', few: 'Artists', many: 'Artists', other: 'Artists')}";
 
-  static m2(count) => "${Intl.plural(count, zero: 'Tracks', one: 'Track', two: 'Tracks', few: 'Tracks', many: 'Tracks', other: 'Tracks')}";
+  static m2(remainingClicks) => "only ${remainingClicks} clicks remaining...";
+
+  static m3(count) => "${Intl.plural(count, zero: 'Playlists', one: 'Playlist', two: 'Playlists', few: 'Playlists', many: 'Playlists', other: 'Playlists')}";
+
+  static m4(count) => "${Intl.plural(count, zero: 'Tracks', one: 'Track', two: 'Tracks', few: 'Tracks', many: 'Tracks', other: 'Tracks')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -38,8 +42,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "almostThere" : MessageLookupByLibrary.simpleMessage("You\'re almost there"),
     "arbitraryQueue" : MessageLookupByLibrary.simpleMessage("Arbitrary queue"),
     "areYouSure" : MessageLookupByLibrary.simpleMessage("Are you sure?"),
-    "artist" : MessageLookupByLibrary.simpleMessage("Artist"),
     "artistUnknown" : MessageLookupByLibrary.simpleMessage("Unknown artist"),
+    "artists" : MessageLookupByLibrary.simpleMessage("Artists"),
+    "artistsPlural" : m1,
     "byQuery" : MessageLookupByLibrary.simpleMessage("By query"),
     "dateAdded" : MessageLookupByLibrary.simpleMessage("Date added"),
     "dateModified" : MessageLookupByLibrary.simpleMessage("Date modified"),
@@ -67,11 +72,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "loopOn" : MessageLookupByLibrary.simpleMessage("Loop on"),
     "minutesShorthand" : MessageLookupByLibrary.simpleMessage("min"),
     "modified" : MessageLookupByLibrary.simpleMessage("Modified"),
+    "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "next" : MessageLookupByLibrary.simpleMessage("Next"),
     "noMusic" : MessageLookupByLibrary.simpleMessage("There\'s no music on your device"),
+    "numberOfAlbums" : MessageLookupByLibrary.simpleMessage("Number of albums"),
     "numberOfTracks" : MessageLookupByLibrary.simpleMessage("Number of tracks"),
     "onThePathToDevMode" : MessageLookupByLibrary.simpleMessage("Something should happen now..."),
-    "onThePathToDevModeClicksRemaining" : m1,
+    "onThePathToDevModeClicksRemaining" : m2,
     "onThePathToDevModeLastClick" : MessageLookupByLibrary.simpleMessage("only 1 click remaining..."),
     "openAppSettingsError" : MessageLookupByLibrary.simpleMessage("Error opening the app settings"),
     "pause" : MessageLookupByLibrary.simpleMessage("Pause"),
@@ -81,8 +88,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "playRecent" : MessageLookupByLibrary.simpleMessage("Play recent"),
     "playback" : MessageLookupByLibrary.simpleMessage("Playback"),
     "playbackControls" : MessageLookupByLibrary.simpleMessage("Playback controls"),
-    "playbackErrorMessage" : MessageLookupByLibrary.simpleMessage("An error occurred during the playback, removing the track"),
-    "playlist" : MessageLookupByLibrary.simpleMessage("Playlist"),
+    "playbackErrorMessage" : MessageLookupByLibrary.simpleMessage("An error occurred during the playback"),
+    "playlists" : MessageLookupByLibrary.simpleMessage("Playlists"),
+    "playlistsPlural" : m3,
     "pressOnceAgainToExit" : MessageLookupByLibrary.simpleMessage("Press once again to exit"),
     "previous" : MessageLookupByLibrary.simpleMessage("Previous"),
     "quitDevMode" : MessageLookupByLibrary.simpleMessage("Quit the developer mode"),
@@ -111,7 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "theme" : MessageLookupByLibrary.simpleMessage("Theme"),
     "title" : MessageLookupByLibrary.simpleMessage("Title"),
     "tracks" : MessageLookupByLibrary.simpleMessage("Tracks"),
-    "tracksPlural" : m2,
+    "tracksPlural" : m4,
     "unknownRoute" : MessageLookupByLibrary.simpleMessage("Unknown route!"),
     "upNext" : MessageLookupByLibrary.simpleMessage("Up next"),
     "year" : MessageLookupByLibrary.simpleMessage("Year")

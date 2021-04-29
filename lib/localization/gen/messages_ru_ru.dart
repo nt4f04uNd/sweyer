@@ -21,9 +21,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m0(count) => "${Intl.plural(count, zero: 'Альбомов', one: 'Альбом', two: 'Альбома', few: 'Альбома', many: 'Альбомов', other: 'Альбома')}";
 
-  static m1(remainingClicks) => "осталось всего ${remainingClicks} клика...";
+  static m1(count) => "${Intl.plural(count, zero: 'Исполнителей', one: 'Исполнитель', two: 'Исполнителя', few: 'Исполнителя', many: 'Исполнителей', other: 'Исполнителя')}";
 
-  static m2(count) => "${Intl.plural(count, zero: 'Треков', one: 'Трек', two: 'Трека', few: 'Трека', many: 'Треков', other: 'Трека')}";
+  static m2(remainingClicks) => "осталось всего ${remainingClicks} клика...";
+
+  static m3(count) => "${Intl.plural(count, zero: 'Плейлистов', one: 'Плейлист', two: 'Плейлиста', few: 'Плейлиста', many: 'Плейлистов', other: 'Плейлиста')}";
+
+  static m4(count) => "${Intl.plural(count, zero: 'Треков', one: 'Трек', two: 'Трека', few: 'Трека', many: 'Треков', other: 'Трека')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -38,8 +42,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "almostThere" : MessageLookupByLibrary.simpleMessage("Вы почти у цели"),
     "arbitraryQueue" : MessageLookupByLibrary.simpleMessage("Произвольная очередь"),
     "areYouSure" : MessageLookupByLibrary.simpleMessage("Вы уверены?"),
-    "artist" : MessageLookupByLibrary.simpleMessage("Исполнитель"),
     "artistUnknown" : MessageLookupByLibrary.simpleMessage("Неизвестный исполнитель"),
+    "artists" : MessageLookupByLibrary.simpleMessage("Исполнители"),
+    "artistsPlural" : m1,
     "byQuery" : MessageLookupByLibrary.simpleMessage("По запросу"),
     "dateAdded" : MessageLookupByLibrary.simpleMessage("Дата добавления"),
     "dateModified" : MessageLookupByLibrary.simpleMessage("Дата изменения"),
@@ -67,11 +72,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "loopOn" : MessageLookupByLibrary.simpleMessage("Повторять этот трек"),
     "minutesShorthand" : MessageLookupByLibrary.simpleMessage("мин"),
     "modified" : MessageLookupByLibrary.simpleMessage("Изменено"),
+    "name" : MessageLookupByLibrary.simpleMessage("Имя"),
     "next" : MessageLookupByLibrary.simpleMessage("Далее"),
     "noMusic" : MessageLookupByLibrary.simpleMessage("На вашем устройстве нету музыки"),
+    "numberOfAlbums" : MessageLookupByLibrary.simpleMessage("Количество альбомов"),
     "numberOfTracks" : MessageLookupByLibrary.simpleMessage("Количество треков"),
     "onThePathToDevMode" : MessageLookupByLibrary.simpleMessage("Сейчас должно что-то произойти..."),
-    "onThePathToDevModeClicksRemaining" : m1,
+    "onThePathToDevModeClicksRemaining" : m2,
     "onThePathToDevModeLastClick" : MessageLookupByLibrary.simpleMessage("остался всего 1 клик..."),
     "openAppSettingsError" : MessageLookupByLibrary.simpleMessage("Произошла ошибка при открытии настроек приложения"),
     "pause" : MessageLookupByLibrary.simpleMessage("Пауза"),
@@ -81,8 +88,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "playRecent" : MessageLookupByLibrary.simpleMessage("Играть текущую очередь"),
     "playback" : MessageLookupByLibrary.simpleMessage("Воспроизведение"),
     "playbackControls" : MessageLookupByLibrary.simpleMessage("Управление воспроизвединем"),
-    "playbackErrorMessage" : MessageLookupByLibrary.simpleMessage("Произошла ошибка при воспроизведении, удаление трека"),
-    "playlist" : MessageLookupByLibrary.simpleMessage("Плейлист"),
+    "playbackErrorMessage" : MessageLookupByLibrary.simpleMessage("Произошла ошибка при воспроизведении"),
+    "playlists" : MessageLookupByLibrary.simpleMessage("Плейлисты"),
+    "playlistsPlural" : m3,
     "pressOnceAgainToExit" : MessageLookupByLibrary.simpleMessage("Нажмите еще раз для выхода"),
     "previous" : MessageLookupByLibrary.simpleMessage("Назад"),
     "quitDevMode" : MessageLookupByLibrary.simpleMessage("Выйти из режима разработчика"),
@@ -111,7 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "theme" : MessageLookupByLibrary.simpleMessage("Тема"),
     "title" : MessageLookupByLibrary.simpleMessage("Название"),
     "tracks" : MessageLookupByLibrary.simpleMessage("Треки"),
-    "tracksPlural" : m2,
+    "tracksPlural" : m4,
     "unknownRoute" : MessageLookupByLibrary.simpleMessage("Неизвестная страница!"),
     "upNext" : MessageLookupByLibrary.simpleMessage("Далее"),
     "year" : MessageLookupByLibrary.simpleMessage("Год")

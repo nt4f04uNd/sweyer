@@ -44,8 +44,8 @@ class SongNumber extends StatelessWidget {
         ),
       );
     } else if (number != null && number > 0 && number < 999) {
-      // since this class won't be used for playlsits, but only for albums
-      // i limit the number to be from 0 to 999, in other cases consider it invalid/unsassigned and show a dot
+      // Since this class won't be used for playlsits, but only for albums,
+      // I limit the number to be from 0 to 999, in other cases consider it invalid/unsassigned and show a dot
       child = Text(
         number.toString(),
         style: const TextStyle(
@@ -204,12 +204,8 @@ class _SongTileState extends SelectableState<SongTile> {
   Widget build(BuildContext context) {
     Widget albumArt;
     if (showAlbumArt) {
-      albumArt = AlbumArt.songTile(
-        source: AlbumArtSource(
-          path: widget.song.albumArt,
-          contentUri: widget.song.contentUri,
-          albumId: widget.song.albumId,
-        ),
+      albumArt = ContentArt.songTile(
+        source: ContentArtSource.song(widget.song),
         current: current,
       );
     } else {

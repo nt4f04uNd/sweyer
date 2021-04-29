@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+export 'content_channel.dart';
 export 'content.dart';
 export 'queue.dart';
 export 'serialization.dart';
@@ -294,9 +295,9 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> seek(Duration position) {
+  Future<void> seek(Duration position) async {
+    await player.seek(position);
     _setState();
-    return player.seek(position);
   }
 
   @override
@@ -665,15 +666,10 @@ class MusicPlayer extends AudioPlayer {
   }
 
   /// Prepare the [song] to be played.
-  Future<void> setSong(Song song, { bool fromBeginning = false, bool duplicate }) async {
+  Future<void> setSong(Song song, { bool fromBeginning = false}) async {
     song ??= ContentControl.state.allSongs.songs[0];
     ContentControl.state.changeSong(song);
     try {
-      final _duplicate = duplicate ?? _hasDuplicates(song);
-      if (_duplicate && duplicate == null) {
-        ContentControl.handleDuplicate(song);
-      }
-
       await setAudioSource(
         ProgressiveAudioSource(Uri.parse(song.contentUri)),
         initialPosition: fromBeginning ? const Duration() : null,
@@ -752,17 +748,12 @@ class MusicPlayer extends AudioPlayer {
     Song clickedSong, {
     SongClickBehavior behavior = SongClickBehavior.play,
   }) async {
-    final hasDuplicates = _hasDuplicates(clickedSong);
-    if (hasDuplicates) {
-      ContentControl.handleDuplicate(clickedSong);
-    }
-    final isSame = clickedSong == ContentControl.state.currentSong;
     if (behavior == SongClickBehavior.play) {
       playerRouteController.open();
-      await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
+      await setSong(clickedSong, fromBeginning: true);
       await play();
     } else {
-      if (isSame) {
+      if (clickedSong == ContentControl.state.currentSong) {
         if (!playing) {
           playerRouteController.open();
           await play();
@@ -771,7 +762,7 @@ class MusicPlayer extends AudioPlayer {
         }
       } else {
         playerRouteController.open();
-        await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
+        await setSong(clickedSong, fromBeginning: true);
         await play();
       }
     }
