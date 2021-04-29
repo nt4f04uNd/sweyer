@@ -14,7 +14,7 @@ import 'package:sweyer/constants.dart' as Constants;
 
 class Seekbar extends StatefulWidget {
   const Seekbar({
-    Key key,
+    Key? key,
     this.color,
     this.player,
     this.duration,
@@ -23,13 +23,13 @@ class Seekbar extends StatefulWidget {
   /// Color of the actove slider part.
   /// 
   /// If non specified [ColorScheme.primary] color will be used.
-  final Color color;
+  final Color? color;
 
   /// Player to use instead of [MusicPlayer], which is used by default.
-  final AudioPlayer player;
+  final AudioPlayer? player;
 
   /// Predefined duration to use.
-  final Duration duration;
+  final Duration? duration;
 
   @override
   _SeekbarState createState() => _SeekbarState();
@@ -43,23 +43,26 @@ class _SeekbarState extends State<Seekbar> {
   double _value = 0.0;
 
   /// Value to perform drag.
-  double _localValue;
+  late double _localValue;
 
   /// Is user dragging slider right now.
   bool _isDragging = false;
 
   /// Value to work with.
-  double get workingValue => _isDragging ? _localValue : _value;
+  double? get workingValue => _isDragging ? _localValue : _value;
 
-  StreamSubscription<Duration> _positionSubscription;
-  StreamSubscription<Song> _songChangeSubscription;
+  late StreamSubscription<Duration> _positionSubscription;
+  StreamSubscription<Song>? _songChangeSubscription;
 
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
 
   @override
   void initState() {
     super.initState();
-    _duration = widget.duration ?? player.duration;
+    final duration = widget.duration ?? player.duration;
+    if (duration != null) {
+      _duration = duration;
+    }
     _value = _positionToValue(player.position);
     // Handle track position movement
     _positionSubscription = player.positionStream.listen((position) {
@@ -137,11 +140,11 @@ class _SeekbarState extends State<Seekbar> {
             width: 36.0 * scaleFactor,
             transform: Matrix4.translationValues(5.0, 0.0, 0.0),
             child: Text(
-              formatDuration(_duration * workingValue),
+              formatDuration(_duration * workingValue!),
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6.color,
+                color: ThemeControl.theme.textTheme.headline6!.color,
               ),
             ),
           ),
@@ -173,7 +176,7 @@ class _SeekbarState extends State<Seekbar> {
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6.color,
+                color: ThemeControl.theme.textTheme.headline6!.color,
               ),
             ),
           ),

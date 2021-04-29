@@ -10,7 +10,7 @@ import 'package:sweyer/constants.dart' as Constants;
 
 /// Button to switch loop mode
 class LoopButton extends StatelessWidget {
-  const LoopButton({Key key}) : super(key: key);
+  const LoopButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class LoopButton extends StatelessWidget {
           icon: const Icon(Icons.loop_rounded),
           size: 40.0,
           iconSize: textScaleFactor * Constants.iconSize,
-          active: snapshot.data,
+          active: snapshot.data!,
           onPressed: player.switchLooping,
         );
       },
@@ -33,7 +33,7 @@ class LoopButton extends StatelessWidget {
 }
 
 class ShuffleButton extends StatelessWidget {
-  const ShuffleButton({Key key}) : super(key: key);
+  const ShuffleButton({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
@@ -57,7 +57,7 @@ class ShuffleButton extends StatelessWidget {
 
 /// Icon button that opens settings page.
 class SettingsButton extends StatelessWidget {
-  const SettingsButton({Key key}) : super(key: key);
+  const SettingsButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

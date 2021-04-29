@@ -58,8 +58,8 @@ class ContentArtSource {
 /// * [_ArtLoader], which loads arts from `MediaStore`
 class ContentArt extends StatefulWidget {
   const ContentArt({
-    Key key,
-    @required this.source,
+    Key? key,
+    required this.source,
     this.color,
     this.size,
     this.assetScale = 1.0,
@@ -72,8 +72,8 @@ class ContentArt extends StatefulWidget {
 
   /// Creates an art for the [SongTile] or [SelectableSongTile].
   const ContentArt.songTile({
-    Key key,
-    @required this.source,
+    Key? key,
+    required this.source,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
@@ -87,8 +87,8 @@ class ContentArt extends StatefulWidget {
   /// Creates an art for the [ALbumTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
   const ContentArt.albumTile({
-    Key key,
-    @required this.source,
+    Key? key,
+    required this.source,
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
@@ -102,8 +102,8 @@ class ContentArt extends StatefulWidget {
   /// Creates an art for the [PlayerRoute].
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.albumTile].
   const ContentArt.playerRoute({
-    Key key,
-    @required this.source,
+    Key? key,
+    required this.source,
     this.size,
     this.color,
     this.assetScale = 1.0,
@@ -114,14 +114,14 @@ class ContentArt extends StatefulWidget {
        currentIndicatorScale = null,
        super(key: key);
 
-  final ContentArtSource source;
+  final ContentArtSource? source;
 
   /// Background color for the album art.
   /// By default will use [ThemeControl.colorForBlend].
-  final Color color;
+  final Color? color;
 
   /// Album art size.
-  final double size;
+  final double? size;
 
   /// Scale that will be applied to the asset image contents.
   final double assetScale;
@@ -143,7 +143,7 @@ class ContentArt extends StatefulWidget {
   final bool highRes;
 
   /// SCale for the [CurrentIndicator].
-  final double currentIndicatorScale;
+  final double? currentIndicatorScale;
 
   /// Above Android Q and above album art loads from bytes, and performns an animation on load.
   /// This defines the duration of this animation.
@@ -166,45 +166,47 @@ class ContentArt extends StatefulWidget {
 /// and [ContentChannel.fixAlbumArt].
 class _ArtLoader {
   _ArtLoader({
-    @required this.context,
-    @required this.song,
-    @required this.size,
-    @required this.onUpdate,
+    required this.context,
+    required this.song,
+    required this.size,
+    required this.onUpdate,
   });
 
   final BuildContext context;
-  final Song song;
-  final double size;
+  final Song? song;
+  final double? size;
   final VoidCallback onUpdate;
 
-  CancellationSignal _signal;
-  Uint8List _bytes;
-  File _file;
+  CancellationSignal? _signal;
+  Uint8List? _bytes;
+  late File _file;
   bool loaded = false;
   bool _broken = false;
 
   bool get showDefault => _broken ? _broken : song == null ||
-                          !_useBytes && song.albumArt == null ||
+                          !_useBytes && song!.albumArt == null ||
                           _useBytes && loaded && _bytes == null;
 
   void load() {
-    if (_useBytes) {
-      final uri = song.contentUri;
-      assert(uri != null);
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+    if (song == null) {
+      loaded = true;
+    } else if (_useBytes) {
+      final uri = song!.contentUri;
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         _signal = CancellationSignal();
         _bytes = await ContentChannel.loadAlbumArt(
           uri: uri,
-          size: Size.square(size) * MediaQuery.of(context).devicePixelRatio,
-          signal: _signal,
+          size: Size.square(size!) * MediaQuery.of(context).devicePixelRatio,
+          signal: _signal!,
         );
         loaded = true;
         onUpdate();
       });
     } else {
       loaded = true;
-      if (song.albumArt != null) {
-        _file = File(song.albumArt);
+      final art = song!.albumArt;
+      if (art != null) {
+        _file = File(art);
         // TODO: make it async and enable lint regarding expensive operations
         final exists = _file.existsSync();
         _broken = !exists;
@@ -216,15 +218,18 @@ class _ArtLoader {
   }
 
   Future<void> _recreateArt() async {
-    await ContentChannel.fixAlbumArt(song.albumId);
-    _broken = true;
+    final ablumId = song!.albumId;
+    if (ablumId != null) {
+      await ContentChannel.fixAlbumArt(song!.albumId!);
+    }
+    _broken = false;
     onUpdate();
   }
 
   Image getImage() {
     if (_useBytes) {
       return Image.memory(
-        _bytes,
+        _bytes!,
         width: size,
         height: size,
         fit: BoxFit.cover,
@@ -244,7 +249,7 @@ class _ArtLoader {
 }
 
 class _ContentArtState extends State<ContentArt> {
-  List<_ArtLoader> _loaders;
+  late List<_ArtLoader> _loaders;
 
   bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
@@ -256,12 +261,12 @@ class _ContentArtState extends State<ContentArt> {
   }
 
   void _init() {
-    final content = widget.source._content;
-    if (content is Song) {
+    final content = widget.source?._content;
+    if (content == null || content is Song) {
       _loaders = [
         _ArtLoader(
           context: context,
-          song: content,
+          song: content as Song?,
           size: widget.size,
           onUpdate: _onUpdate,
         ),
@@ -349,7 +354,7 @@ class _ContentArtState extends State<ContentArt> {
     return widget.currentIndicatorScale == null
         ? const CurrentIndicator()
         : Transform.scale(
-            scale: widget.currentIndicatorScale,
+            scale: widget.currentIndicatorScale!,
             child: const CurrentIndicator(),
           );
   }
@@ -389,7 +394,7 @@ class _ContentArtState extends State<ContentArt> {
           width: widget.size,
           height: widget.size,
           color: widget.color != null
-              ? getColorForBlend(widget.color)
+              ? getColorForBlend(widget.color!)
               : ThemeControl.colorForBlend,
           colorBlendMode: BlendMode.plus,
           fit: BoxFit.cover,
@@ -462,13 +467,12 @@ class _ContentArtState extends State<ContentArt> {
 /// Used in bottom track panel and starts rotating when track starts playing.
 class AlbumArtRotating extends StatefulWidget {
   const AlbumArtRotating({
-    Key key,
-    @required this.source,
-    @required this.initRotating,
+    Key? key,
+    required this.source,
+    required this.initRotating,
     this.initRotation = 0.0,
-  })  : assert(initRotating != null),
-        assert(initRotation >= 0 && initRotation <= 1.0),
-        super(key: key);
+  }) : assert(initRotation >= 0 && initRotation <= 1.0),
+       super(key: key);
 
   final ContentArtSource source;
 
@@ -484,7 +488,7 @@ class AlbumArtRotating extends StatefulWidget {
 }
 
 class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerProviderStateMixin {
-  AnimationController controller;
+  late AnimationController controller;
 
   @override
   void initState() {
@@ -493,7 +497,7 @@ class AlbumArtRotatingState extends State<AlbumArtRotating> with SingleTickerPro
       duration: const Duration(seconds: 15),
       vsync: this,
     );
-    controller.value = widget.initRotation ?? 0;
+    controller.value = widget.initRotation;
     if (widget.initRotating) {
       rotate();
     }

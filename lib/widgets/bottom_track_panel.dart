@@ -16,11 +16,11 @@ const double progressLineHeight = 3.0;
 /// Renders current playing track
 class TrackPanel extends StatelessWidget {
   TrackPanel({
-    Key key,
+    Key? key,
     this.onTap,
   }) : super(key: key);
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +121,7 @@ class TrackPanel extends StatelessWidget {
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {
-  const RotatingAlbumArtWithProgress({Key key}) : super(key: key);
+  const RotatingAlbumArtWithProgress({Key? key}) : super(key: key);
 
   @override
   _RotatingAlbumArtWithProgressState createState() => _RotatingAlbumArtWithProgressState();
@@ -134,9 +134,9 @@ class _RotatingAlbumArtWithProgressState
   // Duration of playing track
   Duration _duration = const Duration(seconds: 0);
 
-  StreamSubscription<Duration> _positionSubscription;
-  StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<bool> _playingSubscription;
+  late StreamSubscription<Duration> _positionSubscription;
+  late StreamSubscription<Song> _songChangeSubscription;
+  late StreamSubscription<bool> _playingSubscription;
 
   final _rotatingArtGlobalKey = GlobalKey<AlbumArtRotatingState>();
 
@@ -149,9 +149,9 @@ class _RotatingAlbumArtWithProgressState
 
     _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
       if (playing) {
-        _rotatingArtGlobalKey.currentState.rotate();
+        _rotatingArtGlobalKey.currentState!.rotate();
       } else {
-        _rotatingArtGlobalKey.currentState.stopRotating();
+        _rotatingArtGlobalKey.currentState!.stopRotating();
       }
     });
 

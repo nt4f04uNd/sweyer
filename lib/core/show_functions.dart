@@ -17,13 +17,13 @@ class ShowFunctions extends NFShowFunctions {
   static final instance = ShowFunctions._();
 
   /// Shows toast from `fluttertoast` plugin.
-  Future<bool> showToast({
-    @required String msg,
-    Toast toastLength,
+  Future<bool?> showToast({
+    required String msg,
+    Toast? toastLength,
     double fontSize = 15.0,
-    ToastGravity gravity,
-    Color textColor,
-    Color backgroundColor,
+    ToastGravity? gravity,
+    Color? textColor,
+    Color? backgroundColor,
   }) async {
     backgroundColor ??= ThemeControl.theme.colorScheme.primary;
 
@@ -54,9 +54,8 @@ class ShowFunctions extends NFShowFunctions {
   ///
   /// From that snack bar will be possible to proceed to special alert to see the error details with the ability to copy them.
   /// [errorDetails] string to show in the alert
-  void showError({ @required String errorDetails }) {
-    final context = AppRouter.instance.navigatorKey.currentContext;
-    assert(context != null);
+  void showError({ required String errorDetails }) {
+    final context = AppRouter.instance.navigatorKey.currentContext!;
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
     final globalKey = GlobalKey<NFSnackbarEntryState>();
@@ -78,7 +77,7 @@ class ShowFunctions extends NFShowFunctions {
             color: Colors.white,
             textStyle: const TextStyle(color: Colors.black),
             onPressed: () {
-              globalKey.currentState.close();
+              globalKey.currentState!.close();
               showAlert(
                 context,
                 title: Text(

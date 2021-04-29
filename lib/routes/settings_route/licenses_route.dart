@@ -15,14 +15,11 @@
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
 
-// TODO: remove all ignores when migrate to nnbd
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Flow;
 import 'package:flutter/scheduler.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:sweyer/sweyer.dart';
 
 /// A page that shows licenses for software used by the application.
@@ -122,10 +119,8 @@ class _PackagesView extends StatefulWidget {
   const _PackagesView({
     Key? key,
     required this.isLateral,
-    required this.selectedId,
-  // ignore: unnecessary_null_comparison
-  })   : assert(isLateral != null),
-        super(key: key);
+    required this.selectedId,n
+  }) : super(key: key);
 
   final bool isLateral;
   final ValueNotifier<int?> selectedId;
@@ -628,15 +623,7 @@ class _MasterDetailFlow extends StatefulWidget {
     this.masterPageBuilder,
     this.masterViewWidth,
     this.title,
-  // ignore: unnecessary_null_comparison
-  })  : assert(masterViewBuilder != null),
-        // ignore: unnecessary_null_comparison
-        assert(automaticallyImplyLeading != null),
-        // ignore: unnecessary_null_comparison
-        assert(detailPageBuilder != null),
-        // ignore: unnecessary_null_comparison
-        assert(displayMode != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// Builder for the master view for lateral navigation.
   ///
@@ -1015,11 +1002,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
     this.masterViewWidth,
-  // ignore: unnecessary_null_comparison
-  })  : assert(detailPageBuilder != null),
-        // ignore: unnecessary_null_comparison
-        assert(masterViewBuilder != null),
-        super(key: key);
+  }) : super(key: key);
 
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1197,11 +1180,9 @@ class _DetailView extends StatelessWidget {
     Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
-  // ignore: unnecessary_null_comparison
-  })  : assert(builder != null),
-        _builder = builder,
-        _arguments = arguments,
-        super(key: key);
+  }) : _builder = builder,
+       _arguments = arguments,
+       super(key: key);
 
   final _DetailPageBuilder _builder;
   final Object? _arguments;

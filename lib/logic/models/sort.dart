@@ -5,7 +5,6 @@
 
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/logic/logic.dart';
 
@@ -139,10 +138,9 @@ class ArtistSortFeature extends SortFeature<Artist> {
 
 abstract class Sort<T extends Content> extends Equatable {
   const Sort({
-    @required this.feature,
-    @required this.orderAscending,
-  })  : assert(feature != null),
-        assert(orderAscending != null);
+    required this.feature,
+    required this.orderAscending,
+  });
   Sort.defaultOrder(this.feature)
       : orderAscending = feature.defaultOrderAscending;
 
@@ -152,7 +150,7 @@ abstract class Sort<T extends Content> extends Equatable {
   @override
   List<Object> get props => [feature, orderAscending];
 
-  Sort<T> copyWith({SortFeature feature, bool orderAscending});
+  Sort<T> copyWith({SortFeature? feature, bool? orderAscending});
   Sort<T> get withDefaultOrder;
 
   Comparator<T> get comparator;
@@ -165,7 +163,7 @@ abstract class Sort<T extends Content> extends Equatable {
 
 class SongSort extends Sort<Song> {
   const SongSort({
-    SongSortFeature feature,
+    required SongSortFeature feature,
     bool orderAscending = true,
   }) : super(feature: feature, orderAscending: orderAscending);
   SongSort.defaultOrder(feature) : super.defaultOrder(feature);
@@ -174,17 +172,17 @@ class SongSort extends Sort<Song> {
         feature: EnumToString.fromString(
           SongSortFeature.values,
           map['feature'],
-        ),
+        )!,
         orderAscending: map['orderAscending'],
       );
 
   @override
   SongSort copyWith({
-    covariant SongSortFeature feature,
-    bool orderAscending,
+    covariant SongSortFeature? feature,
+    bool? orderAscending,
   }) {
     return SongSort(
-      feature: feature ?? this.feature,
+      feature: feature ?? this.feature as SongSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
   }
@@ -240,7 +238,7 @@ class SongSort extends Sort<Song> {
         break;
       case SongSortFeature.album:
         c = (a, b) {
-          final compare = a.album.toLowerCase().compareTo(b.album.toLowerCase());
+          final compare = a.album!.toLowerCase().compareTo(b.album!.toLowerCase());
           if (compare == 0)
             return _fallbackTitle(a, b);
           return compare;
@@ -258,7 +256,7 @@ class SongSort extends Sort<Song> {
 
 class AlbumSort extends Sort<Album> {
   const AlbumSort({
-    AlbumSortFeature feature,
+    required AlbumSortFeature feature,
     bool orderAscending = true,
   }) : super(feature: feature, orderAscending: orderAscending);
   AlbumSort.defaultOrder(feature) : super.defaultOrder(feature);
@@ -267,7 +265,7 @@ class AlbumSort extends Sort<Album> {
         feature: EnumToString.fromString(
           AlbumSortFeature.values,
           map['feature'],
-        ),
+        )!,
         orderAscending: map['orderAscending'],
       );
 
@@ -279,11 +277,11 @@ class AlbumSort extends Sort<Album> {
 
   @override
   AlbumSort copyWith({
-    covariant AlbumSortFeature feature,
-    bool orderAscending,
+    covariant AlbumSortFeature? feature,
+    bool? orderAscending,
   }) {
     return AlbumSort(
-      feature: feature ?? this.feature,
+      feature: feature ?? this.feature as AlbumSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
   }
@@ -350,7 +348,7 @@ class AlbumSort extends Sort<Album> {
 
 class PlaylistSort extends Sort<Playlist> {
   const PlaylistSort({
-    PlaylistSortFeature feature,
+    required PlaylistSortFeature feature,
     bool orderAscending = true,
   }) : super(feature: feature, orderAscending: orderAscending);
   PlaylistSort.defaultOrder(feature) : super.defaultOrder(feature);
@@ -359,7 +357,7 @@ class PlaylistSort extends Sort<Playlist> {
         feature: EnumToString.fromString(
           PlaylistSortFeature.values,
           map['feature'],
-        ),
+        )!,
         orderAscending: map['orderAscending'],
       );
 
@@ -371,11 +369,11 @@ class PlaylistSort extends Sort<Playlist> {
 
   @override
   PlaylistSort copyWith({
-    covariant PlaylistSortFeature feature,
-    bool orderAscending,
+    covariant PlaylistSortFeature? feature,
+    bool? orderAscending,
   }) {
     return PlaylistSort(
-      feature: feature ?? this.feature,
+      feature: feature ?? this.feature as PlaylistSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
   }
@@ -433,7 +431,7 @@ class PlaylistSort extends Sort<Playlist> {
 
 class ArtistSort extends Sort<Artist> {
   const ArtistSort({
-    ArtistSortFeature feature,
+    required ArtistSortFeature feature,
     bool orderAscending = true,
   }) : super(feature: feature, orderAscending: orderAscending);
   ArtistSort.defaultOrder(feature) : super.defaultOrder(feature);
@@ -442,7 +440,7 @@ class ArtistSort extends Sort<Artist> {
         feature: EnumToString.fromString(
           ArtistSortFeature.values,
           map['feature'],
-        ),
+        )!,
         orderAscending: map['orderAscending'],
       );
 
@@ -454,11 +452,11 @@ class ArtistSort extends Sort<Artist> {
 
   @override
   ArtistSort copyWith({
-    covariant ArtistSortFeature feature,
-    bool orderAscending,
+    covariant ArtistSortFeature? feature,
+    bool? orderAscending,
   }) {
     return ArtistSort(
-      feature: feature ?? this.feature,
+      feature: feature ?? this.feature as ArtistSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
   }

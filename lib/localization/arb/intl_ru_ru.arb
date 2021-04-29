@@ -254,11 +254,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unknownRoute": "Неизвестная страница!",
-  "@unknownRoute": {
-    "type": "text",
-    "placeholders": {}
-  },
   "found": "Найдено",
   "@found": {
     "type": "text",

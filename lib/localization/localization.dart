@@ -14,7 +14,7 @@ import 'package:sweyer/sweyer.dart';
 import 'gen/messages_all.dart';
 
 /// Gets [AppLocalizations].
-AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context);
+AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context)!;
 
 /// Gets [AppLocalizations] without context.
 /// If you want to use [AppLocalizations] without flutter app mounting,
@@ -29,7 +29,7 @@ class AppLocalizations {
   /// Can be used to load the delegate before/without flutter app mounting
   /// by using the current system locale.
   static Future<void> init() async {
-    await load(WidgetsBinding.instance.window.locale);
+    await load(WidgetsBinding.instance!.window.locale);
   }
 
   static Future<AppLocalizations> load(Locale locale) async {
@@ -43,7 +43,7 @@ class AppLocalizations {
     );
   }
 
-  static AppLocalizations of(BuildContext context) {
+  static AppLocalizations? of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
@@ -270,7 +270,7 @@ class AppLocalizations {
 
   /// Converts [ArbitraryQueueOrigin] to human readable text.
   /// Returns `null` from `null` argument.
-  String arbitraryQueueOrigin(ArbitraryQueueOrigin origin) {
+  String? arbitraryQueueOrigin(ArbitraryQueueOrigin? origin) {
     if (origin == null)
       return null;
     switch (origin) {
@@ -453,13 +453,6 @@ class AppLocalizations {
     );
   }
 
-  String get unknownRoute {
-    return Intl.message(
-      'Unknown route!',
-      name: 'unknownRoute',
-    );
-  }
-
   String get found {
     return Intl.message(
       'Found',
@@ -609,7 +602,7 @@ class AppLocalizations {
 
   /// Picks a string of a [Content] in plural form.
   /// For example "tracks".
-  String contents<T extends Content>([Type contentType]) {
+  String contents<T extends Content>([Type? contentType]) {
     return contentPick<T, String Function()>(
       contentType: contentType,
       song: () => tracks,

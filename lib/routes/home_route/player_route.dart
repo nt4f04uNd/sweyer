@@ -18,7 +18,7 @@ final SpringDescription playerRouteSpringDescription = SpringDescription.withDam
 );
 
 class PlayerRoute extends StatefulWidget {
-  const PlayerRoute({Key key}) : super(key: key);
+  const PlayerRoute({Key? key}) : super(key: key);
 
   @override
   _PlayerRouteState createState() => _PlayerRouteState();
@@ -27,12 +27,12 @@ class PlayerRoute extends StatefulWidget {
 class _PlayerRouteState extends State<PlayerRoute>
   with SingleTickerProviderStateMixin, SelectionHandler {
   final _queueTabKey = GlobalKey<_QueueTabState>();
-  List<Widget> _tabs;
-  SlidableController controller;
-  SharedAxisTabController tabController;
-  ContentSelectionController<SelectionEntry<Song>> selectionController;
+  late List<Widget> _tabs;
+  late SlidableController controller;
+  late SharedAxisTabController tabController;
+  late ContentSelectionController<SelectionEntry<Song>> selectionController;
 
-  Animation _queueTabAnimation;
+  Animation? _queueTabAnimation;
   SlideDirection slideDirection = SlideDirection.up;
 
   @override
@@ -42,7 +42,7 @@ class _PlayerRouteState extends State<PlayerRoute>
       this,
       counter: true,
       closeButton: true,
-    )
+    ) as ContentSelectionController<SelectionEntry<Song>>
       ..addListener(handleSelection)
       ..addStatusListener(handleSelectionStatus);
     _tabs = [
@@ -55,9 +55,9 @@ class _PlayerRouteState extends State<PlayerRoute>
     tabController = SharedAxisTabController(length: 2);
     tabController.addListener(() {
       if (tabController.index == 0) {
-        _queueTabKey.currentState.opened = false;
+        _queueTabKey.currentState!.opened = false;
       } else if (tabController.index == 1) {
-        _queueTabKey.currentState.opened = true;
+        _queueTabKey.currentState!.opened = true;
       }
     });
     controller = playerRouteController;
@@ -110,7 +110,7 @@ class _PlayerRouteState extends State<PlayerRoute>
     if (tabController.index == 0 && status == AnimationStatus.dismissed) {
       /// When the main tab is fully visible and the queue tab is not,
       /// reset the scroll controller.
-      _queueTabKey.currentState.jumpOnTabChange();
+      _queueTabKey.currentState!.jumpOnTabChange();
     }
   }
 
@@ -137,7 +137,7 @@ class _PlayerRouteState extends State<PlayerRoute>
                 if (child is _QueueTab) {
                   if (animation != _queueTabAnimation) {
                     if (_queueTabAnimation != null) {
-                      _queueTabAnimation.removeStatusListener(_handleQueueTabAnimationStatus);
+                      _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
                     }
                     _queueTabAnimation = animation;
                     animation.addStatusListener(
@@ -163,11 +163,11 @@ class _PlayerRouteState extends State<PlayerRoute>
 
 class _QueueTab extends StatefulWidget {
   _QueueTab({
-    Key key,
-    @required this.selectionController,
+    Key? key,
+    required this.selectionController,
   }) : super(key: key);
 
-  final SelectionController selectionController;
+  final ContentSelectionController<SelectionEntry<Content>> selectionController;
 
   @override
   _QueueTabState createState() => _QueueTabState();
@@ -179,33 +179,28 @@ class _QueueTabState extends State<_QueueTab>
   static const double appBarHeight = 81.0;
 
   /// How much tracks to list end to apply [endScrollAlignment]
-  int edgeOffset;
-  int songsPerScreen;
-
-  /// Min index to start from applying [endScrollAlignment].
-  int get edgeScrollIndex => queueLength - 1 - edgeOffset;
-  int prevSongIndex = ContentControl.state.currentSongIndex;
-  int get queueLength => ContentControl.state.queues.current.length;
+  late int edgeOffset;
+  late int songsPerScreen;
 
   /// This is set in parent via global key
   bool opened = false;
   final ScrollController scrollController = ScrollController();
 
   /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
-  StreamSubscription<Song> _songChangeSubscription;
-  StreamSubscription<void> _contentChangeSubscription;
+  late StreamSubscription<Song> _songChangeSubscription;
+  late StreamSubscription<void> _contentChangeSubscription;
 
   QueueType get type => ContentControl.state.queues.type;
   bool get isAlbum => ContentControl.state.queues.persistent is Album;
-  Album get album {
+  Album? get album {
     assert(isAlbum);
-    return ContentControl.state.queues.persistent as Album;
+    return ContentControl.state.queues.persistent as Album?;
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       jumpToSong(ContentControl.state.currentSongIndex);
     });
 
@@ -218,11 +213,9 @@ class _QueueTabState extends State<_QueueTab>
 
     _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
       if (ContentControl.state.allSongs.isNotEmpty) {
-        // Reset value when queue changes
-        prevSongIndex = ContentControl.state.currentSongIndex;
         setState(() {/* update ui list as data list may have changed */});
         if (!opened) {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
             // Jump when tracklist changes (e.g. shuffle happened)
             jumpToSong();
             // Post framing it because we need to be sure that list gets updated before we jump.
@@ -254,7 +247,7 @@ class _QueueTabState extends State<_QueueTab>
   /// Scrolls to current song.
   ///
   /// If optional [index] is provided - scrolls to it.
-  Future<void> scrollToSong([int index]) async {
+  Future<void> scrollToSong([int? index]) async {
     index ??= ContentControl.state.currentSongIndex;
     final extent = index * kSongTileHeight;
     final pixels = scrollController.position.pixels;
@@ -279,7 +272,7 @@ class _QueueTabState extends State<_QueueTab>
   /// Jumps to current song.
   ///
   /// If optional [index] is provided - jumps to it.
-  void jumpToSong([int index]) {
+  void jumpToSong([int? index]) {
     index ??= ContentControl.state.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
@@ -294,16 +287,13 @@ class _QueueTabState extends State<_QueueTab>
   void _handleTitleTap() {
     switch (type) {
       case QueueType.searched:
-        final query = ContentControl.state.queues.searchQuery;
-        assert(query != null);
-        if (query != null) {
-          ShowFunctions.instance.showSongsSearch(
-            query: query,
-            openKeyboard: false
-          );
-          playerRouteController.close();
-          SearchHistory.instance.save(query);
-        }
+        final query = ContentControl.state.queues.searchQuery!;
+        ShowFunctions.instance.showSongsSearch(
+          query: query,
+          openKeyboard: false
+        );
+        playerRouteController.close();
+        SearchHistory.instance.add(query);
         return;
       case QueueType.persistent:
         if (isAlbum) {
@@ -327,8 +317,7 @@ class _QueueTabState extends State<_QueueTab>
         text.add(TextSpan(text: l10n.allTracks));
         break;
       case QueueType.searched:
-        final query = ContentControl.state.queues.searchQuery;
-        assert(query != null);
+        final query = ContentControl.state.queues.searchQuery!;
         text.add(TextSpan(
           text: '${l10n.found} ${l10n.byQuery.toLowerCase()} ',
         ));
@@ -344,7 +333,7 @@ class _QueueTabState extends State<_QueueTab>
         if (isAlbum) {
           text.add(TextSpan(text: '${l10n.album} '));
           text.add(TextSpan(
-            text: album.album + _getYear(),
+            text: album!.album + ' • ${album!.year}',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,
@@ -366,19 +355,11 @@ class _QueueTabState extends State<_QueueTab>
     return text;
   }
 
-  String _getYear() {
-    final year = album.year;
-    if (year == null) {
-      return '';
-    }
-    return ' • $year';
-  }
-
   Text _buildTitleText(List<TextSpan> text) {
     return Text.rich(
       TextSpan(children: text),
       overflow: TextOverflow.ellipsis,
-      style: ThemeControl.theme.textTheme.subtitle2.copyWith(
+      style: ThemeControl.theme.textTheme.subtitle2!.copyWith(
         fontSize: 14.0,
         height: 1.0,
         fontWeight: FontWeight.w700,
@@ -423,7 +404,7 @@ class _QueueTabState extends State<_QueueTab>
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
                     child: ContentArt(
-                      source: ContentArtSource.album(album),
+                      source: ContentArtSource.album(album!),
                       borderRadius: 8,
                       size: kSongTileArtSize - 8.0,
                     ),
@@ -437,7 +418,7 @@ class _QueueTabState extends State<_QueueTab>
                         children: [
                           Text(
                             l10n.upNext,
-                            style: ThemeControl.theme.textTheme.headline6.copyWith(
+                            style: ThemeControl.theme.textTheme.headline6!.copyWith(
                               fontSize: 24,
                               height: 1.2,
                             ),
@@ -479,7 +460,7 @@ class _QueueTabState extends State<_QueueTab>
                             Icon(
                               Icons.chevron_right_rounded,
                               size: 18.0,
-                              color: ThemeControl.theme.textTheme.subtitle2.color,
+                              color: ThemeControl.theme.textTheme.subtitle2!.color,
                             ),
                         ],
                       ),
@@ -499,7 +480,7 @@ class _QueueTabState extends State<_QueueTab>
         children: [
           Padding(
             padding: EdgeInsets.only(top: appBarHeightWithPadding),
-            child: ValueListenableBuilder<SelectionController>(
+            child: ValueListenableBuilder<SelectionController?>(
               valueListenable: ContentControl.state.selectionNotifier,
               builder: (context, value, child) {
                 return ContentListView<Song>(
@@ -533,7 +514,7 @@ class _QueueTabState extends State<_QueueTab>
 }
 
 class _MainTab extends StatefulWidget {
-  const _MainTab({Key key}) : super(key: key);
+  const _MainTab({Key? key}) : super(key: key);
 
   @override
   _MainTabState createState() => _MainTabState();
@@ -571,7 +552,7 @@ class _MainTabState extends State<_MainTab> {
             ValueListenableBuilder<bool>(
               valueListenable: ContentControl.devMode,
               builder: (context, value, child) => value
-                ? child
+                ? child!
                 : const SizedBox.shrink(),
               child: FadeTransition(
                 opacity: fadeAnimation,
@@ -611,7 +592,7 @@ class _MainTabState extends State<_MainTab> {
 }
 
 class _PlaybackButtons extends StatelessWidget {
-  const _PlaybackButtons({Key key}) : super(key: key);
+  const _PlaybackButtons({Key? key}) : super(key: key);
   static const buttonMargin = 18.0;
 
   @override
@@ -667,7 +648,7 @@ class _PlaybackButtons extends StatelessWidget {
 }
 
 class _InfoButton extends StatelessWidget {
-  const _InfoButton({Key key}) : super(key: key);
+  const _InfoButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -679,12 +660,11 @@ class _InfoButton extends StatelessWidget {
         size: 40.0,
         onPressed: () {
           String songInfo = ContentControl.state.currentSong
-            ?.toMap()
+            .toMap()
             .toString()
             .replaceAll(r', ', ',\n');
-          if (songInfo != null) {
-            songInfo = songInfo.substring(1, songInfo.length - 1);
-          }
+          // Remove curly braces
+          songInfo = songInfo.substring(1, songInfo.length - 1);
           ShowFunctions.instance.showAlert(
             context,
             title: Text(
@@ -693,7 +673,7 @@ class _InfoButton extends StatelessWidget {
             ),
             contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
             content: SelectableText(
-              songInfo ?? 'null',
+              songInfo,
               style: const TextStyle(fontSize: 13.0),
               selectionControls: NFTextSelectionControls(
                 backgroundColor: ThemeControl.theme.colorScheme.background,
@@ -711,14 +691,14 @@ class _InfoButton extends StatelessWidget {
 
 /// A widget that displays all information about current song
 class _TrackShowcase extends StatefulWidget {
-  const _TrackShowcase({Key key}) : super(key: key);
+  const _TrackShowcase({Key? key}) : super(key: key);
 
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }
 
 class _TrackShowcaseState extends State<_TrackShowcase> {
-  StreamSubscription<Song> _songChangeSubscription;
+  late StreamSubscription<Song> _songChangeSubscription;
 
   @override
   void initState() {

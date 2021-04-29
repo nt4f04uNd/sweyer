@@ -42,26 +42,26 @@ mixin SelectionHandler<T extends StatefulWidget> on State<T> {
 abstract class SelectableWidget<T> extends StatefulWidget {
   /// Creates a widget, not selectable.
   const SelectableWidget({
-    Key key,
+    Key? key,
   }) : selected = null,
        selectionController = null,
        super(key: key);
 
   /// Creates a selectable widget.
   const SelectableWidget.selectable({
-    Key key,
-    @required this.selectionController,
+    Key? key,
+    required this.selectionController,
     this.selected = false,
   }) : super(key: key);
 
   /// Makes tiles aware whether they are selected in some global set.
   /// This will be used on first build, after this tile will have internal selection state.
-  final bool selected;
+  final bool? selected;
 
   /// A controller that drive the selection.
   /// 
   /// If `null`, widget will be considered as not selectable
-  final SelectionController<T> selectionController;
+  final SelectionController<T>? selectionController;
 
   /// Converts this widget to the entry [selectionController] is holding.
   T toSelectionEntry();
@@ -74,7 +74,7 @@ abstract class SelectableWidget<T> extends StatefulWidget {
 
 /// A state to be used with [SelectableWidget].
 abstract class SelectableState<T extends SelectableWidget> extends State<T> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   /// Returns animation that can be used for animating the selection.
   /// 
@@ -86,11 +86,11 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// See also:
   /// * [buildAnimation] that build the animation object
   Animation<double> get animation => _animation;
-  Animation<double> _animation;
+  late Animation<double> _animation;
 
   /// Whether the widget is currently being selected.
   bool get selected => _selected;
-  bool _selected;
+  late bool _selected;
 
   /// Whether the widget can be selected.
   bool get selectable => widget.selectionController != null;
@@ -112,16 +112,16 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (selectable) {
-      if (widget.selectionController.notInSelection && _selected) {
+      if (widget.selectionController!.notInSelection && _selected) {
         /// We have to check if controller is closing, i.e. user pressed global close button to quit the selection.
         ///
         /// We are assuming that parent updates us, as we can't add owr own status listener to the selection controller,
         /// because it is quite expensive for the list.
         _selected = false;
-        _controller.value = widget.selectionController.animationController.value;
+        _controller.value = widget.selectionController!.animationController.value;
         _controller.reverse();
       } else if (oldWidget.selected != widget.selected) {
-        _selected = widget.selected;
+        _selected = widget.selected ?? false;
         if (_selected) {
           _controller.forward();
         } else {
@@ -133,9 +133,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
 
   @override
   void dispose() {
-    if (_controller != null) {
-      _controller.dispose();
-    }
+    _controller.dispose();
     super.dispose();
   }
 
@@ -144,8 +142,8 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// The `animation` is the bare, without any applied curves.
   /// 
   /// Override this method to build your own custom animation.
-  Animation buildAnimation(Animation animation) {
-    return Tween<double>(
+  Animation<double> buildAnimation(Animation<double> animation) {
+    return Tween(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
@@ -160,7 +158,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// 
   /// Will return null if not [selectable], because it is common to pass it to [ListTile.onLongPress],
   /// and passing null will disable the long press gesture.
-  VoidCallback get toggleSelection => !selectable ? null : () {
+  VoidCallback? get toggleSelection => !selectable ? null : () {
     if (!selectable)
       return;
     setState(() {
@@ -178,20 +176,20 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// If yes, on taps will be handled by calling [toggleSelection],
   /// otherwise calls the [onTap] callback.
   void handleTap(VoidCallback onTap) {
-    if (selectable && widget.selectionController.inSelection) {
-      toggleSelection();
+    if (selectable && widget.selectionController!.inSelection) {
+      toggleSelection!();
     } else {
       onTap();
     }
   }
 
   void _select() {
-    widget.selectionController.selectItem(widget.toSelectionEntry());
+    widget.selectionController!.selectItem(widget.toSelectionEntry());
     _controller.forward();
   }
 
   void _unselect() {
-    widget.selectionController.unselectItem(widget.toSelectionEntry());
+    widget.selectionController!.unselectItem(widget.toSelectionEntry());
     _controller.reverse();
   }
 }
@@ -201,10 +199,10 @@ typedef _ActionsBuilder = SelectionActionsBar Function(BuildContext);
 
 class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> {
   ContentSelectionController({
-    @required AnimationController animationController,
-    @required this.actionsBuilder,
+    required AnimationController animationController,
+    required this.actionsBuilder,
     this.ignoreWhen,
-    Set<T> data,
+    Set<T>? data,
   }) : super(
          animationController: animationController,
          data: data,
@@ -219,7 +217,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// This is needed, beucase in lists I allow multiple gestures at once, and if user holds one finger
   /// and then taps tile with another finger, this will cause the selection menu to
   /// be displayed over player route, which is not wanted.
-  final ValueGetter<bool> ignoreWhen;
+  final ValueGetter<bool>? ignoreWhen;
 
   /// Constucts a controller for particular `T` [Content] type.
   ///
@@ -232,7 +230,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   @factory
   static ContentSelectionController forContent<T extends Content>(
     TickerProvider vsync, {
-    ValueGetter<bool> ignoreWhen,
+    ValueGetter<bool>? ignoreWhen,
     bool counter = false,
     bool closeButton = false,
   }) {
@@ -293,14 +291,14 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   static ContentSelectionController of(BuildContext context) {
-    final widget = context.getElementForInheritedWidgetOfExactType<_ContentSelectionControllerProvider>()
+    final widget = context.getElementForInheritedWidgetOfExactType<_ContentSelectionControllerProvider>()!
       .widget as _ContentSelectionControllerProvider;
     return widget.controller;
   }
 
-  Color _lastNavColor;
-  OverlayEntry _overlayEntry;
-  ValueNotifier<ContentSelectionController> get _notifier => ContentControl.state.selectionNotifier;
+  Color? _lastNavColor;
+  OverlayEntry? _overlayEntry;
+  ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.state.selectionNotifier;
 
   @override
   void notifyStatusListeners(AnimationStatus status) {
@@ -311,7 +309,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       }
       if (_notifier.value != null && _notifier.value != this) {
         /// Close previous selection.
-        _notifier.value.close();
+        _notifier.value!.close();
         assert(false, 'There can only be one active controller');
       }
       _overlayEntry = OverlayEntry(
@@ -324,7 +322,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
           ),
         ),
       );
-      HomeState.overlayKey.currentState.insert(_overlayEntry);
+      HomeState.overlayKey.currentState!.insert(_overlayEntry!);
       _notifier.value = this;
 
       /// Animate system UI.
@@ -364,7 +362,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   void _removeOverlay() {
     if (_overlayEntry != null) {
       _animateNavBack();
-      _overlayEntry.remove();
+      _overlayEntry!.remove();
       _overlayEntry = null;
     }
   }
@@ -375,7 +373,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       _removeOverlay();
       super.dispose();
     } else {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         _notifier.value = null;
         clearListeners();
         clearStatusListeners();
@@ -390,8 +388,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
 class _ContentSelectionControllerProvider extends InheritedWidget {
   _ContentSelectionControllerProvider({
-    @required Widget child,
-    @required this.controller,
+    required Widget child,
+    required this.controller,
     }) : super(child: child);
 
   final ContentSelectionController controller;
@@ -402,12 +400,12 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
 
 class SelectionCheckmark extends StatefulWidget {
   const SelectionCheckmark({
-    Key key,
-    @required this.animation,
+    Key? key,
+    required this.animation,
     this.size = 21.0,
   }) : super(key: key);
 
-  final Animation animation;
+  final Animation<double> animation;
   final double size;
 
   @override
@@ -470,12 +468,12 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
 /// Ignores its subtree when selection controller is in selection.
 class IgnoreInSelection extends StatelessWidget {
   const IgnoreInSelection({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.child,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
   final SelectionController controller;
 
   @override
@@ -496,8 +494,8 @@ class IgnoreInSelection extends StatelessWidget {
 
 class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
   const SelectionActionsBar({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.left = const [],
     this.right = const [],
   }) : super(key: key);
@@ -566,8 +564,8 @@ class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
 
 class _SelectionAnimation extends AnimatedWidget {
   _SelectionAnimation({
-    @required Animation animation,
-    @required this.child,
+    required Animation<double> animation,
+    required this.child,
     this.begin = const Offset(-1.0, 0.0),
     this.end = Offset.zero,
   }) : super(listenable: animation);
@@ -575,6 +573,9 @@ class _SelectionAnimation extends AnimatedWidget {
   final Widget child;
   final Offset begin;
   final Offset end;
+
+  @override
+  Animation<double> get listenable => super.listenable as Animation<double>;
 
   @override
   Widget build(BuildContext context) {
@@ -608,7 +609,7 @@ class _SelectionAnimation extends AnimatedWidget {
 /// Creates a selection title.
 class ActionsSelectionTitle extends StatelessWidget {
   const ActionsSelectionTitle({
-    Key key,
+    Key? key,
     this.counter = false,
     this.closeButton = false,
   }) : super(key: key);
@@ -658,18 +659,18 @@ class ActionsSelectionTitle extends StatelessWidget {
 
 /// Creates a counter that shows how many items are selected.
 class SelectionCounter extends StatefulWidget {
-  const SelectionCounter({Key key, this.controller}) : super(key: key);
+  const SelectionCounter({Key? key, this.controller}) : super(key: key);
 
   /// Selection controller, if none specified, will try to fetch it from context.
-  final ContentSelectionController controller;
+  final ContentSelectionController? controller;
 
   @override
   _SelectionCounterState createState() => _SelectionCounterState();
 }
 
 class _SelectionCounterState extends State<SelectionCounter> with SelectionHandler {
-  ContentSelectionController controller;
-  int selectionCount;
+  late ContentSelectionController controller;
+  late int selectionCount;
 
   @override
   void initState() { 
@@ -722,14 +723,14 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 
 /// Action that leads to the song album.
 class GoToAlbumSelectionAction extends StatefulWidget {
-  const GoToAlbumSelectionAction({Key key}) : super(key: key);
+  const GoToAlbumSelectionAction({Key? key}) : super(key: key);
 
   @override
   _GoToAlbumSelectionActionState createState() => _GoToAlbumSelectionActionState();
 }
 
 class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
-  ContentSelectionController<SelectionEntry> controller;
+  late ContentSelectionController<SelectionEntry> controller;
 
   @override
   void initState() {
@@ -796,12 +797,12 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
 
 /// Action that queues a [Song] or [Album] to be played next.
 class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
-  const PlayNextSelectionAction({Key key}) : super(key: key);
+  const PlayNextSelectionAction({Key? key}) : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty)
       return;
-    entries.sort((a, b) => a.index.compareTo(b.index));
+    entries.sort((a, b) => a.index!.compareTo(b.index!));
     ContentControl.playNext(
       entries
         .map((el) => el.data)
@@ -813,7 +814,7 @@ class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
     if (entries.isEmpty)
       return;
     // Reverse order is proper here
-    entries.sort((a, b) => b.index.compareTo(a.index));
+    entries.sort((a, b) => b.index!.compareTo(a.index!));
     for (final entry in entries) {
       ContentControl.playQueueNext(entry.data);
     }
@@ -821,10 +822,10 @@ class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     contentPick<T, VoidCallback>(
-      song: () => _handleSongs(controller.data.toList()),
-      album: () => _handleAlbums(controller.data.toList()),
+      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
+      album: () => _handleAlbums(controller.data.toList() as List<SelectionEntry<Album>>),
       fallback: () {
-        final entries = controller.data.toList();
+        final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
         final List<SelectionEntry<Album>> albums = [];
         for (final entry in entries) {
@@ -861,13 +862,13 @@ class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
 
 /// Action that adds a [Song] or an [Album] to the end of the queue.
 class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
-  const AddToQueueSelectionAction({Key key})
+  const AddToQueueSelectionAction({Key? key})
       : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty)
       return;
-    entries.sort((a, b) => a.index.compareTo(b.index));
+    entries.sort((a, b) => a.index!.compareTo(b.index!));
     ContentControl.addToQueue(
       entries
         .map((el) => el.data)
@@ -878,7 +879,7 @@ class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
   void _handleAlbums(List<SelectionEntry<Album>> entries) {
     if (entries.isEmpty)
       return;
-    entries.sort((a, b) => a.index.compareTo(b.index));
+    entries.sort((a, b) => a.index!.compareTo(b.index!));
     for (final entry in entries) {
       ContentControl.addQueueToQueue(entry.data);
     }
@@ -886,10 +887,10 @@ class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     contentPick<T, VoidCallback>(
-      song: () => _handleSongs(controller.data.toList()),
-      album: () => _handleAlbums(controller.data.toList()),
+      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
+      album: () => _handleAlbums(controller.data.toList() as List<SelectionEntry<Album>>),
       fallback: () {
-        final entries = controller.data.toList();
+        final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
         final List<SelectionEntry<Album>> albums = [];
         for (final entry in entries) {
@@ -933,8 +934,8 @@ class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
 /// With the lattter, will automatically check if selection contains only songs and hide the button, if not.
 class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   const DeleteSongsAppBarAction({
-    Key key,
-    @required this.controller
+    Key? key,
+    required this.controller
   }) : super(key: key);
 
   final ContentSelectionController<SelectionEntry<T>> controller;
@@ -944,7 +945,7 @@ class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
 }
 
 class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandler {
-  Type type;
+  late Type type;
   bool shown = false;
 
   @override
@@ -973,7 +974,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
       // On all versions below show in app dialog.
       final l10n = getl10n(context);
       final count = songs.length;
-      Song song;
+      Song? song;
       if (count == 1) {
         song = ContentControl.state.allSongs.byId.get(songs.first.data.sourceId);
       }

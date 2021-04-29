@@ -12,9 +12,8 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
 class AlbumRoute extends StatefulWidget {
-  AlbumRoute({Key key, @required this.album})
-      : assert(album != null),
-        super(key: key);
+  AlbumRoute({Key? key, required this.album})
+    : super(key: key);
 
   final Album album;
 
@@ -24,9 +23,9 @@ class AlbumRoute extends StatefulWidget {
 
 class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, SelectionHandler {
   final ScrollController scrollController = ScrollController();
-  AnimationController appBarController;
-  ContentSelectionController<SelectionEntry<Song>> selectionController;
-  List<Song> songs;
+  late AnimationController appBarController;
+  late ContentSelectionController<SelectionEntry<Song>> selectionController;
+  late List<Song> songs;
 
   static const _appBarHeight = NFConstants.toolbarHeight - 8.0;
   static const _albumArtSize = 130.0;
@@ -46,7 +45,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
     super.initState();
     songs = widget.album.songs;
     appBarController = AnimationController(
-      vsync: AppRouter.instance.navigatorKey.currentState,
+      vsync: AppRouter.instance.navigatorKey.currentState!,
       value: 1.0,
     );
     scrollController.addListener(_handleScroll);
@@ -55,7 +54,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
-    )
+    ) as ContentSelectionController<SelectionEntry<Song>>
       ..addListener(handleSelection)
       ..addStatusListener(handleSelectionStatus);
   }
@@ -130,7 +129,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                           Text(
                             '${l10n.album} • ${widget.album.year}',
                             style: TextStyle(
-                              color: ThemeControl.theme.textTheme.subtitle2.color,
+                              color: ThemeControl.theme.textTheme.subtitle2!.color,
                               fontWeight: FontWeight.w900,
                               fontSize: 14.0,
                             ),
@@ -288,10 +287,10 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
 /// A button with text and icon.
 class _AlbumPlayButton extends StatelessWidget {
   const _AlbumPlayButton({
-    Key key,
-    @required this.text,
-    @required this.icon,
-    @required this.onPressed,
+    Key? key,
+    required this.text,
+    required this.icon,
+    required this.onPressed,
     this.color,
     this.textColor,
     this.splashColor,
@@ -300,9 +299,9 @@ class _AlbumPlayButton extends StatelessWidget {
   final String text;
   final Icon icon;
   final VoidCallback onPressed;
-  final Color color;
-  final Color textColor;
-  final Color splashColor;
+  final Color? color;
+  final Color? textColor;
+  final Color? splashColor;
 
   @override
   Widget build(BuildContext context) {
@@ -312,15 +311,14 @@ class _AlbumPlayButton extends StatelessWidget {
       ),
       child: ElevatedButton(
         onPressed: onPressed,
-        // ignore: missing_required_param
-        style: const ElevatedButton().defaultStyleOf(context).copyWith(
+        style: const ElevatedButton(child: null, onPressed: null).defaultStyleOf(context).copyWith(
           backgroundColor: MaterialStateProperty.all(color),
           foregroundColor: MaterialStateProperty.all(textColor),
           overlayColor: MaterialStateProperty.resolveWith((_) => splashColor ?? Constants.Theme.glowSplashColor.auto),
           splashFactory: NFListTileInkRipple.splashFactory,
           shadowColor: MaterialStateProperty.all(Colors.transparent),
           textStyle: MaterialStateProperty.resolveWith((_) => TextStyle(
-            fontFamily: ThemeControl.theme.textTheme.headline1.fontFamily,
+            fontFamily: ThemeControl.theme.textTheme.headline1!.fontFamily,
             fontWeight: FontWeight.w700,
             fontSize: 15.0,
           )),

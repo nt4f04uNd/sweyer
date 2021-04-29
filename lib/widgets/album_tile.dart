@@ -14,46 +14,42 @@ const double _horizontalPadding = 16.0;
 
 class AlbumTile extends SelectableWidget<SelectionEntry> {
   const AlbumTile({
-    Key key,
-    @required this.album,
+    Key? key,
+    required this.album,
     this.trailing,
     this.current,
     this.onTap,
     this.small = false,
-    double horizontalPadding,
-  })  : assert(album != null),
-        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+    double? horizontalPadding,
+  })  : horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
         index = null,
         super(key: key);
 
   const AlbumTile.selectable({
-    Key key,
-    @required this.album,
-    @required this.index,
-    @required SelectionController<SelectionEntry> selectionController,
+    Key? key,
+    required this.album,
+    required int this.index,
+    required SelectionController<SelectionEntry> selectionController,
     bool selected = false,
     this.trailing,
     this.current,
     this.onTap,
     this.small = false,
-    double horizontalPadding,
-  })  : assert(album != null),
-        assert(index != null),
-        assert(selectionController != null),
-        assert(selectionController is SelectionController<SelectionEntry<Content>> ||
-               selectionController is SelectionController<SelectionEntry<Album>>),
-        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
-        super.selectable(
-          key: key,
-          selected: selected,
-          selectionController: selectionController,
-        );
+    double? horizontalPadding,
+  }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+              selectionController is SelectionController<SelectionEntry<Album>>),
+       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+       super.selectable(
+         key: key,
+         selected: selected,
+         selectionController: selectionController,
+       );
 
   final Album album;
-  final int index;
+  final int? index;
 
   /// Widget to be rendered at the end of the tile.
-  final Widget trailing;
+  final Widget? trailing;
 
   /// Whether this album is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
@@ -65,8 +61,8 @@ class AlbumTile extends SelectableWidget<SelectionEntry> {
   /// return album == ContentControl.state.currentSongOrigin ||
   ///        album == ContentControl.state.queues.persistent;
   /// ```
-  final bool current;
-  final VoidCallback onTap;
+  final bool? current;
+  final VoidCallback? onTap;
 
   /// Creates a small variant of the tile with the sizes of [SelectableTile].
   final bool small;
@@ -85,16 +81,14 @@ class AlbumTile extends SelectableWidget<SelectionEntry> {
 class _AlbumTileState extends SelectableState<AlbumTile> {
   void _handleTap() {
     super.handleTap(() {
-      if (widget.onTap != null) {
-        widget.onTap();
-      }
+      widget.onTap?.call();
       HomeRouter.instance.goto(HomeRoutes.factory.album(widget.album));
     });
   }
 
   bool get current {
     if (widget.current != null)
-      return widget.current;
+      return widget.current!;
     final album = widget.album;
     return album == ContentControl.state.currentSongOrigin ||
            album == ContentControl.state.queues.persistent;

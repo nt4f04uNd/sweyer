@@ -120,7 +120,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "title" : MessageLookupByLibrary.simpleMessage("Название"),
     "tracks" : MessageLookupByLibrary.simpleMessage("Треки"),
     "tracksPlural" : m4,
-    "unknownRoute" : MessageLookupByLibrary.simpleMessage("Неизвестная страница!"),
     "upNext" : MessageLookupByLibrary.simpleMessage("Далее"),
     "year" : MessageLookupByLibrary.simpleMessage("Год")
   };

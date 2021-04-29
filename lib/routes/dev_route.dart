@@ -12,7 +12,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
 class DevRoute extends StatelessWidget {
-  const DevRoute({Key key}) : super(key: key);
+  const DevRoute({Key? key}) : super(key: key);
 
   void _testToast() {
     ShowFunctions.instance.showToast(
@@ -21,9 +21,10 @@ class DevRoute extends StatelessWidget {
     );
   }
 
-  Future<void> _quitDevMode(AppLocalizations l10n, NFLocalizations nfl10n) async {
+  Future<void> _quitDevMode(BuildContext context, AppLocalizations l10n) async {
+    final nfl10n = NFLocalizations.of(context);
     final res = await ShowFunctions.instance.showDialog(
-      AppRouter.instance.navigatorKey.currentContext,
+      context,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
       buttonSplashColor: Constants.Theme.glowSplashColor.auto,
@@ -33,9 +34,9 @@ class DevRoute extends StatelessWidget {
         textStyle: const TextStyle(color: Constants.AppColors.red),
       ),
     );
-    if (res != null && res) {
+    if (res != null && res as bool) {
       ContentControl.setDevMode(false);
-      AppRouter.instance.navigatorKey.currentState.pop();
+      Navigator.of(context).pop();
     }
   }
 
@@ -64,7 +65,7 @@ class DevRoute extends StatelessWidget {
           NFListTile(
             title: Text(l10n.quitDevMode),
             splashColor: ThemeControl.theme.colorScheme.error,
-            onTap: () => _quitDevMode(l10n, NFLocalizations.of(context)),
+            onTap: () => _quitDevMode(context, l10n),
           ),
         ],
       ),
@@ -73,14 +74,14 @@ class DevRoute extends StatelessWidget {
 }
 
 class _TimeDilationSlider extends StatefulWidget {
-  const _TimeDilationSlider({Key key}) : super(key: key);
+  const _TimeDilationSlider({Key? key}) : super(key: key);
 
   @override
   _TimeDilationSliderState createState() => _TimeDilationSliderState();
 }
 
 class _TimeDilationSliderState extends State<_TimeDilationSlider> {
-  double _value;
+  late double _value;
 
   @override
   void initState() {

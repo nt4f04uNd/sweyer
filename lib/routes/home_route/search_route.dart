@@ -37,7 +37,6 @@ class SearchDelegate {
   String get query => _queryTextController.text;
   final TextEditingController _queryTextController = TextEditingController();
   set query(String value) {
-    assert(query != null);
     _queryTextController.text = value;
   }
 }
@@ -45,13 +44,15 @@ class SearchDelegate {
 
 /// Search results container.
 class _Results {
-  Map<Type, List<Content>> map = {
-    Song: [],
-    Album: [],
-  };
+  ContentMap<List<Content>> map = ContentMap({
+    for (final contentType in Content.enumerate())
+      contentType: [],
+  });
 
-  List<Song> get songs => map[Song];
-  List<Album> get albums => map[Album];
+  List<Song> get songs => map.getValue<Song>() as List<Song>;
+  List<Album> get albums => map.getValue<Album>() as List<Album>;
+  List<Playlist> get playlists => map.getValue<Playlist>() as List<Playlist>;
+  List<Artist> get artsits => map.getValue<Artist>() as List<Artist>;
 
   bool get empty => map.values.every((element) => element.isEmpty);
   bool get notEmpty => map.values.any((element) => element.isNotEmpty);
@@ -62,9 +63,13 @@ class _Results {
     }
   }
 
-  void search(query) {
-    map[Song] = ContentControl.search<Song>(query);
-    map[Album] = ContentControl.search<Album>(query);
+  void search(String query) {
+    for (final contentType in Content.enumerate()) {
+      map.setValue<Song>(
+        ContentControl.search(query, contentType: contentType),
+        key: contentType,
+      );
+    }
   }
 }
 
@@ -73,7 +78,7 @@ class _SearchStateDelegate {
     : scrollController = ScrollController(),
     singleListScrollController = ScrollController(),
     selectionController = ContentSelectionController.forContent(
-      AppRouter.instance.navigatorKey.currentState,
+      AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.routes.last != HomeRoutes.search,
     )
@@ -92,7 +97,7 @@ class _SearchStateDelegate {
   final SearchDelegate searchDelegate;
   /// Used to check whether the body is scrolled.
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
-  final ValueNotifier<Type> contentTypeNotifier = ValueNotifier(null);
+  final ValueNotifier<Type?> contentTypeNotifier = ValueNotifier(null);
   _Results results = _Results();
   String prevQuery = '';
   String trimmedQuery = '';
@@ -106,7 +111,7 @@ class _SearchStateDelegate {
     selectionController.dispose();
   }
 
-  static _SearchStateDelegate _of(BuildContext context) {
+  static _SearchStateDelegate? _of(BuildContext context) {
     return _DelegateProvider.of(context).delegate;
   }
 
@@ -119,14 +124,14 @@ class _SearchStateDelegate {
   /// Content type to filter results by.
   ///
   /// When null results are displayed as list of sections, see [_ContentSection].
-  Type get contentType => contentTypeNotifier.value;
-  set contentType(Type value) {
+  Type? get contentType => contentTypeNotifier.value;
+  set contentType(Type? value) {
     contentTypeNotifier.value = value;
     bodyScrolledNotifier.value = false;
   }
 
   void onSubmit() {
-    SearchHistory.instance.save(query);
+    SearchHistory.instance.add(query);
   }
 
   void onQueryChange() {
@@ -140,16 +145,16 @@ class _SearchStateDelegate {
         bodyScrolledNotifier.value = false;
         results.search(trimmedQuery);
       }
-      if (scrollController?.hasClients ?? false)
+      if (scrollController.hasClients)
         scrollController.jumpTo(0);
-      if (singleListScrollController?.hasClients ?? false)
+      if (singleListScrollController.hasClients)
         singleListScrollController.jumpTo(0);
     }
     prevQuery = trimmedQuery;
   }
 
   /// Handles tap to different content tiles.
-  VoidCallback getContentTileTapHandler<T extends Content>([Type contentType]) {
+  VoidCallback getContentTileTapHandler<T extends Content>([Type? contentType]) {
     return contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
@@ -163,14 +168,14 @@ class _SearchStateDelegate {
 
 class SearchPage extends Page<void> {
   const SearchPage({
-    LocalKey key,
-    @required this.delegate,
+    LocalKey? key,
+    required this.delegate,
     this.transitionSettings,
-    String name,
+    String? name,
   }) : super(key: key, name: name);
 
   final SearchDelegate delegate;
-  final RouteTransitionSettings transitionSettings;
+  final RouteTransitionSettings? transitionSettings;
 
   @override
   _SearchPageRoute createRoute(BuildContext context) {
@@ -180,7 +185,7 @@ class SearchPage extends Page<void> {
 
 class _SearchPageRoute extends RouteTransition<_SearchPage> {
   _SearchPageRoute({
-    @required this.page,
+    required this.page,
   }) : super(
          settings: page,
          transitionSettings: page.transitionSettings,
@@ -215,14 +220,14 @@ class _SearchPageRoute extends RouteTransition<_SearchPage> {
 
 class _SearchPage<T> extends StatefulWidget {
   const _SearchPage({
-    Key key,
-    this.route,
-    this.animation,
-    this.delegate,
+    Key? key,
+    required this.route,
+    required this.animation,
+    required this.delegate,
   }) : super(key: key);
 
   final PageRoute route;
-  final Animation animation;
+  final Animation? animation;
   final SearchDelegate delegate;
 
   @override
@@ -230,8 +235,8 @@ class _SearchPage<T> extends StatefulWidget {
 }
 
 class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderStateMixin {
-  _SearchStateDelegate stateDelegate;
-  FocusNode get focusNode => stateDelegate.focusNode;
+  _SearchStateDelegate? stateDelegate;
+  FocusNode get focusNode => stateDelegate!.focusNode;
 
   @override
   void initState() {
@@ -239,17 +244,17 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
     stateDelegate = _SearchStateDelegate(widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
-    widget.animation.addStatusListener(_onAnimationStatusChanged);
+    widget.animation?.addStatusListener(_onAnimationStatusChanged);
     focusNode.addListener(_onFocusChanged);
     playerRouteController.addStatusListener(_handlePlayerRouteStatusChange);
   }
 
   @override
   void dispose() {
-    stateDelegate.dispose();
+    stateDelegate!.dispose();
     widget.delegate._setStateNotifier.removeListener(_handleSetState);
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
-    widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    widget.animation?.removeStatusListener(_onAnimationStatusChanged);
     playerRouteController.removeStatusListener(_handlePlayerRouteStatusChange);
     super.dispose();
   }
@@ -273,7 +278,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
     if (status != AnimationStatus.completed) {
       return;
     }
-    widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    widget.animation!.removeStatusListener(_onAnimationStatusChanged);
     if (widget.delegate.autoKeyboard) {
       focusNode.requestFocus();
     }
@@ -297,7 +302,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   }
 
   void _onQueryChanged() {
-    stateDelegate.onQueryChange();
+    stateDelegate!.onQueryChange();
     setState(() {
       // rebuild ourselves because query changed.
     });
@@ -307,7 +312,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   ///
   /// The value provided for [result] is used as the return value.
   void close(BuildContext context, dynamic result) {
-    focusNode?.unfocus();
+    focusNode.unfocus();
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == widget.route)
       ..pop(result);
@@ -336,7 +341,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   Widget buildLeading() {
     return NFBackButton(
       onPressed: () {
-        final selectionController = stateDelegate.selectionController;
+        final selectionController = stateDelegate!.selectionController;
         if (selectionController.inSelection) {
           selectionController.close();
         }
@@ -364,21 +369,21 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
 
   PreferredSizeWidget buildBottom() {
     const bottomPadding = 12.0;
-    final contentTypeEntries = stateDelegate.results.map.entries
+    final contentTypeEntries = stateDelegate!.results.map.entries
       .where((el) => el.value.isNotEmpty)
       .toList();
-    final showChips = stateDelegate.results.notEmpty && contentTypeEntries.length > 1;
+    final showChips = stateDelegate!.results.notEmpty && contentTypeEntries.length > 1;
     return PreferredSize(
       preferredSize: Size.fromHeight(
         showChips
           ? AppBarBorder.height + 34.0 + bottomPadding
           : AppBarBorder.height,
       ),
-      child: ValueListenableBuilder<Type>(
-        valueListenable: stateDelegate.contentTypeNotifier,
+      child: ValueListenableBuilder<Type?>(
+        valueListenable: stateDelegate!.contentTypeNotifier,
         builder: (context, contentTypeValue, child) {
           return !showChips
-            ? child
+            ? child!
             : Column(
               children: [
                 SizedBox(
@@ -395,12 +400,12 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
                   ),
                 ),
                 const SizedBox(height: bottomPadding),
-                child,
+                child!,
               ],
             );
         },
         child: ValueListenableBuilder<bool>(
-          valueListenable: stateDelegate.bodyScrolledNotifier,
+          valueListenable: stateDelegate!.bodyScrolledNotifier,
           builder: (context, scrolled, child) => AppBarBorder(shown: scrolled)
         ),
       ),
@@ -413,7 +418,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
     final theme = buildAppBarTheme();
     final bottom = buildBottom();
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
-    String routeName;
+    String? routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -439,19 +444,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
               child: SelectionAppBar(
-                selectionController: stateDelegate.selectionController,
+                selectionController: stateDelegate!.selectionController,
                 onMenuPressed: null,
                 titleSelection: Padding(
                   padding: const EdgeInsets.only(top: 15.0),
-                  child: SelectionCounter(controller: stateDelegate.selectionController),
+                  child: SelectionCounter(controller: stateDelegate!.selectionController),
                 ),
                 actionsSelection: [
                   DeleteSongsAppBarAction<Content>(
-                    controller: stateDelegate.selectionController,
+                    controller: stateDelegate!.selectionController,
                   )
                 ],
                 elevationSelection: 0.0,
-                elevation: theme.appBarTheme.elevation,
+                elevation: theme.appBarTheme.elevation!,
                 toolbarHeight: kToolbarHeight,
                 backgroundColor: theme.primaryColor,
                 iconTheme: theme.primaryIconTheme,
@@ -468,7 +473,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
                     focusNode: focusNode,
                     style: theme.textTheme.headline6,
                     textInputAction: TextInputAction.search,
-                    onSubmitted: (String _) => stateDelegate.onSubmit(),
+                    onSubmitted: (String _) => stateDelegate!.onSubmit(),
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: searchFieldLabel,
@@ -497,15 +502,15 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
 
 class _DelegateProvider extends InheritedWidget {
   const _DelegateProvider({
-    Key key, 
-    @required this.delegate,
-    Widget child,
+    Key? key, 
+    required this.delegate,
+    required Widget child,
   }) : super(key: key, child: child);
 
-  final _SearchStateDelegate delegate;
+  final _SearchStateDelegate? delegate;
 
   static _DelegateProvider of(BuildContext context) {
-    return context.getElementForInheritedWidgetOfExactType<_DelegateProvider>().widget as _DelegateProvider;
+    return context.getElementForInheritedWidgetOfExactType<_DelegateProvider>()!.widget as _DelegateProvider;
   }
 
   @override
@@ -513,7 +518,7 @@ class _DelegateProvider extends InheritedWidget {
 }
 
 class _DelegateBuilder extends StatelessWidget {
-  _DelegateBuilder({Key key}) : super(key: key);
+  _DelegateBuilder({Key? key}) : super(key: key);
 
   Future<bool> _handlePop(_SearchStateDelegate delegate) async {
     if (delegate.contentType != null) {
@@ -531,12 +536,12 @@ class _DelegateBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final delegate = _SearchStateDelegate._of(context);
+    final delegate = _SearchStateDelegate._of(context)!;
     final results = delegate.results;
     final l10n = getl10n(context);
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) => _handleNotification(delegate, notification),
-      child: ValueListenableBuilder<Type>(
+      child: ValueListenableBuilder<Type?>(
         valueListenable: delegate.contentTypeNotifier,
         builder: (context, contentType, child) {
           if (delegate.trimmedQuery.isEmpty) {
@@ -619,7 +624,7 @@ class _DelegateBuilder extends StatelessWidget {
                                     if (entry.value.isNotEmpty)
                                       _ContentSection(
                                         contentType: entry.key,
-                                        items: results.map[entry.key],
+                                        items: results.map.getValue(entry.key),
                                         onTap: () => delegate.contentType = entry.key,
                                       ),
                                 ],
@@ -639,12 +644,12 @@ class _DelegateBuilder extends StatelessWidget {
 
 class _ContentChip extends StatefulWidget {
   const _ContentChip({
-    Key key,
-    @required this.delegate,
-    @required this.contentType,
+    Key? key,
+    required this.delegate,
+    required this.contentType,
   }) : super(key: key);
 
-  final _SearchStateDelegate delegate;
+  final _SearchStateDelegate? delegate;
   final Type contentType;
 
   @override
@@ -654,9 +659,9 @@ class _ContentChip extends StatefulWidget {
 class _ContentChipState extends State<_ContentChip> with SingleTickerProviderStateMixin {
   static const borderRadius = BorderRadius.all(Radius.circular(50.0));
 
-  AnimationController controller;
+  late AnimationController controller;
   
-  bool get active => widget.delegate.contentType == widget.contentType;
+  bool get active => widget.delegate!.contentType == widget.contentType;
 
   @override
   void initState() { 
@@ -675,12 +680,12 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 
   void _handleTap() {
     if (active) {
-      widget.delegate.contentType = null;
+      widget.delegate!.contentType = null;
     } else {
-      if (widget.delegate.singleListScrollController.hasClients) {
-        widget.delegate.singleListScrollController.jumpTo(0);
+      if (widget.delegate!.singleListScrollController.hasClients) {
+        widget.delegate!.singleListScrollController.jumpTo(0);
       }
-      widget.delegate.contentType = widget.contentType;
+      widget.delegate!.contentType = widget.contentType;
     }
   }
 
@@ -753,14 +758,14 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 /// content.
 class _ContentSection<T extends Content> extends StatelessWidget {
   const _ContentSection({
-    Key key,
+    Key? key,
     this.contentType,
-    @required this.items,
-    @required this.onTap,
+    required this.items,
+    required this.onTap,
   }) : super(key: key);
 
-  final Type contentType;
-  final List<Content> items;
+  final Type? contentType;
+  final List<Content>? items;
   final VoidCallback onTap;
 
   String getHeaderText(BuildContext context) {
@@ -778,10 +783,10 @@ class _ContentSection<T extends Content> extends StatelessWidget {
     final builder = contentPick<T, Widget Function(int)>(
       contentType: contentType,
       song: (index) {
-        final song = items[index] as Song;
+        final song = items![index] as Song;
         return SongTile.selectable(
           index: index,
-          selected: delegate.selectionController.data
+          selected: delegate!.selectionController.data
             .firstWhereOrNull((el) => el.data == song) != null,
           song: song,
           selectionController: delegate.selectionController,
@@ -790,12 +795,12 @@ class _ContentSection<T extends Content> extends StatelessWidget {
         );
       },
       album: (index) {
-        final album = items[index] as Album;
+        final album = items![index] as Album;
         return AlbumTile.selectable(
           index: index,
-          selected: delegate.selectionController.data
+          selected: delegate!.selectionController.data
             .firstWhereOrNull((el) => el.data == album) != null,
-          album: items[index] as Album,
+          album: items![index] as Album,
           selectionController: delegate.selectionController,
           small: false,
           horizontalPadding: 12.0,
@@ -825,7 +830,7 @@ class _ContentSection<T extends Content> extends StatelessWidget {
         ),
         Column(
           children: [
-            for (int index = 0; index < math.min(5, items.length); index ++)
+            for (int index = 0; index < math.min(5, items!.length); index ++)
               builder(index),
           ],
         )
@@ -835,14 +840,14 @@ class _ContentSection<T extends Content> extends StatelessWidget {
 }
 
 class _Suggestions extends StatefulWidget {
-  _Suggestions({Key key}) : super(key: key);
+  _Suggestions({Key? key}) : super(key: key);
 
   @override
   _SuggestionsState createState() => _SuggestionsState();
 }
 
 class _SuggestionsState extends State<_Suggestions> {
-  Future<void> _loadFuture;
+  Future<void>? _loadFuture;
 
   @override
   void initState() { 
@@ -856,7 +861,7 @@ class _SuggestionsState extends State<_Suggestions> {
     return FutureBuilder<void>(
       future: _loadFuture,
       builder: (context, snapshot) {
-        if (SearchHistory.instance.history == null) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Center(
             child: Spinner(),
           );
@@ -904,11 +909,11 @@ class _SuggestionsState extends State<_Suggestions> {
 
 
 class _SuggestionsHeader extends StatelessWidget {
-  const _SuggestionsHeader({Key key}) : super(key: key);
+  const _SuggestionsHeader({Key? key}) : super(key: key);
 
   void clearHistory(BuildContext context) {
     SearchHistory.instance.clear();
-    _SearchStateDelegate._of(context).searchDelegate.setState();
+    _SearchStateDelegate._of(context)!.searchDelegate.setState();
   }
 
   @override
@@ -944,20 +949,20 @@ class _SuggestionsHeader extends StatelessWidget {
 
 class _SuggestionTile extends StatelessWidget {
   const _SuggestionTile({
-    Key key,
-    @required this.index,
+    Key? key,
+    required this.index,
   }) : super(key: key);
 
   final int index;
 
   /// Deletes item from search history by its index.
   void _removeEntry(BuildContext context, int index) {
-    SearchHistory.instance.remove(index);
-    _SearchStateDelegate._of(context).searchDelegate.setState();
+    SearchHistory.instance.removeAt(index);
+    _SearchStateDelegate._of(context)!.searchDelegate.setState();
   }
 
   void _handleTap(context) {
-    final delegate = _SearchStateDelegate._of(context);
+    final delegate = _SearchStateDelegate._of(context)!;
     delegate.searchDelegate.query = SearchHistory.instance.history[index];
     delegate.focusNode.unfocus();
   }

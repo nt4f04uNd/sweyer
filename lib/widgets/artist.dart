@@ -12,15 +12,15 @@ String formatArtist(String artist, AppLocalizations l10n) =>
 /// Component to show artist, or automatically show 'Unknown artist' instead of '<unknown>'
 class ArtistWidget extends StatelessWidget {
   const ArtistWidget({
-    Key key,
-    @required this.artist,
+    Key? key,
+    required this.artist,
     this.overflow = TextOverflow.ellipsis,
     this.textStyle,
   }) : super(key: key);
 
   final String artist;
   final TextOverflow overflow;
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class ArtistWidget extends StatelessWidget {
     return Text(
       formatArtist(artist, l10n),
       overflow: overflow,
-      style: ThemeControl.theme.textTheme.subtitle2.merge(textStyle),
+      style: ThemeControl.theme.textTheme.subtitle2!.merge(textStyle),
     );
   }
 }

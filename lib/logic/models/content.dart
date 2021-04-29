@@ -19,5 +19,5 @@ abstract class Content with EquatableMixin {
   int get id;
 
   /// Enumerates all the types of content (derived from this class).
-  static List<Type> enumerate() => [Song, Album];
+  static List<Type> enumerate() => [Song, Album, Playlist, Artist, Genre];
 }

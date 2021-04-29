@@ -14,17 +14,17 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Returns app style used for app bar title.
 TextStyle get appBarTitleTextStyle => TextStyle(
   fontWeight: FontWeight.w700,
-  color: ThemeControl.theme.textTheme.headline6.color,
+  color: ThemeControl.theme.textTheme.headline6!.color,
   fontSize: 22.0,
   fontFamily: 'Roboto',
 );
 
 /// Needed to change physics of the [TabBarView].
 class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const _TabsScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  const _TabsScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
-  _TabsScrollPhysics applyTo(ScrollPhysics ancestor) {
+  _TabsScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return _TabsScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -37,7 +37,7 @@ class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
 }
 
 class TabsRoute extends StatefulWidget {
-  const TabsRoute({Key key}) : super(key: key);
+  const TabsRoute({Key? key}) : super(key: key);
 
   @override
   TabsRouteState createState() => TabsRouteState();
@@ -45,8 +45,8 @@ class TabsRoute extends StatefulWidget {
 
 class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, SelectionHandler {
   static const tabBarHeight = 44.0;
-  ContentSelectionController selectionController;
-  TabController tabController;
+  late ContentSelectionController selectionController;
+  late TabController tabController;
   /// Used in [HomeRouter.drawerCanBeOpened].
   bool tabBarDragged = false;
 
@@ -104,21 +104,21 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   }
 
   
-  DateTime _lastBackPressTime;
+  DateTime? _lastBackPressTime;
   Future<bool> _handlePop() async {
     final navigatorKey = AppRouter.instance.navigatorKey;
     final homeNavigatorKey = HomeRouter.instance.navigatorKey;
-    if (navigatorKey.currentState != null && navigatorKey.currentState.canPop()) {
-      navigatorKey.currentState.pop();
+    if (navigatorKey.currentState != null && navigatorKey.currentState!.canPop()) {
+      navigatorKey.currentState!.pop();
       return true;
-    } else if (homeNavigatorKey.currentState != null && homeNavigatorKey.currentState.canPop()) {
-      homeNavigatorKey.currentState.pop();
+    } else if (homeNavigatorKey.currentState != null && homeNavigatorKey.currentState!.canPop()) {
+      homeNavigatorKey.currentState!.pop();
       return true;
     } else {
       final now = DateTime.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime) > const Duration(seconds: 2)) {
+      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;
@@ -235,10 +235,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                                     ),
                                   ),
                                   labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                  labelColor: theme.textTheme.headline6.color,
+                                  labelColor: theme.textTheme.headline6!.color,
                                   indicatorSize: TabBarIndicatorSize.label,
                                   unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
-                                  labelStyle: theme.textTheme.headline6.copyWith(
+                                  labelStyle: theme.textTheme.headline6!.copyWith(
                                     fontSize: 15.0,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -269,9 +269,9 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 
 
 class _ContentTab<T extends Content> extends StatefulWidget {
-  _ContentTab({Key key, @required this.selectionController}) : super(key: key);
+  _ContentTab({Key? key, required this.selectionController}) : super(key: key);
 
-  final ContentSelectionController<SelectionEntry> selectionController;
+  final ContentSelectionController<SelectionEntry>? selectionController;
 
   @override
   _ContentTabState<T> createState() => _ContentTabState();
@@ -313,7 +313,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
       backgroundColor: ThemeControl.theme.colorScheme.primary,
       onRefresh: onRefresh,
       notificationPredicate: (notification) {
-        return selectionController.notInSelection &&
+        return selectionController!.notInSelection &&
                notification.depth == 0;
       },
       child: ContentListView<T>(
@@ -401,11 +401,11 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
 
 class _TabCollapse extends StatelessWidget {
   const _TabCollapse({
-    Key key,
-    this.index,
-    this.tabController,
-    this.label,
-    this.icon,
+    Key? key,
+    required this.index,
+    required this.tabController,
+    required this.label,
+    required this.icon,
   }) : super(key: key);
 
   final int index;
@@ -417,20 +417,20 @@ class _TabCollapse extends StatelessWidget {
   Widget build(BuildContext context) {
     return NFTab(
       child: AnimatedBuilder(
-        animation: tabController.animation,
+        animation: tabController.animation!,
         builder: (context, child) {
-          final tabValue = tabController.animation.value;
+          final tabValue = tabController.animation!.value;
           final indexIsChanging = tabController.indexIsChanging;
           double value = 0.0;
           if (tabValue > index - 1 && tabValue <= index) {
-            if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+            if (indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
               // Animation for next tab.
-              value = 1 + (tabController.animation.value - index);
+              value = 1 + (tabController.animation!.value - index);
             }
           } else if (tabValue <= index + 1 && tabValue > index) {
-            if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+            if (indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
               // Animation for previos tab.
-              value = 1 - (tabController.animation.value - index);
+              value = 1 - (tabController.animation!.value - index);
             }
           }
           value = value.clamp(0.0, 1.0);

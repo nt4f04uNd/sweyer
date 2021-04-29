@@ -6,7 +6,6 @@
 // @dart = 2.12
 
 import 'package:sweyer/sweyer.dart';
-
 class Genre extends Content {
   @override
   final int id;

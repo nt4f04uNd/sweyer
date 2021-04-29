@@ -4,23 +4,22 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Used for selection of [Content].
 class SelectionEntry<T extends Content> extends Equatable {
   const SelectionEntry({
-    @required this.index,
-    @required this.data,
+    required this.index,
+    required this.data,
   });
 
   /// Used for comparison and for sorting when content is being
   /// inserted into queue.
-  final int index;
+  final int? index;
 
   /// The content data.
   final T data;
 
   @override
-  List<Object> get props => [data, index];
+  List<Object?> get props => [data, index];
 }

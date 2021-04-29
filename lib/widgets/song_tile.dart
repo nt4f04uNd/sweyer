@@ -23,14 +23,13 @@ enum SongTileVariant {
 /// Supposed to draw a [Song.track] number, or '-' symbol if it's null.
 class SongNumber extends StatelessWidget {
   SongNumber({
-    Key key,
-    String number,
+    Key? key,
+    String? number,
     this.current = false,
-  })  : assert(current != null),
-        number = int.tryParse(number ?? ''),
-        super(key: key);
+  }) : number = int.tryParse(number ?? ''),
+       super(key: key);
 
-  final int number;
+  final int? number;
   final bool current;
 
   @override
@@ -43,7 +42,7 @@ class SongNumber extends StatelessWidget {
           color: ThemeControl.theme.colorScheme.onBackground,
         ),
       );
-    } else if (number != null && number > 0 && number < 999) {
+    } else if (number != null && number! > 0 && number! < 999) {
       // Since this class won't be used for playlsits, but only for albums,
       // I limit the number to be from 0 to 999, in other cases consider it invalid/unsassigned and show a dot
       child = Text(
@@ -78,32 +77,28 @@ class SongNumber extends StatelessWidget {
 /// A [SongTile] that can be selected.
 class SongTile extends SelectableWidget<SelectionEntry> {
   SongTile({
-    Key key,
-    @required this.song,
+    Key? key,
+    required this.song,
     this.current,
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
     this.horizontalPadding = kSongTileHorizontalPadding,
-  }) : assert(song != null),
-       index = null,
+  }) : index = null,
        super(key: key);
 
   SongTile.selectable({
-    Key key,
-    @required this.song,
-    @required this.index,
-    @required SelectionController<SelectionEntry> selectionController,
+    Key? key,
+    required this.song,
+    required int this.index,
+    required SelectionController<SelectionEntry> selectionController,
     bool selected = false,
     this.current,
     this.onTap,
     this.clickBehavior = SongClickBehavior.play,
     this.variant = SongTileVariant.albumArt,
     this.horizontalPadding = kSongTileHorizontalPadding,
-  }) : assert(song != null),
-       assert(index != null),
-       assert(selectionController != null),
-       assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+  }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
               selectionController is SelectionController<SelectionEntry<Song>>),
        super.selectable(
          key: key,
@@ -112,7 +107,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
        );
 
   final Song song;
-  final int index;
+  final int? index;
 
   /// Whether this song is current, if yes, enables animated
   /// [CurrentIndicator] over the ablum art/instead song number.
@@ -123,8 +118,8 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   /// ```dart
   /// song.sourceId == ContentControl.state.currentSong.sourceId
   /// ```
-  final bool current;
-  final VoidCallback onTap;
+  final bool? current;
+  final VoidCallback? onTap;
   final SongClickBehavior clickBehavior;
   final SongTileVariant variant;
   final double horizontalPadding;
@@ -144,9 +139,7 @@ class _SongTileState extends SelectableState<SongTile> {
 
   void _handleTap() {
     super.handleTap(() async {
-      if (widget.onTap != null) {
-        widget.onTap();
-      }
+      widget.onTap?.call();
       await MusicPlayer.instance.handleSongClick(
         context,
         widget.song,
@@ -156,15 +149,11 @@ class _SongTileState extends SelectableState<SongTile> {
   }
 
   bool get current {
-    if (widget.current != null)
-      return widget.current;
-    return widget.song.sourceId == ContentControl.state.currentSong.sourceId;
+    return widget.current ??
+           widget.song.sourceId == ContentControl.state.currentSong.sourceId;
   }
 
-  Widget _buildTile(
-    Widget albumArt, [
-    double rightPadding,
-  ]) {
+  Widget _buildTile(Widget albumArt, [double? rightPadding]) {
     rightPadding ??= widget.horizontalPadding;
     final theme = ThemeControl.theme;
     Widget title = Text(

@@ -17,28 +17,28 @@ const double _kButtonSize = 66.0;
 
 class AnimatedPlayPauseButton extends StatefulWidget {
   const AnimatedPlayPauseButton({
-    Key key,
+    Key? key,
     this.player,
     this.iconSize,
     this.size,
     this.iconColor,
   }) : super(key: key);
 
-  final AudioPlayer player;
-  final double iconSize;
-  final double size;
-  final Color iconColor;
+  final AudioPlayer? player;
+  final double? iconSize;
+  final double? size;
+  final Color? iconColor;
 
   @override
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
 
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with TickerProviderStateMixin {
-  AnimationController controller;
-  StreamSubscription<bool> _playingSubscription;
+  late AnimationController controller;
+  late StreamSubscription<bool> _playingSubscription;
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
 
-  String _animation;
+  late String _animation;
   set animation(String value) {
     setState(() {
       _animation = value;
@@ -62,7 +62,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
       controller.value = 1.0;
       _animation = 'play';
     }
-    _playingSubscription?.cancel();
+    _playingSubscription.cancel();
     _playingSubscription = player.playingStream.listen((playing) {
       /// Do not handle [PlayerState.PLAYING] as it's not the state the player will remain for long time.
       /// It will start playing next song immediately.
@@ -126,7 +126,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
     ).animate(baseAnimation);
     final scaleAnimation = Tween(begin: 1.05, end: 0.89).animate(baseAnimation);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final color = widget.iconColor ?? ThemeControl.theme.iconTheme.color;
+    final color = widget.iconColor ?? ThemeControl.theme.iconTheme.color!;
     return NFIconButton(
       size: textScaleFactor * (widget.size ?? _kButtonSize),
       iconSize: textScaleFactor * (widget.iconSize ?? _kIconSize),

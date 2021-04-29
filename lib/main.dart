@@ -100,7 +100,7 @@ Future<void> main() async {
   }).sendPort);
   FlutterError.onError = reportFlutterError;
   runZonedGuarded<Future<void>>(() async {
-    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
+    WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
 
     await AppLocalizations.init();
     await ThemeControl.init();
@@ -112,7 +112,7 @@ Future<void> main() async {
 }
 
 class App extends StatefulWidget {
-  const App({Key key}) : super(key: key);
+  const App({Key? key}) : super(key: key);
 
   static NFThemeData nfThemeData = NFThemeData(
     systemUiStyle: Constants.UiTheme.black.auto,
@@ -125,15 +125,15 @@ class App extends StatefulWidget {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
-    (AppRouter.instance.navigatorKey.currentContext as Element).visitChildren(rebuild);
+    (AppRouter.instance.navigatorKey.currentContext as Element?)!.visitChildren(rebuild);
   }
 
   @override
   _AppState createState() => _AppState();
 }
 
-SlidableController _playerRouteController;
-SlidableController _drawerController;
+late SlidableController _playerRouteController;
+late SlidableController _drawerController;
 SlidableController get playerRouteController => _playerRouteController;
 SlidableController get drawerController => _drawerController;
 

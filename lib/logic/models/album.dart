@@ -15,7 +15,7 @@ class Album extends PersistentQueue {
   final String artist;
   final int artistId;
   final int firstYear;
-  final int lastYear;
+  final int? lastYear;
   final int numberOfSongs;
 
   @override
@@ -36,9 +36,9 @@ class Album extends PersistentQueue {
 
   /// Gets album normalized year.
   int get year {
-    return lastYear == null || lastYear < 1000
+    return lastYear == null || lastYear! < 1000
       ? DateTime.now().year
-      : lastYear;
+      : lastYear!;
   }
 
 

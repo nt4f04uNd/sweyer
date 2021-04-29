@@ -15,16 +15,17 @@ import 'package:sweyer/sweyer.dart';
 // Currently it's not used anywhere.
 
 class _StandalonePlayer extends StatefulWidget {
-  _StandalonePlayer({Key key}) : super(key: key);
+  _StandalonePlayer({Key? key}) : super(key: key);
 
   @override
   _StandalonePlayerState createState() => _StandalonePlayerState();
 }
 
 class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerProviderStateMixin {
-  AudioPlayer player;
-  AnimationController controller;
-  Timer timer;
+  late AudioPlayer player;
+  late AnimationController controller;
+  Timer? timer;
+
   static const fadeDuration = Duration(milliseconds: 300);
 
   @override
@@ -56,6 +57,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
     timer?.cancel();
     timer = Timer(const Duration(milliseconds: 1500) + fadeDuration, () {
       controller.reverse();
+      timer = null;
     });
   }
 

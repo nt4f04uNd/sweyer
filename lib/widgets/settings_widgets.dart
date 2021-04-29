@@ -9,25 +9,24 @@ import 'package:sweyer/sweyer.dart';
 /// Creates a setting item with [title], [description] and [content] sections
 class SettingItem extends StatelessWidget {
   const SettingItem({
-    Key key,
-    @required this.title,
+    Key? key,
+    required this.title,
+    required this.content,
     this.description,
     this.trailing,
-    this.content,
-  })  : assert(title != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// Text displayed as main title of the settings
   final String title;
 
-  /// Text displayed as the settings description
-  final String description;
-
-  /// A place for widget to display at the end of title line
-  final Widget trailing;
-
   /// A place for a custom widget (e.g. slider)
   final Widget content;
+
+  /// Text displayed as the settings description
+  final String? description;
+
+  /// A place for widget to display at the end of title line
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +34,12 @@ class SettingItem extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
+        children: [
           //******** Title ********
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
+            children: [
               Padding(
                 padding: const EdgeInsets.only(top: 10.0),
                 child: Text(
@@ -48,7 +47,8 @@ class SettingItem extends StatelessWidget {
                   style: const TextStyle(fontSize: 16.0),
                 ),
               ),
-              if (trailing != null) trailing
+              if (trailing != null)
+                trailing!
             ],
           ),
           //******** Description ********
@@ -56,9 +56,9 @@ class SettingItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 2.0),
               child: Text(
-                description,
+                description!,
                 style: TextStyle(
-                  color: ThemeControl.theme.textTheme.caption.color,
+                  color: ThemeControl.theme.textTheme.caption!.color,
                 ),
               ),
             ),
@@ -76,17 +76,18 @@ class SettingItem extends StatelessWidget {
 /// The [child] is untouchable in the animation.
 class ChangedSwitcher extends StatefulWidget {
   ChangedSwitcher({
-    Key key,
-    this.changed,
+    Key? key,
     this.child,
+    this.changed = false,
   }) : super(key: key);
+
+  final Widget? child;
 
   /// When true, the [child] is shown and clickable.
   /// When false, the [child] is hidden and untouchable, but occupies the same space.
   ///
   /// Represents that some setting has been changed.
   final bool changed;
-  final Widget child;
 
   @override
   _ChangedSwitcherState createState() => _ChangedSwitcherState();

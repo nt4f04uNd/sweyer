@@ -254,11 +254,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unknownRoute": "Unknown route!",
-  "@unknownRoute": {
-    "type": "text",
-    "placeholders": {}
-  },
   "found": "Found",
   "@found": {
     "type": "text",

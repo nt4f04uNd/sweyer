@@ -13,7 +13,7 @@ import 'package:sweyer/constants.dart' as Constants;
 
 /// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
-  const DrawerWidget({Key key}) : super(key: key);
+  const DrawerWidget({Key? key}) : super(key: key);
 
   @override
   _DrawerWidgetState createState() => _DrawerWidgetState();
@@ -24,7 +24,7 @@ class _DrawerWidgetState extends State<DrawerWidget>
   /// Indicates that current route with drawer is ontop and it can take the control
   /// over the ui animations.
   bool _onTop = true;
-  SlidableController controller;
+  late SlidableController controller;
 
   @override
   void initState() {
@@ -104,8 +104,8 @@ class _DrawerWidgetState extends State<DrawerWidget>
 }
 
 class _DrawerWidgetContent extends StatefulWidget {
-  _DrawerWidgetContent({Key key, @required this.controller}) : super(key: key);
-  final SlidableController controller;
+  _DrawerWidgetContent({Key? key, required this.controller}) : super(key: key);
+  final SlidableController? controller;
 
   @override
   _DrawerWidgetContentState createState() => _DrawerWidgetContentState();
@@ -119,17 +119,17 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_handleControllerChange);
+    widget.controller!.addListener(_handleControllerChange);
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_handleControllerChange);
+    widget.controller!.removeListener(_handleControllerChange);
     super.dispose();
   }
 
   void _handleControllerChange() {
-    if (widget.controller.value <= 0.01) {
+    if (widget.controller!.value <= 0.01) {
       if (elevation != 0.0) {
         setState(() {
           elevation = 0.0;
@@ -145,12 +145,12 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   }
 
   void _handleClickSettings() {
-    widget.controller.close();
+    widget.controller!.close();
     AppRouter.instance.goto(AppRoutes.settings);
   }
 
   void _handleClickDebug() {
-    widget.controller.close();
+    widget.controller!.close();
     AppRouter.instance.goto(AppRoutes.dev);
   }
 
@@ -183,7 +183,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
-                          color: ThemeControl.theme.textTheme.headline6.color,
+                          color: ThemeControl.theme.textTheme.headline6!.color,
                         ),
                       ),
                     ),
@@ -199,7 +199,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               ),
               ValueListenableBuilder<bool>(
                 valueListenable: ContentControl.devMode,
-                builder: (context, value, child) => value ? child : const SizedBox.shrink(),
+                builder: (context, value, child) => value ? child! : const SizedBox.shrink(),
                 child: MenuItem(
                   l10n.debug,
                   icon: Icons.adb_rounded,
@@ -215,21 +215,22 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
 }
 
 class MenuItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
-  final double iconSize;
-  final double fontSize;
   const MenuItem(
     this.title, {
-    Key key,
+    Key? key,
     this.icon,
     this.onTap,
     this.onLongPress,
     this.iconSize = 22.0,
     this.fontSize = 15.0,
   }) : super(key: key);
+
+  final IconData? icon;
+  final String title;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final double iconSize;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {

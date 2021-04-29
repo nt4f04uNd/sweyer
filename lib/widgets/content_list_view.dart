@@ -25,9 +25,9 @@ typedef _ItemBuilder = Widget Function(BuildContext context, int index, Widget i
 class ContentListView<T extends Content> extends StatelessWidget {
   /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
-    Key key,
+    Key? key,
     this.contentType,
-    @required this.list,
+    required this.list,
     this.itemBuilder,
     this.controller,
     this.selectionController,
@@ -45,34 +45,34 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) : super(key: key);
 
   /// An explicit content type.
-  final Type contentType;
+  final Type? contentType;
 
   /// Content list.
   final List<T> list;
   
   /// Builder that allows to wrap the prebuilt item tile tile.
   /// For example can be used to add [Dismissible].
-  final _ItemBuilder itemBuilder;
+  final _ItemBuilder? itemBuilder;
 
   /// Viewport scroll controller.
-  final ScrollController controller;
+  final ScrollController? controller;
 
   /// If specified, list will be built as [SongTile.selectable],
   /// otherwise [SongTile] is used (in case if content is [Song]).
-  final ContentSelectionController<SelectionEntry> selectionController;
+  final ContentSelectionController<SelectionEntry>? selectionController;
 
   /// A widget to build before all items.
-  final Widget leading;
+  final Widget? leading;
 
   /// Returned value is passed to [SongTile.current] (in case if content is [Song]).
   ///
   /// The argument [index] is index of the song.
-  final _ItemTest currentTest;
+  final _ItemTest? currentTest;
 
   /// Returned values is passed to [SongTile.selected] (in case if content is [Song]).
   /// 
   /// The argument [index] is index of the song.
-  final _ItemTest selectedTest;
+  final _ItemTest? selectedTest;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -81,7 +81,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   final SongClickBehavior songClickBehavior;
 
   /// Callback to be called on item tap.
-  final VoidCallback onItemTap;
+  final VoidCallback? onItemTap;
 
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry padding;
@@ -144,17 +144,17 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Padding is also removed, since it's possible to just wrap it with [SliverPadding].
   @factory
   static MultiSliver sliver<T extends Content>({
-    Key key,
-    Type contentType,
-    @required List<T> list,
-    _ItemBuilder itemBuilder,
-    ContentSelectionController<SelectionEntry> selectionController,
-    Widget leading,
-    _ItemTest currentTest,
-    _ItemTest selectedTest,
+    Key? key,
+    Type? contentType,
+    required List<T> list,
+    _ItemBuilder? itemBuilder,
+    ContentSelectionController<SelectionEntry>? selectionController,
+    Widget? leading,
+    _ItemTest? currentTest,
+    _ItemTest? selectedTest,
     SongTileVariant songTileVariant = SongTileVariant.albumArt,
     SongClickBehavior songClickBehavior = SongClickBehavior.play,
-    VoidCallback onItemTap,
+    VoidCallback? onItemTap,
   }) {
     final selectable = selectionController != null;
     return MultiSliver(
@@ -168,22 +168,21 @@ class ContentListView<T extends Content> extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final item = list[index] as Song;
-                final localSelected = selectedTest != null
-                  ? selectedTest(index)
-                  : selectionController.data.contains(SelectionEntry<Song>(
-                      data: item,
-                      index: index,
-                    ));
                 Widget child;
                 if (selectable) {
                   child = SongTile.selectable(
                     index: index,
                     song: item,
-                    selectionController: selectionController,
+                    selectionController: selectionController!,
                     clickBehavior: songClickBehavior,
                     variant: songTileVariant,
                     current: currentTest?.call(index),
-                    selected: localSelected,
+                    selected: selectedTest != null
+                      ? selectedTest(index)
+                      : selectionController.data.contains(SelectionEntry<Song>(
+                          data: item,
+                          index: index,
+                        )),
                     onTap: onItemTap,
                   );
                 } else {
@@ -205,12 +204,6 @@ class ContentListView<T extends Content> extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final item = list[index] as Album;
-                final localSelected = selectedTest != null
-                  ? selectedTest(index)
-                  : selectionController.data.contains(SelectionEntry<Album>(
-                      data: item,
-                      index: index,
-                    ));
                 Widget child;
                 if (selectable) {
                   child = AlbumTile.selectable(
@@ -218,8 +211,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
                     album: item,
                     current: currentTest?.call(index),
                     onTap: onItemTap,
-                    selected: localSelected,
-                    selectionController: selectionController,
+                    selectionController: selectionController!,
+                    selected: selectedTest != null
+                      ? selectedTest(index)
+                      : selectionController.data.contains(SelectionEntry<Album>(
+                          data: item,
+                          index: index,
+                        )),
                   );
                 } else {
                   child = AlbumTile(

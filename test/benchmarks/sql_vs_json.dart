@@ -59,6 +59,8 @@ void main() {
     albumId: 0,
     artist: 'artist',
     artistId: 0,
+    genre: 'genre',
+    genreId: 0,
     title: 'title',
     track: 'track',
     dateAdded: 0,
@@ -67,6 +69,10 @@ void main() {
     size: 0,
     data: 'data_data_data_data_data_data_data_data',
     origin: album,
+    isPending: false,
+    isFavorite: false,
+    generationAdded: 0,
+    generationModified: 0,
   ));
 
   testWidgets('sql', (_) async {
@@ -99,10 +105,10 @@ class SongsDatabase {
   static const _DATABASE = 'TEST.db';
   static const TABLE = 'TEST';
 
-  Completer<Database> _completer;
+  Completer<Database>? _completer;
   Future<Database> get _database async {
     if (_completer != null)
-      return _completer.future;
+      return _completer!.future;
     _completer = Completer();
     await openDatabase(
       join(await getDatabasesPath(), _DATABASE),
@@ -112,11 +118,11 @@ class SongsDatabase {
       onDowngrade: (database, oldVersion, newVersion) {},
       onUpgrade: (database, oldVersion, newVersion) {},
       onOpen: (database) {
-        _completer.complete(database);
+        _completer!.complete(database);
       },
       version: 1,
     );
-    return _completer.future;
+    return _completer!.future;
   }
   
   /// Table of all songs.
@@ -132,9 +138,9 @@ class SongsDatabase {
 
 class Table<T extends SqlSong> {
   Table({
-    @required this.name,
-    @required Database database,
-    @required this.factory,
+    required this.name,
+    required Database database,
+    required this.factory,
   }) : _database = database;
 
   /// Table name.
@@ -144,7 +150,7 @@ class Table<T extends SqlSong> {
   final Database _database;
 
   /// Recieves map of data and should create an item from it.
-  final T Function(Map<String, Object> data) factory;
+  final T Function(Map<String, Object?> data) factory;
 
   Future<List<T>> queryAll() async {
     return (await _database.query(name))
@@ -187,8 +193,8 @@ class Table<T extends SqlSong> {
 
 class SqlSong {
   SqlSong({
-    @required this.id,
-    @required this.origin,
+    required this.id,
+    required this.origin,
   })  : assert(() {
           if (origin is Album) {
             return true;
@@ -204,7 +210,7 @@ class SqlSong {
   }
 
   final int id;
-  final PersistentQueue origin;
+  final PersistentQueue? origin;
 
   Map<String, dynamic> toMap() {
     return {
@@ -212,13 +218,13 @@ class SqlSong {
       if (origin != null)
         'origin_type': 'album',
       if (origin != null)
-        'origin_id': origin.id,
+        'origin_id': origin!.id,
     };
   }
 
   factory SqlSong.fromMap(Map<String, dynamic> map) {
     final originType = map['origin_type'];
-    PersistentQueue origin;
+    PersistentQueue? origin;
     assert(originType == 'album');
     if (originType == 'album') {
       origin = ContentControl.state.albums[map['origin_id']];

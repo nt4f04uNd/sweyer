@@ -25,21 +25,21 @@ import 'dev_route.dart';
 final RouteObserver<Route> routeObserver = RouteObserver();
 final RouteObserver<Route> homeRouteObserver = RouteObserver();
 
-abstract class _Routes<T extends Object> extends Equatable {
-  const _Routes(this.location, [this.arguments]);
+abstract class _Routes<T> extends Equatable {
+const _Routes(this.location, [this.arguments]);
 
   final String location;
-  final T arguments;
+  final T? arguments;
 
   /// Value key to pass in to the [Page].
-  ValueKey<String> get key => ValueKey(location);
+  ValueKey<String?> get key => ValueKey(location);
 
   @override
   List<Object> get props => [location];
 }
 
-class AppRoutes<T extends Object> extends _Routes<T> {
-  const AppRoutes._(String location, [T arguments]) : super(location, arguments);
+class AppRoutes<T> extends _Routes<T> {
+  const AppRoutes._(String location, [T? arguments]) : super(location, arguments);
 
   static const initial = AppRoutes<void>._('/');
   static const settings = AppRoutes<void>._('/settings');
@@ -48,8 +48,8 @@ class AppRoutes<T extends Object> extends _Routes<T> {
   static const dev = AppRoutes<void>._('/dev');
 }
 
-class HomeRoutes<T extends Object> extends _Routes<T> {
-  const HomeRoutes._(String location, [T arguments]) : super(location, arguments);
+class HomeRoutes<T> extends _Routes<T> {
+  const HomeRoutes._(String location, [T? arguments]) : super(location, arguments);
 
   static const tabs = HomeRoutes<void>._('/tabs');
   static const album = HomeRoutes<Album>._('/album');
@@ -62,7 +62,7 @@ class HomeRoutes<T extends Object> extends _Routes<T> {
 class _HomeRoutesFactory {
   const _HomeRoutesFactory();
 
-  HomeRoutes<Album> album(Album album) => HomeRoutes._('/album', album);
+  HomeRoutes<Album> album(Album? album) => HomeRoutes._('/album', album);
   HomeRoutes<SearchArguments> search(SearchArguments arguments) => HomeRoutes._('/search', arguments);
 }
 
@@ -80,7 +80,7 @@ class SearchArguments {
 class AppRouteInformationParser extends RouteInformationParser<AppRoutes> {
   @override
   Future<AppRoutes> parseRouteInformation(RouteInformation routeInformation) async {
-    return AppRoutes._(routeInformation.location);
+    return AppRoutes._(routeInformation.location!);
   }
 
   @override
@@ -92,7 +92,7 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutes> {
 class HomeRouteInformationParser extends RouteInformationParser<HomeRoutes> {
   @override
   Future<HomeRoutes> parseRouteInformation(RouteInformation routeInformation) async {
-    return HomeRoutes._(routeInformation.location);
+    return HomeRoutes._(routeInformation.location!);
   }
 
   @override
@@ -143,11 +143,11 @@ mixin _DelegateMixin<T extends _Routes> on RouterDelegate<T>, ChangeNotifier {
 
 class _TransitionSettings {
   _TransitionSettings({
-    @required this.grey,
-    @required this.greyDismissible,
-    @required this.dismissible,
-    @required this.initial,
-    @required this.theme,
+    required this.grey,
+    required this.greyDismissible,
+    required this.dismissible,
+    required this.initial,
+    required this.theme,
   });
   
   /// Used on [HomeRouter] routes that cannot be dismissed.
@@ -170,7 +170,7 @@ class AppRouter extends RouterDelegate<AppRoutes>
   AppRouter._();
   static final instance = AppRouter._();
 
-  final List<AppRoutes> __routes = [AppRoutes.initial];
+  final List<AppRoutes> __routes = [AppRoutes.initial as AppRoutes<Object>];
   @override
   List<AppRoutes> get _routes => __routes;
 
@@ -216,7 +216,7 @@ class AppRouter extends RouterDelegate<AppRoutes>
     updateTransitionSettings();
   }
 
-  VoidCallback setState;
+  VoidCallback? setState;
   void updateTransitionSettings({bool themeChanged = false}) {
     final dismissBarrier = _dismissBarrier;
     transitionSettings.grey.uiStyle = Constants.UiTheme.grey.auto;
@@ -298,8 +298,8 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     // });
   }
 
-  static HomeRouter _instance;
-  static HomeRouter get instance => _instance;
+  static HomeRouter? _instance;
+  static HomeRouter get instance => _instance!;
 
   @override
   void dispose() {
@@ -309,9 +309,9 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     super.dispose();
   }
 
-  StreamSubscription<QuickAction> _quickActionsSub;
+  late StreamSubscription<QuickAction> _quickActionsSub;
 
-  final List<HomeRoutes> __routes = [HomeRoutes.tabs];
+  final List<HomeRoutes> __routes = [HomeRoutes.tabs as HomeRoutes<Object>];
   @override
   List<HomeRoutes> get _routes => __routes;
 
@@ -326,7 +326,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   Future<void> setNewRoutePath(HomeRoutes configuration) async { }
 
   final tabsRouteKey = GlobalKey<TabsRouteState>();
-  SearchDelegate _searchDelegate;
+  SearchDelegate? _searchDelegate;
 
   /// Whether the drawer can be opened.
   bool get drawerCanBeOpened {
@@ -334,7 +334,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     return playerRouteController.closed &&
       (selectionController?.notInSelection ?? true) &&
       routes.last != HomeRoutes.album &&
-      ((tabsRouteKey.currentState?.tabController?.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
+      ((tabsRouteKey.currentState?.tabController.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
       !(tabsRouteKey.currentState?.tabBarDragged ?? false);
   }
 
@@ -342,7 +342,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   /// 
   /// For example we want that player route would be closed first.
   bool handleNecessaryPop() {
-    final selectionController = ContentControl.state.selectionNotifier?.value;
+    final selectionController = ContentControl.state.selectionNotifier.value;
     if (playerRouteController.opened) {
       if (selectionController != null) {
         selectionController.close();
@@ -368,9 +368,9 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
       playerRouteController.close();
     } else if (route == HomeRoutes.search) {
       _searchDelegate ??= SearchDelegate();
-      final SearchArguments arguments = route.arguments;
-      _searchDelegate.query = arguments.query;
-      _searchDelegate.autoKeyboard = arguments.openKeyboard;
+      final arguments = (route as HomeRoutes<SearchArguments>).arguments!;
+      _searchDelegate!.query = arguments.query;
+      _searchDelegate!.autoKeyboard = arguments.openKeyboard;
     }
   }
 
@@ -411,7 +411,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
         pages.add(StackFadePage(
           key: HomeRoutes.album.key,
           transitionSettings: transitionSettings.greyDismissible,
-          child: AlbumRoute(album: route.arguments),
+          child: AlbumRoute(album: (route as HomeRoutes<Album>).arguments!),
         ));
       } else if (route == HomeRoutes.search) {
         pages.add(SearchPage(

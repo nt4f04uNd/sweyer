@@ -14,7 +14,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 // import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
@@ -79,23 +78,22 @@ class ContentMap<V> {
   /// Creates a content map from initial value [map].
   ///
   /// If none specified, will initialize the map with `null`s.
-  ContentMap([Map<Type, V?>? map]) : 
-    _map = map ?? {
-      Song: null,
-      Album: null,
-    };
+  ContentMap([this._map = const {}]);
 
-  Map<Type, V?> _map;
+  final Map<Type, V> _map;
 
   /// Map values.
-  Iterable<V?> get values => _map.values;
+  Iterable<V> get values => _map.values;
+
+  /// Map entries.
+  Iterable<MapEntry<Type, V>> get entries => _map.entries;
 
   /// Returs a [Sort] per `T` [Content] from the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
   V getValue<T extends Content>([Type? key]) {
     assert(
-      Content.enumerate().contains(typeOf<T>()),
+      Content.enumerate().contains(key ?? T),
       "Specified type must be a subtype of Content",
     );
     return _map[key ?? T]!;
@@ -106,7 +104,7 @@ class ContentMap<V> {
   /// If [key] was explicitly provided, will use it instead.
   void setValue<T extends Content>(V value, {Type? key}) {
     assert(
-      Content.enumerate().contains(typeOf<T>()),
+      Content.enumerate().contains(key ?? T),
       "Specified type must be a subtype of Content",
     );
     _map[key ?? T] = value;
@@ -204,9 +202,6 @@ class _ContentState {
     _PoolQueueType.shuffled: Queue([]),
   });
 
-  /// The path to default album art to show it in notification.
-  late String defaultAlbumArtPath;
-
   /// All songs in the application.
   /// This list should be modified in any way, except for sorting.
   Queue allSongs = Queue([]);
@@ -228,8 +223,8 @@ class _ContentState {
   /// Contains various [Sort]s of the application.
   /// Sorts of specific [Queues] like [Album]s are stored separately. // TODO: this is currently not implemented - remove this todo when it will be
   ///
-  /// Values are restored in [_restoreSorts].
-  final ContentMap<Sort> sorts = ContentMap<Sort>();
+  /// Restored in [ContentContol._restoreSorts].
+  late final ContentMap<Sort> sorts;
 
   /// Get current playing song.
   Song get currentSong {
@@ -376,6 +371,7 @@ abstract class ContentControl {
     _sdkInt = androidInfo.version.sdkInt;
     _devMode = ValueNotifier(await Prefs.devModeBool.get());
     if (Permissions.granted) {
+      // TODO: prevent initalizing if already initizlied
       _initializeCompleter = Completer();
       state.emitContentChange(); // update ui to show "Searching songs" screen
       await Future.wait([
@@ -890,11 +886,11 @@ abstract class ContentControl {
         type != QueueType.persistent &&
         type != QueueType.arbitrary) {
       state.idMap.clear();
+      state.idMapDirty = false;
       _idMapSerializer.save(state.idMap);
     } else if (state.idMapDirty) {
       state.idMapDirty = false;
       _idMapSerializer.save(state.idMap);
-      print(state.idMap);
     }
 
     if (emitChangeEvent) {
@@ -1024,7 +1020,6 @@ abstract class ContentControl {
     //
     // final year = int.tryParse(words[0]);
 
-    const year = null;
     /// Splits string by spaces, or dashes, or bar, or paranthesis
     final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
     final l10n = staticl10n;
@@ -1045,7 +1040,7 @@ abstract class ContentControl {
           final wordsTest = words.map<bool>((word) =>
             song.title.toLowerCase().contains(word) ||
             formatArtist(song.artist, l10n).toLowerCase().contains(word) ||
-            song.album.toLowerCase().contains(word)
+            (song.album?.toLowerCase().contains(word) ?? false)
           ).toList();
           final fullQuery = wordsTest.every((e) => e);
           // Abbreviation search
@@ -1186,12 +1181,12 @@ abstract class ContentControl {
 
   /// Restores [sorts] from [Prefs].
   static Future<void> _restoreSorts() async {
-    state.sorts._map = {
+    state.sorts = ContentMap({
       Song: SongSort.fromMap(jsonDecode(await Prefs.songSortString.get())),
       Album: AlbumSort.fromMap(jsonDecode(await Prefs.albumSortString.get())),
       Playlist: PlaylistSort.fromMap(jsonDecode(await Prefs.playlistSortString.get())),
       Artist: ArtistSort.fromMap(jsonDecode(await Prefs.artistSortString.get())),
-    };
+    });
   }
 
   /// Restores saved queues.

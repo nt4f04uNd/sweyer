@@ -111,38 +111,45 @@ class SearchHistory {
   SearchHistory._();
   static final instance = SearchHistory._();
 
-  List<String>? history;
+  /// Before accessing this variable, you mast call [load].
+  List<String> get history => _history!;
+  List<String>? _history;
 
+  /// Loads the history.
   Future<void> load() async {
-    history ??= await Prefs.searchHistoryStringList.get();
+    _history ??= await Prefs.searchHistoryStringList.get();
   }
 
+  /// Clears the history.
   Future<void> clear() async {
-    if (history != null) {
-      history!.clear();
+    if (_history != null) {
+      _history!.clear();
     } else {
-      history = [];
+      _history = [];
     }
     await Prefs.searchHistoryStringList.set(const []);
   }
 
-  Future<void> remove(int index) async {
+  /// Removes an entry from history at [index].
+  Future<void> removeAt(int index) async {
     await load();
-    history!.removeAt(index);
-    await Prefs.searchHistoryStringList.set(history!);
+    history.removeAt(index);
+    await Prefs.searchHistoryStringList.set(history);
   }
 
-  Future<void> save(String entry) async {
+  /// Adds an [entry] to history.
+  /// Automatically calls [load].
+  Future<void> add(String entry) async {
     entry = entry.trim();
     if (entry.isNotEmpty) {
       await load();
       // Remove if this input is in array
-      history!.removeWhere((el) => el == entry);
-      history!.insert(0, entry);
-      if (history!.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
-        history!.removeLast();
+      history.removeWhere((el) => el == entry);
+      history.insert(0, entry);
+      if (history.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+        history.removeLast();
       }
-      await Prefs.searchHistoryStringList.set(history!);
+      await Prefs.searchHistoryStringList.set(history);
     }
   }
 }

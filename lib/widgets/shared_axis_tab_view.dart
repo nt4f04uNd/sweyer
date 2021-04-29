@@ -11,7 +11,7 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 /// Coordinates the logic behind the [SharedAxisTabView].
 class SharedAxisTabController extends ChangeNotifier {
   SharedAxisTabController({
-    @required this.length,
+    required this.length,
     int initialIndex = 0,
   }) : _index = initialIndex,
       _prevIndex = initialIndex;
@@ -47,9 +47,9 @@ class SharedAxisTabController extends ChangeNotifier {
 /// * [SharedAxisTabController] that controls this view
 class SharedAxisTabView extends StatefulWidget {
   const SharedAxisTabView({
-    Key key,
-    @required this.children,
-    @required this.controller,
+    Key? key,
+    required this.children,
+    required this.controller,
     this.tabBuilder = _defaultTabBuilder,
   }) : super(key: key);
 
@@ -132,7 +132,7 @@ class _SharedAxisTabViewState extends State<SharedAxisTabView> {
               child: AnimatedBuilder(
                 animation: animation,
                 child: child,
-                builder: (context, child) => widget.tabBuilder(context, animation, secondaryAnimation, child),
+                builder: (context, child) => widget.tabBuilder(context, animation, secondaryAnimation, child!),
               ),
             );
           },

@@ -12,9 +12,8 @@ import 'package:sweyer/sweyer.dart';
 /// Shows an indicator that marks out the current playing song tile.
 /// Consists of three equalizer bars.
 class CurrentIndicator extends StatelessWidget {
-  const CurrentIndicator({Key key, this.color = Colors.white})
-      : assert(color != null),
-        super(key: key);
+  const CurrentIndicator({Key? key, this.color = Colors.white})
+      : super(key: key);
 
   /// Color of the bars.
   final Color color;
@@ -83,14 +82,14 @@ class CurrentIndicator extends StatelessWidget {
 class _Value {
   const _Value(
     this.height, [
-    int milliseconds,
-    Curve curve,
+    int? milliseconds,
+    Curve? curve,
   ])  : _milliseconds = milliseconds,
         _curve = curve;
 
   final double height;
-  final int _milliseconds;
-  final Curve _curve;
+  final int? _milliseconds;
+  final Curve? _curve;
 
   int get milliseconds => _milliseconds ?? 180;
   Curve get curve => _curve ?? Curves.linear;
@@ -100,20 +99,24 @@ class _Value {
 
 class _Bar extends StatefulWidget {
   const _Bar({
-    Key key,
-    this.values,
+    Key? key,
+    required this.values,
     this.color,
   }) : super(key: key);
+
   final List<_Value> values;
-  final Color color;
+  final Color? color;
+
   @override
   _BarState createState() => _BarState();
 }
 
 class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
-  int index;
-  Timer timer;
-  StreamSubscription<bool> _playingSubscription;
+  late int index;
+  Timer? timer;
+  late StreamSubscription<bool> _playingSubscription;
+
+  _Value get currentValue => widget.values[index];
 
   @override
   void initState() {
@@ -136,10 +139,10 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
   void _iterate() {
     if (!mounted) {
       assert(false);
-      timer.cancel();
+      timer!.cancel();
       timer = null;
     }
-    timer = Timer(dilate(widget.values[index].duration), () {
+    timer = Timer(dilate(currentValue.duration), () {
       setState(() {
         if (index == widget.values.length - 1) {
           index = 0;
@@ -160,7 +163,7 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
   void stop() {
     if (timer != null && mounted) {
       setState(() {
-        timer.cancel();
+        timer!.cancel();
         timer = null;
       });
     }
@@ -177,8 +180,8 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final animating = timer != null;
     return AnimatedContainer(
-      height: animating ? 1.0 + 19.0 * widget.values[index].height : 3.0,
-      curve: animating ? widget.values[index].curve : Curves.easeOutCubic,
+      height: animating ? 1.0 + 19.0 * currentValue.height : 3.0,
+      curve: animating ? currentValue.curve : Curves.easeOutCubic,
       decoration: BoxDecoration(
         color: widget.color,
         borderRadius: const BorderRadius.all(
@@ -187,7 +190,7 @@ class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
       ),
       width: 5.0,
       duration: animating
-          ? widget.values[index].duration
+          ? currentValue.duration
           : const Duration(milliseconds: 500),
     );
   }

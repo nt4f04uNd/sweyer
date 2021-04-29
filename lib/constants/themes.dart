@@ -392,7 +392,7 @@ abstract class UiTheme {
 
 /// Class to wrap some values, so they will have [light] and [dark] variants.
 class _ThemeContainer<T> {
-  const _ThemeContainer({@required this.light, @required this.dark});
+  const _ThemeContainer({required this.light, required this.dark});
   final T light;
   final T dark;
 
@@ -402,7 +402,7 @@ class _ThemeContainer<T> {
   /// Checks theme and automatically picks opposite value from the current brightness.
   T get autoReverse => ThemeControl.isDark ? light : dark;
 
-  _ThemeContainer<T> copyWith({T light, T dark}) {
+  _ThemeContainer<T> copyWith({T? light, T? dark}) {
     return _ThemeContainer(
       light: light ?? this.light,
       dark: dark ?? this.dark,

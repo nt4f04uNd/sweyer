@@ -15,8 +15,8 @@ import 'package:sweyer/constants.dart' as Constants;
 
 abstract class ThemeControl {
   static bool _ready = false;
-  static Color _colorForBlend;
-  static Brightness _brightness;
+  static late Color _colorForBlend;
+  static late Brightness _brightness;
 
   /// Whether the start up ui animation has ended.
   static bool get ready => _ready;
@@ -90,10 +90,7 @@ abstract class ThemeControl {
   }
 
   /// Changes theme to opposite and saves new value to pref.
-  ///
-  /// By default performs an animation of system ui to [Constants.UiTheme.topGrey].
-  /// Optional [systemUiOverlayStyle] allows change that behavior.
-  static Future<void> switchTheme({ SystemUiStyleController systemUiOverlayStyle }) async {
+  static Future<void> switchTheme() async {
     _rebuildOperation?.cancel();
     _brightness = _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Settings.lightThemeBool.set(_brightness == Brightness.light);
@@ -113,7 +110,7 @@ abstract class ThemeControl {
       emitThemeChange(false);
     }());
     await SystemUiStyleController.animateSystemUiOverlay(
-      to: systemUiOverlayStyle ?? Constants.UiTheme.black.auto,
+      to: Constants.UiTheme.black.auto,
       curve: Curves.easeIn,
       duration: const Duration(milliseconds: 160),
     );
@@ -126,12 +123,22 @@ abstract class ThemeControl {
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
     MusicPlayer.instance.updateServiceMediaItem();
-    _rebuildOperation = CancelableOperation.fromFuture(() async {
-      await Future.delayed(dilate(primaryColorChangeDuration));
+    // _rebuildOperation = CancelableOperation.fromFuture(() async {
+    //   await Future.delayed(dilate(primaryColorChangeDuration));
+    //   App.rebuildAllChildren();
+    //   await Future.delayed(dilate(const Duration(milliseconds: 20)));
+    //   emitThemeChange(false);
+    // }());
+    // TODO: test this
+    _rebuildOperation = CancelableOperation<void>.fromFuture(
+      Future.delayed(dilate(primaryColorChangeDuration))
+    )
+    ..valueOrCancellation()
+    .then((value) async {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
-      emitThemeChange(false);
-    }());
+    })
+    .then((value) => emitThemeChange(false));
   }
 
   static void _applyPrimaryColor(Color color) {
@@ -185,7 +192,7 @@ abstract class ThemeControl {
 
   static final StreamController<bool> _controller = StreamController<bool>.broadcast();
   static const Duration primaryColorChangeDuration = Duration(milliseconds: 240);
-  static CancelableOperation _rebuildOperation;
+  static CancelableOperation<void>? _rebuildOperation;
 
   /// Gets stream of changes on theme.
   ///
