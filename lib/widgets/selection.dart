@@ -234,59 +234,44 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     bool counter = false,
     bool closeButton = false,
   }) {
-    final actionsBuilder = contentPick<T, _ActionsBuilder>(
-      song: (context) {
-        final controller = ContentSelectionController.of(context);
-        return SelectionActionsBar(
-          controller: controller,
-          left: [ActionsSelectionTitle(
-            counter: counter,
-            closeButton: closeButton,
-          )],
-          right: const [
-            GoToAlbumSelectionAction(),
-            PlayNextSelectionAction<Song>(),
-            AddToQueueSelectionAction<Song>(),
-          ],
-        );
-      },
-      album: (context) {
-        final controller = ContentSelectionController.of(context);
-        return SelectionActionsBar(
-          controller: controller,
-          left: [ActionsSelectionTitle(
-            counter: counter,
-            closeButton: closeButton,
-          )],
-          right: const [
-            PlayNextSelectionAction<Album>(),
-            AddToQueueSelectionAction<Album>(),
-          ],
-        );
-      },
-      fallback: (context) {
-        final controller = ContentSelectionController.of(context);
-        return SelectionActionsBar(
-          controller: controller,
-          left: [ActionsSelectionTitle(
-            counter: counter,
-            closeButton: closeButton,
-          )],
-          right: const [
-            GoToAlbumSelectionAction(),
-            PlayNextSelectionAction(),
-            AddToQueueSelectionAction(),
-          ],
-        );
-      }
+    final getActions = contentPick<T, ValueGetter<List<Widget>>>(
+      song: () => const [
+        GoToAlbumSelectionAction(),
+        PlayNextSelectionAction<Song>(),
+        AddToQueueSelectionAction<Song>(),
+      ],
+      album: () => const [
+        PlayNextSelectionAction<Album>(),
+        AddToQueueSelectionAction<Album>(),
+      ],
+      playlist: () => const [
+        PlayNextSelectionAction<Playlist>(),
+        AddToQueueSelectionAction<Playlist>(),
+      ],
+      artist: () => const [],
+      fallback: () =>  const [
+        GoToAlbumSelectionAction(),
+        PlayNextSelectionAction(),
+        AddToQueueSelectionAction(),
+      ],
     );
     return ContentSelectionController<SelectionEntry<T>>(
-      actionsBuilder: actionsBuilder,
       ignoreWhen: ignoreWhen,
       animationController: AnimationController(
         vsync: vsync,
         duration: kSelectionDuration,
       ),
+      actionsBuilder: (context) {
+        final controller = ContentSelectionController.of(context);
+        return SelectionActionsBar(
+          controller: controller,
+          left: [ActionsSelectionTitle(
+            counter: counter,
+            closeButton: closeButton,
+          )],
+          right: getActions(),
+        );
+      },
     );
   }
 
@@ -606,6 +591,71 @@ class _SelectionAnimation extends AnimatedWidget {
   }
 }
 
+class _ActionSupported extends StatefulWidget {
+  _ActionSupported({
+    Key? key,
+    required this.shown,
+    required this.controller,
+    required this.child,
+  }) : super(key: key);
+
+  /// Condition to check whether the action should be shown or not.
+  final ValueGetter<bool> shown;
+
+  final ContentSelectionController controller;
+
+  final Widget child;
+
+  @override
+  _ActionSupportedState createState() => _ActionSupportedState();
+}
+
+class _ActionSupportedState extends State<_ActionSupported> with SelectionHandler {
+  bool shown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(handleSelection);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ActionSupported oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(handleSelection);
+      widget.controller.addListener(handleSelection);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(handleSelection);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+     if (widget.controller.inSelection) {
+      /// The condition ensures animation will not play on close, because [SelectionAppBar]
+      /// has its own animation, and combination of them both doesn't look good.
+      shown = widget.shown();
+    }
+    return AnimatedSwitcher(
+      // Prevents animation we enter the selection
+      key: ValueKey(widget.controller.status == AnimationStatus.dismissed),
+      duration: kSelectionDuration,
+      transitionBuilder: (child, animation) => _SelectionAnimation(
+        animation: animation,
+        child: child,
+      ),
+      child: !shown
+        ? const SizedBox.shrink()
+        : widget.child,
+    );
+  }
+}
+
 /// Creates a selection title.
 class ActionsSelectionTitle extends StatelessWidget {
   const ActionsSelectionTitle({
@@ -730,39 +780,22 @@ class GoToAlbumSelectionAction extends StatefulWidget {
 }
 
 class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
-  late ContentSelectionController<SelectionEntry> controller;
+  late ContentSelectionController controller;
 
   @override
-  void initState() {
+  void initState() { 
     super.initState();
     controller = ContentSelectionController.of(context);
-    controller.addListener(_handleControllerChange);
-    controller.addStatusListener(_handleStatusControllerChange);
-  }
-
-  @override
-  void dispose() {
-    controller.removeListener(_handleControllerChange);
-    controller.removeStatusListener(_handleStatusControllerChange);
-    super.dispose();
-  }
-
-  void _handleControllerChange() {
-    setState(() {
-      /* update ui to hide when data lenght is greater than 1 */
-    });
-  }
-
-  void _handleStatusControllerChange(AnimationStatus status) {
-    setState(() {
-      /* update ui to hide when data lenght is greater than 1 */
-    });
+    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+           controller is ContentSelectionController<SelectionEntry<Song>>);
   }
 
   void _handleTap() {
     final song = controller.data.first.data as Song;
     final album = song.getAlbum();
-    HomeRouter.instance.goto(HomeRoutes.factory.album(album));
+    if (album != null) {
+      HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(album));
+    }
     controller.close();
   }
 
@@ -771,26 +804,22 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
     final l10n = getl10n(context);
     final data = controller.data;
 
-    return AnimatedSwitcher(
-      duration: kSelectionDuration,
-      transitionBuilder: (child, animation) => _SelectionAnimation(
-        animation: animation,
-        child: child,
-      ),
-      child:
-          data.length > 1 ||
+    return _ActionSupported(
+      controller: controller,
+      shown: () {
+        return data.length > 1 ||
           data.length == 1 && (data.first.data is! Song || (data.first.data as Song).albumId == null) ||
-          HomeRouter.instance.routes.last == HomeRoutes.album && playerRouteController.closed // disable action in album route
-            ? const SizedBox.shrink()
-            : _SelectionAnimation(
-                animation: controller.animationController,
-                child: NFIconButton(
-                  tooltip: l10n.goToAlbum,
-                  icon: const Icon(Icons.album_rounded),
-                  iconSize: 23.0,
-                  onPressed: _handleTap,
-                ),
-              ),
+          HomeRouter.instance.routes.last == HomeRoutes.album && playerRouteController.closed; // disable action in album route
+      },
+      child: _SelectionAnimation(
+        animation: controller.animationController,
+        child: NFIconButton(
+          tooltip: l10n.goToAlbum,
+          icon: const Icon(Icons.album_rounded),
+          iconSize: 23.0,
+          onPressed: _handleTap,
+        ),
+      ),
     );
   }
 }
@@ -810,7 +839,7 @@ class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
     );
   }
 
-  void _handleAlbums(List<SelectionEntry<Album>> entries) {
+  void _handlePersistentQueues(List<SelectionEntry<PersistentQueue>> entries) {
     if (entries.isEmpty)
       return;
     // Reverse order is proper here
@@ -823,22 +852,24 @@ class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
   void _handleTap(ContentSelectionController controller) {
     contentPick<T, VoidCallback>(
       song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
-      album: () => _handleAlbums(controller.data.toList() as List<SelectionEntry<Album>>),
+      album: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Album>>),
+      playlist: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Playlist>>),
+      artist: () => throw ArgumentError('This actions doesn support artists'),
       fallback: () {
         final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
-        final List<SelectionEntry<Album>> albums = [];
+        final List<SelectionEntry<PersistentQueue>> persistentQueues = [];
         for (final entry in entries) {
           if (entry is SelectionEntry<Song>) {
             songs.add(entry);
-          } else if (entry is SelectionEntry<Album>) {
-            albums.add(entry);
+          } else if (entry is SelectionEntry<PersistentQueue>) {
+            persistentQueues.add(entry);
           } else {
-            throw ArgumentError('This action only supports Song and Album selection simultaniously');
+            throw ArgumentError('This action only supports Song and PersistentQueue selection simultaniously');
           }
         }
         _handleSongs(songs);
-        _handleAlbums(albums);
+        _handlePersistentQueues(persistentQueues);
       },
     )();
     controller.close();
@@ -876,7 +907,7 @@ class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
     );
   }
 
-  void _handleAlbums(List<SelectionEntry<Album>> entries) {
+  void _handlePersistentQueues(List<SelectionEntry<PersistentQueue>> entries) {
     if (entries.isEmpty)
       return;
     entries.sort((a, b) => a.index!.compareTo(b.index!));
@@ -888,22 +919,24 @@ class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
   void _handleTap(ContentSelectionController controller) {
     contentPick<T, VoidCallback>(
       song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
-      album: () => _handleAlbums(controller.data.toList() as List<SelectionEntry<Album>>),
+      album: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Album>>),
+      playlist: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Playlist>>),
+      artist: () => throw ArgumentError('This actions doesn support artists'),
       fallback: () {
         final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
-        final List<SelectionEntry<Album>> albums = [];
+        final List<SelectionEntry<PersistentQueue>> persistentQueues = [];
         for (final entry in entries) {
           if (entry is SelectionEntry<Song>) {
             songs.add(entry);
-          } else if (entry is SelectionEntry<Album>) {
-            albums.add(entry);
+          } else if (entry is SelectionEntry<PersistentQueue>) {
+            persistentQueues.add(entry);
           } else {
-            throw ArgumentError('This action only supports Song and Album selection simultaniously');
+            throw ArgumentError('This action only supports Song and PersistentQueue selection simultaniously');
           }
         }
         _handleSongs(songs);
-        _handleAlbums(albums);
+        _handlePersistentQueues(persistentQueues);
       },
     )();
     controller.close();
@@ -953,15 +986,6 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
     super.initState();
     type = typeOf<T>();
     assert(type == Song || type == Content, 'Only Song and Content types are supported');
-    widget.controller.addListener(handleSelection);
-    widget.controller.addStatusListener(handleSelectionStatus);
-  }
-
-  @override
-  void dispose() { 
-    widget.controller.removeListener(handleSelection);
-    widget.controller.removeStatusListener(handleSelectionStatus);
-    super.dispose();
   }
 
   Future<void> _handleDelete() async {
@@ -1015,21 +1039,13 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
 
   @override
   Widget build(BuildContext context) {
-    if (widget.controller.inSelection) {
-      /// The condition ensures animation will not play on close, because [SelectionAppBar]
-      /// has its own animation, and combination of them both doesn't look good.
-      shown = type == Song ||
+    return _ActionSupported(
+      controller: widget.controller,
+      shown: () {
+        return type == Song ||
               (type == Content &&
               widget.controller.data.firstWhereOrNull((el) => el is SelectionEntry<Album>) == null);
-    }
-    return AnimatedSwitcher(
-      // Prevents animation we enter the selection
-      key: ValueKey(widget.controller.status == AnimationStatus.dismissed),
-      duration: kSelectionDuration,
-      transitionBuilder: (child, animation) => _SelectionAnimation(
-        animation: animation,
-        child: child,
-      ),
+      },
       child: !shown
         ? const SizedBox.shrink()
         : NFIconButton(

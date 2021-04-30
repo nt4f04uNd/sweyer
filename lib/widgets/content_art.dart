@@ -11,7 +11,8 @@ import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
 const double kSongTileArtSize = 48.0;
-const double kAlbumTileArtSize = 64.0;
+const double kPersistentQueueTileArtSize = 64.0;
+const double kArtistTileArtSize = 64.0;
 const double kArtBorderRadius = 10.0;
 
 /// `3` is the [CircularPercentIndicator.lineWidth] doubled and additional 3 spacing
@@ -36,8 +37,13 @@ class ContentArtSource {
   const ContentArtSource.playlist(Playlist playlist)
     : _content = playlist;
 
-  // const ContentArtSource.artist(Artist artist)
-  //   : _content = artist;
+  /// Checks the kind of [PersistentQueue], and respectively either picks [ContentArtSource.album], or [ContentArtSource.playlist].
+  const ContentArtSource.persistentQueue(PersistentQueue persistentQueue)
+    : assert(persistentQueue is Album || persistentQueue is Playlist),
+      _content = persistentQueue;
+
+  const ContentArtSource.artist(Artist artist)
+    : _content = artist;
 
   final Content _content;
 }
@@ -84,9 +90,9 @@ class ContentArt extends StatefulWidget {
        currentIndicatorScale = null,
        super(key: key);
 
-  /// Creates an art for the [ALbumTile].
+  /// Creates an art for the [PersistentQueueTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
-  const ContentArt.albumTile({
+  const ContentArt.persistentQueueTile({
     Key? key,
     required this.source,
     this.color,
@@ -94,13 +100,28 @@ class ContentArt extends StatefulWidget {
     this.borderRadius = kArtBorderRadius,
     this.current = false,
     this.loadAnimationDuration = _kLoadAnimationDuration,
-  }) : size = kAlbumTileArtSize,
+  }) : size = kPersistentQueueTileArtSize,
        highRes = false,
        currentIndicatorScale = 1.17,
        super(key: key);
 
+  /// Creates an art for the [ArtistTile].
+  /// It has the same image contents scale as [AlbumArt.songTile].
+  const ContentArt.artistTile({
+    Key? key,
+    required this.source,
+    this.color,
+    this.assetScale = 1.0,
+    this.borderRadius = kArtistTileArtSize,
+    this.current = false,
+    this.loadAnimationDuration = _kLoadAnimationDuration,
+  }) : size = kPersistentQueueTileArtSize,
+       highRes = false,
+       currentIndicatorScale = 1.1,
+       super(key: key);
+
   /// Creates an art for the [PlayerRoute].
-  /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.albumTile].
+  /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.PersistentQueueTile].
   const ContentArt.playerRoute({
     Key? key,
     required this.source,
@@ -179,7 +200,7 @@ class _ArtLoader {
 
   CancellationSignal? _signal;
   Uint8List? _bytes;
-  late File _file;
+  File? _file;
   bool loaded = false;
   bool _broken = false;
 
@@ -208,7 +229,7 @@ class _ArtLoader {
       if (art != null) {
         _file = File(art);
         // TODO: make it async and enable lint regarding expensive operations
-        final exists = _file.existsSync();
+        final exists = _file!.existsSync();
         _broken = !exists;
         if (_broken) {
           _recreateArt();
@@ -226,7 +247,7 @@ class _ArtLoader {
     onUpdate();
   }
 
-  Image getImage() {
+  Image? getImage() {
     if (_useBytes) {
       return Image.memory(
         _bytes!,
@@ -235,12 +256,14 @@ class _ArtLoader {
         fit: BoxFit.cover,
       );
     }
-    return Image.file(
-      _file,
-      width: size,
-      height: size,
-      fit: BoxFit.cover,
-    );
+    if (!showDefault) {
+      return Image.file(
+        _file!,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      );
+    }
   }
 
   void cancel() {
@@ -250,6 +273,8 @@ class _ArtLoader {
 
 class _ContentArtState extends State<ContentArt> {
   late List<_ArtLoader> _loaders;
+  double? _sizeForPlaylist;
+  double? get sizeForPlaylist => _sizeForPlaylist ?? widget.size;
 
   bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
@@ -282,6 +307,7 @@ class _ContentArtState extends State<ContentArt> {
       ];
     } else if (content is Playlist) {
       final songs = content.songs;
+      _sizeForPlaylist = widget.size == null ? widget.size : widget.size! / 2;
       switch (songs.length) {
         case 0:
           _loaders = [];
@@ -290,7 +316,7 @@ class _ContentArtState extends State<ContentArt> {
           final loader = _ArtLoader(
             context: context,
             song: songs.first,
-            size: widget.size,
+            size: _sizeForPlaylist,
             onUpdate: _onUpdate,
           );
           List.generate(4, (index) => loader);
@@ -299,7 +325,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders = List.generate(2, (index) => _ArtLoader(
             context: context,
             song: songs[index],
-            size: widget.size,
+            size: _sizeForPlaylist,
             onUpdate: _onUpdate,
           ));
           _loaders.addAll(_loaders.reversed.toList());
@@ -308,7 +334,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders = List.generate(3, (index) => _ArtLoader(
             context: context,
             song: songs[index],
-            size: widget.size,
+            size: _sizeForPlaylist,
             onUpdate: _onUpdate,
           ));
           _loaders.add(_loaders[0]);
@@ -317,11 +343,20 @@ class _ContentArtState extends State<ContentArt> {
           _loaders = List.generate(4, (index) => _ArtLoader(
             context: context,
             song: songs[index],
-            size: widget.size,
+            size: _sizeForPlaylist,
             onUpdate: _onUpdate,
           ));
           break;
       }
+    } else if (content is Artist) {
+      _loaders = [
+        _ArtLoader(
+          context: context,
+          song: null,
+          size: widget.size,
+          onUpdate: _onUpdate,
+        ),
+      ];
     }
     for (final loader in _loaders) {
       loader.load();
@@ -359,6 +394,25 @@ class _ContentArtState extends State<ContentArt> {
           );
   }
 
+  Widget _buildDefault(bool forPlaylist) {
+    Widget child = Image.asset(
+      widget.highRes
+          ? Constants.Assets.ASSET_LOGO_MASK
+          : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
+      width: forPlaylist ? sizeForPlaylist : widget.size,
+      height: forPlaylist ? sizeForPlaylist : widget.size,
+      color: widget.color != null
+          ? getColorForBlend(widget.color!)
+          : ThemeControl.colorForBlend,
+      colorBlendMode: BlendMode.plus,
+      fit: BoxFit.cover,
+    );
+    if (widget.assetScale != 1.0) {
+      child = Transform.scale(scale: widget.assetScale, child: child);
+    }
+    return child;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(_loaders.isEmpty || _loaders.length == 1 || _loaders.length == 4);
@@ -387,39 +441,29 @@ class _ContentArtState extends State<ContentArt> {
           child: _buildCurrentIndicator(),
         );
       } else {
-        child = Image.asset(
-          widget.highRes
-              ? Constants.Assets.ASSET_LOGO_MASK
-              : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
-          width: widget.size,
-          height: widget.size,
-          color: widget.color != null
-              ? getColorForBlend(widget.color!)
-              : ThemeControl.colorForBlend,
-          colorBlendMode: BlendMode.plus,
-          fit: BoxFit.cover,
-        );
-        if (widget.assetScale != 1.0) {
-          child = Transform.scale(scale: widget.assetScale, child: child);
-        }
+        child = _buildDefault(false);
       }
     } else {
       Widget arts;
       if (_loaders.length == 1) {
-        arts = _loaders.first.getImage();
+        arts = _loaders.first.getImage() ?? _buildDefault(false);
       } else {
+        Widget? defaultArt;
+        if (_loaders.any((el) => el.showDefault)) {
+          defaultArt = _buildDefault(true);
+        }
         arts = Column(
           children: [
             Row(
               children: [
-                _loaders[0].getImage(),
-                _loaders[1].getImage(),
+                _loaders[0].getImage() ?? defaultArt!,
+                _loaders[1].getImage() ?? defaultArt!,
               ],
             ),
             Row(
               children: [
-                _loaders[2].getImage(),
-                _loaders[3].getImage(),
+                _loaders[2].getImage() ?? defaultArt!,
+                _loaders[3].getImage() ?? defaultArt!,
               ],
             ),
           ],

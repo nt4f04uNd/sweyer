@@ -5,12 +5,23 @@
 
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/logic/logic.dart';
 
 /// Inteface for other sort feature enums.
 abstract class SortFeature<T extends Content> extends Enum<String> {
   const SortFeature._(String value) : super(value);
+
+  /// Returns sort feature values for a given content.
+  static List<SortFeature> getValuesForContent<T extends Content>() {
+    return contentPick<T, ValueGetter<List<SortFeature>>>(
+      song: () => SongSortFeature.values,
+      album: () => AlbumSortFeature.values,
+      playlist: () => PlaylistSortFeature.values,
+      artist: () => ArtistSortFeature.values,
+    )();
+  }
 
   /// Whether the default order is ASC.
   bool get defaultOrderAscending;

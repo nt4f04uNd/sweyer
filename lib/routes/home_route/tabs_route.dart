@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
@@ -189,8 +190,8 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                         children: [
                           _ContentTab<Song>(selectionController: selectionController),
                           _ContentTab<Album>(selectionController: selectionController),
-                          Container(),
-                          Container(),
+                          _ContentTab<Playlist>(selectionController: selectionController),
+                          _ContentTab<Artist>(selectionController: selectionController),
                         ],
                       ),
                     ),
@@ -288,16 +289,20 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
     return contentPick<T, bool>(
       song: feature == SongSortFeature.title,
       album: feature == AlbumSortFeature.title,
+      playlist: feature == PlaylistSortFeature.name,
+      artist: feature == ArtistSortFeature.name,
     );
   }
 
-  Future<void> Function() get onRefresh {
-    return contentPick<T, Future<void> Function()>(
+  AsyncValueGetter<void> get onRefresh {
+    return contentPick<T, AsyncValueGetter<void>>(
       song: () => Future.wait([
         ContentControl.refetch<Song>(),
         ContentControl.refetch<Album>(),
       ]),
       album: () => ContentControl.refetch<Album>(),
+      playlist: () => ContentControl.refetch<Playlist>(),
+      artist: () => ContentControl.refetch<Artist>(),
     );
   }
 
@@ -322,6 +327,9 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         selectionController: selectionController,
         onItemTap: contentPick<T, VoidCallback>(
           song: ContentControl.resetQueue,
+          album: () {},
+          playlist: () {},
+          artist: () {},
         ),
         leading: ContentListHeader<T>(
           count: list.length,
@@ -357,6 +365,12 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                           arbitraryQueueOrigin: ArbitraryQueueOrigin.allAlbums,
                         );
                       },
+                      playlist: () {
+                        // TODO: implement
+                      },
+                      artist: () {
+                        // TODO: implement
+                      },
                     )();
                     MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
                     MusicPlayer.instance.play();
@@ -384,6 +398,12 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                           arbitraryQueueOrigin: ArbitraryQueueOrigin.allAlbums,
                         );
                       },
+                      playlist: () {
+                        // TODO: implement
+                      },
+                      artist: () {
+                        // TODO: implement
+                      }
                     )();
                     MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
                     MusicPlayer.instance.play();
@@ -423,12 +443,12 @@ class _TabCollapse extends StatelessWidget {
           final indexIsChanging = tabController.indexIsChanging;
           double value = 0.0;
           if (tabValue > index - 1 && tabValue <= index) {
-            if (indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+            if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
               // Animation for next tab.
               value = 1 + (tabController.animation!.value - index);
             }
           } else if (tabValue <= index + 1 && tabValue > index) {
-            if (indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+            if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
               // Animation for previos tab.
               value = 1 - (tabController.animation!.value - index);
             }

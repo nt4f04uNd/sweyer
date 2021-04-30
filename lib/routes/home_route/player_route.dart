@@ -297,7 +297,7 @@ class _QueueTabState extends State<_QueueTab>
         return;
       case QueueType.persistent:
         if (isAlbum) {
-          HomeRouter.instance.goto(HomeRoutes.factory.album(album));
+          HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(album!));
         } else {
           throw InvalidCodePathError();
         }

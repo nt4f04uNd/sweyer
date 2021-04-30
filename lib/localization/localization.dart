@@ -3,6 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// TODO: remove this (and other similar) when intl_translation supports nnbd https://github.com/dart-lang/intl_translation/issues/134
+// @dart = 2.7
+
 import 'dart:async';
 
 import 'package:intl/intl.dart';
@@ -14,7 +17,7 @@ import 'package:sweyer/sweyer.dart';
 import 'gen/messages_all.dart';
 
 /// Gets [AppLocalizations].
-AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context)!;
+AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context);
 
 /// Gets [AppLocalizations] without context.
 /// If you want to use [AppLocalizations] without flutter app mounting,
@@ -29,7 +32,7 @@ class AppLocalizations {
   /// Can be used to load the delegate before/without flutter app mounting
   /// by using the current system locale.
   static Future<void> init() async {
-    await load(WidgetsBinding.instance!.window.locale);
+    await load(WidgetsBinding.instance.window.locale);
   }
 
   static Future<AppLocalizations> load(Locale locale) async {
@@ -43,7 +46,7 @@ class AppLocalizations {
     );
   }
 
-  static AppLocalizations? of(BuildContext context) {
+  static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
@@ -191,6 +194,18 @@ class AppLocalizations {
     );
   }
 
+  /// Picks a string of a [Content] in plural form.
+  /// For example "tracks".
+  String contents<T extends Content>([Type contentType]) {
+    return contentPick<T, ValueGetter<String>>(
+      contentType: contentType,
+      song: () => tracks,
+      album: () => albums,
+      playlist: () => playlists,
+      artist: () => artists,
+    )();
+  }
+
   String tracksPlural(int count) {
     return Intl.plural(
       count,
@@ -247,6 +262,17 @@ class AppLocalizations {
     );
   }
 
+  /// Calls a `plural` getter from Intl for a [Content].
+  String contentsPlural<T extends Content>(int count, [Type contentType]) {
+    return contentPick<T, ValueGetter<String>>(
+      contentType: contentType,
+      song: () => tracksPlural(count),
+      album: () => albumsPlural(count),
+      playlist: () => playlistsPlural(count),
+      artist: () => artistsPlural(count),
+    )();
+  }
+
   String get allTracks {
     return Intl.message(
       "All tracks",
@@ -270,7 +296,7 @@ class AppLocalizations {
 
   /// Converts [ArbitraryQueueOrigin] to human readable text.
   /// Returns `null` from `null` argument.
-  String? arbitraryQueueOrigin(ArbitraryQueueOrigin? origin) {
+  String arbitraryQueueOrigin(ArbitraryQueueOrigin origin) {
     if (origin == null)
       return null;
     switch (origin) {
@@ -600,20 +626,8 @@ class AppLocalizations {
     );
   }
 
-  /// Picks a string of a [Content] in plural form.
-  /// For example "tracks".
-  String contents<T extends Content>([Type? contentType]) {
-    return contentPick<T, String Function()>(
-      contentType: contentType,
-      song: () => tracks,
-      album: () => albums,
-      playlist: () => playlist,
-      artist: () => artist,
-    )();
-  }
-
   String sortFeature<T extends Content>(SortFeature<T> feature) {
-    return contentPick<T, String Function()>(
+    return contentPick<T, ValueGetter<String>>(
       song: () {
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
@@ -649,7 +663,7 @@ class AppLocalizations {
           case PlaylistSortFeature.dateModified:
             return dateModified;
           case PlaylistSortFeature.dateAdded:
-            return artist;
+            return dateAdded;
           case PlaylistSortFeature.name:
             return title;
           default:

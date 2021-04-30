@@ -53,6 +53,8 @@ class HomeRoutes<T> extends _Routes<T> {
 
   static const tabs = HomeRoutes<void>._('/tabs');
   static const album = HomeRoutes<Album>._('/album');
+  static const playlist = HomeRoutes<Playlist>._('/playlist');
+  static const artist = HomeRoutes<Artist>._('/artist');
   static const search = HomeRoutes<SearchArguments>._('/search');
 
   /// Returns a factory to create routes with arguments.
@@ -62,8 +64,26 @@ class HomeRoutes<T> extends _Routes<T> {
 class _HomeRoutesFactory {
   const _HomeRoutesFactory();
 
-  HomeRoutes<Album> album(Album? album) => HomeRoutes._('/album', album);
-  HomeRoutes<SearchArguments> search(SearchArguments arguments) => HomeRoutes._('/search', arguments);
+  HomeRoutes<T> content<T extends Content>(T content) {
+    return contentPick<T, ValueGetter<dynamic>>(
+      song: () => throw ArgumentError(),
+      album: () => HomeRoutes<Album>._(HomeRoutes.album.location, content as Album),
+      playlist: () => HomeRoutes<Playlist>._(HomeRoutes.playlist.location, content as Playlist),
+      artist: () => HomeRoutes<Artist>._(HomeRoutes.artist.location, content as Artist),
+    )();
+  }
+
+  HomeRoutes<Content> persistentQueue<T extends PersistentQueue>(T persistentQueue) {
+    if (persistentQueue is Album || persistentQueue is Playlist) {
+      return content<T>(persistentQueue);
+    } else {
+      throw ArgumentError();
+    }
+  }
+
+  HomeRoutes<SearchArguments> search(SearchArguments arguments) {
+    return HomeRoutes._(HomeRoutes.search.location, arguments);
+  }
 }
 
 class SearchArguments {
@@ -416,7 +436,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
       } else if (route == HomeRoutes.search) {
         pages.add(SearchPage(
           key: HomeRoutes.search.key,
-          delegate: _searchDelegate,
+          delegate: _searchDelegate!,
           transitionSettings: transitionSettings.grey,
         ));
       } else {

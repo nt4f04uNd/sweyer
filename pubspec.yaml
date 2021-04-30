@@ -65,12 +65,13 @@ dependencies:
   audio_service:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
     # See https://github.com/ryanheise/audio_service/issues/633
-    # path: C:/dev/projects/native/audio_service/audio_service
+    path: C:/dev/projects/native/audio_service/audio_service
 
-    git:
-      url: https://github.com/nt4f04uNd/audio_service/
-      ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d # sweyer
-      path: audio_service
+    # TODO: git points to wrong platform_interface if there's more than 1 commit on branch, report this to https://github.com/dart-lang/pub/issues
+    # git:
+    #   url: https://github.com/nt4f04uNd/audio_service/
+    #   ref: sweyer # sweyer
+    #   path: audio_service
 
     # git: 
     #   url: C:\dev\projects\native\audio_service

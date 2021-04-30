@@ -49,10 +49,10 @@ class _Results {
       contentType: [],
   });
 
-  List<Song> get songs => map.getValue<Song>() as List<Song>;
-  List<Album> get albums => map.getValue<Album>() as List<Album>;
-  List<Playlist> get playlists => map.getValue<Playlist>() as List<Playlist>;
-  List<Artist> get artsits => map.getValue<Artist>() as List<Artist>;
+  List<Song> get songs => map.getValue<Song>().cast<Song>();
+  List<Album> get albums => map.getValue<Album>().cast<Album>();
+  List<Playlist> get playlists => map.getValue<Playlist>().cast<Playlist>();
+  List<Artist> get artists => map.getValue<Artist>().cast<Artist>();
 
   bool get empty => map.values.every((element) => element.isEmpty);
   bool get notEmpty => map.values.any((element) => element.isNotEmpty);
@@ -162,6 +162,8 @@ class _SearchStateDelegate {
         ContentControl.setSearchedQueue(query, results.songs);
       },
       album: onSubmit,
+      playlist: onSubmit,
+      artist: onSubmit,
     );
   }
 }
@@ -598,11 +600,13 @@ class _DelegateBuilder extends StatelessWidget {
                         ? () {
                           final list = single
                             ? contentTypeEntries.single.value
-                            : contentPick<Content, List<Content>>(
+                            : contentPick<Content, ValueGetter<List<Content>>>(
                                 contentType: contentType,
-                                song: delegate.results.songs,
-                                album: delegate.results.albums,
-                              );
+                                song: () => delegate.results.songs,
+                                album: () => delegate.results.albums,
+                                playlist: () =>  delegate.results.playlists,
+                                artist: () => delegate.results.artists,
+                              )();
                           return ContentListView(
                             contentType: contentListContentType,
                             controller: delegate.singleListScrollController,
@@ -756,7 +760,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 /// 
 /// This widget renders a tappable header for such sections, and the sections
 /// content.
-class _ContentSection<T extends Content> extends StatelessWidget {
+class _ContentSection extends StatelessWidget {
   const _ContentSection({
     Key? key,
     this.contentType,
@@ -768,46 +772,55 @@ class _ContentSection<T extends Content> extends StatelessWidget {
   final List<Content>? items;
   final VoidCallback onTap;
 
-  String getHeaderText(BuildContext context) {
-    final l10n = getl10n(context);
-    return contentPick<T, String>(
-      contentType: contentType,
-      song: l10n.tracks,
-      album: l10n.albums,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = getl10n(context);
     final delegate = _SearchStateDelegate._of(context);
-    final builder = contentPick<T, Widget Function(int)>(
+
+    Widget Function(int) forPersistentQueue<Q extends PersistentQueue>() => (int index) {
+      final item = items![index] as Q;
+      return PersistentQueueTile<Q>.selectable(
+        index: index,
+        selected: delegate!.selectionController.data
+          .firstWhereOrNull((el) => el.data == item) != null,
+        queue: items![index] as Q,
+        selectionController: delegate.selectionController,
+        small: false,
+        horizontalPadding: 12.0,
+        onTap: delegate.getContentTileTapHandler<Q>(),
+      );
+    };
+
+    final builder = contentPick<Content, Widget Function(int)>(
       contentType: contentType,
       song: (index) {
-        final song = items![index] as Song;
+        final item = items![index] as Song;
         return SongTile.selectable(
           index: index,
           selected: delegate!.selectionController.data
-            .firstWhereOrNull((el) => el.data == song) != null,
-          song: song,
+            .firstWhereOrNull((el) => el.data == item) != null,
+          song: item,
           selectionController: delegate.selectionController,
           horizontalPadding: 12.0,
           onTap: delegate.getContentTileTapHandler<Song>(),
         );
       },
-      album: (index) {
-        final album = items![index] as Album;
-        return AlbumTile.selectable(
+      album: forPersistentQueue<Album>(),
+      playlist: forPersistentQueue<Playlist>(),
+      artist: (index) {
+        final item = items![index] as Artist;
+        return ArtistTile.selectable(
           index: index,
           selected: delegate!.selectionController.data
-            .firstWhereOrNull((el) => el.data == album) != null,
-          album: items![index] as Album,
+            .firstWhereOrNull((el) => el.data == item) != null,
+          artist: item,
           selectionController: delegate.selectionController,
-          small: false,
           horizontalPadding: 12.0,
-          onTap: delegate.getContentTileTapHandler<Album>(),
+          onTap: delegate.getContentTileTapHandler<Artist>(),
         );
       },
     );
+  
     return Column(
       children: [
         NFInkWell(
@@ -817,7 +830,7 @@ class _ContentSection<T extends Content> extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  getHeaderText(context),
+                  l10n.contents(contentType),
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.w800,

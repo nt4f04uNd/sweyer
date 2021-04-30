@@ -46,29 +46,23 @@ packages:
   audio_service:
     dependency: "direct main"
     description:
-      path: audio_service
-      ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d
-      resolved-ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d
-      url: "https://github.com/nt4f04uNd/audio_service/"
-    source: git
+      path: "C:/dev/projects/native/audio_service/audio_service"
+      relative: false
+    source: path
     version: "0.16.2"
   audio_service_platform_interface:
     dependency: transitive
     description:
-      path: audio_service_platform_interface
-      ref: sweyer
-      resolved-ref: "67944252c2484272562078b3168fa30f4a6f6505"
-      url: "https://github.com/nt4f04und/audio_service.git"
-    source: git
+      path: "../../audio_service/audio_service_platform_interface"
+      relative: true
+    source: path
     version: "1.0.0"
   audio_service_web:
     dependency: transitive
     description:
-      path: audio_service_web
-      ref: sweyer
-      resolved-ref: "67944252c2484272562078b3168fa30f4a6f6505"
-      url: "https://github.com/nt4f04und/audio_service.git"
-    source: git
+      path: "../../audio_service/audio_service_web"
+      relative: true
+    source: path
     version: "0.16.2"
   audio_session:
     dependency: transitive

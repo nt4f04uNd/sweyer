@@ -3,8 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12 
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';

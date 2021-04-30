@@ -157,11 +157,45 @@ class ContentListView<T extends Content> extends StatelessWidget {
     VoidCallback? onItemTap,
   }) {
     final selectable = selectionController != null;
+
+    ValueGetter<Widget> forPersistentQueue<Q extends PersistentQueue>() => () => SliverFixedExtentList(
+      itemExtent: kPersistentQueueTileHeight,
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final item = list[index] as Q;
+          Widget child;
+          if (selectable) {
+            child = PersistentQueueTile<Q>.selectable(
+              index: index,
+              queue: item,
+              current: currentTest?.call(index),
+              onTap: onItemTap,
+              selectionController: selectionController!,
+              selected: selectedTest != null
+                ? selectedTest(index)
+                : selectionController.data.contains(SelectionEntry<Q>(
+                    data: item,
+                    index: index,
+                  )),
+            );
+          } else {
+            child = PersistentQueueTile<Q>(
+              queue: item,
+              onTap: onItemTap,
+              current: currentTest?.call(index),
+            );
+          }
+          return itemBuilder?.call(context, index, child) ?? child;
+        },
+        childCount: list.length,
+      ),
+    );
+
     return MultiSliver(
       children: [
         if (leading != null)
           leading,
-        contentPick<T, Widget Function()>(
+        contentPick<T, ValueGetter<Widget>>(
           contentType: contentType,
           song: () => SliverFixedExtentList(
             itemExtent: kSongTileHeight,
@@ -199,29 +233,31 @@ class ContentListView<T extends Content> extends StatelessWidget {
               childCount: list.length,
             ),
           ),
-          album: () => SliverFixedExtentList(
-            itemExtent: kAlbumTileHeight,
+          album: forPersistentQueue<Album>(),
+          playlist: forPersistentQueue<Playlist>(),
+          artist: () => SliverFixedExtentList(
+            itemExtent: kArtistTileHeight,
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final item = list[index] as Album;
+                final item = list[index] as Artist;
                 Widget child;
                 if (selectable) {
-                  child = AlbumTile.selectable(
+                  child = ArtistTile.selectable(
                     index: index,
-                    album: item,
+                    artist: item,
                     current: currentTest?.call(index),
                     onTap: onItemTap,
                     selectionController: selectionController!,
                     selected: selectedTest != null
                       ? selectedTest(index)
-                      : selectionController.data.contains(SelectionEntry<Album>(
+                      : selectionController.data.contains(SelectionEntry<Artist>(
                           data: item,
                           index: index,
                         )),
                   );
                 } else {
-                  child = AlbumTile(
-                    album: item,
+                  child = ArtistTile(
+                    artist: item,
                     onTap: onItemTap,
                     current: currentTest?.call(index),
                   );

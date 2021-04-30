@@ -5,6 +5,7 @@
 
 export 'album_tile.dart';
 export 'app_bar_border.dart';
+export 'artist_tile.dart';
 export 'artist.dart';
 export 'bottom_track_panel.dart';
 export 'buttons.dart';

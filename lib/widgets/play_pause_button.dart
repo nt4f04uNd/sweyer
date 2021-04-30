@@ -35,7 +35,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with TickerProviderStateMixin {
   late AnimationController controller;
-  late StreamSubscription<bool> _playingSubscription;
+  StreamSubscription<bool>? _playingSubscription;
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
 
   late String _animation;
@@ -62,7 +62,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
       controller.value = 1.0;
       _animation = 'play';
     }
-    _playingSubscription.cancel();
+    _playingSubscription?.cancel();
     _playingSubscription = player.playingStream.listen((playing) {
       /// Do not handle [PlayerState.PLAYING] as it's not the state the player will remain for long time.
       /// It will start playing next song immediately.
@@ -84,7 +84,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
 
   @override
   void dispose() {
-    _playingSubscription.cancel();
+    _playingSubscription?.cancel();
     controller.dispose();
     super.dispose();
   }

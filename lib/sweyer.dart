@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// @dart = 2.7
+
 /// This is general module of a whole app.
 ///
 /// It exports all except of constants, see `constants.dart`.

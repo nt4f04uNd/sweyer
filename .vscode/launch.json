@@ -8,21 +8,31 @@
          "name": "dev",
          "type": "dart",
          "request": "launch",
-         "program": "lib/main.dart"
+         "program": "lib/main.dart",
+         "args": [
+            // TODO: remove this when intl_translation supports nnbd https://github.com/dart-lang/intl_translation/issues/134
+            "--no-sound-null-safety"
+         ]
       },
       {
          "name": "profile",
          "type": "dart",
          "request": "launch",
          "program": "lib/main.dart",
-         "flutterMode": "profile"
+         "flutterMode": "profile",
+         "args": [
+            "--no-sound-null-safety"
+         ]
       },
       {
          "name": "release",
          "type": "dart",
          "request": "launch",
          "program": "lib/main.dart",
-         "flutterMode": "release"
+         "flutterMode": "release",
+         "args": [
+            "--no-sound-null-safety"
+         ]
       }
    ]
 }

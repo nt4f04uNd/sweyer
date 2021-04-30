@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sweyer/sweyer.dart';
@@ -42,7 +41,7 @@ import 'package:sweyer/sweyer.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   
-  final album = Album(
+  const album = Album(
     id: 0,
     album: 'album',
     albumArt: 'albumArt_albumArt_albumArt',

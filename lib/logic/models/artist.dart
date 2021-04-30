@@ -3,8 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12
-
 import 'package:sweyer/sweyer.dart';
 
 class Artist extends Content {
@@ -16,6 +14,23 @@ class Artist extends Content {
 
   @override
   List<Object> get props => [id];
+
+  /// Returns songs for this artst.
+  List<Song> get songs {
+    return ContentControl.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
+      if (el.artistId == id) {
+        prev.add(el.copyWith());
+      }
+      return prev;
+    }).toList();
+  }
+
+  /// Returns albums for this artst.
+  List<Album> get albums {
+    return ContentControl.state.albums.values
+      .where((el) => el.artistId == id)
+      .toList();
+  }
 
   const Artist({
     required this.id,

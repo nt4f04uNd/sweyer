@@ -3,9 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12
-
-
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -23,13 +20,16 @@ class Album extends PersistentQueue {
 
   /// Returns songs that belong to this album.
   @override
-  List<Song> get songs =>
-      ContentControl.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
+  List<Song> get songs {
+    return ContentControl.state.allSongs.songs
+      .fold<List<Song>>([], (prev, el) {
         if (el.albumId == id) {
           prev.add(el.copyWith());
         }
         return prev;
-      }).toList();
+      })
+      .toList();
+  }
 
   @override
   int get length => numberOfSongs;

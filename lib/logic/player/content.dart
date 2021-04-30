@@ -3,8 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -938,7 +936,7 @@ abstract class ContentControl {
   
   /// Returns content of specified type.
   static List<T> getContent<T extends Content>([Type? contentType]) {
-    return contentPick<T, List<T> Function()>(
+    return contentPick<T, ValueGetter<List<T>>>(
       contentType: contentType,
       song: () => state.allSongs.songs as List<T>,
       album: () => state.albums.values.toList() as List<T>,
@@ -1032,7 +1030,7 @@ abstract class ContentControl {
             .join()
             .contains(query);
     }
-    final contentInterable = contentPick<T, Iterable<T> Function()>(
+    final contentInterable = contentPick<T, ValueGetter<Iterable<T>>>(
       contentType: contentType,
       song: () {
         return state.allSongs.songs.where((song) {

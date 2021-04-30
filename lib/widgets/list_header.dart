@@ -77,10 +77,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   Sort<T> getSort() => ContentControl.state.sorts.getValue<T>() as Sort<T>;
 
   String getContentCountText(AppLocalizations l10n) {
-    final plural = contentPick<T, String Function(int)>(
-      song: l10n.tracksPlural,
-      album: l10n.albumsPlural,
-    )(count).toLowerCase();
+    final plural = l10n.contentsPlural<T>(count).toLowerCase();
     return '$count $plural';
   }
 
@@ -120,10 +117,10 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
       acceptButton: const SizedBox.shrink(),
       content: Column(
-        children: contentPick<T, List<SortFeature> Function()>(
-          song: () => SongSortFeature.values,
-          album: () => AlbumSortFeature.values,
-        )().map((el) => buildItem(el)).toList(),
+        children: SortFeature
+          .getValuesForContent<T>()
+          .map((el) => buildItem(el))
+          .toList(),
       ),
     );
   }
@@ -232,8 +229,12 @@ class _RadioListTile<T> extends StatelessWidget {
               value: value,
               splashRadius: 0.0,
               groupValue: groupValue,
-              onChanged: (value) => onChanged(value!),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onChanged: (value) {
+                if (value != null) {
+                  onChanged(value);
+                }
+              },
             ),
             if (title != null)
               Padding(
