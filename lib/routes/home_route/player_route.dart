@@ -290,7 +290,7 @@ class _QueueTabState extends State<_QueueTab>
         final query = ContentControl.state.queues.searchQuery!;
         ShowFunctions.instance.showSongsSearch(
           query: query,
-          openKeyboard: false
+          openKeyboard: false,
         );
         playerRouteController.close();
         SearchHistory.instance.add(query);

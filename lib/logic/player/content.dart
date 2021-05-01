@@ -1291,3 +1291,18 @@ abstract class ContentControl {
     }
   }
 }
+
+
+class ContentUtils {
+  /// Checks whether a [Song] is currently playing.
+  /// Compares by [Song.sourceId].
+  static bool songIsCurrent(Song song) {
+    return song.sourceId == ContentControl.state.currentSong.sourceId;
+  }
+
+  /// Checks whether a [PersistentQueue] is currently playing.
+  static bool persistentQueueIsCurrent(PersistentQueue queue) {
+    return queue == ContentControl.state.currentSongOrigin ||
+           queue == ContentControl.state.queues.persistent;
+  }
+}

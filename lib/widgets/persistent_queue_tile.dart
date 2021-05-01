@@ -29,7 +29,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     Key? key,
     required this.queue,
     required int this.index,
-    required SelectionController<SelectionEntry> selectionController,
+    required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
     this.trailing,
     this.current,
@@ -54,13 +54,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   /// Whether this queue is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
   /// 
-  /// If not specified, by default true if queue is `currentSongOrigin` or
-  /// if it's currently playing persistent playlist:
-  /// 
-  /// ```dart
-  /// return queue == ContentControl.state.currentSongOrigin ||
-  ///        queue == ContentControl.state.queues.persistent;
-  /// ```
+  /// If not specified, by default uses [ContentUtils.persistentQueueIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
 
@@ -89,9 +83,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   bool get current {
     if (widget.current != null)
       return widget.current!;
-    final queue = widget.queue;
-    return queue == ContentControl.state.currentSongOrigin ||
-           queue == ContentControl.state.queues.persistent;
+    return ContentUtils.persistentQueueIsCurrent(widget.queue);
   }
 
   Widget _buildTile() {

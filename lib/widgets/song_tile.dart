@@ -91,7 +91,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     Key? key,
     required this.song,
     required int this.index,
-    required SelectionController<SelectionEntry> selectionController,
+    required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
     this.current,
     this.onTap,
@@ -112,12 +112,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   /// Whether this song is current, if yes, enables animated
   /// [CurrentIndicator] over the ablum art/instead song number.
   /// 
-  /// If not specified, by default true for equality of [Song.sourceId]
-  /// of song with given [index] and current song:
-  /// 
-  /// ```dart
-  /// song.sourceId == ContentControl.state.currentSong.sourceId
-  /// ```
+  /// If not specified, by default uses [ContentUtils.songIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
   final SongClickBehavior clickBehavior;
@@ -149,8 +144,7 @@ class _SongTileState extends SelectableState<SongTile> {
   }
 
   bool get current {
-    return widget.current ??
-           widget.song.sourceId == ContentControl.state.currentSong.sourceId;
+    return widget.current ?? ContentUtils.songIsCurrent(widget.song);
   }
 
   Widget _buildTile(Widget albumArt, [double? rightPadding]) {

@@ -247,12 +247,15 @@ class _ArtLoader {
     onUpdate();
   }
 
-  Image? getImage() {
+  Image? getImage(int? cacheSize) {
+    // TODO: evaluate whether i should use cache size
     if (_useBytes) {
       return Image.memory(
         _bytes!,
         width: size,
         height: size,
+        // cacheHeight: cacheSize,
+        // cacheWidth: cacheSize,
         fit: BoxFit.cover,
       );
     }
@@ -261,6 +264,8 @@ class _ArtLoader {
         _file!,
         width: size,
         height: size,
+        // cacheHeight: cacheSize,
+        // cacheWidth: cacheSize,
         fit: BoxFit.cover,
       );
     }
@@ -273,8 +278,6 @@ class _ArtLoader {
 
 class _ContentArtState extends State<ContentArt> {
   late List<_ArtLoader> _loaders;
-  double? _sizeForPlaylist;
-  double? get sizeForPlaylist => _sizeForPlaylist ?? widget.size;
 
   bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
@@ -307,7 +310,7 @@ class _ContentArtState extends State<ContentArt> {
       ];
     } else if (content is Playlist) {
       final songs = content.songs;
-      _sizeForPlaylist = widget.size == null ? widget.size : widget.size! / 2;
+      final size = _getSize(true);
       switch (songs.length) {
         case 0:
           _loaders = [];
@@ -316,7 +319,7 @@ class _ContentArtState extends State<ContentArt> {
           final loader = _ArtLoader(
             context: context,
             song: songs.first,
-            size: _sizeForPlaylist,
+            size: size,
             onUpdate: _onUpdate,
           );
           List.generate(4, (index) => loader);
@@ -325,7 +328,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders = List.generate(2, (index) => _ArtLoader(
             context: context,
             song: songs[index],
-            size: _sizeForPlaylist,
+            size: size,
             onUpdate: _onUpdate,
           ));
           _loaders.addAll(_loaders.reversed.toList());
@@ -334,7 +337,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders = List.generate(3, (index) => _ArtLoader(
             context: context,
             song: songs[index],
-            size: _sizeForPlaylist,
+            size: size,
             onUpdate: _onUpdate,
           ));
           _loaders.add(_loaders[0]);
@@ -343,7 +346,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders = List.generate(4, (index) => _ArtLoader(
             context: context,
             song: songs[index],
-            size: _sizeForPlaylist,
+            size: size,
             onUpdate: _onUpdate,
           ));
           break;
@@ -385,6 +388,20 @@ class _ContentArtState extends State<ContentArt> {
     super.dispose();
   }
 
+  /// Returns a size for image.
+  double? _getSize([bool forPlaylist = false]) {
+    return forPlaylist && widget.size != null
+      ? widget.size! / 2
+      : widget.size;
+  }
+
+  /// Returns a cache size for image.
+  int? _getCacheSize([bool forPlaylist = false, double? size]) {
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio.round();
+    size ??= _getSize(forPlaylist);
+    return (size == null ? size : size * devicePixelRatio)?.round();
+  }
+
   Widget _buildCurrentIndicator() {
     return widget.currentIndicatorScale == null
         ? const CurrentIndicator()
@@ -394,13 +411,22 @@ class _ContentArtState extends State<ContentArt> {
           );
   }
 
-  Widget _buildDefault(bool forPlaylist) {
+  Widget _buildDefault([bool forPlaylist = false, int? cacheSize]) {
+    final size = _getSize(forPlaylist);
+    cacheSize ??= _getCacheSize(forPlaylist, size);
+    final int? _cacheSize = (
+      cacheSize == null
+      ? cacheSize
+      : cacheSize * widget.assetScale
+    )?.round();
     Widget child = Image.asset(
       widget.highRes
           ? Constants.Assets.ASSET_LOGO_MASK
           : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
-      width: forPlaylist ? sizeForPlaylist : widget.size,
-      height: forPlaylist ? sizeForPlaylist : widget.size,
+      width: size,
+      height: size,
+      cacheWidth: _cacheSize,
+      cacheHeight: _cacheSize,
       color: widget.color != null
           ? getColorForBlend(widget.color!)
           : ThemeControl.colorForBlend,
@@ -409,6 +435,9 @@ class _ContentArtState extends State<ContentArt> {
     );
     if (widget.assetScale != 1.0) {
       child = Transform.scale(scale: widget.assetScale, child: child);
+      if (forPlaylist) {
+        child = ClipRRect(child: child);
+      }
     }
     return child;
   }
@@ -441,29 +470,30 @@ class _ContentArtState extends State<ContentArt> {
           child: _buildCurrentIndicator(),
         );
       } else {
-        child = _buildDefault(false);
+        child = _buildDefault();
       }
     } else {
       Widget arts;
       if (_loaders.length == 1) {
-        arts = _loaders.first.getImage() ?? _buildDefault(false);
+        arts = _loaders.first.getImage(_getCacheSize()) ?? _buildDefault();
       } else {
         Widget? defaultArt;
+        final cacheSize = _getCacheSize(true);
         if (_loaders.any((el) => el.showDefault)) {
-          defaultArt = _buildDefault(true);
+          defaultArt = _buildDefault(true, cacheSize);
         }
         arts = Column(
           children: [
             Row(
               children: [
-                _loaders[0].getImage() ?? defaultArt!,
-                _loaders[1].getImage() ?? defaultArt!,
+                _loaders[0].getImage(cacheSize) ?? defaultArt!,
+                _loaders[1].getImage(cacheSize) ?? defaultArt!,
               ],
             ),
             Row(
               children: [
-                _loaders[2].getImage() ?? defaultArt!,
-                _loaders[3].getImage() ?? defaultArt!,
+                _loaders[2].getImage(cacheSize) ?? defaultArt!,
+                _loaders[3].getImage(cacheSize) ?? defaultArt!,
               ],
             ),
           ],

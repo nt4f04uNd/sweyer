@@ -30,7 +30,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     Key? key,
     required this.artist,
     required int this.index,
-    required SelectionController<SelectionEntry> selectionController,
+    required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
     this.trailing,
     this.current,
@@ -55,13 +55,8 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   /// Whether this queue is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
   /// 
-  /// If not specified, by default true if queue is `currentSongOrigin` or
-  /// if it's currently playing persistent playlist:
-  /// 
-  /// ```dart
-  /// return queue == ContentControl.state.currentSongOrigin ||
-  ///        queue == ContentControl.state.queues.persistent;
-  /// ```
+  /// If not specified, by default uses [ContentUtils.persistentQueueIsCurrent].
+  /// TODO: current
   final bool? current;
   final VoidCallback? onTap;
 
@@ -90,9 +85,8 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
   bool get current {
     if (widget.current != null)
       return widget.current!;
-    final queue = widget.artist;
-    return queue == ContentControl.state.currentSongOrigin ||
-           queue == ContentControl.state.queues.persistent;
+    // TODO: current
+    return false;
   }
 
   Widget _buildTile() {

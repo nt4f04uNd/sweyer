@@ -76,11 +76,6 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
 
   Sort<T> getSort() => ContentControl.state.sorts.getValue<T>() as Sort<T>;
 
-  String getContentCountText(AppLocalizations l10n) {
-    final plural = l10n.contentsPlural<T>(count).toLowerCase();
-    return '$count $plural';
-  }
-
   void _handleTap() {
     final context = HomeRouter.instance.navigatorKey.currentContext!;
     final l10n = getl10n(context);
@@ -148,7 +143,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 10.0),
             child: Text(
-              getContentCountText(l10n),
+              l10n.contentsPluralWithCount<T>(count),
               style: textStyle,
             ),
           ),

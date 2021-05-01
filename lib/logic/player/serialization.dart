@@ -27,7 +27,7 @@ abstract class JsonSerializer<R, S> {
   /// Create file json if it does not exists or of it is empty then write to it empty array.
   Future<void> init() async {
     final file = await getFile();
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       await file.create();
       await file.writeAsString(jsonEncode(initialValue));
     } else if (await file.readAsString() == '') {

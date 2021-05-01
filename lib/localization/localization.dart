@@ -262,6 +262,11 @@ class AppLocalizations {
     );
   }
 
+  /// Returns string in form "5 songs".
+  String contentsPluralWithCount<T extends Content>(int count, [Type contentType]) {
+    return '$count ${contentsPlural<T>(count, contentType).toLowerCase()}';
+  }
+
   /// Calls a `plural` getter from Intl for a [Content].
   String contentsPlural<T extends Content>(int count, [Type contentType]) {
     return contentPick<T, ValueGetter<String>>(

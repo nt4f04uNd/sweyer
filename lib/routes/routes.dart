@@ -346,6 +346,8 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   Future<void> setNewRoutePath(HomeRoutes configuration) async { }
 
   final tabsRouteKey = GlobalKey<TabsRouteState>();
+  final searchRouteKey = GlobalKey<SearchRouteState>();
+
   SearchDelegate? _searchDelegate;
 
   /// Whether the drawer can be opened.
@@ -353,9 +355,10 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
     final selectionController = ContentControl.state.selectionNotifier.value;
     return playerRouteController.closed &&
       (selectionController?.notInSelection ?? true) &&
-      routes.last != HomeRoutes.album &&
+      (routes.last == HomeRoutes.tabs || routes.last == HomeRoutes.search) &&
       ((tabsRouteKey.currentState?.tabController.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
-      !(tabsRouteKey.currentState?.tabBarDragged ?? false);
+      !(tabsRouteKey.currentState?.tabBarDragged ?? false) &&
+      !(searchRouteKey.currentState?.chipsBarDragged ?? false);
   }
 
   /// Callback that must be called before any pop.
@@ -396,7 +399,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
 
   @override
   bool _handlePopPage(Route<dynamic> route, dynamic result) {
-    if (_searchDelegate != null && _routes.contains(HomeRoutes.search)) {
+    if (_searchDelegate != null && _routes.last == HomeRoutes.search) {
       _searchDelegate = null;
     }
     return super._handlePopPage(route, result);
@@ -431,12 +434,24 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
         pages.add(StackFadePage(
           key: HomeRoutes.album.key,
           transitionSettings: transitionSettings.greyDismissible,
-          child: AlbumRoute(album: (route as HomeRoutes<Album>).arguments!),
+          child: PersistentQueueRoute(queue: (route as HomeRoutes<Album>).arguments!),
+        ));
+      } else if (route == HomeRoutes.playlist) {
+        pages.add(StackFadePage(
+          key: HomeRoutes.playlist.key,
+          transitionSettings: transitionSettings.greyDismissible,
+          child: PersistentQueueRoute(queue: (route as HomeRoutes<Playlist>).arguments!),
+        ));
+      } else if (route == HomeRoutes.artist) {
+        pages.add(StackFadePage(
+          key: HomeRoutes.artist.key,
+          transitionSettings: transitionSettings.greyDismissible,
+          child: ArtistRoute(artist: (route as HomeRoutes<Artist>).arguments!),
         ));
       } else if (route == HomeRoutes.search) {
         pages.add(SearchPage(
           key: HomeRoutes.search.key,
-          delegate: _searchDelegate!,
+          child: SearchRoute(key: searchRouteKey, delegate: _searchDelegate!),
           transitionSettings: transitionSettings.grey,
         ));
       } else {

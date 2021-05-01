@@ -11,46 +11,52 @@ import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-class AlbumRoute extends StatefulWidget {
-  AlbumRoute({Key? key, required this.album})
+class PersistentQueueRoute extends StatefulWidget {
+  PersistentQueueRoute({Key? key, required this.queue})
     : super(key: key);
 
-  final Album album;
+  final PersistentQueue queue;
 
   @override
-  _AlbumRouteState createState() => _AlbumRouteState();
+  _PersistentQueueRouteState createState() => _PersistentQueueRouteState();
 }
 
-class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, SelectionHandler {
+class _PersistentQueueRouteState extends State<PersistentQueueRoute> with TickerProviderStateMixin, SelectionHandler {
   final ScrollController scrollController = ScrollController();
   late AnimationController appBarController;
   late ContentSelectionController<SelectionEntry<Song>> selectionController;
   late List<Song> songs;
 
   static const _appBarHeight = NFConstants.toolbarHeight - 8.0;
-  static const _albumArtSize = 130.0;
-  static const _albumSectionTopPadding = 10.0;
-  static const _albumSectionBottomPadding = 24.0;
-  static const _albumSectionHeight = _albumArtSize + _albumSectionTopPadding + _albumSectionBottomPadding;
+  static const _artSize = 130.0;
+  static const _infoSectionTopPadding = 10.0;
+  static const _infoSectionBottomPadding = 24.0;
+  static const _infoSectionHeight = _artSize + _infoSectionTopPadding + _infoSectionBottomPadding;
 
   static const _buttonSectionButtonHeight = 38.0;
   static const _buttonSectionBottomPadding = 12.0;
   static const _buttonSectionHeight = _buttonSectionButtonHeight + _buttonSectionBottomPadding;
 
   /// Amount of pixels user always can scroll.
-  static const _alwaysCanScrollExtent = _albumSectionHeight + _buttonSectionHeight;
+  static const _alwaysCanScrollExtent = _infoSectionHeight + _buttonSectionHeight;
+
+  bool get isAlbum => widget.queue is Album;
+  Album get album {
+    assert(isAlbum);
+    return widget.queue as Album;
+  }
 
   @override
   void initState() {
     super.initState();
-    songs = widget.album.songs;
+    songs = widget.queue.songs;
     appBarController = AnimationController(
       vsync: AppRouter.instance.navigatorKey.currentState!,
       value: 1.0,
     );
     scrollController.addListener(_handleScroll);
     selectionController = ContentSelectionController.forContent<Song>(
-      this,
+      AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
@@ -68,10 +74,10 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
   }
 
   void _handleScroll() {
-    appBarController.value = 1.0 - scrollController.offset / _albumSectionHeight;
+    appBarController.value = 1.0 - scrollController.offset / _infoSectionHeight;
   }
 
-  Widget _buildAlbumInfo() {
+  Widget _buildInfo() {
     final l10n = getl10n(context);
     return Padding(
       padding: const EdgeInsets.only(
@@ -84,8 +90,8 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
             opacity: appBarController,
             child: Container(
               padding: const EdgeInsets.only(
-                top: _albumSectionTopPadding,
-                bottom: _albumSectionBottomPadding,
+                top: _infoSectionTopPadding,
+                bottom: _infoSectionBottomPadding,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,7 +100,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                     size: 130.0,
                     highRes: true,
                     assetScale: 1.4,
-                    source: ContentArtSource.album(widget.album),
+                    source: ContentArtSource.persistentQueue(widget.queue),
                   ),
                   Expanded(
                     child: Padding(
@@ -103,7 +109,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.album.album,
+                            widget.queue.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -112,28 +118,30 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                               fontSize: 24.0,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              top: 8.0,
-                            ),
-                            child: ArtistWidget(
-                              artist: widget.album.artist,
-                              overflow: TextOverflow.clip,
-                              textStyle: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 15.0,
-                                color: ThemeControl.theme.colorScheme.onBackground,
+                          if (isAlbum)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 8.0,
+                              ),
+                              child: ArtistWidget(
+                                artist: album.artist,
+                                overflow: TextOverflow.clip,
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 15.0,
+                                  color: ThemeControl.theme.colorScheme.onBackground,
+                                ),
                               ),
                             ),
-                          ),
-                          Text(
-                            '${l10n.album} • ${widget.album.year}',
-                            style: TextStyle(
-                              color: ThemeControl.theme.textTheme.subtitle2!.color,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 14.0,
+                          if (isAlbum)
+                            Text(
+                              '${l10n.album} • ${album.year}',
+                              style: TextStyle(
+                                color: ThemeControl.theme.textTheme.subtitle2!.color,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14.0,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -151,15 +159,10 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: _AlbumPlayButton(
-                      text: l10n.shuffleContentList,
-                      icon: const Icon(Icons.shuffle_rounded, size: 22.0),
-                      color: Constants.Theme.contrast.auto,
-                      textColor: ThemeControl.theme.colorScheme.background,
-                      splashColor: Constants.Theme.glowSplashColorOnContrast.auto,
+                    child: ShuffleQueueButton(
                       onPressed: () {
                          ContentControl.setPersistentQueue(
-                          queue: widget.album,
+                          queue: widget.queue,
                           songs: songs,
                           shuffled: true,
                         );
@@ -171,11 +174,9 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                   ),
                   const SizedBox(width: 16.0),
                   Expanded(
-                    child: _AlbumPlayButton(
-                      text: l10n.playContentList,
-                      icon: const Icon(Icons.play_arrow_rounded, size: 28.0),
+                    child: PlayQueueButton(
                       onPressed: () {
-                        ContentControl.setPersistentQueue(queue: widget.album, songs: songs);
+                        ContentControl.setPersistentQueue(queue: widget.queue, songs: songs);
                         MusicPlayer.instance.setSong(songs[0]);
                         MusicPlayer.instance.play();
                         playerRouteController.open();
@@ -236,7 +237,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                           : 0.0,
                         curve: Curves.easeOut,
                         duration: const Duration(milliseconds: 400),
-                        child: Text(widget.album.album),
+                        child: Text(widget.queue.title),
                       ),
                     ),
                   ),
@@ -244,7 +245,7 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                   SliverToBoxAdapter(
                     child: IgnoreInSelection(
                       controller: selectionController,
-                      child: _buildAlbumInfo()
+                      child: _buildInfo()
                     ),
                   ),
 
@@ -259,11 +260,11 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
                     sliver: ContentListView.sliver<Song>(
                       list: songs,
                       selectionController: selectionController,
-                      currentTest: (index) => ContentControl.state.queues.persistent == widget.album &&
-                                    songs[index].sourceId == ContentControl.state.currentSong.sourceId,
+                      currentTest: (index) => ContentUtils.persistentQueueIsCurrent(widget.queue) &&
+                                              songs[index].sourceId == ContentControl.state.currentSong.sourceId,
                       songTileVariant: SongTileVariant.number,
                       onItemTap: () => ContentControl.setPersistentQueue(
-                        queue: widget.album,
+                        queue: widget.queue,
                         songs: songs,
                       ),
                     ),
@@ -279,62 +280,6 @@ class _AlbumRouteState extends State<AlbumRoute> with TickerProviderStateMixin, 
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-/// A button with text and icon.
-class _AlbumPlayButton extends StatelessWidget {
-  const _AlbumPlayButton({
-    Key? key,
-    required this.text,
-    required this.icon,
-    required this.onPressed,
-    this.color,
-    this.textColor,
-    this.splashColor,
-  }) : super(key: key);
-
-  final String text;
-  final Icon icon;
-  final VoidCallback onPressed;
-  final Color? color;
-  final Color? textColor;
-  final Color? splashColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeControl.theme.copyWith(
-        splashFactory: NFListTileInkRipple.splashFactory,
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: const ElevatedButton(child: null, onPressed: null).defaultStyleOf(context).copyWith(
-          backgroundColor: MaterialStateProperty.all(color),
-          foregroundColor: MaterialStateProperty.all(textColor),
-          overlayColor: MaterialStateProperty.resolveWith((_) => splashColor ?? Constants.Theme.glowSplashColor.auto),
-          splashFactory: NFListTileInkRipple.splashFactory,
-          shadowColor: MaterialStateProperty.all(Colors.transparent),
-          textStyle: MaterialStateProperty.resolveWith((_) => TextStyle(
-            fontFamily: ThemeControl.theme.textTheme.headline1!.fontFamily,
-            fontWeight: FontWeight.w700,
-            fontSize: 15.0,
-          )),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(width: 6.0),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 1.0),
-              child: Text(text),
-            ),
-            const SizedBox(width: 8.0),
-          ],
-        ),
       ),
     );
   }

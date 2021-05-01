@@ -110,7 +110,7 @@ class SearchHistory {
   static final instance = SearchHistory._();
 
   /// Before accessing this variable, you mast call [load].
-  List<String> get history => _history!;
+  List<String>? get history => _history;
   List<String>? _history;
 
   /// Loads the history.
@@ -131,8 +131,8 @@ class SearchHistory {
   /// Removes an entry from history at [index].
   Future<void> removeAt(int index) async {
     await load();
-    history.removeAt(index);
-    await Prefs.searchHistoryStringList.set(history);
+    history!.removeAt(index);
+    await Prefs.searchHistoryStringList.set(history!);
   }
 
   /// Adds an [entry] to history.
@@ -142,12 +142,12 @@ class SearchHistory {
     if (entry.isNotEmpty) {
       await load();
       // Remove if this input is in array
-      history.removeWhere((el) => el == entry);
-      history.insert(0, entry);
-      if (history.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
-        history.removeLast();
+      history!.removeWhere((el) => el == entry);
+      history!.insert(0, entry);
+      if (history!.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+        history!.removeLast();
       }
-      await Prefs.searchHistoryStringList.set(history);
+      await Prefs.searchHistoryStringList.set(history!);
     }
   }
 }

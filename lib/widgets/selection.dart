@@ -807,9 +807,9 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
     return _ActionSupported(
       controller: controller,
       shown: () {
-        return data.length > 1 ||
-          data.length == 1 && (data.first.data is! Song || (data.first.data as Song).albumId == null) ||
-          HomeRouter.instance.routes.last == HomeRoutes.album && playerRouteController.closed; // disable action in album route
+        return data.length == 1 &&
+          data.first.data is Song && (data.first.data as Song).albumId != null &&
+          (HomeRouter.instance.routes.last != HomeRoutes.album || playerRouteController.opened); // disable action in album route
       },
       child: _SelectionAnimation(
         animation: controller.animationController,
@@ -979,7 +979,6 @@ class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
 
 class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandler {
   late Type type;
-  bool shown = false;
 
   @override
   void initState() { 
@@ -1046,12 +1045,10 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
               (type == Content &&
               widget.controller.data.firstWhereOrNull((el) => el is SelectionEntry<Album>) == null);
       },
-      child: !shown
-        ? const SizedBox.shrink()
-        : NFIconButton(
-            icon: const Icon(Icons.delete_outline_rounded),
-            onPressed: _handleDelete,
-          ),
+      child: NFIconButton(
+        icon: const Icon(Icons.delete_outline_rounded),
+        onPressed: _handleDelete,
+      ),
     );
   }
 }

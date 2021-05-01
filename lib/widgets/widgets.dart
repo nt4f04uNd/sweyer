@@ -3,19 +3,20 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-export 'album_tile.dart';
 export 'app_bar_border.dart';
 export 'artist_tile.dart';
 export 'artist.dart';
 export 'bottom_track_panel.dart';
 export 'buttons.dart';
 export 'content_art.dart';
+export 'content_section.dart';
 export 'content_list_view.dart';
 export 'content_tile.dart';
 export 'current_indicator.dart';
 export 'drawer.dart';
 export 'list_header.dart';
 export 'logo.dart';
+export 'persistent_queue_tile.dart';
 export 'play_pause_button.dart';
 export 'screens.dart';
 export 'scrollbar.dart';

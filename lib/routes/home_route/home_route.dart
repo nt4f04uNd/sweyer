@@ -10,7 +10,8 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-export 'album_route.dart';
+export 'artist_route.dart';
+export 'persistent_queue_route.dart';
 export 'player_route.dart';
 export 'search_route.dart';
 export 'tabs_route.dart';
