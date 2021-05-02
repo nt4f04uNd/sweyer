@@ -173,8 +173,7 @@ class _QueueTab extends StatefulWidget {
   _QueueTabState createState() => _QueueTabState();
 }
 
-class _QueueTabState extends State<_QueueTab>
-  with SingleTickerProviderStateMixin, SelectionHandler {
+class _QueueTabState extends State<_QueueTab> with SelectionHandler {
 
   static const double appBarHeight = 81.0;
 
@@ -207,9 +206,7 @@ class _QueueTabState extends State<_QueueTab>
     songsPerScreen = (screenHeight / kSongTileHeight).ceil() - 2;
     edgeOffset = (screenHeight / kSongTileHeight / 2).ceil();
 
-    widget.selectionController
-      ..addListener(handleSelection)
-      ..addStatusListener(handleSelectionStatus);
+    widget.selectionController.addListener(handleSelection);
 
     _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
       if (ContentControl.state.allSongs.isNotEmpty) {
@@ -236,9 +233,7 @@ class _QueueTabState extends State<_QueueTab>
 
   @override
   void dispose() {
-    widget.selectionController
-      ..removeListener(handleSelection)
-      ..removeStatusListener(handleSelectionStatus);
+    widget.selectionController.removeListener(handleSelection);
     _contentChangeSubscription.cancel();
     _songChangeSubscription.cancel();
     super.dispose();
@@ -333,7 +328,7 @@ class _QueueTabState extends State<_QueueTab>
         if (isAlbum) {
           text.add(TextSpan(text: '${l10n.album} '));
           text.add(TextSpan(
-            text: album!.album + ' • ${album!.year}',
+            text: album!.nameAndYear,
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,

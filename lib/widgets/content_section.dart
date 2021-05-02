@@ -119,14 +119,20 @@ class ContentSection<T extends Content> extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  l10n.contentsPluralWithCount<T>(count, contentType),
+                  l10n.contents<T>(contentType),
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                if (onHeaderTap != null)
-                  const Icon(Icons.chevron_right_rounded),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: onHeaderTap == null
+                    ? const SizedBox.shrink()
+                    : const Icon(Icons.chevron_right_rounded),
+                ),
               ],
             ), 
           ),

@@ -233,7 +233,7 @@ class SearchRoute<T> extends StatefulWidget {
   SearchRouteState createState() => SearchRouteState<T>();
 }
 
-class SearchRouteState<T> extends State<SearchRoute<T>> with TickerProviderStateMixin {
+class SearchRouteState<T> extends State<SearchRoute<T>> {
   late _SearchStateDelegate stateDelegate;
   FocusNode get focusNode => stateDelegate.focusNode;
   late ModalRoute _route;
@@ -627,7 +627,7 @@ class _DelegateBuilder extends StatelessWidget {
                             contentType: contentListContentType,
                             controller: delegate.singleListScrollController,
                             selectionController: delegate.selectionController,
-                            selectedTest: (index) =>delegate.selectionController.data
+                            selectedTest: (index) => delegate.selectionController.data
                               .firstWhereOrNull((el) => el.data == list[index]) != null,
                             onItemTap: () => delegate.handleContentTap(contentListContentType),
                             list: list,

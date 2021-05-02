@@ -40,6 +40,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   bool _disposed = false;
+  bool _running = false;
   MusicPlayer player = MusicPlayer.instance;
   final BehaviorSubject<void> contentChangeSubject = BehaviorSubject();
 
@@ -55,6 +56,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       }
     });
     player.playingStream.listen((playing) {
+      _running = true;
       _setState();
       _lastEvent = DateTime.now();
     });
@@ -208,6 +210,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> stop() async {
+    _running = false;
     // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
     // await player.stop();
     await player.pause();
@@ -452,7 +455,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   /// Broadcasts the current state to all clients.
   void _setState() {
-    if (_disposed)
+    if (_disposed || !_running)
       return;
     final playing = player.playing;
     final l10n = staticl10n;

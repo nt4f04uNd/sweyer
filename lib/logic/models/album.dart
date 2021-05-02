@@ -41,9 +41,13 @@ class Album extends PersistentQueue {
       : lastYear!;
   }
 
-
   Song get firstSong {
     return ContentControl.state.allSongs.songs.firstWhere((el) => el.albumId == id);
+  }
+
+  /// Returns string in format `album name • year`. 
+  String get nameAndYear {
+    return ContentUtils.appendYearWithDot(album, year);
   }
 
   const Album({
@@ -64,7 +68,7 @@ class Album extends PersistentQueue {
       defaultArtBlendColor: ThemeControl.colorForBlend.value,
       artUri: null,
       title: album,
-      artist: formatArtist(artist, staticl10n),
+      artist: ContentUtils.localizedArtist(artist, staticl10n),
       genre: null,
       rating: null,
       extras: null,

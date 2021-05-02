@@ -111,7 +111,7 @@ class _Bar extends StatefulWidget {
   _BarState createState() => _BarState();
 }
 
-class _BarState extends State<_Bar> with SingleTickerProviderStateMixin {
+class _BarState extends State<_Bar> {
   late int index;
   Timer? timer;
   late StreamSubscription<bool> _playingSubscription;

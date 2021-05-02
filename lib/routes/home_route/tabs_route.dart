@@ -58,8 +58,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       this,
       ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.routes.last != HomeRoutes.tabs,
     )
-      ..addListener(handleSelection)
-      ..addStatusListener(handleSelectionStatus);
+      ..addListener(handleSelection);
     tabController = TabController(
       vsync: this,
       length: 4,

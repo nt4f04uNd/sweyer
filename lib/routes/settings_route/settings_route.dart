@@ -136,7 +136,7 @@ class _FooterState extends State<_Footer> {
             leading: Icon(
               Icons.adb_rounded,
               color: Colors.white,
-              size: Constants.iconSize * textScaleFactor,
+              size: NFConstants.iconSize * textScaleFactor,
             ),
             title: Text(l10n.devModeGreet, style: textStyle),
             color: Constants.AppColors.androidGreen,

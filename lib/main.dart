@@ -138,7 +138,6 @@ SlidableController get playerRouteController => _playerRouteController;
 SlidableController get drawerController => _drawerController;
 
 class _AppState extends State<App> with TickerProviderStateMixin {
-
   @override
   void initState() {
     super.initState();

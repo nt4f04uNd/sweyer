@@ -114,7 +114,7 @@ class _SeekbarState extends State<Seekbar> {
     });
   }
 
-  /// FIXME: https://github.com/nt4f04uNd/sweyer/issues/6
+  /// TODO: https://github.com/nt4f04uNd/sweyer/issues/6
   Future<void> _handleChangeEnd(double newValue) async {
     await player.seek(_duration * newValue);
     if (mounted) {

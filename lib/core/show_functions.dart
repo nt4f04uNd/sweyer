@@ -96,7 +96,7 @@ class ShowFunctions extends NFShowFunctions {
                 ),
                 content: SelectableText(
                   errorDetails,
-                  // FIXME: temporarily do not apply AlwaysScrollableScrollPhysics, because of this issue https://github.com/flutter/flutter/issues/71342
+                  // TODO: temporarily do not apply AlwaysScrollableScrollPhysics, because of this issue https://github.com/flutter/flutter/issues/71342
                   // scrollPhysics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                   style: const TextStyle(fontSize: 11.0),
                 ),

@@ -3,4 +3,4 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// TODO: when if add [ContentTile], change the above term.
+// TODO: add [ContentTile]

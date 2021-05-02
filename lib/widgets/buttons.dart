@@ -23,7 +23,7 @@ class LoopButton extends StatelessWidget {
         return AnimatedIconButton(
           icon: const Icon(Icons.loop_rounded),
           size: 40.0,
-          iconSize: textScaleFactor * Constants.iconSize,
+          iconSize: textScaleFactor * NFConstants.iconSize,
           active: snapshot.data!,
           onPressed: player.switchLooping,
         );
@@ -43,7 +43,7 @@ class ShuffleButton extends StatelessWidget {
         icon: const Icon(Icons.shuffle_rounded),
         color: ThemeControl.theme.colorScheme.onSurface,
         size: 40.0,
-        iconSize: textScaleFactor * Constants.iconSize,
+        iconSize: textScaleFactor * NFConstants.iconSize,
         active: ContentControl.state.queues.shuffled,
         onPressed: () {
           ContentControl.setQueue(

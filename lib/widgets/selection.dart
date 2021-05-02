@@ -17,8 +17,8 @@ const Duration kSelectionDuration = Duration(milliseconds: 350);
 
 /// The [SelectionWidget] need its parent updates him.
 ///
-/// Mixin this to a parent of [SelectableWidget] and add [handleSelection]\
-/// and [handleSelectionStatus] as handlers to listeners to the controller(s).
+/// Mixin this to a parent of [SelectableWidget] and add [handleSelection],
+/// (or optionally [handleSelectionStatus]) as handler to listener to the controller(s).
 mixin SelectionHandler<T extends StatefulWidget> on State<T> {
   /// Listens to [SelectionController.addListener].
   /// By default just calls [setState].
@@ -133,7 +133,8 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (selectable)
+      _controller.dispose();
     super.dispose();
   }
 
@@ -228,7 +229,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// 
   /// If [closeButton] is  `true`, will show a selection close button in the title.
   @factory
-  static ContentSelectionController forContent<T extends Content>(
+  static ContentSelectionController<SelectionEntry<T>> forContent<T extends Content>(
     TickerProvider vsync, {
     ValueGetter<bool>? ignoreWhen,
     bool counter = false,
@@ -381,6 +382,49 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
+}
+
+/// Creats a selection controller and automatically rebuilds, when it updates.
+class ContentSelectionControllerCreator<T extends Content> extends StatefulWidget {
+  ContentSelectionControllerCreator({
+    Key? key,
+    required this.builder,
+    this.child,
+  }) : super(key: key);
+
+  final Widget Function(BuildContext context, ContentSelectionController<SelectionEntry<T>> selectionController, Widget? child) builder;
+  final Widget? child;
+
+  @override
+  _SelectionControllerCreatorState<T> createState() => _SelectionControllerCreatorState();
+}
+
+class _SelectionControllerCreatorState<T extends Content> extends State<ContentSelectionControllerCreator<T>>
+    with SelectionHandler {
+  late final ContentSelectionController<SelectionEntry<T>> controller; 
+
+  @override
+  void initState() { 
+    super.initState();
+    controller = ContentSelectionController.forContent<T>(
+      AppRouter.instance.navigatorKey.currentState!,
+      closeButton: true,
+      counter: true,
+      ignoreWhen: () => playerRouteController.opened,
+    )
+      ..addListener(handleSelection);
+  }
+
+  @override
+  void dispose() { 
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, controller, widget.child);
+  }
 }
 
 class SelectionCheckmark extends StatefulWidget {

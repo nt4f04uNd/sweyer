@@ -7,7 +7,3 @@ export 'assets.dart';
 export 'colors.dart';
 export 'config.dart';
 export 'themes.dart';
-
-const double iconSize = 25.0;
-const double iconButtonSize = 36.0;
-

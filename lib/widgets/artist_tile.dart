@@ -20,9 +20,8 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.trailing,
     this.current,
     this.onTap,
-    this.small = false,
     double? horizontalPadding,
-  })  : horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+  })  : horizontalPadding = horizontalPadding ?? _horizontalPadding,
         index = null,
         super(key: key);
 
@@ -35,11 +34,10 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.trailing,
     this.current,
     this.onTap,
-    this.small = false,
     double? horizontalPadding,
   }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
               selectionController is SelectionController<SelectionEntry<Artist>>),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+       horizontalPadding = horizontalPadding ?? _horizontalPadding,
        super.selectable(
          key: key,
          selected: selected,
@@ -60,8 +58,6 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   final bool? current;
   final VoidCallback? onTap;
 
-  /// Creates a small variant of the tile with the sizes of [SelectableTile].
-  final bool small;
   final double horizontalPadding;
 
   @override
@@ -91,6 +87,7 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
 
   Widget _buildTile() {
     final source = ContentArtSource.artist(widget.artist);
+    final l10n = getl10n(context);
     return InkWell(
       onTap: _handleTap,
       onLongPress: toggleSelection,
@@ -103,18 +100,13 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
+          children: [
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
-              child: widget.small
-                ? ContentArt.songTile(
-                    source: source,
-                    current: current,
-                  )
-                : ContentArt.artistTile(
-                    source: source,
-                    current: current,
-                  ),
+              child: ContentArt.artistTile(
+                source: source,
+                current: current,
+              ),
             ),
             Expanded(
               child: Padding(
@@ -122,9 +114,9 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
+                  children: [
                     Text(
-                      widget.artist.artist,
+                      ContentUtils.localizedArtist(widget.artist.artist, l10n),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: ThemeControl.theme.textTheme.headline6,

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 class PersistentQueueRoute extends StatefulWidget {
   PersistentQueueRoute({Key? key, required this.queue})
@@ -21,7 +20,7 @@ class PersistentQueueRoute extends StatefulWidget {
   _PersistentQueueRouteState createState() => _PersistentQueueRouteState();
 }
 
-class _PersistentQueueRouteState extends State<PersistentQueueRoute> with TickerProviderStateMixin, SelectionHandler {
+class _PersistentQueueRouteState extends State<PersistentQueueRoute> with SelectionHandler {
   final ScrollController scrollController = ScrollController();
   late AnimationController appBarController;
   late ContentSelectionController<SelectionEntry<Song>> selectionController;
@@ -61,8 +60,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Ticker
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
     ) as ContentSelectionController<SelectionEntry<Song>>
-      ..addListener(handleSelection)
-      ..addStatusListener(handleSelectionStatus);
+      ..addListener(handleSelection);
   }
 
   @override
@@ -99,7 +97,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Ticker
                   ContentArt(
                     size: 130.0,
                     highRes: true,
-                    assetScale: 1.4,
+                    assetScale: 1.5,
                     source: ContentArtSource.persistentQueue(widget.queue),
                   ),
                   Expanded(
@@ -135,7 +133,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Ticker
                             ),
                           if (isAlbum)
                             Text(
-                              '${l10n.album} • ${album.year}',
+                              ContentUtils.appendYearWithDot(l10n.album, album.year),
                               style: TextStyle(
                                 color: ThemeControl.theme.textTheme.subtitle2!.color,
                                 fontWeight: FontWeight.w900,
@@ -151,7 +149,11 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Ticker
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: _buttonSectionBottomPadding),
+            padding: const EdgeInsets.only(
+              bottom: _buttonSectionBottomPadding,
+              // Compensate the padding difference up the tree
+              right: 3.0
+            ),
             child: SizedBox(
               height: _buttonSectionButtonHeight,
               child: Row(
@@ -199,12 +201,13 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Ticker
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // TODO: add comment how this is working
-          final height = constraints.maxHeight -
+          /// The height to add at the end of the scroll view to make the top info part of the route
+          /// always be fully scrollable, even if there's not enough items for that.
+          final additionalHeight = constraints.maxHeight -
             _appBarHeight -
-            kSongTileHeight * songs.length -
             AppBarBorder.height -
-            MediaQuery.of(context).padding.top;
+            MediaQuery.of(context).padding.top -
+            kSongTileHeight * songs.length;
 
           return ScrollConfiguration(
             behavior: const GlowlessScrollBehavior(),
@@ -270,11 +273,10 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Ticker
                     ),
                   ),
                   
-                  SliverToBoxAdapter(
-                    child: height <= 0
-                      ? const SizedBox.shrink()
-                      : Container(height: height),
-                  ),
+                  if (additionalHeight > 0) 
+                    SliverToBoxAdapter(
+                      child: Container(height: additionalHeight),
+                    ),
                 ],
               ),
             ),

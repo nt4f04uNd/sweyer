@@ -19,8 +19,7 @@ class DrawerWidget extends StatefulWidget {
   _DrawerWidgetState createState() => _DrawerWidgetState();
 }
 
-class _DrawerWidgetState extends State<DrawerWidget>
-    with SingleTickerProviderStateMixin {
+class _DrawerWidgetState extends State<DrawerWidget> {
   /// Indicates that current route with drawer is ontop and it can take the control
   /// over the ui animations.
   bool _onTop = true;

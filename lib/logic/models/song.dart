@@ -145,7 +145,7 @@ class Song extends Content {
       artUri: null,
       album: getAlbum()?.album,
       title: title,
-      artist: formatArtist(artist, staticl10n),
+      artist: ContentUtils.localizedArtist(artist, staticl10n),
       genre: genre,
       duration: Duration(milliseconds: duration),
       playable: true,

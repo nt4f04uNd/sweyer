@@ -3,10 +3,14 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 class ArtistRoute extends StatefulWidget {
   ArtistRoute({Key? key, required this.artist}) : super(key: key);
@@ -17,10 +21,12 @@ class ArtistRoute extends StatefulWidget {
   _ArtistRouteState createState() => _ArtistRouteState();
 }
 
-class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
+class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStateMixin, SelectionHandler {
   final ScrollController scrollController = ScrollController();
   late AnimationController appBarController;
-  late ContentSelectionController<SelectionEntry<Song>> selectionController;
+  late AnimationController backButtonAnimationController;
+  late Animation<double> backButtonAnimation;
+  late ContentSelectionController selectionController;
   late List<Song> songs;
   late List<Album> albums;
 
@@ -29,6 +35,8 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
   static const _buttonSectionButtonHeight = 38.0;
   static const _buttonSectionBottomPadding = 12.0;
   static const _buttonSectionHeight = _buttonSectionButtonHeight + _buttonSectionBottomPadding;
+
+  static const _albumsSectionHeight = 280.0;
 
   /// Amount of pixels user always can scroll.
   double get _alwaysCanScrollExtent => _artScrollExtent + _buttonSectionHeight;
@@ -39,6 +47,9 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
 
   /// Full size of app bar.
   double get _fullAppBarHeight => _appBarHeight + mediaQuery.padding.top;
+
+  /// Whether the title is visible.
+  bool get _appBarTitleVisible => 1.0 - appBarController.value > 0.85;
 
   late MediaQueryData mediaQuery;
 
@@ -51,30 +62,77 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
       vsync: AppRouter.instance.navigatorKey.currentState!,
       value: 1.0,
     );
+    backButtonAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    backButtonAnimation = CurvedAnimation(
+      parent: backButtonAnimationController,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    );
     scrollController.addListener(_handleScroll);
-    selectionController = ContentSelectionController.forContent<Song>(
+    selectionController = ContentSelectionController.forContent(
       AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
-    ) as ContentSelectionController<SelectionEntry<Song>>
-      ..addListener(handleSelection)
-      ..addStatusListener(handleSelectionStatus);
+    )
+     ..addListener(handleSelection);
   }
 
   @override
   void dispose() {
     selectionController.dispose();
     appBarController.dispose();
+    backButtonAnimationController.dispose();
     scrollController.removeListener(_handleScroll);
     super.dispose();
   }
 
   void _handleScroll() {
-    appBarController.value = 1.0 - scrollController.offset / (mediaQuery.size.width - _fullAppBarHeight);
+    appBarController.value = 1.0 - scrollController.offset / _artScrollExtent;
+    if (1.0 - appBarController.value > 0.5) {
+      backButtonAnimationController.forward();
+    } else {
+      backButtonAnimationController.reverse();
+    }
   }
 
   Widget _buildInfo() {
+    final l10n = getl10n(context);
+    final theme = ThemeControl.theme;
+    final artSize = mediaQuery.size.width;
+    final totalDuration = Duration(milliseconds: songs.fold(0, (prev, el) => prev + el.duration));
+    final hours = totalDuration.inHours;
+    final minutes = totalDuration.inMinutes % 60;
+    final seconds = totalDuration.inSeconds % 60;
+    final buffer = StringBuffer();
+    if (hours > 0) {
+      if (hours.toString().length < 2) {
+        buffer.write(0);
+      }
+      buffer.write(hours);
+      buffer.write(':');
+    }
+    if (minutes > 0) {
+      if (minutes.toString().length < 2) {
+        buffer.write(0);
+      }
+      buffer.write(minutes);
+      buffer.write(':');
+    }
+    if (seconds > 0) {
+      if (seconds.toString().length < 2) {
+        buffer.write(0);
+      }
+      buffer.write(seconds);
+    }
+    final summary = ContentUtils.joinDot([
+      l10n.contentsPluralWithCount<Song>(songs.length),
+      l10n.contentsPluralWithCount<Album>(albums.length),
+      buffer,
+    ]);
     return Column(
       children: [
         FadeTransition(
@@ -86,15 +144,16 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                 children: [
                   ContentArt(
                     highRes: true,
-                    size: mediaQuery.size.width,
+                    size: artSize,
                     borderRadius: 0.0,
                     source: ContentArtSource.artist(widget.artist),
                   ),
                   Positioned.fill(
+                    top: artSize / 3,
                     child: Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.transparent, Colors.black],
+                          colors: [Colors.transparent, theme.colorScheme.background],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         )
@@ -102,17 +161,33 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                     ),
                   ),
                   Positioned.fill(
-                    bottom: 40.0,
+                    bottom: 20.0,
                     child: Align(
                       alignment: Alignment.bottomCenter, 
-                      child: Text(
-                        widget.artist.artist,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          height: 1.0,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 42.0,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              height: 1.0,
+                              fontWeight: FontWeight.w800,
+                              color: Constants.Theme.contrast.auto,
+                              fontSize: 42.0,
+                            ),
+                          ),
+                          Text(
+                            summary,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              height: 1.0,
+                              fontWeight: FontWeight.w700,
+                              // color: theme.colorScheme.onSurface,
+                              color: Constants.Theme.contrast.auto,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -166,7 +241,11 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: _buttonSectionBottomPadding),
+          padding: const EdgeInsets.only(
+            bottom: _buttonSectionBottomPadding,
+            left: 13.0,
+            right: 13.0,
+          ),
           child: SizedBox(
             height: _buttonSectionButtonHeight,
             child: Row(
@@ -180,7 +259,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                       ContentControl.setQueue(
                         // queue: widget.queue,
                         type: QueueType.arbitrary,
-                        songs: songs,
+                        shuffleFrom: songs,
                         shuffled: true,
                       );
                       MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
@@ -197,6 +276,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                       ContentControl.setQueue(
                         // queue: widget.queue,
                         type: QueueType.arbitrary,
+                        shuffled: false,
                         songs: songs,
                       );
                       MusicPlayer.instance.setSong(songs[0]);
@@ -222,10 +302,14 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // TODO: add comment how this is working
-          final height = constraints.maxHeight -
+          /// The height to add at the end of the scroll view to make the top info part of the route
+          /// always be fully scrollable, even if there's not enough content for that.
+          final additionalHeight = constraints.maxHeight -
             _fullAppBarHeight -
-            kSongTileHeight * songs.length;
+            kSongTileHeight * math.min(songs.length, 5) -
+            40.0 -
+            _albumsSectionHeight -
+            40.0;
 
           return ScrollConfiguration(
             behavior: const GlowlessScrollBehavior(),
@@ -244,14 +328,13 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                           ),
                         ),
 
-                      
                         if (songs.isNotEmpty)
                           SliverToBoxAdapter(
                             child: ContentSection<Song>(
                               list: songs,
                               selectionController: selectionController,
                               maxPreviewCount: 5,
-                              onHeaderTap: songs.length <= 5 ? null : () {
+                              onHeaderTap: selectionController.inSelection || songs.length <= 5 ? null : () {
                                 Navigator.of(context).push(StackFadeRouteTransition(
                                   child: _ContentListRoute<Song>(list: songs),
                                   transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
@@ -267,28 +350,33 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                               },
                             ),
                           ),
+
                         if (albums.isNotEmpty)
                           MultiSliver(
                             children: [
                               ContentSection<Album>.custom(
                                 list: albums,
-                                onHeaderTap: songs.length <= 5 ? null : () {
+                                onHeaderTap: selectionController.inSelection || songs.length <= 5 ? null : () {
                                   Navigator.of(context).push(StackFadeRouteTransition(
-                                    child: _ContentListRoute<Song>(list: songs),
+                                    child: _ContentListRoute<Album>(list: albums),
                                     transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
                                   ));
                                 },
                                 child: SizedBox(
-                                  height: 240.0,
+                                  height: _albumsSectionHeight,
                                   child: ListView.separated(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                     scrollDirection: Axis.horizontal,
                                     itemCount: albums.length,
                                     itemBuilder: (context, index) {
-                                      return ContentArt(
-                                        size: 240.0,
-                                        highRes: true,
-                                        assetScale: 1.4,
-                                        source: ContentArtSource.album(albums[index]),
+                                      return PersistentQueueTile<Album>.selectable(
+                                        queue: albums[index],
+                                        index: index,
+                                        selected: selectionController.data
+                                          .firstWhereOrNull((el) => el.data == albums[index]) != null,
+                                        selectionController: selectionController,
+                                        grid: true,
+                                        gridShowYear: true,
                                       );
                                     },
                                     separatorBuilder: (BuildContext context, int index) { 
@@ -297,15 +385,13 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 24.0),
                             ],
                           ),
                         
-                        SliverToBoxAdapter(
-                          child: height <= 0
-                            ? const SizedBox.shrink()
-                            : Container(height: height),
-                        ),
+                        if (additionalHeight > 0)
+                          SliverToBoxAdapter(
+                            child: Container(height: additionalHeight),
+                          ),
                       ],
                     ),
                   ),
@@ -313,15 +399,33 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                     bottom: null,
                     child: AnimatedBuilder(
                       animation: appBarController,
-                      child: NFBackButton(
-                        onPressed: () {
-                          selectionController.close();
-                          Navigator.of(context).pop();
+                      child: AnimatedBuilder(
+                        animation: backButtonAnimationController,
+                        builder: (context, child) {
+                          final colorAnimation = ColorTween(
+                            begin: Colors.white,
+                            end: theme.iconTheme.color,
+                          ).animate(backButtonAnimation);
+
+                          final splashColorAnimation = ColorTween(
+                            begin: Constants.Theme.glowSplashColor.auto,
+                            end: theme.splashColor,
+                          ).animate(backButtonAnimation);
+
+                          return NFIconButton(
+                            icon: const Icon(Icons.arrow_back_rounded),
+                            color: colorAnimation.value,
+                            splashColor: splashColorAnimation.value,
+                            onPressed: () {
+                              selectionController.close();
+                              Navigator.of(context).pop();
+                            },
+                          );
                         },
                       ),
                       builder: (context, child) => SizedBox(
                         height: _fullAppBarHeight,
-                        child:  AppBar(
+                        child: AppBar(
                           elevation: 0.0,
                           automaticallyImplyLeading: false,
                           leading: child,
@@ -330,17 +434,19 @@ class _ArtistRouteState extends State<ArtistRoute> with SelectionHandler {
                               ? theme.colorScheme.background
                               : theme.colorScheme.background.withOpacity(0.0),
                           title: AnimatedOpacity(
-                            opacity: 1.0 - appBarController.value > 0.85
+                            opacity: _appBarTitleVisible
                               ? 1.0
                               : 0.0,
                             curve: Curves.easeOut,
                             duration: const Duration(milliseconds: 400),
-                            child: Text(widget.artist.artist),
+                            child: Text(
+                              ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                            ),
                           ),
                           bottom: PreferredSize(
                             preferredSize: const Size.fromHeight(AppBarBorder.height),
                             child: scrollController.offset < _artScrollExtent
-                              ? const SizedBox.shrink()
+                              ? const SizedBox(height: 1)
                               : AppBarBorder(
                                   shown: scrollController.offset > _alwaysCanScrollExtent,
                                 ),
@@ -372,8 +478,11 @@ class _ContentListRoute<T extends Content> extends StatelessWidget {
         title: Text(l10n.contentsPluralWithCount<T>(list.length)),
         leading: const NFBackButton(),
       ),
-      body: ContentListView<T>(
-        list: list,
+      body: ContentSelectionControllerCreator<T>(
+        builder: (context, selectionController, child) => ContentListView<T>(
+          list: list,
+          selectionController: selectionController,
+        ),
       ),
     );
   }

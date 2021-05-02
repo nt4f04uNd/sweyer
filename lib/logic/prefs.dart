@@ -110,20 +110,19 @@ class SearchHistory {
   static final instance = SearchHistory._();
 
   /// Before accessing this variable, you mast call [load].
-  List<String>? get history => _history;
-  List<String>? _history;
+  List<String>? history;
 
   /// Loads the history.
   Future<void> load() async {
-    _history ??= await Prefs.searchHistoryStringList.get();
+    history ??= await Prefs.searchHistoryStringList.get();
   }
 
   /// Clears the history.
   Future<void> clear() async {
-    if (_history != null) {
-      _history!.clear();
+    if (history != null) {
+      history!.clear();
     } else {
-      _history = [];
+      history = [];
     }
     await Prefs.searchHistoryStringList.set(const []);
   }

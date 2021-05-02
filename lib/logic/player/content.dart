@@ -1037,7 +1037,7 @@ abstract class ContentControl {
           // Exact query search
           final wordsTest = words.map<bool>((word) =>
             song.title.toLowerCase().contains(word) ||
-            formatArtist(song.artist, l10n).toLowerCase().contains(word) ||
+            ContentUtils.localizedArtist(song.artist, l10n).toLowerCase().contains(word) ||
             (song.album?.toLowerCase().contains(word) ?? false)
           ).toList();
           final fullQuery = wordsTest.every((e) => e);
@@ -1050,7 +1050,7 @@ abstract class ContentControl {
         return state.albums.values.where((album) {
           // Exact query search
           final wordsTest = words.map<bool>((word) =>
-            formatArtist(album.artist, l10n).toLowerCase().contains(word) ||
+            ContentUtils.localizedArtist(album.artist, l10n).toLowerCase().contains(word) ||
             album.album.toLowerCase().contains(word),
           ).toList();
           final fullQuery = wordsTest.every((e) => e);
@@ -1294,6 +1294,23 @@ abstract class ContentControl {
 
 
 class ContentUtils {
+  /// If artist is unknown returns localized artist.
+  /// Otherwise returns artist as is.
+  static String localizedArtist(String artist, AppLocalizations l10n) {
+    return artist != '<unknown>' ? artist : l10n.artistUnknown;
+  }
+
+  static const String dot = '•';
+
+  static String joinDot(List list) {
+    return list.join(dot);
+  }
+
+  /// Appends dot and year to [string].
+  static String appendYearWithDot(String string, int year) {
+    return '$string $dot $year'; 
+  }
+
   /// Checks whether a [Song] is currently playing.
   /// Compares by [Song.sourceId].
   static bool songIsCurrent(Song song) {
