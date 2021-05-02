@@ -39,7 +39,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
   static const _albumsSectionHeight = 280.0;
 
   /// Amount of pixels user always can scroll.
-  double get _alwaysCanScrollExtent => _artScrollExtent + _buttonSectionHeight;
+  double get _alwaysCanScrollExtent => (_artScrollExtent + _buttonSectionHeight).ceilToDouble();
 
   /// Amount of pixels after art will be fully hidden and appbar will have background color
   /// instead of being transparent.
@@ -304,12 +304,14 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
         builder: (context, constraints) {
           /// The height to add at the end of the scroll view to make the top info part of the route
           /// always be fully scrollable, even if there's not enough content for that.
-          final additionalHeight = constraints.maxHeight -
+          var additionalHeight = constraints.maxHeight -
             _fullAppBarHeight -
             kSongTileHeight * math.min(songs.length, 5) -
-            40.0 -
-            _albumsSectionHeight -
-            40.0;
+            48.0;
+
+          if (albums.isNotEmpty) {
+            additionalHeight -= _albumsSectionHeight + 48.0;
+          }
 
           return ScrollConfiguration(
             behavior: const GlowlessScrollBehavior(),
@@ -445,7 +447,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                           ),
                           bottom: PreferredSize(
                             preferredSize: const Size.fromHeight(AppBarBorder.height),
-                            child: scrollController.offset < _artScrollExtent
+                            child: scrollController.offset <= _artScrollExtent
                               ? const SizedBox(height: 1)
                               : AppBarBorder(
                                   shown: scrollController.offset > _alwaysCanScrollExtent,
