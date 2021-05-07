@@ -143,11 +143,12 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
     return Stack(
       children: [
         _buildTile(),
-        Positioned(
-          left: kArtistTileArtSize + 2.0,
-          bottom: 2.0,
-          child: SelectionCheckmark(animation: animation),
-        ),
+        if (animation.status != AnimationStatus.dismissed)
+          Positioned(
+            left: kArtistTileArtSize + 2.0,
+            bottom: 2.0,
+            child: SelectionCheckmark(animation: animation),
+          ),
       ],
     );
   }

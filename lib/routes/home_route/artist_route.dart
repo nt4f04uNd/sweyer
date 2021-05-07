@@ -161,7 +161,9 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                     ),
                   ),
                   Positioned.fill(
-                    bottom: 20.0,
+                    bottom: 22.0,
+                    left: 13.0,
+                    right: 13.0,
                     child: Align(
                       alignment: Alignment.bottomCenter, 
                       child: Column(
@@ -174,9 +176,10 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                               height: 1.0,
                               fontWeight: FontWeight.w800,
                               color: Constants.Theme.contrast.auto,
-                              fontSize: 42.0,
+                              fontSize: 36.0,
                             ),
                           ),
+                          const SizedBox(height: 7.0),
                           Text(
                             summary,
                             style: TextStyle(
@@ -358,7 +361,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                             children: [
                               ContentSection<Album>.custom(
                                 list: albums,
-                                onHeaderTap: selectionController.inSelection || songs.length <= 5 ? null : () {
+                                onHeaderTap: selectionController.inSelection ? null : () {
                                   Navigator.of(context).push(StackFadeRouteTransition(
                                     child: _ContentListRoute<Album>(list: albums),
                                     transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,

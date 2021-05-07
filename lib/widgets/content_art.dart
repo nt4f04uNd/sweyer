@@ -200,7 +200,7 @@ class _ArtLoader {
 
   CancellationSignal? _signal;
   Uint8List? _bytes;
-  File? _file;
+  late File _file;
   bool loaded = false;
   bool _broken = false;
 
@@ -228,8 +228,7 @@ class _ArtLoader {
       final art = song!.albumArt;
       if (art != null) {
         _file = File(art);
-        // TODO: make it async and enable lint regarding expensive operations
-        final exists = _file!.existsSync();
+        final exists = _file.existsSync();
         _broken = !exists;
         if (_broken) {
           _recreateArt();
@@ -248,24 +247,23 @@ class _ArtLoader {
   }
 
   Image? getImage(int? cacheSize) {
-    // TODO: evaluate whether i should use cache size
     if (_useBytes) {
       return Image.memory(
         _bytes!,
         width: size,
         height: size,
-        // cacheHeight: cacheSize,
-        // cacheWidth: cacheSize,
+        cacheHeight: cacheSize,
+        cacheWidth: cacheSize,
         fit: BoxFit.cover,
       );
     }
     if (!showDefault) {
       return Image.file(
-        _file!,
+        _file,
         width: size,
         height: size,
-        // cacheHeight: cacheSize,
-        // cacheWidth: cacheSize,
+        cacheHeight: cacheSize,
+        cacheWidth: cacheSize,
         fit: BoxFit.cover,
       );
     }

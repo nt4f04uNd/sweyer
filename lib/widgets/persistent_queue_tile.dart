@@ -133,7 +133,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     final queue = widget.queue;
     if (queue is Album) {
       final artist = widget.gridShowYear
-        ? queue.nameAndYear
+        ? queue.albumDotName(getl10n(context))
         : queue.artist;
       children.add(ArtistWidget(
         artist: artist,
@@ -153,20 +153,23 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
 
     final Widget child;
     if (widget.grid) {
-      child = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ContentArt(
-            size: widget.gridArtSize,
-            highRes: true,
-            currentIndicatorScale: widget.gridCurrentIndicatorScale,
-            assetScale: widget.gridArtAssetScale,
-            source: source,
-            current: current,
-          ),
-          _buildInfo(),
-        ],
+      child = SizedBox(
+        width: widget.gridArtSize,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ContentArt(
+              size: widget.gridArtSize,
+              highRes: true,
+              currentIndicatorScale: widget.gridCurrentIndicatorScale,
+              assetScale: widget.gridArtAssetScale,
+              source: source,
+              current: current,
+            ),
+            _buildInfo(),
+          ],
+        ),
       );
     } else {
       child = Padding(
@@ -247,14 +250,15 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       clipBehavior: Clip.none,
       children: [
         _buildTile(),
-        Positioned(
-          left: artSize + (widget.grid ? -20.0 : 2.0),
-          top: artSize - (widget.grid ? 20.0 : 7.0),
-          child: SelectionCheckmark(
-            size: widget.grid ? 28.0 : 21.0,
-            animation: animation,
+        if (animation.status != AnimationStatus.dismissed)
+          Positioned(
+            left: artSize + (widget.grid ? -20.0 : 2.0),
+            top: artSize - (widget.grid ? 20.0 : 7.0),
+            child: SelectionCheckmark(
+              size: widget.grid ? 28.0 : 21.0,
+              animation: animation,
+            ),
           ),
-        ),
       ],
     );
   }

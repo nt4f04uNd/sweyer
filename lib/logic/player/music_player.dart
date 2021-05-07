@@ -56,9 +56,10 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       }
     });
     player.playingStream.listen((playing) {
-      _running = true;
       _setState();
       _lastEvent = DateTime.now();
+      if (playing)
+        _running = true;
     });
     player.loopingStream.listen((event) => _setState());
     ContentControl.state.onSongChange.listen((song) {
@@ -571,7 +572,7 @@ class MusicPlayer extends AudioPlayer {
   /// Updates service state media item.
   void updateServiceMediaItem() {
     final song = ContentControl.state.currentSongNullable;
-    if (song != null) {
+    if (song != null && _handler!._running) {
       _handler!.mediaItem.add(song.toMediaItem());
     }
   }

@@ -25,7 +25,7 @@ class PlayerRoute extends StatefulWidget {
 }
 
 class _PlayerRouteState extends State<PlayerRoute>
-  with SingleTickerProviderStateMixin, SelectionHandler {
+    with SingleTickerProviderStateMixin, SelectionHandler {
   final _queueTabKey = GlobalKey<_QueueTabState>();
   late List<Widget> _tabs;
   late SlidableController controller;
@@ -42,7 +42,7 @@ class _PlayerRouteState extends State<PlayerRoute>
       this,
       counter: true,
       closeButton: true,
-    ) as ContentSelectionController<SelectionEntry<Song>>
+    )
       ..addListener(handleSelection)
       ..addStatusListener(handleSelectionStatus);
     _tabs = [
@@ -177,10 +177,6 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
 
   static const double appBarHeight = 81.0;
 
-  /// How much tracks to list end to apply [endScrollAlignment]
-  late int edgeOffset;
-  late int songsPerScreen;
-
   /// This is set in parent via global key
   bool opened = false;
   final ScrollController scrollController = ScrollController();
@@ -202,9 +198,6 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       jumpToSong(ContentControl.state.currentSongIndex);
     });
-
-    songsPerScreen = (screenHeight / kSongTileHeight).ceil() - 2;
-    edgeOffset = (screenHeight / kSongTileHeight / 2).ceil();
 
     widget.selectionController.addListener(handleSelection);
 
@@ -328,7 +321,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
         if (isAlbum) {
           text.add(TextSpan(text: '${l10n.album} '));
           text.add(TextSpan(
-            text: album!.nameAndYear,
+            text: album!.nameDotYear,
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,

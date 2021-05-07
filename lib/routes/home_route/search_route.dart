@@ -535,11 +535,19 @@ class _DelegateProvider extends InheritedWidget {
   bool updateShouldNotify(_DelegateProvider oldWidget) => false;
 }
 
-class _DelegateBuilder extends StatelessWidget {
+class _DelegateBuilder extends StatefulWidget {
   _DelegateBuilder({Key? key}) : super(key: key);
 
+  @override
+  _DelegateBuilderState createState() => _DelegateBuilderState();
+}
+
+class _DelegateBuilderState extends State<_DelegateBuilder> {
+  // TODO: remove when https://github.com/flutter/flutter/issues/82046 is resolved
+  bool _onTop = false;
+
   Future<bool> _handlePop(_SearchStateDelegate delegate) async {
-    if (delegate.contentType != null) {
+    if (_onTop && delegate.contentType != null) {
       delegate.contentType = null;
       return true;
     }
@@ -557,107 +565,111 @@ class _DelegateBuilder extends StatelessWidget {
     final delegate = _SearchStateDelegate._of(context)!;
     final results = delegate.results;
     final l10n = getl10n(context);
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) => _handleNotification(delegate, notification),
-      child: ValueListenableBuilder<Type?>(
-        valueListenable: delegate.contentTypeNotifier,
-        builder: (context, contentType, child) {
-          if (delegate.trimmedQuery.isEmpty) {
-            return _Suggestions();
-          } else if (results.empty) {
-            // Displays a message that there's nothing found
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8.0),
-                    child: Icon(Icons.error_outline_rounded),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 80.0),
-                    child: Text(
-                      l10n.searchNothingFound,
-                      textAlign: TextAlign.center,
+    return RouteAwareWidget(
+      onPushNext: () => _onTop = false,
+      onPopNext: () => _onTop = true,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) => _handleNotification(delegate, notification),
+        child: ValueListenableBuilder<Type?>(
+          valueListenable: delegate.contentTypeNotifier,
+          builder: (context, contentType, child) {
+            if (delegate.trimmedQuery.isEmpty) {
+              return _Suggestions();
+            } else if (results.empty) {
+              // Displays a message that there's nothing found
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: Icon(Icons.error_outline_rounded),
                     ),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            final contentTypeEntries = results.map.entries
-              .where((el) => el.value.isNotEmpty)
-              .toList();
-            final single = contentTypeEntries.length == 1;
-            final showSingleCategoryContentList = single || contentType != null;
-            final contentListContentType = single ? contentTypeEntries.single.key : contentType;
-            return NFBackButtonListener(
-              onBackButtonPressed: () => _handlePop(delegate),
-              child:
-              StreamBuilder(
-                stream: ContentControl.state.onSongChange,
-                builder: (context, snapshot) =>
-              StreamBuilder(stream: ContentControl.state.onContentChange,
-                builder: (context, snapshot) =>
-                PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  reverse: !single && contentType == null,
-                  transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                      transitionType: SharedAxisTransitionType.vertical,
-                      animation: animation,
-                      secondaryAnimation: secondaryAnimation,
-                      fillColor: Colors.transparent,
-                      child: child,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 80.0),
+                      child: Text(
+                        l10n.searchNothingFound,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  child: Container(
-                    key: ValueKey(contentType),
-                    child: showSingleCategoryContentList
-                        ? () {
-                          final list = single
-                            ? contentTypeEntries.single.value
-                            : contentPick<Content, ValueGetter<List<Content>>>(
-                                contentType: contentType,
-                                song: () => delegate.results.songs,
-                                album: () => delegate.results.albums,
-                                playlist: () =>  delegate.results.playlists,
-                                artist: () => delegate.results.artists,
-                              )();
-                          return ContentListView(
-                            contentType: contentListContentType,
-                            controller: delegate.singleListScrollController,
-                            selectionController: delegate.selectionController,
-                            selectedTest: (index) => delegate.selectionController.data
-                              .firstWhereOrNull((el) => el.data == list[index]) != null,
-                            onItemTap: () => delegate.handleContentTap(contentListContentType),
-                            list: list,
-                          );
-                        } ()
-                        : 
-                        // AppScrollbar( // TODO: enable this when i have more content on search screen
-                        //     controller: delegate.scrollController,
-                        //     child: 
-                            ListView(
-                                controller: delegate.scrollController,
-                                children: [
-                                  for (final entry in contentTypeEntries)
-                                    if (entry.value.isNotEmpty)
-                                      ContentSection(
-                                        contentType: entry.key,
-                                        list: results.map.getValue(entry.key),
-                                        onHeaderTap: () => delegate.contentType = entry.key,
-                                        selectionController: delegate.selectionController,
-                                        contentTileTapHandler: delegate.handleContentTap,
-                                      ),
-                                ],
-                              ),
-                            ),
-                    ),
-                  ),
+                  ],
                 ),
               );
-          }
-        },
+            } else {
+              final contentTypeEntries = results.map.entries
+                .where((el) => el.value.isNotEmpty)
+                .toList();
+              final single = contentTypeEntries.length == 1;
+              final showSingleCategoryContentList = single || contentType != null;
+              final contentListContentType = single ? contentTypeEntries.single.key : contentType;
+              return NFBackButtonListener(
+                onBackButtonPressed: () => _handlePop(delegate),
+                child:
+                StreamBuilder(
+                  stream: ContentControl.state.onSongChange,
+                  builder: (context, snapshot) =>
+                StreamBuilder(stream: ContentControl.state.onContentChange,
+                  builder: (context, snapshot) =>
+                  PageTransitionSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    reverse: !single && contentType == null,
+                    transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                        transitionType: SharedAxisTransitionType.vertical,
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        fillColor: Colors.transparent,
+                        child: child,
+                      ),
+                    child: Container(
+                      key: ValueKey(contentType),
+                      child: showSingleCategoryContentList
+                          ? () {
+                            final list = single
+                              ? contentTypeEntries.single.value
+                              : contentPick<Content, ValueGetter<List<Content>>>(
+                                  contentType: contentType,
+                                  song: () => delegate.results.songs,
+                                  album: () => delegate.results.albums,
+                                  playlist: () =>  delegate.results.playlists,
+                                  artist: () => delegate.results.artists,
+                                )();
+                            return ContentListView(
+                              contentType: contentListContentType,
+                              controller: delegate.singleListScrollController,
+                              selectionController: delegate.selectionController,
+                              selectedTest: (index) => delegate.selectionController.data
+                                .firstWhereOrNull((el) => el.data == list[index]) != null,
+                              onItemTap: () => delegate.handleContentTap(contentListContentType),
+                              list: list,
+                            );
+                          } ()
+                          : 
+                          // AppScrollbar( // TODO: enable this when i have more content on search screen
+                          //     controller: delegate.scrollController,
+                          //     child: 
+                              ListView(
+                                  controller: delegate.scrollController,
+                                  children: [
+                                    for (final entry in contentTypeEntries)
+                                      if (entry.value.isNotEmpty)
+                                        ContentSection(
+                                          contentType: entry.key,
+                                          list: results.map.getValue(entry.key),
+                                          onHeaderTap: () => delegate.contentType = entry.key,
+                                          selectionController: delegate.selectionController,
+                                          contentTileTapHandler: delegate.handleContentTap,
+                                        ),
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                );
+            }
+          },
+        ),
       ),
     );
   }

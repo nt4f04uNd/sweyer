@@ -63,12 +63,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     /// the next route pops, like I do for [ShowFunctions.showBottomSheet] for example
     /// because I close the drawer after route push, so there's no way it will be open at this moment.
     return RouteAwareWidget(
-      onPushNext: () {
-        _onTop = false;
-      },
-      onPopNext: () {
-        _onTop = true;
-      },
+      onPushNext: () => _onTop = false,
+      onPopNext: () => _onTop = true,
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) => Slidable(

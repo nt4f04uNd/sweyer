@@ -447,7 +447,16 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
   @override
   void initState() {
     super.initState();
+    _update();
     widget.animation.addStatusListener(_handleStatusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant SelectionCheckmark oldWidget) {
+    if (oldWidget.animation != widget.animation) {
+      _update();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -456,10 +465,14 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
     super.dispose();
   }
 
-  void _handleStatusChange(AnimationStatus status) {
-    if (status == AnimationStatus.forward) {
+  void _update() {
+    if (widget.animation.status == AnimationStatus.forward) {
       _flareAnimation = 'play';
     }
+  }
+
+  void _handleStatusChange(AnimationStatus status) {
+    _update();
   }
 
   @override

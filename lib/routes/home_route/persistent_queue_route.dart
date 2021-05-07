@@ -59,7 +59,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
-    ) as ContentSelectionController<SelectionEntry<Song>>
+    )
       ..addListener(handleSelection);
   }
 

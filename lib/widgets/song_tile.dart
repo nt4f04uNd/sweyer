@@ -215,12 +215,13 @@ class _SongTileState extends SelectableState<SongTile> {
             return _buildTile(albumArt, rightPadding);
           },
         ),
-        Positioned(
-          left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
-          right: showAlbumArt ? null : 10.0 + widget.horizontalPadding,
-          bottom: showAlbumArt ? 2.0 : 20.0,
-          child: SelectionCheckmark(animation: animation),
-        ),
+        if (animation.status != AnimationStatus.dismissed)
+          Positioned(
+            left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
+            right: showAlbumArt ? null : 10.0 + widget.horizontalPadding,
+            bottom: showAlbumArt ? 2.0 : 20.0,
+            child: SelectionCheckmark(animation: animation),
+          ),
       ],
     );
   }

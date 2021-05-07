@@ -1302,6 +1302,7 @@ class ContentUtils {
 
   static const String dot = '•';
 
+  /// Joins list with the [dot].
   static String joinDot(List list) {
     return list.join(dot);
   }

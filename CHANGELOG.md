@@ -1,3 +1,8 @@
+## 1.0.4
+
+- Added playlists and artsts
+- List optimizations
+
 ## 1.0.3
 
 - Fix issue with current song not updated on search route
@@ -13,7 +18,7 @@
   was saved only for the current app session, when it was added, and was not restored.
 - Optimized scrollbar and listviews
 - Became media browser service, support for Android Auto
-- Fixed that album arts were not recahced (below Android 11)
+- Fixed that album arts were not recached (below Android 10)
 - Refactored a lot of code and fixed a lot of other bugs
 - Changed player backend (non-UX)
 

@@ -103,12 +103,15 @@ abstract class ThemeControl {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
 
     emitThemeChange(true);
-    _rebuildOperation = CancelableOperation.fromFuture(() async {
-      await Future.delayed(dilate(const Duration(milliseconds: 300)));
+    _rebuildOperation = CancelableOperation<void>.fromFuture(
+      Future.delayed(dilate(const Duration(milliseconds: 300)))
+    )
+    ..value.then((value) async {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
-      emitThemeChange(false);
-    }());
+    })
+    ..value.then((value) => emitThemeChange(false));
+  
     await SystemUiStyleController.animateSystemUiOverlay(
       to: Constants.UiTheme.black.auto,
       curve: Curves.easeIn,
@@ -123,22 +126,14 @@ abstract class ThemeControl {
     Settings.primaryColorInt.set(color.value);
     emitThemeChange(true);
     MusicPlayer.instance.updateServiceMediaItem();
-    // _rebuildOperation = CancelableOperation.fromFuture(() async {
-    //   await Future.delayed(dilate(primaryColorChangeDuration));
-    //   App.rebuildAllChildren();
-    //   await Future.delayed(dilate(const Duration(milliseconds: 20)));
-    //   emitThemeChange(false);
-    // }());
-    // TODO: test this
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(primaryColorChangeDuration))
     )
-    ..valueOrCancellation()
-    .then((value) async {
+    ..value.then((value) async {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
     })
-    .then((value) => emitThemeChange(false));
+    ..value.then((value) => emitThemeChange(false));
   }
 
   static void _applyPrimaryColor(Color color) {

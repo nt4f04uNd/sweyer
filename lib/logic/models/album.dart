@@ -46,8 +46,13 @@ class Album extends PersistentQueue {
   }
 
   /// Returns string in format `album name • year`. 
-  String get nameAndYear {
+  String get nameDotYear {
     return ContentUtils.appendYearWithDot(album, year);
+  }
+
+  /// Returns string in format `Album • year`. 
+  String albumDotName(AppLocalizations l10n) {
+    return ContentUtils.appendYearWithDot(l10n.album, year);
   }
 
   const Album({
