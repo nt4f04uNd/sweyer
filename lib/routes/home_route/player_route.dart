@@ -186,11 +186,6 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
   late StreamSubscription<void> _contentChangeSubscription;
 
   QueueType get type => ContentControl.state.queues.type;
-  bool get isAlbum => ContentControl.state.queues.persistent is Album;
-  Album? get album {
-    assert(isAlbum);
-    return ContentControl.state.queues.persistent as Album?;
-  }
 
   @override
   void initState() {
@@ -284,25 +279,37 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
         SearchHistory.instance.add(query);
         return;
       case QueueType.persistent:
-        if (isAlbum) {
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(album!));
-        } else {
-          throw InvalidCodePathError();
-        }
+        final persistenteQueue = ContentControl.state.queues.persistent!;
+        if (persistenteQueue is Album)
+          HomeRouter.instance.goto(HomeRoutes.factory.persistentQueue<Album>(persistenteQueue));
+        else if (persistenteQueue is Playlist)
+          HomeRouter.instance.goto(HomeRoutes.factory.persistentQueue<Playlist>(persistenteQueue));
+        else
+          throw StateError('');
         return;
-      case QueueType.all:
+      case QueueType.allSongs:
+      case QueueType.allAlbums:
+      case QueueType.allPlaylists:
+      case QueueType.allArtists:
       case QueueType.arbitrary:
         return;
-      default:
-        throw InvalidCodePathError();
     }
   }
 
   List<TextSpan> _getQueueType(AppLocalizations l10n) {
     final List<TextSpan> text = [];
     switch (ContentControl.state.queues.type) {
-      case QueueType.all:
+      case QueueType.allSongs:
         text.add(TextSpan(text: l10n.allTracks));
+        break;
+      case QueueType.allAlbums:
+        text.add(TextSpan(text: l10n.allAlbums));
+        break;
+      case QueueType.allPlaylists:
+        text.add(TextSpan(text: l10n.allPlaylists));
+        break;
+      case QueueType.allArtists:
+        text.add(TextSpan(text: l10n.allArtists));
         break;
       case QueueType.searched:
         final query = ContentControl.state.queues.searchQuery!;
@@ -318,17 +325,27 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
         ));
         break;
       case QueueType.persistent:
-        if (isAlbum) {
+        final persistenteQueue = ContentControl.state.queues.persistent!;
+        if (persistenteQueue is Album) {
           text.add(TextSpan(text: '${l10n.album} '));
           text.add(TextSpan(
-            text: album!.nameDotYear,
+            text: persistenteQueue.nameDotYear,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: ThemeControl.theme.colorScheme.onBackground,
+            ),
+          ));
+        } else if (persistenteQueue is Playlist) {
+          text.add(TextSpan(text: '${l10n.playlist} '));
+          text.add(TextSpan(
+            text: persistenteQueue.name,
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,
             ),
           ));
         } else {
-          throw InvalidCodePathError();
+          throw StateError('');
         }
         break;
       case QueueType.arbitrary:
@@ -337,8 +354,6 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
             ?? l10n.arbitraryQueue,
         ));
         break;
-      default:
-        throw InvalidCodePathError();
     }
     return text;
   }
@@ -359,7 +374,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
   Widget build(BuildContext context) {
     final currentSongIndex = ContentControl.state.currentSongIndex;
     final l10n = getl10n(context);
-    final horizontalPadding = isAlbum ? 12.0 : 20.0;
+    final persistentQueue = ContentControl.state.queues.persistent;
+    final horizontalPadding = persistentQueue is Album ? 12.0 : 20.0;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
@@ -378,21 +394,17 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
           top: 24.0,
           bottom: 0.0,
         ),
-        child: AnimatedBuilder(
-          animation: playerRouteController,
-          builder: (context, child) => FadeTransition(
-            opacity: fadeAnimation,
-            child: child,
-          ),
+        child: FadeTransition(
+          opacity: fadeAnimation,
           child: GestureDetector(
             onTap: _handleTitleTap,
             child: Row(
               children: [
-                if (isAlbum)
+                if (persistentQueue != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
                     child: ContentArt(
-                      source: ContentArtSource.album(album!),
+                      source: ContentArtSource.persistentQueue(persistentQueue),
                       borderRadius: 8,
                       size: kSongTileArtSize - 8.0,
                     ),
@@ -444,7 +456,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
                       Row(
                         children: [
                           Flexible(child: _buildTitleText(_getQueueType(l10n))),
-                          if (isAlbum || type == QueueType.searched)
+                          if (persistentQueue != null || type == QueueType.searched)
                             Icon(
                               Icons.chevron_right_rounded,
                               size: 18.0,

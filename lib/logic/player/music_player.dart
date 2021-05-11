@@ -252,6 +252,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       }).toList();
       ContentControl.setQueue(
         type: QueueType.arbitrary,
+        shuffled: false,
         songs: songs,
       );
       if (!songs.contains(ContentControl.state.currentSong)) {

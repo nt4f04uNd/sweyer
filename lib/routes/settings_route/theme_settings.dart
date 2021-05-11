@@ -93,7 +93,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
         body: ScrollConfiguration(
           behavior: const GlowlessScrollBehavior(),
           child: AnimatedBuilder(
-            animation: controller,
+            animation: animation,
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 6.0),
               height: 53.0,
@@ -206,7 +206,7 @@ class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMi
       child: SizedBox(
         width: _colorItemSize,
         child: AnimatedBuilder(
-          animation: controller,
+          animation: animation,
           child: Container(
             width: _colorItemSize,
             height: _colorItemSize,
@@ -219,8 +219,7 @@ class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMi
           ),
           builder: (context, child) {
             final margin = 12.0 * animation.value;
-            final borderContainerSize =
-                _colorItemSize + _colorItemActiveBorderWidth * 2 - margin;
+            final borderContainerSize = _colorItemSize + _colorItemActiveBorderWidth * 2 - margin;
             return Stack(
               alignment: Alignment.center,
               children: [

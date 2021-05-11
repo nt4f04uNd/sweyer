@@ -405,7 +405,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                     child: AnimatedBuilder(
                       animation: appBarController,
                       child: AnimatedBuilder(
-                        animation: backButtonAnimationController,
+                        animation: backButtonAnimation,
                         builder: (context, child) {
                           final colorAnimation = ColorTween(
                             begin: Colors.white,

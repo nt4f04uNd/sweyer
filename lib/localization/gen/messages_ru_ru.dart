@@ -38,6 +38,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "albums" : MessageLookupByLibrary.simpleMessage("Альбомы"),
     "albumsPlural" : m0,
     "allAlbums" : MessageLookupByLibrary.simpleMessage("Все альбомы"),
+    "allArtists" : MessageLookupByLibrary.simpleMessage("Все исполнители"),
+    "allPlaylists" : MessageLookupByLibrary.simpleMessage("Все плейлисты"),
     "allTracks" : MessageLookupByLibrary.simpleMessage("Все треки"),
     "allowAccessToExternalStorage" : MessageLookupByLibrary.simpleMessage("Пожалуйста, предоставьте доступ к хранилищу"),
     "allowAccessToExternalStorageManually" : MessageLookupByLibrary.simpleMessage("Предоставьте доступ к хранилищу вручную"),

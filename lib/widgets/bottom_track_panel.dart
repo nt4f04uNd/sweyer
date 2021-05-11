@@ -40,13 +40,14 @@ class TrackPanel extends StatelessWidget {
       builder: (context, snapshot) {
         return FadeTransition(
           opacity: fadeAnimation,
-          child: AnimatedBuilder(
+          child: AnimationStrategyBuilder<bool>(
+            strategy: const IgnoringStrategy(
+              forward: true,
+              completed: true,
+            ),
             animation: playerRouteController,
-            builder: (context, child) => IgnorePointer(
-              ignoring: const IgnoringStrategy(
-                forward: true,
-                completed: true,
-              ).evaluate(playerRouteController),
+            builder: (context, value, child) => IgnorePointer(
+              ignoring: value,
               child: child,
             ),
             child: GestureDetector(

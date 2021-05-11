@@ -8,7 +8,6 @@
 export 'models/models.dart';
 export 'player/music_player.dart';
 
-export 'exceptions.dart';
 export 'permissions.dart';
 export 'prefs.dart';
 export 'theme.dart';

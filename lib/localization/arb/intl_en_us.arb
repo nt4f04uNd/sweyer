@@ -1,6 +1,6 @@
 {
   "@@locale": "en_us",
-  "@@last_modified": "2021-04-14T21:30:55.342088",
+  "@@last_modified": "2021-05-11T18:53:36.114551",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -119,18 +119,23 @@
     "type": "text",
     "placeholders": {}
   },
-  "playlist": "Playlist",
-  "@playlist": {
+  "allAlbums": "All albums",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allPlaylists": "All playlists",
+  "@allPlaylists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allArtists": "All artitst",
+  "@allArtists": {
     "type": "text",
     "placeholders": {}
   },
   "arbitraryQueue": "Arbitrary queue",
   "@arbitraryQueue": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "allAlbums": "All albums",
-  "@allAlbums": {
     "type": "text",
     "placeholders": {}
   },
@@ -321,11 +326,6 @@
   },
   "sort": "Sort",
   "@sort": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "artist": "Artist",
-  "@artist": {
     "type": "text",
     "placeholders": {}
   },

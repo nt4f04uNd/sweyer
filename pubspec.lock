@@ -42,7 +42,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.0"
+    version: "2.6.0"
   audio_service:
     dependency: "direct main"
     description:
@@ -430,7 +430,7 @@ packages:
       path: "c:/dev/projects/native/nt4f04unds_widgets/"
       relative: false
     source: path
-    version: "1.1.4"
+    version: "1.1.5"
   package_config:
     dependency: transitive
     description:

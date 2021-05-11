@@ -65,32 +65,29 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     return RouteAwareWidget(
       onPushNext: () => _onTop = false,
       onPopNext: () => _onTop = true,
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) => Slidable(
-          direction: SlideDirection.right,
-          start: -304.0 / screenWidth,
-          end: 0.0,
-          shouldGiveUpGesture: (event) {
-            return controller.value == 0.0 &&
-                // when on another drag on the right to next tab
-                (event.delta.dx < 0.0 ||
-                 // when player route is opened, for example
-                 !HomeRouter.instance.drawerCanBeOpened);
-          },
-          onBarrierTap: controller.close,
-          barrier: Container(color: Colors.black26),
-          controller: controller,
-          barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
-          hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
-          child: SizedBox(
-            height: screenHeight,
-            width: screenWidth,
-            child: Container(
-              width: 304.0,
-              alignment: Alignment.centerLeft,
-              child: _DrawerWidgetContent(controller: controller),
-            ),
+      child: Slidable(
+        direction: SlideDirection.right,
+        start: -304.0 / screenWidth,
+        end: 0.0,
+        shouldGiveUpGesture: (event) {
+          return controller.value == 0.0 &&
+              // when on another drag on the right to next tab
+              (event.delta.dx < 0.0 ||
+                // when player route is opened, for example
+                !HomeRouter.instance.drawerCanBeOpened);
+        },
+        onBarrierTap: controller.close,
+        barrier: Container(color: Colors.black26),
+        controller: controller,
+        barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
+        hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
+        child: SizedBox(
+          height: screenHeight,
+          width: screenWidth,
+          child: Container(
+            width: 304.0,
+            alignment: Alignment.centerLeft,
+            child: _DrawerWidgetContent(controller: controller),
           ),
         ),
       ),

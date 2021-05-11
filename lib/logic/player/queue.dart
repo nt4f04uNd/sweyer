@@ -10,7 +10,16 @@ import 'package:sweyer/sweyer.dart';
 /// The type of currently playing queue.
 enum QueueType {
   /// Queue of all songs.
-  all,
+  allSongs,
+
+  /// Queue of all albums.
+  allAlbums,
+
+  /// Queue of all playlists.
+  allPlaylists,
+
+  /// Queue of all artistt.
+  allArtists,
 
   /// Queue of searched tracks.
   searched,

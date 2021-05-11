@@ -26,12 +26,13 @@ extension QuickActionSerialization on QuickAction {
   String get value => EnumToString.convertToString(this);
 } 
 
+/// TODO:  currently this is unused.
+/// 
 /// The description where the [QueueType.arbitrary] originates from.
 /// 
 /// Can be Cconverted to human readable text with [AppLocalizations.arbitraryQueueOrigin].
 enum ArbitraryQueueOrigin {
-  /// Correspnods
-  allAlbums,
+  ___stub___,
 }
 
 extension ArbitraryQueueOriginSerialization on ArbitraryQueueOrigin {
@@ -149,7 +150,7 @@ class _QueuePool {
 
   /// Actual type of the queue, that can be displayed to the user.
   QueueType get type => _type;
-  QueueType _type = QueueType.all;
+  QueueType _type = QueueType.allSongs;
 
   _PoolQueueType get _internalType {
     if (shuffled) {
@@ -682,7 +683,7 @@ abstract class ContentControl {
       }
       if (containsCurrent) {
         /// TODO: add to [Queue] something like relative indexing, that allows negative indexes
-        /// and imporvie this
+        /// and imporove this
         MusicPlayer.instance.setSong(state.queues.current.songs[0]);
       }
       setQueue(modified: true);
@@ -725,7 +726,7 @@ abstract class ContentControl {
   /// Resets queue to all songs.
   static void resetQueue() {
     setQueue(
-      type: QueueType.all,
+      type: QueueType.allSongs,
       modified: false,
       shuffled: false,
     );
@@ -866,7 +867,7 @@ abstract class ContentControl {
       queues._shuffledQueue.clear();
       if (songs != null) {
         queues._queue.setSongs(copySongs(songs));
-      } else if (type == QueueType.all && !modified) {
+      } else if (type == QueueType.allSongs && !modified) {
         queues._queue.setSongs(List.from(state.allSongs.songs));
       }
     }
@@ -904,7 +905,7 @@ abstract class ContentControl {
     if (state.queues.current.isEmpty) {
       //  Set queue to global if searched or shuffled are happened to be zero-length
       setQueue(
-        type: QueueType.all,
+        type: QueueType.allSongs,
         modified: false,
         shuffled: false,
         emitChangeEvent: false,
@@ -1246,7 +1247,7 @@ abstract class ContentControl {
 
     if (songs.isEmpty) {
       setQueue(
-        type: QueueType.all,
+        type: QueueType.allSongs,
         modified: false,
         // we must save it, so do not `save: false`
       );

@@ -55,7 +55,7 @@ class AppLocalizations {
   /// Used as notification channel name.
   String get playback {
     return Intl.message(
-      'Playback',
+      "Playback",
       name: 'playback',
     );
   }
@@ -63,56 +63,56 @@ class AppLocalizations {
   /// Used as notification channel description.
   String get playbackControls {
     return Intl.message(
-      'Playback controls',
+      "Playback controls",
       name: 'playbackControls',
     );
   }
 
   String get play {
     return Intl.message(
-      'Play',
+      "Play",
       name: 'play',
     );
   }
 
   String get pause {
     return Intl.message(
-      'Pause',
+      "Pause",
       name: 'pause',
     );
   }
 
   String get stop {
     return Intl.message(
-      'Stop',
+      "Stop",
       name: 'stop',
     );
   }
 
   String get next {
     return Intl.message(
-      'Next',
+      "Next",
       name: 'next',
     );
   }
 
   String get previous {
     return Intl.message(
-      'Previous',
+      "Previous",
       name: 'previous',
     );
   }
 
   String get loopOff {
     return Intl.message(
-      'Loop off',
+      "Loop off",
       name: 'loopOff',
     );
   }
 
   String get loopOn {
     return Intl.message(
-      'Loop on',
+      "Loop on",
       name: 'loopOn',
     );
   }
@@ -122,21 +122,21 @@ class AppLocalizations {
   
   String get search {
     return Intl.message(
-      'Search',
+      "Search",
       name: 'search',
     );
   }
 
   String get shuffleAll {
     return Intl.message(
-      'Shuffle all',
+      "Shuffle all",
       name: 'shuffleAll',
     );
   }
 
   String get playRecent {
     return Intl.message(
-      'Play recent',
+      "Play recent",
       name: 'playRecent',
     );
   }
@@ -145,7 +145,7 @@ class AppLocalizations {
   /// Label for unknown artist.
   String get artistUnknown {
     return Intl.message(
-      'Unknown artist',
+      "Unknown artist",
       name: 'artistUnknown',
     );
   }
@@ -168,28 +168,28 @@ class AppLocalizations {
 
   String get tracks {
     return Intl.message(
-      'Tracks',
+      "Tracks",
       name: 'tracks',
     );
   }
 
   String get albums {
     return Intl.message(
-      'Albums',
+      "Albums",
       name: 'albums',
     );
   }
 
   String get playlists {
     return Intl.message(
-      'Playlists',
+      "Playlists",
       name: 'playlists',
     );
   }
 
   String get artists {
     return Intl.message(
-      'Artists',
+      "Artists",
       name: 'artists',
     );
   }
@@ -209,12 +209,12 @@ class AppLocalizations {
   String tracksPlural(int count) {
     return Intl.plural(
       count,
-      zero: 'Tracks',
-      one: 'Track',
-      two: 'Tracks',
-      few: 'Tracks',
-      many: 'Tracks',
-      other: 'Tracks',
+      zero: "Tracks",
+      one: "Track",
+      two: "Tracks",
+      few: "Tracks",
+      many: "Tracks",
+      other: "Tracks",
       args: [count],
       name: 'tracksPlural',
     );
@@ -223,12 +223,12 @@ class AppLocalizations {
   String albumsPlural(int count) {
     return Intl.plural(
       count,
-      zero: 'Albums',
-      one: 'Album',
-      two: 'Albums',
-      few: 'Albums',
-      many: 'Albums',
-      other: 'Albums',
+      zero: "Albums",
+      one: "Album",
+      two: "Albums",
+      few: "Albums",
+      many: "Albums",
+      other: "Albums",
       args: [count],
       name: 'albumsPlural',
     );
@@ -237,12 +237,12 @@ class AppLocalizations {
   String playlistsPlural(int count) {
     return Intl.plural(
       count,
-      zero: 'Playlists',
-      one: 'Playlist',
-      two: 'Playlists',
-      few: 'Playlists',
-      many: 'Playlists',
-      other: 'Playlists',
+      zero: "Playlists",
+      one: "Playlist",
+      two: "Playlists",
+      few: "Playlists",
+      many: "Playlists",
+      other: "Playlists",
       args: [count],
       name: 'playlistsPlural',
     );
@@ -251,12 +251,12 @@ class AppLocalizations {
   String artistsPlural(int count) {
     return Intl.plural(
       count,
-      zero: 'Artists',
-      one: 'Artist',
-      two: 'Artists',
-      few: 'Artists',
-      many: 'Artists',
-      other: 'Artists',
+      zero: "Artists",
+      one: "Artist",
+      two: "Artists",
+      few: "Artists",
+      many: "Artists",
+      other: "Artists",
       args: [count],
       name: 'artistsPlural',
     );
@@ -285,17 +285,31 @@ class AppLocalizations {
     );
   }
 
-  String get arbitraryQueue {
+  String get allAlbums {
     return Intl.message(
-      'Arbitrary queue',
-      name: 'arbitraryQueue',
+      "All albums",
+      name: 'allAlbums',
     );
   }
 
-  String get allAlbums {
+  String get allPlaylists {
     return Intl.message(
-      'All albums',
-      name: 'allAlbums',
+      "All playlists",
+      name: 'allPlaylists',
+    );
+  }
+
+  String get allArtists {
+    return Intl.message(
+      "All artitst",
+      name: 'allArtists',
+    );
+  }
+
+  String get arbitraryQueue {
+    return Intl.message(
+      "Arbitrary queue",
+      name: 'arbitraryQueue',
     );
   }
 
@@ -305,7 +319,6 @@ class AppLocalizations {
     if (origin == null)
       return null;
     switch (origin) {
-      case ArbitraryQueueOrigin.allAlbums: return allAlbums;
       default: throw UnimplementedError();
     }
   }
@@ -358,107 +371,107 @@ class AppLocalizations {
 
   String get areYouSure {
     return Intl.message(
-      'Are you sure?',
+      "Are you sure?",
       name: 'areYouSure',
     );
   }
 
   String get reset {
     return Intl.message(
-      'Reset',
+      "Reset",
       name: 'reset',
     );
   }
 
   String get save {
     return Intl.message(
-      'Save',
+      "Save",
       name: 'save',
     );
   }
 
-  // todo: currently unused
+  // TODO: currently unused
   String get secondsShorthand {
     return Intl.message(
-      's',
+      "s",
       name: 'secondsShorthand',
     );
   }
 
-  // todo: currently unused
+  // TODO: currently unused
   String get minutesShorthand {
     return Intl.message(
-      'min',
+      "min",
       name: 'minutesShorthand',
     );
   }
 
   String get remove {
     return Intl.message(
-      'Remove',
+      "Remove",
       name: 'remove',
     );
   }
 
   String get delete {
     return Intl.message(
-      'Delete',
+      "Delete",
       name: 'delete',
     );
   }
 
   String get deletion {
     return Intl.message(
-      'Deletion',
+      "Deletion",
       name: 'deletion',
     );
   }
 
   String get deletionError {
     return Intl.message(
-      'Deletion error',
+      "Deletion error",
       name: 'deletionError',
     );
   }
 
   String get edit {
     return Intl.message(
-      'Edit',
+      "Edit",
       name: 'edit',
     );
   }
 
   String get refresh {
     return Intl.message(
-      'Refresh',
+      "Refresh",
       name: 'refresh',
     );
   }
 
   String get grant {
     return Intl.message(
-      'Grant',
+      "Grant",
       name: 'grant',
     );
   }
 
   String get errorMessage {
     return Intl.message(
-      'Oops! An error occurred',
+      "Oops! An error occurred",
       name: 'errorMessage',
     );
   }
 
   String get errorDetails {
     return Intl.message(
-      'Error details',
+      "Error details",
       name: 'errorDetails',
     );
   }
 
   String get playbackErrorMessage {
     return Intl.message(
-      'An error occurred during the playback',
+      "An error occurred during the playback",
       name: 'playbackErrorMessage',
     );
   }
@@ -472,28 +485,28 @@ class AppLocalizations {
 
   String get songInformation {
     return Intl.message(
-      'Track information',
+      "Track information",
       name: 'songInformation',
     );
   }
 
   String get editMetadata {
     return Intl.message(
-      'Edit metadata',
+      "Edit metadata",
       name: 'editMetadata',
     );
   }
 
   String get found {
     return Intl.message(
-      'Found',
+      "Found",
       name: 'found',
     );
   }
 
   String get upNext {
     return Intl.message(
-      'Up next',
+      "Up next",
       name: 'upNext',
     );
   }
@@ -577,56 +590,56 @@ class AppLocalizations {
 
   String get sort {
     return Intl.message(
-      'Sort',
+      "Sort",
       name: 'sort',
     );
   }
   
   String get title {
     return Intl.message(
-      'Title',
+      "Title",
       name: 'title',
     );
   }
 
   String get name {
     return Intl.message(
-      'Name',
+      "Name",
       name: 'name',
     );
   }
 
   String get dateModified {
     return Intl.message(
-      'Date modified',
+      "Date modified",
       name: 'dateModified',
     );
   }
 
   String get dateAdded {
     return Intl.message(
-      'Date added',
+      "Date added",
       name: 'dateAdded',
     );
   }
 
   String get year {
     return Intl.message(
-      'Year',
+      "Year",
       name: 'year',
     );
   }
 
   String get numberOfTracks {
     return Intl.message(
-      'Number of tracks',
+      "Number of tracks",
       name: 'numberOfTracks',
     );
   }
 
   String get numberOfAlbums {
     return Intl.message(
-      'Number of albums',
+      "Number of albums",
       name: 'numberOfAlbums',
     );
   }
@@ -695,14 +708,14 @@ class AppLocalizations {
   /// The description is being splitted into rich text there.
   String get deletionPromptDescriptionP1 {
     return Intl.message(
-      'Are you sure you want to delete ',
+      "Are you sure you want to delete ",
       name: 'deletionPromptDescriptionP1',
     );
   }
 
   String get deletionPromptDescriptionP2 {
     return Intl.message(
-      ' selected tracks?',
+      " selected tracks?",
       name: 'deletionPromptDescriptionP2',
     );
   }
@@ -710,7 +723,7 @@ class AppLocalizations {
   //* Dev route ******************
   String get devModeGreet {
     return Intl.message(
-      'Done! You are now a developer',
+      "Done! You are now a developer",
       name: 'devModeGreet',
     );
   }
@@ -718,7 +731,7 @@ class AppLocalizations {
   /// Shown when user tapped 4 times on app logo
   String get onThePathToDevMode {
     return Intl.message(
-      'Something should happen now...',
+      "Something should happen now...",
       name: 'onThePathToDevMode',
     );
   }
@@ -742,42 +755,42 @@ class AppLocalizations {
 
   String get devTestToast {
     return Intl.message(
-      'Test toast',
+      "Test toast",
       name: 'devTestToast',
     );
   }
 
   String get devErrorSnackbar {
     return Intl.message(
-      'Show error snackbar',
+      "Show error snackbar",
       name: 'devErrorSnackbar',
     );
   }
 
   String get devImportantSnackbar {
     return Intl.message(
-      'Show important snackbar',
+      "Show important snackbar",
       name: 'devImportantSnackbar',
     );
   }
 
   String get devAnimationsSlowMo {
     return Intl.message(
-      'Slow down animations',
+      "Slow down animations",
       name: 'devAnimationsSlowMo',
     );
   }
 
   String get quitDevMode {
     return Intl.message(
-      'Quit the developer mode',
+      "Quit the developer mode",
       name: 'quitDevMode',
     );
   }
 
   String get quitDevModeDescription {
     return Intl.message(
-      'Stop being a developer?',
+      "Stop being a developer?",
       name: 'quitDevModeDescription',
     );
   }
@@ -786,28 +799,28 @@ class AppLocalizations {
 
   String get settings {
     return Intl.message(
-      'Settings',
+      "Settings",
       name: 'settings',
     );
   }
 
   String get general {
     return Intl.message(
-      'General',
+      "General",
       name: 'general',
     );
   }
 
   String get theme {
     return Intl.message(
-      'Theme',
+      "Theme",
       name: 'theme',
     );
   }
 
   String get settingLightMode {
     return Intl.message(
-      'Light mode',
+      "Light mode",
       name: 'settingLightMode',
     );
   }
@@ -816,21 +829,21 @@ class AppLocalizations {
 
   String get searchHistory {
     return Intl.message(
-      'Search history',
+      "Search history",
       name: 'searchHistory',
     );
   }
 
   String get searchHistoryPlaceholder {
     return Intl.message(
-      'Your search history will be displayed here',
+      "Your search history will be displayed here",
       name: 'searchHistoryPlaceholder',
     );
   }
 
   String get searchNothingFound {
     return Intl.message(
-      'Nothing found',
+      "Nothing found",
       name: 'searchNothingFound',
     );
   }
@@ -839,21 +852,21 @@ class AppLocalizations {
   /// The description is being splitted into rich text there.
   String get searchHistoryRemoveEntryDescriptionP1 {
     return Intl.message(
-      'Are you sure you want to remove ',
+      "Are you sure you want to remove ",
       name: 'searchHistoryRemoveEntryDescriptionP1',
     );
   }
 
   String get searchHistoryRemoveEntryDescriptionP2 {
     return Intl.message(
-      ' from your search history?',
+      " from your search history?",
       name: 'searchHistoryRemoveEntryDescriptionP2',
     );
   }
 
   String get searchClearHistory {
     return Intl.message(
-      'Clear search history?',
+      "Clear search history?",
       name: 'searchClearHistory',
     );
   }

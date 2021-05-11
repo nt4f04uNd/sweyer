@@ -119,6 +119,21 @@
     "type": "text",
     "placeholders": {}
   },
+  "allAlbums": "Все альбомы",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allPlaylists": "Все плейлисты",
+  "@allPlaylists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allArtists": "Все исполнители",
+  "@allArtists": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playlist": "Плейлист",
   "@playlist": {
     "type": "text",
@@ -126,11 +141,6 @@
   },
   "arbitraryQueue": "Произвольная очередь",
   "@arbitraryQueue": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "allAlbums": "Все альбомы",
-  "@allAlbums": {
     "type": "text",
     "placeholders": {}
   },

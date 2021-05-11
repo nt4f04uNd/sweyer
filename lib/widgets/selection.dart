@@ -520,14 +520,15 @@ class IgnoreInSelection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
+    return AnimationStrategyBuilder<bool>(
+      strategy: const IgnoringStrategy(
+        forward: true,
+        completed: true,
+      ),
       animation: controller.animationController,
       child: child,
-      builder: (context, child) => IgnorePointer(
-        ignoring: const IgnoringStrategy(
-          forward: true,
-          completed: true,
-        ).evaluate(controller.animationController),
+      builder: (context, value, child) => IgnorePointer(
+        ignoring: value,
         child: child
       ),
     );
@@ -567,34 +568,35 @@ class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
     );
     return Align(
       alignment: Alignment.bottomCenter,
-      child: AnimatedBuilder(
-        animation: selectionAnimation,
-        builder: (context, child) => FadeTransition(
-          opacity: fadeAnimation,
-          child: IgnorePointer(
-            ignoring: const IgnoringStrategy(
-              reverse: true,
-              dismissed: true,
-            ).evaluate(selectionAnimation),
-            child: child,
-          ),
+      child: AnimationStrategyBuilder<bool>(
+        strategy: const IgnoringStrategy(
+          reverse: true,
+          dismissed: true,
         ),
-        child: Container(
-          height: kSongTileHeight,
-          color: ThemeControl.theme.colorScheme.secondary,
-          padding: const EdgeInsets.only(bottom: 6.0),
-          child: Material(
-            color: Colors.transparent,
-            child: ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(children: left),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: right,
-                  ),
-                ],
+        animation: selectionAnimation,
+        builder: (context, value, child) => IgnorePointer(
+          ignoring: value,
+          child: child,
+        ),
+        child: FadeTransition(
+          opacity: fadeAnimation,
+          child: Container(
+            height: kSongTileHeight,
+            color: ThemeControl.theme.colorScheme.secondary,
+            padding: const EdgeInsets.only(bottom: 6.0),
+            child: Material(
+              color: Colors.transparent,
+              child: ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(children: left),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: right,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -630,18 +632,19 @@ class _SelectionAnimation extends AnimatedWidget {
       reverseCurve: Curves.easeInCubic,
     ));
     return ClipRect(
-      child: AnimatedBuilder(
+      child: AnimationStrategyBuilder<bool>(
+        strategy: const IgnoringStrategy(
+          dismissed: true,
+          reverse: true,
+        ),
         animation: listenable,
-        child: child,
-        builder: (context, child) => IgnorePointer(
-          ignoring: const IgnoringStrategy(
-            dismissed: true,
-            reverse: true,
-          ).evaluate(listenable),
-          child: SlideTransition(
-            position: animation,
-            child: child,
-          ),
+        child: SlideTransition(
+          position: animation,
+          child: child,
+        ),
+        builder: (context, value, child) => IgnorePointer(
+          ignoring: value,
+          child: child,
         ),
       ),
     );

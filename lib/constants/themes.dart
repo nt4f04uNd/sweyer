@@ -68,7 +68,6 @@ abstract class Theme {
       fontFamily: 'Manrope',
       brightness: Brightness.light,
       //****************** Colors **********************
-      accentColor: Colors.white,
       backgroundColor: Colors.white,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade400,
@@ -194,7 +193,6 @@ abstract class Theme {
       fontFamily: 'Manrope',
       brightness: Brightness.dark,
       //****************** Colors **********************
-      accentColor: Colors.red,
       backgroundColor: Colors.black,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade800,

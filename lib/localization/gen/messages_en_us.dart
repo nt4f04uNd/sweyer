@@ -38,6 +38,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "albums" : MessageLookupByLibrary.simpleMessage("Albums"),
     "albumsPlural" : m0,
     "allAlbums" : MessageLookupByLibrary.simpleMessage("All albums"),
+    "allArtists" : MessageLookupByLibrary.simpleMessage("All artitst"),
+    "allPlaylists" : MessageLookupByLibrary.simpleMessage("All playlists"),
     "allTracks" : MessageLookupByLibrary.simpleMessage("All tracks"),
     "allowAccessToExternalStorage" : MessageLookupByLibrary.simpleMessage("Please, allow access to storage"),
     "allowAccessToExternalStorageManually" : MessageLookupByLibrary.simpleMessage("Allow access to storage manually"),

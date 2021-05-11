@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-04-27T04:10:13.241614",
+  "@@last_modified": "2021-05-11T18:55:33.201447",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -118,13 +118,23 @@
     "type": "text",
     "placeholders": {}
   },
-  "arbitraryQueue": "Arbitrary queue",
-  "@arbitraryQueue": {
+  "allAlbums": "All albums",
+  "@allAlbums": {
     "type": "text",
     "placeholders": {}
   },
-  "allAlbums": "All albums",
-  "@allAlbums": {
+  "allPlaylists": "All playlists",
+  "@allPlaylists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allArtists": "All artitst",
+  "@allArtists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "arbitraryQueue": "Arbitrary queue",
+  "@arbitraryQueue": {
     "type": "text",
     "placeholders": {}
   },

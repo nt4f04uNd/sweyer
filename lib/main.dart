@@ -99,6 +99,7 @@ Future<void> main() async {
     await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
   }).sendPort);
   FlutterError.onError = reportFlutterError;
+
   runZonedGuarded<Future<void>>(() async {
     WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
 

@@ -72,7 +72,7 @@ abstract class Prefs {
   /// Last played [QueueType].
   static final Pref<String> queueTypeString = Pref<String>(
     key: 'queue_type',
-    defaultValue: QueueType.all.value,
+    defaultValue: QueueType.allSongs.value,
   );
 
   /// Last persistent queue.

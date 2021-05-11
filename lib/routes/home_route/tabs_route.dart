@@ -343,7 +343,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                      contentPick<T, VoidCallback>(
                       song: () {
                         ContentControl.setQueue(
-                          type: QueueType.all,
+                          type: QueueType.allSongs,
                           modified: false,
                           shuffled: true,
                           shuffleFrom: ContentControl.state.allSongs.songs,
@@ -358,17 +358,35 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                           }
                         }
                         ContentControl.setQueue(
-                          type: QueueType.arbitrary,
+                          type: QueueType.allAlbums,
                           shuffled: true,
                           shuffleFrom: songs,
-                          arbitraryQueueOrigin: ArbitraryQueueOrigin.allAlbums,
                         );
                       },
                       playlist: () {
-                        // TODO: implement
+                        final List<Song> songs = [];
+                        for (final playlist in ContentControl.state.playlists.toList()) {
+                          for (final song in playlist.songs) {
+                            song.origin = playlist;
+                            songs.add(song);
+                          }
+                        }
+                        ContentControl.setQueue(
+                          type: QueueType.allPlaylists,
+                          shuffled: true,
+                          shuffleFrom: songs,
+                        );
                       },
                       artist: () {
-                        // TODO: implement
+                        final List<Song> songs = [];
+                        for (final artist in ContentControl.state.artists.toList()) {
+                          songs.addAll(artist.songs);
+                        }
+                        ContentControl.setQueue(
+                          type: QueueType.allArtists,
+                          shuffled: true,
+                          shuffleFrom: songs,
+                        );
                       },
                     )();
                     MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
@@ -392,16 +410,32 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                           }
                         }
                         ContentControl.setQueue(
-                          type: QueueType.arbitrary,
+                          type: QueueType.allAlbums,
                           songs: songs,
-                          arbitraryQueueOrigin: ArbitraryQueueOrigin.allAlbums,
                         );
                       },
                       playlist: () {
-                        // TODO: implement
+                        final List<Song> songs = [];
+                        for (final playlist in ContentControl.state.playlists.toList()) {
+                          for (final song in playlist.songs) {
+                            song.origin = playlist;
+                            songs.add(song);
+                          }
+                        }
+                        ContentControl.setQueue(
+                          type: QueueType.allPlaylists,
+                          songs: songs,
+                        );
                       },
                       artist: () {
-                        // TODO: implement
+                        final List<Song> songs = [];
+                        for (final artist in ContentControl.state.artists.toList()) {
+                          songs.addAll(artist.songs);
+                        }
+                        ContentControl.setQueue(
+                          type: QueueType.allArtists,
+                          songs: songs,
+                        );
                       }
                     )();
                     MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
@@ -437,6 +471,7 @@ class _TabCollapse extends StatelessWidget {
     return NFTab(
       child: AnimatedBuilder(
         animation: tabController.animation!,
+        child: Text(label),
         builder: (context, child) {
           final tabValue = tabController.animation!.value;
           final indexIsChanging = tabController.indexIsChanging;
@@ -485,7 +520,7 @@ class _TabCollapse extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   widthFactor: value,
-                  child: Text(label),
+                  child: child,
                 ),
               ),
             ],
