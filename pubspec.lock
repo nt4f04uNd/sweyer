@@ -42,7 +42,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.0"
+    version: "2.6.0"
   audio_service:
     dependency: "direct main"
     description:
@@ -358,7 +358,7 @@ packages:
     source: hosted
     version: "2.0.6"
   flutter:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -370,7 +370,7 @@ packages:
     source: hosted
     version: "3.0.1"
   flutter_localizations:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"

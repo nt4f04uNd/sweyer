@@ -11,6 +11,10 @@ environment:
   flutter: 2.2.0-11.0.pre.158 # https://github.com/nt4f04uNd/flutter/tree/sweyer
 
 dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   # color_thief_flutter: ^1.0.2
   uuid: ^3.0.4
   async: ^2.5.0
@@ -88,11 +92,6 @@ dependency_overrides:
     # git: 
     #   url: https://github.com/ryanheise/audio_session.git
     #   ref: master
-
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
 
 dev_dependencies:
   flutter_test:
