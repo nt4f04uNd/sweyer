@@ -12,6 +12,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide SearchDelegate;
 import 'package:collection/collection.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -31,6 +32,10 @@ class SearchDelegate {
   void setState() {
     _setStateNotifier.notify();
   }
+
+  /// Used in [HomeRouter.drawerCanBeOpened].
+  bool get chipsBarDragged => _chipsBarDragged;
+  bool _chipsBarDragged = false;
 
   /// The current query string shown in the [AppBar].
   String get query => _queryTextController.text;
@@ -79,7 +84,7 @@ class _SearchStateDelegate {
     selectionController = ContentSelectionController.forContent(
       AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
-      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.routes.last != HomeRoutes.search,
+      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
     )
   {
     selectionController.addListener(setState);
@@ -237,9 +242,7 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
   late _SearchStateDelegate stateDelegate;
   FocusNode get focusNode => stateDelegate.focusNode;
   late ModalRoute _route;
-  late Animation<double> _animation; 
-  /// Used in [HomeRouter.drawerCanBeOpened].
-  bool chipsBarDragged = false;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -261,6 +264,7 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
     stateDelegate.dispose();
     widget.delegate._setStateNotifier.removeListener(_handleSetState);
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
+    widget.delegate._chipsBarDragged = false;
    _animation.removeStatusListener(_onAnimationStatusChanged);
     playerRouteController.removeStatusListener(_handlePlayerRouteStatusChange);
     super.dispose();
@@ -389,38 +393,47 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
       child: ValueListenableBuilder<Type?>(
         valueListenable: stateDelegate.contentTypeNotifier,
         builder: (context, contentTypeValue, child) {
-          return !showChips
-            ? child!
-            : Column(
-              children: [
-                SizedBox(
-                  height: 34.0,
-                  child: GestureDetector(
-                    onPanDown: (_) {
-                      chipsBarDragged = true;
-                    },
-                    onPanCancel: () {
-                      chipsBarDragged = false;
-                    },
-                    onPanEnd: (_) {
-                      chipsBarDragged = false;
-                    },
-                    child: ListView.separated(
-                      padding: const EdgeInsets.only(left: 12.0),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: contentTypeEntries.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 8.0),
-                      itemBuilder: (context, index) => _ContentChip(
-                        delegate: stateDelegate,
-                        contentType: contentTypeEntries[index].key,
-                      ),
-                    ),
+          if (!showChips)
+            return child!;
+
+          final List<Widget> children = [];
+          for (int i = 0; i < contentTypeEntries.length; i++) {
+            children.add(_ContentChip(
+              delegate: stateDelegate,
+              contentType: contentTypeEntries[i].key,
+            ));
+            if (i != contentTypeEntries.length - 1) {
+              children.add(const SizedBox(width: 8.0));
+            }
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 34.0,
+                child: GestureDetector(
+                  onPanDown: (_) {
+                    widget.delegate._chipsBarDragged = true;
+                  },
+                  onPanCancel: () {
+                    widget.delegate._chipsBarDragged = false;
+                  },
+                  onPanEnd: (_) {
+                    widget.delegate._chipsBarDragged = false;
+                  },
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: children,
+                    )
                   ),
                 ),
-                const SizedBox(height: bottomPadding),
-                child!,
-              ],
-            );
+              ),
+              const SizedBox(height: bottomPadding),
+              child!,
+            ],
+          );
         },
         child: ValueListenableBuilder<bool>(
           valueListenable: stateDelegate.bodyScrolledNotifier,
@@ -544,7 +557,8 @@ class _DelegateBuilder extends StatefulWidget {
 
 class _DelegateBuilderState extends State<_DelegateBuilder> {
   // TODO: remove when https://github.com/flutter/flutter/issues/82046 is resolved
-  bool _onTop = false;
+  bool _onTop = true;
+  int _prevIndex = -1;
 
   Future<bool> _handlePop(_SearchStateDelegate delegate) async {
     if (_onTop && delegate.contentType != null) {
@@ -603,6 +617,10 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
               final single = contentTypeEntries.length == 1;
               final showSingleCategoryContentList = single || contentType != null;
               final contentListContentType = single ? contentTypeEntries.single.key : contentType;
+              final index = contentType == null ? -1 : Content.enumerate().indexOf(contentType);
+              WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                _prevIndex = index;
+              });
               return NFBackButtonListener(
                 onBackButtonPressed: () => _handlePop(delegate),
                 child:
@@ -613,9 +631,9 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                   builder: (context, snapshot) =>
                   PageTransitionSwitcher(
                     duration: const Duration(milliseconds: 300),
-                    reverse: !single && contentType == null,
+                    reverse: !single && (contentType == null || index < _prevIndex),
                     transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                        transitionType: SharedAxisTransitionType.vertical,
+                        transitionType: SharedAxisTransitionType.horizontal,
                         animation: animation,
                         secondaryAnimation: secondaryAnimation,
                         fillColor: Colors.transparent,
@@ -713,6 +731,13 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   }
 
   void _handleTap() {
+    // Scroll to chip
+    ensureVisible(
+      context,
+      duration: kTabScrollDuration,
+      alignment: 0.5,
+      alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+    );
     if (active) {
       widget.delegate.contentType = null;
     } else {
@@ -723,8 +748,117 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     }
   }
 
+  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// given context visible.
+  ///
+  /// Copied from [Scrollable.ensureVisible].
+  static Future<void> ensureVisible(
+    BuildContext context, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+  }) {
+    final List<Future<void>> futures = <Future<void>>[];
+
+    // The `targetRenderObject` is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, we should let
+    // the `targetRenderObject` as visible as possible to improve the user experience.
+    // Otherwise, let the outer renderObject as visible as possible maybe cause
+    // the `targetRenderObject` invisible.
+    // Also see https://github.com/flutter/flutter/issues/65100
+    RenderObject? targetRenderObject;
+    ScrollableState? scrollable = Scrollable.of(context);
+    while (scrollable != null) {
+      futures.add(_ensureVisible(
+        scrollable.position,
+        context.findRenderObject()!,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
+      ));
+
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
+      context = scrollable.context;
+      scrollable = Scrollable.of(context);
+    }
+
+    if (futures.isEmpty || duration == Duration.zero)
+      return Future<void>.value();
+    if (futures.length == 1)
+      return futures.single;
+    return Future.wait<void>(futures).then<void>((List<void> _) => null);
+  }
+
+  /// Copied from [ScrollPosition.ensureVisible].
+  ///
+  /// By default [ScrollPosition.ensureVisible] will always scroll to the
+  /// given alignment, no matter what. I need it to scroll only in certain
+  /// conditions, so I changed it a little bit.
+  static Future<void> _ensureVisible(
+    ScrollPosition position,
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    assert(object.attached);
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
+
+    Rect? targetRect;
+    if (targetRenderObject != null && targetRenderObject != object) {
+      targetRect = MatrixUtils.transformRect(
+        targetRenderObject.getTransformTo(object),
+        object.paintBounds.intersect(targetRenderObject.paintBounds),
+      );
+    }
+
+    double target;
+    switch (alignmentPolicy) {
+      case ScrollPositionAlignmentPolicy.explicit:
+        target = viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
+        target = viewport.getOffsetToReveal(object, 1.0, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        if (target < position.pixels) {
+          target = position.pixels;
+        }
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
+        target = viewport.getOffsetToReveal(object, 0.0, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        if (target > position.pixels) {
+          target = position.pixels;
+        }
+        break;
+    }
+
+    if (position.pixels > position.viewportDimension / 2 &&
+       (position.pixels - target).abs() < position.viewportDimension / 2 - 50) {
+      return Future<void>.value();
+    }
+
+    if (duration == Duration.zero) {
+      position.jumpTo(target);
+      return Future<void>.value();
+    }
+
+    return position.animateTo(target, duration: duration, curve: curve);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (active) {
+      controller.forward();
+    } else {
+      controller.reverse();
+    }
     final l10n = getl10n(context);
     final count = widget.delegate.results.map.getValue(widget.contentType).length;
     final colorScheme =  ThemeControl.theme.colorScheme;
@@ -746,11 +880,6 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       begin: Constants.Theme.glowSplashColor.auto,
       end: Constants.Theme.glowSplashColorOnContrast.auto,
     ).animate(baseAnimation);
-    if (active) {
-      controller.forward();
-    } else {
-      controller.reverse();
-    }
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) => Material(

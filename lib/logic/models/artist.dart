@@ -39,6 +39,8 @@ class Artist extends Content {
     required this.numberOfTracks,
   });
 
+  ArtistCopyWith get copyWith => _ArtistCopyWith(this);
+
   factory Artist.fromMap(Map map) {
     return Artist(
       id: map['id'] as int,
@@ -54,4 +56,40 @@ class Artist extends Content {
     'numberOfAlbums': numberOfAlbums,
     'numberOfTracks': numberOfTracks,
   };
+}
+
+/// The `copyWith` function type for [Artist].
+abstract class ArtistCopyWith {
+  Artist call({
+    int id,
+    String artist,
+    int numberOfAlbums,
+    int numberOfTracks,
+  });
+}
+
+/// The implementation of [Artist]'s `copyWith` function allowing
+/// parameters to be explicitly set to null.
+class _ArtistCopyWith extends ArtistCopyWith {
+  static const _undefined = Object();
+
+  /// The object this function applies to.
+  final Artist value;
+
+  _ArtistCopyWith(this.value);
+
+  @override
+  Artist call({
+    Object id = _undefined,
+    Object artist = _undefined,
+    Object numberOfAlbums = _undefined,
+    Object numberOfTracks = _undefined,
+  }) {
+    return Artist(
+      id: id == _undefined ? value.id : id as int,
+      artist: artist == _undefined ? value.artist : artist as String,
+      numberOfAlbums: numberOfAlbums == _undefined ? value.numberOfAlbums : numberOfAlbums as int,
+      numberOfTracks: numberOfTracks == _undefined ? value.numberOfTracks : numberOfTracks as int,
+    );
+  }
 }

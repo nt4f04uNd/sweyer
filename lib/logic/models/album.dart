@@ -55,6 +55,9 @@ class Album extends PersistentQueue {
     return ContentUtils.appendYearWithDot(l10n.album, year);
   }
 
+  /// Returns the album artist.
+  Artist getArtist() => ContentControl.state.artists[artistId];
+
   const Album({
     required int id,
     required this.album,
@@ -65,6 +68,8 @@ class Album extends PersistentQueue {
     required this.lastYear,
     required this.numberOfSongs,
   }) : super(id: id);
+
+  AlbumCopyWith get copyWith => _AlbumCopyWith(this);
 
   MediaItem toMediaItem() {
     return MediaItem(
@@ -104,4 +109,52 @@ class Album extends PersistentQueue {
       'lastYear': lastYear,
       'numberOfSongs': numberOfSongs,
     };
+}
+
+/// The `copyWith` function type for [Album].
+abstract class AlbumCopyWith {
+  Album call({
+    int id,
+    String album,
+    String albumArt,
+    String artist,
+    int artistId,
+    int firstYear,
+    int? lastYear,
+    int numberOfSongs,
+  });
+}
+
+/// The implementation of [Album]'s `copyWith` function allowing
+/// parameters to be explicitly set to null.
+class _AlbumCopyWith extends AlbumCopyWith {
+  static const _undefined = Object();
+
+  /// The object this function applies to.
+  final Album value;
+
+  _AlbumCopyWith(this.value);
+
+  @override
+  Album call({
+    Object id = _undefined,
+    Object album = _undefined,
+    Object albumArt = _undefined,
+    Object artist = _undefined,
+    Object artistId = _undefined,
+    Object firstYear = _undefined,
+    Object? lastYear = _undefined,
+    Object numberOfSongs = _undefined,
+  }) {
+    return Album(
+      id: id == _undefined ? value.id : id as int,
+      album: album == _undefined ? value.album : album as String,
+      albumArt: albumArt == _undefined ? value.albumArt : albumArt as String,
+      artist: artist == _undefined ? value.artist : artist as String,
+      artistId: artistId == _undefined ? value.artistId : artistId as int,
+      firstYear: firstYear == _undefined ? value.firstYear : firstYear as int,
+      lastYear: lastYear == _undefined ? value.lastYear : lastYear as int?,
+      numberOfSongs: numberOfSongs == _undefined ? value.numberOfSongs : numberOfSongs as int,
+    );
+  }
 }

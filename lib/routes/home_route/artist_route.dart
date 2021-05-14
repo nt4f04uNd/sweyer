@@ -196,50 +196,6 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                   ),
                 ],
               ),
-              // Expanded(
-              //   child: Padding(
-              //     padding: const EdgeInsets.only(left: 14.0),
-              //     child: Column(
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         Text(
-              //           widget.queue.title,
-              //           maxLines: 2,
-              //           overflow: TextOverflow.ellipsis,
-              //           style: const TextStyle(
-              //             fontWeight: FontWeight.w900,
-              //             height: 1.1,
-              //             fontSize: 24.0,
-              //           ),
-              //         ),
-              //         if (isAlbum)
-              //           Padding(
-              //             padding: const EdgeInsets.only(
-              //               top: 8.0,
-              //             ),
-              //             child: ArtistWidget(
-              //               artist: album.artist,
-              //               overflow: TextOverflow.clip,
-              //               textStyle: TextStyle(
-              //                 fontWeight: FontWeight.w900,
-              //                 fontSize: 15.0,
-              //                 color: ThemeControl.theme.colorScheme.onBackground,
-              //               ),
-              //             ),
-              //           ),
-              //         if (isAlbum)
-              //           Text(
-              //             '${l10n.album} • ${album.year}',
-              //             style: TextStyle(
-              //               color: ThemeControl.theme.textTheme.subtitle2!.color,
-              //               fontWeight: FontWeight.w900,
-              //               fontSize: 14.0,
-              //             ),
-              //           ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),

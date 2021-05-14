@@ -145,8 +145,8 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
         _buildTile(),
         if (animation.status != AnimationStatus.dismissed)
           Positioned(
-            left: kArtistTileArtSize + 2.0,
-            bottom: 2.0,
+            left: kArtistTileArtSize - 4.0,
+            bottom: 6.0,
             child: SelectionCheckmark(animation: animation),
           ),
       ],

@@ -10,6 +10,8 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sweyer/sweyer.dart';
 
+import '../test.dart';
+
 /// Comparison of JSON serialization vs `sqflite`
 ///
 /// Results - JSON absolutely kills SQL (tested with `sqflite 2.0.0+3`):
@@ -40,39 +42,8 @@ import 'package:sweyer/sweyer.dart';
 /// ```
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
-  const album = Album(
-    id: 0,
-    album: 'album',
-    albumArt: 'albumArt_albumArt_albumArt',
-    artist: 'artist',
-    artistId: 0,
-    firstYear: 2000,
-    lastYear: 2000,
-    numberOfSongs: 1000,
-  );
 
-  final songs = List.generate(1000, (index) => Song(
-    id: index,
-    album: 'album',
-    albumId: 0,
-    artist: 'artist',
-    artistId: 0,
-    genre: 'genre',
-    genreId: 0,
-    title: 'title',
-    track: 'track',
-    dateAdded: 0,
-    dateModified: 0,
-    duration: 0,
-    size: 0,
-    data: 'data_data_data_data_data_data_data_data',
-    origin: album,
-    isPending: false,
-    isFavorite: false,
-    generationAdded: 0,
-    generationModified: 0,
-  ));
+  final songs = List.generate(1000, (index) => songWith(id: index));
 
   testWidgets('sql', (_) async {
     final db = SongsDatabase.instance;

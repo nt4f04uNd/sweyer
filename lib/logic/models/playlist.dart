@@ -51,23 +51,7 @@ class Playlist extends PersistentQueue {
     required this.songIds,
   }) : super(id: id);
 
-  Playlist copyWith({
-    required int id,
-    required String data,
-    required int dateAdded,
-    required int dateModified,
-    required String name,
-    required List<int> songIds,
-  }) {
-    return Playlist(
-      id: id,
-      data: data,
-      dateAdded: dateAdded,
-      dateModified: dateModified,
-      name: name,
-      songIds: songIds,
-    );
-  }
+  PlaylistCopyWith get copyWith => _PlaylistCopyWith(this);
 
   factory Playlist.fromMap(Map map) {
     return Playlist(
@@ -80,12 +64,54 @@ class Playlist extends PersistentQueue {
     );
   }
 
-  Map<String, dynamic> toMap() => <String, dynamic>{
-      'id': id,
-      'data': data,
-      'dateAdded': dateAdded,
-      'dateModified': dateModified,
-      'name': name,
-      'songIds': songIds,
-    };
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'data': data,
+    'dateAdded': dateAdded,
+    'dateModified': dateModified,
+    'name': name,
+    'songIds': songIds,
+  };
+}
+
+/// The `copyWith` function type for [Playlist].
+abstract class PlaylistCopyWith {
+  Playlist call({
+    int id,
+    String data,
+    int dateAdded,
+    int dateModified,
+    String name,
+    List<int> songIds,
+  });
+}
+
+/// The implementation of [Playlist]'s `copyWith` function allowing
+/// parameters to be explicitly set to null.
+class _PlaylistCopyWith extends PlaylistCopyWith {
+  static const _undefined = Object();
+
+  /// The object this function applies to.
+  final Playlist value;
+
+  _PlaylistCopyWith(this.value);
+
+  @override
+  Playlist call({
+    Object id = _undefined,
+    Object data = _undefined,
+    Object dateAdded = _undefined,
+    Object dateModified = _undefined,
+    Object name = _undefined,
+    Object songIds = _undefined,
+  }) {
+    return Playlist(
+      id: id == _undefined ? value.id : id as int,
+      data: data == _undefined ? value.data : data as String,
+      dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
+      dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
+      name: name == _undefined ? value.name : name as String,
+      songIds: songIds == _undefined ? value.songIds : songIds as List<int>,
+    );
+  }
 }

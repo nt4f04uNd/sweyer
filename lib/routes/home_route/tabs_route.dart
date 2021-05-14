@@ -56,7 +56,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     super.initState();
     selectionController = ContentSelectionController.forContent(
       this,
-      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.routes.last != HomeRoutes.tabs,
+      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.tabs),
     )
       ..addListener(handleSelection);
     tabController = TabController(

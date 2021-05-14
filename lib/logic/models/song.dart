@@ -60,6 +60,9 @@ class Song extends Content {
     return id < 0 ? ContentControl.state.idMap[id.toString()]! : id;
   }
 
+  /// Returns the song artist.
+  Artist getArtist() => ContentControl.state.artists[artistId];
+
   /// Returns the album this song belongs to (if any).
   Album? getAlbum() => albumId == null ? null : ContentControl.state.albums[albumId!];
 
@@ -91,51 +94,7 @@ class Song extends Content {
     this.origin,
   });
 
-  Song copyWith({
-    int? id,
-    String? album,
-    int? albumId,
-    String? artist,
-    int? artistId,
-    String? genre,
-    int? genreId,
-    String? title,
-    String? track,
-    int? dateAdded,
-    int? dateModified,
-    int? duration,
-    int? size,
-    String? data,
-    String? bucketDisplayName,
-    int? bucketId,
-    int? generationAdded,
-    int? generationModified,
-    bool? isFavorite,
-    bool? isPending,
-    PersistentQueue? origin,
-  }) {
-    return Song(
-      id: id ?? this.id,
-      album: album ?? this.album,
-      albumId: albumId ?? this.albumId,
-      artist: artist ?? this.artist,
-      artistId: artistId ?? this.artistId,
-      genre: genre ?? this.genre,
-      genreId: genreId ?? this.genreId,
-      title: title ?? this.title,
-      track: track ?? this.track,
-      dateAdded: dateAdded ?? this.dateAdded,
-      dateModified: dateModified ?? this.dateModified,
-      duration: duration ?? this.duration,
-      size: size ?? this.size,
-      data: data ?? this.data,
-      isPending: isPending ?? this.isPending,
-      isFavorite: isFavorite ?? this.isFavorite,
-      generationAdded: generationAdded ?? this.generationAdded,
-      generationModified: generationModified ?? this.generationModified,
-      origin: origin ?? this.origin,
-    );
-  }
+  SongCopyWith get copyWith => _SongCopyWith(this);
 
   MediaItem toMediaItem() {
     return MediaItem(
@@ -197,4 +156,85 @@ class Song extends Content {
       'generationAdded': generationAdded,
       'generationModified': generationModified,
     };
+}
+
+/// The `copyWith` function type for [Song].
+abstract class SongCopyWith {
+  Song call({
+    int id,
+    String? album,
+    int? albumId,
+    String artist,
+    int artistId,
+    String? genre,
+    int? genreId,
+    String title,
+    String? track,
+    int dateAdded,
+    int dateModified,
+    int duration,
+    int size,
+    String? data,
+    bool? isFavorite,
+    bool? isPending,
+    int? generationAdded,
+    int? generationModified,
+    PersistentQueue? origin,
+  });
+}
+
+/// The implementation of [Song]'s `copyWith` function allowing
+/// parameters to be explicitly set to null.
+class _SongCopyWith extends SongCopyWith {
+  static const _undefined = Object();
+
+  /// The object this function applies to.
+  final Song value;
+
+  _SongCopyWith(this.value);
+
+  @override
+  Song call({
+    Object id = _undefined,
+    Object? album = _undefined,
+    Object? albumId = _undefined,
+    Object artist = _undefined,
+    Object artistId = _undefined,
+    Object? genre = _undefined,
+    Object? genreId = _undefined,
+    Object title = _undefined,
+    Object? track = _undefined,
+    Object dateAdded = _undefined,
+    Object dateModified = _undefined,
+    Object duration = _undefined,
+    Object size = _undefined,
+    Object? data = _undefined,
+    Object? isPending = _undefined,
+    Object? isFavorite = _undefined,
+    Object? generationAdded = _undefined,
+    Object? generationModified = _undefined,
+    Object? origin = _undefined,
+  }) {
+    return Song(
+      id: id == _undefined ? value.id : id as int,
+      album: album == _undefined ? value.album : album as String?,
+      albumId: albumId == _undefined ? value.albumId : albumId as int?,
+      artist: artist == _undefined ? value.artist : artist as String,
+      artistId: artistId == _undefined ? value.artistId : artistId as int,
+      genre: genre == _undefined ? value.genre : genre as String?,
+      genreId: genreId == _undefined ? value.genreId : genreId as int?,
+      title: title == _undefined ? value.title : title as String,
+      track: track == _undefined ? value.track : track as String?,
+      dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
+      dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
+      duration: duration == _undefined ? value.duration : duration as int,
+      size: size == _undefined ? value.size : size as int,
+      data: data == _undefined ? value.data : data as String?,
+      isPending: isPending == _undefined ? value.isPending : isPending as bool?,
+      isFavorite: isFavorite == _undefined ? value.isFavorite : isFavorite as bool?,
+      generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
+      generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
+      origin: origin == _undefined ? value.origin : origin as PersistentQueue?,
+    );
+  }
 }

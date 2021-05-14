@@ -671,6 +671,7 @@ class _ActionSupported extends StatefulWidget {
 }
 
 class _ActionSupportedState extends State<_ActionSupported> with SelectionHandler {
+  UniqueKey key = UniqueKey();
   bool shown = false;
 
   @override
@@ -695,15 +696,24 @@ class _ActionSupportedState extends State<_ActionSupported> with SelectionHandle
   }
 
   @override
+  void handleSelection() {
+    if (widget.controller.data.length == 1 && widget.controller.lengthIncreased) {
+      // Prevents animation we enter the selection by updating the key
+      key = UniqueKey();
+    }
+    super.handleSelection();
+  }
+
+  @override
   Widget build(BuildContext context) {
-     if (widget.controller.inSelection) {
+    if (widget.controller.inSelection) {
       /// The condition ensures animation will not play on close, because [SelectionAppBar]
       /// has its own animation, and combination of them both doesn't look good.
       shown = widget.shown();
     }
+    print(widget.controller.status == AnimationStatus.dismissed);
     return AnimatedSwitcher(
-      // Prevents animation we enter the selection
-      key: ValueKey(widget.controller.status == AnimationStatus.dismissed),
+      key: key,
       duration: kSelectionDuration,
       transitionBuilder: (child, animation) => _SelectionAnimation(
         animation: animation,
@@ -781,6 +791,7 @@ class SelectionCounter extends StatefulWidget {
 class _SelectionCounterState extends State<SelectionCounter> with SelectionHandler {
   late ContentSelectionController controller;
   late int selectionCount;
+  UniqueKey key = UniqueKey();
 
   @override
   void initState() { 
@@ -807,6 +818,15 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
   }
 
   @override
+  void handleSelection() {
+    if (controller.data.length == 1 && controller.lengthIncreased) {
+      // Prevents animation we enter the selection by updating the key
+      key = UniqueKey();
+    }
+    super.handleSelection();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // This will prevent animation when controller is closing
     if (controller.inSelection) {
@@ -814,8 +834,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
       selectionCount = max(1, controller.data.length);
     }
     return CountSwitcher(
-      // Prevents animation we enter the selection
-      key: ValueKey(controller.status == AnimationStatus.dismissed),
+      key: key,
       childKey: ValueKey(selectionCount),
       valueIncreased: controller.lengthIncreased,
       child: Container(
@@ -869,7 +888,7 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
       shown: () {
         return data.length == 1 &&
           data.first.data is Song && (data.first.data as Song).albumId != null &&
-          (HomeRouter.instance.routes.last != HomeRoutes.album || playerRouteController.opened); // disable action in album route
+          (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.album) || playerRouteController.opened); // disable action in album route
       },
       child: _SelectionAnimation(
         animation: controller.animationController,

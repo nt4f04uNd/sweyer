@@ -20,7 +20,14 @@ const double kArtBorderRadius = 10.0;
 /// `2` is border width
 const double kRotatingArtSize = kSongTileArtSize - 6 - 3 - 2;
 
-const Duration _kLoadAnimationDuration = Duration(milliseconds: 340);
+/// Used for loading some large arts which should be emphasized.
+/// For example main content art in album or artist route.
+///
+/// Used by default [ContentArt] constructor.
+const Duration kArtLoadAnimationDuration = Duration(milliseconds: 240);
+
+/// Used for loading arts in lists.
+const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
 /// Whether to use bytes to load album arts from `MediaStore`.
 bool get _useBytes => ContentControl.sdkInt >= 29;
@@ -73,7 +80,7 @@ class ContentArt extends StatefulWidget {
     this.current = false,
     this.highRes = false,
     this.currentIndicatorScale,
-    this.loadAnimationDuration = _kLoadAnimationDuration,
+    this.loadAnimationDuration = kArtLoadAnimationDuration,
   }) : super(key: key);
 
   /// Creates an art for the [SongTile] or [SelectableSongTile].
@@ -84,7 +91,7 @@ class ContentArt extends StatefulWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-    this.loadAnimationDuration = _kLoadAnimationDuration,
+    this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kSongTileArtSize,
        highRes = false,
        currentIndicatorScale = null,
@@ -99,7 +106,7 @@ class ContentArt extends StatefulWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-    this.loadAnimationDuration = _kLoadAnimationDuration,
+    this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kPersistentQueueTileArtSize,
        highRes = false,
        currentIndicatorScale = 1.17,
@@ -114,7 +121,7 @@ class ContentArt extends StatefulWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtistTileArtSize,
     this.current = false,
-    this.loadAnimationDuration = _kLoadAnimationDuration,
+    this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kPersistentQueueTileArtSize,
        highRes = false,
        currentIndicatorScale = 1.1,
@@ -129,7 +136,7 @@ class ContentArt extends StatefulWidget {
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
-    this.loadAnimationDuration = _kLoadAnimationDuration,
+    this.loadAnimationDuration = const Duration(milliseconds: 500),
   }) : current = false,
        highRes = true,
        currentIndicatorScale = null,
@@ -210,7 +217,10 @@ class _ArtLoader {
 
   void load() {
     if (song == null) {
-      loaded = true;
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        loaded = true;
+        onUpdate();
+      });
     } else if (_useBytes) {
       final uri = song!.contentUri;
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
@@ -224,16 +234,19 @@ class _ArtLoader {
         onUpdate();
       });
     } else {
-      loaded = true;
-      final art = song!.albumArt;
-      if (art != null) {
-        _file = File(art);
-        final exists = _file.existsSync();
-        _broken = !exists;
-        if (_broken) {
-          _recreateArt();
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        final art = song!.albumArt;
+        if (art != null) {
+          _file = File(art);
+          final exists = _file.existsSync();
+          _broken = !exists;
+          if (_broken) {
+            _recreateArt();
+          }
         }
-      }
+        loaded = true;
+        onUpdate();
+      });
     }
   }
 
@@ -311,7 +324,14 @@ class _ContentArtState extends State<ContentArt> {
       final size = _getSize(true);
       switch (songs.length) {
         case 0:
-          _loaders = [];
+          _loaders = [
+            _ArtLoader(
+              context: context,
+              song: null,
+              size: widget.size,
+              onUpdate: _onUpdate,
+            ),
+          ];
           break;
         case 1:
           final loader = _ArtLoader(
@@ -444,18 +464,18 @@ class _ContentArtState extends State<ContentArt> {
   Widget build(BuildContext context) {
     assert(_loaders.isEmpty || _loaders.length == 1 || _loaders.length == 4);
     Widget child;
+    Widget? currentIndicator;
     if (!loaded) {
+      child = SizedBox(
+        width: widget.size,
+        height: widget.size,
+      );
       if (widget.current) {
-        child = Container(
+        currentIndicator = Container(
           alignment: Alignment.center,
           width: widget.size,
           height: widget.size,
           child: _buildCurrentIndicator(),
-        );
-      } else {
-        child = SizedBox(
-          width: widget.size,
-          height: widget.size,
         );
       }
     } else if (showDefault) {
@@ -465,8 +485,8 @@ class _ContentArtState extends State<ContentArt> {
           color: ThemeControl.theme.colorScheme.primary,
           width: widget.size,
           height: widget.size,
-          child: _buildCurrentIndicator(),
         );
+        currentIndicator = _buildCurrentIndicator();
       } else {
         child = _buildDefault();
       }
@@ -506,10 +526,10 @@ class _ContentArtState extends State<ContentArt> {
               color: Colors.black.withOpacity(0.5),
               width: widget.size,
               height: widget.size,
-              child: _buildCurrentIndicator(),
             ),
           ],
         );
+        currentIndicator = _buildCurrentIndicator();
       } else {
         child = arts;
       }
@@ -522,14 +542,24 @@ class _ContentArtState extends State<ContentArt> {
       child: child,
     );
 
-    if (!_useBytes)
-      return child;
-    return AnimatedSwitcher(
-      duration: widget.loadAnimationDuration,
-      switchInCurve: Curves.easeOut,
-      child: Container(
-        key: ValueKey(loaded),
-        child: child
+    return SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: Stack(
+        children: [
+          Center(
+            child: AnimatedSwitcher(
+              duration: widget.loadAnimationDuration,
+              switchInCurve: Curves.easeOut,
+              child: Container(
+                key: ValueKey(loaded),
+                child: child
+              ),
+            ),
+          ),
+          if (currentIndicator != null)
+            Center(child: currentIndicator),
+        ],
       ),
     );
   }

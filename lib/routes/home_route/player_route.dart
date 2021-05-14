@@ -275,7 +275,6 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
           query: query,
           openKeyboard: false,
         );
-        playerRouteController.close();
         SearchHistory.instance.add(query);
         return;
       case QueueType.persistent:
@@ -746,10 +745,63 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             top: 10.0,
           ),
           child: LayoutBuilder(
-            builder: (context, constraints) => ContentArt.playerRoute(
-              size: constraints.maxWidth,
-              loadAnimationDuration: const Duration(milliseconds: 500),
-              source: ContentArtSource.song(currentSong),
+            builder: (context, constraints) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 420),
+              transitionBuilder: (child, animation) {
+
+                // TODO: play more with this
+                final Animation<double> scaleAnimation;
+                final Animation<double> fadeAnimation;
+                // final fadeAnimation = ConstantTween(1.0).animate(animation);
+                if (ValueKey(currentSong) == child.key) {
+                  scaleAnimation = Tween(
+                    begin: 1.2,
+                    end: 1.0,
+                  ).animate(CurvedAnimation(
+                    curve: Curves.easeOutCubic,
+                    reverseCurve: Curves.easeInCubic,
+                    parent: animation,
+                  ));
+                  fadeAnimation = fadeAnimation = Tween(
+                    begin: 0.0,
+                    end: 1.0,
+                  ).animate(CurvedAnimation(
+                    curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+                    reverseCurve:const Interval(0.4, 1.0, curve: Curves.easeIn),
+                    parent: animation,
+                  ));
+                } else {
+                  fadeAnimation = Tween(
+                    begin: 0.0,
+                    end: 1.0,
+                  ).animate(CurvedAnimation(
+                    curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+                    reverseCurve: const Interval(0.6, 1.0, curve: Curves.easeIn),
+                    parent: animation,
+                  ));
+                  scaleAnimation = Tween(
+                    begin: 0.84,
+                    end: 1.0,
+                  ).animate(CurvedAnimation(
+                    curve: Curves.easeOut,
+                    reverseCurve: Curves.easeIn,
+                    parent: animation,
+                  ));
+                }
+
+                return FadeTransition(
+                  opacity: fadeAnimation,
+                  child: ScaleTransition(
+                    scale: scaleAnimation,
+                    child: child,
+                  ),
+                );
+              },
+              child: ContentArt.playerRoute(
+                key: ValueKey(currentSong),
+                size: constraints.maxWidth,
+                source: ContentArtSource.song(currentSong),
+              ),
             ),
           ),
         ),
