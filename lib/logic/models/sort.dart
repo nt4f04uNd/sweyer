@@ -37,9 +37,9 @@ class SongSortFeature extends SortFeature<Song> {
   @override
   bool get defaultOrderAscending => this != dateModified && this != dateAdded;
 
-  static List<SongSortFeature> get values {
-    return [dateModified, dateAdded, title, artist, album];
-  }
+  static List<SongSortFeature> get values => const [
+    dateModified, dateAdded, title, artist, album
+  ];
 
   /// Sort by the [Song.dateModified].
   /// Default sort order is DESC.
@@ -72,9 +72,9 @@ class AlbumSortFeature extends SortFeature<Album> {
   @override
   bool get defaultOrderAscending => this != year;
 
-  static List<AlbumSortFeature> get values {
-    return [title, artist, year, numberOfSongs];
-  }
+  static List<AlbumSortFeature> get values => const [
+    title, artist, year, numberOfSongs
+  ];
 
   /// Sort by the [Album.album].
   /// Default sort order is ASC.
@@ -103,9 +103,9 @@ class PlaylistSortFeature extends SortFeature<Playlist> {
   @override
   bool get defaultOrderAscending => this != dateModified && this != dateAdded;
 
-  static List<PlaylistSortFeature> get values {
-    return [dateAdded, dateModified, name];
-  }
+  static List<PlaylistSortFeature> get values => const [
+    dateAdded, dateModified, name
+  ];
 
   /// Sort by the [Playlist.dateModified].
   /// Default sort order is DESC.
@@ -130,9 +130,9 @@ class ArtistSortFeature extends SortFeature<Artist> {
   @override
   bool get defaultOrderAscending => true;
 
-  static List<ArtistSortFeature> get values {
-    return [name, numberOfAlbums, numberOfTracks];
-  }
+  static List<ArtistSortFeature> get values => const [
+    name, numberOfAlbums, numberOfTracks
+  ];
 
   /// Sort by the [Artist.artist].
   /// Default sort order is ASC.

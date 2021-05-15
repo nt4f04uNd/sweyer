@@ -180,7 +180,7 @@ class SqlSong {
   }
 
   final int id;
-  final PersistentQueue? origin;
+  final SongOrigin? origin;
 
   Map<String, dynamic> toMap() {
     return {

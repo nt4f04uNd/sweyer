@@ -109,9 +109,7 @@ class QueueSerializer extends JsonSerializer<List<Map<String, dynamic>>, List<So
       return {
         'id': song.id,
         if (origin != null)
-          'origin_type': origin is Album ? 'album' : throw UnimplementedError(),
-        if (origin != null)
-          'origin_id': origin.id,
+          'origin': origin.toSongOriginEntry().toMap(),
       };
     }).toList());
     await file.writeAsString(json);

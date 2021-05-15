@@ -34,6 +34,9 @@ class Album extends PersistentQueue {
   @override
   int get length => numberOfSongs;
 
+  @override
+  bool get playable => true;
+
   /// Gets album normalized year.
   int get year {
     return lastYear == null || lastYear! < 1000
@@ -69,8 +72,10 @@ class Album extends PersistentQueue {
     required this.numberOfSongs,
   }) : super(id: id);
 
+  @override
   AlbumCopyWith get copyWith => _AlbumCopyWith(this);
 
+  @override
   MediaItem toMediaItem() {
     return MediaItem(
       id: id.toString(),
@@ -83,6 +88,14 @@ class Album extends PersistentQueue {
       rating: null,
       extras: null,
       playable: false,
+    );
+  }
+
+  @override
+  SongOriginEntry toSongOriginEntry() {
+    return SongOriginEntry(
+      type: SongOriginType.album,
+      id: id,
     );
   }
 
@@ -99,6 +112,7 @@ class Album extends PersistentQueue {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() => <String, dynamic>{
       'id': id,
       'album': album,

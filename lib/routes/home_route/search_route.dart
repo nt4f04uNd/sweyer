@@ -81,7 +81,7 @@ class _SearchStateDelegate {
   _SearchStateDelegate(this.searchDelegate)
     : scrollController = ScrollController(),
     singleListScrollController = ScrollController(),
-    selectionController = ContentSelectionController.forContent(
+    selectionController = ContentSelectionController.create(
       AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
@@ -101,7 +101,6 @@ class _SearchStateDelegate {
   final SearchDelegate searchDelegate;
   /// Used to check whether the body is scrolled.
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
-  final ValueNotifier<Type?> contentTypeNotifier = ValueNotifier(null);
   _Results results = _Results();
   String prevQuery = '';
   String trimmedQuery = '';
@@ -111,7 +110,6 @@ class _SearchStateDelegate {
     scrollController.dispose();
     singleListScrollController.dispose();
     bodyScrolledNotifier.dispose();
-    contentTypeNotifier.dispose();
     selectionController.dispose();
   }
 
@@ -125,16 +123,32 @@ class _SearchStateDelegate {
     searchDelegate.setState();
   }
 
+  ValueListenable<Type?> get onContentTypeChange => selectionController.onContentTypeChange;
+
   /// Content type to filter results by.
   ///
   /// When null results are displayed as list of sections, see [ContentSection].
-  Type? get contentType => contentTypeNotifier.value;
+  Type? get contentType => selectionController.primaryContentType;
   set contentType(Type? value) {
-    contentTypeNotifier.value = value;
+    selectionController.primaryContentType = value;
     bodyScrolledNotifier.value = false;
+    // Scroll to chip
+    ensureVisible(
+      chipContextMap.getValue(value),
+      duration: kTabScrollDuration,
+      alignment: 0.5,
+      alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+    );
+  }
+
+  ContentMap<BuildContext> chipContextMap = ContentMap();
+  /// Saves chips context to be able to scroll it when [contentType] changes.
+  void registerChipContext(BuildContext context, Type contentType) {
+    chipContextMap.setValue(context, key: contentType);
   }
 
   void onSubmit() {
+    
     SearchHistory.instance.add(query);
   }
 
@@ -169,6 +183,110 @@ class _SearchStateDelegate {
       playlist: onSubmit,
       artist: onSubmit,
     )();
+  }
+
+  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// given context visible.
+  ///
+  /// Copied from [Scrollable.ensureVisible].
+  static Future<void> ensureVisible(
+    BuildContext context, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+  }) {
+    final List<Future<void>> futures = <Future<void>>[];
+
+    // The `targetRenderObject` is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, we should let
+    // the `targetRenderObject` as visible as possible to improve the user experience.
+    // Otherwise, let the outer renderObject as visible as possible maybe cause
+    // the `targetRenderObject` invisible.
+    // Also see https://github.com/flutter/flutter/issues/65100
+    RenderObject? targetRenderObject;
+    ScrollableState? scrollable = Scrollable.of(context);
+    while (scrollable != null) {
+      futures.add(_ensureVisible(
+        scrollable.position,
+        context.findRenderObject()!,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
+      ));
+
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
+      context = scrollable.context;
+      scrollable = Scrollable.of(context);
+    }
+
+    if (futures.isEmpty || duration == Duration.zero)
+      return Future<void>.value();
+    if (futures.length == 1)
+      return futures.single;
+    return Future.wait<void>(futures).then<void>((List<void> _) => null);
+  }
+
+  /// Copied from [ScrollPosition.ensureVisible].
+  ///
+  /// By default [ScrollPosition.ensureVisible] will always scroll to the
+  /// given alignment, no matter what. I need it to scroll only in certain
+  /// conditions, so I changed it a little bit.
+  static Future<void> _ensureVisible(
+    ScrollPosition position,
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    assert(object.attached);
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
+
+    Rect? targetRect;
+    if (targetRenderObject != null && targetRenderObject != object) {
+      targetRect = MatrixUtils.transformRect(
+        targetRenderObject.getTransformTo(object),
+        object.paintBounds.intersect(targetRenderObject.paintBounds),
+      );
+    }
+
+    double target;
+    switch (alignmentPolicy) {
+      case ScrollPositionAlignmentPolicy.explicit:
+        target = viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
+        target = viewport.getOffsetToReveal(object, 1.0, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        if (target < position.pixels) {
+          target = position.pixels;
+        }
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
+        target = viewport.getOffsetToReveal(object, 0.0, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        if (target > position.pixels) {
+          target = position.pixels;
+        }
+        break;
+    }
+
+    if (position.pixels > position.viewportDimension / 2 &&
+       (position.pixels - target).abs() < position.viewportDimension / 2 - 50) {
+      return Future<void>.value();
+    }
+
+    if (duration == Duration.zero) {
+      position.jumpTo(target);
+      return Future<void>.value();
+    }
+
+    return position.animateTo(target, duration: duration, curve: curve);
   }
 }
 
@@ -391,7 +509,7 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
           : AppBarBorder.height,
       ),
       child: ValueListenableBuilder<Type?>(
-        valueListenable: stateDelegate.contentTypeNotifier,
+        valueListenable: stateDelegate.onContentTypeChange,
         builder: (context, contentTypeValue, child) {
           if (!showChips)
             return child!;
@@ -585,7 +703,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) => _handleNotification(delegate, notification),
         child: ValueListenableBuilder<Type?>(
-          valueListenable: delegate.contentTypeNotifier,
+          valueListenable: delegate.onContentTypeChange,
           builder: (context, contentType, child) {
             if (delegate.trimmedQuery.isEmpty) {
               return _Suggestions();
@@ -719,6 +837,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   void initState() { 
     super.initState();
     controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    widget.delegate.registerChipContext(context, widget.contentType);
     if (active) {
       controller.forward();
     }
@@ -731,13 +850,6 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   }
 
   void _handleTap() {
-    // Scroll to chip
-    ensureVisible(
-      context,
-      duration: kTabScrollDuration,
-      alignment: 0.5,
-      alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
-    );
     if (active) {
       widget.delegate.contentType = null;
     } else {
@@ -746,110 +858,6 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       }
       widget.delegate.contentType = widget.contentType;
     }
-  }
-
-  /// Scrolls the scrollables that enclose the given context so as to make the
-  /// given context visible.
-  ///
-  /// Copied from [Scrollable.ensureVisible].
-  static Future<void> ensureVisible(
-    BuildContext context, {
-    double alignment = 0.0,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
-    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-  }) {
-    final List<Future<void>> futures = <Future<void>>[];
-
-    // The `targetRenderObject` is used to record the first target renderObject.
-    // If there are multiple scrollable widgets nested, we should let
-    // the `targetRenderObject` as visible as possible to improve the user experience.
-    // Otherwise, let the outer renderObject as visible as possible maybe cause
-    // the `targetRenderObject` invisible.
-    // Also see https://github.com/flutter/flutter/issues/65100
-    RenderObject? targetRenderObject;
-    ScrollableState? scrollable = Scrollable.of(context);
-    while (scrollable != null) {
-      futures.add(_ensureVisible(
-        scrollable.position,
-        context.findRenderObject()!,
-        alignment: alignment,
-        duration: duration,
-        curve: curve,
-        alignmentPolicy: alignmentPolicy,
-        targetRenderObject: targetRenderObject,
-      ));
-
-      targetRenderObject = targetRenderObject ?? context.findRenderObject();
-      context = scrollable.context;
-      scrollable = Scrollable.of(context);
-    }
-
-    if (futures.isEmpty || duration == Duration.zero)
-      return Future<void>.value();
-    if (futures.length == 1)
-      return futures.single;
-    return Future.wait<void>(futures).then<void>((List<void> _) => null);
-  }
-
-  /// Copied from [ScrollPosition.ensureVisible].
-  ///
-  /// By default [ScrollPosition.ensureVisible] will always scroll to the
-  /// given alignment, no matter what. I need it to scroll only in certain
-  /// conditions, so I changed it a little bit.
-  static Future<void> _ensureVisible(
-    ScrollPosition position,
-    RenderObject object, {
-    double alignment = 0.0,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
-    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-    RenderObject? targetRenderObject,
-  }) {
-    assert(object.attached);
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
-
-    Rect? targetRect;
-    if (targetRenderObject != null && targetRenderObject != object) {
-      targetRect = MatrixUtils.transformRect(
-        targetRenderObject.getTransformTo(object),
-        object.paintBounds.intersect(targetRenderObject.paintBounds),
-      );
-    }
-
-    double target;
-    switch (alignmentPolicy) {
-      case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset
-          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
-        break;
-      case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0, rect: targetRect).offset
-          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
-        if (target < position.pixels) {
-          target = position.pixels;
-        }
-        break;
-      case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0, rect: targetRect).offset
-          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
-        if (target > position.pixels) {
-          target = position.pixels;
-        }
-        break;
-    }
-
-    if (position.pixels > position.viewportDimension / 2 &&
-       (position.pixels - target).abs() < position.viewportDimension / 2 - 50) {
-      return Future<void>.value();
-    }
-
-    if (duration == Duration.zero) {
-      position.jumpTo(target);
-      return Future<void>.value();
-    }
-
-    return position.animateTo(target, duration: duration, curve: curve);
   }
 
   @override

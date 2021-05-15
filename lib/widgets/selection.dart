@@ -6,11 +6,15 @@
 import 'dart:math';
 
 import 'package:flare_flutter/flare_actor.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
+
+// See selection actions logic overview here
+// https://docs.google.com/spreadsheets/d/1LYJ5Abb1zWhYMAUs0zRjx-aiMwJn-3XLS2NjoqV5le8
 
 /// Selection animation duration.
 const Duration kSelectionDuration = Duration(milliseconds: 350);
@@ -196,10 +200,10 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
 }
 
 /// Signature, used for [ContentSelectionController.actionsBuilder].
-typedef _ActionsBuilder = SelectionActionsBar Function(BuildContext);
+typedef _ActionsBuilder = _SelectionActionsBar Function(BuildContext);
 
 class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> {
-  ContentSelectionController({
+  ContentSelectionController._({
     required AnimationController animationController,
     required this.actionsBuilder,
     this.ignoreWhen,
@@ -220,6 +224,27 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// be displayed over player route, which is not wanted.
   final ValueGetter<bool>? ignoreWhen;
 
+  /// Notifies about changes of [primaryContentType].
+  ValueListenable<Type?> get onContentTypeChange => _primaryContentTypeNotifier;
+  final ValueNotifier<Type?> _primaryContentTypeNotifier = ValueNotifier(null);
+
+  /// Current primary content type for when `T` is [Content], and not
+  /// specific subclass of it, like [Song]. It is an error to set this
+  /// value when `T` not [Content].
+  ///
+  /// When [Content] is being used in this way, that means that multiple
+  /// types of content can be selected, and in some cases, there can be
+  /// a situation some of the content type is primarily shown to user
+  /// (and standalone, without other content types).
+  ///
+  /// For example in tabs route the that denotes the currently selected tab,
+  /// or in search route that denotes currently filtered content type.
+  Type? get primaryContentType => _primaryContentTypeNotifier.value;
+  set primaryContentType(Type? value) {
+    assert(T != Content, 'T must be a subclass of Content');
+    _primaryContentTypeNotifier.value = value;
+  }
+
   /// Constucts a controller for particular `T` [Content] type.
   ///
   /// Generally, it's recommended to pass navigator state to [vsync], so controller can
@@ -229,7 +254,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// 
   /// If [closeButton] is  `true`, will show a selection close button in the title.
   @factory
-  static ContentSelectionController<SelectionEntry<T>> forContent<T extends Content>(
+  static ContentSelectionController<SelectionEntry<T>> create<T extends Content>(
     TickerProvider vsync, {
     ValueGetter<bool>? ignoreWhen,
     bool counter = false,
@@ -237,36 +262,34 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }) {
     final getActions = contentPick<T, ValueGetter<List<Widget>>>(
       song: () => const [
-        GoToAlbumSelectionAction(),
-        PlayNextSelectionAction<Song>(),
-        AddToQueueSelectionAction<Song>(),
+        _GoToAlbumSelectionAction(),
+        _PlayNextSelectionAction<Song>(),
+        _AddToQueueSelectionAction<Song>(),
       ],
       album: () => const [
-        PlayNextSelectionAction<Album>(),
-        AddToQueueSelectionAction<Album>(),
+        _PlayNextSelectionAction<Album>(),
+        _AddToQueueSelectionAction<Album>(),
       ],
       playlist: () => const [
-        PlayNextSelectionAction<Playlist>(),
-        AddToQueueSelectionAction<Playlist>(),
+        _PlayNextSelectionAction<Playlist>(),
+        _AddToQueueSelectionAction<Playlist>(),
       ],
       artist: () => const [],
       fallback: () =>  const [
-        GoToAlbumSelectionAction(),
-        PlayNextSelectionAction(),
-        AddToQueueSelectionAction(),
+        _GoToAlbumSelectionAction(),
+        _PlayNextSelectionAction(),
+        _AddToQueueSelectionAction(),
       ],
     );
-    return ContentSelectionController<SelectionEntry<T>>(
+    return ContentSelectionController<SelectionEntry<T>>._(
       ignoreWhen: ignoreWhen,
       animationController: AnimationController(
         vsync: vsync,
         duration: kSelectionDuration,
       ),
       actionsBuilder: (context) {
-        final controller = ContentSelectionController.of(context);
-        return SelectionActionsBar(
-          controller: controller,
-          left: [ActionsSelectionTitle(
+        return _SelectionActionsBar(
+          left: [_ActionsSelectionTitle(
             counter: counter,
             closeButton: closeButton,
           )],
@@ -276,7 +299,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     );
   }
 
-  static ContentSelectionController of(BuildContext context) {
+  static ContentSelectionController _of(BuildContext context) {
     final widget = context.getElementForInheritedWidgetOfExactType<_ContentSelectionControllerProvider>()!
       .widget as _ContentSelectionControllerProvider;
     return widget.controller;
@@ -294,7 +317,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         return;
       }
       if (_notifier.value != null && _notifier.value != this) {
-        /// Close previous selection.
+        // Close previous selection.
         _notifier.value!.close();
         assert(false, 'There can only be one active controller');
       }
@@ -311,7 +334,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       HomeState.overlayKey.currentState!.insert(_overlayEntry!);
       _notifier.value = this;
 
-      /// Animate system UI.
+      // Animate system UI
       final lastUi = SystemUiStyleController.lastUi;
       _lastNavColor = lastUi.systemNavigationBarColor;
       SystemUiStyleController.animateSystemUiOverlay(
@@ -319,7 +342,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
           systemNavigationBarColor: Constants.UiTheme.grey.auto.systemNavigationBarColor
         ),
         duration: kSelectionDuration,
-        curve: SelectionActionsBar.forwardCurve,
+        curve: _SelectionActionsBar.forwardCurve,
       );
     } else if (status == AnimationStatus.reverse) {
       if (!ContentControl.disposed) {
@@ -340,7 +363,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         systemNavigationBarColor: _lastNavColor,
       ),
       duration: kSelectionDuration,
-      curve: SelectionActionsBar.reverseCurve.flipped,
+      curve: _SelectionActionsBar.reverseCurve.flipped,
     );
     _lastNavColor = null;
   }
@@ -357,10 +380,14 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   void dispose() {
     if (ContentControl.disposed) {
       _removeOverlay();
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+        _primaryContentTypeNotifier.dispose();
+      });
       super.dispose();
     } else {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         _notifier.value = null;
+        _primaryContentTypeNotifier.dispose();
         clearListeners();
         clearStatusListeners();
         if (inSelection)
@@ -406,7 +433,7 @@ class _SelectionControllerCreatorState<T extends Content> extends State<ContentS
   @override
   void initState() { 
     super.initState();
-    controller = ContentSelectionController.forContent<T>(
+    controller = ContentSelectionController.create<T>(
       AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       counter: true,
@@ -535,15 +562,13 @@ class IgnoreInSelection extends StatelessWidget {
   }
 }
 
-class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
-  const SelectionActionsBar({
+class _SelectionActionsBar extends StatelessWidget {
+  const _SelectionActionsBar({
     Key? key,
-    required this.controller,
     this.left = const [],
     this.right = const [],
   }) : super(key: key);
 
-  final SelectionController<T> controller;
   final List<Widget> left;
   final List<Widget> right;
 
@@ -560,7 +585,7 @@ class SelectionActionsBar<T extends SelectionEntry> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectionAnimation = controller.animationController;
+    final selectionAnimation = ContentSelectionController._of(context).animationController;
     final fadeAnimation = CurvedAnimation(
       curve: forwardCurve,
       reverseCurve: reverseCurve,
@@ -727,8 +752,8 @@ class _ActionSupportedState extends State<_ActionSupported> with SelectionHandle
 }
 
 /// Creates a selection title.
-class ActionsSelectionTitle extends StatelessWidget {
-  const ActionsSelectionTitle({
+class _ActionsSelectionTitle extends StatelessWidget {
+  const _ActionsSelectionTitle({
     Key? key,
     this.counter = false,
     this.closeButton = false,
@@ -743,7 +768,7 @@ class ActionsSelectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final controller = ContentSelectionController.of(context);
+    final controller = ContentSelectionController._of(context);
     return Row(
       children: [
         if (closeButton)
@@ -796,7 +821,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
   @override
   void initState() { 
     super.initState();
-    controller = widget.controller ?? ContentSelectionController.of(context);
+    controller = widget.controller ?? ContentSelectionController._of(context);
     controller.addListener(handleSelection);
     selectionCount = max(1, controller.data.length);
   }
@@ -806,7 +831,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller?.removeListener(handleSelection);
-      controller = widget.controller ?? ContentSelectionController.of(context);
+      controller = widget.controller ?? ContentSelectionController._of(context);
       controller.addListener(handleSelection);
     }
   }
@@ -850,21 +875,178 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
   }
 }
 
+//************** ACTIONS **************
+
+//*********** Queue actions ***********
+
+/// Action that queues a [Song] or [Album] to be played next.
+class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
+  const _PlayNextSelectionAction({Key? key}) : super(key: key);
+
+  void _handleSongs(List<SelectionEntry<Song>> entries) {
+    if (entries.isEmpty)
+      return;
+    entries.sort((a, b) => a.index!.compareTo(b.index!));
+    ContentControl.playNext(
+      entries
+        .map((el) => el.data)
+        .toList(),
+    );
+  }
+
+  void _handleOrigins(List<SelectionEntry<SongOrigin>> entries) {
+    if (entries.isEmpty)
+      return;
+    // Reverse order is proper here
+    entries.sort((a, b) => b.index!.compareTo(a.index!));
+    for (final entry in entries) {
+      ContentControl.playOriginNext(entry.data);
+    }
+  }
+
+  void _handleTap(ContentSelectionController controller) {
+    contentPick<T, VoidCallback>(
+      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
+      album: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>),
+      playlist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>),
+      artist: () => throw ArgumentError('This actions doesn support artists'),
+      fallback: () {
+        final List<SelectionEntry<Content>> entries = controller.data.toList();
+        final List<SelectionEntry<Song>> songs = [];
+        final List<SelectionEntry<Album>> albums = [];
+        final List<SelectionEntry<Playlist>> playlists = [];
+        final List<SelectionEntry<Artist>> artists = [];
+        for (final entry in entries) {
+          if (entry is SelectionEntry<Song>) {
+            songs.add(entry);
+          } else if (entry is SelectionEntry<Album>) {
+            albums.add(entry);
+          } else if (entry is SelectionEntry<Playlist>) {
+            playlists.add(entry);
+          } else if (entry is SelectionEntry<Artist>) {
+            artists.add(entry);
+          } else {
+            throw UnimplementedError('Unsupported selection');
+          }
+        }
+        _handleSongs(songs);
+        _handleOrigins(albums);
+        _handleOrigins(playlists);
+        _handleOrigins(artists);
+      },
+    )();
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    return _SelectionAnimation(
+      animation: controller.animationController,
+      child: NFIconButton(
+        tooltip: l10n.playNext,
+        icon: const Icon(Icons.playlist_play_rounded),
+        iconSize: 30.0,
+        onPressed: () => _handleTap(controller),
+      ),
+    );
+  }
+}
+
+/// Action that adds a [Song] or an [Album] to the end of the queue.
+class _AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
+  const _AddToQueueSelectionAction({Key? key})
+      : super(key: key);
+
+  void _handleSongs(List<SelectionEntry<Song>> entries) {
+    if (entries.isEmpty)
+      return;
+    entries.sort((a, b) => a.index!.compareTo(b.index!));
+    ContentControl.addToQueue(
+      entries
+        .map((el) => el.data)
+        .toList(),
+    );
+  }
+
+  void _handleOrigins(List<SelectionEntry<SongOrigin>> entries) {
+    if (entries.isEmpty)
+      return;
+    // Reverse order is proper here
+    entries.sort((a, b) => b.index!.compareTo(a.index!));
+    for (final entry in entries) {
+      ContentControl.playOriginNext(entry.data);
+    }
+  }
+
+  void _handleTap(ContentSelectionController controller) {
+    contentPick<T, VoidCallback>(
+      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
+      album: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>),
+      playlist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>),
+      artist: () => throw ArgumentError('This actions doesn support artists'),
+      fallback: () {
+        final List<SelectionEntry<Content>> entries = controller.data.toList();
+        final List<SelectionEntry<Song>> songs = [];
+        final List<SelectionEntry<Album>> albums = [];
+        final List<SelectionEntry<Playlist>> playlists = [];
+        final List<SelectionEntry<Artist>> artists = [];
+        for (final entry in entries) {
+          if (entry is SelectionEntry<Song>) {
+            songs.add(entry);
+          } else if (entry is SelectionEntry<Album>) {
+            albums.add(entry);
+          } else if (entry is SelectionEntry<Playlist>) {
+            playlists.add(entry);
+          } else if (entry is SelectionEntry<Artist>) {
+            artists.add(entry);
+          } else {
+            throw UnimplementedError('Unsupported selection');
+          }
+        }
+        _handleSongs(songs);
+        _handleOrigins(albums);
+        _handleOrigins(playlists);
+        _handleOrigins(artists);
+      },
+    )();
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    return _SelectionAnimation(
+      animation: controller.animationController,
+      child: NFIconButton(
+        tooltip: l10n.addToQueue,
+        icon: const Icon(Icons.queue_music_rounded),
+        iconSize: 30.0,
+        onPressed: () => _handleTap(controller),
+      ),
+    );
+  }
+}
+
+//*********** Navigation actions ***********
+
 /// Action that leads to the song album.
-class GoToAlbumSelectionAction extends StatefulWidget {
-  const GoToAlbumSelectionAction({Key? key}) : super(key: key);
+class _GoToAlbumSelectionAction extends StatefulWidget {
+  const _GoToAlbumSelectionAction({Key? key}) : super(key: key);
 
   @override
   _GoToAlbumSelectionActionState createState() => _GoToAlbumSelectionActionState();
 }
 
-class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
+class _GoToAlbumSelectionActionState extends State<_GoToAlbumSelectionAction> {
   late ContentSelectionController controller;
 
   @override
   void initState() { 
     super.initState();
-    controller = ContentSelectionController.of(context);
+    controller = ContentSelectionController._of(context);
     assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
            controller is ContentSelectionController<SelectionEntry<Song>>);
   }
@@ -903,141 +1085,7 @@ class _GoToAlbumSelectionActionState extends State<GoToAlbumSelectionAction> {
   }
 }
 
-/// Action that queues a [Song] or [Album] to be played next.
-class PlayNextSelectionAction<T extends Content> extends StatelessWidget {
-  const PlayNextSelectionAction({Key? key}) : super(key: key);
-
-  void _handleSongs(List<SelectionEntry<Song>> entries) {
-    if (entries.isEmpty)
-      return;
-    entries.sort((a, b) => a.index!.compareTo(b.index!));
-    ContentControl.playNext(
-      entries
-        .map((el) => el.data)
-        .toList(),
-    );
-  }
-
-  void _handlePersistentQueues(List<SelectionEntry<PersistentQueue>> entries) {
-    if (entries.isEmpty)
-      return;
-    // Reverse order is proper here
-    entries.sort((a, b) => b.index!.compareTo(a.index!));
-    for (final entry in entries) {
-      ContentControl.playQueueNext(entry.data);
-    }
-  }
-
-  void _handleTap(ContentSelectionController controller) {
-    contentPick<T, VoidCallback>(
-      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
-      album: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Album>>),
-      playlist: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Playlist>>),
-      artist: () => throw ArgumentError('This actions doesn support artists'),
-      fallback: () {
-        final List<SelectionEntry<Content>> entries = controller.data.toList();
-        final List<SelectionEntry<Song>> songs = [];
-        final List<SelectionEntry<PersistentQueue>> persistentQueues = [];
-        for (final entry in entries) {
-          if (entry is SelectionEntry<Song>) {
-            songs.add(entry);
-          } else if (entry is SelectionEntry<PersistentQueue>) {
-            persistentQueues.add(entry);
-          } else {
-            throw ArgumentError('This action only supports Song and PersistentQueue selection simultaniously');
-          }
-        }
-        _handleSongs(songs);
-        _handlePersistentQueues(persistentQueues);
-      },
-    )();
-    controller.close();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = getl10n(context);
-    final controller = ContentSelectionController.of(context);
-    return _SelectionAnimation(
-      animation: controller.animationController,
-      child: NFIconButton(
-        tooltip: l10n.playNext,
-        icon: const Icon(Icons.playlist_play_rounded),
-        iconSize: 30.0,
-        onPressed: () => _handleTap(controller),
-      ),
-    );
-  }
-}
-
-/// Action that adds a [Song] or an [Album] to the end of the queue.
-class AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
-  const AddToQueueSelectionAction({Key? key})
-      : super(key: key);
-
-  void _handleSongs(List<SelectionEntry<Song>> entries) {
-    if (entries.isEmpty)
-      return;
-    entries.sort((a, b) => a.index!.compareTo(b.index!));
-    ContentControl.addToQueue(
-      entries
-        .map((el) => el.data)
-        .toList(),
-    );
-  }
-
-  void _handlePersistentQueues(List<SelectionEntry<PersistentQueue>> entries) {
-    if (entries.isEmpty)
-      return;
-    entries.sort((a, b) => a.index!.compareTo(b.index!));
-    for (final entry in entries) {
-      ContentControl.addQueueToQueue(entry.data);
-    }
-  }
-
-  void _handleTap(ContentSelectionController controller) {
-    contentPick<T, VoidCallback>(
-      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
-      album: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Album>>),
-      playlist: () => _handlePersistentQueues(controller.data.toList() as List<SelectionEntry<Playlist>>),
-      artist: () => throw ArgumentError('This actions doesn support artists'),
-      fallback: () {
-        final List<SelectionEntry<Content>> entries = controller.data.toList();
-        final List<SelectionEntry<Song>> songs = [];
-        final List<SelectionEntry<PersistentQueue>> persistentQueues = [];
-        for (final entry in entries) {
-          if (entry is SelectionEntry<Song>) {
-            songs.add(entry);
-          } else if (entry is SelectionEntry<PersistentQueue>) {
-            persistentQueues.add(entry);
-          } else {
-            throw ArgumentError('This action only supports Song and PersistentQueue selection simultaniously');
-          }
-        }
-        _handleSongs(songs);
-        _handlePersistentQueues(persistentQueues);
-      },
-    )();
-    controller.close();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = getl10n(context);
-    final controller = ContentSelectionController.of(context);
-    return _SelectionAnimation(
-      animation: controller.animationController,
-      child: NFIconButton(
-        tooltip: l10n.addToQueue,
-        icon: const Icon(Icons.queue_music_rounded),
-        iconSize: 30.0,
-        onPressed: () => _handleTap(controller),
-      ),
-    );
-  }
-}
-
-//*********** Appbar actions ***********
+//*********** Content related actions (always in app bar) ***********
 
 /// Displays an action to delete songs.
 /// Only meant to be displayed in app bar.

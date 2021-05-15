@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Playlist extends PersistentQueue {
@@ -17,6 +18,9 @@ class Playlist extends PersistentQueue {
 
   @override
   int get length => songIds.length;
+
+  @override
+  bool get playable => songIds.isNotEmpty;
 
   @override
   List<Song> get songs {
@@ -51,7 +55,32 @@ class Playlist extends PersistentQueue {
     required this.songIds,
   }) : super(id: id);
 
+  @override
   PlaylistCopyWith get copyWith => _PlaylistCopyWith(this);
+
+  @override
+  MediaItem toMediaItem() {
+    return MediaItem(
+      id: id.toString(),
+      album: null,
+      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      artUri: null,
+      title: title,
+      artist: null,
+      genre: null,
+      rating: null,
+      extras: null,
+      playable: false,
+    );
+  }
+
+  @override
+  SongOriginEntry toSongOriginEntry() {
+    return SongOriginEntry(
+      type: SongOriginType.playlist,
+      id: id,
+    );
+  }
 
   factory Playlist.fromMap(Map map) {
     return Playlist(
@@ -64,6 +93,7 @@ class Playlist extends PersistentQueue {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() => {
     'id': id,
     'data': data,

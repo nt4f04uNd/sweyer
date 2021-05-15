@@ -54,7 +54,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       value: 1.0,
     );
     scrollController.addListener(_handleScroll);
-    selectionController = ContentSelectionController.forContent<Song>(
+    selectionController = ContentSelectionController.create<Song>(
       AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       counter: true,
@@ -163,8 +163,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   Expanded(
                     child: ShuffleQueueButton(
                       onPressed: () {
-                         ContentControl.setPersistentQueue(
-                          queue: widget.queue,
+                         ContentControl.setOriginQueue(
+                          origin: widget.queue,
                           songs: songs,
                           shuffled: true,
                         );
@@ -178,7 +178,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   Expanded(
                     child: PlayQueueButton(
                       onPressed: () {
-                        ContentControl.setPersistentQueue(queue: widget.queue, songs: songs);
+                        ContentControl.setOriginQueue(origin: widget.queue, songs: songs);
                         MusicPlayer.instance.setSong(songs[0]);
                         MusicPlayer.instance.play();
                         playerRouteController.open();
@@ -263,11 +263,11 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                     sliver: ContentListView.sliver<Song>(
                       list: songs,
                       selectionController: selectionController,
-                      currentTest: (index) => ContentUtils.persistentQueueIsCurrent(widget.queue) &&
+                      currentTest: (index) => ContentUtils.originIsCurrent(widget.queue) &&
                                               songs[index].sourceId == ContentControl.state.currentSong.sourceId,
                       songTileVariant: SongTileVariant.number,
-                      onItemTap: () => ContentControl.setPersistentQueue(
-                        queue: widget.queue,
+                      onItemTap: () => ContentControl.setOriginQueue(
+                        origin: widget.queue,
                         songs: songs,
                       ),
                     ),

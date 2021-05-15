@@ -38,7 +38,7 @@ abstract class Prefs {
   //****************** Sorts ***********************
 
   /// Sort feature used for song list.
-  static final Pref<String> songSortString = Pref<String>(
+  static final Pref<String> songSortJson = Pref<String>(
     key: 'songs_sort',
     defaultValue: jsonEncode(
       SongSort.defaultOrder(SongSortFeature.dateModified).toMap(),
@@ -46,7 +46,7 @@ abstract class Prefs {
   );
 
   /// Sort feature used for album list.
-  static final Pref<String> albumSortString = Pref<String>(
+  static final Pref<String> albumSortJson = Pref<String>(
     key: 'album_sort',
     defaultValue: jsonEncode(
       AlbumSort.defaultOrder(AlbumSortFeature.year).toMap(),
@@ -54,7 +54,7 @@ abstract class Prefs {
   );
 
   /// Sort feature used for playlist list.
-  static final Pref<String> playlistSortString = Pref<String>(
+  static final Pref<String> playlistSortJson = Pref<String>(
     key: 'playlist_sort',
     defaultValue: jsonEncode(
       PlaylistSort.defaultOrder(PlaylistSortFeature.dateAdded).toMap(),
@@ -62,7 +62,7 @@ abstract class Prefs {
   );
 
   /// Sort feature used for artist list.
-  static final Pref<String> artistSortString = Pref<String>(
+  static final Pref<String> artistSortJson = Pref<String>(
     key: 'artist_sort',
     defaultValue: jsonEncode(
       ArtistSort.defaultOrder(ArtistSortFeature.name).toMap(),
@@ -75,9 +75,10 @@ abstract class Prefs {
     defaultValue: QueueType.allSongs.value,
   );
 
-  /// Last persistent queue.
-  static final Pref<int?> persistentQueueId =
-      Pref<int>(key: 'persistent_queue_id', defaultValue: null);
+  /// Last [SongOrigin].
+  /// Serialized via 
+  static final Pref<String?> songOriginJson =
+      Pref<String>(key: 'song_origin', defaultValue: null);
 
   /// Last search query.
   static final Pref<String?> searchQueryString =

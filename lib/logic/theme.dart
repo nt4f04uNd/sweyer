@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -102,7 +103,7 @@ abstract class ThemeControl {
 
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
 
-    emitThemeChange(true);
+    themeChaning.add(true);
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(const Duration(milliseconds: 300)))
     )
@@ -110,7 +111,7 @@ abstract class ThemeControl {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
     })
-    ..value.then((value) => emitThemeChange(false));
+    ..value.then((value) => themeChaning.add(false));
   
     await SystemUiStyleController.animateSystemUiOverlay(
       to: Constants.UiTheme.black.auto,
@@ -124,7 +125,7 @@ abstract class ThemeControl {
     _rebuildOperation?.cancel();
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
-    emitThemeChange(true);
+    themeChaning.add(true);
     MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(primaryColorChangeDuration))
@@ -133,7 +134,7 @@ abstract class ThemeControl {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
     })
-    ..value.then((value) => emitThemeChange(false));
+    ..value.then((value) => themeChaning.add(false));
   }
 
   static void _applyPrimaryColor(Color color) {
@@ -185,26 +186,10 @@ abstract class ThemeControl {
     );
   }
 
-  static final StreamController<bool> _controller = StreamController<bool>.broadcast();
   static const Duration primaryColorChangeDuration = Duration(milliseconds: 240);
   static CancelableOperation<void>? _rebuildOperation;
 
-  /// Gets stream of changes on theme.
-  ///
-  /// Boolean value emitted to the stream indicates that theme animation is now playing and
-  /// some interface that can be hidden for the animation optimization.
-  static Stream<bool> get onThemeChange => _controller.stream;
-  static bool get themeChaning => _themeChaning;
-
-  /// Whether the theme is curretly chaning.
-  static bool _themeChaning = false;
-
-  /// Emit theme change into stream
-  ///
-  /// The [value] indicates that theme animation is now playing and
-  /// some interface that can be hidden for the animation optimization.
-  static void emitThemeChange(bool value) {
-    _themeChaning = value;
-    _controller.add(value);
-  }
+  /// If `true` - that means theme animation is now being performed and
+  /// some interface can hidden for optimization sake.
+  static final BehaviorSubject<bool> themeChaning = BehaviorSubject.seeded(false);
 }

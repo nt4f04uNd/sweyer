@@ -16,6 +16,10 @@ import 'package:flutter/rendering.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
+// See content logic overview here
+// https://docs.google.com/document/d/1QtF9koBcWuRE1lIYJ45cRMogAprb7xD83ImmI0cn3lQ/edit
+// TODO: update it
+
 enum QuickAction {
   search,
   shuffleAll,
@@ -77,7 +81,7 @@ class ContentMap<V> {
   /// Creates a content map from initial value [map].
   ///
   /// If none specified, will initialize the map with `null`s.
-  ContentMap([this._map = const {}]);
+  ContentMap([Map<Type, V>? map]) : _map = map ?? {};
 
   final Map<Type, V> _map;
 
@@ -163,10 +167,10 @@ class _QueuePool {
   Queue get _queue => _map[_PoolQueueType.queue]!;
   Queue get _shuffledQueue => _map[_PoolQueueType.shuffled]!;
 
-  /// Current queue for [QueueType.persistent].
-  /// If [type] is not [QueueType.persistent], will return `null`.
-  PersistentQueue? get persistent => _persistent;
-  PersistentQueue? _persistent;
+  /// Current queue for [QueueType.origin].
+  /// If [type] is not [QueueType.origin], will return `null`.
+  SongOrigin? get origin => _origin;
+  SongOrigin? _origin;
 
   /// A search query for [QueueType.searched].
   /// If [type] is not [QueueType.searched], will return `null`.
@@ -249,13 +253,13 @@ class _ContentState {
     return index;
   }
 
-  /// Currently playing peristent queue when song is added via [playQueueNext]
-  /// or [addQueueToQueue].
+  /// Currently playing peristent queue when song is added via [playOriginNext]
+  /// or [addOriginToQueue].
   ///
-  /// Used for showing [CurrentIndicator] for [PersistenQueue]s.
+  /// Used for showing [CurrentIndicator] for [SongOrigin]s.
   ///
-  /// See [Song.origin] for more info.
-  PersistentQueue? get currentSongOrigin => currentSong.origin;
+  /// See also [Song.origin].
+  SongOrigin? get currentSongOrigin => currentSong.origin;
 
   /// Changes current song id and emits change event.
   /// This allows to change the current id visually, separately from the player.
@@ -469,15 +473,14 @@ abstract class ContentControl {
     );
   }
 
-  /// Cheks if current queue is persistent, if yes, adds this queue as origin
-  /// to all its songs. This is a required actions for each addition to the queue. 
+  /// Cheks if current queue is [QueueType.origin], if yes, adds this queue as origin
+  /// to all its songs. This is a required action for each addition to the queue. 
   static void _setOrigins() {
-    // Adding origin to the songs in the current persistent playlist.
-    if (state.queues.type == QueueType.persistent) {
+    if (state.queues.type == QueueType.origin) {
       final songs = state.queues.current.songs;
-      final persistentQueue = state.queues.persistent!;
+      final songOrigin = state.queues.origin!;
       for (final song in songs) {
-        song.origin = persistentQueue;
+        song.origin = songOrigin;
       }
     }
   }
@@ -486,7 +489,7 @@ abstract class ContentControl {
   /// else will move it to be next. After that it can be duplicated to be played more.
   ///
   /// Same as for [addToQueue]:
-  /// * if current queue is [QueueType.persistent] and the added [song] is present in it, will mark the queue as modified,
+  /// * if current queue is [QueueType.origin] and the added [song] is present in it, will mark the queue as modified,
   /// else will traverse it into [QueueType.arbitrary]. All the other queues will be just marked as modified.
   /// * if current queue is shuffled, it will copy all songs (thus saving the order of shuffled songs), go back to be unshuffled,
   /// and add the [songs] there.
@@ -510,9 +513,9 @@ abstract class ContentControl {
       final song = songs[i].copyWith();
       _handleDuplicate(song);
       currentQueue.insert(state.currentSongIndex + i + 1, song);
-      if (queues._type == QueueType.persistent && contains) {
-        final persistentSongs = queues.persistent!.songs;
-        final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
+      if (queues._type == QueueType.origin && contains) {
+        final originSongs = queues.origin!.songs;
+        final index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
         contains = index >= 0;
       }
     }
@@ -522,7 +525,7 @@ abstract class ContentControl {
   /// Queues the [song] to the last position in queue.
   ///
   /// Same as for [playNext]:
-  /// * if current queue is [QueueType.persistent] and the added [song] is present in it, will mark the queue as modified,
+  /// * if current queue is [QueueType.origin] and the added [song] is present in it, will mark the queue as modified,
   /// else will traverse it into [QueueType.arbitrary]. All the other queues will be just marked as modified.
   /// * if current queue is shuffled, it will copy all songs (thus saving the order of shuffled songs), go back to be unshuffled,
   /// and add the [songs] there.
@@ -537,26 +540,26 @@ abstract class ContentControl {
       song = song.copyWith();
       _handleDuplicate(song);
       state.queues.current.add(song);
-      if (queues._type == QueueType.persistent && contains) {
-        final persistentSongs = queues.persistent!.songs;
-        final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
+      if (queues._type == QueueType.origin && contains) {
+        final originSongs = queues.origin!.songs;
+        final index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
         contains = index >= 0;
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
   }
 
-  /// Queues the persistent [queue] to be played next.
+  /// Queues the song origin to be played next.
   ///
   /// Saves it to [Song.origin] in its items, and so when the item is played,
-  /// this peristent queue will be also shown as playing.
+  /// this song origin will be also shown as playing.
   ///
-  /// If currently some persistent queue is already playing, will first save the current queue to
+  /// If currently some song origin is already playing, will first save the current queue to
   /// [Song.origin] in its items.
   /// 
   /// In difference with [playNext], always traverses the playlist into [QueueType.arbitrary].
-  static void playQueueNext(PersistentQueue queue) {
-    final songs = queue.songs;
+  static void playOriginNext(SongOrigin origin) {
+    final songs = origin.songs;
     assert(songs.isNotEmpty);
     // Save queue order
     _unshuffle();
@@ -567,24 +570,24 @@ abstract class ContentControl {
     for (var song in songs) {
       song = song.copyWith();
       _handleDuplicate(song);
-      song.origin = queue;
+      song.origin = origin;
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
     }
     setQueue(type: QueueType.arbitrary);
   }
 
-  /// Queues the persistent [queue] to the last position in queue.
+  /// Queues the song origin to the last position in queue.
   ///
   /// Saves it to [Song.origin] in its items, and so when the item is played,
-  /// this peristent queue will be also shown as playing.
+  /// this song origin will be also shown as playing.
   ///
-  /// If currently some persistent queue is already playing, will first save the current queue to
+  /// If currently some song origin is already playing, will first save the current queue to
   /// [Song.origin] in its items.
   ///
   /// In difference with [addToQueue], always traverses the playlist into [QueueType.arbitrary].
-  static void addQueueToQueue(PersistentQueue queue) {
-    final songs = queue.songs;
+  static void addOriginToQueue(SongOrigin origin) {
+    final songs = origin.songs;
     assert(songs.isNotEmpty);
     // Save queue order
     _unshuffle();
@@ -592,7 +595,7 @@ abstract class ContentControl {
     for (var song in songs) {
       song = song.copyWith();
       _handleDuplicate(song);
-      song.origin = queue;
+      song.origin = origin;
       state.queues.current.add(song);
     }
     setQueue(type: QueueType.arbitrary);
@@ -608,9 +611,9 @@ abstract class ContentControl {
     _handleDuplicate(song);
     queues.current.insert(index, song);
     bool contains = true;
-    if (queues._type == QueueType.persistent) {
-      final persistentSongs = queues.persistent!.songs;
-      final index = persistentSongs.indexWhere((el) => el.sourceId == song.sourceId);
+    if (queues._type == QueueType.origin) {
+      final originSongs = queues.origin!.songs;
+      final index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
       contains = index >= 0;
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
@@ -701,11 +704,11 @@ abstract class ContentControl {
     );
   }
 
-  /// A shorthand for setting [QueueType.persistent].
-  /// 
+  /// A shorthand for setting [QueueType.origin].
+  ///
   /// By default sets [shuffled] queue.
-  static void setPersistentQueue({
-    required PersistentQueue queue,
+  static void setOriginQueue({
+    required SongOrigin origin,
     required List<Song> songs,
     bool shuffled = false,
   }) {
@@ -714,8 +717,8 @@ abstract class ContentControl {
       shuffledSongs = Queue.shuffleSongs(songs);
     }
     setQueue(
-      type: QueueType.persistent,
-      persistentQueue: queue,
+      type: QueueType.origin,
+      origin: origin,
       modified: false,
       shuffled: shuffled,
       songs: shuffledSongs ?? songs,
@@ -751,13 +754,13 @@ abstract class ContentControl {
   ///
   ///   If both [songs] and [shuffleFrom] is not specified, will shuffle
   ///   from current queue.
-  /// * [persistentQueue] is the persistent queue being set,
-  ///   only applied when [type] is [QueueType.persistent].
-  ///   When [QueueType.persistent] is set and currently it's not persistent, this parameter is required.
+  /// * [origin] is the song origin being set,
+  ///   only applied when [type] is [QueueType.origin].
+  ///   When [QueueType.origin] is set and currently it's not origin, this parameter is required.
   ///   Otherwise it can be omitted and for updating other paramters only.
   /// * [searchQuery] is the search query the playlist was searched by,
   ///   only applied when [type] is [QueueType.searched].
-  ///   Similarly as for [persistentQueue], when [QueueType.searched] is set and currently it's not searched,
+  ///   Similarly as for [origin], when [QueueType.searched] is set and currently it's not searched,
   ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
   /// * [arbitraryQueueOrigin] is the description where the [QueueType.arbitrary] originates from,
   ///   ignored with other types of queues. If none specified, by default instead of description,
@@ -777,7 +780,7 @@ abstract class ContentControl {
     bool? modified,
     List<Song>? songs,
     List<Song>? shuffleFrom,
-    PersistentQueue? persistentQueue,
+    SongOrigin? origin,
     String? searchQuery,
     ArbitraryQueueOrigin? arbitraryQueueOrigin,
     bool save = true,
@@ -796,10 +799,10 @@ abstract class ContentControl {
       "It's invalid to set empty songs queue",
     );
     assert(
-      type != QueueType.persistent ||
-      queues._persistent != null ||
-      persistentQueue != null,
-      "When you set `persistent` queue and currently none set, you must provide the `persistentQueue` paramenter",
+      type != QueueType.origin ||
+      queues._origin != null ||
+      origin != null,
+      "When you set `origin` queue and currently none set, you must provide the `origin` paramenter",
     );
     assert(
       type != QueueType.searched ||
@@ -825,14 +828,14 @@ abstract class ContentControl {
       Prefs.arbitraryQueueOrigin.delete();
     }
 
-    if (type == QueueType.persistent) {
-      if (persistentQueue != null) {
-        queues._persistent = persistentQueue;
-        Prefs.persistentQueueId.set(persistentQueue.id);
+    if (type == QueueType.origin) {
+      if (origin != null) {
+        queues._origin = origin;
+        Prefs.songOriginJson.set(jsonEncode(origin.toSongOriginEntry().toMap()));
       }
     } else {
-      queues._persistent = null;
-      Prefs.persistentQueueId.delete();
+      queues._origin = null;
+      Prefs.songOriginJson.delete();
     }
 
     if (type == QueueType.searched) {
@@ -882,7 +885,7 @@ abstract class ContentControl {
     if (state.idMap.isNotEmpty &&
         !modified &&
         !shuffled &&
-        type != QueueType.persistent &&
+        type != QueueType.origin &&
         type != QueueType.arbitrary) {
       state.idMap.clear();
       state.idMapDirty = false;
@@ -1097,14 +1100,14 @@ abstract class ContentControl {
       song: () {
         final _sort = sort! as SongSort;
         sorts.setValue<Song>(_sort);
-        Prefs.songSortString.set(jsonEncode(sort.toMap()));
+        Prefs.songSortJson.set(jsonEncode(sort.toMap()));
         final comparator = _sort.comparator;
         state.allSongs.songs.sort(comparator);
       },
       album: () {
         final _sort = sort! as AlbumSort;
         sorts.setValue<Album>(_sort);
-        Prefs.albumSortString.set(jsonEncode(_sort.toMap()));
+        Prefs.albumSortJson.set(jsonEncode(_sort.toMap()));
         final comparator = _sort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()
           ..sort((a, b) {
@@ -1114,14 +1117,14 @@ abstract class ContentControl {
       playlist: () {
         final _sort = sort! as PlaylistSort;
         sorts.setValue<Playlist>(_sort);
-        Prefs.playlistSortString.set(jsonEncode(sort.toMap()));
+        Prefs.playlistSortJson.set(jsonEncode(sort.toMap()));
         final comparator = _sort.comparator;
         state.playlists.sort(comparator);
       },
       artist: () {
         final _sort = sort! as ArtistSort;
         sorts.setValue<Artist>(_sort);
-        Prefs.artistSortString.set(jsonEncode(sort.toMap()));
+        Prefs.artistSortJson.set(jsonEncode(sort.toMap()));
         final comparator = _sort.comparator;
         state.artists.sort(comparator);
       },
@@ -1181,22 +1184,23 @@ abstract class ContentControl {
   /// Restores [sorts] from [Prefs].
   static Future<void> _restoreSorts() async {
     state.sorts = ContentMap({
-      Song: SongSort.fromMap(jsonDecode(await Prefs.songSortString.get())),
-      Album: AlbumSort.fromMap(jsonDecode(await Prefs.albumSortString.get())),
-      Playlist: PlaylistSort.fromMap(jsonDecode(await Prefs.playlistSortString.get())),
-      Artist: ArtistSort.fromMap(jsonDecode(await Prefs.artistSortString.get())),
+      Song: SongSort.fromMap(jsonDecode(await Prefs.songSortJson.get())),
+      Album: AlbumSort.fromMap(jsonDecode(await Prefs.albumSortJson.get())),
+      Playlist: PlaylistSort.fromMap(jsonDecode(await Prefs.playlistSortJson.get())),
+      Artist: ArtistSort.fromMap(jsonDecode(await Prefs.artistSortJson.get())),
     });
   }
 
   /// Restores saved queues.
   ///
   /// * If stored queue becomes empty after restoration (songs do not exist anymore), will fall back to not modified [QueueType.all].
-  /// * If saved persistent queue songs are restored successfully, but the playlist itself cannot be found, will fall back to [QueueType.arbitrary].
+  /// * If saved song origin songs are restored successfully, but the playlist itself cannot be found, will fall back to [QueueType.arbitrary].
   /// * In all other cases it will restore as it was.
   static Future<void> _restoreQueue() async {
     final shuffled = await Prefs.queueShuffledBool.get();
     final modified = await Prefs.queueModifiedBool.get();
-    final persistentQueueId = await Prefs.persistentQueueId.get();
+    final String? songOriginString = await Prefs.songOriginJson.get();
+    final Map? songOriginMap = songOriginString == null ? null : jsonDecode(songOriginString);
     final type = EnumToString.fromString(
       QueueType.values,
       await Prefs.queueTypeString.get(),
@@ -1210,13 +1214,10 @@ abstract class ContentControl {
       var song = state.allSongs.byId.get(Song.getSourceId(id));
       if (song != null) {
         song = song.copyWith(id: id);
-        final origin = item['origin_type'];
-        if (origin != null) {
-          if (origin == 'album') {
-            song.origin = state.albums[item['origin_id']];
-          } else {
-            assert(false);
-          }
+        final rawOrigin = item['origin'];
+        if (rawOrigin != null) {
+          final origin = SongOrigin.originFromMap(rawOrigin);
+          song.origin = origin;
         }
         queueSongs.add(song);
       }
@@ -1230,13 +1231,10 @@ abstract class ContentControl {
         var song = state.allSongs.byId.get(Song.getSourceId(id));
         if (song != null) {
           song = song.copyWith(id: id);
-          final origin = item['origin_type'];
-          if (origin != null) {
-            if (origin == 'album') {
-              song.origin = state.albums[item['origin_id']];
-            } else {
-              assert(false);
-            }
+          final rawOrigin = item['origin'];
+          if (rawOrigin != null) {
+            final origin = SongOrigin.originFromMap(rawOrigin);
+            song.origin = origin;
           }
           shuffledSongs.add(song);
         }
@@ -1251,18 +1249,20 @@ abstract class ContentControl {
         modified: false,
         // we must save it, so do not `save: false`
       );
-    } else if (type == QueueType.persistent) {
-      if (persistentQueueId != null &&
-          state.albums[persistentQueueId] != null) {
-        setQueue(
-          type: type,
-          modified: modified,
-          shuffled: shuffled,
-          songs: songs,
-          shuffleFrom: queueSongs,
-          persistentQueue: state.albums[persistentQueueId],
-          save: false,
-        );
+    } else if (type == QueueType.origin) {
+      if (songOriginMap != null) {
+        final origin = SongOrigin.originFromMap(songOriginMap);
+        if (origin != null) {
+          setQueue(
+            type: type,
+            modified: modified,
+            shuffled: shuffled,
+            songs: songs,
+            shuffleFrom: queueSongs,
+            origin: origin,
+            save: false,
+          );
+        }
       } else {
         setQueue(
           type: QueueType.arbitrary,
@@ -1319,9 +1319,9 @@ class ContentUtils {
     return song.sourceId == ContentControl.state.currentSong.sourceId;
   }
 
-  /// Checks whether a [PersistentQueue] is currently playing.
-  static bool persistentQueueIsCurrent(PersistentQueue queue) {
+  /// Checks whether a song origin is currently playing.
+  static bool originIsCurrent(SongOrigin queue) {
     return queue == ContentControl.state.currentSongOrigin ||
-           queue == ContentControl.state.queues.persistent;
+           queue == ContentControl.state.queues.origin;
   }
 }

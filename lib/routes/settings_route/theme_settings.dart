@@ -22,7 +22,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   Color prevPrimaryColor = ThemeControl.theme.colorScheme.primary;
   Color primaryColor = ThemeControl.theme.colorScheme.primary;
   bool get switched => ThemeControl.isLight;
-  bool get canPop => !ThemeControl.themeChaning;
+  bool get canPop => !ThemeControl.themeChaning.valueWrapper!.value;
   late AnimationController controller;
 
   static const List<Color> colors = [

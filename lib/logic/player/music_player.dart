@@ -100,7 +100,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
         albums: () {
           final album = ContentControl.state.albums[parent.id!];
           if (album != null) {
-            ContentControl.setPersistentQueue(queue: album, songs: album.songs);
+            ContentControl.setOriginQueue(origin: album, songs: album.songs);
           }
         },
       )();

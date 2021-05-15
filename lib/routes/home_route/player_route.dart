@@ -38,7 +38,7 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   void initState() {
     super.initState();
-    selectionController = ContentSelectionController.forContent<Song>(
+    selectionController = ContentSelectionController.create<Song>(
       this,
       counter: true,
       closeButton: true,
@@ -277,12 +277,14 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
         );
         SearchHistory.instance.add(query);
         return;
-      case QueueType.persistent:
-        final persistenteQueue = ContentControl.state.queues.persistent!;
-        if (persistenteQueue is Album)
-          HomeRouter.instance.goto(HomeRoutes.factory.persistentQueue<Album>(persistenteQueue));
-        else if (persistenteQueue is Playlist)
-          HomeRouter.instance.goto(HomeRoutes.factory.persistentQueue<Playlist>(persistenteQueue));
+      case QueueType.origin:
+        final origin = ContentControl.state.queues.origin!;
+        if (origin is Album)
+          HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(origin));
+        else if (origin is Playlist)
+          HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(origin));
+        else if (origin is Artist)
+          HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(origin));
         else
           throw StateError('');
         return;
@@ -293,6 +295,14 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
       case QueueType.arbitrary:
         return;
     }
+  }
+
+  double _getBorderRadius(SongOrigin origin) {
+    if (origin is PersistentQueue)
+      return 8.0;
+    else if (origin is Artist)
+      return kArtistTileArtSize;
+    throw UnimplementedError();
   }
 
   List<TextSpan> _getQueueType(AppLocalizations l10n) {
@@ -323,21 +333,30 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
           ),
         ));
         break;
-      case QueueType.persistent:
-        final persistenteQueue = ContentControl.state.queues.persistent!;
-        if (persistenteQueue is Album) {
+      case QueueType.origin:
+        final origin = ContentControl.state.queues.origin!;
+        if (origin is Album) {
           text.add(TextSpan(text: '${l10n.album} '));
           text.add(TextSpan(
-            text: persistenteQueue.nameDotYear,
+            text: origin.nameDotYear,
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,
             ),
           ));
-        } else if (persistenteQueue is Playlist) {
+        } else if (origin is Playlist) {
           text.add(TextSpan(text: '${l10n.playlist} '));
           text.add(TextSpan(
-            text: persistenteQueue.name,
+            text: origin.name,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: ThemeControl.theme.colorScheme.onBackground,
+            ),
+          ));
+        } else if (origin is Artist) {
+          text.add(TextSpan(text: '${l10n.artist} '));
+          text.add(TextSpan(
+            text: origin.artist,
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,
@@ -373,8 +392,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
   Widget build(BuildContext context) {
     final currentSongIndex = ContentControl.state.currentSongIndex;
     final l10n = getl10n(context);
-    final persistentQueue = ContentControl.state.queues.persistent;
-    final horizontalPadding = persistentQueue is Album ? 12.0 : 20.0;
+    final origin = ContentControl.state.queues.origin;
+    final horizontalPadding = origin is Album ? 12.0 : 20.0;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
@@ -399,12 +418,12 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
             onTap: _handleTitleTap,
             child: Row(
               children: [
-                if (persistentQueue != null)
+                if (origin != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
                     child: ContentArt(
-                      source: ContentArtSource.persistentQueue(persistentQueue),
-                      borderRadius: 8,
+                      source: ContentArtSource.origin(origin),
+                      borderRadius: _getBorderRadius(origin),
                       size: kSongTileArtSize - 8.0,
                     ),
                   ),
@@ -455,7 +474,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
                       Row(
                         children: [
                           Flexible(child: _buildTitleText(_getQueueType(l10n))),
-                          if (persistentQueue != null || type == QueueType.searched)
+                          if (origin != null || type == QueueType.searched)
                             Icon(
                               Icons.chevron_right_rounded,
                               size: 18.0,
@@ -490,7 +509,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
                     top: 4.0,
                     bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
                   ),
-                  songTileVariant: ContentControl.state.queues.persistent is Album
+                  songTileVariant: ContentControl.state.queues.origin is Album
                     ? SongTileVariant.number
                     : SongTileVariant.albumArt,
                   songClickBehavior: SongClickBehavior.playPause,

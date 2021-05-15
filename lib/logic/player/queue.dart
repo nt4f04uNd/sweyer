@@ -24,9 +24,8 @@ enum QueueType {
   /// Queue of searched tracks.
   searched,
 
-  /// Some persistent queue on user device, has an id.
-  /// See [PersistentQueue].
-  persistent,
+  /// Queue that has same [SongOrigin].
+  origin,
 
   /// Some arbitrary queue. Сannot have modified state.
   ///

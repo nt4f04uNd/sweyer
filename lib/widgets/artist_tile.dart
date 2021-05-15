@@ -53,8 +53,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   /// Whether this queue is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
   /// 
-  /// If not specified, by default uses [ContentUtils.persistentQueueIsCurrent].
-  /// TODO: current
+  /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
 
@@ -81,8 +80,7 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
   bool get current {
     if (widget.current != null)
       return widget.current!;
-    // TODO: current
-    return false;
+    return ContentUtils.originIsCurrent(widget.artist);
   }
 
   Widget _buildTile() {

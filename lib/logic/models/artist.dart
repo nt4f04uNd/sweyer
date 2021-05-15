@@ -3,9 +3,10 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 
-class Artist extends Content {
+class Artist extends SongOrigin {
   @override
   final int id;
   final String artist;
@@ -15,7 +16,11 @@ class Artist extends Content {
   @override
   List<Object> get props => [id];
 
+  @override
+  String get title => artist;
+
   /// Returns songs for this artst.
+  @override
   List<Song> get songs {
     return ContentControl.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
       if (el.artistId == id) {
@@ -24,6 +29,12 @@ class Artist extends Content {
       return prev;
     }).toList();
   }
+
+  @override
+  int get length => numberOfTracks;
+
+  @override
+  bool get playable => true;
 
   /// Returns albums for this artst.
   List<Album> get albums {
@@ -39,7 +50,32 @@ class Artist extends Content {
     required this.numberOfTracks,
   });
 
+  @override
   ArtistCopyWith get copyWith => _ArtistCopyWith(this);
+
+  @override
+  MediaItem toMediaItem() {
+    return MediaItem(
+      id: id.toString(),
+      album: null,
+      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      artUri: null,
+      title: title,
+      artist: null,
+      genre: null,
+      rating: null,
+      extras: null,
+      playable: false,
+    );
+  }
+
+  @override
+  SongOriginEntry toSongOriginEntry() {
+    return SongOriginEntry(
+      type: SongOriginType.artist,
+      id: id,
+    );
+  }
 
   factory Artist.fromMap(Map map) {
     return Artist(
@@ -50,6 +86,7 @@ class Artist extends Content {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() => {
     'id': id,
     'artist': artist,

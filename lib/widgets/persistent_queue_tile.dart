@@ -71,7 +71,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   /// Whether this queue is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
   /// 
-  /// If not specified, by default uses [ContentUtils.persistentQueueIsCurrent].
+  /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
 
@@ -118,7 +118,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   bool get current {
     if (widget.current != null)
       return widget.current!;
-    return ContentUtils.persistentQueueIsCurrent(widget.queue);
+    return ContentUtils.originIsCurrent(widget.queue);
   }
 
   Widget _buildInfo() {

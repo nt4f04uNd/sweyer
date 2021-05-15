@@ -16,21 +16,12 @@ import 'package:sweyer/sweyer.dart';
 /// 
 /// See also:
 /// * [QueueType] which is a type of currently playing queue.
-abstract class PersistentQueue extends Content {
+abstract class PersistentQueue extends SongOrigin {
   const PersistentQueue({ required this.id });
 
   /// A unique ID of this queue.
   @override
   final int id;
-
-  /// Title of this queue.
-  String get title;
-
-  /// List of songs.
-  List<Song> get songs;
-
-  /// Length of the queue.
-  int get length;
 
   @override
   List<Object> get props => [id];

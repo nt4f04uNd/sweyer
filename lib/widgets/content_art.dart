@@ -13,6 +13,7 @@ import 'package:sweyer/sweyer.dart';
 const double kSongTileArtSize = 48.0;
 const double kPersistentQueueTileArtSize = 64.0;
 const double kArtistTileArtSize = 64.0;
+// const double kArtBorderRadius = 10.0;
 const double kArtBorderRadius = 10.0;
 
 /// `3` is the [CircularPercentIndicator.lineWidth] doubled and additional 3 spacing
@@ -51,6 +52,9 @@ class ContentArtSource {
 
   const ContentArtSource.artist(Artist artist)
     : _content = artist;
+
+  const ContentArtSource.origin(SongOrigin origin)
+    : _content = origin;
 
   final Content _content;
 }

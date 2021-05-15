@@ -72,7 +72,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
       reverseCurve: Curves.easeIn,
     );
     scrollController.addListener(_handleScroll);
-    selectionController = ContentSelectionController.forContent(
+    selectionController = ContentSelectionController.create(
       AppRouter.instance.navigatorKey.currentState!,
       closeButton: true,
       counter: true,
@@ -214,11 +214,9 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                 Expanded(
                   child: ShuffleQueueButton(
                     onPressed: () {
-                      // todo: this
-                      ContentControl.setQueue(
-                        // queue: widget.queue,
-                        type: QueueType.arbitrary,
-                        shuffleFrom: songs,
+                      ContentControl.setOriginQueue(
+                        origin: widget.artist,
+                        songs: songs,
                         shuffled: true,
                       );
                       MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
@@ -231,13 +229,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                 Expanded(
                   child: PlayQueueButton(
                     onPressed: () {
-                      // todo: this
-                      ContentControl.setQueue(
-                        // queue: widget.queue,
-                        type: QueueType.arbitrary,
-                        shuffled: false,
-                        songs: songs,
-                      );
+                      ContentControl.setOriginQueue(origin: widget.artist, songs: songs);
                       MusicPlayer.instance.setSong(songs[0]);
                       MusicPlayer.instance.play();
                       playerRouteController.open();
@@ -302,10 +294,8 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                                 ));
                               },
                               contentTileTapHandler: <T extends Content>(Type t) {
-                                ContentControl.setQueue(
-                                  // todo: this
-                                  type: QueueType.arbitrary,
-                                  // queue: widget.queue,
+                                ContentControl.setOriginQueue(
+                                  origin: widget.artist,
                                   songs: songs,
                                 );
                               },

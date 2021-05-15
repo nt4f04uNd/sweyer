@@ -48,9 +48,9 @@ class Song extends Content {
   /// Available starting from Android R, in lower is `null`.
   final int? generationModified;
 
-  /// The [PersistentQueue] this song comes from.
+  /// The origin this song comes from.
   /// This will help determining where the song comes from to show [CurrentIndicator]s.
-  PersistentQueue? origin;
+  SongOrigin? origin;
 
   @override
   List<Object?> get props => [id];
@@ -94,8 +94,10 @@ class Song extends Content {
     this.origin,
   });
 
+  @override
   SongCopyWith get copyWith => _SongCopyWith(this);
 
+  @override
   MediaItem toMediaItem() {
     return MediaItem(
       id: sourceId.toString(),
@@ -136,6 +138,7 @@ class Song extends Content {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() => <String, dynamic>{
       'id': id,
       'album': album,
@@ -234,7 +237,7 @@ class _SongCopyWith extends SongCopyWith {
       isFavorite: isFavorite == _undefined ? value.isFavorite : isFavorite as bool?,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
       generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
-      origin: origin == _undefined ? value.origin : origin as PersistentQueue?,
+      origin: origin == _undefined ? value.origin : origin as SongOrigin?,
     );
   }
 }
