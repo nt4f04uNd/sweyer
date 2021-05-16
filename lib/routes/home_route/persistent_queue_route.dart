@@ -55,7 +55,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     );
     scrollController.addListener(_handleScroll);
     selectionController = ContentSelectionController.create<Song>(
-      AppRouter.instance.navigatorKey.currentState!,
+      vsync: AppRouter.instance.navigatorKey.currentState!,
+      context: context,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,

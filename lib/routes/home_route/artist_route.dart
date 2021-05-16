@@ -73,7 +73,8 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
     );
     scrollController.addListener(_handleScroll);
     selectionController = ContentSelectionController.create(
-      AppRouter.instance.navigatorKey.currentState!,
+      vsync: AppRouter.instance.navigatorKey.currentState!,
+      context: context,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,

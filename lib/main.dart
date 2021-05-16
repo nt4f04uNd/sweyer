@@ -142,7 +142,10 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _drawerController = SlidableController(vsync: this);
+    _drawerController = SlidableController(
+      vsync: this,
+      springDescription: DismissibleRoute.springDescription,
+    );
     _playerRouteController = SlidableController(
       vsync: this,
       springDescription: playerRouteSpringDescription,

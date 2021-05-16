@@ -78,11 +78,12 @@ class _Results {
 }
 
 class _SearchStateDelegate {
-  _SearchStateDelegate(this.searchDelegate)
+  _SearchStateDelegate(BuildContext context, this.searchDelegate)
     : scrollController = ScrollController(),
     singleListScrollController = ScrollController(),
     selectionController = ContentSelectionController.create(
-      AppRouter.instance.navigatorKey.currentState!,
+      vsync: AppRouter.instance.navigatorKey.currentState!,
+      context: context,
       closeButton: true,
       ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
     )
@@ -365,7 +366,7 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
   @override
   void initState() {
     super.initState();
-    stateDelegate = _SearchStateDelegate(widget.delegate);
+    stateDelegate = _SearchStateDelegate(context, widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -471,9 +472,7 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
     return NFBackButton(
       onPressed: () {
         final selectionController = stateDelegate.selectionController;
-        if (selectionController.inSelection) {
-          selectionController.close();
-        }
+        selectionController.close();
         close(context, null);
       },
     );

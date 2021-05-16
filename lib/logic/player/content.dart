@@ -253,8 +253,8 @@ class _ContentState {
     return index;
   }
 
-  /// Currently playing peristent queue when song is added via [playOriginNext]
-  /// or [addOriginToQueue].
+  /// Currently playing peristent queue when song is added via [ContentControl.playOriginNext]
+  /// or [ContentControl.addOriginToQueue].
   ///
   /// Used for showing [CurrentIndicator] for [SongOrigin]s.
   ///

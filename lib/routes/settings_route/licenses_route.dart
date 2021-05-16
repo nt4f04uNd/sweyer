@@ -117,7 +117,7 @@ class _PackagesView extends StatefulWidget {
   const _PackagesView({
     Key? key,
     required this.isLateral,
-    required this.selectedId,n
+    required this.selectedId,
   }) : super(key: key);
 
   final bool isLateral;

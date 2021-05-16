@@ -59,6 +59,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
       controller.reset();
     }
 
+    final screenWidth = MediaQuery.of(context).size.width;
+
     /// I don't bother myself applying drawer screen ui theme after
     /// the next route pops, like I do for [ShowFunctions.showBottomSheet] for example
     /// because I close the drawer after route push, so there's no way it will be open at this moment.
@@ -81,9 +83,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         controller: controller,
         barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
         hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
-        child: SizedBox(
-          height: screenHeight,
-          width: screenWidth,
+        child: SizedBox.expand(
           child: Container(
             width: 304.0,
             alignment: Alignment.centerLeft,

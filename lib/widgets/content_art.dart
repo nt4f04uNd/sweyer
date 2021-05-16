@@ -198,13 +198,13 @@ class ContentArt extends StatefulWidget {
 /// and [ContentChannel.fixAlbumArt].
 class _ArtLoader {
   _ArtLoader({
-    required this.context,
+    required this.state,
     required this.song,
     required this.size,
     required this.onUpdate,
   });
 
-  final BuildContext context;
+  final State state;
   final Song? song;
   final double? size;
   final VoidCallback onUpdate;
@@ -222,23 +222,31 @@ class _ArtLoader {
   void load() {
     if (song == null) {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        if (!state.mounted)
+          return;
         loaded = true;
         onUpdate();
       });
     } else if (_useBytes) {
       final uri = song!.contentUri;
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+        if (!state.mounted)
+          return;
         _signal = CancellationSignal();
         _bytes = await ContentChannel.loadAlbumArt(
           uri: uri,
-          size: Size.square(size!) * MediaQuery.of(context).devicePixelRatio,
+          size: Size.square(size!) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
         );
+        if (!state.mounted)
+          return;
         loaded = true;
         onUpdate();
       });
     } else {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        if (!state.mounted)
+          return;
         final art = song!.albumArt;
         if (art != null) {
           _file = File(art);
@@ -297,6 +305,15 @@ class _ContentArtState extends State<ContentArt> {
   bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
 
+  /// Min duration for [loadAnimationDuration].
+  static Duration get _minDuration => _useBytes
+    ? const Duration(milliseconds: 150)
+    : Duration.zero;
+
+  Duration get loadAnimationDuration => widget.loadAnimationDuration < _minDuration
+    ? _minDuration
+    : widget.loadAnimationDuration;
+
   @override
   void initState() { 
     super.initState();
@@ -308,7 +325,7 @@ class _ContentArtState extends State<ContentArt> {
     if (content == null || content is Song) {
       _loaders = [
         _ArtLoader(
-          context: context,
+          state: this,
           song: content as Song?,
           size: widget.size,
           onUpdate: _onUpdate,
@@ -317,7 +334,7 @@ class _ContentArtState extends State<ContentArt> {
     } else if (content is Album) {
       _loaders = [
         _ArtLoader(
-          context: context,
+          state: this,
           song: content.firstSong,
           size: widget.size,
           onUpdate: _onUpdate,
@@ -330,7 +347,7 @@ class _ContentArtState extends State<ContentArt> {
         case 0:
           _loaders = [
             _ArtLoader(
-              context: context,
+              state: this,
               song: null,
               size: widget.size,
               onUpdate: _onUpdate,
@@ -339,7 +356,7 @@ class _ContentArtState extends State<ContentArt> {
           break;
         case 1:
           final loader = _ArtLoader(
-            context: context,
+            state: this,
             song: songs.first,
             size: size,
             onUpdate: _onUpdate,
@@ -348,7 +365,7 @@ class _ContentArtState extends State<ContentArt> {
           break;
         case 2: 
           _loaders = List.generate(2, (index) => _ArtLoader(
-            context: context,
+            state: this,
             song: songs[index],
             size: size,
             onUpdate: _onUpdate,
@@ -357,7 +374,7 @@ class _ContentArtState extends State<ContentArt> {
           break;
         case 3:
           _loaders = List.generate(3, (index) => _ArtLoader(
-            context: context,
+            state: this,
             song: songs[index],
             size: size,
             onUpdate: _onUpdate,
@@ -366,7 +383,7 @@ class _ContentArtState extends State<ContentArt> {
           break;
         case 4:
           _loaders = List.generate(4, (index) => _ArtLoader(
-            context: context,
+            state: this,
             song: songs[index],
             size: size,
             onUpdate: _onUpdate,
@@ -376,7 +393,7 @@ class _ContentArtState extends State<ContentArt> {
     } else if (content is Artist) {
       _loaders = [
         _ArtLoader(
-          context: context,
+          state: this,
           song: null,
           size: widget.size,
           onUpdate: _onUpdate,
@@ -551,16 +568,19 @@ class _ContentArtState extends State<ContentArt> {
       height: widget.size,
       child: Stack(
         children: [
-          Center(
-            child: AnimatedSwitcher(
-              duration: widget.loadAnimationDuration,
-              switchInCurve: Curves.easeOut,
-              child: Container(
-                key: ValueKey(loaded),
-                child: child
+          if (loadAnimationDuration == Duration.zero)
+            Center(child: child)
+          else
+            Center(
+              child: AnimatedSwitcher(
+                duration: loadAnimationDuration,
+                switchInCurve: Curves.easeOut,
+                child: Container(
+                  key: ValueKey(loaded),
+                  child: child
+                ),
               ),
             ),
-          ),
           if (currentIndicator != null)
             Center(child: currentIndicator),
         ],

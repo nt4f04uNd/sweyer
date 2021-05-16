@@ -39,7 +39,8 @@ class _PlayerRouteState extends State<PlayerRoute>
   void initState() {
     super.initState();
     selectionController = ContentSelectionController.create<Song>(
-      this,
+      vsync: this,
+      context: context,
       counter: true,
       closeButton: true,
     )
@@ -117,6 +118,7 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   Widget build(BuildContext context) {
     final backgroundColor = ThemeControl.theme.colorScheme.background;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Slidable(
       controller: controller,
       start: 1.0 - kSongTileHeight / screenHeight,
@@ -237,6 +239,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
     final delta = (extent - pixels).abs();
+    final screenHeight = MediaQuery.of(context).size.height;
     if (delta >= screenHeight) {
       final directionForward = extent > pixels;
       if (directionForward) {
@@ -286,7 +289,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
         else if (origin is Artist)
           HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(origin));
         else
-          throw StateError('');
+          throw UnimplementedError;
         return;
       case QueueType.allSongs:
       case QueueType.allAlbums:
@@ -363,7 +366,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
             ),
           ));
         } else {
-          throw StateError('');
+          throw UnimplementedError();
         }
         break;
       case QueueType.arbitrary:
@@ -388,10 +391,45 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
     );
   }
 
+  AnimatedCrossFade _crossFade(bool showFirst, Widget firstChild, Widget secondChild) {
+    return AnimatedCrossFade(
+      crossFadeState: showFirst
+        ? CrossFadeState.showFirst
+        : CrossFadeState.showSecond,
+      duration: const Duration(milliseconds: 400),
+      layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
+        // TODO: remove `layoutBuilder` build when https://github.com/flutter/flutter/issues/82614 is resolved
+        return Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            Positioned(
+              key: bottomChildKey,
+              top: 0.0,
+              left: 0.0,
+              bottom: 0.0,
+              child: bottomChild,
+            ),
+            Positioned(
+              key: topChildKey,
+              child: topChild,
+            ),
+          ],
+        );
+      },
+      firstCurve: Curves.easeOutCubic,
+      secondCurve: Curves.easeOutCubic,
+      sizeCurve: Curves.easeOutCubic,
+      alignment: Alignment.centerLeft,
+      firstChild: firstChild,
+      secondChild: secondChild,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentSongIndex = ContentControl.state.currentSongIndex;
     final l10n = getl10n(context);
+    final theme = ThemeControl.theme;
     final origin = ContentControl.state.queues.origin;
     final horizontalPadding = origin is Album ? 12.0 : 20.0;
     final topScreenPadding = MediaQuery.of(context).padding.top;
@@ -402,7 +440,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
     );
     final appBar = Material(
       elevation: 2.0,
-      color: ThemeControl.theme.appBarTheme.color,
+      color: theme.appBarTheme.color,
       child: Container(
         height: appBarHeight,
         margin: EdgeInsets.only(top: topScreenPadding),
@@ -436,38 +474,32 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
                         children: [
                           Text(
                             l10n.upNext,
-                            style: ThemeControl.theme.textTheme.headline6!.copyWith(
+                            style: theme.textTheme.headline6!.copyWith(
                               fontSize: 24,
                               height: 1.2,
                             ),
                           ),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            switchInCurve: Curves.easeOut,
-                            switchOutCurve: Curves.easeInCubic,
-                            child: !ContentControl.state.queues.modified
-                                ? const SizedBox.shrink()
-                                : const Padding(
-                                    padding: EdgeInsets.only(left: 5.0),
-                                    child: Icon(
-                                      Icons.edit_rounded,
-                                      size: 18.0,
-                                    ),
-                                  ),
+                          _crossFade(
+                            !ContentControl.state.queues.modified,
+                            const SizedBox(height: 18.0),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 5.0),
+                              child: Icon(
+                                Icons.edit_rounded,
+                                size: 18.0,
+                              ),
+                            )
                           ),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            switchInCurve: Curves.easeOut,
-                            switchOutCurve: Curves.easeInCubic,
-                            child: !ContentControl.state.queues.shuffled
-                                ? const SizedBox.shrink()
-                                : const Padding(
-                                    padding: EdgeInsets.only(left: 2.0),
-                                    child: Icon(
-                                      Icons.shuffle_rounded,
-                                      size: 20.0,
-                                    ),
-                                  ),
+                          _crossFade(
+                            !ContentControl.state.queues.shuffled,
+                            const SizedBox(height: 20.0),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 2.0),
+                              child: Icon(
+                                Icons.shuffle_rounded,
+                                size: 20.0,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -478,7 +510,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
                             Icon(
                               Icons.chevron_right_rounded,
                               size: 18.0,
-                              color: ThemeControl.theme.textTheme.subtitle2!.color,
+                              color: theme.textTheme.subtitle2!.color,
                             ),
                         ],
                       ),
@@ -541,9 +573,10 @@ class _MainTab extends StatefulWidget {
 class _MainTabState extends State<_MainTab> {
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeControl.theme;
     final animation = ColorTween(
-      begin: ThemeControl.theme.colorScheme.secondary,
-      end: ThemeControl.theme.colorScheme.background,
+      begin: theme.colorScheme.secondary,
+      end: theme.colorScheme.background,
     ).animate(playerRouteController);
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
@@ -715,25 +748,100 @@ class _TrackShowcase extends StatefulWidget {
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }
 
-class _TrackShowcaseState extends State<_TrackShowcase> {
+class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderStateMixin {
   late StreamSubscription<Song> _songChangeSubscription;
+  late AnimationController controller;
+  late AnimationController fadeController;
+  Widget? prevArt;
+
+  static const defaultDuration = Duration(milliseconds: 200);
+
+  /// When `true`, should use fade animation instaed of scale.
+  late bool useFade;
 
   @override
   void initState() {
     super.initState();
+    controller = AnimationController( 
+      vsync: this,
+      duration: defaultDuration,
+    );
+    fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    controller.addStatusListener(_handleStatus);
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
+      if (useFade) {
+        fadeController.reset();
+        fadeController.forward();
+      } else {
+        controller.forward();
+      }
       setState(() {/* update track in ui */});
     });
+    playerRouteController.addStatusListener(_handlePlayerRouteStatus);
+    _updateUseFade();
+  }
+
+  void _handleStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed)
+      controller.reverse();
+  }
+
+  void _handlePlayerRouteStatus(AnimationStatus status) {
+    _updateUseFade();
+  }
+
+  void _updateUseFade() {
+    useFade = playerRouteController.value == 0.0;
   }
 
   @override
   void dispose() {
+    controller.dispose();
+    fadeController.dispose();
+    playerRouteController.removeStatusListener(_handlePlayerRouteStatus);
     _songChangeSubscription.cancel();
     super.dispose();
   }
 
+  Widget _fade(Widget child) {
+    final fadeAnimation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeIn),
+      parent: fadeController,
+    ));
+    final scaleAnimation = Tween(
+      begin: 1.06,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
+      reverseCurve:const Interval(0.5, 1.0, curve: Curves.easeInCubic),
+      parent: fadeController,
+    ));
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: ScaleTransition(
+        scale: scaleAnimation,
+        child: child,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final animation = Tween(
+      begin: 1.0,
+      end: 0.9,
+    ).animate(CurvedAnimation(
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+      parent: controller,
+    ));
     final currentSong = ContentControl.state.currentSong;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -741,7 +849,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: NFMarquee(
-            key: ValueKey(ContentControl.state.currentSong.id),
+            key: ValueKey(currentSong),
             fontWeight: FontWeight.w900,
             text: currentSong.title,
             fontSize: 20.0,
@@ -763,64 +871,51 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
             right: 60.0,
             top: 10.0,
           ),
+          // child: LayoutBuilder(
+          //   builder: (context, constraints) => AnimationStatusBuilder(
+          //     animation: playerRouteController,
+          //     builder: (context, child) => AnimatedSwitcher(
+          //       duration: animateLonger
+          //         ? const Duration(milliseconds: 420)
+          //         : const Duration(milliseconds: 300),
+          //         // : const Duration(milliseconds: 200),
+          //       transitionBuilder: transitionBuilder,
+          //       child: ContentArt.playerRoute(
+          //         key: key,
+          //         size: constraints.maxWidth,
+          //         source: ContentArtSource.song(currentSong),
+          //       ),
+          //     ),
+          //     // child: ,
+          //   ),
           child: LayoutBuilder(
-            builder: (context, constraints) => AnimatedSwitcher(
-              duration: const Duration(milliseconds: 420),
-              transitionBuilder: (child, animation) {
-
-                // TODO: play more with this
-                final Animation<double> scaleAnimation;
-                final Animation<double> fadeAnimation;
-                // final fadeAnimation = ConstantTween(1.0).animate(animation);
-                if (ValueKey(currentSong) == child.key) {
-                  scaleAnimation = Tween(
-                    begin: 1.2,
-                    end: 1.0,
-                  ).animate(CurvedAnimation(
-                    curve: Curves.easeOutCubic,
-                    reverseCurve: Curves.easeInCubic,
-                    parent: animation,
-                  ));
-                  fadeAnimation = fadeAnimation = Tween(
-                    begin: 0.0,
-                    end: 1.0,
-                  ).animate(CurvedAnimation(
-                    curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-                    reverseCurve:const Interval(0.4, 1.0, curve: Curves.easeIn),
-                    parent: animation,
-                  ));
-                } else {
-                  fadeAnimation = Tween(
-                    begin: 0.0,
-                    end: 1.0,
-                  ).animate(CurvedAnimation(
-                    curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
-                    reverseCurve: const Interval(0.6, 1.0, curve: Curves.easeIn),
-                    parent: animation,
-                  ));
-                  scaleAnimation = Tween(
-                    begin: 0.84,
-                    end: 1.0,
-                  ).animate(CurvedAnimation(
-                    curve: Curves.easeOut,
-                    reverseCurve: Curves.easeIn,
-                    parent: animation,
-                  ));
+            builder: (context, constraints) => AnimatedBuilder(
+              animation: controller,
+              builder: (context, child) {
+                final newArt = ContentArt.playerRoute(
+                  key: ValueKey(currentSong),
+                  size: constraints.maxWidth,
+                  loadAnimationDuration: Duration.zero,
+                  source: ContentArtSource.song(currentSong),
+                );
+                if (prevArt == null ||
+                    controller.status == AnimationStatus.reverse || controller.status == AnimationStatus.dismissed ||
+                    useFade) {
+                  prevArt = newArt;
                 }
-
-                return FadeTransition(
-                  opacity: fadeAnimation,
-                  child: ScaleTransition(
-                    scale: scaleAnimation,
-                    child: child,
-                  ),
+                return Stack(
+                  children: [
+                    ScaleTransition(
+                      scale: animation,
+                      child: Opacity(opacity: useFade ? 0.0 : 1.0, child: newArt),
+                    ),
+                    ScaleTransition(
+                      scale: animation,
+                      child: _fade(prevArt!),
+                    ),
+                  ],
                 );
               },
-              child: ContentArt.playerRoute(
-                key: ValueKey(currentSong),
-                size: constraints.maxWidth,
-                source: ContentArtSource.song(currentSong),
-              ),
             ),
           ),
         ),
@@ -828,3 +923,92 @@ class _TrackShowcaseState extends State<_TrackShowcase> {
     );
   }
 }
+
+
+
+//  // TODO: report AnimatedSwitcher transitionBuilder weird behavior
+//   Widget Function(Widget child, Animation<double> animation) get transitionBuilder => (Widget child, Animation<double> animation) {
+//     final Animation<double> scaleAnimation;
+//     final Animation<double> fadeAnimation;
+//     CurvedAnimation? fadeBase;
+//     CurvedAnimation? scaleBase;
+
+//     final current = key == child.key;
+
+//     if (current || !current && !animateLonger) {
+//       fadeBase = CurvedAnimation(
+//         curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+//         reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeIn),
+//         parent: animation,
+//       );
+//       scaleBase = CurvedAnimation(
+//         curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
+//         reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeInCubic),
+//         parent: animation,
+//       );
+//     }
+
+//     final fadeTween = Tween(
+//       begin: 0.0,
+//       end: 1.0,
+//     );
+
+//     if (current) {
+//       // fadeAnimation = fadeTween.animate(fadeBase!);
+//       // scaleAnimation = Tween(
+//       //   begin: 1.06,
+//       //   end: 1.0,
+//       // ).animate(scaleBase!);
+//       fadeAnimation = TweenSequence<double>([
+//         TweenSequenceItem(tween: ConstantTween(0), weight: 1),
+//         TweenSequenceItem(tween: ConstantTween(1), weight: 1),
+//       ]).animate(CurvedAnimation(
+//         curve: Curves.easeOutCubic,
+//         reverseCurve: Curves.easeOutCubic,
+//         parent: animation,
+//       ));
+//       scaleAnimation = Tween(
+//         begin: 0.9,
+//         end: 1.0,
+//       ).animate(scaleBase!);
+//     } else {
+//       final scaleTween = Tween(
+//         begin: 0.97,
+//         end: 1.0,
+//       );
+//       if (!animateLonger) {
+//         // fadeAnimation = fadeTween.animate(fadeBase!);
+//         // scaleAnimation = scaleTween.animate(scaleBase!);
+//         fadeAnimation = fadeAnimation = TweenSequence<double>([
+//         TweenSequenceItem(tween: ConstantTween(0), weight: 1),
+//         TweenSequenceItem(tween: ConstantTween(1), weight: 1),
+//       ]).animate(CurvedAnimation(
+//         curve: Curves.easeOutCubic,
+//         reverseCurve: Curves.easeOutCubic,
+//         parent: animation,
+//       ));
+//         scaleAnimation =  Tween(
+//           begin: 0.9,
+//           end: 1.0,
+//         ).animate(scaleBase!);
+//       } else {
+//         final fasterBase = CurvedAnimation(
+//           curve: const Interval(0.8, 1.0, curve: Curves.easeOutCubic),
+//           reverseCurve: const Interval(0.8, 1.0, curve: Curves.easeInCubic),
+//           parent: animation,
+//         );
+//         fadeAnimation = fadeTween.animate(fasterBase);
+//         scaleAnimation = scaleTween.animate(fasterBase);
+//       }
+//     }
+
+//     return 
+//     FadeTransition(
+//       opacity: fadeAnimation,
+//       child: 
+//       ScaleTransition(
+//         scale: scaleAnimation,
+//         child: child,
+//       ),
+//     );
+//   };

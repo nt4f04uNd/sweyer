@@ -28,14 +28,24 @@ mixin SelectionHandler<T extends StatefulWidget> on State<T> {
   /// By default just calls [setState].
   @protected
   void handleSelection() {
-    setState(() {/* tiles on selection */});
+    /// [ContentSelectionController.dispose] delays the controller disposal
+    /// to animate keep closing animation, so it is valid (unless it was
+    /// triggered in unmounted state in some other way).
+    if (mounted) {
+      setState(() {/* tiles on selection */});
+    }
   }
 
   /// Listens to [SelectionController.addStatusListener].
   /// By default just calls [setState].
   @protected
-  void handleSelectionStatus(AnimationStatus _) {
-    setState(() {/* update appbar and tiles on selection status */});
+  void handleSelectionStatus(AnimationStatus status) {
+    /// [ContentSelectionController.dispose] delays the controller disposal
+    /// to animate keep closing animation, so it is valid (unless it was
+    /// triggered in unmounted state in some other way).
+    if (mounted) {
+      setState(() {/* update appbar and tiles on selection status */});
+    }
   }
 }
 
@@ -206,6 +216,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ContentSelectionController._({
     required AnimationController animationController,
     required this.actionsBuilder,
+    required this.context,
     this.ignoreWhen,
     Set<T>? data,
   }) : super(
@@ -215,6 +226,10 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   /// Will build selection controls overlay widget.
   final _ActionsBuilder actionsBuilder;
+
+  /// Needed to listen listen to a [DismissibleRoute], and as soon as it's
+  /// dismissed, the selection will be closed.
+  final BuildContext context;
 
   /// Before entering selection, controller will check this getter, and if it
   /// returns `true`, selection will be cancelled out.
@@ -254,11 +269,12 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// 
   /// If [closeButton] is  `true`, will show a selection close button in the title.
   @factory
-  static ContentSelectionController<SelectionEntry<T>> create<T extends Content>(
-    TickerProvider vsync, {
-    ValueGetter<bool>? ignoreWhen,
+  static ContentSelectionController<SelectionEntry<T>> create<T extends Content>({
+    required TickerProvider vsync,
+    required BuildContext context,
     bool counter = false,
     bool closeButton = false,
+    ValueGetter<bool>? ignoreWhen,
   }) {
     final getActions = contentPick<T, ValueGetter<List<Widget>>>(
       song: () => const [
@@ -283,6 +299,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     );
     return ContentSelectionController<SelectionEntry<T>>._(
       ignoreWhen: ignoreWhen,
+      context: context,
       animationController: AnimationController(
         vsync: vsync,
         duration: kSelectionDuration,
@@ -307,6 +324,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   Color? _lastNavColor;
   OverlayEntry? _overlayEntry;
+  SlidableController? _dismissibleRouteController;
   ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.state.selectionNotifier;
 
   @override
@@ -321,6 +339,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         _notifier.value!.close();
         assert(false, 'There can only be one active controller');
       }
+      _dismissibleRouteController = DismissibleRoute.controllerOf(context);
+      _dismissibleRouteController?.addDragEventListener(_handleDismissibleRouteDrag);
       _overlayEntry = OverlayEntry(
         builder: (context) => _ContentSelectionControllerProvider(
           controller: this,
@@ -355,6 +375,12 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     super.notifyStatusListeners(status);
   }
 
+  void _handleDismissibleRouteDrag(SlidableDragEvent event) {
+    if (event is SlidableDragEnd && event.closing) {
+      close();
+    }
+  }
+
   void _animateNavBack() {
     if (_lastNavColor == null)
       return;
@@ -378,6 +404,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   @override
   void dispose() {
+    _dismissibleRouteController?.removeDragEventListener(_handleDismissibleRouteDrag);
+    _dismissibleRouteController = null;
     if (ContentControl.disposed) {
       _removeOverlay();
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
@@ -388,8 +416,6 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         _notifier.value = null;
         _primaryContentTypeNotifier.dispose();
-        clearListeners();
-        clearStatusListeners();
         if (inSelection)
           await close();
         _removeOverlay();
@@ -434,7 +460,8 @@ class _SelectionControllerCreatorState<T extends Content> extends State<ContentS
   void initState() { 
     super.initState();
     controller = ContentSelectionController.create<T>(
-      AppRouter.instance.navigatorKey.currentState!,
+      vsync: AppRouter.instance.navigatorKey.currentState!,
+      context: context,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
@@ -736,7 +763,6 @@ class _ActionSupportedState extends State<_ActionSupported> with SelectionHandle
       /// has its own animation, and combination of them both doesn't look good.
       shown = widget.shown();
     }
-    print(widget.controller.status == AnimationStatus.dismissed);
     return AnimatedSwitcher(
       key: key,
       duration: kSelectionDuration,

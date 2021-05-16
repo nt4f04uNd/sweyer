@@ -55,15 +55,15 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   void initState() {
     super.initState();
     selectionController = ContentSelectionController.create(
-      this,
+      vsync: this,
+      context: context,
       ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.tabs),
     )
       ..addListener(handleSelection);
     tabController = TabController(
       vsync: this,
       length: 4,
-    )
-      ..addListener(handleSelection);
+    );
   }
 
   @override
@@ -130,6 +130,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   @override
   Widget build(BuildContext context) {
     final theme = ThemeControl.theme;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     final appBar = SelectionAppBar(
       titleSpacing: 0.0,
@@ -490,7 +491,7 @@ class _TabCollapse extends StatelessWidget {
           value = value.clamp(0.0, 1.0);
           return Row(
             children: [
-              ClipRRect(
+              ClipRect(
                 child: Align(
                   alignment: Alignment.centerLeft,
                   heightFactor: 1.0 - value,
@@ -516,7 +517,7 @@ class _TabCollapse extends StatelessWidget {
                   ),
                 ]).transform(value),
               ),
-              ClipRRect(
+              ClipRect(
                 child: Align(
                   alignment: Alignment.centerLeft,
                   widthFactor: value,
