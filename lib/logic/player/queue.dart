@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -34,10 +33,6 @@ enum QueueType {
   /// * after restoring shuffled queue (as the info about the queue it was shuffled from is lost on app restart)
   /// * in any other ways not described yet
   arbitrary,
-}
-
-extension QueueTypeSerialization on QueueType {
-  String get value => EnumToString.convertToString(this);
 }
 
 /// Class, representing a queue in application

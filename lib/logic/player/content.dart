@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -27,19 +26,6 @@ enum QuickAction {
 }
 
 extension QuickActionSerialization on QuickAction {
-  String get value => EnumToString.convertToString(this);
-} 
-
-/// TODO:  currently this is unused.
-/// 
-/// The description where the [QueueType.arbitrary] originates from.
-/// 
-/// Can be Cconverted to human readable text with [AppLocalizations.arbitraryQueueOrigin].
-enum ArbitraryQueueOrigin {
-  ___stub___,
-}
-
-extension ArbitraryQueueOriginSerialization on ArbitraryQueueOrigin {
   String get value => EnumToString.convertToString(this);
 }
 
@@ -177,15 +163,6 @@ class _QueuePool {
   String? get searchQuery => _searchQuery;
   String? _searchQuery;
 
-  /// A description where the [QueueType.arbitrary] originates from.
-  ///
-  /// May be `null`, then by default instead of description, in the interface queue should be just
-  /// marked as [AppLocalizations.arbitraryQueue].
-  ///
-  /// If [type] is not [QueueType.arbitrary], will return `null`.
-  ArbitraryQueueOrigin? get arbitraryQueueOrigin => _arbitraryQueueOrigin;
-  ArbitraryQueueOrigin? _arbitraryQueueOrigin;
-
   /// Whether the current queue is modified.
   ///
   /// Applied in certain conditions when user adds, removes
@@ -266,7 +243,7 @@ class _ContentState {
   ///
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
-    Prefs.songIdInt.set(song.id);
+    Prefs.songId.set(song.id);
     // Song id saved to prefs in the native play method.
     emitSongChange(song);
   }
@@ -361,7 +338,7 @@ abstract class ContentControl {
   /// Sets dev mode.
   static void setDevMode(bool value) {
     devMode.value = value;
-    Prefs.devModeBool.set(value);
+    Prefs.devMode.set(value);
   }
 
   /// The main data app initialization function, inits all queues.
@@ -372,7 +349,7 @@ abstract class ContentControl {
     }
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     _sdkInt = androidInfo.version.sdkInt;
-    _devMode = ValueNotifier(await Prefs.devModeBool.get());
+    _devMode = ValueNotifier(Prefs.devMode.get());
     if (Permissions.granted) {
       // TODO: prevent initalizing if already initizlied
       _initializeCompleter = Completer();
@@ -711,10 +688,10 @@ abstract class ContentControl {
     required SongOrigin origin,
     required List<Song> songs,
     bool shuffled = false,
+    List<Song>? shuffledSongs,
   }) {
-    List<Song>? shuffledSongs;
     if (shuffled) {
-      shuffledSongs = Queue.shuffleSongs(songs);
+      shuffledSongs ??= Queue.shuffleSongs(songs);
     }
     setQueue(
       type: QueueType.origin,
@@ -754,21 +731,13 @@ abstract class ContentControl {
   ///
   ///   If both [songs] and [shuffleFrom] is not specified, will shuffle
   ///   from current queue.
-  /// * [origin] is the song origin being set,
-  ///   only applied when [type] is [QueueType.origin].
+  /// * [origin] is the song origin being set, only applied when [type] is [QueueType.origin].
   ///   When [QueueType.origin] is set and currently it's not origin, this parameter is required.
   ///   Otherwise it can be omitted and for updating other paramters only.
   /// * [searchQuery] is the search query the playlist was searched by,
   ///   only applied when [type] is [QueueType.searched].
   ///   Similarly as for [origin], when [QueueType.searched] is set and currently it's not searched,
   ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
-  /// * [arbitraryQueueOrigin] is the description where the [QueueType.arbitrary] originates from,
-  ///   ignored with other types of queues. If none specified, by default instead of description,
-  ///   queue is just marked as [AppLocalizations.arbitraryQueue].
-  ///   It always must be localized, so [AppLocalizations] getter must be returned from this function.
-  /// 
-  ///   Because this parameter can be null with [QueueType.arbitrary], to reset to back to `null`
-  ///   after it's set, you need to pass [type] explicitly.
   /// * [emitChangeEvent] is whether to emit a song list change event
   /// * [save] parameter can be used to disable redundant writing to JSONs when,
   ///   for example, when we restore the queue from this exact json.
@@ -782,7 +751,6 @@ abstract class ContentControl {
     List<Song>? shuffleFrom,
     SongOrigin? origin,
     String? searchQuery,
-    ArbitraryQueueOrigin? arbitraryQueueOrigin,
     bool save = true,
     bool copied = false,
     bool emitChangeEvent = true,
@@ -811,51 +779,39 @@ abstract class ContentControl {
       "When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter",
     );
 
-    final typeArg = type;
     type ??= queues._type;
     if (type == QueueType.arbitrary) {
       modified = false;
-      if (arbitraryQueueOrigin != null) {
-        // Set once and don't change thereafter until type is passed explicitly.
-        state.queues._arbitraryQueueOrigin = arbitraryQueueOrigin;
-        Prefs.arbitraryQueueOrigin.set(arbitraryQueueOrigin.value);
-      }
-    }
-    if (type != QueueType.arbitrary ||
-        // Reset when queue type is passed explicitly.
-        typeArg == QueueType.arbitrary && arbitraryQueueOrigin == null) {  
-      state.queues._arbitraryQueueOrigin = null;
-      Prefs.arbitraryQueueOrigin.delete();
     }
 
     if (type == QueueType.origin) {
       if (origin != null) {
         queues._origin = origin;
-        Prefs.songOriginJson.set(jsonEncode(origin.toSongOriginEntry().toMap()));
+        Prefs.songOrigin.set(origin);
       }
     } else {
       queues._origin = null;
-      Prefs.songOriginJson.delete();
+      Prefs.songOrigin.delete();
     }
 
     if (type == QueueType.searched) {
       if (searchQuery != null) {
         queues._searchQuery = searchQuery;
-        Prefs.searchQueryString.set(searchQuery);
+        Prefs.searchQuery.set(searchQuery);
       }
     } else {
       queues._searchQuery = null;
-      Prefs.searchQueryString.delete();
+      Prefs.searchQuery.delete();
     }
 
     modified ??= queues._modified;
     shuffled ??= queues._shuffled;
 
     queues._type = type;
-    Prefs.queueTypeString.set(type.value);
+    Prefs.queueType.set(type);
 
     queues._modified = modified;
-    Prefs.queueModifiedBool.set(modified);
+    Prefs.queueModified.set(modified);
 
     if (shuffled) {
       queues._shuffledQueue.setSongs(
@@ -876,7 +832,7 @@ abstract class ContentControl {
     }
 
     queues._shuffled = shuffled;
-    Prefs.queueShuffledBool.set(shuffled);
+    Prefs.queueShuffled.set(shuffled);
 
     if (save) {
       state.queues._saveCurrentQueue();
@@ -1100,14 +1056,14 @@ abstract class ContentControl {
       song: () {
         final _sort = sort! as SongSort;
         sorts.setValue<Song>(_sort);
-        Prefs.songSortJson.set(jsonEncode(sort.toMap()));
+        Prefs.songSort.set(_sort);
         final comparator = _sort.comparator;
         state.allSongs.songs.sort(comparator);
       },
       album: () {
         final _sort = sort! as AlbumSort;
         sorts.setValue<Album>(_sort);
-        Prefs.albumSortJson.set(jsonEncode(_sort.toMap()));
+        Prefs.albumSort.set(_sort);
         final comparator = _sort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()
           ..sort((a, b) {
@@ -1117,14 +1073,14 @@ abstract class ContentControl {
       playlist: () {
         final _sort = sort! as PlaylistSort;
         sorts.setValue<Playlist>(_sort);
-        Prefs.playlistSortJson.set(jsonEncode(sort.toMap()));
+        Prefs.playlistSort.set(_sort);
         final comparator = _sort.comparator;
         state.playlists.sort(comparator);
       },
       artist: () {
         final _sort = sort! as ArtistSort;
         sorts.setValue<Artist>(_sort);
-        Prefs.artistSortJson.set(jsonEncode(sort.toMap()));
+        Prefs.artistSort.set(_sort);
         final comparator = _sort.comparator;
         state.artists.sort(comparator);
       },
@@ -1184,10 +1140,10 @@ abstract class ContentControl {
   /// Restores [sorts] from [Prefs].
   static Future<void> _restoreSorts() async {
     state.sorts = ContentMap({
-      Song: SongSort.fromMap(jsonDecode(await Prefs.songSortJson.get())),
-      Album: AlbumSort.fromMap(jsonDecode(await Prefs.albumSortJson.get())),
-      Playlist: PlaylistSort.fromMap(jsonDecode(await Prefs.playlistSortJson.get())),
-      Artist: ArtistSort.fromMap(jsonDecode(await Prefs.artistSortJson.get())),
+      Song: Prefs.songSort.get(),
+      Album: Prefs.albumSort.get(),
+      Playlist: Prefs.playlistSort.get(),
+      Artist: Prefs.artistSort.get(),
     });
   }
 
@@ -1197,14 +1153,11 @@ abstract class ContentControl {
   /// * If saved song origin songs are restored successfully, but the playlist itself cannot be found, will fall back to [QueueType.arbitrary].
   /// * In all other cases it will restore as it was.
   static Future<void> _restoreQueue() async {
-    final shuffled = await Prefs.queueShuffledBool.get();
-    final modified = await Prefs.queueModifiedBool.get();
-    final String? songOriginString = await Prefs.songOriginJson.get();
-    final Map? songOriginMap = songOriginString == null ? null : jsonDecode(songOriginString);
-    final type = EnumToString.fromString(
-      QueueType.values,
-      await Prefs.queueTypeString.get(),
-    )!;
+    final shuffled = Prefs.queueShuffled.get();
+    final modified = Prefs.queueModified.get();
+    final songOrigin = Prefs.songOrigin.get();
+    final type =  Prefs.queueType.get();
+  
     state.idMap = await _idMapSerializer.read();
 
     final List<Song> queueSongs = [];
@@ -1250,19 +1203,16 @@ abstract class ContentControl {
         // we must save it, so do not `save: false`
       );
     } else if (type == QueueType.origin) {
-      if (songOriginMap != null) {
-        final origin = SongOrigin.originFromMap(songOriginMap);
-        if (origin != null) {
-          setQueue(
-            type: type,
-            modified: modified,
-            shuffled: shuffled,
-            songs: songs,
-            shuffleFrom: queueSongs,
-            origin: origin,
-            save: false,
-          );
-        }
+      if (songOrigin != null) {
+        setQueue(
+          type: type,
+          modified: modified,
+          shuffled: shuffled,
+          songs: songs,
+          shuffleFrom: queueSongs,
+          origin: songOrigin,
+          save: false,
+        );
       } else {
         setQueue(
           type: QueueType.arbitrary,
@@ -1273,20 +1223,13 @@ abstract class ContentControl {
         );
       }
     } else {
-      final arbitraryQueueOrigin = await Prefs.arbitraryQueueOrigin.get();
       setQueue(
         type: type,
         shuffled: shuffled,
         modified: modified,
         songs: songs,
         shuffleFrom: queueSongs,
-        searchQuery: await Prefs.searchQueryString.get(),
-        arbitraryQueueOrigin: arbitraryQueueOrigin == null
-          ? null
-          : EnumToString.fromString(
-              ArbitraryQueueOrigin.values,
-              arbitraryQueueOrigin,
-            ),
+        searchQuery: Prefs.searchQuery.get(),
         save: false,
       );
     }
@@ -1324,4 +1267,33 @@ class ContentUtils {
     return queue == ContentControl.state.currentSongOrigin ||
            queue == ContentControl.state.queues.origin;
   }
+
+  /// Shuffles song origins and returns songs and shuffled songs.
+  static ShuffleResponse shuffleSongOrigins(List<SongOrigin> origins) {
+    final List<Song> songs = [];
+    final List<Song> shuffledSongs = [];
+    for (final origin in origins) {
+      for (final song in origin.songs) {
+        song.origin = origin;
+        songs.add(song);
+      }
+    }
+    for (final origin in List<SongOrigin>.from(origins)..shuffle()) {
+      for (final song in origin.songs) {
+        song.origin = origin;
+        shuffledSongs.add(song);
+      }
+    }
+    return ShuffleResponse(
+      songs,
+      shuffledSongs,
+    );
+  }
+}
+
+/// Result of [ContentUtils.shuffleSongOrigins].
+class ShuffleResponse {
+  const ShuffleResponse(this.songs, this.shuffledSongs);
+  final List<Song> songs;
+  final List<Song> shuffledSongs;
 }

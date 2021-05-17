@@ -351,42 +351,30 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                         );
                       },
                       album: () {
-                        final List<Song> songs = [];
-                        for (final album in ContentControl.state.albums.values.toList()) {
-                          for (final song in album.songs) {
-                            song.origin = album;
-                            songs.add(song);
-                          }
-                        }
+                        final shuffleResult = ContentUtils.shuffleSongOrigins(ContentControl.state.albums.values.toList());
                         ContentControl.setQueue(
                           type: QueueType.allAlbums,
                           shuffled: true,
-                          shuffleFrom: songs,
+                          songs: shuffleResult.shuffledSongs,
+                          shuffleFrom: shuffleResult.songs,
                         );
                       },
                       playlist: () {
-                        final List<Song> songs = [];
-                        for (final playlist in ContentControl.state.playlists.toList()) {
-                          for (final song in playlist.songs) {
-                            song.origin = playlist;
-                            songs.add(song);
-                          }
-                        }
+                        final shuffleResult = ContentUtils.shuffleSongOrigins(ContentControl.state.playlists);
                         ContentControl.setQueue(
                           type: QueueType.allPlaylists,
                           shuffled: true,
-                          shuffleFrom: songs,
+                          songs: shuffleResult.shuffledSongs,
+                          shuffleFrom: shuffleResult.songs,
                         );
                       },
                       artist: () {
-                        final List<Song> songs = [];
-                        for (final artist in ContentControl.state.artists.toList()) {
-                          songs.addAll(artist.songs);
-                        }
+                        final shuffleResult = ContentUtils.shuffleSongOrigins(ContentControl.state.artists);
                         ContentControl.setQueue(
                           type: QueueType.allArtists,
                           shuffled: true,
-                          shuffleFrom: songs,
+                          songs: shuffleResult.shuffledSongs,
+                          shuffleFrom: shuffleResult.songs,
                         );
                       },
                     )();
@@ -417,7 +405,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                       },
                       playlist: () {
                         final List<Song> songs = [];
-                        for (final playlist in ContentControl.state.playlists.toList()) {
+                        for (final playlist in ContentControl.state.playlists) {
                           for (final song in playlist.songs) {
                             song.origin = playlist;
                             songs.add(song);
@@ -430,14 +418,14 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                       },
                       artist: () {
                         final List<Song> songs = [];
-                        for (final artist in ContentControl.state.artists.toList()) {
+                        for (final artist in ContentControl.state.artists) {
                           songs.addAll(artist.songs);
                         }
                         ContentControl.setQueue(
                           type: QueueType.allArtists,
                           songs: songs,
                         );
-                      }
+                      },
                     )();
                     MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
                     MusicPlayer.instance.play();

@@ -611,13 +611,13 @@ class MusicPlayer extends AudioPlayer {
     });
 
     positionStream.listen((position) { 
-      Prefs.songPositionInt.set(position.inSeconds);
+      Prefs.songPosition.set(position.inSeconds);
     });
 
     // Restore from prefs.
     await Future.wait([
-      seek(Duration(seconds: await Prefs.songPositionInt.get())),
-      setLoopMode(await Prefs.loopModeBool.get()
+      seek(Duration(seconds: Prefs.songPosition.get())),
+      setLoopMode(Prefs.loopMode.get()
         ? LoopMode.one
         : LoopMode.off),
     ]);
@@ -637,7 +637,7 @@ class MusicPlayer extends AudioPlayer {
     final current = ContentControl.state.queues.current;
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (current.isNotEmpty) {
-      final songId = await Prefs.songIdInt.get();
+      final songId = Prefs.songId.get();
       await setSong(songId == null
         ? current.songs[0]
         : current.byId.get(songId) ?? current.songs[0]);
@@ -656,7 +656,7 @@ class MusicPlayer extends AudioPlayer {
       mode = LoopMode.off;
     }
     await super.setLoopMode(mode);
-    Prefs.loopModeBool.set(looping);
+    Prefs.loopMode.set(looping);
   }
 
   /// Switches the [looping].

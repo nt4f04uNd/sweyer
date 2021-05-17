@@ -133,13 +133,15 @@ class _SearchStateDelegate {
   set contentType(Type? value) {
     selectionController.primaryContentType = value;
     bodyScrolledNotifier.value = false;
-    // Scroll to chip
-    ensureVisible(
-      chipContextMap.getValue(value),
-      duration: kTabScrollDuration,
-      alignment: 0.5,
-      alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
-    );
+    if (value != null) {
+      // Scroll to chip
+      ensureVisible(
+        chipContextMap.getValue(value),
+        duration: kTabScrollDuration,
+        alignment: 0.5,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+      );
+    }
   }
 
   ContentMap<BuildContext> chipContextMap = ContentMap();
@@ -471,8 +473,6 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
   Widget buildLeading() {
     return NFBackButton(
       onPressed: () {
-        final selectionController = stateDelegate.selectionController;
-        selectionController.close();
         close(context, null);
       },
     );

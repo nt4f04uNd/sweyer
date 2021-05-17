@@ -313,16 +313,6 @@ class AppLocalizations {
     );
   }
 
-  /// Converts [ArbitraryQueueOrigin] to human readable text.
-  /// Returns `null` from `null` argument.
-  String arbitraryQueueOrigin(ArbitraryQueueOrigin origin) {
-    if (origin == null)
-      return null;
-    switch (origin) {
-      default: throw UnimplementedError();
-    }
-  }
-
   // NOTE: currently unused
   String get shuffled {
     return Intl.message(

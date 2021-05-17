@@ -32,8 +32,10 @@ abstract class ContentChannel {
 
   /// Loads album art on Android Q (SDK 29) and above.
   /// Calling this on versions below with throw.
-  static Future<Uint8List> loadAlbumArt({ required String uri, required Size size, required CancellationSignal signal }) async {
-    final res = await _channel.invokeMethod<Uint8List>(
+  ///
+  /// Can return `null` in case operation is cancelled before fetching if finished.
+  static Future<Uint8List?> loadAlbumArt({ required String uri, required Size size, required CancellationSignal signal }) async {
+    return _channel.invokeMethod<Uint8List>(
       'loadAlbumArt',
       {
         'id': signal._id,
@@ -42,7 +44,6 @@ abstract class ContentChannel {
         'height': size.height.toInt(),
       },
     );
-    return res!;
   }
 
   /// Tries to tell system to recreate album art by [albumId].

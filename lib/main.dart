@@ -28,7 +28,7 @@ $stack''';
 }
 
 Future<void> reportError(dynamic ex, StackTrace stack) async {
-  if (await Prefs.devModeBool.get()) {
+  if (Prefs.devMode.get()) {
     ShowFunctions.instance.showError(
       errorDetails: buildErrorReport(ex, stack),
     );
@@ -40,7 +40,7 @@ Future<void> reportError(dynamic ex, StackTrace stack) async {
 }
 
 Future<void> reportFlutterError(FlutterErrorDetails details) async {
-  if (await Prefs.devModeBool.get()) {
+  if (Prefs.devMode.get()) {
     ShowFunctions.instance.showError(
       errorDetails: buildErrorReport(details.exception, details.stack),
     );
@@ -87,6 +87,7 @@ Future<void> main() async {
   // Related to https://github.com/flutter/flutter/issues/40590
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   binding.renderView.automaticSystemUiAdjustment = false;
+  await NFPrefs.initialize();
 
   await Firebase.initializeApp();
   if (kDebugMode) {

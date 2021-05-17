@@ -212,7 +212,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
 /// Signature, used for [ContentSelectionController.actionsBuilder].
 typedef _ActionsBuilder = _SelectionActionsBar Function(BuildContext);
 
-class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> {
+class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> with RouteAware{
   ContentSelectionController._({
     required AnimationController animationController,
     required this.actionsBuilder,
@@ -339,6 +339,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         _notifier.value!.close();
         assert(false, 'There can only be one active controller');
       }
+      for (final observer in NFWidgets.routeObservers!)
+        observer.subscribe(this, ModalRoute.of(context)!);
       _dismissibleRouteController = DismissibleRoute.controllerOf(context);
       _dismissibleRouteController?.addDragEventListener(_handleDismissibleRouteDrag);
       _overlayEntry = OverlayEntry(
@@ -375,6 +377,11 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     super.notifyStatusListeners(status);
   }
 
+  @override
+  void didPop() {
+    close();
+  }
+
   void _handleDismissibleRouteDrag(SlidableDragEvent event) {
     if (event is SlidableDragEnd && event.closing) {
       close();
@@ -406,6 +413,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   void dispose() {
     _dismissibleRouteController?.removeDragEventListener(_handleDismissibleRouteDrag);
     _dismissibleRouteController = null;
+    for (final observer in NFWidgets.routeObservers!)
+      observer.unsubscribe(this);
+  
     if (ContentControl.disposed) {
       _removeOverlay();
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {

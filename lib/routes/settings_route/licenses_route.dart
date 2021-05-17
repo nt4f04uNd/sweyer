@@ -830,8 +830,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       child: Navigator(
         key: _navigatorKey,
         initialRoute: 'initial',
-        onGenerateInitialRoutes:
-            (NavigatorState navigator, String initialRoute) {
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
           switch (focus) {
             case _Focus.master:
               return <Route<void>>[masterPageRoute];
@@ -881,8 +880,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
                   flexibleSpace: widget.flexibleSpace,
                   automaticallyImplyLeading: widget.automaticallyImplyLeading,
                   floatingActionButton: widget.floatingActionButton,
-                  floatingActionButtonLocation:
-                      widget.floatingActionButtonMasterPageLocation,
+                  floatingActionButtonLocation: widget.floatingActionButtonMasterPageLocation,
                   masterViewBuilder: widget.masterViewBuilder,
                   actionBuilder: widget.actionBuilder,
                 ),
@@ -900,11 +898,11 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
             onBackButtonPressed: () async {
               // No need for setState() as rebuild happens on navigation pop.
               focus = _Focus.master;
-              Navigator.of(context).pop();
-              return true;
+              return Navigator.of(context).maybePop();
             },
             child: BlockSemantics(
-                child: widget.detailPageBuilder(context, arguments, null)),
+              child: widget.detailPageBuilder(context, arguments, null),
+            ),
           );
         },
       ),

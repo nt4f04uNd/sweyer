@@ -68,6 +68,7 @@ class HomeRoutes<T> extends _Routes<T> {
   static const album = HomeRoutes<Album>._('/album');
   static const playlist = HomeRoutes<Playlist>._('/playlist');
   static const artist = HomeRoutes<Artist>._('/artist');
+  static const artistContent = HomeRoutes<Artist>._('/artist/content');
   static const search = HomeRoutes<SearchArguments>._('/search');
 
   /// Returns a factory to create routes with arguments.
@@ -80,10 +81,18 @@ class _HomeRoutesFactory {
   HomeRoutes<T> content<T extends Content>(T content) {
     return contentPick<T, ValueGetter<dynamic>>(
       song: () => throw ArgumentError(),
-      album: () => HomeRoutes<Album>._(HomeRoutes.album.location, content as Album),
-      playlist: () => HomeRoutes<Playlist>._(HomeRoutes.playlist.location, content as Playlist),
-      artist: () => HomeRoutes<Artist>._(HomeRoutes.artist.location, content as Artist),
+      album: () => HomeRoutes._(HomeRoutes.album.location, content as Album),
+      playlist: () => HomeRoutes._(HomeRoutes.playlist.location, content as Playlist),
+      artist: () => HomeRoutes._(HomeRoutes.artist.location, content as Artist),
     )();
+  }
+
+  HomeRoutes<ArtistContentArguments<T>> artistContent<T extends Content>(Artist artist, List<T> list) {
+    assert(T == Song || T == Album);
+    return HomeRoutes._(HomeRoutes.artistContent.location, ArtistContentArguments<T>(
+      artist: artist,
+      list: list,
+    ));
   }
 
   HomeRoutes<Content> persistentQueue<T extends PersistentQueue>(T persistentQueue) {
@@ -97,6 +106,16 @@ class _HomeRoutesFactory {
   HomeRoutes<SearchArguments> search(SearchArguments arguments) {
     return HomeRoutes._(HomeRoutes.search.location, arguments);
   }
+}
+
+class ArtistContentArguments<T> {
+  ArtistContentArguments({
+    required this.artist,
+    required this.list,
+  });
+
+  final Artist artist;
+  final List<T> list;
 }
 
 class SearchArguments {
@@ -449,6 +468,20 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
           key: _buildContentKey<Artist>(route),
           transitionSettings: transitionSettings.greyDismissible,
           child: ArtistRoute(artist: (route as HomeRoutes<Artist>).arguments!),
+        ));
+      } else if (route.hasSameLocation(HomeRoutes.artistContent)) {
+        final arguments = route.arguments!;
+        final ArtistContentRoute _route;
+        if (arguments is ArtistContentArguments<Song>)
+          _route = ArtistContentRoute<Song>(arguments: route.arguments!);
+        else if (arguments is ArtistContentArguments<Album>)
+          _route = ArtistContentRoute<Album>(arguments: route.arguments!);
+        else
+          throw ArgumentError();
+        pages.add(StackFadePage(
+          key: ValueKey('${HomeRoutes.artistContent}/$i'),
+          transitionSettings: transitionSettings.greyDismissible,
+          child: _route,
         ));
       } else if (route.hasSameLocation(HomeRoutes.search)) {
         pages.add(SearchPage(

@@ -117,6 +117,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   l10n.contents<T>(contentType),

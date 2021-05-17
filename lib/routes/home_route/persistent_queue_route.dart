@@ -219,12 +219,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                 slivers: [
                   AnimatedBuilder(
                     animation: appBarController,
-                    child: NFBackButton(
-                      onPressed: () {
-                        selectionController.close();
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                    child: const NFBackButton(),
                     builder: (context, child) => SliverAppBar(
                       pinned: true,
                       elevation: 0.0,

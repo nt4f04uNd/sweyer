@@ -70,9 +70,9 @@ class ContentArtSource {
 ///    * 2 - two arts in the first row, and same two arts on the second, though reversed
 ///    * 3 - arts of 3 songs, and the last one is of the first song
 ///    * 4 - just 4 arts of 4 songs
-/// 
+///
 /// See also:
-/// * [_ArtLoader], which loads arts from `MediaStore`
+///  * [_ArtLoader], which loads arts from `MediaStore`
 class ContentArt extends StatefulWidget {
   const ContentArt({
     Key? key,
@@ -84,6 +84,7 @@ class ContentArt extends StatefulWidget {
     this.current = false,
     this.highRes = false,
     this.currentIndicatorScale,
+    this.onLoad,
     this.loadAnimationDuration = kArtLoadAnimationDuration,
   }) : super(key: key);
 
@@ -95,6 +96,7 @@ class ContentArt extends StatefulWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
+    this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kSongTileArtSize,
        highRes = false,
@@ -110,6 +112,7 @@ class ContentArt extends StatefulWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
+    this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kPersistentQueueTileArtSize,
        highRes = false,
@@ -125,6 +128,7 @@ class ContentArt extends StatefulWidget {
     this.assetScale = 1.0,
     this.borderRadius = kArtistTileArtSize,
     this.current = false,
+    this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kPersistentQueueTileArtSize,
        highRes = false,
@@ -140,6 +144,7 @@ class ContentArt extends StatefulWidget {
     this.color,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
+    this.onLoad,
     this.loadAnimationDuration = const Duration(milliseconds: 500),
   }) : current = false,
        highRes = true,
@@ -177,6 +182,9 @@ class ContentArt extends StatefulWidget {
   /// SCale for the [CurrentIndicator].
   final double? currentIndicatorScale;
 
+  /// Called when art is loaded.
+  final VoidCallback? onLoad;
+
   /// Above Android Q and above album art loads from bytes, and performns an animation on load.
   /// This defines the duration of this animation.
   final Duration loadAnimationDuration;
@@ -201,13 +209,13 @@ class _ArtLoader {
     required this.state,
     required this.song,
     required this.size,
-    required this.onUpdate,
+    required this.onLoad,
   });
 
   final State state;
   final Song? song;
   final double? size;
-  final VoidCallback onUpdate;
+  final VoidCallback onLoad;
 
   CancellationSignal? _signal;
   Uint8List? _bytes;
@@ -224,8 +232,7 @@ class _ArtLoader {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
         if (!state.mounted)
           return;
-        loaded = true;
-        onUpdate();
+        _commitLoad();
       });
     } else if (_useBytes) {
       final uri = song!.contentUri;
@@ -240,8 +247,7 @@ class _ArtLoader {
         );
         if (!state.mounted)
           return;
-        loaded = true;
-        onUpdate();
+        _commitLoad();
       });
     } else {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -252,23 +258,26 @@ class _ArtLoader {
           _file = File(art);
           final exists = _file.existsSync();
           _broken = !exists;
-          if (_broken) {
+          if (_broken)
             _recreateArt();
-          }
         }
-        loaded = true;
-        onUpdate();
+        if (!_broken)
+          _commitLoad();
       });
     }
   }
 
+  void _commitLoad() {
+    loaded = true;
+    onLoad();
+  }
+
   Future<void> _recreateArt() async {
     final ablumId = song!.albumId;
-    if (ablumId != null) {
+    if (ablumId != null)
       await ContentChannel.fixAlbumArt(song!.albumId!);
-    }
     _broken = false;
-    onUpdate();
+    _commitLoad();
   }
 
   Image? getImage(int? cacheSize) {
@@ -307,7 +316,7 @@ class _ContentArtState extends State<ContentArt> {
 
   /// Min duration for [loadAnimationDuration].
   static Duration get _minDuration => _useBytes
-    ? const Duration(milliseconds: 150)
+    ? const Duration(milliseconds: 100)
     : Duration.zero;
 
   Duration get loadAnimationDuration => widget.loadAnimationDuration < _minDuration
@@ -328,7 +337,7 @@ class _ContentArtState extends State<ContentArt> {
           state: this,
           song: content as Song?,
           size: widget.size,
-          onUpdate: _onUpdate,
+          onLoad: _onLoad,
         ),
       ];
     } else if (content is Album) {
@@ -337,7 +346,7 @@ class _ContentArtState extends State<ContentArt> {
           state: this,
           song: content.firstSong,
           size: widget.size,
-          onUpdate: _onUpdate,
+          onLoad: _onLoad,
         ),
       ];
     } else if (content is Playlist) {
@@ -350,7 +359,7 @@ class _ContentArtState extends State<ContentArt> {
               state: this,
               song: null,
               size: widget.size,
-              onUpdate: _onUpdate,
+              onLoad: _onLoad,
             ),
           ];
           break;
@@ -359,7 +368,7 @@ class _ContentArtState extends State<ContentArt> {
             state: this,
             song: songs.first,
             size: size,
-            onUpdate: _onUpdate,
+            onLoad: _onLoad,
           );
           List.generate(4, (index) => loader);
           break;
@@ -368,7 +377,7 @@ class _ContentArtState extends State<ContentArt> {
             state: this,
             song: songs[index],
             size: size,
-            onUpdate: _onUpdate,
+            onLoad: _onLoad,
           ));
           _loaders.addAll(_loaders.reversed.toList());
           break;
@@ -377,7 +386,7 @@ class _ContentArtState extends State<ContentArt> {
             state: this,
             song: songs[index],
             size: size,
-            onUpdate: _onUpdate,
+            onLoad: _onLoad,
           ));
           _loaders.add(_loaders[0]);
           break;
@@ -386,7 +395,7 @@ class _ContentArtState extends State<ContentArt> {
             state: this,
             song: songs[index],
             size: size,
-            onUpdate: _onUpdate,
+            onLoad: _onLoad,
           ));
           break;
       }
@@ -396,7 +405,7 @@ class _ContentArtState extends State<ContentArt> {
           state: this,
           song: null,
           size: widget.size,
-          onUpdate: _onUpdate,
+          onLoad: _onLoad,
         ),
       ];
     }
@@ -405,7 +414,8 @@ class _ContentArtState extends State<ContentArt> {
     }
   }
 
-  void _onUpdate() {
+  void _onLoad() {
+    widget.onLoad?.call();
     if (mounted) {
       setState(() { });
     }
@@ -414,6 +424,8 @@ class _ContentArtState extends State<ContentArt> {
   @override
   void didUpdateWidget(covariant ContentArt oldWidget) {
     if (oldWidget.source?._content != widget.source?._content) {
+      for (final loader in _loaders)
+        loader.cancel();
       _init();
     }
     super.didUpdateWidget(oldWidget);
@@ -421,9 +433,8 @@ class _ContentArtState extends State<ContentArt> {
 
   @override
   void dispose() { 
-    for (final loader in _loaders) {
+    for (final loader in _loaders)
       loader.cancel();
-    }
     super.dispose();
   }
 
