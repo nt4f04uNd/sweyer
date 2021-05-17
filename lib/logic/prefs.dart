@@ -3,8 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
@@ -91,7 +89,7 @@ abstract class Prefs {
   /// * special dev menu in the drawer gets unlocked
   /// * error snackbars are shown
   /// * song info button available in the top right menu of [PlayerRoute].
-  static const devMode = BoolPref('dev_mode', false);
+  static final devMode = PrefNotifier(const BoolPref('dev_mode', false));
 }
 
 class SearchHistory {

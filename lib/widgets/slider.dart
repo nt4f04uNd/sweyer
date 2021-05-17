@@ -90,7 +90,7 @@ class LabelledSlider extends StatelessWidget {
             height: 30.0,
             child: SliderTheme(
               data: SliderThemeData(
-                trackShape: themeData.trackShape ?? const TrackShapeWithMargin(),
+                trackShape: themeData.trackShape ?? const TrackShapeWithMargin(horizontalMargin: 12.0),
                 valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
                 overlayColor: Colors.transparent,
                 activeTrackColor: activeColor ?? ThemeControl.theme.colorScheme.primary,
@@ -119,31 +119,5 @@ class LabelledSlider extends StatelessWidget {
           ),
       ],
     );
-  }
-}
-
-/// Put it into slider theme to make custom track margin
-class TrackShapeWithMargin extends RoundedRectSliderTrackShape {
-  const TrackShapeWithMargin({
-    this.horizontalMargin = 12.0,
-  });
-
-  /// Margin to be applied for each side horizontally
-  final double horizontalMargin;
-
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    final double trackHeight = sliderTheme.trackHeight!;
-    final double trackLeft = offset.dx + horizontalMargin;
-    final double trackTop =
-        offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width - horizontalMargin * 2;
-    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }

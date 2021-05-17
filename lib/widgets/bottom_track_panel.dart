@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -40,76 +40,78 @@ class TrackPanel extends StatelessWidget {
       builder: (context, snapshot) {
         return FadeTransition(
           opacity: fadeAnimation,
-          child: AnimationStrategyBuilder<bool>(
-            strategy: const IgnoringStrategy(
-              forward: true,
-              completed: true,
-            ),
-            animation: playerRouteController,
-            builder: (context, value, child) => IgnorePointer(
-              ignoring: value,
-              child: child,
-            ),
-            child: GestureDetector(
-              onTap: onTap,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  height: kSongTileHeight * math.max(0.95, textScaleFactor),
-                  padding: const EdgeInsets.only(
-                    left: 16.0,
-                    right: 16.0,
-                    top: 4.0,
-                    bottom: 4.0,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Transform.scale(
-                          scale: math.min(1.1, textScaleFactor),
-                          child: const RotatingAlbumArtWithProgress(),
+          child: RepaintBoundary(
+            child:AnimationStrategyBuilder<bool>(
+              strategy: const IgnoringStrategy(
+                forward: true,
+                completed: true,
+              ),
+              animation: playerRouteController,
+              builder: (context, value, child) => IgnorePointer(
+                ignoring: value,
+                child: child,
+              ),
+              child: GestureDetector(
+                onTap: onTap,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    height: kSongTileHeight * math.max(0.95, textScaleFactor),
+                    padding: const EdgeInsets.only(
+                      left: 16.0,
+                      right: 16.0,
+                      top: 4.0,
+                      bottom: 4.0,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Transform.scale(
+                            scale: math.min(1.1, textScaleFactor),
+                            child: const RotatingAlbumArtWithProgress(),
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              NFMarquee(
-                                key: ValueKey(ContentControl.state.currentSong.id),
-                                fontWeight: FontWeight.w700,
-                                text: ContentControl.state.currentSong.title,
-                                fontSize: 16,
-                                velocity: 26.0,
-                                blankSpace: 40.0,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4.0),
-                                child: ArtistWidget(
-                                  artist: ContentControl.state.currentSong.artist,
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                NFMarquee(
+                                  key: ValueKey(ContentControl.state.currentSong.id),
+                                  fontWeight: FontWeight.w700,
+                                  text: ContentControl.state.currentSong.title,
+                                  fontSize: 16,
+                                  velocity: 26.0,
+                                  blankSpace: 40.0,
                                 ),
-                              ),
-                            ],
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  child: ArtistWidget(
+                                    artist: ContentControl.state.currentSong.artist,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: textScaleFactor * 50.0),
-                          child: const AnimatedPlayPauseButton(
-                            size: 40.0,
-                            iconSize: 19.0,
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: textScaleFactor * 50.0),
+                            child: const AnimatedPlayPauseButton(
+                              size: 40.0,
+                              iconSize: 19.0,
+                            ),
                           ),
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -131,9 +133,9 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
 class _RotatingAlbumArtWithProgressState
     extends State<RotatingAlbumArtWithProgress> {
   /// Actual track position value
-  Duration _value = const Duration(seconds: 0);
+  Duration _value = Duration.zero;
   // Duration of playing track
-  Duration _duration = const Duration(seconds: 0);
+  Duration _duration = Duration.zero;
 
   late StreamSubscription<Duration> _positionSubscription;
   late StreamSubscription<Song> _songChangeSubscription;

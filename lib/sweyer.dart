@@ -8,7 +8,6 @@
 /// This is general module of a whole app.
 ///
 /// It exports all except of constants, see `constants.dart`.
-/// API is also not exported as you should use `as API`, see `api.dart`.
 
 export 'package:sweyer/core/core.dart';
 export 'package:sweyer/localization/localization.dart';
@@ -16,3 +15,5 @@ export 'package:sweyer/logic/logic.dart';
 export 'package:sweyer/routes/routes.dart';
 export 'package:sweyer/widgets/widgets.dart';
 export 'package:sweyer/main.dart';
+
+export 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';

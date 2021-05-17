@@ -17,7 +17,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Flow;
 import 'package:flutter/scheduler.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 
 /// A page that shows licenses for software used by the application.

@@ -333,14 +333,6 @@ abstract class ContentControl {
   static late int _sdkInt;
   static int get sdkInt => _sdkInt;
 
-  static ValueNotifier<bool> get devMode => _devMode;
-  static late ValueNotifier<bool> _devMode;
-  /// Sets dev mode.
-  static void setDevMode(bool value) {
-    devMode.value = value;
-    Prefs.devMode.set(value);
-  }
-
   /// The main data app initialization function, inits all queues.
   /// Also handles no-permissions situations.
   static Future<void> init() async {
@@ -349,7 +341,6 @@ abstract class ContentControl {
     }
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     _sdkInt = androidInfo.version.sdkInt;
-    _devMode = ValueNotifier(Prefs.devMode.get());
     if (Permissions.granted) {
       // TODO: prevent initalizing if already initizlied
       _initializeCompleter = Completer();

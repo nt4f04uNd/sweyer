@@ -6,8 +6,7 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-import 'package:sweyer/logic/logic.dart';
+import 'package:sweyer/sweyer.dart';
 
 /// Inteface for other sort feature enums.
 abstract class SortFeature<T extends Content> extends Enum<String> {

@@ -8,7 +8,7 @@ import 'dart:math';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -344,12 +344,14 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       _dismissibleRouteController = DismissibleRoute.controllerOf(context);
       _dismissibleRouteController?.addDragEventListener(_handleDismissibleRouteDrag);
       _overlayEntry = OverlayEntry(
-        builder: (context) => _ContentSelectionControllerProvider(
-          controller: this,
-          child: Builder(
-            builder: (_context) => Builder(
-            builder: (_context) => actionsBuilder(_context),
-          ),
+        builder: (context) => RepaintBoundary(
+          child: _ContentSelectionControllerProvider(
+            controller: this,
+            child: Builder(
+              builder: (_context) => Builder(
+              builder: (_context) => actionsBuilder(_context),
+            ),
+            ),
           ),
         ),
       );
@@ -702,7 +704,9 @@ class _SelectionAnimation extends AnimatedWidget {
         animation: listenable,
         child: SlideTransition(
           position: animation,
-          child: child,
+          child: RepaintBoundary(
+            child:child,
+          ),
         ),
         builder: (context, value, child) => IgnorePointer(
           ignoring: value,

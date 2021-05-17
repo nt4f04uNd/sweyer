@@ -7,7 +7,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
@@ -190,7 +190,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                 onTap: _handleClickSettings,
               ),
               ValueListenableBuilder<bool>(
-                valueListenable: ContentControl.devMode,
+                valueListenable: Prefs.devMode,
                 builder: (context, value, child) => value ? child! : const SizedBox.shrink(),
                 child: MenuItem(
                   l10n.debug,

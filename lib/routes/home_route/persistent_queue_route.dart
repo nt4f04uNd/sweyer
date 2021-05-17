@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 
 class PersistentQueueRoute extends StatefulWidget {
@@ -87,65 +86,67 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         children: [
           FadeTransition(
             opacity: appBarController,
-            child: Container(
-              padding: const EdgeInsets.only(
-                top: _infoSectionTopPadding,
-                bottom: _infoSectionBottomPadding,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ContentArt(
-                    size: 130.0,
-                    highRes: true,
-                    assetScale: 1.5,
-                    source: ContentArtSource.persistentQueue(widget.queue),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 14.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.queue.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              height: 1.1,
-                              fontSize: 24.0,
-                            ),
-                          ),
-                          if (isAlbum)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: 8.0,
+            child: RepaintBoundary(
+              child: Container(
+                padding: const EdgeInsets.only(
+                  top: _infoSectionTopPadding,
+                  bottom: _infoSectionBottomPadding,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ContentArt(
+                      size: 130.0,
+                      highRes: true,
+                      assetScale: 1.5,
+                      source: ContentArtSource.persistentQueue(widget.queue),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 14.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.queue.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                height: 1.1,
+                                fontSize: 24.0,
                               ),
-                              child: ArtistWidget(
-                                artist: album.artist,
-                                overflow: TextOverflow.clip,
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 15.0,
-                                  color: ThemeControl.theme.colorScheme.onBackground,
+                            ),
+                            if (isAlbum)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 8.0,
+                                ),
+                                child: ArtistWidget(
+                                  artist: album.artist,
+                                  overflow: TextOverflow.clip,
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 15.0,
+                                    color: ThemeControl.theme.colorScheme.onBackground,
+                                  ),
                                 ),
                               ),
-                            ),
-                          if (isAlbum)
-                            Text(
-                              ContentUtils.appendYearWithDot(l10n.album, album.year),
-                              style: TextStyle(
-                                color: ThemeControl.theme.textTheme.subtitle2!.color,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14.0,
+                            if (isAlbum)
+                              Text(
+                                ContentUtils.appendYearWithDot(l10n.album, album.year),
+                                style: TextStyle(
+                                  color: ThemeControl.theme.textTheme.subtitle2!.color,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14.0,
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

@@ -5,8 +5,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
@@ -153,9 +154,7 @@ class _PlayerRouteState extends State<PlayerRoute>
                 );
               },
             ),
-            TrackPanel(
-              onTap: controller.open,
-            ),
+            TrackPanel(onTap: controller.open),
           ],
         ),
       ),
@@ -449,72 +448,74 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
         ),
         child: FadeTransition(
           opacity: fadeAnimation,
-          child: GestureDetector(
-            onTap: _handleTitleTap,
-            child: Row(
-              children: [
-                if (origin != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
-                    child: ContentArt(
-                      source: ContentArtSource.origin(origin),
-                      borderRadius: _getBorderRadius(origin),
-                      size: kSongTileArtSize - 8.0,
+          child: RepaintBoundary(
+            child: GestureDetector(
+              onTap: _handleTitleTap,
+              child: Row(
+                children: [
+                  if (origin != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
+                      child: ContentArt(
+                        source: ContentArtSource.origin(origin),
+                        borderRadius: _getBorderRadius(origin),
+                        size: kSongTileArtSize - 8.0,
+                      ),
+                    ),
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: [
+                            Text(
+                              l10n.upNext,
+                              style: theme.textTheme.headline6!.copyWith(
+                                fontSize: 24,
+                                height: 1.2,
+                              ),
+                            ),
+                            _crossFade(
+                              !ContentControl.state.queues.modified,
+                              const SizedBox(height: 18.0),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 5.0),
+                                child: Icon(
+                                  Icons.edit_rounded,
+                                  size: 18.0,
+                                ),
+                              )
+                            ),
+                            _crossFade(
+                              !ContentControl.state.queues.shuffled,
+                              const SizedBox(height: 20.0),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 2.0),
+                                child: Icon(
+                                  Icons.shuffle_rounded,
+                                  size: 20.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Flexible(child: _buildTitleText(_getQueueType(l10n))),
+                            if (origin != null || type == QueueType.searched)
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 18.0,
+                                color: theme.textTheme.subtitle2!.color,
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: [
-                          Text(
-                            l10n.upNext,
-                            style: theme.textTheme.headline6!.copyWith(
-                              fontSize: 24,
-                              height: 1.2,
-                            ),
-                          ),
-                          _crossFade(
-                            !ContentControl.state.queues.modified,
-                            const SizedBox(height: 18.0),
-                            const Padding(
-                              padding: EdgeInsets.only(left: 5.0),
-                              child: Icon(
-                                Icons.edit_rounded,
-                                size: 18.0,
-                              ),
-                            )
-                          ),
-                          _crossFade(
-                            !ContentControl.state.queues.shuffled,
-                            const SizedBox(height: 20.0),
-                            const Padding(
-                              padding: EdgeInsets.only(left: 2.0),
-                              child: Icon(
-                                Icons.shuffle_rounded,
-                                size: 20.0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Flexible(child: _buildTitleText(_getQueueType(l10n))),
-                          if (origin != null || type == QueueType.searched)
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              size: 18.0,
-                              color: theme.textTheme.subtitle2!.color,
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -590,21 +591,25 @@ class _MainTabState extends State<_MainTab> {
           backgroundColor: Colors.transparent,
           leading: FadeTransition(
             opacity: fadeAnimation,
-            child: NFIconButton(
-              icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              size: 40.0,
-              onPressed: playerRouteController.close,
+            child: RepaintBoundary(
+              child: NFIconButton(
+                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                size: 40.0,
+                onPressed: playerRouteController.close,
+              ),
             ),
           ),
           actions: <Widget>[
             ValueListenableBuilder<bool>(
-              valueListenable: ContentControl.devMode,
+              valueListenable: Prefs.devMode,
               builder: (context, value, child) => value
                 ? child!
                 : const SizedBox.shrink(),
               child: FadeTransition(
                 opacity: fadeAnimation,
-                child: const _InfoButton(),
+                child: const RepaintBoundary(
+                  child: _InfoButton(),
+                ),
               ),
             ),
           ],

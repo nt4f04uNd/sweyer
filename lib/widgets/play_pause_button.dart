@@ -7,7 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -137,17 +137,19 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
           scale: scaleAnimation,
           // Needed because for some reason the color is not updated on theme change.
           key: ValueKey(color),
-          child: FlareActor(
-            Constants.Assets.ASSET_ANIMATION_PLAY_PAUSE,
-            animation: _animation,
-            callback: (value) {
-              if (value == 'pause_play' && _animation != 'play_pause') {
-                animation = 'play';
-              } else if (value == 'play_pause' && _animation != 'pause_play') {
-                animation = 'pause';
-              }
-            },
-            color: color,
+          child: RepaintBoundary(
+            child: FlareActor(
+              Constants.Assets.ASSET_ANIMATION_PLAY_PAUSE,
+              animation: _animation,
+              callback: (value) {
+                if (value == 'pause_play' && _animation != 'play_pause') {
+                  animation = 'play';
+                } else if (value == 'play_pause' && _animation != 'pause_play') {
+                  animation = 'pause';
+                }
+              },
+              color: color,
+            ),
           ),
         ),
       ),

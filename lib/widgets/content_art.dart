@@ -72,7 +72,7 @@ class ContentArtSource {
 ///    * 4 - just 4 arts of 4 songs
 ///
 /// See also:
-///  * [_ArtLoader], which loads arts from `MediaStore`
+///  * [ContentArtLoader], which loads arts from `MediaStore`
 class ContentArt extends StatefulWidget {
   const ContentArt({
     Key? key,
@@ -204,79 +204,95 @@ class ContentArt extends StatefulWidget {
 /// Also, sometimes below Android Q, album arts files sometimes become unaccessible,
 /// even though they should not. Loader will try to restore them with [Song.albumId]
 /// and [ContentChannel.fixAlbumArt].
-class _ArtLoader {
-  _ArtLoader({
-    required this.state,
+class ContentArtLoader {
+  ContentArtLoader._({
+    required _ContentArtState state,
     required this.song,
     required this.size,
-    required this.onLoad,
-  });
+    required VoidCallback onLoad,
+  }) : _state = state,
+       _onLoad = onLoad;
 
-  final State state;
   final Song? song;
   final double? size;
-  final VoidCallback onLoad;
+  final _ContentArtState _state;
+  final VoidCallback _onLoad;
 
   CancellationSignal? _signal;
   Uint8List? _bytes;
   late File _file;
   bool loaded = false;
-  bool _broken = false;
 
-  bool get showDefault => _broken ? _broken : song == null ||
+  bool get showDefault => song == null ||
                           !_useBytes && song!.albumArt == null ||
                           _useBytes && loaded && _bytes == null;
 
-  void load() {
+  void _load() {
+    assert(
+      !loaded,
+      "Art loader can be loaded only once",
+    );
     if (song == null) {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (!state.mounted)
-          return;
-        _commitLoad();
-      });
+      if (_state.loadAnimationDuration == Duration.zero) {
+        loaded = true;
+      } else {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          _commitLoad();
+        });
+      }
     } else if (_useBytes) {
       final uri = song!.contentUri;
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
-        if (!state.mounted)
+        if (!_state.mounted)
           return;
         _signal = CancellationSignal();
         _bytes = await ContentChannel.loadAlbumArt(
           uri: uri,
-          size: Size.square(size!) * MediaQuery.of(state.context).devicePixelRatio,
+          size: Size.square(size!) * MediaQuery.of(_state.context).devicePixelRatio,
           signal: _signal!,
         );
-        if (!state.mounted)
-          return;
         _commitLoad();
       });
     } else {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (!state.mounted)
-          return;
-        final art = song!.albumArt;
-        if (art != null) {
-          _file = File(art);
-          final exists = _file.existsSync();
-          _broken = !exists;
-          if (_broken)
-            _recreateArt();
-        }
-        if (!_broken)
-          _commitLoad();
-      });
+      if (_state.loadAnimationDuration == Duration.zero) {
+        _loadFile();
+      } else {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          _loadFile();
+        });
+      }
     }
   }
 
   void _commitLoad() {
+    assert(
+      !loaded,
+      "Art loader can be loaded only once",
+    );
     loaded = true;
-    onLoad();
+    _onLoad();
+  }
+
+  void _loadFile() {
+    if (!_state.mounted)
+      return;
+    final art = song!.albumArt;
+    bool broken = false;
+    if (art != null) {
+      _file = File(art);
+      final exists = _file.existsSync();
+      broken = !exists;
+      if (broken)
+        _recreateArt();
+    }
+    if (!broken)
+      _commitLoad();
   }
 
   Future<void> _recreateArt() async {
     final ablumId = song!.albumId;
     if (ablumId != null)
       await ContentChannel.fixAlbumArt(song!.albumId!);
-    _broken = false;
     _commitLoad();
   }
 
@@ -309,7 +325,7 @@ class _ArtLoader {
 }
 
 class _ContentArtState extends State<ContentArt> {
-  late List<_ArtLoader> _loaders;
+  late List<ContentArtLoader> _loaders;
 
   bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
@@ -330,10 +346,11 @@ class _ContentArtState extends State<ContentArt> {
   }
 
   void _init() {
+    _dirty = true;
     final content = widget.source?._content;
     if (content == null || content is Song) {
       _loaders = [
-        _ArtLoader(
+        ContentArtLoader._(
           state: this,
           song: content as Song?,
           size: widget.size,
@@ -342,7 +359,7 @@ class _ContentArtState extends State<ContentArt> {
       ];
     } else if (content is Album) {
       _loaders = [
-        _ArtLoader(
+        ContentArtLoader._(
           state: this,
           song: content.firstSong,
           size: widget.size,
@@ -355,7 +372,7 @@ class _ContentArtState extends State<ContentArt> {
       switch (songs.length) {
         case 0:
           _loaders = [
-            _ArtLoader(
+            ContentArtLoader._(
               state: this,
               song: null,
               size: widget.size,
@@ -364,7 +381,7 @@ class _ContentArtState extends State<ContentArt> {
           ];
           break;
         case 1:
-          final loader = _ArtLoader(
+          final loader = ContentArtLoader._(
             state: this,
             song: songs.first,
             size: size,
@@ -373,7 +390,7 @@ class _ContentArtState extends State<ContentArt> {
           List.generate(4, (index) => loader);
           break;
         case 2: 
-          _loaders = List.generate(2, (index) => _ArtLoader(
+          _loaders = List.generate(2, (index) => ContentArtLoader._(
             state: this,
             song: songs[index],
             size: size,
@@ -382,7 +399,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders.addAll(_loaders.reversed.toList());
           break;
         case 3:
-          _loaders = List.generate(3, (index) => _ArtLoader(
+          _loaders = List.generate(3, (index) => ContentArtLoader._(
             state: this,
             song: songs[index],
             size: size,
@@ -391,7 +408,7 @@ class _ContentArtState extends State<ContentArt> {
           _loaders.add(_loaders[0]);
           break;
         case 4:
-          _loaders = List.generate(4, (index) => _ArtLoader(
+          _loaders = List.generate(4, (index) => ContentArtLoader._(
             state: this,
             song: songs[index],
             size: size,
@@ -401,7 +418,7 @@ class _ContentArtState extends State<ContentArt> {
       }
     } else if (content is Artist) {
       _loaders = [
-        _ArtLoader(
+        ContentArtLoader._(
           state: this,
           song: null,
           size: widget.size,
@@ -410,24 +427,50 @@ class _ContentArtState extends State<ContentArt> {
       ];
     }
     for (final loader in _loaders) {
-      loader.load();
+      loader._load();
     }
   }
 
+  bool _dirty = true;
   void _onLoad() {
-    widget.onLoad?.call();
     if (mounted) {
       setState(() { });
     }
   }
+  void _deliverLoad(int? frame, RawImage child) {
+    // RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+    // ui.Image image = await boundary.toImage();
+    // ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    // Uint8List pngBytes = byteData.buffer.asUint8List();
+    // print(pngBytes);
+    // final image = 
+    // if (_dirty) {
+    //   widget.onLoad?.call(child.key);
+    //   _dirty = false;
+    // }
+  }
+
+  void _update() {
+    for (final loader in _loaders)
+      loader.cancel();
+    _init();
+  }
+
+  double? _devicePixelRatio;
+
+  @override
+  void didChangeDependencies() {
+    final newPixelRatio = MediaQuery.of(context).devicePixelRatio;
+    if (_devicePixelRatio != null && _devicePixelRatio != newPixelRatio)
+      _update();
+    _devicePixelRatio = newPixelRatio;
+    super.didChangeDependencies();
+  }
 
   @override
   void didUpdateWidget(covariant ContentArt oldWidget) {
-    if (oldWidget.source?._content != widget.source?._content) {
-      for (final loader in _loaders)
-        loader.cancel();
-      _init();
-    }
+    if (oldWidget.source?._content != widget.source?._content)
+      _update();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -481,6 +524,16 @@ class _ContentArtState extends State<ContentArt> {
           ? getColorForBlend(widget.color!)
           : ThemeControl.colorForBlend,
       colorBlendMode: BlendMode.plus,
+      frameBuilder:(
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        // _deliverLoad();
+        print('wqfqfw $frame');
+        return child;
+      },
       fit: BoxFit.cover,
     );
     if (widget.assetScale != 1.0) {
@@ -586,9 +639,9 @@ class _ContentArtState extends State<ContentArt> {
               child: AnimatedSwitcher(
                 duration: loadAnimationDuration,
                 switchInCurve: Curves.easeOut,
-                child: Container(
+                child: RepaintBoundary(
                   key: ValueKey(loaded),
-                  child: child
+                  child: child,
                 ),
               ),
             ),

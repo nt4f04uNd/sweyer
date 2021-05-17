@@ -15,7 +15,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
 import 'routes/routes.dart';
 
@@ -166,6 +165,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         data: App.nfThemeData,
           child: MaterialApp.router(
             // showPerformanceOverlay: true,
+            checkerboardRasterCacheImages: true,
             title: Constants.Config.APPLICATION_TITLE,
             color: ThemeControl.theme.colorScheme.primary,
             supportedLocales: Constants.Config.supportedLocales,

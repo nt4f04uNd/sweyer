@@ -8,7 +8,6 @@ import 'dart:ui';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 
 // I was just playing around with UI and saved this file for future use.
@@ -97,13 +96,15 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
                       onTap: _handleTap,
                       child: AnimatedBuilder(
                         animation: controller,
-                        child: Container(
-                          alignment: Alignment.center,
-                          color: Colors.black38,
-                          child: IgnorePointer(
-                            child: AnimatedPlayPauseButton(
-                              player: player,
-                              iconSize: 46,
+                          child: RepaintBoundary(
+                            child: Container(
+                            alignment: Alignment.center,
+                            color: Colors.black38,
+                            child: IgnorePointer(
+                              child: AnimatedPlayPauseButton(
+                                player: player,
+                                iconSize: 46,
+                              ),
                             ),
                           ),
                         ),
@@ -189,7 +190,9 @@ void _openStandalonePlayerRoute(BuildContext context) {
                     scale: routeScaleAnimation,
                     child: FadeTransition(
                       opacity: routeFadeAnimation,
-                      child: child,
+                      child: RepaintBoundary(// TODO: test RepaintBoundaries in this file
+                        child: child,
+                      ),
                     ),
                   ),
                 ),

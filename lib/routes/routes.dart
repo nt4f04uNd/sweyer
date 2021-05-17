@@ -15,7 +15,6 @@ import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
 import 'home_route/home_route.dart';
 import 'settings_route/settings_route.dart';

@@ -6,7 +6,6 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -35,7 +34,7 @@ class DevRoute extends StatelessWidget {
       ),
     );
     if (res != null && res as bool) {
-      ContentControl.setDevMode(false);
+      Prefs.devMode.set(false);
       Navigator.of(context).pop();
     }
   }

@@ -6,7 +6,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:sweyer/sweyer.dart';
 
 /// Coordinates the logic behind the [SharedAxisTabView].
 class SharedAxisTabController extends ChangeNotifier {
@@ -30,7 +30,9 @@ class SharedAxisTabController extends ChangeNotifier {
   /// If true, the active tab cannot be changed, neither by [changeTab],
   /// nor by user drag.
   bool canChange = true;
-  
+
+  /// Changes the tab and notifies liteners.
+  /// Updates can be disabled with [canChange] `false`.
   void changeTab(int value) {
     if (!canChange)
       return;
