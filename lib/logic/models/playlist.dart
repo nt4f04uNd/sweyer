@@ -22,17 +22,31 @@ class Playlist extends PersistentQueue {
   @override
   bool get playable => songIds.isNotEmpty;
 
+  /// Created and filled automatically each time the [songs] is called.
+  late Map<String, int> idMap;
+
   @override
   List<Song> get songs {
+    idMap = {};
     final List<Song> found = [];
     final List<int> notFoundIndices = [];
     for (int i = 0; i < songIds.length; i++) {
       final song = ContentControl.state.allSongs.byId.get(songIds[i]);
       if (song != null) {
-        found.add(song);
+        final copiedSong = song.copyWith();
+        copiedSong.idMap = idMap;
+        found.add(copiedSong);
       } else {
         notFoundIndices.add(songIds[i]);
       }
+    }
+    for (final song in found) {
+      ContentControl.deduplicateSong(
+        song,
+        inserted: true,
+        source: found,
+        idMap: idMap,
+      );
     }
     for (int i = notFoundIndices.length - 1; i >= 0; i--) {
       songIds.remove(i);
@@ -46,7 +60,7 @@ class Playlist extends PersistentQueue {
     return song.contentUri;
   }
 
-  const Playlist({
+  Playlist({
     required int id,
     required this.data,
     required this.dateAdded,
@@ -89,7 +103,7 @@ class Playlist extends PersistentQueue {
       dateAdded: map['dateAdded'] as int,
       dateModified: map['dateModified'] as int,
       name: map['name'] as String,
-      songIds: (map['songIds'] as List).cast<int>(),
+      songIds: (map['songIds'] as List).cast<int>().toList(),
     );
   }
 

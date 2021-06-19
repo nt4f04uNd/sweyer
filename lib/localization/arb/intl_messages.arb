@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-05-11T18:55:33.201447",
+  "@@last_modified": "2021-06-19T20:35:43.769636",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -113,6 +113,16 @@
       "count": {}
     }
   },
+  "albumNotFound": "Album not found",
+  "@albumNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistNotFound": "Artist not found",
+  "@artistNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
   "allTracks": "All tracks",
   "@allTracks": {
     "type": "text",
@@ -153,6 +163,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "selectedPlural": "Selected",
+  "@selectedPlural": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newPlaylist": "New playlist",
+  "@newPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playContentList": "Play",
   "@playContentList": {
     "type": "text",
@@ -170,6 +190,11 @@
   },
   "areYouSure": "Are you sure?",
   "@areYouSure": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSureYouWantTo": "Are you sure you want to",
+  "@areYouSureYouWantTo": {
     "type": "text",
     "placeholders": {}
   },
@@ -193,6 +218,31 @@
     "type": "text",
     "placeholders": {}
   },
+  "and": "And",
+  "@and": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "more": "More",
+  "@more": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "done": "Done",
+  "@done": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "create": "Create",
+  "@create": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "add": "Add",
+  "@add": {
+    "type": "text",
+    "placeholders": {}
+  },
   "remove": "Remove",
   "@remove": {
     "type": "text",
@@ -208,11 +258,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "deletionError": "Deletion error",
-  "@deletionError": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Edit",
   "@edit": {
     "type": "text",
@@ -225,21 +270,6 @@
   },
   "grant": "Grant",
   "@grant": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorMessage": "Oops! An error occurred",
-  "@errorMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorDetails": "Error details",
-  "@errorDetails": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "playbackErrorMessage": "An error occurred during the playback",
-  "@playbackErrorMessage": {
     "type": "text",
     "placeholders": {}
   },
@@ -298,8 +328,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "openAppSettingsError": "Error opening the app settings",
-  "@openAppSettingsError": {
+  "selected": "Selected",
+  "@selected": {
     "type": "text",
     "placeholders": {}
   },
@@ -313,13 +343,48 @@
     "type": "text",
     "placeholders": {}
   },
+  "goToArtist": "Go to artist",
+  "@goToArtist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playNext": "Play next",
   "@playNext": {
     "type": "text",
     "placeholders": {}
   },
+  "addToPlaylist": "Add to playlist",
+  "@addToPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromPlaylist": "Remove from playlist",
+  "@removeFromPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToFavorites": "Add to favorites",
+  "@addToFavorites": {
+    "type": "text",
+    "placeholders": {}
+  },
   "addToQueue": "Add to queue",
   "@addToQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromQueue": "Remove from queue",
+  "@removeFromQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "share": "Share",
+  "@share": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selectAll": "Select all",
+  "@selectAll": {
     "type": "text",
     "placeholders": {}
   },
@@ -363,16 +428,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "deletionPromptDescriptionP1": "Are you sure you want to delete ",
-  "@deletionPromptDescriptionP1": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "deletionPromptDescriptionP2": " selected tracks?",
-  "@deletionPromptDescriptionP2": {
-    "type": "text",
-    "placeholders": {}
-  },
   "devModeGreet": "Done! You are now a developer",
   "@devModeGreet": {
     "type": "text",
@@ -397,16 +452,6 @@
   },
   "devTestToast": "Test toast",
   "@devTestToast": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "devErrorSnackbar": "Show error snackbar",
-  "@devErrorSnackbar": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "devImportantSnackbar": "Show important snackbar",
-  "@devImportantSnackbar": {
     "type": "text",
     "placeholders": {}
   },
@@ -472,6 +517,36 @@
   },
   "searchClearHistory": "Clear search history?",
   "@searchClearHistory": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "oopsErrorOccurred": "Oops! An error occurred",
+  "@oopsErrorOccurred": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorDetails": "Error details",
+  "@errorDetails": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionError": "Deletion error",
+  "@deletionError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistDoesNotExistError": "Can't find the playlist, perhaps it was deleted",
+  "@playlistDoesNotExistError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackError": "An error occurred during the playback",
+  "@playbackError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openAppSettingsError": "Error opening the app settings",
+  "@openAppSettingsError": {
     "type": "text",
     "placeholders": {}
   }

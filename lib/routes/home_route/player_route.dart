@@ -258,6 +258,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
   ///
   /// If optional [index] is provided - jumps to it.
   void jumpToSong([int? index]) {
+    if (!mounted)
+      return;
     index ??= ContentControl.state.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
@@ -542,7 +544,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
                   songTileVariant: ContentControl.state.queues.origin is Album
                     ? SongTileVariant.number
                     : SongTileVariant.albumArt,
-                  songClickBehavior: SongClickBehavior.playPause,
+                  songTileClickBehavior: SongTileClickBehavior.playPause,
                   currentTest: (index) => index == currentSongIndex,
                   alwaysShowScrollbar: true,
                 );
@@ -725,11 +727,22 @@ class _InfoButton extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
-            content: SelectableText(
-              songInfo,
-              style: const TextStyle(fontSize: 13.0),
-              selectionControls: NFTextSelectionControls(
-                backgroundColor: ThemeControl.theme.colorScheme.background,
+            content: PrimaryScrollController(
+              controller: ScrollController(),
+              child: Builder(
+                builder: (context) {
+                  return AppScrollbar(
+                    child: SingleChildScrollView(
+                      child: SelectableText(
+                        songInfo,
+                        style: const TextStyle(fontSize: 13.0),
+                        selectionControls: NFTextSelectionControls(
+                          backgroundColor: ThemeControl.theme.colorScheme.background,
+                        ),
+                      ),
+                    ),
+                  );
+                }
               ),
             ),
             additionalActions: [

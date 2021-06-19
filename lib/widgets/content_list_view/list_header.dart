@@ -39,10 +39,8 @@ class ListHeader extends StatelessWidget {
         color: color,
         padding: margin,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
           children: [
-            if (leading != null) leading!,
+            if (leading != null) Expanded(child: leading!),
             if (trailing != null) trailing!,
           ],
         ),
@@ -53,13 +51,27 @@ class ListHeader extends StatelessWidget {
 
 /// Displays content controls to sort content and content [count] at the trailing.
 class ContentListHeader<T extends Content> extends StatelessWidget {
+  /// Creats a default header with sort controls, count and slots widgets
+  /// for other widgets.
   const ContentListHeader({
     Key? key,
     required this.count,
     this.selectionController,
     this.leading,
     this.trailing,
-  }) : super(key: key);
+  }) : _onlyCount = false, super(key: key);
+
+  /// Creates a header that shows only count.
+  const ContentListHeader.onlyCount({
+    Key? key,
+    required this.count,
+  }) : _onlyCount = true,
+       selectionController = null,
+       leading = null,
+       trailing = null,
+       super(key: key);
+
+  final bool _onlyCount;
 
   /// Content count, will be displayed at the trailing.
   final int count;
@@ -120,6 +132,18 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     );
   }
 
+  Widget _buildCount(AppLocalizations l10n, TextStyle textStyle) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, right: 10.0),
+      child: Text(
+        l10n.contentsPluralWithCount<T>(count),
+        softWrap: false,
+        overflow: TextOverflow.fade,
+        style: textStyle,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
@@ -136,24 +160,25 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         left: 10.0,
         right: 7.0,
       ),
-      trailing: Row(
-        children: [
-          if (trailing != null)
-            trailing!,
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: Text(
-              l10n.contentsPluralWithCount<T>(count),
-              style: textStyle,
+      trailing: _onlyCount
+        ? null
+        : Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (trailing != null)
+              trailing!,
+            Flexible(
+              child: _buildCount(l10n, textStyle),
             ),
-          ),
-        ],
-      ),
-      leading: Theme(
+          ],
+        ),
+      leading: _onlyCount ? _buildCount(l10n, textStyle) : Theme(
         data: Theme.of(context).copyWith(
           splashFactory: NFListTileInkRipple.splashFactory,
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ContentListHeaderAction(
               icon: Icon(sort.orderAscending 
@@ -165,16 +190,20 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                 );
               },
             ),
-            InkResponse(
-              onTap: _handleTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4.0,
-                  vertical: 2.0,
-                ),
-                child: Text(
-                  l10n.sortFeature<T>(sort.feature),
-                  style: textStyle,
+            Flexible(
+              child: InkResponse(
+                onTap: _handleTap,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4.0,
+                    vertical: 2.0,
+                  ),
+                  child: Text(
+                    l10n.sortFeature<T>(sort.feature),
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                    style: textStyle,
+                  ),
                 ),
               ),
             ),
@@ -254,11 +283,13 @@ class ContentListHeaderAction extends StatelessWidget {
   final Widget icon;
   final VoidCallback? onPressed;
 
+  static const size = 28.0;
+
   @override
   Widget build(BuildContext context) {
     return NFIconButton(
       icon: icon,
-      size: 28.0,
+      size: size,
       iconSize: 20.0,
       onPressed: onPressed,
     );

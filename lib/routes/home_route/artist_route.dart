@@ -3,14 +3,18 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+import 'dart:async';
+import 'dart:ui' as ui;
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/widgets/debug.dart';
 
 class ArtistRoute extends StatefulWidget {
   ArtistRoute({Key? key, required this.artist}) : super(key: key);
@@ -21,7 +25,7 @@ class ArtistRoute extends StatefulWidget {
   _ArtistRouteState createState() => _ArtistRouteState();
 }
 
-class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStateMixin, SelectionHandler {
+class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin, SelectionHandler {
   final ScrollController scrollController = ScrollController();
   late AnimationController appBarController;
   late AnimationController backButtonAnimationController;
@@ -29,6 +33,8 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
   late ContentSelectionController selectionController;
   late List<Song> songs;
   late List<Album> albums;
+  late StreamSubscription<void> _contentChangeSubscription;
+
 
   static const _appBarHeight = NFConstants.toolbarHeight - 8.0 + AppBarBorder.height;
 
@@ -56,10 +62,9 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    songs = widget.artist.songs;
-    albums = widget.artist.albums;
+    _updateContent(false);
     appBarController = AnimationController(
-      vsync: AppRouter.instance.navigatorKey.currentState!,
+      vsync: this,
       value: 1.0,
     );
     backButtonAnimationController = AnimationController(
@@ -80,15 +85,45 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
       ignoreWhen: () => playerRouteController.opened,
     )
      ..addListener(handleSelection);
+    _contentChangeSubscription = ContentControl.state.onContentChange.listen(_handleContentChange);
   }
 
   @override
   void dispose() {
+    _contentChangeSubscription.cancel();
     selectionController.dispose();
     appBarController.dispose();
-    backButtonAnimationController.dispose();
     scrollController.removeListener(_handleScroll);
     super.dispose();
+  }
+
+   void _handleContentChange(void event) {
+    setState(() {
+      _updateContent();
+    });
+  }
+
+  void _updateContent([bool postFrame = false]) {
+    songs = widget.artist.songs;
+    albums = widget.artist.albums;
+    if (songs.isEmpty && albums.isEmpty) {
+      if (postFrame) {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          if (mounted) {
+            _quitBecauseNotFound();
+          }
+        });
+      } else {
+        _quitBecauseNotFound();
+      }
+    }
+  }
+
+  void _quitBecauseNotFound() {
+    ContentControl.refetchAll();
+    final l10n = getl10n(context);
+    ShowFunctions.instance.showToast(msg: l10n.artistNotFound);
+    Navigator.of(context).pop();
   }
 
   void _handleScroll() {
@@ -101,39 +136,18 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
     }
   }
 
+  PaletteGenerator? palette;
+  static Future<PaletteGenerator> _isolate(image) => createPalette(image);
+
   Widget _buildInfo() {
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
     final artSize = mediaQuery.size.width;
-    final totalDuration = Duration(milliseconds: songs.fold(0, (prev, el) => prev + el.duration));
-    final hours = totalDuration.inHours;
-    final minutes = totalDuration.inMinutes % 60;
-    final seconds = totalDuration.inSeconds % 60;
-    final buffer = StringBuffer();
-    if (hours > 0) {
-      if (hours.toString().length < 2) {
-        buffer.write(0);
-      }
-      buffer.write(hours);
-      buffer.write(':');
-    }
-    if (minutes > 0) {
-      if (minutes.toString().length < 2) {
-        buffer.write(0);
-      }
-      buffer.write(minutes);
-      buffer.write(':');
-    }
-    if (seconds > 0) {
-      if (seconds.toString().length < 2) {
-        buffer.write(0);
-      }
-      buffer.write(seconds);
-    }
     final summary = ContentUtils.joinDot([
       l10n.contentsPluralWithCount<Song>(songs.length),
-      l10n.contentsPluralWithCount<Album>(albums.length),
-      buffer,
+      if (albums.isNotEmpty)
+        l10n.contentsPluralWithCount<Album>(albums.length),
+      ContentUtils.bulkDuration(songs),
     ]);
     return Column(
       children: [
@@ -149,14 +163,27 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                       highRes: true,
                       size: artSize,
                       borderRadius: 0.0,
+                      // onLoad: (image) async {
+                        // palette = await compute<ui.Image, PaletteGenerator>(_isolate, image);
+                        // palette = await _isolate(image);
+                        // if (mounted) {
+                        //   WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                        //     if (mounted) {
+                        //       setState(() {});
+                        //       _debugOverlay = DebugOverlay(
+                        //         (context) => PaletteSwatches(generator: palette),
+                        //       );
+                        //     }
+                        //   });
+                        // }
+                      // },
                       source: ContentArtSource.artist(widget.artist),
                     ),
                     Positioned.fill(
-                      top: artSize / 3,
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.transparent, theme.colorScheme.background],
+                            colors: [theme.colorScheme.background.withOpacity(0.0), theme.colorScheme.background],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                           )
@@ -189,7 +216,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                                 fontSize: 16.0,
                                 height: 1.0,
                                 fontWeight: FontWeight.w700,
-                                color: Constants.Theme.contrast.auto,
+                                color: theme.colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -249,11 +276,6 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    // return const ImageColors(
-    //     title: 'Image Colors',
-    //     image: NetworkImage('https://is3-ssl.mzstatic.com/image/thumb/Music123/v4/94/70/f9/9470f96d-a57c-e9eb-d988-ec3014b0e4f0/888915939307_cover.jpg/400x400bb.jpeg'),
-    //     imageSize: Size(256.0, 256.0),
-    //   );
     final theme = ThemeControl.theme;
     final l10n = getl10n(context);
     mediaQuery = MediaQuery.of(context);
@@ -298,7 +320,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                               onHeaderTap: selectionController.inSelection || songs.length <= 5 ? null : () {
                                 HomeRouter.instance.goto(HomeRoutes.factory.artistContent<Song>(widget.artist, songs));
                               },
-                              contentTileTapHandler: <T extends Content>(Type t) {
+                              contentTileTapHandler: () {
                                 ContentControl.setOriginQueue(
                                   origin: widget.artist,
                                   songs: songs,
@@ -329,7 +351,6 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                                           .firstWhereOrNull((el) => el.data == albums[index]) != null,
                                         selectionController: selectionController,
                                         grid: true,
-                                        gridShowYear: true,
                                       );
                                     },
                                     separatorBuilder: (BuildContext context, int index) { 
@@ -361,7 +382,7 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
                           ).animate(backButtonAnimation);
 
                           final splashColorAnimation = ColorTween(
-                            begin: Constants.Theme.glowSplashColor.auto,
+                            begin: Constants.Theme.glowSplashColorOnContrast.auto,
                             end: theme.splashColor,
                           ).animate(backButtonAnimation);
 
@@ -418,338 +439,3 @@ class _ArtistRouteState extends State<ArtistRoute> with SingleTickerProviderStat
     );
   }
 }
-
-class ArtistContentRoute<T extends Content> extends StatelessWidget {
-  const ArtistContentRoute({
-    Key? key,
-    required this.arguments,
-  }) : super(key: key);
-
-  final ArtistContentArguments<T> arguments;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = getl10n(context);
-    final artist = arguments.artist;
-    final list = arguments.list;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ContentUtils.localizedArtist(artist.artist, l10n)),
-        leading: const NFBackButton(),
-      ),
-      body: ContentSelectionControllerCreator<T>(
-        builder: (context, selectionController, child) => StreamBuilder(
-          stream: ContentControl.state.onSongChange,
-          builder: (context, snapshot) => ContentListView<T>(
-            list: list,
-            selectionController: selectionController,
-            leading: ContentListHeader<T>(
-              count: list.length,
-              selectionController: selectionController,
-              trailing: Padding(
-                padding: const EdgeInsets.only(bottom: 1.0, right: 10.0),
-                child: Row(
-                  children: [
-                    ContentListHeaderAction(
-                      icon: const Icon(Icons.shuffle_rounded),
-                      onPressed: () {
-                        contentPick<T, VoidCallback>(
-                          song: () {
-                            ContentControl.setOriginQueue(
-                              origin: artist,
-                              shuffled: true,
-                              songs: list as List<Song>,
-                            );
-                          },
-                          album: () {
-                            final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
-                            ContentControl.setQueue(
-                              type: QueueType.allArtists,
-                              shuffled: true,
-                              songs: shuffleResult.shuffledSongs,
-                              shuffleFrom: shuffleResult.songs,
-                            );
-                            ContentControl.setOriginQueue(
-                              origin: artist,
-                              shuffled: true,
-                              songs: shuffleResult.songs,
-                              shuffledSongs: shuffleResult.shuffledSongs,
-                            );
-                          },
-                          playlist: () => throw UnimplementedError(),
-                          artist: () => throw UnimplementedError(),
-                        )();
-                        MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
-                        MusicPlayer.instance.play();
-                        playerRouteController.open();
-                      },
-                    ),
-                    ContentListHeaderAction(
-                      icon: const Icon(Icons.play_arrow_rounded),
-                      onPressed: () {
-                        contentPick<T, VoidCallback>(
-                          song: () {
-                            ContentControl.setOriginQueue(
-                              origin: artist,
-                              songs: list as List<Song>,
-                            );
-                          },
-                          album: () {
-                            final List<Song> songs = [];
-                            for (final album in list as List<Album>) {
-                              for (final song in album.songs) {
-                                song.origin = album;
-                                songs.add(song);
-                              }
-                            }
-                            ContentControl.setOriginQueue(
-                              origin: artist,
-                              songs: songs,
-                            );
-                          },
-                          playlist: () => throw UnimplementedError(),
-                          artist: () => throw UnimplementedError(),
-                        )();
-                        MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
-                        MusicPlayer.instance.play();
-                        playerRouteController.open();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// /// A small square of color with an optional label.
-// @immutable
-// class PaletteSwatch extends StatelessWidget {
-//   /// Creates a PaletteSwatch.
-//   ///
-//   /// If the [paletteColor] has property `isTargetColorFound` as `false`,
-//   /// then the swatch will show a placeholder instead, to indicate
-//   /// that there is no color.
-//   const PaletteSwatch({
-//     Key? key,
-//     this.color,
-//     this.label,
-//   }) : super(key: key);
-
-//   /// The color of the swatch.
-//   final Color? color;
-
-//   /// The optional label to display next to the swatch.
-//   final String? label;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Compute the "distance" of the color swatch and the background color
-//     // so that we can put a border around those color swatches that are too
-//     // close to the background's saturation and lightness. We ignore hue for
-//     // the comparison.
-//     final HSLColor hslColor = HSLColor.fromColor(color ?? Colors.transparent);
-//     final HSLColor backgroundAsHsl = HSLColor.fromColor(_kBackgroundColor);
-//     final double colorDistance = math.sqrt(
-//         math.pow(hslColor.saturation - backgroundAsHsl.saturation, 2.0) +
-//             math.pow(hslColor.lightness - backgroundAsHsl.lightness, 2.0));
-
-//     Widget swatch = Padding(
-//       padding: const EdgeInsets.all(2.0),
-//       child: color == null
-//           ? const Placeholder(
-//               fallbackWidth: 34.0,
-//               fallbackHeight: 20.0,
-//               color: Color(0xff404040),
-//               strokeWidth: 2.0,
-//             )
-//           : Container(
-//               decoration: BoxDecoration(
-//                   color: color,
-//                   border: Border.all(
-//                     width: 1.0,
-//                     color: _kPlaceholderColor,
-//                     style: colorDistance < 0.2
-//                         ? BorderStyle.solid
-//                         : BorderStyle.none,
-//                   )),
-//               width: 34.0,
-//               height: 20.0,
-//             ),
-//     );
-
-//     if (label != null) {
-//       swatch = ConstrainedBox(
-//         constraints: const BoxConstraints(maxWidth: 130.0, minWidth: 130.0),
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.start,
-//           children: <Widget>[
-//             swatch,
-//             Container(width: 5.0),
-//             Text(label!),
-//           ],
-//         ),
-//       );
-//     }
-//     return swatch;
-//   }
-// }
-
-
-// const Color _kBackgroundColor = Color(0xffa0a0a0);
-// const Color _kSelectionRectangleBackground = Color(0x15000000);
-// const Color _kSelectionRectangleBorder = Color(0x80000000);
-// const Color _kPlaceholderColor = Color(0x80404040);
-
-// /// The home page for this example app.
-// @immutable
-// class ImageColors extends StatefulWidget {
-//   /// Creates the home page.
-//   const ImageColors({
-//     Key? key,
-//     this.title,
-//     required this.image,
-//     this.imageSize,
-//   }) : super(key: key);
-
-//   /// The title that is shown at the top of the page.
-//   final String? title;
-
-//   /// This is the image provider that is used to load the colors from.
-//   final ImageProvider image;
-
-//   /// The dimensions of the image.
-//   final Size? imageSize;
-
-//   @override
-//   _ImageColorsState createState() {
-//     return _ImageColorsState();
-//   }
-// }
-
-// class _ImageColorsState extends State<ImageColors> {
-//   Rect? region;
-//   Rect? dragRegion;
-//   Offset? startDrag;
-//   Offset? currentDrag;
-//   PaletteGenerator? paletteGenerator;
-
-//   final GlobalKey imageKey = GlobalKey();
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     if (widget.imageSize != null) {
-//       region = Offset.zero & widget.imageSize!;
-//     }
-//     _updatePaletteGenerator(region);
-//   }
-
-//   Future<void> _updatePaletteGenerator(Rect? newRegion) async {
-//     paletteGenerator = 
-//     setState(() {});
-//   }
-
-//   // Called when the user starts to drag
-//   void _onPanDown(DragDownDetails details) {
-//     final RenderBox box =
-//         imageKey.currentContext!.findRenderObject()! as RenderBox;
-//     final Offset localPosition = box.globalToLocal(details.globalPosition);
-//     setState(() {
-//       startDrag = localPosition;
-//       currentDrag = localPosition;
-//       dragRegion = Rect.fromPoints(localPosition, localPosition);
-//     });
-//   }
-
-//   // Called as the user drags: just updates the region, not the colors.
-//   void _onPanUpdate(DragUpdateDetails details) {
-//     setState(() {
-//       currentDrag = currentDrag! + details.delta;
-//       dragRegion = Rect.fromPoints(startDrag!, currentDrag!);
-//     });
-//   }
-
-//   // Called if the drag is canceled (e.g. by rotating the device or switching
-//   // apps)
-//   void _onPanCancel() {
-//     setState(() {
-//       dragRegion = null;
-//       startDrag = null;
-//     });
-//   }
-
-//   // Called when the drag ends. Sets the region, and updates the colors.
-//   Future<void> _onPanEnd(DragEndDetails details) async {
-//     final Size? imageSize = imageKey.currentContext?.size;
-//     Rect? newRegion;
-
-//     if (imageSize != null) {
-//       newRegion = (Offset.zero & imageSize).intersect(dragRegion!);
-//       if (newRegion.size.width < 4 && newRegion.size.width < 4) {
-//         newRegion = Offset.zero & imageSize;
-//       }
-//     }
-
-//     await _updatePaletteGenerator(newRegion);
-//     setState(() {
-//       region = newRegion;
-//       dragRegion = null;
-//       startDrag = null;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: _kBackgroundColor,
-//       appBar: AppBar(
-//         title: Text(widget.title ?? ''),
-//       ),
-//       body: Column(
-//         mainAxisSize: MainAxisSize.max,
-//         mainAxisAlignment: MainAxisAlignment.start,
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         children: <Widget>[
-//           Padding(
-//             padding: const EdgeInsets.all(20.0),
-//             // GestureDetector is used to handle the selection rectangle.
-//             child: GestureDetector(
-//               onPanDown: _onPanDown,
-//               onPanUpdate: _onPanUpdate,
-//               onPanCancel: _onPanCancel,
-//               onPanEnd: _onPanEnd,
-//               child: Stack(children: <Widget>[
-//                 Image(
-//                   key: imageKey,
-//                   image: widget.image,
-//                   width: widget.imageSize?.width,
-//                   height: widget.imageSize?.height,
-//                 ),
-//                 // This is the selection rectangle.
-//                 Positioned.fromRect(
-//                     rect: dragRegion ?? region ?? Rect.zero,
-//                     child: Container(
-//                       decoration: BoxDecoration(
-//                           color: _kSelectionRectangleBackground,
-//                           border: Border.all(
-//                             width: 1.0,
-//                             color: _kSelectionRectangleBorder,
-//                             style: BorderStyle.solid,
-//                           )),
-//                     )),
-//               ]),
-//             ),
-//           ),
-//           // Use a FutureBuilder so that the palettes will be displayed when
-//           // the palette generator is done generating its data.
-//           PaletteSwatches(generator: paletteGenerator),
-//         ],
-//       ),
-//     );
-//   }
-// }

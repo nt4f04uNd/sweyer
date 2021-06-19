@@ -64,7 +64,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
     _show();
     setState(() {
       if (player.processingState == ProcessingState.completed) {
-        player.seek(const Duration());
+        player.seek(Duration.zero);
       }
       if (player.playing) {
         player.pause();

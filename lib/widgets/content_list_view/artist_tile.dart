@@ -21,6 +21,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.current,
     this.onTap,
     double? horizontalPadding,
+    this.backgroundColor = Colors.transparent,
   })  : horizontalPadding = horizontalPadding ?? _horizontalPadding,
         index = null,
         super(key: key);
@@ -31,16 +32,19 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     required int this.index,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
+    bool selectionGestureEnabled = true,
     this.trailing,
     this.current,
     this.onTap,
     double? horizontalPadding,
+    this.backgroundColor = Colors.transparent,
   }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
               selectionController is SelectionController<SelectionEntry<Artist>>),
        horizontalPadding = horizontalPadding ?? _horizontalPadding,
        super.selectable(
          key: key,
          selected: selected,
+         selectionGestureEnabled: selectionGestureEnabled,
          selectionController: selectionController,
        );
 
@@ -59,9 +63,13 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
 
   final double horizontalPadding;
 
+  /// Background tile color.
+  /// By default tile background is transparent.
+  final Color backgroundColor;
+
   @override
   SelectionEntry<Artist> toSelectionEntry() => SelectionEntry<Artist>(
-    index: index,
+    index: index!,
     data: artist,
   );
 
@@ -86,49 +94,51 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
   Widget _buildTile() {
     final source = ContentArtSource.artist(widget.artist);
     final l10n = getl10n(context);
-    return InkWell(
-      onTap: _handleTap,
-      onLongPress: toggleSelection,
-      splashFactory: NFListTileInkRipple.splashFactory,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: widget.horizontalPadding,
-          vertical: _tileVerticalPadding,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: ContentArt.artistTile(
-                source: source,
-                current: current,
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      ContentUtils.localizedArtist(widget.artist.artist, l10n),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ThemeControl.theme.textTheme.headline6,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (widget.trailing != null)
+    return Material(
+      color: widget.backgroundColor,
+      child: InkWell(
+        onTap: _handleTap,
+        onLongPress: toggleSelection,
+        splashFactory: NFListTileInkRipple.splashFactory,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.horizontalPadding,
+            vertical: _tileVerticalPadding,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
-                child: widget.trailing,
+                child: ContentArt.artistTile(
+                  source: source,
+                  current: current,
+                ),
               ),
-          ],
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                        overflow: TextOverflow.ellipsis,
+                        style: ThemeControl.theme.textTheme.headline6,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (widget.trailing != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: widget.trailing,
+                ),
+            ],
+          ),
         ),
       ),
     );

@@ -18,9 +18,12 @@ public class FetchHandler {
    // Some audio may be explicitly marked as not being music or be trashed (on Android R and above),
    // I'm excluding such.
    static String songsSelection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+   static String AND = " AND ";
    static {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-         songsSelection += " AND " + MediaStore.Audio.Media.IS_TRASHED + " == 0";
+         songsSelection += AND +
+            MediaStore.Audio.Media.IS_TRASHED + " == 0" + AND +
+            MediaStore.Audio.Media.IS_PENDING + " == 0";
       }
    }
 
@@ -88,6 +91,7 @@ public class FetchHandler {
               // * IS_DRM
               //
               // * IS_TRASHED - trashed items are excluded, see `selection` above
+              // * IS_PENDING - pedning items are excluded, see `selection` above
               //
               // * MIME_TYPE
               // * NUM_TRACKS - the number of songs in the origin this media comes from
@@ -105,9 +109,6 @@ public class FetchHandler {
               // media item.
       ));
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-         projection.add(MediaStore.Audio.Media.IS_PENDING);
-      }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
          projection.add(MediaStore.Audio.Media.IS_FAVORITE);
          projection.add(MediaStore.Audio.Media.GENERATION_ADDED);
@@ -141,15 +142,12 @@ public class FetchHandler {
             map.put("duration", cursor.getInt(10));
             map.put("size", cursor.getInt(11));
             map.put("data", cursor.getString(12));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-               map.put("isPending", cursor.getInt(13) == 1);
-            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-               map.put("isFavorite", cursor.getInt(14) == 1);
-               map.put("generationAdded", cursor.getInt(15));
-               map.put("generationModified", cursor.getInt(16));
-               map.put("genre", cursor.getString(17));
-               map.put("genreId", cursor.getInt(18));
+               map.put("isFavorite", cursor.getInt(13) == 1);
+               map.put("generationAdded", cursor.getInt(14));
+               map.put("generationModified", cursor.getInt(15));
+               map.put("genre", cursor.getString(16));
+               map.put("genreId", cursor.getInt(17));
             }
             maps.add(map);
          }

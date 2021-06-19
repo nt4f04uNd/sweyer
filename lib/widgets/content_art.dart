@@ -4,9 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
@@ -30,12 +35,13 @@ const Duration kArtLoadAnimationDuration = Duration(milliseconds: 240);
 /// Used for loading arts in lists.
 const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
-/// Whether to use bytes to load album arts from `MediaStore`.
-bool get _useBytes => ContentControl.sdkInt >= 29;
+/// Whether running on scoped storage, and should use bytes to load album
+/// arts from `MediaStore`.
+bool get _useScopedStorage => ContentControl.sdkInt >= 29;
 
-/// Source to load an [ContentArt].
 class ContentArtSource {
-  /// Creates art for song.
+  const ContentArtSource(Content content) : _content = content;
+
   const ContentArtSource.song(Song song)
     : _content = song;
 
@@ -71,8 +77,6 @@ class ContentArtSource {
 ///    * 3 - arts of 3 songs, and the last one is of the first song
 ///    * 4 - just 4 arts of 4 songs
 ///
-/// See also:
-///  * [ContentArtLoader], which loads arts from `MediaStore`
 class ContentArt extends StatefulWidget {
   const ContentArt({
     Key? key,
@@ -183,7 +187,7 @@ class ContentArt extends StatefulWidget {
   final double? currentIndicatorScale;
 
   /// Called when art is loaded.
-  final VoidCallback? onLoad;
+  final Function(ui.Image)? onLoad;
 
   /// Above Android Q and above album art loads from bytes, and performns an animation on load.
   /// This defines the duration of this animation.
@@ -193,90 +197,278 @@ class ContentArt extends StatefulWidget {
   _ContentArtState createState() => _ContentArtState();
 }
 
-/// Loads local album art for a song.
-///
-/// Lower Android Q album arts ared displayed directly from the file path
-/// of album art from [Song.albumArt].Above though, this path was deprecated due to
-/// scoped storage, and now album arts should be fetched with special method in `MediaStore.loadThumbnail`.
-/// The [_useBytes] indicates that we are on scoped storage and should use this
-/// new method.
-/// 
-/// Also, sometimes below Android Q, album arts files sometimes become unaccessible,
-/// even though they should not. Loader will try to restore them with [Song.albumId]
-/// and [ContentChannel.fixAlbumArt].
-class ContentArtLoader {
-  ContentArtLoader._({
-    required _ContentArtState state,
-    required this.song,
-    required this.size,
-    required VoidCallback onLoad,
-  }) : _state = state,
-       _onLoad = onLoad;
+/// Loading state for [_ArtSourceLoader].
+enum _SourceLoading {
+  /// There's not source to load.
+  notLoading,
 
-  final Song? song;
-  final double? size;
-  final _ContentArtState _state;
-  final VoidCallback _onLoad;
+  /// Source loading is in process.
+  loading,
 
-  CancellationSignal? _signal;
-  Uint8List? _bytes;
-  late File _file;
-  bool loaded = false;
+  /// Source has been loaded and ready to be used.
+  loaded,
+}
 
-  bool get showDefault => song == null ||
-                          !_useBytes && song!.albumArt == null ||
-                          _useBytes && loaded && _bytes == null;
+/// Signature for function that notifies about updates of [_SourceLoading] state.
+typedef OnLoadingChangeCallback = void Function(_SourceLoading);
 
-  void _load() {
+/// Base class for loading arts for a content.
+/// It loads a source of the art and provides it to the [_ContentArtState].
+
+abstract class _ArtSourceLoader {
+  _ArtSourceLoader({
+    required this.state,
+    this.onLoadingChange,
+  });
+
+  /// Art state this loader is bound to.
+  final _ContentArtState state;
+
+  /// Function that notifies about updates of [_SourceLoading] state.
+  /// If none specified [Art._onSourceLoad] will be used.
+  final OnLoadingChangeCallback? onLoadingChange;
+
+  /// Loading state.
+  _SourceLoading get loading => _loading;
+  _SourceLoading _loading = _SourceLoading.notLoading;
+  void setLoading(_SourceLoading value) {
     assert(
-      !loaded,
-      "Art loader can be loaded only once",
+      _loading != _SourceLoading.loaded,
+      "Image has loaded and loader is locked",
     );
-    if (song == null) {
-      if (_state.loadAnimationDuration == Duration.zero) {
-        loaded = true;
-      } else {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-          _commitLoad();
-        });
-      }
-    } else if (_useBytes) {
-      final uri = song!.contentUri;
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
-        if (!_state.mounted)
-          return;
-        _signal = CancellationSignal();
-        _bytes = await ContentChannel.loadAlbumArt(
-          uri: uri,
-          size: Size.square(size!) * MediaQuery.of(_state.context).devicePixelRatio,
-          signal: _signal!,
-        );
-        _commitLoad();
-      });
+    _loading = value;
+    final onLoad = onLoadingChange ?? state._onSourceLoad;
+    onLoad(value);
+  }
+
+  /// Whether art should show some default art, after the loader loads.
+  /// It should be invalid to call this method when not [_SourceLoading.loaded].
+  bool get showDefault;
+
+  /// Loads the source.
+  ///
+  /// Commonly, at the start of this method, state should be set to
+  /// [_SourceLoading.loading], and then at the end, set to [_SourceLoading.loaded].
+  void load();
+
+  /// Cancels the source loading.
+  void cancel();
+
+  /// Returns the image built from the loaded source.
+  /// May return `null`, when [showDefault] is `true`.
+  Widget? getImage(int? cacheSize);
+}
+
+/// Always loads the default art.
+class _NoSourceLoader extends _ArtSourceLoader {
+  _NoSourceLoader(_ContentArtState state) : super(state: state);
+
+  @override
+  bool get showDefault => true;
+
+  @override
+  void load() {
+    if (loading != _SourceLoading.notLoading)
+      return;
+    if (state.loadAnimationDuration == Duration.zero) {
+      setLoading(_SourceLoading.notLoading);
     } else {
-      if (_state.loadAnimationDuration == Duration.zero) {
-        _loadFile();
-      } else {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-          _loadFile();
-        });
-      }
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        setLoading(_SourceLoading.notLoading);
+      });
     }
   }
 
-  void _commitLoad() {
-    assert(
-      !loaded,
-      "Art loader can be loaded only once",
-    );
-    loaded = true;
-    _onLoad();
+  @override
+  void cancel() { }
+
+  @override
+  Widget? getImage(int? cacheSize) {
+    return null;
+  }
+}
+
+/// Loads song art for [Song]s.
+///
+/// This class automatically chooses between [_SongScopedStorageArtSourceLoader] and [_SongFileArtSourceLoader],
+/// depended on Android version.
+class _SongArtSourceLoader extends _ArtSourceLoader {
+  _SongArtSourceLoader({
+    required this.song,
+    required this.size,
+    required _ContentArtState state,
+  }) :  super(state: state) {
+    if (song == null) {
+      loader = _NoSourceLoader(state);
+    } else if (_useScopedStorage) {
+      loader = _SongScopedStorageArtSourceLoader(
+        song: song!,
+        size: size!,
+        onLoadingChange: (value) => setLoading(value),
+        state: state,
+      );
+    } else { 
+      loader = _SongFileArtSourceLoader(
+        song: song!,
+        size: size,
+        onLoadingChange: (value) => setLoading(value),
+        state: state,
+      );
+    }
   }
 
-  void _loadFile() {
-    if (!_state.mounted)
+  final Song? song;
+  final double? size;
+  late final _ArtSourceLoader loader;
+
+  @override
+  bool get showDefault {
+    assert(loading != _SourceLoading.loading);
+    return loader.showDefault;
+  }
+
+  @override
+  void load() {
+    loader.load();
+  }
+
+  @override
+  void cancel() {
+    loader.cancel();
+  }
+
+  @override
+  Widget? getImage(int? cacheSize) {
+    return loader.getImage(cacheSize);
+  }
+}
+
+/// Loads local song art with `MediaStore` API, used above Android Q.
+/// 
+/// Lower Android Q album arts ared displayed directly from the file path
+/// of album art from [Song.albumArt].
+///
+/// Above Q though, this path was deprecated due to  scoped storage, and now
+/// album arts should be fetched with special method in `MediaStore.loadThumbnail`.
+///
+/// The [_useScopedStorage] indicates that we are on scoped storage and should use this
+/// new method.
+/// 
+/// See also:
+///  * [_SongFileArtSourceLoader], which loads arts from files
+///  * [_SongArtSourceLoader], which automatically chooses between this loader and [_SongFileArtSourceLoader],
+///    dependent on Android version
+class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
+  _SongScopedStorageArtSourceLoader({
+    required this.song,
+    required this.size,
+    required _ContentArtState state,
+    required OnLoadingChangeCallback onLoadingChange,
+  }) : super(state: state, onLoadingChange: onLoadingChange);
+
+  final Song song;
+  final double size;
+
+  CancellationSignal? _signal;
+  Uint8List? _bytes;
+
+  @override
+  bool get showDefault {
+    assert(loading != _SourceLoading.loading);
+    return _bytes == null;
+  }
+
+  @override
+  void load() {
+    if (loading != _SourceLoading.notLoading)
       return;
-    final art = song!.albumArt;
+    setLoading(_SourceLoading.loading);
+    final uri = song.contentUri;
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      if (!state.mounted)
+        return;
+      _signal = CancellationSignal();
+      _bytes = await ContentChannel.loadAlbumArt(
+        uri: uri,
+        size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
+        signal: _signal!,
+      );
+      setLoading(_SourceLoading.loaded);
+    });
+  }
+
+  @override
+  void cancel() {
+    _signal?.cancel();
+    _signal = null;
+  }
+
+  @override
+  Widget? getImage(int? cacheSize) {
+    if (showDefault)
+      return null;
+    return Image.memory(
+      _bytes!,
+      width: size,
+      height: size,
+      cacheHeight: cacheSize,
+      cacheWidth: cacheSize,
+      fit: BoxFit.cover,
+      frameBuilder: state.frameBuilder,
+    );
+  }
+}
+
+/// Loads local song art from the file, used below Android Q.
+///
+/// Also, sometimes below Android Q, album arts files sometimes become unaccessible,
+/// even though they should not. This loader will try to restore them with [Song.albumId]
+/// and [ContentChannel.fixAlbumArt].
+///
+/// See also:
+///  * [_SongScopedStorageArtSourceLoader], which loads arts in scoped storage
+///  * [_SongArtSourceLoader], which automatically chooses between this loader and [_SongScopedStorageArtSourceLoader],
+///    dependent on Android version
+class _SongFileArtSourceLoader extends _ArtSourceLoader {
+  _SongFileArtSourceLoader({
+    required this.song,
+    required this.size,
+    required _ContentArtState state,
+    required OnLoadingChangeCallback onLoadingChange,
+  }) : super(state: state, onLoadingChange: onLoadingChange);
+
+  final Song song;
+  final double? size;
+
+  late File _file;
+
+  @override
+  bool get showDefault {
+    assert(loading != _SourceLoading.loading);
+    return song.albumArt == null;
+  }
+
+  @override
+  void load() {
+    if (loading != _SourceLoading.notLoading)
+      return;
+    setLoading(_SourceLoading.loading);
+    if (state.loadAnimationDuration == Duration.zero) {
+      _loadFile();
+    } else {
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        _loadFile();
+      });
+    }
+  }
+
+  @override
+  void cancel() { }
+
+  void _loadFile() {
+    if (!state.mounted)
+      return;
+    final art = song.albumArt;
     bool broken = false;
     if (art != null) {
       _file = File(art);
@@ -286,52 +478,127 @@ class ContentArtLoader {
         _recreateArt();
     }
     if (!broken)
-      _commitLoad();
+      setLoading(_SourceLoading.loaded);
   }
 
   Future<void> _recreateArt() async {
-    final ablumId = song!.albumId;
+    final ablumId = song.albumId;
     if (ablumId != null)
-      await ContentChannel.fixAlbumArt(song!.albumId!);
-    _commitLoad();
+      await ContentChannel.fixAlbumArt(song.albumId!);
+    setLoading(_SourceLoading.loaded);
   }
 
-  Image? getImage(int? cacheSize) {
-    if (_useBytes) {
-      return Image.memory(
-        _bytes!,
-        width: size,
-        height: size,
-        cacheHeight: cacheSize,
-        cacheWidth: cacheSize,
-        fit: BoxFit.cover,
-      );
-    }
-    if (!showDefault) {
-      return Image.file(
-        _file,
-        width: size,
-        height: size,
-        cacheHeight: cacheSize,
-        cacheWidth: cacheSize,
-        fit: BoxFit.cover,
-      );
-    }
-  }
-
-  void cancel() {
-    _signal?.cancel();
+  @override
+  Widget? getImage(int? cacheSize) {
+    if (showDefault)
+      return null;
+    return Image.file(
+      _file,
+      width: size,
+      height: size,
+      cacheHeight: cacheSize,
+      cacheWidth: cacheSize,
+      fit: BoxFit.cover,
+      frameBuilder: state.frameBuilder,
+    );
   }
 }
 
-class _ContentArtState extends State<ContentArt> {
-  late List<ContentArtLoader> _loaders;
 
-  bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loaded);
+/// Makes a call to the backend which searches an for artist art
+/// on Genius.
+///
+/// Unknown artist will be ignored and set as not loading immediately.
+class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
+  _ArtistGeniusArtSourceLoader({
+    required this.artist,
+    required this.size,
+    required _ContentArtState state,
+  }) : super(state: state);
+
+  final Artist artist;
+  final double? size;
+
+  String? _url;
+
+  @override
+  bool get showDefault {
+    assert(loading != _SourceLoading.loading);
+    return _url == null;
+  }
+
+  @override
+  void load() {
+    if (loading != _SourceLoading.notLoading)
+      return;
+    if (artist.isUnknown) {
+      setLoading(_SourceLoading.notLoading);
+      return;
+    }
+    setLoading(_SourceLoading.loading);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      if (!state.mounted)
+        return;
+      final info = await artist.fetchInfo();
+      _url = info.imageUrl;
+      setLoading(_SourceLoading.loaded);
+    });
+  }
+
+  @override
+  void cancel() { }
+
+  @override
+  Widget? getImage(int? cacheSize) {
+    if (showDefault)
+      return null;
+    return Image(
+      image: ResizeImage.resizeIfNeeded(cacheSize, cacheSize, CachedNetworkImageProvider(_url!)),
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stacktrace) {
+        FirebaseCrashlytics.instance.recordError(error, stacktrace);
+        return state._buildDefault();
+      },
+      frameBuilder: state.frameBuilder,
+    );
+  }
+}
+
+// TODO: end the abstraction of Art and ContentArt
+// I started it, but it's consumed a lot of time and I left it unended
+//
+// What needs to be done is that there should be a clean widget Art,
+// all specifics regarding source and how widget is exactly rendered should be either:
+//  * factored out to delegates (like this class)
+//  * or implemented as derived widgets from [Art], like [ContentArt]
+//
+/// Loading the art consists of three stages:
+///
+///  1. Load the source - this part is delegated to [_ArtSourceLoader].
+///
+///     During this stage, art displays either:
+///      * current indicator, if it's current
+///      * an empty box otherwise
+///
+///  2. Load the image from source.
+///
+///     When the traversal happens from the first stage to this, the art is
+///     revealed with animation.
+///
+///  3. Optionally, if [Art.onLoad] was provided, send the loaded art widget
+///     to it.
+///
+class _ContentArtState extends State<ContentArt> {
+  late List<_ArtSourceLoader> _loaders;
+  GlobalKey? globalKey;
+
+  bool get loaded => _loaders.isEmpty || _loaders.every((el) => el.loading != _SourceLoading.loading);
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
 
   /// Min duration for [loadAnimationDuration].
-  static Duration get _minDuration => _useBytes
+  static Duration get _minDuration => _useScopedStorage
     ? const Duration(milliseconds: 100)
     : Duration.zero;
 
@@ -342,112 +609,148 @@ class _ContentArtState extends State<ContentArt> {
   @override
   void initState() { 
     super.initState();
+    if (widget.onLoad != null)
+      globalKey = GlobalKey();
     _init();
   }
 
   void _init() {
-    _dirty = true;
+    _delivered = false;
     final content = widget.source?._content;
-    if (content == null || content is Song) {
-      _loaders = [
-        ContentArtLoader._(
-          state: this,
-          song: content as Song?,
-          size: widget.size,
-          onLoad: _onLoad,
-        ),
-      ];
+    if (content == null) {
+      _loaders = [_NoSourceLoader(this)];
+    } else if (content is Song) {
+      _loaders = [_SongArtSourceLoader(
+        state: this,
+        song: content,
+        size: widget.size,
+      )];
     } else if (content is Album) {
-      _loaders = [
-        ContentArtLoader._(
-          state: this,
-          song: content.firstSong,
-          size: widget.size,
-          onLoad: _onLoad,
-        ),
-      ];
+      _loaders = [_SongArtSourceLoader(
+        state: this,
+        song: content.firstSong,
+        size: widget.size,
+      )];
     } else if (content is Playlist) {
       final songs = content.songs;
       final size = _getSize(true);
       switch (songs.length) {
         case 0:
-          _loaders = [
-            ContentArtLoader._(
-              state: this,
-              song: null,
-              size: widget.size,
-              onLoad: _onLoad,
-            ),
-          ];
+          _loaders = [_SongArtSourceLoader(
+            state: this,
+            song: null,
+            size: widget.size,
+          )];
           break;
         case 1:
-          final loader = ContentArtLoader._(
+          final loader = _SongArtSourceLoader(
             state: this,
             song: songs.first,
             size: size,
-            onLoad: _onLoad,
           );
-          List.generate(4, (index) => loader);
+          _loaders = List.generate(4, (index) => loader);
           break;
         case 2: 
-          _loaders = List.generate(2, (index) => ContentArtLoader._(
+          _loaders = List.generate(2, (index) => _SongArtSourceLoader(
             state: this,
             song: songs[index],
             size: size,
-            onLoad: _onLoad,
           ));
           _loaders.addAll(_loaders.reversed.toList());
           break;
         case 3:
-          _loaders = List.generate(3, (index) => ContentArtLoader._(
+          _loaders = List.generate(3, (index) => _SongArtSourceLoader(
             state: this,
             song: songs[index],
             size: size,
-            onLoad: _onLoad,
           ));
           _loaders.add(_loaders[0]);
           break;
         case 4:
-          _loaders = List.generate(4, (index) => ContentArtLoader._(
+        default:
+          _loaders = List.generate(4, (index) => _SongArtSourceLoader(
             state: this,
             song: songs[index],
             size: size,
-            onLoad: _onLoad,
           ));
           break;
       }
     } else if (content is Artist) {
-      _loaders = [
-        ContentArtLoader._(
-          state: this,
-          song: null,
-          size: widget.size,
-          onLoad: _onLoad,
-        ),
-      ];
+      _loaders = [_ArtistGeniusArtSourceLoader(
+        state: this,
+        artist: content,
+        size: widget.size,
+      )];
+    } else {
+      throw UnimplementedError();
     }
     for (final loader in _loaders) {
-      loader._load();
+      loader.load();
     }
   }
 
-  bool _dirty = true;
-  void _onLoad() {
+  bool _delivered = false;
+  void _onSourceLoad(_SourceLoading loading) {
     if (mounted) {
+      if (loading == _SourceLoading.notLoading)
+        _deliverLoad();
       setState(() { });
     }
   }
-  void _deliverLoad(int? frame, RawImage child) {
-    // RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
-    // ui.Image image = await boundary.toImage();
-    // ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    // Uint8List pngBytes = byteData.buffer.asUint8List();
-    // print(pngBytes);
-    // final image = 
-    // if (_dirty) {
-    //   widget.onLoad?.call(child.key);
-    //   _dirty = false;
-    // }
+
+  Widget frameBuilder(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+    if (frame == 0 && loaded)
+      _deliverLoad();
+    return child;
+  }
+
+  /// Finally reveals the art and delivers the [ContentArt.onLoad] event, if listener was
+  /// provided.
+  ///
+  /// For each widget that can be return from build method:
+  ///  * if that widget is an image - the [frameBuilder] should be provided to it, so when it's ready,
+  ///    this method would be called to reveal it
+  ///  * otherwise it should be called manually (see _deliverLoad call in [build])
+  ///
+  /// It's an error to call this method, when [loaded] is not true.
+  Future<void> _deliverLoad() async {
+    assert(loaded);
+    if (!_delivered) {
+      _delivered = true;
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        if (mounted) {
+          setState(() {
+            /* rebuild to change animated switcher child */
+          });
+        }
+      });
+      if (widget.onLoad != null) {
+        /// Schedule two build phazes, don't know exactly why, but one throws with
+        /// `debugNeedsPaint` assertion fail.
+        ///
+        /// And the third is for the called above `setState`, because calling it
+        /// will cause image to be rebuilt to trigger [AnimatiedSwitcher] animation.
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+          if (!mounted)
+            return;
+          final object = globalKey!.currentContext!.findRenderObject()!;
+          final RenderRepaintBoundary boundary;
+          if (object is RenderStack) {
+            boundary = (object.lastChild! as RenderAnimatedOpacity).child! as RenderRepaintBoundary;
+          } else if (object is RenderPositionedBox) {
+            boundary = object.child! as RenderRepaintBoundary;
+          } else {
+            throw StateError('');
+          }
+          final image = await boundary.toImage();
+          widget.onLoad!(image);
+        });
+        });
+        });
+      }
+    }
   }
 
   void _update() {
@@ -461,7 +764,9 @@ class _ContentArtState extends State<ContentArt> {
   @override
   void didChangeDependencies() {
     final newPixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (_devicePixelRatio != null && _devicePixelRatio != newPixelRatio)
+    // Reload arts when on scoped storage, as they are using the pixel ratio size at the stage
+    // of loading.
+    if (_useScopedStorage && _devicePixelRatio != null && _devicePixelRatio != newPixelRatio)
       _update();
     _devicePixelRatio = newPixelRatio;
     super.didChangeDependencies();
@@ -469,7 +774,11 @@ class _ContentArtState extends State<ContentArt> {
 
   @override
   void didUpdateWidget(covariant ContentArt oldWidget) {
-    if (oldWidget.source?._content != widget.source?._content)
+    final oldContent = oldWidget.source?._content;
+    final content =  widget.source?._content;
+    if (oldContent != content ||
+        oldContent is Album && content is Album && oldContent.firstSong != content.firstSong ||
+        oldContent is Playlist && content is Playlist && !listEquals(oldContent.songIds, content.songIds))
       _update();
     super.didUpdateWidget(oldWidget);
   }
@@ -524,16 +833,7 @@ class _ContentArtState extends State<ContentArt> {
           ? getColorForBlend(widget.color!)
           : ThemeControl.colorForBlend,
       colorBlendMode: BlendMode.plus,
-      frameBuilder:(
-        BuildContext context,
-        Widget child,
-        int? frame,
-        bool wasSynchronouslyLoaded,
-      ) {
-        // _deliverLoad();
-        print('wqfqfw $frame');
-        return child;
-      },
+      frameBuilder: frameBuilder,
       fit: BoxFit.cover,
     );
     if (widget.assetScale != 1.0) {
@@ -548,6 +848,7 @@ class _ContentArtState extends State<ContentArt> {
   @override
   Widget build(BuildContext context) {
     assert(_loaders.isEmpty || _loaders.length == 1 || _loaders.length == 4);
+
     Widget child;
     Widget? currentIndicator;
     if (!loaded) {
@@ -572,6 +873,8 @@ class _ContentArtState extends State<ContentArt> {
           height: widget.size,
         );
         currentIndicator = _buildCurrentIndicator();
+        // We should show the art now.
+        _deliverLoad();
       } else {
         child = _buildDefault();
       }
@@ -620,11 +923,13 @@ class _ContentArtState extends State<ContentArt> {
       }
     }
 
-    child = ClipRRect(
-      borderRadius: BorderRadius.all(
-        Radius.circular(widget.borderRadius),
+    child = RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(
+          Radius.circular(widget.borderRadius),
+        ),
+        child: child,
       ),
-      child: child,
     );
 
     return SizedBox(
@@ -633,16 +938,18 @@ class _ContentArtState extends State<ContentArt> {
       child: Stack(
         children: [
           if (loadAnimationDuration == Duration.zero)
-            Center(child: child)
+            Center(
+              key: globalKey,
+              child: child,
+            )
           else
             Center(
               child: AnimatedSwitcher(
+                key: globalKey,
                 duration: loadAnimationDuration,
                 switchInCurve: Curves.easeOut,
-                child: RepaintBoundary(
-                  key: ValueKey(loaded),
-                  child: child,
-                ),
+                switchOutCurve: Curves.easeIn,
+                child: _delivered ? child : Opacity(opacity: 0, child: child),
               ),
             ),
           if (currentIndicator != null)

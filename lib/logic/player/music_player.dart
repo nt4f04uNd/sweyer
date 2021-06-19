@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+export 'backend.dart';
 export 'content_channel.dart';
 export 'content.dart';
 export 'queue.dart';
@@ -434,7 +435,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       case 'pause':
       case 'play': return player.playPause();
       case 'play_next': return player.playNext();
-      case 'stop': stop();
+      case 'stop': return stop();
+      default: throw UnimplementedError();
     }
   }
 
@@ -637,9 +639,12 @@ class MusicPlayer extends AudioPlayer {
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (current.isNotEmpty) {
       final songId = Prefs.songId.get();
-      await setSong(songId == null
-        ? current.songs[0]
-        : current.byId.get(songId) ?? current.songs[0]);
+      await setSong(
+        songId == null
+          ? current.songs[0]
+          : current.byId.get(songId) ?? current.songs[0],
+        fromBeginningWhenSame: false,
+      );
     }
   }
 
@@ -664,19 +669,28 @@ class MusicPlayer extends AudioPlayer {
   }
 
   /// Prepare the [song] to be played.
-  Future<void> setSong(Song? song, { bool fromBeginning = false}) async {
+  /// The song position is set to 0.
+  ///
+  /// Calling this function with the same song will just seek to the
+  /// beginning. To disable this [fromBeginningWhenSame] can be set to false.
+  Future<void> setSong(Song? song, { bool fromBeginningWhenSame = true }) async {
     song ??= ContentControl.state.allSongs.songs[0];
+    final previousCurrentSong = ContentControl.state.currentSongNullable;
     ContentControl.state.changeSong(song);
+    if (previousCurrentSong == ContentControl.state.currentSong) {
+      if (fromBeginningWhenSame)
+        await seek(Duration.zero);
+      return;
+    }
     try {
       await setAudioSource(
         ProgressiveAudioSource(Uri.parse(song.contentUri)),
-        initialPosition: fromBeginning ? const Duration() : null,
       );
     } catch (e) {
       if (e is PlayerInterruptedException) {
-
+        // Do nothing
       } else if (e is PlayerException) {
-        final message = getl10n(AppRouter.instance.navigatorKey.currentContext!).playbackErrorMessage;
+        final message = getl10n(AppRouter.instance.navigatorKey.currentContext!).playbackError;
         ShowFunctions.instance.showToast(msg: message);
         playNext(song: song);
         ContentControl.state.allSongs.remove(song);
@@ -708,13 +722,13 @@ class MusicPlayer extends AudioPlayer {
       song ?? ContentControl.state.currentSong,
     );
     if (song != null) {
-      await setSong(song, fromBeginning: true);
+      await setSong(song);
       await play();
     } else {
       final songs = ContentControl.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
-        await setSong(song, fromBeginning: true);
+        await setSong(song);
         await play();
       }
     }
@@ -726,52 +740,15 @@ class MusicPlayer extends AudioPlayer {
       song ?? ContentControl.state.currentSong,
     );
     if (song != null) {
-      await setSong(song, fromBeginning: true);
+      await setSong(song);
       await play();
     } else {
       final songs = ContentControl.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
-        await setSong(song, fromBeginning: true);
+        await setSong(song);
         await play();
       }
     }
   }
-
-  /// Function that handles click on track tile.
-  ///
-  /// Opens player route.
-  Future<void> handleSongClick(
-    BuildContext context,
-    Song clickedSong, {
-    SongClickBehavior behavior = SongClickBehavior.play,
-  }) async {
-    if (behavior == SongClickBehavior.play) {
-      playerRouteController.open();
-      await setSong(clickedSong, fromBeginning: true);
-      await play();
-    } else {
-      if (clickedSong == ContentControl.state.currentSong) {
-        if (!playing) {
-          playerRouteController.open();
-          await play();
-        } else {
-          await pause();
-        }
-      } else {
-        playerRouteController.open();
-        await setSong(clickedSong, fromBeginning: true);
-        await play();
-      }
-    }
-  }
-}
-
-/// Describes how to respond to song tile clicks.
-enum SongClickBehavior {
-  /// Always start the clicked song from the beginning.
-  play,
-
-  /// Allow play/pause on the clicked song.
-  playPause
 }

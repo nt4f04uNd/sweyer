@@ -41,7 +41,7 @@ class TrackPanel extends StatelessWidget {
         return FadeTransition(
           opacity: fadeAnimation,
           child: RepaintBoundary(
-            child:AnimationStrategyBuilder<bool>(
+            child: AnimationStrategyBuilder<bool>(
               strategy: const IgnoringStrategy(
                 forward: true,
                 completed: true,
@@ -130,8 +130,11 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
   _RotatingAlbumArtWithProgressState createState() => _RotatingAlbumArtWithProgressState();
 }
 
-class _RotatingAlbumArtWithProgressState
-    extends State<RotatingAlbumArtWithProgress> {
+class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgress> {
+  static const min = 0.001;
+
+  double initRotation = math.Random(DateTime.now().second).nextDouble();
+
   /// Actual track position value
   Duration _value = Duration.zero;
   // Duration of playing track
@@ -146,10 +149,8 @@ class _RotatingAlbumArtWithProgressState
   @override
   void initState() {
     super.initState();
-
     _value = MusicPlayer.instance.position;
     _duration = MusicPlayer.instance.duration;
-
     _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
       if (playing) {
         _rotatingArtGlobalKey.currentState!.rotate();
@@ -157,18 +158,11 @@ class _RotatingAlbumArtWithProgressState
         _rotatingArtGlobalKey.currentState!.stopRotating();
       }
     });
-
-    // Handle track position movement
     _positionSubscription = MusicPlayer.instance.positionStream.listen((position) {
-      if (position.inSeconds != _value.inSeconds) {
-        // Prevent waste updates
-        setState(() {
-          _value = position;
-        });
-      }
+      setState(() {
+        _value = position;
+      });
     });
-
-    // Handle song change
     _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
       _value = MusicPlayer.instance.position;
       setState(() {
@@ -185,25 +179,15 @@ class _RotatingAlbumArtWithProgressState
     super.dispose();
   }
 
-  double _calcProgress() {
-    if (_value.inMilliseconds == 0.0 || _duration.inMilliseconds == 0.0) {
-      return 0.001;
-    }
-    // Additional safety checks
-    var result = _value.inMilliseconds / _duration.inMilliseconds;
-    if (result < 0) {
-      result = 0;
-    } else if (result > 1) {
-      result = 0;
-    }
-    return result;
+  double get _progress {
+    return (_value.inMilliseconds / _duration.inMilliseconds).clamp(min, 1.0);
   }
 
   @override
   Widget build(BuildContext context) {
     final song = ContentControl.state.currentSong;
     return CircularPercentIndicator(
-      percent: _calcProgress(),
+      percent: _progress,
       animation: true,
       animationDuration: 200,
       curve: Curves.easeOutCubic,
@@ -216,7 +200,7 @@ class _RotatingAlbumArtWithProgressState
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,
         source: ContentArtSource.song(song),
-        initRotation: math.Random(DateTime.now().second).nextDouble(),
+        initRotation: initRotation,
         initRotating: MusicPlayer.instance.playing,
       ),
     );

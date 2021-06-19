@@ -4,10 +4,20 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:ui';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
+
+class _ReorderOperation {
+  final int oldIndex;
+  final int newIndex;
+  _ReorderOperation(this.oldIndex, this.newIndex);
+}
 
 class PersistentQueueRoute extends StatefulWidget {
   PersistentQueueRoute({Key? key, required this.queue})
@@ -23,7 +33,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   final ScrollController scrollController = ScrollController();
   late AnimationController appBarController;
   late ContentSelectionController<SelectionEntry<Song>> selectionController;
-  late List<Song> songs;
+  late PersistentQueue queue;
+  late List<Song> queueSongs;
+  late StreamSubscription<void> _contentChangeSubscription;
 
   static const _appBarHeight = NFConstants.toolbarHeight - 8.0;
   static const _artSize = 130.0;
@@ -38,16 +50,17 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   /// Amount of pixels user always can scroll.
   static const _alwaysCanScrollExtent = _infoSectionHeight + _buttonSectionHeight;
 
-  bool get isAlbum => widget.queue is Album;
-  Album get album {
-    assert(isAlbum);
-    return widget.queue as Album;
-  }
+  bool get isAlbum => queue is Album;
+  bool get isPlaylist => queue is Playlist;
+  Album get album => queue as Album;
+  Playlist get playlist => queue as Playlist;
+  // List<Song> get songs => editing ? editingSongs : queueSongs;
+  List<Song> get songs => queueSongs;
 
   @override
   void initState() {
     super.initState();
-    songs = widget.queue.songs;
+    _updateContent(true);
     appBarController = AnimationController(
       vsync: AppRouter.instance.navigatorKey.currentState!,
       value: 1.0,
@@ -59,24 +72,208 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
+      actionsBuilder: actionsBuilder,
     )
       ..addListener(handleSelection);
+    playerRouteController.addListener(_handlePlayerRouteController);
+    _contentChangeSubscription = ContentControl.state.onContentChange.listen(_handleContentChange);
   }
 
   @override
   void dispose() {
+    playerRouteController.removeListener(_handlePlayerRouteController);
+    _contentChangeSubscription.cancel();
     selectionController.dispose();
     appBarController.dispose();
     scrollController.removeListener(_handleScroll);
     super.dispose();
   }
 
+  List<Widget> actionsBuilder(context) {
+    if (isAlbum)
+      return const [];
+    if (isPlaylist)
+      return [
+        RemoveFromPlaylistSelectionAction(playlist: playlist),
+      ];
+    throw UnimplementedError();
+  }
+
+  void _handlePlayerRouteController() {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   void _handleScroll() {
     appBarController.value = 1.0 - scrollController.offset / _infoSectionHeight;
   }
 
+  void _handleContentChange(void event) {
+    setState(() {
+      _updateContent();
+    });
+  }
+
+  PersistentQueue? _findOriginalQueue() {
+    if (widget.queue is Album) {
+      return ContentControl.state.albums[widget.queue.id];
+    } else if (widget.queue is Playlist) {
+      return ContentControl.state.playlists.firstWhereOrNull((el) => el == widget.queue);
+    }
+    throw UnimplementedError();
+  }
+
+  /// Updates content.
+  /// If such playlist no longer exist, will automatically call [_quitBecauseNotFound].
+  void _updateContent([bool init = false]) {
+    final queue = _findOriginalQueue();
+    final queueSongs = queue?.songs;
+
+    if (queue == null || queue is Album && queueSongs!.isEmpty) {
+      if (init) {
+        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          if (mounted) {
+            _quitBecauseNotFound();
+          }
+        });
+      } else {
+        _quitBecauseNotFound();
+      }
+      return;
+    }
+    this.queue = queue;
+    this.queueSongs = queueSongs!;
+    if (!init && editing) {
+      // If received an update, discard any edits and start editing anew
+      _handleStartEditing();
+    }
+  }
+
+  void _quitBecauseNotFound() {
+    ContentControl.refetchAll();
+    final l10n = getl10n(context);
+    String message = '';
+    if (isAlbum) {
+      message = l10n.albumNotFound;
+    } else if (isPlaylist) {
+      message = l10n.playlistDoesNotExistError;
+    } else {
+      assert(false);
+    }
+    ShowFunctions.instance.showToast(msg: message);
+    Navigator.of(context).pop();
+  }
+
+  void _handleAddTracks() {
+    AppRouter.instance.goto(AppRoutes.tabsSelection.withArguments(TabsSelectionArguments(
+      title: (context) => getl10n(context).addToPlaylist,
+      onSubmit: (entries) {
+        print(ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged));
+        ContentControl.insertSongsInPlaylist(
+          index: songs.length,
+          songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged),
+          playlist: queue as Playlist,
+        );
+      },
+    )));
+  }
+
+  bool editing = false;
+  late List<Song> editingSongs;
+  late final List<_ReorderOperation> reorderOperations = [];
+  late final TextEditingController textEditingController = TextEditingController.fromValue(
+    TextEditingValue(text: queue.title),
+  );
+
+  bool get _canSubmit => _renamed || _reordered;
+  bool get _renamed => textEditingController.text.isNotEmpty && textEditingController.text != queue.title;
+  bool get _reordered => reorderOperations.isNotEmpty;
+
+  void _handleStartEditing() {
+    setState(() {
+      editing = true;
+      editingSongs = List.from(queueSongs);
+      textEditingController.text = queue.title;
+      reorderOperations.clear();
+    });
+  }
+
+  Future<void> _handleSubmit() async {
+    setState(() {
+      editing = false;
+      editingSongs.clear();
+      reorderOperations.clear();
+    });
+    if (_canSubmit) {
+      await Future.wait([
+        _commitRename(),
+        _commitReorder(),
+      ]);
+      await ContentControl.refetchSongsAndPlaylists();
+    }
+  }
+
+  void _handleCancel() {
+    setState(() {
+      editing = false;
+      textEditingController.text = queue.title;
+      reorderOperations.clear();
+    });
+  }
+  
+  Future<void> _commitRename() async {
+    if (!_renamed)
+      return;
+    final result = await ContentControl.renamePlaylist(playlist, textEditingController.text);
+    if (!result) {
+      _quitBecauseNotFound();
+    }
+  }
+
+  Future<void> _commitReorder() async {
+    if (!_reordered)
+      return;
+    final songIds = List<int>.from(playlist.songIds);
+    for (final operation in reorderOperations) {
+      final oldIndex = operation.oldIndex;
+      final newIndex = operation.newIndex;
+      final id = songIds.removeAt(oldIndex);
+      songIds.insert(newIndex, id);
+      await ContentControl.moveSongInPlaylist(
+        playlist: playlist,
+        from: oldIndex,
+        to: newIndex,
+        emitChangeEvent: false,
+      );
+    }
+    final index = ContentControl.state.playlists.indexOf(playlist);
+    ContentControl.state.playlists[index] = playlist.copyWith(songIds: songIds);
+  }
+
+  void _handleReorder(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    setState(() {
+      final song = songs.removeAt(oldIndex);
+      songs.insert(newIndex, song);
+      reorderOperations.add(_ReorderOperation(oldIndex, newIndex));
+    });
+  }
+
   Widget _buildInfo() {
     final l10n = getl10n(context);
+    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    const titleFontSize = 24.0;
+    final title = Text(
+      isPlaylist ? textEditingController.text : queue.title,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(
+        fontWeight: FontWeight.w900,
+        height: 1.0,
+        fontSize: titleFontSize,
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.only(
         left: 13.0,
@@ -93,30 +290,60 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   bottom: _infoSectionBottomPadding,
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ContentArt(
                       size: 130.0,
                       highRes: true,
                       assetScale: 1.5,
-                      source: ContentArtSource.persistentQueue(widget.queue),
+                      source: ContentArtSource.persistentQueue(queue),
                     ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 14.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text(
-                              widget.queue.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                height: 1.1,
-                                fontSize: 24.0,
+                            if (isAlbum)
+                              title
+                            else if (isPlaylist)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                                child: Stack(
+                                  alignment: Alignment.bottomLeft,
+                                  children: [
+                                    AnimatedSwitcher(
+                                      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                        return Stack(
+                                          alignment: Alignment.centerLeft,
+                                          children: <Widget>[
+                                            ...previousChildren,
+                                            if (currentChild != null) currentChild,
+                                          ],
+                                        );
+                                      },
+                                      duration: const Duration(milliseconds: 300),
+                                      switchInCurve: Curves.easeOut,
+                                      switchOutCurve: Curves.easeIn,
+                                      child: editing
+                                        ? AppTextField(
+                                            controller: textEditingController,
+                                            isDense: true,
+                                            contentPadding: const EdgeInsets.only(top: -9.0, bottom: -6.0),
+                                            textStyle: const TextStyle(
+                                              fontSize: 24.0,
+                                              fontWeight: FontWeight.w800,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            hintStyle: const TextStyle(fontSize: 22.0, height: 1.1, fontWeight: FontWeight.w800),
+                                          )
+                                        : SizedBox(
+                                            height: titleFontSize * textScaleFactor,
+                                            child: title,
+                                          ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             if (isAlbum)
                               Padding(
                                 padding: const EdgeInsets.only(
@@ -132,13 +359,55 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   ),
                                 ),
                               ),
-                            if (isAlbum)
-                              Text(
-                                ContentUtils.appendYearWithDot(l10n.album, album.year),
-                                style: TextStyle(
-                                  color: ThemeControl.theme.textTheme.subtitle2!.color,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14.0,
+                            Text(
+                              ContentUtils.joinDot([
+                                if (isAlbum)
+                                  l10n.album
+                                else
+                                  l10n.playlist,
+                                if (isAlbum)
+                                  album.year
+                                else
+                                  l10n.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
+                                ContentUtils.bulkDuration(songs),
+                              ]),
+                              style: TextStyle(
+                                color: ThemeControl.theme.textTheme.subtitle2!.color,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14.0,
+                              ),
+                            ),
+                            if (isPlaylist)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6.0),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 240),
+                                  switchInCurve: Curves.easeOutCubic,
+                                  switchOutCurve: Curves.easeInCubic,
+                                  child: Row(
+                                    key: ValueKey(editing),
+                                    children: !editing
+                                        ? [
+                                            _ActionIconButton(
+                                              icon: const Icon(Icons.edit_rounded),
+                                              onPressed: _handleStartEditing,
+                                            ),
+                                            const Spacer(),
+                                          ]
+                                        : [
+                                            _ActionIconButton(
+                                              icon: const Icon(Icons.close_rounded),
+                                              onPressed: _handleCancel,
+                                            ),
+                                            AnimatedBuilder(
+                                              animation: textEditingController,
+                                              builder: (context, child) => _ActionIconButton(
+                                                icon: const Icon(Icons.done_rounded),
+                                                onPressed: _canSubmit ? _handleSubmit : null,
+                                              ),
+                                            ),
+                                          ],
+                                  ),
                                 ),
                               ),
                           ],
@@ -164,9 +433,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                 children: [
                   Expanded(
                     child: ShuffleQueueButton(
-                      onPressed: () {
+                      onPressed: songs.isEmpty ? null : () {
                          ContentControl.setOriginQueue(
-                          origin: widget.queue,
+                          origin: queue,
                           songs: songs,
                           shuffled: true,
                         );
@@ -179,8 +448,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: PlayQueueButton(
-                      onPressed: () {
-                        ContentControl.setOriginQueue(origin: widget.queue, songs: songs);
+                      onPressed: songs.isEmpty ? null : () {
+                        ContentControl.setOriginQueue(origin: queue, songs: songs);
                         MusicPlayer.instance.setSong(songs[0]);
                         MusicPlayer.instance.play();
                         playerRouteController.open();
@@ -198,87 +467,209 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
 
   @override
   Widget build(BuildContext context) {
+    final l10n = getl10n(context);
     final theme = ThemeControl.theme;
 
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          /// The height to add at the end of the scroll view to make the top info part of the route
-          /// always be fully scrollable, even if there's not enough items for that.
-          final additionalHeight = constraints.maxHeight -
-            _appBarHeight -
-            AppBarBorder.height -
-            MediaQuery.of(context).padding.top -
-            kSongTileHeight * songs.length;
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            /// The height to add at the end of the scroll view to make the top info part of the route
+            /// always be fully scrollable, even if there's not enough items for that.
+            final additionalHeight = constraints.maxHeight -
+              _appBarHeight -
+              AppBarBorder.height -
+              MediaQuery.of(context).padding.top -
+              kSongTileHeight * songs.length -
+              (isAlbum ? 0.0 : kSongTileHeight); // InListContentAction
 
-          return ScrollConfiguration(
-            behavior: const GlowlessScrollBehavior(),
-            child: StreamBuilder(
-              stream: ContentControl.state.onSongChange,
-              builder: (context, snapshot) => CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  AnimatedBuilder(
-                    animation: appBarController,
-                    child: const NFBackButton(),
-                    builder: (context, child) => SliverAppBar(
-                      pinned: true,
-                      elevation: 0.0,
-                      automaticallyImplyLeading: false,
-                      toolbarHeight: _appBarHeight,
-                      leading: child,
-                      titleSpacing: 0.0,
-                      backgroundColor: appBarController.isDismissed
-                          ? theme.colorScheme.background
-                          : theme.colorScheme.background.withOpacity(0.0),
-                      title: AnimatedOpacity(
-                        opacity: 1.0 - appBarController.value > 0.35
-                          ? 1.0
-                          : 0.0,
-                        curve: Curves.easeOut,
-                        duration: const Duration(milliseconds: 400),
-                        child: Text(widget.queue.title),
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: IgnoreInSelection(
-                      controller: selectionController,
-                      child: _buildInfo()
-                    ),
-                  ),
-
-                  SliverStickyHeader(
-                    overlapsContent: false,
-                    header: AnimatedBuilder(
+            return ScrollConfiguration(
+              behavior: const GlowlessScrollBehavior(),
+              child: StreamBuilder(
+                stream: ContentControl.state.onSongChange,
+                builder: (context, snapshot) => CustomScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  controller: scrollController,
+                  slivers: [
+                    AnimatedBuilder(
                       animation: appBarController,
-                      builder: (context, child) => AppBarBorder(
-                        shown: scrollController.offset > _alwaysCanScrollExtent,
+                      child: const NFBackButton(),
+                      builder: (context, child) => SliverAppBar(
+                        pinned: true,
+                        elevation: 0.0,
+                        automaticallyImplyLeading: false,
+                        toolbarHeight: _appBarHeight,
+                        leading: child,
+                        titleSpacing: 0.0,
+                        backgroundColor: appBarController.isDismissed
+                            ? theme.colorScheme.background
+                            : theme.colorScheme.background.withOpacity(0.0),
+                        title: AnimatedOpacity(
+                          opacity: 1.0 - appBarController.value > 0.35
+                            ? 1.0
+                            : 0.0,
+                          curve: Curves.easeOut,
+                          duration: const Duration(milliseconds: 400),
+                          child: Text(queue.title),
+                        ),
                       ),
                     ),
-                    sliver: ContentListView.sliver<Song>(
-                      list: songs,
-                      selectionController: selectionController,
-                      currentTest: (index) => ContentUtils.originIsCurrent(widget.queue) &&
-                                              songs[index].sourceId == ContentControl.state.currentSong.sourceId,
-                      songTileVariant: SongTileVariant.number,
-                      onItemTap: () => ContentControl.setOriginQueue(
-                        origin: widget.queue,
-                        songs: songs,
-                      ),
-                    ),
-                  ),
-                  
-                  if (additionalHeight > 0) 
+
                     SliverToBoxAdapter(
-                      child: Container(height: additionalHeight),
+                      child: IgnoreInSelection(
+                        controller: selectionController,
+                        child: _buildInfo()
+                      ),
                     ),
-                ],
+
+                    SliverStickyHeader(
+                      overlapsContent: false,
+                      header: AnimatedBuilder(
+                        animation: appBarController,
+                        builder: (context, child) => AppBarBorder(
+                          shown: scrollController.offset > _alwaysCanScrollExtent,
+                        ),
+                      ),
+                      sliver: MultiSliver(
+                        children: [
+                          ContentListView.reorderableSliver<Song>(
+                            list: songs,
+                            selectionController: selectionController,
+                            reorderingEnabled: editing,
+                            onReorder: _handleReorder,
+                            currentTest: (index) {
+                              final idMap = ContentControl.state.idMap;
+                              final id = songs[index].id;
+                              final currentId = ContentControl.state.currentSong.id;
+                              // Entries where the item ID is referenced as value
+                              final entries = idMap.entries.where((el) => el.value == id);
+                              return ContentUtils.originIsCurrent(queue) &&
+                                    isAlbum && songs[index].sourceId == ContentControl.state.currentSong.sourceId ||
+                                    isPlaylist && ((id == currentId) ||
+                                    // For neganive values we definitely know this is a queue duplicate
+                                    // and just check for equalit for the current song
+                                    id < 0 && entries.isNotEmpty && entries.any((entry) => entry.key == currentId.toString()) ||
+                                    id > 0 && entries.isNotEmpty && (entries.any((entry) {
+                                      // Whe don't know yet whether the entry is duplicated from the playlist
+                                      // or from inserting to the queue, so check the playlist id map and exclude
+                                      // playlist duplications and only then check for other things
+                                      return (queue as Playlist).idMap[entry.key] == null &&
+                                              (entry.key == currentId.toString() ||
+                                              // Check if there are any entries where key is referenced as value
+                                              // that are equal to the current song
+                                              idMap.entries.where((el) => el.value.toString() == entry.key)
+                                                .any((entry) => entry.key == currentId.toString()));
+                                    })));
+                            },
+                            songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
+                            onItemTap: () => ContentControl.setOriginQueue(
+                              origin: queue,
+                              songs: songs,
+                            ),
+                          ),
+                          if (isPlaylist)
+                            SliverToBoxAdapter(
+                              child: InListContentAction.song(
+                                onTap: editing ? null : _handleAddTracks,
+                                icon: Icons.add_rounded,
+                                text: '${l10n.add} ${l10n.tracks.toLowerCase()}',
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    
+                    if (additionalHeight > 0) 
+                      SliverToBoxAdapter(
+                        child: Container(height: additionalHeight),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionIconButton extends StatefulWidget {
+  const _ActionIconButton({
+    Key? key,
+    required this.icon,
+    required this.onPressed,
+  }) : super(key: key);
+
+  final Widget icon;
+  final VoidCallback? onPressed;
+
+  @override
+  State<_ActionIconButton> createState() => _ActionIconButtonState();
+}
+
+class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerProviderStateMixin {
+  late final controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 240),
+  );
+  late final colorAnimation = ColorTween(
+    begin: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.12),
+    end: ThemeControl.theme.iconTheme.color,
+  ).animate(CurvedAnimation(
+    parent: controller,
+    curve: Curves.easeOut,
+    reverseCurve: Curves.easeIn,
+  ));
+
+  bool get enabled => widget.onPressed != null;
+
+  @override
+  void initState() { 
+    super.initState();
+    if (enabled) {
+      controller.forward();
+    } 
+  }
+  
+  @override
+  void didUpdateWidget(covariant _ActionIconButton oldWidget) {
+    if (oldWidget.onPressed != widget.onPressed) {
+      if (enabled) {
+        controller.forward();
+      } else {
+        controller.reverse();
+      }
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) => IgnorePointer(
+        ignoring: const IgnoringStrategy(
+          reverse: true,
+          dismissed: true,
+        ).ask(controller),
+        child: NFIconButton(
+          size: 30.0,
+          iconSize: 21.0,
+          icon: widget.icon,
+          onPressed: () {
+            widget.onPressed?.call();
+          },
+          color: colorAnimation.value,
+        ),
       ),
     );
   }

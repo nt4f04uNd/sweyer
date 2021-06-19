@@ -9,6 +9,17 @@ import 'package:sweyer/sweyer.dart';
 /// Needed for scrollbar label computations
 const double kSongTileHeight = 64.0;
 const double kSongTileHorizontalPadding = 10.0;
+const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
+const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
+
+/// Describes how to respond to song tile clicks.
+enum SongTileClickBehavior {
+  /// Always start the clicked song from the beginning.
+  play,
+
+  /// Allow play/pause on the clicked song.
+  playPause
+}
 
 /// Describes what to draw in the tile leading.
 enum SongTileVariant {
@@ -78,11 +89,13 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   SongTile({
     Key? key,
     required this.song,
+    this.trailing,
     this.current,
     this.onTap,
-    this.clickBehavior = SongClickBehavior.play,
-    this.variant = SongTileVariant.albumArt,
+    this.variant = kSongTileVariant,
+    this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
+    this.backgroundColor = Colors.transparent,
   }) : index = null,
        super(key: key);
 
@@ -92,21 +105,28 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     required int this.index,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
+    bool selectionGestureEnabled = true,
+    this.trailing,
     this.current,
     this.onTap,
-    this.clickBehavior = SongClickBehavior.play,
-    this.variant = SongTileVariant.albumArt,
+    this.variant = kSongTileVariant,
+    this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
+    this.backgroundColor = Colors.transparent,
   }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
               selectionController is SelectionController<SelectionEntry<Song>>),
        super.selectable(
          key: key,
          selected: selected,
+         selectionGestureEnabled: selectionGestureEnabled,
          selectionController: selectionController,
        );
 
   final Song song;
   final int? index;
+
+  /// Widget to be rendered at the end of the tile.
+  final Widget? trailing;
 
   /// Whether this song is current, if yes, enables animated
   /// [CurrentIndicator] over the ablum art/instead song number.
@@ -114,13 +134,17 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   /// If not specified, by default uses [ContentUtils.songIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
-  final SongClickBehavior clickBehavior;
   final SongTileVariant variant;
+  final SongTileClickBehavior clickBehavior;
   final double horizontalPadding;
+
+  /// Background tile color.
+  /// By default tile background is transparent.
+  final Color backgroundColor;
 
   @override
   SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
-    index: index,
+    index: index!,
     data: song,
   );
 
@@ -134,11 +158,26 @@ class _SongTileState extends SelectableState<SongTile> {
   void _handleTap() {
     super.handleTap(() async {
       widget.onTap?.call();
-      await MusicPlayer.instance.handleSongClick(
-        context,
-        widget.song,
-        behavior: widget.clickBehavior,
-      );
+      final song = widget.song;
+      final player = MusicPlayer.instance;
+      if (widget.clickBehavior == SongTileClickBehavior.play) {
+        playerRouteController.open();
+        await player.setSong(song);
+        await player.play();
+      } else {
+        if (song == ContentControl.state.currentSong) {
+          if (!player.playing) {
+            playerRouteController.open();
+            await player.play();
+          } else {
+            await player.pause();
+          }
+        } else {
+          playerRouteController.open();
+          await player.setSong(song);
+          await player.play();
+        }
+      }
     });
   }
 
@@ -154,7 +193,10 @@ class _SongTileState extends SelectableState<SongTile> {
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.headline6,
     );
-    Widget subtitle = ArtistWidget(artist: widget.song.artist);
+    Widget subtitle = ArtistWidget(
+      artist: widget.song.artist,
+      trailingText: formatDuration(Duration(milliseconds: widget.song.duration)),
+    );
     if (!showAlbumArt) {
       // Reduce padding between leading and title.
       Widget translate(Widget child) {
@@ -167,18 +209,23 @@ class _SongTileState extends SelectableState<SongTile> {
       title = translate(title);
       subtitle = translate(subtitle);
     }
-    return NFListTile(
-      dense: true,
-      isThreeLine: false,
-      contentPadding: EdgeInsets.only(
-        left: widget.horizontalPadding,
-        right: rightPadding,
+
+    return Material(
+      color: widget.backgroundColor,
+      child: NFListTile(
+        dense: true,
+        isThreeLine: false,
+        contentPadding: EdgeInsets.only(
+          left: widget.horizontalPadding,
+          right: rightPadding,
+        ),
+        onTap: _handleTap,
+        onLongPress: toggleSelection,
+        title: title,
+        subtitle: subtitle,
+        leading: albumArt,
+        trailing: widget.trailing,
       ),
-      onTap: _handleTap,
-      onLongPress: toggleSelection,
-      title: title,
-      subtitle: subtitle,
-      leading: albumArt,
     );
   }
 

@@ -57,7 +57,7 @@ public class DeletionService extends Service {
             );
             handler.post(() -> {
                // On R it's required to request an OS permission for file deletions
-               ContentChannel.instance.startDeletion(pendingIntent);
+               ContentChannel.instance.startIntentSenderForResult(pendingIntent, Constants.intents.PERMANENT_DELETION_REQUEST);
             });
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();

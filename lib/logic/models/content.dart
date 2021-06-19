@@ -20,6 +20,9 @@ abstract class Content with EquatableMixin {
   /// A unique ID of the content.
   int get id;
 
+  /// Title the content.
+  String get title;
+
   /// Creates a copy of this content with the given fields replaced with new values.
   dynamic get copyWith;
 
@@ -37,17 +40,11 @@ abstract class Content with EquatableMixin {
 abstract class SongOrigin extends Content {
   const SongOrigin();
 
-  /// Title of this queue.
-  String get title;
-
   /// List of songs.
   List<Song> get songs;
 
   /// Length of the queue.
   int get length;
-
-  /// Whether the queue can be played.
-  bool get playable;
 
   /// Used to serialize the origin.
   SongOriginEntry toSongOriginEntry();

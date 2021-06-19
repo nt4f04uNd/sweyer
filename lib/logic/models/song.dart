@@ -6,7 +6,16 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 
+/// Represends a song.
+///
+/// Songs are always playable, trashed or pending songs on Android Q are excluded.
 class Song extends Content {
+  /// This is the main song ID used for comparisons.
+  /// 
+  /// Initially, this is equal to the source song [sourceId], but if song is
+  /// found to be duplicated within some queue and this queue is currently
+  /// being processed in some way (for example, played), it might be altered
+  /// with a negative value.
   @override
   int id;
   /// Album name.
@@ -17,6 +26,7 @@ class Song extends Content {
   // TODO: vodoo shenanigans on android versions with this (and other places where i can)
   final String? genre;
   final int? genreId;
+  @override
   final String title;
   /// The track number of this song on the album, if any.
   final String? track;
@@ -26,11 +36,6 @@ class Song extends Content {
   final int duration;
   final int size;
   final String? data;
-
-  /// Indicates that song is pending, and still being inserted by its owner.
-  ///
-  /// Available starting from Android Q, in lower is always `false`.
-  final bool? isPending;
 
   /// Indicates that user marked this song as favorite.
   ///
@@ -52,13 +57,15 @@ class Song extends Content {
   /// This will help determining where the song comes from to show [CurrentIndicator]s.
   SongOrigin? origin;
 
+  /// A supplementary ID map, inserted by origins that allow duplication,
+  /// like [Playlist].
+  Map<String, int>? idMap;
+
   @override
   List<Object?> get props => [id];
 
-  int get sourceId => getSourceId(id);
-  static int getSourceId(int id) {
-    return id < 0 ? ContentControl.state.idMap[id.toString()]! : id;
-  }
+  /// Returns source song ID.
+  int get sourceId => idMap?[id.toString()] ?? ContentControl.getSourceId(id);
 
   /// Returns the song artist.
   Artist getArtist() => ContentControl.state.artists[artistId];
@@ -87,7 +94,6 @@ class Song extends Content {
     required this.duration,
     required this.size,
     required this.data,
-    required this.isPending,
     required this.isFavorite,
     required this.generationAdded,
     required this.generationModified,
@@ -131,7 +137,6 @@ class Song extends Content {
       duration: map['duration'] as int,
       size: map['size'] as int,
       data: map['data'] as String?,
-      isPending: map['isPending'] as bool?,
       isFavorite: map['isFavorite'] as bool?,
       generationAdded: map['generationAdded'] as int?,
       generationModified: map['generationModified'] as int?,
@@ -154,7 +159,6 @@ class Song extends Content {
       'duration': duration,
       'size': size,
       'data': data,
-      'isPending': isPending,
       'isFavorite': isFavorite,
       'generationAdded': generationAdded,
       'generationModified': generationModified,
@@ -179,7 +183,6 @@ abstract class SongCopyWith {
     int size,
     String? data,
     bool? isFavorite,
-    bool? isPending,
     int? generationAdded,
     int? generationModified,
     PersistentQueue? origin,
@@ -212,11 +215,11 @@ class _SongCopyWith extends SongCopyWith {
     Object duration = _undefined,
     Object size = _undefined,
     Object? data = _undefined,
-    Object? isPending = _undefined,
     Object? isFavorite = _undefined,
     Object? generationAdded = _undefined,
     Object? generationModified = _undefined,
     Object? origin = _undefined,
+    Object? supplementaryId = _undefined,
   }) {
     return Song(
       id: id == _undefined ? value.id : id as int,
@@ -233,7 +236,6 @@ class _SongCopyWith extends SongCopyWith {
       duration: duration == _undefined ? value.duration : duration as int,
       size: size == _undefined ? value.size : size as int,
       data: data == _undefined ? value.data : data as String?,
-      isPending: isPending == _undefined ? value.isPending : isPending as bool?,
       isFavorite: isFavorite == _undefined ? value.isFavorite : isFavorite as bool?,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
       generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,

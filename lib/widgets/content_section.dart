@@ -55,57 +55,27 @@ class ContentSection<T extends Content> extends StatelessWidget {
 
   /// Receives a type of tapped content tile and can be used to fire
   /// additional callbacks.
-  final void Function<K extends Content>(Type)? contentTileTapHandler;
+  final VoidCallback? contentTileTapHandler;
 
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
 
-    Widget Function(int) forPersistentQueue<Q extends PersistentQueue>() => (int index) {
-      final item = list[index] as Q;
-      return PersistentQueueTile<Q>.selectable(
-        index: index,
-        selected: selectionController?.data
-          .firstWhereOrNull((el) => el.data == item) != null,
-        queue: list[index] as Q,
-        selectionController: selectionController,
-        small: false,
-        horizontalPadding: 12.0,
-        onTap: () => contentTileTapHandler?.call<Q>(Q),
-      );
-    };
-
     Widget Function(int)? builder;
     if (child == null) {
-      builder = contentPick<T, Widget Function(int)>(
-        contentType: contentType,
-        song: (index) {
-          final item = list[index] as Song;
-          return SongTile.selectable(
-            index: index,
-            selected: selectionController?.data
-              .firstWhereOrNull((el) => el.data == item) != null,
-            song: item,
-            selectionController: selectionController,
-            horizontalPadding: 12.0,
-            onTap: () => contentTileTapHandler?.call<Song>(Song),
-          );
-        },
-        album: forPersistentQueue<Album>(),
-        playlist: forPersistentQueue<Playlist>(),
-        artist: (index) {
-          final item = list[index] as Artist;
-          return ArtistTile.selectable(
-            index: index,
-            selected: selectionController?.data
-              .firstWhereOrNull((el) => el.data == item) != null,
-            artist: item,
-            selectionController: selectionController,
-            horizontalPadding: 12.0,
-            onTap: () => contentTileTapHandler?.call<Artist>(Artist),
-          );
-        },
-      );
+      builder = (index) {
+        final item = list[index];
+        return ContentTile<T>(
+          contentType: contentType,
+          content: item,
+          index: index,
+          selected: selectionController?.data
+            .firstWhereOrNull((el) => el.data == item) != null,
+          selectionController: selectionController,
+          onTap: () => contentTileTapHandler?.call(),
+          horizontalPadding: 12.0,
+        );
+      };
     }
   
     final count = list.length;
@@ -143,7 +113,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
         else
           Column(
             children: [
-              for (int index = 0; index < math.min(maxPreviewCount, count); index ++)
+              for (int index = 0; index < math.min(maxPreviewCount, count); index++)
                 builder!(index),
             ],
           )

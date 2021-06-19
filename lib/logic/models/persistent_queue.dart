@@ -23,6 +23,9 @@ abstract class PersistentQueue extends SongOrigin {
   @override
   final int id;
 
+  /// Whether the queue can be played.
+  bool get playable;
+
   @override
   List<Object> get props => [id];
 }

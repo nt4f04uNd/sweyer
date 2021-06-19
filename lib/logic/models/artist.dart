@@ -33,15 +33,17 @@ class Artist extends SongOrigin {
   @override
   int get length => numberOfTracks;
 
-  @override
-  bool get playable => true;
-
   /// Returns albums for this artst.
   List<Album> get albums {
     return ContentControl.state.albums.values
       .where((el) => el.artistId == id)
       .toList();
   }
+
+  /// Whether this artist represents an unknown artist.
+  bool get isUnknown => artist == ContentUtils.unknownArtist;
+
+  Future<GetArtistInfoResponse> fetchInfo() => Backend.getArtistInfo(artist);
 
   const Artist({
     required this.id,

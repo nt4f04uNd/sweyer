@@ -43,7 +43,7 @@ class ShowFunctions extends NFShowFunctions {
     String query = '',
     bool openKeyboard = true,
   }) {
-    HomeRouter.instance.goto(HomeRoutes.factory.search(SearchArguments(
+    HomeRouter.instance.goto(HomeRoutes.search.withArguments(SearchArguments(
       query: query,
       openKeyboard: openKeyboard,
     )));
@@ -63,11 +63,17 @@ class ShowFunctions extends NFShowFunctions {
         globalKey: globalKey,
         child: NFSnackbar(
           title: Text(
-            '😮 ' + l10n.errorMessage,
+            '😮 ' + l10n.oopsErrorOccurred,
             style: TextStyle(
               fontSize: 15.0,
               color: theme.colorScheme.onError,
             ),
+          ),
+          padding: const EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 4.0,
+            bottom: 4.0,
           ),
           color: theme.colorScheme.error,
           trailing: NFButton(
@@ -93,11 +99,25 @@ class ShowFunctions extends NFShowFunctions {
                   right: 2.0,
                   bottom: 10.0,
                 ),
-                content: SelectableText(
-                  errorDetails,
-                  // TODO: temporarily do not apply AlwaysScrollableScrollPhysics, because of this issue https://github.com/flutter/flutter/issues/71342
-                  // scrollPhysics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-                  style: const TextStyle(fontSize: 11.0),
+                content: PrimaryScrollController(
+                  controller: ScrollController(),
+                  child: Builder(
+                    builder: (context) {
+                      return AppScrollbar(
+                        child: SingleChildScrollView(
+                          child: SelectableText(
+                            errorDetails,
+                            // TODO: temporarily do not apply AlwaysScrollableScrollPhysics, because of this issue https://github.com/flutter/flutter/issues/71342
+                            // scrollPhysics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                            style: const TextStyle(fontSize: 11.0),
+                            selectionControls: NFTextSelectionControls(
+                              backgroundColor: ThemeControl.theme.colorScheme.background,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  ),
                 ),
                 additionalActions: [
                   NFCopyButton(text: errorDetails),

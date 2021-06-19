@@ -21,7 +21,6 @@ final _testSong = Song(
   size: 0,
   data: 'data_data_data_data_data_data_data_data',
   origin: _testAlbum,
-  isPending: false,
   isFavorite: false,
   generationAdded: 0,
   generationModified: 0,

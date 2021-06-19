@@ -15,7 +15,7 @@ class SelectionEntry<T extends Content> extends Equatable {
 
   /// Used for comparison and for sorting when content is being
   /// inserted into queue.
-  final int? index;
+  final int index;
 
   /// The content data.
   final T data;

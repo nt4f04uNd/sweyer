@@ -23,6 +23,7 @@ class SweyerLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cacheSize = (size * 1.65 * MediaQuery.of(context).devicePixelRatio).round();
     return ClipRRect(
       borderRadius: const BorderRadius.all(
         Radius.circular(8.0),
@@ -39,7 +40,10 @@ class SweyerLogo extends StatelessWidget {
                 color: color != null
                     ? getColorForBlend(color!)
                     : ThemeControl.colorForBlend,
+                cacheHeight: cacheSize,
+                cacheWidth: cacheSize,
                 colorBlendMode: BlendMode.plus,
+                filterQuality: FilterQuality.high,
               ),
             ),
           ],

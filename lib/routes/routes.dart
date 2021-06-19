@@ -10,7 +10,7 @@ export 'dev_route.dart';
 
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide LicensePage, SearchDelegate;
+import 'package:flutter/material.dart' hide LicensePage;
 import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
@@ -30,8 +30,14 @@ abstract class _Routes<T> extends Equatable {
   final String location;
   final T? arguments;
 
-  /// Value key to pass in to the [Page].
-  ValueKey<String> get key => ValueKey(location);
+  _Routes withArguments(T arguments);
+
+  /// Returns a unique key to pass in to the [Page].
+  /// This will disallow adding this route to stack multiple times.
+  ///
+  /// See also:
+  ///  * [uniqueKey], which allows for multiple [Page]s for this route
+  ValueKey<String> get uniqueKey => ValueKey(location);
 
   @override
   List<Object?> get props => [location, arguments];
@@ -53,15 +59,27 @@ abstract class _Routes<T> extends Equatable {
 class AppRoutes<T> extends _Routes<T> {
   const AppRoutes._(String location, [T? arguments]) : super(location, arguments);
 
+  @override
+  AppRoutes<T> withArguments(T arguments) {
+    return AppRoutes<T>._(location, arguments);
+  }
+
   static const initial = AppRoutes<void>._('/');
   static const settings = AppRoutes<void>._('/settings');
   static const themeSettings = AppRoutes<void>._('/settings/theme');
   static const licenses = AppRoutes<void>._('/settings/licenses');
   static const dev = AppRoutes<void>._('/dev');
+  /// Creates [TabsRoute.selection].
+  static const tabsSelection = AppRoutes<TabsSelectionArguments>._('/selection');
 }
 
 class HomeRoutes<T> extends _Routes<T> {
   const HomeRoutes._(String location, [T? arguments]) : super(location, arguments);
+
+  @override
+  HomeRoutes<T> withArguments(T arguments) {
+    return HomeRoutes<T>._(location, arguments);
+  }
 
   static const tabs = HomeRoutes<void>._('/tabs');
   static const album = HomeRoutes<Album>._('/album');
@@ -101,10 +119,17 @@ class _HomeRoutesFactory {
       throw ArgumentError();
     }
   }
+}
 
-  HomeRoutes<SearchArguments> search(SearchArguments arguments) {
-    return HomeRoutes._(HomeRoutes.search.location, arguments);
-  }
+class TabsSelectionArguments {
+  TabsSelectionArguments({
+    required this.title,
+    required this.onSubmit,
+  });
+  /// Builder for title to display in the app bar.
+  final String Function(BuildContext) title;
+  /// Fired when user pressed a done button.
+  final ValueSetter<Set<SelectionEntry>> onSubmit;
 }
 
 class ArtistContentArguments<T> {
@@ -121,12 +146,15 @@ class SearchArguments {
   SearchArguments({
     this.query = '',
     this.openKeyboard = true
-  });
+  }) {
+    _delegate.query = query;
+    _delegate.autoKeyboard = openKeyboard;
+  }
 
   final String query;
   final bool openKeyboard;
 
-  final _delegate = SearchDelegate();
+  final _delegate = ContentSearchDelegate();
 }
 
 
@@ -184,7 +212,7 @@ mixin _DelegateMixin<T extends _Routes> on RouterDelegate<T>, ChangeNotifier {
     notifyListeners();
   }
 
-  bool _handlePopPage(Route<dynamic> route, dynamic result) {
+  bool _handlePopPage(Route<Object?> route, Object? result) {
     final bool success = route.didPop(result);
     if (success) {
       if (_routes.length <= 1) {
@@ -219,7 +247,7 @@ class _TransitionSettings {
   final StackFadeRouteTransitionSettings theme;
 }
 
-class AppRouter extends RouterDelegate<AppRoutes>
+class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   with ChangeNotifier,
        _DelegateMixin,
        PopNavigatorRouterDelegateMixin {
@@ -228,8 +256,8 @@ class AppRouter extends RouterDelegate<AppRoutes>
   static final instance = AppRouter._();
 
   @override
-  List<AppRoutes> get _routes => __routes;
-  final List<AppRoutes> __routes = [AppRoutes.initial as AppRoutes<Object>];
+  List<AppRoutes<Object?>> get _routes => __routes;
+  final List<AppRoutes<Object?>> __routes = [AppRoutes.initial as AppRoutes<Object>];
 
   @override
   Future<void> setNewRoutePath(AppRoutes configuration) async { }
@@ -295,48 +323,63 @@ class AppRouter extends RouterDelegate<AppRoutes>
     return StatefulBuilder(
       builder: (BuildContext context, setState) {
         this.setState = () => setState(() { });
+
+        final pages = <Page<void>>[
+          StackFadePage(
+            key: AppRoutes.initial.uniqueKey,
+            child: const InitialRoute(),
+            transitionSettings: transitionSettings.initial,
+          ),
+        ];
+
+        for (int i = 0; i < _routes.length; i++) {
+          final route = _routes[i];
+          if (route.hasSameLocation(AppRoutes.settings)) {
+            pages.add(StackFadePage(
+              key: AppRoutes.settings.uniqueKey,
+              child: const SettingsRoute(),
+              transitionSettings: transitionSettings.dismissible,
+            ));
+          } else if (route.hasSameLocation(AppRoutes.themeSettings)) {
+            pages.add(StackFadePage(
+              key: AppRoutes.themeSettings.uniqueKey,
+              child: const ThemeSettingsRoute(),
+              transitionSettings: transitionSettings.theme,
+            ));
+          } else if (route.hasSameLocation(AppRoutes.licenses)) {
+            pages.add(StackFadePage(
+              key: AppRoutes.licenses.uniqueKey,
+              child: const LicensePage(),
+              transitionSettings: transitionSettings.dismissible,
+            ));
+          } else if (route.hasSameLocation(AppRoutes.dev)) {
+            pages.add(StackFadePage(
+              key: AppRoutes.dev.uniqueKey,
+              child: const DevRoute(),
+              transitionSettings: transitionSettings.dismissible,
+            ));
+          } else if (route.hasSameLocation(AppRoutes.tabsSelection)) {
+            pages.add(StackFadePage(
+              key: AppRoutes.tabsSelection.uniqueKey,
+              child: TabsRoute.selection(
+                selectionArguments: (route as AppRoutes<TabsSelectionArguments>).arguments!,
+              ),
+              transitionSettings: transitionSettings.greyDismissible,
+            ));
+          }
+        }
         return Navigator(
           key: navigatorKey,
           observers: [routeObserver],
           onPopPage: _handlePopPage,
-          pages: <Page<void>>[
-            StackFadePage(
-              key: AppRoutes.initial.key,
-              child: const InitialRoute(),
-              transitionSettings: transitionSettings.initial,
-            ),
-            if (_routes.length > 1 && _routes[1].hasSameLocation(AppRoutes.settings))
-              StackFadePage(
-                key: AppRoutes.settings.key,
-                child: const SettingsRoute(),
-                transitionSettings: transitionSettings.dismissible,
-              ),
-            if (_routes.length > 2 && _routes[2].hasSameLocation(AppRoutes.themeSettings))
-              StackFadePage(
-                key: AppRoutes.themeSettings.key,
-                child: const ThemeSettingsRoute(),
-                transitionSettings: transitionSettings.theme,
-              ),
-            if (_routes.length > 2 && _routes[2].hasSameLocation(AppRoutes.licenses))
-              StackFadePage(
-                key: AppRoutes.licenses.key,
-                child: const LicensePage(),
-                transitionSettings: transitionSettings.dismissible,
-              ),
-            if (_routes.length > 1 && _routes[1].hasSameLocation(AppRoutes.dev))
-              StackFadePage(
-                key: AppRoutes.dev.key,
-                child: const DevRoute(),
-                transitionSettings: transitionSettings.dismissible,
-              ),
-          ],
+          pages: pages,
         );
       },
     );
   }
 }
 
-class HomeRouter extends RouterDelegate<HomeRoutes>
+class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   with ChangeNotifier,
        _DelegateMixin,
        PopNavigatorRouterDelegateMixin {
@@ -365,8 +408,8 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
   // late StreamSubscription<QuickAction> _quickActionsSub;
 
   @override
-  List<HomeRoutes> get _routes => __routes;
-  final List<HomeRoutes> __routes = [HomeRoutes.tabs as HomeRoutes<Object>];
+  List<HomeRoutes<Object?>> get _routes => __routes;
+  final List<HomeRoutes<Object?>> __routes = [HomeRoutes.tabs as HomeRoutes<Object>];
 
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
@@ -376,7 +419,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
 
   final tabsRouteKey = GlobalKey<TabsRouteState>();
 
-  SearchDelegate? get _currentSearchDelegate => _routes.last.hasSameLocation(HomeRoutes.search) 
+  ContentSearchDelegate? get _currentSearchDelegate => _routes.last.hasSameLocation(HomeRoutes.search) 
     ? (_routes.last as HomeRoutes<SearchArguments>).arguments!._delegate
     : null;
 
@@ -423,8 +466,9 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
       final newArguments = (route as HomeRoutes<SearchArguments>).arguments!;
       lastRoute.arguments!._delegate.query = newArguments.query;
       lastRoute.arguments!._delegate.autoKeyboard = newArguments.openKeyboard;
+    } else {
+      super.goto(route);
     }
-    super.goto(route);
   }
 
   @override
@@ -446,7 +490,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
       final route = _routes[i];
       if (route.hasSameLocation(HomeRoutes.tabs)) {
         pages.add(StackFadePage(
-          key: HomeRoutes.tabs.key,
+          key: HomeRoutes.tabs.uniqueKey,
           child: TabsRoute(key: tabsRouteKey),
           transitionSettings: transitionSettings.grey,
         ));
@@ -469,23 +513,24 @@ class HomeRouter extends RouterDelegate<HomeRoutes>
           child: ArtistRoute(artist: (route as HomeRoutes<Artist>).arguments!),
         ));
       } else if (route.hasSameLocation(HomeRoutes.artistContent)) {
-        final arguments = route.arguments!;
+        final arguments = route.arguments! as ArtistContentArguments;
         final ArtistContentRoute _route;
         if (arguments is ArtistContentArguments<Song>)
-          _route = ArtistContentRoute<Song>(arguments: route.arguments!);
+          _route = ArtistContentRoute<Song>(arguments: arguments);
         else if (arguments is ArtistContentArguments<Album>)
-          _route = ArtistContentRoute<Album>(arguments: route.arguments!);
+          _route = ArtistContentRoute<Album>(arguments: arguments);
         else
           throw ArgumentError();
         pages.add(StackFadePage(
-          key: ValueKey('${HomeRoutes.artistContent}/$i'),
+          key: ValueKey('${HomeRoutes.artistContent.location}/${arguments.artist.id}_$i'),
           transitionSettings: transitionSettings.greyDismissible,
           child: _route,
         ));
       } else if (route.hasSameLocation(HomeRoutes.search)) {
+        final arguments = route.arguments! as SearchArguments;
         pages.add(SearchPage(
-          key: HomeRoutes.search.key,
-          child: SearchRoute(delegate: (route as HomeRoutes<SearchArguments>).arguments!._delegate),
+          key: ValueKey('${HomeRoutes.search.location}/$i'),
+          child: SearchRoute(delegate: arguments._delegate),
           transitionSettings: transitionSettings.grey,
         ));
       } else {

@@ -41,9 +41,9 @@ public class MainActivity extends FlutterActivity {
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       super.onActivityResult(requestCode, resultCode, data);
-      if (requestCode == Constants.intents.PERMANENT_DELETION_REQUEST) {
-         // Report deletion intent result on android R
-         ContentChannel.instance.sendDeletionResult(resultCode == RESULT_OK);
+      if (requestCode == Constants.intents.PERMANENT_DELETION_REQUEST.value ||
+              requestCode == Constants.intents.FAVORITE_REQUEST.value) {
+         ContentChannel.instance.sendResultFromIntent(resultCode == RESULT_OK);
       }
    }
 

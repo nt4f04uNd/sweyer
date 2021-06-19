@@ -12,6 +12,9 @@ class Genre extends Content {
   final List<int> songIds;
 
   @override
+  String get title => name;
+
+  @override
   List<Object> get props => [id];
 
   const Genre({
@@ -19,7 +22,6 @@ class Genre extends Content {
     required this.name,
     required this.songIds,
   });
-
 
   @override
   GenreCopyWith get copyWith => _GenreCopyWith(this);

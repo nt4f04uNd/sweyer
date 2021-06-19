@@ -53,10 +53,10 @@ abstract class Theme {
     dark: Colors.white.withOpacity(0.1),
   );
 
-  /// A [glowSplashColor] to draw over [contrast].
+  /// A [glowSplashColor] to draw over contrasting colors, like primary or [contrast].
   static final _ThemeContainer<Color> glowSplashColorOnContrast = _ThemeContainer(
     light: Colors.white.withOpacity(0.13),
-    dark: const Color(0x80cccccc),
+    dark: Colors.black.withOpacity(0.13),
   );
 
   static const Color _lightIconColor = Color(0xff616266);
@@ -349,8 +349,7 @@ abstract class UiTheme {
   );
 
   /// Theme for the bottom sheet dialog.
-  static final _ThemeContainer<SystemUiOverlayStyle> bottomSheet =
-      _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> bottomSheet = _ThemeContainer(
     light: black.light.copyWith(
       systemNavigationBarColor: Colors.white,
       statusBarBrightness: Brightness.light,
@@ -369,14 +368,11 @@ abstract class UiTheme {
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.light,
     ),
-    dark: black.dark.copyWith(
-      statusBarColor: Colors.black,
-    ),
+    dark: black.dark,
   );
 
   /// Theme for the modal dialog that is displayed over [grey].
-  static final _ThemeContainer<SystemUiOverlayStyle> modalOverGrey =
-      _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> modalOverGrey = _ThemeContainer(
     light: modal.light.copyWith(
       systemNavigationBarColor: const Color(0xff6d6d6d),
     ),

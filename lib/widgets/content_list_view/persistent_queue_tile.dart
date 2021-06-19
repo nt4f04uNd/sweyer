@@ -12,7 +12,7 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Needed for scrollbar computations.
 const double kPersistentQueueTileHeight = kPersistentQueueTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
-const double _horizontalPadding = 16.0;
+const double kPersistentQueueTileHorizontalPadding = 16.0;
 const double _gridArtSize = 220.0;
 const double _gridArtAssetScale = 1.2;
 const double _gridCurrentIndicatorScale = 1.7;
@@ -29,10 +29,10 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.gridArtSize = _gridArtSize,
     this.gridArtAssetScale = _gridArtAssetScale,
     this.gridCurrentIndicatorScale = _gridCurrentIndicatorScale,
-    this.gridShowYear = false,
     double? horizontalPadding,
+    this.backgroundColor = Colors.transparent,
   }) : assert(!grid || !small),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
        index = null,
        super(key: key);
 
@@ -42,6 +42,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     required int this.index,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
+    bool selectionGestureEnabled = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -50,15 +51,16 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.gridArtSize = _gridArtSize,
     this.gridArtAssetScale = _gridArtAssetScale,
     this.gridCurrentIndicatorScale = _gridCurrentIndicatorScale,
-    this.gridShowYear = false,
     double? horizontalPadding,
+    this.backgroundColor = Colors.transparent,
   }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
               selectionController is SelectionController<SelectionEntry<T>>),
        assert(!grid || !small),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : _horizontalPadding),
+       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
        super.selectable(
          key: key,
          selected: selected,
+         selectionGestureEnabled: selectionGestureEnabled,
          selectionController: selectionController,
        );
 
@@ -91,15 +93,16 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   /// Value passed to [ContentArt.currentIndicatorScale] when [grid] is `true`.
   final double gridCurrentIndicatorScale;
 
-  /// If true, for [Album]s near the artist, the ablum year will be shown.
-  final bool gridShowYear;
-
   /// Tile horizontal padding. Ignored whne [grid] is `true`.
   final double horizontalPadding;
 
+  /// Background tile color.
+  /// By default tile background is transparent.
+  final Color? backgroundColor;
+
   @override
   SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>(
-    index: index,
+    index: index!,
     data: queue,
   );
 
@@ -125,18 +128,15 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     final List<Widget> children = [
       Text(
         widget.queue.title,
-        maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: ThemeControl.theme.textTheme.headline6,
       ),
     ];
     final queue = widget.queue;
     if (queue is Album) {
-      final artist = widget.gridShowYear
-        ? queue.albumDotName(getl10n(context))
-        : queue.artist;
       children.add(ArtistWidget(
-        artist: artist,
+        artist: queue.artist,
+        trailingText: queue.year.toString(),
         textStyle: const TextStyle(fontSize: 14.0, height: 1.0),
       ));
     }

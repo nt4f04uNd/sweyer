@@ -50,7 +50,7 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  //* Used in notification
+  //* Used in notification ******************
   
   /// Used as notification channel name.
   String get playback {
@@ -116,9 +116,8 @@ class AppLocalizations {
       name: 'loopOn',
     );
   }
-  //*------------------------------------
 
-  //* Quick actions
+  //* Quick actions ******************
   
   String get search {
     return Intl.message(
@@ -140,7 +139,8 @@ class AppLocalizations {
       name: 'playRecent',
     );
   }
-  //*------------------------------------
+
+  //* Content ******************
 
   /// Label for unknown artist.
   String get artistUnknown {
@@ -278,6 +278,20 @@ class AppLocalizations {
     )();
   }
 
+  String get albumNotFound {
+    return Intl.message(
+      "Album not found",
+      name: 'albumNotFound',
+    );
+  }
+
+  String get artistNotFound {
+    return Intl.message(
+      "Artist not found",
+      name: 'artistNotFound',
+    );
+  }
+
   String get allTracks {
     return Intl.message(
       "All tracks",
@@ -336,6 +350,25 @@ class AppLocalizations {
     );
   }
 
+  /// Should be in plural form
+  String get selectedPlural {
+    return Intl.message(
+      "Selected",
+      name: 'selectedPlural',
+    );
+  }
+
+  //* Playlists **********
+
+  String get newPlaylist {
+    return Intl.message(
+      "New playlist",
+      name: 'newPlaylist',
+    );
+  }
+
+  //* Generic ******************
+
   /// Displayed in list headers in button to play it.
   String get playContentList {
     return Intl.message(
@@ -363,6 +396,13 @@ class AppLocalizations {
     return Intl.message(
       "Are you sure?",
       name: 'areYouSure',
+    );
+  }
+
+  String get areYouSureYouWantTo {
+    return Intl.message(
+      "Are you sure you want to",
+      name: 'areYouSureYouWantTo',
     );
   }
 
@@ -396,6 +436,46 @@ class AppLocalizations {
     );
   }
 
+  String get and {
+    return Intl.message(
+      "And",
+      name: 'and',
+    );
+  }
+
+  String get more {
+    return Intl.message(
+      "More",
+      name: 'more',
+    );
+  }
+
+  /// "And 3 more"
+  String andNMore(int count) {
+    return "${and.toLowerCase()} $count ${more.toLowerCase()}";
+  }
+
+  String get done {
+    return Intl.message(
+      "Done",
+      name: 'done',
+    );
+  }
+
+  String get create {
+    return Intl.message(
+      "Create",
+      name: 'create',
+    );
+  }
+
+  String get add {
+    return Intl.message(
+      "Add",
+      name: 'add',
+    );
+  }
+
   String get remove {
     return Intl.message(
       "Remove",
@@ -414,13 +494,6 @@ class AppLocalizations {
     return Intl.message(
       "Deletion",
       name: 'deletion',
-    );
-  }
-
-  String get deletionError {
-    return Intl.message(
-      "Deletion error",
-      name: 'deletionError',
     );
   }
 
@@ -445,27 +518,6 @@ class AppLocalizations {
     );
   }
 
-  String get errorMessage {
-    return Intl.message(
-      "Oops! An error occurred",
-      name: 'errorMessage',
-    );
-  }
-
-  String get errorDetails {
-    return Intl.message(
-      "Error details",
-      name: 'errorDetails',
-    );
-  }
-
-  String get playbackErrorMessage {
-    return Intl.message(
-      "An error occurred during the playback",
-      name: 'playbackErrorMessage',
-    );
-  }
-
   String get details {
     return Intl.message(
       'Details',
@@ -480,6 +532,7 @@ class AppLocalizations {
     );
   }
 
+  // TODO: currently unused
   String get editMetadata {
     return Intl.message(
       "Edit metadata",
@@ -543,10 +596,10 @@ class AppLocalizations {
     );
   }
 
-  String get openAppSettingsError {
+  String get selected {
     return Intl.message(
-      "Error opening the app settings",
-      name: 'openAppSettingsError',
+      "Selected",
+      name: 'selected',
     );
   }
 
@@ -564,6 +617,14 @@ class AppLocalizations {
     );
   }
 
+  // TODO: currently unused
+  String get goToArtist {
+    return Intl.message(
+      "Go to artist",
+      name: 'goToArtist',
+    );
+  }
+
   String get playNext {
     return Intl.message(
       "Play next",
@@ -571,12 +632,60 @@ class AppLocalizations {
     );
   }
 
+  String get addToPlaylist {
+    return Intl.message(
+      "Add to playlist",
+      name: 'addToPlaylist',
+    );
+  }
+
+  String get removeFromPlaylist {
+    return Intl.message(
+      "Remove from playlist",
+      name: 'removeFromPlaylist',
+    );
+  }
+
+  // TODO: currently unused
+  String get addToFavorites {
+    return Intl.message(
+      "Add to favorites",
+      name: 'addToFavorites',
+    );
+  }
+  
   String get addToQueue {
     return Intl.message(
       "Add to queue",
       name: 'addToQueue',
     );
   }
+
+  // TODO: currently unused
+  String get removeFromQueue {
+    return Intl.message(
+      "Remove from queue",
+      name: 'removeFromQueue',
+    );
+  }
+
+  // TODO: currently unused
+  String get share {
+    return Intl.message(
+      "Share",
+      name: 'share',
+    );
+  }
+
+  // TODO: currently unused
+  String get selectAll {
+    return Intl.message(
+      "Select all",
+      name: 'selectAll',
+    );
+  }
+
+  //* Sort *****************
 
   String get sort {
     return Intl.message(
@@ -693,23 +802,6 @@ class AppLocalizations {
     )();
   }
 
-  //* Prompts ******************
-  // Specific section for prompts localizations that are not concretely tied with some route
-  /// The description is being splitted into rich text there.
-  String get deletionPromptDescriptionP1 {
-    return Intl.message(
-      "Are you sure you want to delete ",
-      name: 'deletionPromptDescriptionP1',
-    );
-  }
-
-  String get deletionPromptDescriptionP2 {
-    return Intl.message(
-      " selected tracks?",
-      name: 'deletionPromptDescriptionP2',
-    );
-  }
-
   //* Dev route ******************
   String get devModeGreet {
     return Intl.message(
@@ -747,20 +839,6 @@ class AppLocalizations {
     return Intl.message(
       "Test toast",
       name: 'devTestToast',
-    );
-  }
-
-  String get devErrorSnackbar {
-    return Intl.message(
-      "Show error snackbar",
-      name: 'devErrorSnackbar',
-    );
-  }
-
-  String get devImportantSnackbar {
-    return Intl.message(
-      "Show important snackbar",
-      name: 'devImportantSnackbar',
     );
   }
 
@@ -815,7 +893,7 @@ class AppLocalizations {
     );
   }
 
-  //****************** Search route ******************
+  //* Search route ******************
 
   String get searchHistory {
     return Intl.message(
@@ -858,6 +936,49 @@ class AppLocalizations {
     return Intl.message(
       "Clear search history?",
       name: 'searchClearHistory',
+    );
+  }
+
+  //* Errors ******************
+  String get oopsErrorOccurred {
+    return Intl.message(
+      "Oops! An error occurred",
+      name: 'oopsErrorOccurred',
+    );
+  }
+
+  String get errorDetails {
+    return Intl.message(
+      "Error details",
+      name: 'errorDetails',
+    );
+  }
+
+  String get deletionError {
+    return Intl.message(
+      "Deletion error",
+      name: 'deletionError',
+    );
+  }
+
+  String get playlistDoesNotExistError {
+    return Intl.message(
+      "Can't find the playlist, perhaps it was deleted",
+      name: 'playlistDoesNotExistError',
+    );
+  }
+
+  String get playbackError {
+    return Intl.message(
+      "An error occurred during the playback",
+      name: 'playbackError',
+    );
+  }
+
+  String get openAppSettingsError {
+    return Intl.message(
+      "Error opening the app settings",
+      name: 'openAppSettingsError',
     );
   }
 }

@@ -1,7 +1,10 @@
 ## 1.0.4
 
-- Added playlists and artsts
-- List optimizations
+- Added playlists and artists
+- Added more selection actions
+- Added favorites
+- In deletion prompts added a preview of the arts of the content that is being deleted
+- Other fixes and cosmetic changes
 
 ## 1.0.3
 

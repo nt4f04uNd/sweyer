@@ -9,8 +9,9 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide SearchDelegate;
+import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 
@@ -23,7 +24,16 @@ class _Notifier extends ChangeNotifier {
   }
 }
 
-class SearchDelegate {
+class ContentSearchDelegate {
+  ContentSearchDelegate([this.selectionController]);
+
+  /// If non-null, then the search route will start in selection
+  /// mode driven by that controller and will adapt in way so user
+  /// can search and select items simultainiously.
+  ///
+  /// Used for [TabsRoute.selection].
+  final ContentSelectionController? selectionController;
+
   /// Whether to automatically open the keyboard when page is opened.
   bool autoKeyboard = false;
 
@@ -81,11 +91,12 @@ class _SearchStateDelegate {
   _SearchStateDelegate(BuildContext context, this.searchDelegate)
     : scrollController = ScrollController(),
     singleListScrollController = ScrollController(),
-    selectionController = ContentSelectionController.create(
+    selectionController = searchDelegate.selectionController ?? ContentSelectionController.create(
       vsync: AppRouter.instance.navigatorKey.currentState!,
       context: context,
       closeButton: true,
-      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
+      ignoreWhen: () => playerRouteController.opened ||
+                        HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
     )
   {
     selectionController.addListener(setState);
@@ -99,7 +110,7 @@ class _SearchStateDelegate {
   final ScrollController scrollController;
   final ScrollController singleListScrollController;
   final ContentSelectionController selectionController;
-  final SearchDelegate searchDelegate;
+  final ContentSearchDelegate searchDelegate;
   /// Used to check whether the body is scrolled.
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
   _Results results = _Results();
@@ -111,7 +122,8 @@ class _SearchStateDelegate {
     scrollController.dispose();
     singleListScrollController.dispose();
     bodyScrolledNotifier.dispose();
-    selectionController.dispose();
+    if (searchDelegate.selectionController == null)
+      selectionController.dispose();
   }
 
   static _SearchStateDelegate? _of(BuildContext context) {
@@ -305,8 +317,8 @@ class SearchPage extends Page<void> {
   final RouteTransitionSettings? transitionSettings;
 
   @override
-  _SearchPageRoute createRoute(BuildContext context) {
-    return _SearchPageRoute(
+  SearchPageRoute createRoute(BuildContext context) {
+    return SearchPageRoute(
       settings: this,
       child: child,
       transitionSettings: transitionSettings,
@@ -314,10 +326,10 @@ class SearchPage extends Page<void> {
   }
 }
 
-class _SearchPageRoute extends RouteTransition<SearchPage> {
-  _SearchPageRoute({
-    RouteSettings? settings,
+class SearchPageRoute extends RouteTransition<SearchPage> {
+  SearchPageRoute({
     required this.child,
+    RouteSettings? settings,
     RouteTransitionSettings? transitionSettings,
   }) : super(
          settings: settings,
@@ -347,23 +359,25 @@ class _SearchPageRoute extends RouteTransition<SearchPage> {
   }
 }
 
-class SearchRoute<T> extends StatefulWidget {
-  const SearchRoute({
+class SearchRoute extends StatefulWidget {
+  SearchRoute({
     Key? key,
     required this.delegate,
   }) : super(key: key);
 
-  final SearchDelegate delegate;
+  final ContentSearchDelegate delegate;
 
   @override
-  SearchRouteState createState() => SearchRouteState<T>();
+  _SearchRouteState createState() => _SearchRouteState();
 }
 
-class SearchRouteState<T> extends State<SearchRoute<T>> {
+class _SearchRouteState extends State<SearchRoute> {
   late _SearchStateDelegate stateDelegate;
   FocusNode get focusNode => stateDelegate.focusNode;
   late ModalRoute _route;
   late Animation<double> _animation;
+
+  bool get selection => widget.delegate.selectionController != null;
 
   @override
   void initState() {
@@ -372,16 +386,31 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      _route = ModalRoute.of(context)!;
-      _animation = _route.animation!; 
-      _animation.addStatusListener(_onAnimationStatusChanged);
+      if (mounted) {
+        _route = ModalRoute.of(context)!;
+        _animation = _route.animation!;
+        _animation.addStatusListener(_onAnimationStatusChanged);
+      }
     });
     focusNode.addListener(_onFocusChanged);
     playerRouteController.addStatusListener(_handlePlayerRouteStatusChange);
+    if (selection)
+      BackButtonInterceptor.add(backButtonInterceptor);
+  }
+
+  /// Using interceptor for [selection] to gain a priority over the navigator and
+  /// internal [SearchRoute] back button listeners, because I want the selection route
+  /// to be closed with one back button tap.
+  bool backButtonInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    Navigator.of(context).maybePop();
+    BackButtonInterceptor.remove(backButtonInterceptor);
+    return true;
   }
 
   @override
   void dispose() {
+    if (selection)
+      BackButtonInterceptor.remove(backButtonInterceptor);
     stateDelegate.dispose();
     widget.delegate._setStateNotifier.removeListener(_handleSetState);
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
@@ -417,7 +446,7 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
   }
 
   @override
-  void didUpdateWidget(SearchRoute<T> oldWidget) {
+  void didUpdateWidget(SearchRoute oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
@@ -578,6 +607,22 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
+    final title = Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: TextField(
+        selectionControls: NFTextSelectionControls(),
+        controller: widget.delegate._queryTextController,
+        focusNode: focusNode,
+        style: theme.textTheme.headline6,
+        textInputAction: TextInputAction.search,
+        onSubmitted: (String _) => stateDelegate.onSubmit(),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: searchFieldLabel,
+          hintStyle: theme.inputDecorationTheme.hintStyle,
+        ),
+      ),
+    );
     return RouteAwareWidget(
       onPushNext: _handlePushNext,
       child: Builder(
@@ -594,11 +639,12 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
               child: SelectionAppBar(
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
-                titleSelection: Padding(
+                showMenuButton: false,
+                titleSelection: selection ? title : Padding(
                   padding: const EdgeInsets.only(top: 15.0),
                   child: SelectionCounter(controller: stateDelegate.selectionController),
                 ),
-                actionsSelection: [
+                actionsSelection: selection ? const [] : [
                   DeleteSongsAppBarAction<Content>(
                     controller: stateDelegate.selectionController,
                   )
@@ -611,24 +657,9 @@ class SearchRouteState<T> extends State<SearchRoute<T>> {
                 textTheme: theme.primaryTextTheme,
                 brightness: theme.primaryColorBrightness,
                 leading: buildLeading(),
-                actions: buildActions(),
+                actions: selection ? const [] : buildActions(),
                 bottom: bottom,
-                title: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: TextField(
-                    selectionControls: NFTextSelectionControls(),
-                    controller: widget.delegate._queryTextController,
-                    focusNode: focusNode,
-                    style: theme.textTheme.headline6,
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: (String _) => stateDelegate.onSubmit(),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: searchFieldLabel,
-                      hintStyle: theme.inputDecorationTheme.hintStyle,
-                    ),
-                  ),
-                ),
+                title: !selection ? title : const SizedBox.shrink(),
               ),
             ),
             body: SafeArea(
@@ -766,7 +797,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                                   contentType: contentType,
                                   song: () => delegate.results.songs,
                                   album: () => delegate.results.albums,
-                                  playlist: () =>  delegate.results.playlists,
+                                  playlist: () => delegate.results.playlists,
                                   artist: () => delegate.results.artists,
                                 )();
                             return ContentListView(
@@ -778,26 +809,26 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                               onItemTap: () => delegate.handleContentTap(contentListContentType),
                               list: list,
                             );
-                          } ()
+                          }()
                           : 
                           // AppScrollbar( // TODO: enable this when i have more content on search screen
                           //     controller: delegate.scrollController,
                           //     child: 
                               ListView(
-                                  controller: delegate.scrollController,
-                                  children: [
-                                    for (final entry in contentTypeEntries)
-                                      if (entry.value.isNotEmpty)
-                                        ContentSection(
-                                          contentType: entry.key,
-                                          list: results.map.getValue(entry.key),
-                                          onHeaderTap: () => delegate.contentType = entry.key,
-                                          selectionController: delegate.selectionController,
-                                          contentTileTapHandler: delegate.handleContentTap,
-                                        ),
-                                  ],
-                                ),
+                                controller: delegate.scrollController,
+                                children: [
+                                  for (final entry in contentTypeEntries)
+                                    if (entry.value.isNotEmpty)
+                                      ContentSection(
+                                        contentType: entry.key,
+                                        list: results.map.getValue(entry.key),
+                                        onHeaderTap: () => delegate.contentType = entry.key,
+                                        selectionController: delegate.selectionController,
+                                        contentTileTapHandler: () => delegate.handleContentTap(entry.key),
+                                      ),
+                                ],
                               ),
+                            ),
                       ),
                     ),
                   ),

@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 // import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sweyer/logic/logic.dart';
 import 'package:sweyer/sweyer.dart';
 
 // See content logic overview here
@@ -193,8 +195,13 @@ class _ContentState {
   List<Artist> artists = [];
 
   /// This is a map to store ids of duplicated songs in queue.
-  /// Its key is always negative, so when a song has negative id, you must
-  /// look up for the mapping of its actual id in here.
+  ///
+  /// The key is string, because [jsonEncode] and [jsonDecode] can only
+  /// work with `Map<String, dynamic>`. Convertion to int doesn't seem to be a
+  /// benefit, so keeping this as string.
+  /// 
+  /// See [ContentControl.deduplicateSong] for discussion about the
+  /// logic behind this.
   Map<String, int> idMap = {};
 
   /// When true, [idMap] will be saved in the next [setQueue] call.
@@ -243,9 +250,10 @@ class _ContentState {
   ///
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
-    Prefs.songId.set(song.id);
-    // Song id saved to prefs in the native play method.
-    emitSongChange(song);
+    if (song.id != currentSongNullable?.id)
+      Prefs.songId.set(song.id);
+    if (!identical(song, currentSongNullable))
+      emitSongChange(song);
   }
 
   /// A stream of changes over content.
@@ -411,21 +419,89 @@ abstract class ContentControl {
 
   //****************** Queue manipulation methods *****************************************************
 
+  /// Returns the original song ID.
+  static int getSourceId(int id) {
+    if (id < 0)
+      id = ContentControl.state.idMap[id.toString()]!;
+    if (id < 0)
+      id = ContentControl.state.idMap[id.toString()]!;
+    if (id < 0)
+      throw StateError('');
+    return id;
+  }
+
+  /// Checks the [song] for being a duplicate within the [source], and if
+  /// it is, changes its ID and saves the mapping to the original source ID to
+  /// [_ContentState.idMap].
+  /// 
+  /// To distinct songs that were deduplicated while inserting to queue,
+  /// and songs that were deduplicated because their origin allows duplicating
+  /// (for example a [Playlist]) - reference depth in map can be up to 2 levels.
+  /// 
+  /// For example:
+  /// 
+  /// ```
+  /// {
+  ///   '-1': 0,
+  ///   '-2': -1,
+  ///   '-3': -1,
+  ///   '-4': -3,
+  /// }
+  /// ```
+  /// 
+  /// In this map:
+  ///  * 0 is original song
+  ///  * -1 might be both queue or playlist duplicate of 0
+  ///  * -2 and -3 can only be queue insertion duplicates, they cannot be created from
+  ///    duplicating songs in the playlist
+  ///  * -4 is forbidden and should not ever appear !
+  ///
+  /// The [inserted] parameter tells whether the [song] was already inserted
+  /// in the source. It adjusts the amount of candidates needed for song
+  /// to be considired a duplicate.
+  /// 
+  /// If [source] is `null`, current queue will be used.
+  /// When using non `null` [source], the [idMap] is also required.
+  ///
+  /// When [idMap] is `null`, also sets [_ContentState.idMapDirty] to `true`,
+  /// so [_ContentState.idMap] will be saved in the next call of [setQueue].
+  ///
   /// Should be called whenever song is added to queue.
-  /// Sets [ContentState.idMapDirty] to `true`, so id map will be saved in the next call of [setQueue].
-  static void _handleDuplicate(Song song) {
+  static void deduplicateSong(Song song, {
+    bool inserted = false,
+    List<Song>? source,
+    Map<String, int>? idMap,
+  }) {
+    assert(
+      source == null || idMap != null,
+      "When using a custom source, the custom idMap is also required"
+    );
+    source ??= state.queues.current.songs;
     assert(() {
       final originalSong = state.allSongs.byId.get(song.sourceId);
       if (identical(originalSong, song)) {
-        throw ArgumentError('Tried to handle duplicate on the original song');
+        throw ArgumentError(
+          "Tried to handle duplicate on the original song. This may lead " 
+          "to that the source song ID is lost, copy the song first.",
+        );
       }
       return true;
     }());
-    final map = state.idMap;
-    final newId = -(map.length + 1);
-    map[newId.toString()] = song.sourceId;
-    song.id = newId;
-    state.idMapDirty = true;
+    final candidates = source.where((el) => el.id == song.id);
+    if (candidates.length > (inserted ? 1 : 0)) {
+      final map = idMap ?? state.idMap;
+      final newId = -(map.length + 1);
+      final id = song.id;
+      if (id < 0 && map[id.toString()]! < 0) {
+        map[newId.toString()] = map[id.toString()]!;
+      } else {
+        map[newId.toString()] = id;
+      }
+      song.id = newId;
+      if (idMap == null) {
+        state.idMapDirty = true;
+      }
+    }
   }
 
   /// Marks queues modified and traverses it to be unshuffled, preseving the shuffled
@@ -470,8 +546,8 @@ abstract class ContentControl {
     final currentQueue = queues.current;
     if (songs.length == 1) {
       final song = songs[0];
-      if (song != state.currentSong &&
-          song != currentQueue.getNext(state.currentSong) &&
+      if (song.sourceId != state.currentSong.sourceId &&
+          song.sourceId != currentQueue.getNext(state.currentSong)?.sourceId &&
           state.currentSongIndex != currentQueue.length - 1) {
         currentQueue.remove(song);
       }
@@ -479,7 +555,7 @@ abstract class ContentControl {
     bool contains = true;
     for (int i = 0; i < songs.length; i++) {
       final song = songs[i].copyWith();
-      _handleDuplicate(song);
+      deduplicateSong(song);
       currentQueue.insert(state.currentSongIndex + i + 1, song);
       if (queues._type == QueueType.origin && contains) {
         final originSongs = queues.origin!.songs;
@@ -506,7 +582,7 @@ abstract class ContentControl {
     bool contains = true;
     for (var song in songs) {
       song = song.copyWith();
-      _handleDuplicate(song);
+      deduplicateSong(song);
       state.queues.current.add(song);
       if (queues._type == QueueType.origin && contains) {
         final originSongs = queues.origin!.songs;
@@ -537,8 +613,8 @@ abstract class ContentControl {
     int i = 0;
     for (var song in songs) {
       song = song.copyWith();
-      _handleDuplicate(song);
       song.origin = origin;
+      deduplicateSong(song);
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
     }
@@ -562,8 +638,8 @@ abstract class ContentControl {
     _setOrigins();
     for (var song in songs) {
       song = song.copyWith();
-      _handleDuplicate(song);
       song.origin = origin;
+      deduplicateSong(song);
       state.queues.current.add(song);
     }
     setQueue(type: QueueType.arbitrary);
@@ -576,7 +652,7 @@ abstract class ContentControl {
     _setOrigins();
     final queues = state.queues;
     song = song.copyWith();
-    _handleDuplicate(song);
+    deduplicateSong(song);
     queues.current.insert(index, song);
     bool contains = true;
     if (queues._type == QueueType.origin) {
@@ -673,8 +749,6 @@ abstract class ContentControl {
   }
 
   /// A shorthand for setting [QueueType.origin].
-  ///
-  /// By default sets [shuffled] queue.
   static void setOriginQueue({
     required SongOrigin origin,
     required List<Song> songs,
@@ -704,8 +778,8 @@ abstract class ContentControl {
   }
 
   /// Sets the queue with specified [type] and other parameters.
-  /// Most of the parameters are updated separately and almost can be omitted,
-  /// unless differently specified:
+  /// Most of the parameters are updated separately and can be omitted, unless
+  /// differently specified:
   ///
   /// * [shuffled] can be used to shuffle / unshuffle the queue
   /// * [modified] can be used to mark current queue as modified
@@ -725,11 +799,16 @@ abstract class ContentControl {
   /// * [origin] is the song origin being set, only applied when [type] is [QueueType.origin].
   ///   When [QueueType.origin] is set and currently it's not origin, this parameter is required.
   ///   Otherwise it can be omitted and for updating other paramters only.
+  ///
+  ///   With playlist origin the [Playlist.idMap] will be used to update the
+  ///   [_ContentState.idMap].
   /// * [searchQuery] is the search query the playlist was searched by,
   ///   only applied when [type] is [QueueType.searched].
   ///   Similarly as for [origin], when [QueueType.searched] is set and currently it's not searched,
   ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
   /// * [emitChangeEvent] is whether to emit a song list change event
+  /// * [setIdMapFromPlaylist] allows to configure whether to set the [Playlist.idMap]
+  ///   when set [origin] is playlist. Needed to not override the map at the app start.
   /// * [save] parameter can be used to disable redundant writing to JSONs when,
   ///   for example, when we restore the queue from this exact json.
   /// * [copied] indicates that [songs] was already copied,
@@ -743,6 +822,7 @@ abstract class ContentControl {
     SongOrigin? origin,
     String? searchQuery,
     bool save = true,
+    bool setIdMapFromPlaylist = true,
     bool copied = false,
     bool emitChangeEvent = true,
   }) {
@@ -779,6 +859,12 @@ abstract class ContentControl {
       if (origin != null) {
         queues._origin = origin;
         Prefs.songOrigin.set(origin);
+        if (setIdMapFromPlaylist && origin is Playlist) {
+          state.idMap.clear();
+          state.idMap.addAll(origin.idMap);
+          state.idMapDirty = false;
+        _idMapSerializer.save(state.idMap);
+        }
       }
     } else {
       queues._origin = null;
@@ -902,7 +988,7 @@ abstract class ContentControl {
       for (final contentType in Content.enumerate())
         refetch(contentType: contentType),
     ]);
-    return MusicPlayer.instance.restoreLastSong();
+    await MusicPlayer.instance.restoreLastSong();
   }
 
   /// Refetches content by the `T` content type.
@@ -1039,7 +1125,7 @@ abstract class ContentControl {
   }
 
   /// Sorts songs, albums, etc.
-  /// See [ContentState.sorts].
+  /// See [_ContentState.sorts].
   static void sort<T extends Content>({ Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
     sort ??= sorts.getValue<T>() as Sort<T>;
@@ -1082,36 +1168,69 @@ abstract class ContentControl {
     }
   }
 
-  /// Deletes songs by specified [idSet].
+  /// Filters out non-source songs (with negative IDs), and asserts that.
+  static Set<Song> _ensureSongsAreSource(Set<Song> songs) {
+    return songs.fold<Set<Song>>({}, (prev, el) {
+      if (el.id >= 0) {
+        // Taking precautions for release mode
+        prev.add(el);
+      } else {
+        assert(false, "All IDs must be source (non-negative)");
+      }
+      return prev;
+    }).toSet();
+  }
+
+  /// Sets songs' favorite flag to [value].
   ///
-  /// Ids must be source (not negative).
-  static Future<void> deleteSongs(Set<int> idSet) async {
-    final Set<Song> songsSet = {};
-    // On Android R the deletion is performed with OS dialog.
+  /// The songs must have a source ID (non-negative).
+  static Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
+    // todo: implement
+    songs = _ensureSongsAreSource(songs);
     if (sdkInt >= 30) {
-      for (final id in idSet) {
-        final song = state.allSongs.byId.get(id);
-        if (song != null) {
-          songsSet.add(song);
+      try {
+        final result = await ContentChannel.setSongsFavorite(songs, value);
+        if (result) {
+          await refetch<Song>();
         }
+      } catch (ex, stack) {
+        FirebaseCrashlytics.instance.recordError(
+          ex,
+          stack,
+          reason: 'in setSongsFavorite',
+        );
+        ShowFunctions.instance.showToast(
+          msg: staticl10n.oopsErrorOccurred,
+        );
+        debugPrint('setSongsFavorite error: $ex');
       }
     } else {
-      for (final id in idSet) {
-        final song = state.allSongs.byId.get(id);
-        if (song != null) {
-          songsSet.add(song);
-        }
-        state.allSongs.byId.remove(id);
-      }
+     
+    }
+  }
+
+  /// Deletes a set of songs.
+  ///
+  /// The songs must have a source ID (non-negative).
+  static Future<void> deleteSongs(Set<Song> songs) async {
+    songs = _ensureSongsAreSource(songs);
+
+    void _removeFromState() {
+      for (final song in songs)
+        state.allSongs.byId.remove(song.id);
       removeObsolete();
     }
 
+    // On Android R the deletion is performed with OS dialog.
+    if (sdkInt < 30) {
+      _removeFromState();
+    }
+
     try {
-      final result = await ContentChannel.deleteSongs(songsSet);
+      final result = await ContentChannel.deleteSongs(songs);
       await refetchAll();
       if (sdkInt >= 30 && result) {
-        idSet.forEach(state.allSongs.byId.remove);
-        removeObsolete();
+        _removeFromState();
       }
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
@@ -1122,7 +1241,94 @@ abstract class ContentControl {
       ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
-      print('Deletion error: $ex');
+      debugPrint('deleteSongs error: $ex');
+    }
+  }
+
+  /// When playlists are being updated in any way, there's a chance
+  /// that after refetching a playlist, it will contain a song with
+  /// ID that we don't know yet.
+  ///
+  /// To avoid this, both songs and playlists should be refetched.
+  static Future<void> refetchSongsAndPlaylists() {
+    return Future.wait([
+      refetch<Song>(),
+      refetch<Playlist>(),
+    ]);
+  }
+
+  /// Creates a playlist with a given name.
+  static Future<void> createPlaylist(String name) async {
+    await ContentChannel.createPlaylist(name);
+    await refetchSongsAndPlaylists();
+  }
+
+  /// Renames a playlist and returns a boolean indicating whether the
+  /// operation was successful.
+  static Future<bool> renamePlaylist(Playlist playlist, String name) async {
+    try {
+      // Update the playlist just in case they are outdated
+      await refetch<Playlist>(emitChangeEvent: false);
+      // state.playlists.fold([], (prev, el) {
+      //   if (prev.)
+      //   return prev;
+      // });
+      // final duplicates = state.playlists.where((el) => el != playlist && el.name.startsWith(name));
+      // if ()
+      // final parenthesesRegexp = RegExp(r'\(([^)]+)\)');
+      // if
+      // RegExp(r'\(([^)]+)\)')
+      //   .allMatches(string)
+      //   .map((el) => el.group(1))
+      //   .toList();
+      // if ( != null)
+      await ContentChannel.renamePlaylist(playlist, name);
+      await refetch<Song>();
+      await refetch<Playlist>();
+      return true;
+    } on ContentChannelException catch(ex) {
+      if (ex == ContentChannelException.playlistNotExists)
+        return false;
+      rethrow;
+    }
+  }
+
+  /// Inserts songs in the playlist at the given [index].
+  static Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
+    await ContentChannel.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
+    await refetchSongsAndPlaylists();
+  }
+
+  /// Moves song in playlist, returned value indicates whether the operation was successful.
+  static Future<void> moveSongInPlaylist({ required Playlist playlist, required int from, required int to, bool emitChangeEvent = true }) async {
+    if (from != to) {
+      await ContentChannel.moveSongInPlaylist(playlist: playlist, from: from, to: to);
+      if (emitChangeEvent)
+        await refetchSongsAndPlaylists();
+    }
+  }
+
+  /// Removes songs from playlist.
+  static Future<void> removeSongsFromPlaylist({ required List<Song> songs, required Playlist playlist }) async {
+    await ContentChannel.removeSongsFromPlaylist(songs: songs, playlist: playlist);
+    await refetchSongsAndPlaylists();
+  }
+
+  /// Deletes playlists.
+  static Future<void> deletePlaylists(List<Playlist> playlists) async {
+    try {
+      await ContentChannel.removePlaylists(playlists);
+      await refetchSongsAndPlaylists();
+    } catch (ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in deletePlaylists',
+      );
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.deletionError,
+      );
+      debugPrint('deletePlaylists error: $ex');
     }
   }
 
@@ -1152,27 +1358,11 @@ abstract class ContentControl {
     state.idMap = await _idMapSerializer.read();
 
     final List<Song> queueSongs = [];
-    final rawQueue = await state.queues._queueSerializer.read();
-    for (final item in rawQueue) {
-      final id = item['id'];
-      var song = state.allSongs.byId.get(Song.getSourceId(id));
-      if (song != null) {
-        song = song.copyWith(id: id);
-        final rawOrigin = item['origin'];
-        if (rawOrigin != null) {
-          final origin = SongOrigin.originFromMap(rawOrigin);
-          song.origin = origin;
-        }
-        queueSongs.add(song);
-      }
-    }
-
-    final List<Song> shuffledSongs = [];
-    if (shuffled == true) {
-      final rawShuffledQueue = await state.queues._shuffledSerializer.read();
-      for (final item in rawShuffledQueue) {
+    try {
+      final rawQueue = await state.queues._queueSerializer.read();
+      for (final item in rawQueue) {
         final id = item['id'];
-        var song = state.allSongs.byId.get(Song.getSourceId(id));
+        var song = state.allSongs.byId.get(ContentControl.getSourceId(id));
         if (song != null) {
           song = song.copyWith(id: id);
           final rawOrigin = item['origin'];
@@ -1180,9 +1370,41 @@ abstract class ContentControl {
             final origin = SongOrigin.originFromMap(rawOrigin);
             song.origin = origin;
           }
-          shuffledSongs.add(song);
+          queueSongs.add(song);
         }
       }
+    } catch(ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in rawQueue restoration',
+      );
+    }
+
+    final List<Song> shuffledSongs = [];
+    try {
+      if (shuffled == true) {
+        final rawShuffledQueue = await state.queues._shuffledSerializer.read();
+        for (final item in rawShuffledQueue) {
+          final id = item['id'];
+          var song = state.allSongs.byId.get(ContentControl.getSourceId(id));
+          if (song != null) {
+            song = song.copyWith(id: id);
+            final rawOrigin = item['origin'];
+            if (rawOrigin != null) {
+              final origin = SongOrigin.originFromMap(rawOrigin);
+              song.origin = origin;
+            }
+            shuffledSongs.add(song);
+          }
+        }
+      }
+    } catch(ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in rawShuffledQueue restoration',
+      );
     }
 
     final songs = shuffled && shuffledSongs.isNotEmpty ? shuffledSongs : queueSongs;
@@ -1203,6 +1425,7 @@ abstract class ContentControl {
           shuffleFrom: queueSongs,
           origin: songOrigin,
           save: false,
+          setIdMapFromPlaylist: false,
         );
       } else {
         setQueue(
@@ -1229,17 +1452,29 @@ abstract class ContentControl {
 
 
 class ContentUtils {
+  /// Android unkown artist.
+  static const unknownArtist = '<unknown>';
+
   /// If artist is unknown returns localized artist.
   /// Otherwise returns artist as is.
   static String localizedArtist(String artist, AppLocalizations l10n) {
-    return artist != '<unknown>' ? artist : l10n.artistUnknown;
+    return artist != unknownArtist ? artist : l10n.artistUnknown;
   }
 
   static const String dot = '•';
 
   /// Joins list with the [dot].
   static String joinDot(List list) {
-    return list.join(dot);
+    if (list.isEmpty)
+      return '';
+    var result = list.first;
+    for (int i = 1; i < list.length; i++) {
+      final string = list[i].toString();
+      if (string.isNotEmpty) {
+        result += ' $dot $string';
+      }
+    }
+    return result;
   }
 
   /// Appends dot and year to [string].
@@ -1254,37 +1489,162 @@ class ContentUtils {
   }
 
   /// Checks whether a song origin is currently playing.
-  static bool originIsCurrent(SongOrigin queue) {
-    return queue == ContentControl.state.currentSongOrigin ||
-           queue == ContentControl.state.queues.origin;
+  static bool originIsCurrent(SongOrigin origin) {
+    return origin == ContentControl.state.currentSongOrigin ||
+           origin == ContentControl.state.queues.origin;
   }
 
-  /// Shuffles song origins and returns songs and shuffled songs.
-  static ShuffleResponse shuffleSongOrigins(List<SongOrigin> origins) {
+  /// Computes the duration of mulitple [songs] and returs it as formatted string.
+  static String bulkDuration(List<Song> songs) {
+    final duration = Duration(milliseconds: songs.fold(0, (prev, el) => prev + el.duration));
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    final seconds = duration.inSeconds % 60;
+    final buffer = StringBuffer();
+    if (hours > 0) {
+      if (hours.toString().length < 2) {
+        buffer.write(0);
+      }
+      buffer.write(hours);
+      buffer.write(':');
+    }
+    if (minutes > 0) {
+      if (minutes.toString().length < 2) {
+        buffer.write(0);
+      }
+      buffer.write(minutes);
+      buffer.write(':');
+    }
+    if (seconds > 0) {
+      if (seconds.toString().length < 2) {
+        buffer.write(0);
+      }
+      buffer.write(seconds);
+    }
+    return buffer.toString();
+  }
+
+  /// Joins and returns a list of all songs of specified [origins] list.
+  static List<Song> joinSongOrigins(List<SongOrigin> origins) {
     final List<Song> songs = [];
-    final List<Song> shuffledSongs = [];
     for (final origin in origins) {
       for (final song in origin.songs) {
         song.origin = origin;
         songs.add(song);
       }
     }
+    return songs;
+  }
+
+  /// Joins specified [origins] list and returns a list of all songs and a
+  /// shuffled variant of it.
+  static ShuffleResult shuffleSongOrigins(List<SongOrigin> origins) {
+    final List<Song> songs = joinSongOrigins(origins);
+    final List<Song> shuffledSongs = [];
     for (final origin in List<SongOrigin>.from(origins)..shuffle()) {
       for (final song in origin.songs) {
         song.origin = origin;
         shuffledSongs.add(song);
       }
     }
-    return ShuffleResponse(
+    return ShuffleResult(
       songs,
       shuffledSongs,
+    );
+  }
+
+  /// Accepts a collection of content, exctracts songs from each entry
+  /// and returns a one flattened array of songs.
+  static List<Song> flatten(List<Content> collection) {
+    final List<Song> songs = [];
+    for (final content in collection) {
+      if (content is Song) {
+        songs.add(content);
+      } else if (content is Album) {
+        songs.addAll(content.songs);
+      } else if (content is Playlist) {
+        songs.addAll(content.songs);
+      } else if (content is Artist) {
+        songs.addAll(content.songs);
+      } else {
+        throw UnimplementedError();
+      }
+      assert(() {
+        contentPick<Song, void>(
+          song: null,
+          album: null,
+          playlist: null,
+          artist: null,
+        );
+        return true;
+      }());
+    }
+    return songs;
+  }
+
+  /// Receives a selection data set, extracts all types of contents,
+  /// sorts them by index in ascending order and returns the result.
+  static SortAndPackResult selectionSortAndPack(Set<SelectionEntry<Content>> data) {
+    final List<SelectionEntry<Song>> songs = [];
+    final List<SelectionEntry<Album>> albums = [];
+    final List<SelectionEntry<Playlist>> playlists = [];
+    final List<SelectionEntry<Artist>> artists = [];
+    for (final entry in data) {
+      if (entry is SelectionEntry<Song>) {
+        songs.add(entry);
+      } else if (entry is SelectionEntry<Album>) {
+        albums.add(entry);
+      } else if (entry is SelectionEntry<Playlist>) {
+        playlists.add(entry);
+      } else if (entry is SelectionEntry<Artist>) {
+        artists.add(entry);
+      } else {
+        throw UnimplementedError();
+      }
+    }
+    assert(() {
+      contentPick<Song, void>(
+        song: null,
+        album: null,
+        playlist: null,
+        artist: null,
+      );
+      return true;
+    }());
+    songs.sort((a, b) => a.index.compareTo(b.index));
+    albums.sort((a, b) => a.index.compareTo(b.index));
+    playlists.sort((a, b) => a.index.compareTo(b.index));
+    artists.sort((a, b) => a.index.compareTo(b.index));
+    return SortAndPackResult(
+      songs.map((el) => el.data).toList(),
+      albums.map((el) => el.data).toList(),
+      playlists.map((el) => el.data).toList(),
+      artists.map((el) => el.data).toList(),
     );
   }
 }
 
 /// Result of [ContentUtils.shuffleSongOrigins].
-class ShuffleResponse {
-  const ShuffleResponse(this.songs, this.shuffledSongs);
+class ShuffleResult {
+  const ShuffleResult(this.songs, this.shuffledSongs);
   final List<Song> songs;
   final List<Song> shuffledSongs;
+}
+
+
+/// Result of [ContentUtils.sortAndPack].
+class SortAndPackResult {
+  final List<Song> songs;
+  final List<Album> albums;
+  final List<Playlist> playlists;
+  final List<Artist> artists;
+
+  SortAndPackResult(this.songs, this.albums, this.playlists, this.artists);
+
+  List<Content> get merged => [
+    ...songs,
+    ...albums,
+    ...playlists,
+    ...artists,
+  ];
 }
