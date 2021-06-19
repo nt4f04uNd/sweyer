@@ -270,11 +270,9 @@ public enum ContentChannel {
                      ContentValues values = new ContentValues(1);
                      values.put(MediaStore.Audio.Playlists.NAME, name);
 
-//                     Uri uri = resolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
-                     Uri uri = resolver.insert(MediaStore.Audio.Playlists.getContentUri("external_primary"), values);
+                     Uri uri = resolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
                      if (uri != null) {
-//                        resolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null);
-                        resolver.notifyChange(MediaStore.Audio.Playlists.getContentUri("external_primary"), null);
+                        resolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null);
                      }
                      handler.post(() -> {
                         result.success(null);
