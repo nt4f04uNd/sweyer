@@ -78,7 +78,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
 
   /// This needed to ignore the header sort buttons when the controller is in selection.
   /// This parameter can be `null`.
-  final ContentSelectionController<SelectionEntry>? selectionController;
+  final ContentSelectionController? selectionController;
 
   /// Additional widget to place after sorting controls.
   final Widget? leading;
@@ -88,8 +88,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
 
   Sort<T> getSort() => ContentControl.state.sorts.getValue<T>() as Sort<T>;
 
-  void _handleTap() {
-    final context = HomeRouter.instance.navigatorKey.currentContext!;
+  void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
     final sort = getSort();
     Widget buildItem(SortFeature feature) {
@@ -192,7 +191,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
             ),
             Flexible(
               child: InkResponse(
-                onTap: _handleTap,
+                onTap: () => _handleTap(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 4.0,
@@ -290,6 +289,28 @@ class ContentListHeaderAction extends StatelessWidget {
     return NFIconButton(
       icon: icon,
       size: size,
+      iconSize: 20.0,
+      onPressed: onPressed,
+    );
+  }
+}
+
+/// A small button to be placed into [ContentListSortHeader] with animation.
+class AnimatedContentListHeaderAction extends StatelessWidget {
+  const AnimatedContentListHeaderAction({
+    Key? key,
+    required this.icon,
+    this.onPressed,
+  }) : super(key: key);
+
+  final Widget icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedIconButton(
+      icon: icon,
+      size: ContentListHeaderAction.size,
       iconSize: 20.0,
       onPressed: onPressed,
     );

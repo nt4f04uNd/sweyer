@@ -106,7 +106,7 @@ class _ChangedSwitcherState extends State<ChangedSwitcher> {
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
           padding: widget.changed
-              ? const EdgeInsets.only(right: 0.0)
+              ? EdgeInsets.zero
               : const EdgeInsets.only(right: 3.0),
           child: widget.child,
         ),

@@ -274,6 +274,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "nothingHere": "There's nothing here",
+  "@nothingHere": {
+    "type": "text",
+    "placeholders": {}
+  },
   "details": "Details",
   "@details": {
     "type": "text",

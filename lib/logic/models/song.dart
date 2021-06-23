@@ -55,6 +55,12 @@ class Song extends Content {
 
   /// The origin this song comes from.
   /// This will help determining where the song comes from to show [CurrentIndicator]s.
+  //
+  /// For true source origins like [Album] or [Playlist] this will can only be set
+  /// on queue insertions, like [ContentContol.playNext].
+  ///
+  /// For [DuplicatingSongOriginMixin] that allow duplication is set by them within
+  /// the [SongOrigin.songs] getter.
   SongOrigin? origin;
 
   /// A supplementary ID map, inserted by origins that allow duplication,
@@ -68,7 +74,7 @@ class Song extends Content {
   int get sourceId => idMap?[id.toString()] ?? ContentControl.getSourceId(id);
 
   /// Returns the song artist.
-  Artist getArtist() => ContentControl.state.artists[artistId];
+  Artist getArtist() => ContentControl.state.artists.firstWhere((el) => el.id == artistId);
 
   /// Returns the album this song belongs to (if any).
   Album? getAlbum() => albumId == null ? null : ContentControl.state.albums[albumId!];

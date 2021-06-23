@@ -3,6 +3,7 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+export 'add_to_selection_button.dart';
 export 'artist_tile.dart';
 export 'content_tile.dart';
 export 'in_list_action.dart';
@@ -36,11 +37,14 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.contentType,
     required this.list,
     this.itemBuilder,
+    this.itemTrailingBuilder,
     this.controller,
     this.selectionController,
     this.leading,
     this.currentTest,
     this.selectedTest,
+    this.longPressGestureEnabledTest,
+    this.handleTapInSelectionTest,
     this.onItemTap,
     this.songTileVariant = kSongTileVariant,
     this.songTileClickBehavior = kSongTileClickBehavior,
@@ -61,25 +65,30 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// For example can be used to add [Dismissible].
   final _ItemBuilder? itemBuilder;
 
+  /// Builds an item trailing.
+  final IndexedWidgetBuilder? itemTrailingBuilder;
+
   /// Viewport scroll controller.
   final ScrollController? controller;
 
   /// If specified, list will be built as [SongTile.selectable],
   /// otherwise [SongTile] is used (in case if content is [Song]).
-  final ContentSelectionController<SelectionEntry>? selectionController;
+  final ContentSelectionController? selectionController;
 
   /// A widget to build before all items.
   final Widget? leading;
 
   /// Returned value is passed to [SongTile.current] (in case if content is [Song]).
-  ///
-  /// The argument [index] is index of the song.
   final _ItemTest? currentTest;
 
-  /// Returned values is passed to [SongTile.selected] (in case if content is [Song]).
-  /// 
-  /// The argument [index] is index of the song.
+  /// Returned value is passed to [SongTile.selected] (in case if content is [Song]).
   final _ItemTest? selectedTest;
+
+  /// Returned value is passed to [SongTile.longPressGestureEnabled] (in case if content is [Song]).
+  final _ItemTest? longPressGestureEnabledTest;
+
+  /// Returned value is passed to [SongTile.handleTapInSelection] (in case if content is [Song]).
+  final _ItemTest? handleTapInSelectionTest;
 
   /// Callback to be called on item tap.
   final VoidCallback? onItemTap;
@@ -129,10 +138,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
               contentType: contentType,
               list: list,
               itemBuilder: itemBuilder,
+              itemTrailingBuilder: itemTrailingBuilder,
               selectionController: selectionController,
               leading: leading,
               currentTest: currentTest,
               selectedTest: selectedTest,
+              longPressGestureEnabledTest: longPressGestureEnabledTest,
+              handleTapInSelectionTest: handleTapInSelectionTest,
               songTileVariant: songTileVariant,
               songTileClickBehavior: songTileClickBehavior,
               onItemTap: onItemTap,
@@ -158,11 +170,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Type? contentType,
     required List<T> list,
     _ItemBuilder? itemBuilder,
-    ContentSelectionController<SelectionEntry>? selectionController,
+    IndexedWidgetBuilder? itemTrailingBuilder,
+    ContentSelectionController? selectionController,
     Widget? leading,
     _ItemTest? currentTest,
     _ItemTest? selectedTest,
-    _ItemTest? selectionGestureEnabledTest,
+    _ItemTest? longPressGestureEnabledTest,
+    _ItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     VoidCallback? onItemTap,
@@ -187,8 +201,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
                       index: index,
                     ))
                   ?? false,
-                selectionGestureEnabled: selectionGestureEnabledTest?.call(index) ?? true,
+                longPressGestureEnabled: longPressGestureEnabledTest?.call(index) ?? true,
+                handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
                 selectionController: selectionController,
+                trailing: itemTrailingBuilder?.call(context, index),
                 current: currentTest?.call(index),
                 onTap: onItemTap,
                 songTileVariant: songTileVariant,
@@ -220,11 +236,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
     required ReorderCallback onReorder,
     bool reorderingEnabled = true,
     _ItemBuilder? itemBuilder,
-    ContentSelectionController<SelectionEntry>? selectionController,
+    IndexedWidgetBuilder? itemTrailingBuilder,
+    ContentSelectionController? selectionController,
     Widget? leading,
     _ItemTest? currentTest,
     _ItemTest? selectedTest,
-    _ItemTest? selectionGestureEnabledTest,
+    _ItemTest? longPressGestureEnabledTest,
+    _ItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     VoidCallback? onItemTap,
@@ -255,7 +273,9 @@ class ContentListView<T extends Content> extends StatelessWidget {
                       index: index,
                     ))
                   ?? false,
-                selectionGestureEnabled: selectionGestureEnabledTest?.call(index)
+                longPressGestureEnabled: longPressGestureEnabledTest?.call(index)
+                  ?? !reorderingEnabled,
+                handleTapInSelection: handleTapInSelectionTest?.call(index)
                   ?? !reorderingEnabled,
                 selectionController: selectionController,
                 current: currentTest?.call(index),
@@ -278,14 +298,16 @@ class ContentListView<T extends Content> extends StatelessWidget {
                       ),
                     );
                   },
-                  child: !reorderingEnabled ? const SizedBox.shrink() : ReorderableDragStartListener(
-                    enabled: reorderingEnabled,
-                    index: index,
-                    child: const Icon(
-                      Icons.drag_handle,
-                      size: 30.0,
-                    ),
-                  ),
+                  child: !reorderingEnabled
+                    ? itemTrailingBuilder?.call(context, index) ?? const SizedBox.shrink()
+                    : ReorderableDragStartListener(
+                        enabled: reorderingEnabled,
+                        index: index,
+                        child: const Icon(
+                          Icons.drag_handle,
+                          size: 30.0,
+                        ),
+                      ),
                 ),
               ),
             );

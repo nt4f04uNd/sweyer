@@ -39,11 +39,12 @@ class ShowFunctions extends NFShowFunctions {
   }
 
   /// Opens songs search
-  void showSongsSearch({
+  void showSongsSearch(
+    BuildContext context, {
     String query = '',
     bool openKeyboard = true,
   }) {
-    HomeRouter.instance.goto(HomeRoutes.search.withArguments(SearchArguments(
+    HomeRouter.of(context).goto(HomeRoutes.search.withArguments(SearchArguments(
       query: query,
       openKeyboard: openKeyboard,
     )));

@@ -15,10 +15,14 @@ const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
 /// Describes how to respond to song tile clicks.
 enum SongTileClickBehavior {
   /// Always start the clicked song from the beginning.
+  ///
+  /// Expands that player route.
   play,
 
   /// Allow play/pause on the clicked song.
-  playPause
+  ///
+  /// Doesn't expand the player route.
+  playPause,
 }
 
 /// Describes what to draw in the tile leading.
@@ -105,7 +109,8 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     required int this.index,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
-    bool selectionGestureEnabled = true,
+    bool longPressGestureEnabled = true,
+    bool handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -118,7 +123,8 @@ class SongTile extends SelectableWidget<SelectionEntry> {
        super.selectable(
          key: key,
          selected: selected,
-         selectionGestureEnabled: selectionGestureEnabled,
+         longPressGestureEnabled: longPressGestureEnabled,
+         handleTapInSelection: handleTapInSelection,
          selectionController: selectionController,
        );
 
@@ -135,6 +141,10 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   final bool? current;
   final VoidCallback? onTap;
   final SongTileVariant variant;
+
+  /// How to respond to tile clicks.
+  ///
+  /// Will be force treated as [SongTileClickBehavior.playPause] if [selectionRouteOf] is `true`.
   final SongTileClickBehavior clickBehavior;
   final double horizontalPadding;
 
@@ -160,20 +170,18 @@ class _SongTileState extends SelectableState<SongTile> {
       widget.onTap?.call();
       final song = widget.song;
       final player = MusicPlayer.instance;
-      if (widget.clickBehavior == SongTileClickBehavior.play) {
+      if (!selectionRouteOf(context) && widget.clickBehavior == SongTileClickBehavior.play) {
         playerRouteController.open();
         await player.setSong(song);
         await player.play();
       } else {
         if (song == ContentControl.state.currentSong) {
           if (!player.playing) {
-            playerRouteController.open();
             await player.play();
           } else {
             await player.pause();
           }
         } else {
-          playerRouteController.open();
           await player.setSong(song);
           await player.play();
         }
@@ -183,6 +191,16 @@ class _SongTileState extends SelectableState<SongTile> {
 
   bool get current {
     return widget.current ?? ContentUtils.songIsCurrent(widget.song);
+  }
+
+  Widget _buildAddToSelection() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: AddToSelectionButton(
+        entryFactory: widget.toSelectionEntry,
+        controller: widget.selectionController!,
+      ),
+    );
   }
 
   Widget _buildTile(Widget albumArt, [double? rightPadding]) {
@@ -224,7 +242,16 @@ class _SongTileState extends SelectableState<SongTile> {
         title: title,
         subtitle: subtitle,
         leading: albumArt,
-        trailing: widget.trailing,
+        trailing: showAlbumArt && selectable && selectionRouteOf(context)
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.trailing != null)
+                  widget.trailing!,
+                _buildAddToSelection(),
+              ],
+            )
+          : widget.trailing,
       ),
     );
   }
@@ -245,6 +272,7 @@ class _SongTileState extends SelectableState<SongTile> {
     }
     if (!selectable)
       return _buildTile(albumArt);
+    final selectionRoute = selectionRouteOf(context);
     return Stack(
       children: [
         AnimatedBuilder(
@@ -257,16 +285,36 @@ class _SongTileState extends SelectableState<SongTile> {
                   animation.value > 0.2) {
                 rightPadding += 40.0;
               }
+              if (selectionRoute)
+                rightPadding += AddToSelectionButton.size;
             }
             return _buildTile(albumArt, rightPadding);
           },
         ),
-        if (animation.status != AnimationStatus.dismissed)
+        if (selectionRoute || animation.status != AnimationStatus.dismissed)
           Positioned(
             left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
-            right: showAlbumArt ? null : 10.0 + widget.horizontalPadding,
-            bottom: showAlbumArt ? 2.0 : 20.0,
-            child: SelectionCheckmark(animation: animation),
+            right: showAlbumArt ? null : 4.0 + widget.horizontalPadding,
+            bottom: showAlbumArt ? 2.0 : selectionRoute ? 0.0 : 20.0,
+            child: showAlbumArt
+              ? animation.status == AnimationStatus.dismissed
+                ? const SizedBox.shrink()
+                : Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: SelectionCheckmark(animation: animation),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (animation.status != AnimationStatus.dismissed)
+                      SelectionCheckmark(animation: animation),
+                    if (selectionRoute)
+                       Material(
+                        color: Colors.transparent,
+                        child: _buildAddToSelection(),
+                      ),
+                  ],
+                ),
           ),
       ],
     );

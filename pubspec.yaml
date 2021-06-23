@@ -47,6 +47,7 @@ dependencies:
   flutter_cache_manager: ^3.1.1
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
+
   # fluttertoast: ^8.0.3
   fluttertoast:
     # path: C:/dev/projects/native/FlutterToast
@@ -55,10 +56,6 @@ dependencies:
     git: 
       url: https://github.com/nt4f04uNd/fluttertoast/
       ref: f753a91591569acece70a9e8748745efa9faabfb # patch
-  # flutter_media_metadata:
-  #   path: C:/dev/projects/native/flutter_media_metadata
-
-  #   # git: https://github.com/alexmercerind/flutter_media_metadata
   just_audio:
     ^0.7.3
   
@@ -72,12 +69,6 @@ dependencies:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
     # See https://github.com/ryanheise/audio_service/issues/633
     path: C:/dev/projects/native/audio_service/audio_service
-
-    # TODO: git points to wrong platform_interface if there's more than 1 commit on branch, report this to https://github.com/dart-lang/pub/issues
-    # git:
-    #   url: https://github.com/nt4f04uNd/audio_service/
-    #   ref: sweyer # sweyer
-    #   path: audio_service
 
     # git: 
     #   url: C:\dev\projects\native\audio_service
@@ -118,3 +109,6 @@ flutter:
           weight: 700
         - asset: assets/fonts/Manrope/manrope-semibold.ttf
           weight: 600
+    - family:  SweyerIcons
+      fonts:
+       - asset: assets/fonts/SweyerIcons/SweyerIcons.ttf

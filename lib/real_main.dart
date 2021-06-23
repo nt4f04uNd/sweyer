@@ -108,7 +108,7 @@ Future<void> realMain() async {
     WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
 
     await AppLocalizations.init();
-    await ThemeControl.init();
+    ThemeControl.init();
     ThemeControl.initSystemUi();
     await Permissions.init();
     await ContentControl.init();

@@ -128,7 +128,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
                 child!,
                 Image.asset(
                   Constants.Assets.ASSET_LOGO_MASK,
-                  color: getColorForBlend(animation.value!),
+                  color: ContentArt.getColorToBlendInDefaultArt(animation.value!),
                   colorBlendMode: BlendMode.plus,
                   fit: BoxFit.cover,
                 ),

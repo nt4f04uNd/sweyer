@@ -59,10 +59,10 @@ abstract class ThemeControl {
   /// Inits theme, fetches brightness from [Prefs].
   ///
   /// NOTE that this does NOT call [emitThemeChange].
-  static Future<void> init() async {
-    final lightTheme = await Settings.lightThemeBool.get();
+  static void init() {
+    final lightTheme = Settings.lightThemeBool.get();
     _brightness = lightTheme ? Brightness.light : Brightness.dark;
-    final primaryColor = Color(await Settings.primaryColorInt.get());
+    final primaryColor = Color(Settings.primaryColorInt.get());
     _applyPrimaryColor(primaryColor);
   }
 
@@ -138,7 +138,7 @@ abstract class ThemeControl {
 
   static void _applyPrimaryColor(Color color) {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
-    _colorForBlend = getColorForBlend(color);
+    _colorForBlend = ContentArt.getColorToBlendInDefaultArt(color);
     Constants.Theme.app = Constants.Theme.app.copyWith(
       light: Constants.Theme.app.light.copyWith(
         primaryColor: color,

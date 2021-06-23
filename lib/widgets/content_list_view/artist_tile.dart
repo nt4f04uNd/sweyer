@@ -32,7 +32,8 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     required int this.index,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
-    bool selectionGestureEnabled = true,
+    bool longPressGestureEnabled = true,
+    bool handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -44,7 +45,8 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
        super.selectable(
          key: key,
          selected: selected,
-         selectionGestureEnabled: selectionGestureEnabled,
+         longPressGestureEnabled: longPressGestureEnabled,
+         handleTapInSelection: handleTapInSelection,
          selectionController: selectionController,
        );
 
@@ -81,7 +83,7 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
-      HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(widget.artist));
+      HomeRouter.of(context).goto(HomeRoutes.factory.content<Artist>(widget.artist));
     });
   }
 
@@ -89,6 +91,16 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
     if (widget.current != null)
       return widget.current!;
     return ContentUtils.originIsCurrent(widget.artist);
+  }
+
+  Widget _buildAddToSelection() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: AddToSelectionButton(
+        entryFactory: widget.toSelectionEntry,
+        controller: widget.selectionController!,
+      ),
+    );
   }
 
   Widget _buildTile() {
@@ -132,11 +144,20 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
                   ),
                 ),
               ),
-              if (widget.trailing != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: widget.trailing,
-                ),
+            if (selectionRoute)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.trailing != null)
+                    widget.trailing!,
+                  _buildAddToSelection(),
+                ],
+              )
+            else if (widget.trailing != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: widget.trailing,
+              ),
             ],
           ),
         ),

@@ -9,7 +9,6 @@
 ///
 /// It exports all except of constants, see `constants.dart`.
 
-export 'package:sweyer/core/core.dart';
 export 'package:sweyer/localization/localization.dart';
 export 'package:sweyer/logic/logic.dart';
 export 'package:sweyer/routes/routes.dart';

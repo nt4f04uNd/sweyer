@@ -193,6 +193,22 @@ class ContentArt extends StatefulWidget {
   /// This defines the duration of this animation.
   final Duration loadAnimationDuration;
 
+  /// This is the color of the mask background (by RGBs, full color would be `0x1a1a1a`).
+  /// It's twice lighter than the shadow color on the mask,
+  /// which is `0x001d0d0d`.Used in [getColorToBlendInDefaultArt].
+  static const int _defaultArtMask = 0x1a;
+
+  /// Returns the color to be blended in default art.
+  ///
+  /// The default art asset is a grey-toned mask, so we subtract that mask
+  /// to get the color we need to blend to get that original [color].
+  static Color getColorToBlendInDefaultArt(Color color) {
+    final int r = (((color.value >> 16) & 0xff) - _defaultArtMask).clamp(0, 0xff);
+    final int g = (((color.value >> 8) & 0xff) - _defaultArtMask).clamp(0, 0xff);
+    final int b = ((color.value & 0xff) - _defaultArtMask).clamp(0, 0xff);
+    return Color((0xff << 24) + (r << 16) + (g << 8) + b);
+  }
+
   @override
   _ContentArtState createState() => _ContentArtState();
 }
@@ -830,7 +846,7 @@ class _ContentArtState extends State<ContentArt> {
       cacheWidth: _cacheSize,
       cacheHeight: _cacheSize,
       color: widget.color != null
-          ? getColorForBlend(widget.color!)
+          ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
           : ThemeControl.colorForBlend,
       colorBlendMode: BlendMode.plus,
       frameBuilder: frameBuilder,

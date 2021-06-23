@@ -518,9 +518,16 @@ class AppLocalizations {
     );
   }
 
+  String get nothingHere {
+    return Intl.message(
+      "There's nothing here",
+      name: 'nothingHere',
+    );
+  }
+
   String get details {
     return Intl.message(
-      'Details',
+      "Details",
       name: 'details',
     );
   }

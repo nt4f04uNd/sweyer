@@ -5,7 +5,6 @@
 
 import 'dart:async';
 
-import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -33,50 +32,34 @@ class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
 
   @override
   SpringDescription get spring => const SpringDescription(
-        mass: 80,
-        stiffness: 100,
-        damping: 1,
-      );
+    mass: 80,
+    stiffness: 100,
+    damping: 1,
+  );
 }
 
 class TabsRoute extends StatefulWidget {
-  /// Main route variant shown on top of the [HomeRouter].
-  const TabsRoute({Key? key})
-    : selectionArguments = null,
-      super(key: key);
-
-  /// Route variant used to select items.
-  TabsRoute.selection({
-    Key? key,
-    required this.selectionArguments,
-  }) : super(key: key);
-
-  final TabsSelectionArguments? selectionArguments;
+  const TabsRoute({Key? key}) : super(key: key);
 
   @override
   TabsRouteState createState() => TabsRouteState();
 }
 
-class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, SelectionHandler {
+class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, SelectionHandlerMixin {
   static const tabBarHeight = 44.0;
 
   late TabController tabController;
-  late ContentSelectionController selectionController;
-
-  late GlobalKey<NavigatorState> navigatorKey;
 
   /// Used in [HomeRouter.drawerCanBeOpened].
   bool tabBarDragged = false;
   static late bool _mainTabsCreated = false;
-
-  bool get selection => widget.selectionArguments != null;
 
   @override
   void initState() {
     super.initState();
 
     assert(() {
-      if (!selection) {
+      if (!selectionRoute) {
         if (_mainTabsCreated) {
           throw StateError(
             "Several main tabs routes was created twice at the same time, "
@@ -88,44 +71,13 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       return true;
     }());
 
-    if (selection) {
-      navigatorKey = GlobalKey();
-      BackButtonInterceptor.add(backButtonInterceptor);
-      selectionController = ContentSelectionController.createAlwaysInSelection(
-        context: context,
-        actionsBuilder: (context) {
-          final l10n = getl10n(context);
-          return [
-            AnimatedBuilder(
-              animation: selectionController,
-              builder: (context, child) => AppButton(
-                text: l10n.done,
-                onPressed: selectionController.data.isEmpty ? null : () {
-                  widget.selectionArguments!.onSubmit(selectionController.data);
-                  Navigator.of(this.context).pop();
-                },
-              ),
-            ),
+    initSelectionController(() => ContentSelectionController.create(
+      vsync: this,
+      context: context,
+      ignoreWhen: () => playerRouteController.opened ||
+                        HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.tabs),
+    ));
   
-          ];
-        },
-      );
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        if (mounted) {
-          selectionController.overlay = navigatorKey.currentState!.overlay;
-          selectionController.activate();
-        }
-      });
-    } else {
-      selectionController = ContentSelectionController.create(
-        vsync: this,
-        context: context,
-        ignoreWhen: () => playerRouteController.opened ||
-                          HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.tabs),
-      );
-    }
-
-    selectionController.addListener(handleSelection);
     tabController = TabController(
       vsync: this,
       length: 4,
@@ -135,26 +87,13 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   @override
   void dispose() {
     assert(() {
-      if (!selection)
+      if (!selectionRoute)
         _mainTabsCreated = false;
       return true;
     }());
-    if (selection)
-      BackButtonInterceptor.remove(backButtonInterceptor);
-    selectionController.dispose();
+    disposeSelectionController();
     tabController.dispose();
     super.dispose();
-  }
-
-  /// Using interceptor for [selection] to gain a priority over the navigator and
-  /// internal [SearchRoute] back button listeners, because I want the selection route
-  /// to be closed with one back button tap.
-  bool backButtonInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    if (stopDefaultButtonEvent)
-      return false;
-    Navigator.of(context).maybePop();
-    BackButtonInterceptor.remove(backButtonInterceptor);
-    return true;
   }
 
   List<Widget> _buildTabs() {
@@ -175,7 +114,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       _TabCollapse(
         index: 2,
         tabController: tabController,
-        icon: const Icon(Icons.queue_music_rounded),
+        icon: const Icon(Icons.queue_music_rounded, size: 28.0),
         label: l10n.playlists,
       ),
       _TabCollapse(
@@ -191,29 +130,43 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   DateTime? _lastBackPressTime;
   Future<bool> _handlePop() async {
     final navigatorKey = AppRouter.instance.navigatorKey;
-    final homeNavigatorKey = HomeRouter.instance.navigatorKey;
+    final homeNavigatorKey = homeRouter!.navigatorKey;
+
+    if (selectionRoute && homeNavigatorKey.currentState!.canPop()) {
+      homeNavigatorKey.currentState!.pop();
+      return true;
+    }
     if (navigatorKey.currentState != null && navigatorKey.currentState!.canPop()) {
       navigatorKey.currentState!.pop();
       return true;
-    } else if (homeNavigatorKey.currentState != null && homeNavigatorKey.currentState!.canPop()) {
+    }
+    if (homeNavigatorKey.currentState != null && homeNavigatorKey.currentState!.canPop()) {
       homeNavigatorKey.currentState!.pop();
       return true;
-    } else {
-      final now = DateTime.now();
-      // Show toast when user presses back button on main route, that
-      // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
-        _lastBackPressTime = now;
-        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
-        return true;
-      }
     }
+
+    final now = DateTime.now();
+    // Show toast when user presses back button on main route, that
+    // asks from user to press again to confirm that he wants to quit the app
+    if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+      _lastBackPressTime = now;
+      ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
+      return true;
+    }
+
     return false;
   }
 
-  Widget _buildPage() {
+  @override
+  Widget build(BuildContext context) {
     final theme = ThemeControl.theme;
     final screenWidth = MediaQuery.of(context).size.width;
+    final searchButton = NFIconButton(
+      icon: const Icon(Icons.search_rounded),
+      onPressed: () {
+        ShowFunctions.instance.showSongsSearch(context);
+      },
+    );
 
     final appBar = SelectionAppBar(
       titleSpacing: 0.0,
@@ -221,50 +174,30 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       elevationSelection: 2.0,
       selectionController: selectionController,
       toolbarHeight: kToolbarHeight,
-      showMenuButton: !selection,
-      leading: selection
-        ? NFBackButton(onPressed: () => Navigator.of(context).pop())
+      showMenuButton: !selectionRoute,
+      leading: selectionRoute
+        ? NFBackButton(onPressed: () => AppRouter.instance.navigatorKey.currentState!.pop())
         : const NFBackButton(),
       onMenuPressed: () {
         drawerController.open();
       },
-      actions: selection ? const [] : [
-        NFIconButton(
-          icon: const Icon(Icons.search_rounded),
-          onPressed: () {
-            ShowFunctions.instance.showSongsSearch();
-          },
-        ),
-      ],
-      actionsSelection: !selection
+      actions: selectionRoute ? const [] : [searchButton],
+      actionsSelection: !selectionRoute
         ? [DeleteSongsAppBarAction<Content>(controller: selectionController)]
-        : [NFIconButton(
-            icon: const Icon(Icons.search_rounded),
-            onPressed: () {
-              navigatorKey.currentState!.push(SearchPageRoute(
-                transitionSettings: AppRouter.instance.transitionSettings.grey,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: kSongTileHeight),
-                  child: SearchRoute(
-                    delegate: ContentSearchDelegate(selectionController),
-                  ),
-                ),
-              ));
-            },
-          )],
+        : [searchButton],
       title: Padding(
         padding: const EdgeInsets.only(left: 15.0),
-        child: selection ? const SizedBox.shrink() : Text(
+        child: selectionRoute ? const SizedBox.shrink() : Text(
           Constants.Config.APPLICATION_TITLE,
           style: appBarTitleTextStyle,
         ),
       ),
-      titleSelection: selection
+      titleSelection: selectionRoute
         ? Text(
-            widget.selectionArguments!.title(context),
+            homeRouter!.selectionArguments!.title(context),
           )
         : Padding(
-            padding: const EdgeInsets.only(left: 10.0),
+            padding: const EdgeInsets.only(left: 14.0),
             child: SelectionCounter(controller: selectionController),
           ),
     );
@@ -294,10 +227,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                           controller: tabController,
                           physics: const _TabsScrollPhysics(),
                           children: [
-                            _ContentTab<Song>(selectionController: selectionController, selection: selection),
-                            _ContentTab<Album>(selectionController: selectionController, selection: selection),
-                            _ContentTab<Playlist>(selectionController: selectionController, selection: selection),
-                            _ContentTab<Artist>(selectionController: selectionController, selection: selection),
+                            _ContentTab<Song>(selectionController: selectionController),
+                            _ContentTab<Album>(selectionController: selectionController),
+                            _ContentTab<Playlist>(selectionController: selectionController),
+                            _ContentTab<Artist>(selectionController: selectionController),
                           ],
                         ),
                       ),
@@ -373,35 +306,16 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    if (selection)
-      return Navigator(
-        key: navigatorKey,
-        onGenerateInitialRoutes: (context, name) {
-          return [PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => Padding(
-              padding: const EdgeInsets.only(bottom: kSongTileHeight),
-              child: _buildPage(),
-            ),
-          )];
-        },
-      );
-    return _buildPage();
-  }
 }
 
 
 class _ContentTab<T extends Content> extends StatefulWidget {
   _ContentTab({
     Key? key,
-    required this.selection,
     required this.selectionController,
   }) : super(key: key);
 
-  final bool selection;
-  final ContentSelectionController<SelectionEntry>? selectionController;
+  final ContentSelectionController selectionController;
 
   @override
   _ContentTabState<T> createState() => _ContentTabState();
@@ -504,7 +418,9 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
   Widget build(BuildContext context) {
     super.build(context);
     final list = ContentControl.getContent<T>();
+    final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
     final selectionController = widget.selectionController;
+    final selectionRoute = selectionRouteOf(context);
     return RefreshIndicator(
       key: key,
       strokeWidth: 2.5,
@@ -512,7 +428,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
       onRefresh: ContentControl.refetchAll,
       backgroundColor: ThemeControl.theme.colorScheme.primary,
       notificationPredicate: (notification) {
-        return selectionController!.notInSelection &&
+        return selectionController.notInSelection &&
                notification.depth == 0;
       },
       child: ContentListView<T>(
@@ -527,7 +443,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         ),
         leading: Column(
           children: [
-            if (widget.selection)
+            if (selectionRoute)
               ContentListHeader<T>.onlyCount(count: list.length)
             else
               ContentListHeader<T>(
@@ -548,87 +464,87 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                         ],
                       );
                     },
-                    child: list.isEmpty || widget.selection
+                    child: list.isEmpty || selectionRoute
                       ? const SizedBox(
                           width: ContentListHeaderAction.size * 2,
                           height: ContentListHeaderAction.size,
                         )
                       : Row(
-                        children: [
-                          ContentListHeaderAction(
-                            icon: const Icon(Icons.shuffle_rounded),
-                            onPressed: () {
+                          children: [
+                            AnimatedContentListHeaderAction(
+                              icon: const Icon(Icons.shuffle_rounded),
+                              onPressed: showDisabledActions ? null : () {
+                                  contentPick<T, VoidCallback>(
+                                  song: () {
+                                    ContentControl.setQueue(
+                                      type: QueueType.allSongs,
+                                      modified: false,
+                                      shuffled: true,
+                                      shuffleFrom: list as List<Song>,
+                                    );
+                                  },
+                                  album: () {
+                                    final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
+                                    ContentControl.setQueue(
+                                      type: QueueType.allAlbums,
+                                      shuffled: true,
+                                      songs: shuffleResult.shuffledSongs,
+                                      shuffleFrom: shuffleResult.songs,
+                                    );
+                                  },
+                                  playlist: () {
+                                    final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Playlist>);
+                                    ContentControl.setQueue(
+                                      type: QueueType.allPlaylists,
+                                      shuffled: true,
+                                      songs: shuffleResult.shuffledSongs,
+                                      shuffleFrom: shuffleResult.songs,
+                                    );
+                                  },
+                                  artist: () {
+                                    final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Artist>);
+                                    ContentControl.setQueue(
+                                      type: QueueType.allArtists,
+                                      shuffled: true,
+                                      songs: shuffleResult.shuffledSongs,
+                                      shuffleFrom: shuffleResult.songs,
+                                    );
+                                  },
+                                )();
+                                MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                                MusicPlayer.instance.play();
+                                playerRouteController.open();
+                              },
+                            ),
+                            AnimatedContentListHeaderAction(
+                              icon: const Icon(Icons.play_arrow_rounded),
+                              onPressed: showDisabledActions ? null : () {
                                 contentPick<T, VoidCallback>(
-                                song: () {
-                                  ContentControl.setQueue(
-                                    type: QueueType.allSongs,
-                                    modified: false,
-                                    shuffled: true,
-                                    shuffleFrom: list as List<Song>,
-                                  );
-                                },
-                                album: () {
-                                  final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
-                                  ContentControl.setQueue(
+                                  song: () => ContentControl.resetQueue(),
+                                  album: () => ContentControl.setQueue(
                                     type: QueueType.allAlbums,
-                                    shuffled: true,
-                                    songs: shuffleResult.shuffledSongs,
-                                    shuffleFrom: shuffleResult.songs,
-                                  );
-                                },
-                                playlist: () {
-                                  final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Playlist>);
-                                  ContentControl.setQueue(
+                                    songs: ContentUtils.joinSongOrigins(list as List<Album>),
+                                  ),
+                                  playlist: () => ContentControl.setQueue(
                                     type: QueueType.allPlaylists,
-                                    shuffled: true,
-                                    songs: shuffleResult.shuffledSongs,
-                                    shuffleFrom: shuffleResult.songs,
-                                  );
-                                },
-                                artist: () {
-                                  final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Artist>);
-                                  ContentControl.setQueue(
+                                    songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
+                                  ),
+                                  artist: () => ContentControl.setQueue(
                                     type: QueueType.allArtists,
-                                    shuffled: true,
-                                    songs: shuffleResult.shuffledSongs,
-                                    shuffleFrom: shuffleResult.songs,
-                                  );
-                                },
-                              )();
-                              MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
-                              MusicPlayer.instance.play();
-                              playerRouteController.open();
-                            },
-                          ),
-                          ContentListHeaderAction(
-                            icon: const Icon(Icons.play_arrow_rounded),
-                            onPressed: () {
-                              contentPick<T, VoidCallback>(
-                                song: () => ContentControl.resetQueue(),
-                                album: () => ContentControl.setQueue(
-                                  type: QueueType.allAlbums,
-                                  songs: ContentUtils.joinSongOrigins(list as List<Album>),
-                                ),
-                                playlist: () => ContentControl.setQueue(
-                                  type: QueueType.allPlaylists,
-                                  songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
-                                ),
-                                artist: () => ContentControl.setQueue(
-                                  type: QueueType.allArtists,
-                                  songs: ContentUtils.joinSongOrigins(list as List<Artist>),
-                                ),
-                              )();
-                              MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
-                              MusicPlayer.instance.play();
-                              playerRouteController.open();
-                            },
-                          ),
-                        ],
-                      ),
+                                    songs: ContentUtils.joinSongOrigins(list as List<Artist>),
+                                  ),
+                                )();
+                                MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                                MusicPlayer.instance.play();
+                                playerRouteController.open();
+                              },
+                            ),
+                          ],
+                        ),
                   ),
                 ),
               ),
-            if (T == Playlist && !widget.selection)
+            if (T == Playlist && !selectionRoute)
               _buildCreatePlaylist(),
           ],
         ),
@@ -653,6 +569,7 @@ class _TabCollapse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: some wierd stuff happening if value is 1.6090780263766646e-7, this suggests some issue in the rendering that would needed to be investigated, reproduced and filed to flutter as issue
     return NFTab(
       child: AnimatedBuilder(
         animation: tabController.animation!,
@@ -668,7 +585,7 @@ class _TabCollapse extends StatelessWidget {
             }
           } else if (tabValue <= index + 1 && tabValue > index) {
             if (!indexIsChanging || indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
-              // Animation for previos tab.
+              // Animation for previous tab.
               value = 1 - (tabController.animation!.value - index);
             }
           }

@@ -37,6 +37,13 @@ abstract class Content with EquatableMixin {
 }
 
 /// Content that can contain other songs inside it.
+/// 
+/// This class represents not duplicating, a.k.a. `true source` song origins.
+/// For origins to allow duplication, see a protocol in [DuplicatingSongOriginMixin].
+/// 
+/// Examples:
+///  * [Album]
+///  * [Artist]
 abstract class SongOrigin extends Content {
   const SongOrigin();
 
@@ -64,6 +71,35 @@ abstract class SongOrigin extends Content {
       default:
         throw UnimplementedError();
     }
+  }
+}
+
+/// Song origin that allows duplication within the [songs].
+/// 
+/// Classes that are mixed in with this should in [songs] getter:
+/// * create and fill the [idMap]
+/// * set the [Song.idMap] and [Song.origin]
+/// * call [debugAssertSongsAreValid] at the ennd of the getter, to check
+///   that everything is set correctly.
+///
+/// Examples:
+///  * [Playlist]
+mixin DuplicatingSongOriginMixin on SongOrigin {
+  /// Must be created and filled automatically each time the [songs] is called.
+  Map<String, int>? get idMap;
+
+  /// Ensures that [idMap] is initialized and receieved [Song.idMap]
+  /// and the [Song.origin].
+  bool debugAssertSongsAreValid(List<Song> songs) {
+    // Check that new valid idMap is created.
+    // ignore: unused_local_variable
+    final value = idMap;
+
+    for (final song in songs) {
+      if (song.origin != this || song.idMap != idMap)
+        return false;
+    }
+    return true;
   }
 }
 

@@ -6,7 +6,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 
-class Playlist extends PersistentQueue {
+class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   final String data;
   final int dateAdded;
   final int dateModified;
@@ -22,18 +22,25 @@ class Playlist extends PersistentQueue {
   @override
   bool get playable => songIds.isNotEmpty;
 
-  /// Created and filled automatically each time the [songs] is called.
-  late Map<String, int> idMap;
+  @override
+  Map<String, int> get idMap => _idMap;
+  late Map<String, int> _idMap;
 
+  /// For each array of songs a new instance of [idMap] will be created
+  /// and assonged to each [Song.idMap].
+  ///
+  /// The origin will also be set for interaction with queue instertions
+  /// at functions like [ContentControl.playNext].
   @override
   List<Song> get songs {
-    idMap = {};
+    _idMap = {};
     final List<Song> found = [];
     final List<int> notFoundIndices = [];
     for (int i = 0; i < songIds.length; i++) {
       final song = ContentControl.state.allSongs.byId.get(songIds[i]);
       if (song != null) {
         final copiedSong = song.copyWith();
+        copiedSong.origin = this;
         copiedSong.idMap = idMap;
         found.add(copiedSong);
       } else {
@@ -51,6 +58,7 @@ class Playlist extends PersistentQueue {
     for (int i = notFoundIndices.length - 1; i >= 0; i--) {
       songIds.remove(i);
     }
+    assert(debugAssertSongsAreValid(found));
     return found;
   }
 

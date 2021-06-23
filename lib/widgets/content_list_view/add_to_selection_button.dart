@@ -1,0 +1,35 @@
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) nt4f04und. All rights reserved.
+*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+
+import 'package:flutter/material.dart';
+import 'package:sweyer/sweyer.dart';
+
+/// Creates an icon button that adds a content entry to selection.
+class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
+  const AddToSelectionButton({
+    Key? key,
+    required this.entryFactory,
+    required this.controller,
+  }) : super(key: key);
+
+  final ValueGetter<T> entryFactory;
+  final SelectionController<T> controller;
+
+  static const size = 36.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: NFIconButton(
+        icon: const Icon(Icons.add_rounded),
+        onPressed: () {
+          controller.toggleItem(entryFactory());
+        },
+      ),
+    );
+  }
+}

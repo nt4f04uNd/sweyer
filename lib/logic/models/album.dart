@@ -59,7 +59,7 @@ class Album extends PersistentQueue {
   }
 
   /// Returns the album artist.
-  Artist getArtist() => ContentControl.state.artists[artistId];
+  Artist getArtist() => ContentControl.state.artists.firstWhere((el) => el.id == artistId);
 
   const Album({
     required int id,

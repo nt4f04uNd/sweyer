@@ -251,7 +251,7 @@ abstract class ContentChannel {
         'removeSongsFromPlaylist',
         {
           'id': playlist.id,
-          'songIds': songs.map((el) => el.id).toList(),
+          'songIds': songs.map((el) => el.sourceId).toList(),
         },
       );
     } on PlatformException catch(ex) {

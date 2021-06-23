@@ -38,7 +38,7 @@ class SweyerLogo extends StatelessWidget {
               child: Image.asset(
                 Constants.Assets.ASSET_LOGO_MASK,
                 color: color != null
-                    ? getColorForBlend(color!)
+                    ? ContentArt.getColorToBlendInDefaultArt(color!)
                     : ThemeControl.colorForBlend,
                 cacheHeight: cacheSize,
                 cacheWidth: cacheSize,

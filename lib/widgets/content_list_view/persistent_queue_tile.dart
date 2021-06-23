@@ -42,7 +42,8 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     required int this.index,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
-    bool selectionGestureEnabled = true,
+    bool longPressGestureEnabled = true,
+    bool handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -60,7 +61,8 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
        super.selectable(
          key: key,
          selected: selected,
-         selectionGestureEnabled: selectionGestureEnabled,
+         longPressGestureEnabled: longPressGestureEnabled,
+         handleTapInSelection: handleTapInSelection,
          selectionController: selectionController,
        );
 
@@ -114,7 +116,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
-      HomeRouter.instance.goto(HomeRoutes.factory.persistentQueue<T>(widget.queue));
+      HomeRouter.of(context).goto(HomeRoutes.factory.persistentQueue<T>(widget.queue));
     });
   }
 
@@ -145,6 +147,16 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
+    );
+  }
+
+  Widget _buildAddToSelection() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: AddToSelectionButton(
+        entryFactory: widget.toSelectionEntry,
+        controller: widget.selectionController!,
+      ),
     );
   }
 
@@ -199,7 +211,16 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                 child: _buildInfo(),
               ),
             ),
-            if (widget.trailing != null)
+            if (selectionRoute)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.trailing != null)
+                    widget.trailing!,
+                  _buildAddToSelection(),
+                ],
+              )
+            else if (widget.trailing != null)
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: widget.trailing,
@@ -245,6 +266,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     if (!selectable)
       return _buildTile();
 
+    final theme = ThemeControl.theme;
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
       clipBehavior: Clip.none,
@@ -252,13 +274,36 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
         _buildTile(),
         if (animation.status != AnimationStatus.dismissed)
           Positioned(
-            left: artSize + (widget.grid ? -20.0 : 2.0),
-            top: artSize - (widget.grid ? 20.0 : 7.0),
-            child: SelectionCheckmark(
-              size: widget.grid ? 28.0 : 21.0,
-              animation: animation,
+            left: artSize + (widget.grid ? -32.0 : 2.0) - 4.0,
+            top: artSize - (widget.grid ? 32.0 : 7.0) - 4.0,
+            child: GestureDetector(
+              onTap: !selectionRoute ? null : () {
+                widget.selectionController!.toggleItem(widget.toSelectionEntry());
+              },
+              child: SelectionCheckmark(
+                ignorePointer: !selectionRoute,
+                size: widget.grid ? 28.0 : 21.0,
+                animation: animation,
+              ),
             ),
           ),
+        if (selectionRoute && widget.grid)
+            Positioned(
+              top: (widget.gridArtSize - 4.0 - AddToSelectionButton.size).clamp(0.0, double.infinity),
+              right: 4.0,
+              child: ScaleTransition(
+                scale: ReverseAnimation(animation),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Theme(
+                    data: theme.copyWith(
+                      iconTheme: theme.iconTheme.copyWith(color: Colors.white),
+                    ),
+                    child: _buildAddToSelection(),
+                  ),
+                ),
+              ),
+            ),
       ],
     );
   }

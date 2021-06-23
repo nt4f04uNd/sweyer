@@ -116,8 +116,8 @@ class Queue implements _QueueOperations<Song> {
   }
 
   @override
-  void remove(Song song) {
-    byId.remove(song.id);
+  bool remove(Song song) {
+    return byId.remove(song.id);
   }
 
   @override
@@ -164,7 +164,7 @@ abstract class _QueueOperations<T> {
   bool contains(T arg);
 
   /// Removes song.
-  void remove(T arg);
+  bool remove(T arg);
 
   /// Retruns song.
   Song? get(T arg);
@@ -190,8 +190,16 @@ class _QueueOperationsById implements _QueueOperations<int> {
   }
 
   @override
-  void remove(int id) {
-    queue.songs.removeWhere((el) => el.id == id);
+  bool remove(int id) {
+    bool removed = false;
+    queue.songs.removeWhere((el) {
+      if (el.id == id) {
+        removed = true;
+        return true;
+      }
+      return false;
+    });
+    return removed;
   }
 
   @override

@@ -9,7 +9,6 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
-import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -25,14 +24,7 @@ class _Notifier extends ChangeNotifier {
 }
 
 class ContentSearchDelegate {
-  ContentSearchDelegate([this.selectionController]);
-
-  /// If non-null, then the search route will start in selection
-  /// mode driven by that controller and will adapt in way so user
-  /// can search and select items simultainiously.
-  ///
-  /// Used for [TabsRoute.selection].
-  final ContentSelectionController? selectionController;
+  ContentSearchDelegate();
 
   /// Whether to automatically open the keyboard when page is opened.
   bool autoKeyboard = false;
@@ -88,18 +80,10 @@ class _Results {
 }
 
 class _SearchStateDelegate {
-  _SearchStateDelegate(BuildContext context, this.searchDelegate)
+  _SearchStateDelegate(this.selectionController, this.searchDelegate)
     : scrollController = ScrollController(),
-    singleListScrollController = ScrollController(),
-    selectionController = searchDelegate.selectionController ?? ContentSelectionController.create(
-      vsync: AppRouter.instance.navigatorKey.currentState!,
-      context: context,
-      closeButton: true,
-      ignoreWhen: () => playerRouteController.opened ||
-                        HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
-    )
-  {
-    selectionController.addListener(setState);
+    singleListScrollController = ScrollController()
+    {
     /// Initalize [prevQuery] and [trimmedQuery] values.
     onQueryChange();
   }
@@ -122,8 +106,6 @@ class _SearchStateDelegate {
     scrollController.dispose();
     singleListScrollController.dispose();
     bodyScrolledNotifier.dispose();
-    if (searchDelegate.selectionController == null)
-      selectionController.dispose();
   }
 
   static _SearchStateDelegate? _of(BuildContext context) {
@@ -371,18 +353,25 @@ class SearchRoute extends StatefulWidget {
   _SearchRouteState createState() => _SearchRouteState();
 }
 
-class _SearchRouteState extends State<SearchRoute> {
+class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   late _SearchStateDelegate stateDelegate;
   FocusNode get focusNode => stateDelegate.focusNode;
   late ModalRoute _route;
   late Animation<double> _animation;
 
-  bool get selection => widget.delegate.selectionController != null;
-
   @override
   void initState() {
     super.initState();
-    stateDelegate = _SearchStateDelegate(context, widget.delegate);
+
+    initSelectionController(() => ContentSelectionController.create(
+      vsync: AppRouter.instance.navigatorKey.currentState!,
+      context: context,
+      closeButton: true,
+      ignoreWhen: () => playerRouteController.opened ||
+                        HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
+    ));
+
+    stateDelegate = _SearchStateDelegate(selectionController, widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -394,28 +383,16 @@ class _SearchRouteState extends State<SearchRoute> {
     });
     focusNode.addListener(_onFocusChanged);
     playerRouteController.addStatusListener(_handlePlayerRouteStatusChange);
-    if (selection)
-      BackButtonInterceptor.add(backButtonInterceptor);
-  }
-
-  /// Using interceptor for [selection] to gain a priority over the navigator and
-  /// internal [SearchRoute] back button listeners, because I want the selection route
-  /// to be closed with one back button tap.
-  bool backButtonInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    Navigator.of(context).maybePop();
-    BackButtonInterceptor.remove(backButtonInterceptor);
-    return true;
   }
 
   @override
   void dispose() {
-    if (selection)
-      BackButtonInterceptor.remove(backButtonInterceptor);
     stateDelegate.dispose();
+    disposeSelectionController();
     widget.delegate._setStateNotifier.removeListener(_handleSetState);
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
     widget.delegate._chipsBarDragged = false;
-   _animation.removeStatusListener(_onAnimationStatusChanged);
+    _animation.removeStatusListener(_onAnimationStatusChanged);
     playerRouteController.removeStatusListener(_handlePlayerRouteStatusChange);
     super.dispose();
   }
@@ -640,11 +617,11 @@ class _SearchRouteState extends State<SearchRoute> {
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
                 showMenuButton: false,
-                titleSelection: selection ? title : Padding(
+                titleSelection: selectionRoute ? title : Padding(
                   padding: const EdgeInsets.only(top: 15.0),
                   child: SelectionCounter(controller: stateDelegate.selectionController),
                 ),
-                actionsSelection: selection ? const [] : [
+                actionsSelection: selectionRoute ? const [] : [
                   DeleteSongsAppBarAction<Content>(
                     controller: stateDelegate.selectionController,
                   )
@@ -657,9 +634,9 @@ class _SearchRouteState extends State<SearchRoute> {
                 textTheme: theme.primaryTextTheme,
                 brightness: theme.primaryColorBrightness,
                 leading: buildLeading(),
-                actions: selection ? const [] : buildActions(),
+                actions: selectionRoute ? const [] : buildActions(),
                 bottom: bottom,
-                title: !selection ? title : const SizedBox.shrink(),
+                title: !selectionRoute ? title : const SizedBox.shrink(),
               ),
             ),
             body: SafeArea(

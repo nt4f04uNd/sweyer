@@ -86,6 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "newPlaylist" : MessageLookupByLibrary.simpleMessage("New playlist"),
     "next" : MessageLookupByLibrary.simpleMessage("Next"),
     "noMusic" : MessageLookupByLibrary.simpleMessage("There\'s no music on your device"),
+    "nothingHere" : MessageLookupByLibrary.simpleMessage("There\'s nothing here"),
     "numberOfAlbums" : MessageLookupByLibrary.simpleMessage("Number of albums"),
     "numberOfTracks" : MessageLookupByLibrary.simpleMessage("Number of tracks"),
     "onThePathToDevMode" : MessageLookupByLibrary.simpleMessage("Something should happen now..."),

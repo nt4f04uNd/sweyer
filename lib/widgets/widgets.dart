@@ -20,6 +20,8 @@ export 'seekbar.dart';
 export 'selection.dart';
 export 'settings_widgets.dart';
 export 'shared_axis_tab_view.dart';
+export 'show_functions.dart';
 export 'slider.dart';
 export 'spinner.dart';
+export 'sweyer_icons.dart';
 export 'text_field.dart';

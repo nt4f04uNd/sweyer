@@ -95,7 +95,7 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   static GlobalKey<OverlayState> overlayKey = GlobalKey();
-  final router = HomeRouter();
+  final router = HomeRouter.main();
 
   @override
   Widget build(BuildContext context) {

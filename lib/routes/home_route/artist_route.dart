@@ -14,7 +14,6 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/widgets/debug.dart';
 
 class ArtistRoute extends StatefulWidget {
   ArtistRoute({Key? key, required this.artist}) : super(key: key);
@@ -25,16 +24,14 @@ class ArtistRoute extends StatefulWidget {
   _ArtistRouteState createState() => _ArtistRouteState();
 }
 
-class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin, SelectionHandler {
+class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin, SelectionHandlerMixin {
   final ScrollController scrollController = ScrollController();
   late AnimationController appBarController;
   late AnimationController backButtonAnimationController;
   late Animation<double> backButtonAnimation;
-  late ContentSelectionController selectionController;
   late List<Song> songs;
   late List<Album> albums;
   late StreamSubscription<void> _contentChangeSubscription;
-
 
   static const _appBarHeight = NFConstants.toolbarHeight - 8.0 + AppBarBorder.height;
 
@@ -77,21 +74,22 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
       reverseCurve: Curves.easeIn,
     );
     scrollController.addListener(_handleScroll);
-    selectionController = ContentSelectionController.create(
+
+    initSelectionController(() => ContentSelectionController.create(
       vsync: AppRouter.instance.navigatorKey.currentState!,
       context: context,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
-    )
-     ..addListener(handleSelection);
+    ));
+  
     _contentChangeSubscription = ContentControl.state.onContentChange.listen(_handleContentChange);
   }
 
   @override
   void dispose() {
     _contentChangeSubscription.cancel();
-    selectionController.dispose();
+    disposeSelectionController();
     appBarController.dispose();
     scrollController.removeListener(_handleScroll);
     super.dispose();
@@ -317,8 +315,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               list: songs,
                               selectionController: selectionController,
                               maxPreviewCount: 5,
-                              onHeaderTap: selectionController.inSelection || songs.length <= 5 ? null : () {
-                                HomeRouter.instance.goto(HomeRoutes.factory.artistContent<Song>(widget.artist, songs));
+                              onHeaderTap: selectionController.inSelection && !selectionRoute || songs.length <= 5 ? null : () {
+                                HomeRouter.of(context).goto(HomeRoutes.factory.artistContent<Song>(widget.artist, songs));
                               },
                               contentTileTapHandler: () {
                                 ContentControl.setOriginQueue(
@@ -334,8 +332,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                             children: [
                               ContentSection<Album>.custom(
                                 list: albums,
-                                onHeaderTap: selectionController.inSelection ? null : () {
-                                  HomeRouter.instance.goto(HomeRoutes.factory.artistContent<Album>(widget.artist, albums));
+                                onHeaderTap: selectionController.inSelection && !selectionRoute ? null : () {
+                                  HomeRouter.of(context).goto(HomeRoutes.factory.artistContent<Album>(widget.artist, albums));
                                 },
                                 child: SizedBox(
                                   height: _albumsSectionHeight,

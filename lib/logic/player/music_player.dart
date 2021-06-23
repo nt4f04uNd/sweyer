@@ -240,7 +240,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   Future<void> insertQueueItem(int index, MediaItem mediaItem) async {
     final song = ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
     if (song != null) {
-      ContentControl.insertToQueue(index, song);
+      ContentControl.insertToQueue(index, [song]);
     }
   }
 

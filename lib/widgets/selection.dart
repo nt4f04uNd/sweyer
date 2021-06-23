@@ -22,11 +22,52 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Selection animation duration.
 const Duration kSelectionDuration = Duration(milliseconds: 350);
 
-/// The [SelectionWidget] need its parent updates him.
+// TODO: comments
+bool selectionRouteOf(context) {
+  return HomeRouter.maybeOf(context)?.selectionArguments != null;
+}
+
+/// A mixin for easy creation of [ContentSelectionController] and
+/// connection with [SelectionRoute] selection controller.
+///
+/// Usually this is a creator of [SelectionWidget].
 ///
 /// Mixin this to a parent of [SelectableWidget] and add [handleSelection],
 /// (or optionally [handleSelectionStatus]) as handler to listener to the controller(s).
-mixin SelectionHandler<T extends StatefulWidget> on State<T> {
+///
+/// For example see [TabsRoute].
+///
+/// TODO: comments
+mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
+  late ContentSelectionController selectionController;
+
+  late HomeRouter? homeRouter = HomeRouter.maybeOf(context);
+  bool get selectionRoute => homeRouter?.selectionArguments != null;
+
+  void initSelectionController(ValueGetter<ContentSelectionController> factory, {
+    bool listen = true,
+    bool listenStatus = false,
+  }) {
+    if (selectionRoute) {
+      selectionController = homeRouter!.selectionArguments!.selectionController;
+    } else {
+      selectionController = factory();
+    }
+    if (listen)
+      selectionController.addListener(handleSelection);
+    if (listenStatus)
+      selectionController.addStatusListener(handleSelectionStatus);
+  }
+
+  void disposeSelectionController() {
+    if (selectionRoute) {
+      selectionController.removeListener(handleSelection);
+      selectionController.removeStatusListener(handleSelectionStatus);
+    } else {
+      selectionController.dispose();
+    }
+  }
+
   /// Listens to [SelectionController.addListener].
   /// By default just calls [setState].
   @protected
@@ -61,7 +102,8 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   const SelectableWidget({
     Key? key,
   }) : selected = null,
-       selectionGestureEnabled = null,
+       longPressGestureEnabled = null,
+       handleTapInSelection = null,
        selectionController = null,
        super(key: key);
 
@@ -70,7 +112,8 @@ abstract class SelectableWidget<T> extends StatefulWidget {
     Key? key,
     required this.selectionController,
     required bool this.selected,
-    required bool this.selectionGestureEnabled,
+    required bool this.longPressGestureEnabled,
+    required bool this.handleTapInSelection,
   }) : super(key: key);
 
   /// Makes tiles aware whether they are selected in some global set.
@@ -79,8 +122,17 @@ abstract class SelectableWidget<T> extends StatefulWidget {
 
   /// Whether the selection gesture is enabled.
   ///
-  /// When `false`, widget will be considered as not selectable.
-  final bool? selectionGestureEnabled;
+  /// Will be force treated as `false` if [selectionRouteOf] is `true`.
+  final bool? longPressGestureEnabled;
+
+  /// Whether in selection the tap handling is enabled.
+  ///
+  /// Set this to `false` if there's a need to preserve the ability of user to
+  /// perform default tile tap actions in selection, and instead have some custom
+  /// for selection button for example in the tile trailing.
+  ///
+  /// Will be force treated as `false` if [selectionRouteOf] is `true`.
+  final bool? handleTapInSelection;
 
   /// A controller that drive the selection.
   /// 
@@ -108,7 +160,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// To avoid this, animation is instantiated in [initState].
   /// 
   /// See also:
-  /// * [buildAnimation] that build the animation object
+  /// * [buildAnimation] that builds the animation
   Animation<double> get animation => _animation;
   late Animation<double> _animation;
 
@@ -118,6 +170,9 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
 
   /// Whether the widget can be selected.
   bool get selectable => widget.selectionController != null;
+
+  /// Whether the widget is inside the selection route and is [selectable].
+  bool get selectionRoute => selectable && selectionRouteOf(context);
 
   @override
   void initState() { 
@@ -183,7 +238,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// 
   /// Will return null if not [selectable], because it is common to pass it to [ListTile.onLongPress],
   /// and passing null will disable the long press gesture.
-  VoidCallback? get toggleSelection => !selectable || !widget.selectionGestureEnabled! ? null : () {
+  VoidCallback? get toggleSelection => !selectable || !selectionRouteOf(context) && !widget.longPressGestureEnabled! ? null : () {
     if (!selectable)
       return;
     setState(() {
@@ -201,7 +256,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// If yes, on taps will be handled by calling [toggleSelection],
   /// otherwise calls the [onTap] callback.
   void handleTap(VoidCallback onTap) {
-    if (selectable && widget.selectionController!.inSelection && widget.selectionGestureEnabled!) {
+    if (selectable && widget.selectionController!.inSelection && !selectionRouteOf(context) && widget.handleTapInSelection!) {
       toggleSelection!();
     } else {
       onTap();
@@ -293,8 +348,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// The [actionsBar] can be set to `false` to disable this behavior.
   ///
   /// By default actions bar is filled with a few default actions,
-  /// which should always be visiable. The [actionsBuilder] parameter
-  /// allows to add additinal actions to these default ones.
+  /// which should always be visiable. The [additionalActionsBuilder] parameter
+  /// allows to add additional actions to these default ones.
   ///
   /// If [counter] is `true`, will show a couter in the actions bar title.
   ///
@@ -306,7 +361,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     required TickerProvider vsync,
     required BuildContext context,
     bool actionsBar = true,
-    List<Widget> Function(BuildContext)? actionsBuilder,
+    List<Widget> Function(BuildContext)? additionalActionsBuilder,
     bool counter = false,
     bool closeButton = false,
     ValueGetter<bool>? ignoreWhen,
@@ -325,8 +380,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
             closeButton: closeButton,
           )],
           right: [
-            if (actionsBuilder != null)
-              ...actionsBuilder(context),
+            if (additionalActionsBuilder != null)
+              ...additionalActionsBuilder(context),
             ..._getActions<T>()()
           ],
         );
@@ -368,23 +423,34 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   static ValueGetter<List<Widget>> _getActions<T extends Content>() {
+    const playActions = <Widget>[
+      _PlayAsQueueSelectionAction(),
+      _ShuffleAsQueueSelectionAction(),
+    ];
     return contentPick<T, ValueGetter<List<Widget>>>(
-      song: () => const [
+      song: () => playActions + const [
+        _GoToArtistSelectionAction(),
         _GoToAlbumSelectionAction(),
         _PlayNextSelectionAction<Song>(),
         _AddToQueueSelectionAction<Song>(),
       ],
-      album: () => const [
+      album: () => playActions + const [
         _PlayNextSelectionAction<Album>(),
         _AddToQueueSelectionAction<Album>(),
       ],
-      playlist: () => const [
+      playlist: () => playActions + const [
+        _EditPlaylistSelectionAction(),
         _PlayNextSelectionAction<Playlist>(),
         _AddToQueueSelectionAction<Playlist>(),
       ],
-      artist: () => const [],
-      fallback: () => const [
+      artist: () => playActions + const [
+        _PlayNextSelectionAction<Artist>(),
+        _AddToQueueSelectionAction<Artist>(),
+      ],
+      fallback: () => playActions + const [
+        _GoToArtistSelectionAction(),
         _GoToAlbumSelectionAction(),
+        _EditPlaylistSelectionAction(),
         _PlayNextSelectionAction(),
         _AddToQueueSelectionAction(),
       ],
@@ -396,6 +462,11 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       .widget as _ContentSelectionControllerProvider;
     return widget.controller;
   }
+
+  /// Returns true when data, or song origins inside it, have at least one song,
+  /// in other words, if [ContentUtils.flatten] for this controller would return
+  /// non-empty array.
+  bool get hasAtLeastOneSong => data.any((el) => el is! SelectionEntry<Playlist> || el.data.songIds.isNotEmpty);
 
   Color? _lastNavColor;
   OverlayEntry? _overlayEntry;
@@ -467,7 +538,10 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   @override
   void didPop() {
-    close();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      // This might be called during the build which will cause a crash
+      close();
+    });
   }
 
   void _handleDismissibleRouteDrag(SlidableDragEvent event) {
@@ -543,7 +617,7 @@ class ContentSelectionControllerCreator<T extends Content> extends StatefulWidge
     this.child,
   }) : super(key: key);
 
-  final Widget Function(BuildContext context, ContentSelectionController<SelectionEntry<T>> selectionController, Widget? child) builder;
+  final Widget Function(BuildContext context, ContentSelectionController selectionController, Widget? child) builder;
   final Widget? child;
 
   @override
@@ -551,31 +625,29 @@ class ContentSelectionControllerCreator<T extends Content> extends StatefulWidge
 }
 
 class _SelectionControllerCreatorState<T extends Content> extends State<ContentSelectionControllerCreator<T>>
-    with SelectionHandler {
-  late final ContentSelectionController<SelectionEntry<T>> controller; 
+    with SelectionHandlerMixin {
 
   @override
   void initState() { 
     super.initState();
-    controller = ContentSelectionController.create<T>(
+    initSelectionController(() => ContentSelectionController.create<T>(
       vsync: AppRouter.instance.navigatorKey.currentState!,
       context: context,
       closeButton: true,
       counter: true,
       ignoreWhen: () => playerRouteController.opened,
-    )
-      ..addListener(handleSelection);
+    ));
   }
 
   @override
-  void dispose() { 
-    controller.dispose();
+  void dispose() {
+    disposeSelectionController();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, controller, widget.child);
+    return widget.builder(context, selectionController, widget.child);
   }
 }
 
@@ -583,10 +655,12 @@ class SelectionCheckmark extends StatefulWidget {
   const SelectionCheckmark({
     Key? key,
     required this.animation,
+    this.ignorePointer = true,
     this.size = 21.0,
   }) : super(key: key);
 
   final Animation<double> animation;
+  final bool ignorePointer;
   final double size;
 
   @override
@@ -630,6 +704,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
+      ignoring: widget.ignorePointer,
       child: AnimatedBuilder(
         animation: widget.animation,
         builder: (context, child) => ScaleTransition(
@@ -806,30 +881,33 @@ class EmergeAnimation extends AnimatedWidget {
   }
 }
 
-/// Checks whether the actions is supported and hides it, if it's not.
+/// Checks whether the action is supported and hides it, if it's not.
 /// 
-/// By default it will ensure that no action is shown when selection is empty.
-class _ActionSupported extends StatefulWidget {
-  _ActionSupported({
+/// Calls the build again, when selection is updated, excluding the
+/// selection closing.
+class _ActionBuilder extends StatefulWidget {
+  _ActionBuilder({
     Key? key,
     required this.controller,
-    required this.child,
-    this.shown,
+    required this.builder,
+    required this.shown,
+    this.child,
   }) : super(key: key);
 
   final ContentSelectionController controller;
 
-  final Widget child;
+  final TransitionBuilder builder;
+
+  final Widget? child;
 
   /// Condition to check whether the action should be shown or not.
-  /// By default is true.
-  final ValueGetter<bool>? shown;
+  final ValueGetter<bool> shown;
 
   @override
-  _ActionSupportedState createState() => _ActionSupportedState();
+  _ActionBuilderState createState() => _ActionBuilderState();
 }
 
-class _ActionSupportedState extends State<_ActionSupported> with SelectionHandler {
+class _ActionBuilderState extends State<_ActionBuilder> with SelectionHandlerMixin {
   UniqueKey key = UniqueKey();
   bool shown = false;
 
@@ -840,7 +918,7 @@ class _ActionSupportedState extends State<_ActionSupported> with SelectionHandle
   }
 
   @override
-  void didUpdateWidget(covariant _ActionSupported oldWidget) {
+  void didUpdateWidget(covariant _ActionBuilder oldWidget) {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(handleSelection);
       widget.controller.addListener(handleSelection);
@@ -868,7 +946,7 @@ class _ActionSupportedState extends State<_ActionSupported> with SelectionHandle
     if (widget.controller.inSelection) {
       /// The condition ensures animation will not play on close, because [SelectionAppBar]
       /// has its own animation, and combination of them both doesn't look good.
-      shown = widget.shown?.call() ?? true;
+      shown = widget.shown.call();
     }
     return AnimatedSwitcher(
       key: key,
@@ -877,9 +955,9 @@ class _ActionSupportedState extends State<_ActionSupported> with SelectionHandle
         animation: animation,
         child: child,
       ),
-      child: !shown || widget.controller.data.isEmpty
+      child: !shown
         ? const SizedBox.shrink()
-        : widget.child,
+        : widget.builder(context, widget.child),
     );
   }
 }
@@ -916,7 +994,7 @@ class _ActionsSelectionTitle extends StatelessWidget {
               iconSize: NFConstants.iconSize,
               color: ThemeControl.theme.colorScheme.onSurface,
               onPressed: () => controller.close(),
-              icon: const Icon(Icons.close),
+              icon: const Icon(Icons.close_rounded),
             ),
           ),
         if (selectedTitle && counter || !counter)
@@ -972,7 +1050,7 @@ class SelectionCounter extends StatefulWidget {
   _SelectionCounterState createState() => _SelectionCounterState();
 }
 
-class _SelectionCounterState extends State<SelectionCounter> with SelectionHandler {
+class _SelectionCounterState extends State<SelectionCounter> with SelectionHandlerMixin {
   late ContentSelectionController controller;
   late int selectionCount;
   UniqueKey key = UniqueKey();
@@ -1039,7 +1117,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 
 //*********** Queue actions ***********
 
-/// Action that queues a [Song] or [Album] to be played next.
+/// Action that queues a [Song] or a [SongOrigin] to be played next.
 class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
   const _PlayNextSelectionAction({Key? key}) : super(key: key);
 
@@ -1069,7 +1147,7 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
       song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
       album: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>),
       playlist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>),
-      artist: () => throw ArgumentError('This actions doesn support artists'),
+      artist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Artist>>),
       fallback: () {
         final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
@@ -1111,23 +1189,25 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    return _ActionSupported(
+    return _ActionBuilder(
+      shown: () => true,
       controller: controller,
-        child: EmergeAnimation(
+      builder: (context, child) => EmergeAnimation(
         animation: controller.animation,
-        child: NFIconButton(
+        child: AnimatedIconButton(
           tooltip: l10n.playNext,
-          icon: const Icon(Icons.playlist_play_rounded),
+          duration: const Duration(milliseconds: 240),
+          icon: const Icon(SweyerIcons.play_next),
           iconSize: 30.0,
-          onPressed: () => _handleTap(controller),
+          onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(controller),
         ),
       ),
     );
   }
 }
 
-/// Action that adds a [Song] or an [Album] to the end of the queue.
-class _AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
+/// Action that adds a [Song] or a [SongOrigin] to the end of the queue.
+class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
   const _AddToQueueSelectionAction({Key? key})
       : super(key: key);
 
@@ -1145,10 +1225,9 @@ class _AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
   void _handleOrigins(List<SelectionEntry<SongOrigin>> entries) {
     if (entries.isEmpty)
       return;
-    // Reverse order is proper here
-    entries.sort((a, b) => b.index.compareTo(a.index));
+    entries.sort((a, b) => a.index.compareTo(b.index));
     for (final entry in entries) {
-      ContentControl.playOriginNext(entry.data);
+      ContentControl.addOriginToQueue(entry.data);
     }
   }
 
@@ -1157,7 +1236,7 @@ class _AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
       song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
       album: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>),
       playlist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>),
-      artist: () => throw ArgumentError('This actions doesn support artists'),
+      artist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Artist>>),
       fallback: () {
         final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
@@ -1199,14 +1278,125 @@ class _AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    return _ActionSupported(
+    return _ActionBuilder(
+      shown: () => true,
       controller: controller,
+      builder: (context, child) => EmergeAnimation(
+        animation: controller.animation,
+        child: AnimatedIconButton(
+          tooltip: l10n.addToQueue,
+          duration: const Duration(milliseconds: 240),
+          icon: const Icon(SweyerIcons.add_to_queue),
+          iconSize: 30.0,
+          onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Action that plays selected content as queue.
+class _PlayAsQueueSelectionAction extends StatelessWidget {
+  const _PlayAsQueueSelectionAction({Key? key})
+      : super(key: key);
+
+  void _handleTap(ContentSelectionController controller) {
+    final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
+    ContentControl.setQueue(
+      type: QueueType.arbitrary,
+      songs: songs,
+    );
+    MusicPlayer.instance.setSong(songs.first);
+    MusicPlayer.instance.play();
+    playerRouteController.open();
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    return _ActionBuilder(
+      shown: () => true,
+      controller: controller,
+       builder: (context, child) => EmergeAnimation(
+        animation: controller.animation,
+        child: AnimatedIconButton(
+          tooltip: l10n.playContentList,
+          duration: const Duration(milliseconds: 240),
+          icon: const Icon(Icons.play_arrow_rounded),
+          iconSize: 27.0,
+          onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Action that shulles and plays selected content as queue.
+class _ShuffleAsQueueSelectionAction extends StatelessWidget {
+  const _ShuffleAsQueueSelectionAction({Key? key})
+      : super(key: key);
+
+  void _handleTap(ContentSelectionController controller) {
+    final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
+    ContentControl.setQueue(
+      type: QueueType.arbitrary,
+      shuffled: true,
+      shuffleFrom: songs,
+    );
+    MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+    MusicPlayer.instance.play();
+    playerRouteController.open();
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    return _ActionBuilder(
+      shown: () => true,
+      controller: controller,
+       builder: (context, child) => EmergeAnimation(
+        animation: controller.animation,
+        child: AnimatedIconButton(
+          tooltip: l10n.shuffleContentList,
+          duration: const Duration(milliseconds: 240),
+          icon: const Icon(Icons.shuffle_rounded),
+          iconSize: 22.0,
+          onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Action that removes a song from the queue.
+class RemoveFromQueueSelectionAction extends StatelessWidget {
+  const RemoveFromQueueSelectionAction({Key? key}) : super(key: key);
+
+  void _handleTap(ContentSelectionController<SelectionEntry<Song>> controller) {
+    for (final entry in controller.data) {
+      final removed = ContentControl.removeFromQueue(entry.data);
+      assert(removed);
+    }
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context) as ContentSelectionController<SelectionEntry<Song>>;
+    return _ActionBuilder(
+      controller: controller,
+      shown: () => true,
+      builder: (context, child) => child!,
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
-          tooltip: l10n.addToQueue,
-          icon: const Icon(Icons.queue_music_rounded),
-          iconSize: 30.0,
+          tooltip: l10n.removeFromQueue,
+          icon: const Icon(Icons.remove_rounded),
           onPressed: () => _handleTap(controller),
         ),
       ),
@@ -1217,25 +1407,10 @@ class _AddToQueueSelectionAction<T extends Content>  extends StatelessWidget {
 //*********** Navigation actions ***********
 
 /// Action that leads to the song album.
-class _GoToAlbumSelectionAction extends StatefulWidget {
+class _GoToAlbumSelectionAction extends StatelessWidget {
   const _GoToAlbumSelectionAction({Key? key}) : super(key: key);
 
-  @override
-  _GoToAlbumSelectionActionState createState() => _GoToAlbumSelectionActionState();
-}
-
-class _GoToAlbumSelectionActionState extends State<_GoToAlbumSelectionAction> {
-  late ContentSelectionController controller;
-
-  @override
-  void initState() { 
-    super.initState();
-    controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
-           controller is ContentSelectionController<SelectionEntry<Song>>);
-  }
-
-  void _handleTap() {
+  void _handleTap(ContentSelectionController controller) {
     final song = controller.data.first.data as Song;
     final album = song.getAlbum();
     if (album != null) {
@@ -1247,22 +1422,108 @@ class _GoToAlbumSelectionActionState extends State<_GoToAlbumSelectionAction> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+           controller is ContentSelectionController<SelectionEntry<Song>>);
     final data = controller.data;
 
-    return _ActionSupported(
+    return _ActionBuilder(
       controller: controller,
       shown: () {
         return data.length == 1 &&
           data.first.data is Song && (data.first.data as Song).albumId != null &&
           (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.album) || playerRouteController.opened); // disable action in album route
       },
+      builder: (context, child) => child!,
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
           tooltip: l10n.goToAlbum,
           icon: const Icon(Icons.album_rounded),
           iconSize: 23.0,
-          onPressed: _handleTap,
+          onPressed: () => _handleTap(controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Action that leads to the song or album artist.
+class _GoToArtistSelectionAction extends StatelessWidget {
+  const _GoToArtistSelectionAction({Key? key}) : super(key: key);
+
+  void _handleTap(ContentSelectionController controller) {
+    final content = controller.data.first.data;
+    if (content is Song) {
+      HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(content.getArtist()));
+    } else if (content is Album) {
+      HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(content.getArtist()));
+    } else {
+      throw UnimplementedError();
+    }
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+           controller is ContentSelectionController<SelectionEntry<Song>> ||
+           controller is ContentSelectionController<SelectionEntry<Album>>);
+    final data = controller.data;
+
+    return _ActionBuilder(
+      controller: controller,
+      shown: () {
+        return data.length == 1 && (data.first.data is Song || data.first.data is Album) &&
+          (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.artist) || playerRouteController.opened); // disable action in album route
+      },
+      builder: (context, child) => child!,
+      child: EmergeAnimation(
+        animation: controller.animation,
+        child: NFIconButton(
+          tooltip: l10n.goToArtist,
+          icon: const Icon(Icons.person_rounded),
+          iconSize: 23.0,
+          onPressed: () => _handleTap(controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Action that opens a playlist edit mode.
+class _EditPlaylistSelectionAction extends StatelessWidget {
+  const _EditPlaylistSelectionAction({Key? key}) : super(key: key);
+
+  void _handleTap(ContentSelectionController controller) {
+    final playlist = controller.data.first.data as Playlist;
+    HomeRouter.instance.goto(HomeRoutes.playlist.withArguments(PersistentQueueArguments(queue: playlist, editing: true)));
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+           controller is ContentSelectionController<SelectionEntry<Playlist>>);
+    final data = controller.data;
+
+    return _ActionBuilder(
+      controller: controller,
+      shown: () {
+        return data.length == 1 && data.first.data is Playlist; // disable action in album route
+      },
+      builder: (context, child) => child!,
+      child: EmergeAnimation(
+        animation: controller.animation,
+        child: NFIconButton(
+          tooltip: "${l10n.edit} ${l10n.playlist.toLowerCase()}",
+          icon: const Icon(Icons.edit_rounded, size: 21.0),
+          // iconSize: 23.0,
+          onPressed: () => _handleTap(controller),
         ),
       ),
     );
@@ -1272,7 +1533,7 @@ class _GoToAlbumSelectionActionState extends State<_GoToAlbumSelectionAction> {
 //*********** Content related actions ***********
 
 /// Action that removes a song from playlist.
-class RemoveFromPlaylistSelectionAction extends StatefulWidget {
+class RemoveFromPlaylistSelectionAction extends StatelessWidget {
   const RemoveFromPlaylistSelectionAction({
     Key? key,
     required this.playlist,
@@ -1280,43 +1541,40 @@ class RemoveFromPlaylistSelectionAction extends StatefulWidget {
 
   final Playlist playlist;
 
-  @override
-  RemoveFromPlaylistSelectionActionState createState() => RemoveFromPlaylistSelectionActionState();
-}
-
-class RemoveFromPlaylistSelectionActionState extends State<RemoveFromPlaylistSelectionAction> {
-  late ContentSelectionController<SelectionEntry<Song>> controller;
-
-  @override
-  void initState() { 
-    super.initState();
-    controller = ContentSelectionController._of(context) as ContentSelectionController<SelectionEntry<Song>>;
-  }
-
-  void _handleTap() {
-    ContentControl.removeSongsFromPlaylist(
-      songs: controller.data.map((el) => el.data).toList(),
-      playlist: widget.playlist,
+  void _handleTap(BuildContext context, ContentSelectionController<SelectionEntry<Song>> controller) {
+    final entries = controller.data
+      .cast<SelectionEntry<Song>>()
+      .toList()
+      ..sort((a, b) => a.index.compareTo(b.index));
+    final list = entries.map((el) => el.data).toList();
+    _showActionConfirmationDialog<Song>(
+      context: context,
+      controller: controller,
+      list: list,
+      localizedAction: (l10n) => l10n.remove,
+      onSubmit: () {
+        ContentControl.removeSongsFromPlaylist(
+          songs: controller.data.map((el) => el.data).toList(),
+          playlist: playlist,
+        );
+      },
     );
-    controller.close();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final data = controller.data;
-
-    return _ActionSupported(
+    final controller = ContentSelectionController._of(context) as ContentSelectionController<SelectionEntry<Song>>;
+    return _ActionBuilder(
       controller: controller,
-      shown: () {
-        return data.isNotEmpty;
-      },
+      shown: () => true,
+      builder: (context, child) => child!,
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
-          // tooltip: l10n.goToAlbum,
+          tooltip: l10n.removeFromPlaylist,
           icon: const Icon(Icons.delete_outline_rounded),
-          onPressed: _handleTap,
+          onPressed: () => _handleTap(context, controller),
         ),
       ),
     );
@@ -1340,7 +1598,7 @@ class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   _DeleteSongsAppBarActionState<T> createState() => _DeleteSongsAppBarActionState();
 }
 
-class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandler {
+class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandlerMixin {
   late Type type;
   late Type typeToDelete;
 
@@ -1349,59 +1607,6 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
     super.initState();
     type = typeOf<T>();
     assert(type == Song || type == Playlist || type == Content, 'Only Song, Playlist and Content types are supported');
-  }
-
-  void _showDialog<E extends Content>({
-    required List<E> list,
-    required VoidCallback onSubmit,
-  }) {
-    final l10n = getl10n(context);
-    final count = list.length;
-    E? entry;
-    if (count == 1) {
-      entry = list.first;
-    }
-
-    ShowFunctions.instance.showDialog(
-      context,
-      ui: Constants.UiTheme.modalOverGrey.auto,
-      title: Text(
-        '${l10n.delete} ${count > 1 ? '$count ' : ''}${l10n.contentsPlural<E>(count).toLowerCase()}',
-      ),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text.rich(
-            TextSpan(
-              style: const TextStyle(fontSize: 15.0),
-              children: [
-                TextSpan(text: "${l10n.areYouSureYouWantTo} ${l10n.delete.toLowerCase()}"),
-                TextSpan(
-                  text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
-                  style: entry != null
-                      ? const TextStyle(fontWeight: FontWeight.w700)
-                      : null,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          _DeletionArtsPreview<E>(
-            list: list.toList(),
-          ),
-        ],
-      ),
-      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-      acceptButton: NFButton.accept(
-        text: l10n.delete,
-        splashColor: Constants.Theme.glowSplashColor.auto,
-        textStyle: const TextStyle(color: Constants.AppColors.red),
-        onPressed: () {
-          onSubmit();
-          widget.controller.close();
-        },
-      ),
-    );
   }
 
   Future<void> _handleDelete() async {
@@ -1418,11 +1623,14 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
       } else {
         // On all versions below show in app dialog.
         final list = entries.map((el) => el.data).toList();
-        _showDialog<Song>(
+        _showActionConfirmationDialog<Song>(
+          context: context,
+          controller: widget.controller,
           list: list,
+          localizedAction: (l10n) => l10n.delete,
           onSubmit: () {
             ContentControl.deleteSongs(entries.map((e) => e.data).toSet());
-          }
+          },
         );
       }
     } else if (typeToDelete == Playlist) {
@@ -1431,18 +1639,21 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         .toList()
         ..sort((a, b) => a.index.compareTo(b.index));
       final list = entries.map((el) => el.data).toList();
-      _showDialog<Playlist>(
+      _showActionConfirmationDialog<Playlist>(
+        context: context,
+        controller: widget.controller,
         list: list,
+        localizedAction: (l10n) => l10n.delete,
         onSubmit: () {
           ContentControl.deletePlaylists(list);
-        }
+        },
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _ActionSupported(
+    return _ActionBuilder(
       controller: widget.controller,
       shown: () {
         if (type == Song || type == Playlist) {
@@ -1469,6 +1680,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         }
         return false;
       },
+      builder: (context, child) => child!,
       child: NFIconButton(
         icon: const Icon(Icons.delete_outline_rounded),
         onPressed: _handleDelete,
@@ -1477,8 +1689,77 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
   }
 }
 
+void _showActionConfirmationDialog<E extends Content>({
+  required BuildContext context,
+  required ContentSelectionController controller,
+  required List<E> list,
+  required VoidCallback onSubmit,
+  required String Function(AppLocalizations) localizedAction,
+}) {
+  final count = list.length;
+  E? entry;
+  if (count == 1) {
+    entry = list.first;
+  }
+
+  ShowFunctions.instance.showDialog(
+    context,
+    ui: Constants.UiTheme.modalOverGrey.auto,
+    title: Builder(
+      builder: (context) {
+        final l10n = getl10n(context);
+        return Text(
+          '${localizedAction(getl10n(context))} ${count > 1 ? '$count ' : ''}${l10n.contentsPlural<E>(count).toLowerCase()}',
+        );
+      },
+    ),
+    content: Builder(
+      builder: (context) {
+        final l10n = getl10n(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text.rich(
+              TextSpan(
+                style: const TextStyle(fontSize: 15.0),
+                children: [
+                  TextSpan(text: "${l10n.areYouSureYouWantTo} ${localizedAction(l10n).toLowerCase()}"),
+                  TextSpan(
+                    text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
+                    style: entry != null
+                        ? const TextStyle(fontWeight: FontWeight.w700)
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            _DeletionArtsPreview<E>(
+              list: list.toList(),
+            ),
+          ],
+        );
+      },
+    ),
+    buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+    acceptButton: Builder(
+      builder: (context) => NFButton.accept(
+        text: localizedAction(getl10n(context)),
+        splashColor: Constants.Theme.glowSplashColor.auto,
+        textStyle: const TextStyle(color: Constants.AppColors.red),
+        onPressed: () {
+          onSubmit();
+          controller.close();
+        },
+      ),
+    ),
+  );
+}
+
 /// Shows the preview arts from [list] and, if there are more that are not fit,
 /// adds a text at the end "and N more".
+/// 
+/// Supports only songs and playlists.
 class _DeletionArtsPreview<T extends Content> extends StatefulWidget {
   const _DeletionArtsPreview({Key? key, required this.list}) : super(key: key);
 

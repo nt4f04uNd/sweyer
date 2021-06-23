@@ -23,7 +23,8 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.songTileClickBehavior = kSongTileClickBehavior,
     this.index,
     this.selected = false,
-    this.selectionGestureEnabled = true,
+    this.longPressGestureEnabled = true,
+    this.handleTapInSelection = true,
     this.selectionController,
   }) : super(key: key);
 
@@ -39,8 +40,9 @@ class ContentTile<T extends Content> extends StatelessWidget {
 
   final int? index;
   final bool selected;
-  final bool selectionGestureEnabled;
-  final ContentSelectionController<SelectionEntry>? selectionController;
+  final bool longPressGestureEnabled;
+  final bool handleTapInSelection;
+  final ContentSelectionController? selectionController;
 
   static double getHeight<T extends Content>(Type? contentType) {
     return contentPick<T, double>(
@@ -53,7 +55,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
   }
 
   bool get selectable => selectionController != null;
-
+  
   ValueGetter<Widget> forPersistentQueue<Q extends PersistentQueue>() {
     return () => !selectable
       ? PersistentQueueTile<Q>(
@@ -69,7 +71,8 @@ class ContentTile<T extends Content> extends StatelessWidget {
           index: index!,
           selectionController: selectionController!,
           selected: selected,
-          selectionGestureEnabled: selectionGestureEnabled,
+          longPressGestureEnabled: longPressGestureEnabled,
+          handleTapInSelection: handleTapInSelection,
           trailing: trailing,
           current: current,
           onTap: onTap,
@@ -85,10 +88,9 @@ class ContentTile<T extends Content> extends StatelessWidget {
       'If tile is selectable, an `index` must be provided'
     );
 
-    final localSelectable = selectable;
     return contentPick<T, ValueGetter<Widget>>(
       contentType: contentType,
-      song: () => !localSelectable
+      song: () => !selectable
         ? SongTile(
             song: content as Song,
             trailing: trailing,
@@ -104,7 +106,8 @@ class ContentTile<T extends Content> extends StatelessWidget {
             index: index!,
             selectionController: selectionController,
             selected: selected,
-            selectionGestureEnabled: selectionGestureEnabled,
+            longPressGestureEnabled: longPressGestureEnabled,
+            handleTapInSelection: handleTapInSelection,
             trailing: trailing,
             current: current,
             onTap: onTap,
@@ -115,7 +118,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
           ),
       album: forPersistentQueue<Album>(),
       playlist: forPersistentQueue<Playlist>(),
-      artist: () => !localSelectable
+      artist: () => !selectable
         ? ArtistTile(
             artist: content as Artist,
             trailing: trailing,
@@ -129,7 +132,8 @@ class ContentTile<T extends Content> extends StatelessWidget {
             index: index!,
             selectionController: selectionController,
             selected: selected,
-            selectionGestureEnabled: selectionGestureEnabled,
+            longPressGestureEnabled: longPressGestureEnabled,
+            handleTapInSelection: handleTapInSelection,
             trailing: trailing,
             current: current,
             onTap: onTap,

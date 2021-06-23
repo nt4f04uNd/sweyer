@@ -26,12 +26,11 @@ class PlayerRoute extends StatefulWidget {
 }
 
 class _PlayerRouteState extends State<PlayerRoute>
-    with SingleTickerProviderStateMixin, SelectionHandler {
+    with SingleTickerProviderStateMixin, SelectionHandlerMixin {
   final _queueTabKey = GlobalKey<_QueueTabState>();
   late List<Widget> _tabs;
   late SlidableController controller;
   late SharedAxisTabController tabController;
-  late ContentSelectionController<SelectionEntry<Song>> selectionController;
 
   Animation? _queueTabAnimation;
   SlideDirection slideDirection = SlideDirection.up;
@@ -39,14 +38,18 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   void initState() {
     super.initState();
-    selectionController = ContentSelectionController.create<Song>(
-      vsync: this,
-      context: context,
-      counter: true,
-      closeButton: true,
-    )
-      ..addListener(handleSelection)
-      ..addStatusListener(handleSelectionStatus);
+    initSelectionController(() => ContentSelectionController.create<Song>(
+        vsync: this,
+        context: context,
+        counter: true,
+        closeButton: true,
+        additionalActionsBuilder: (context) => const [
+          RemoveFromQueueSelectionAction(),
+        ],
+      ),
+      listenStatus: true,
+    );
+  
     _tabs = [
       const _MainTab(),
       _QueueTab(
@@ -168,13 +171,13 @@ class _QueueTab extends StatefulWidget {
     required this.selectionController,
   }) : super(key: key);
 
-  final ContentSelectionController<SelectionEntry<Content>> selectionController;
+  final ContentSelectionController selectionController;
 
   @override
   _QueueTabState createState() => _QueueTabState();
 }
 
-class _QueueTabState extends State<_QueueTab> with SelectionHandler {
+class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
 
   static const double appBarHeight = 81.0;
 
@@ -276,6 +279,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandler {
       case QueueType.searched:
         final query = ContentControl.state.queues.searchQuery!;
         ShowFunctions.instance.showSongsSearch(
+          context,
           query: query,
           openKeyboard: false,
         );

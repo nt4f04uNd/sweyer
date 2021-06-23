@@ -151,7 +151,14 @@ class _QueuePool {
     return _PoolQueueType.queue;
   }
 
-  Queue get current => _map[_internalType]!;
+  Queue get current {
+    final value = _map[_internalType]!;
+    assert(value.isNotEmpty, "Current queue must not be empty");
+    if (value.isEmpty) {
+      ContentControl.resetQueue();
+    }
+    return _map[_internalType]!;
+  }
   Queue get _queue => _map[_PoolQueueType.queue]!;
   Queue get _shuffledQueue => _map[_PoolQueueType.shuffled]!;
 
@@ -517,7 +524,7 @@ abstract class ContentControl {
     );
   }
 
-  /// Cheks if current queue is [QueueType.origin], if yes, adds this queue as origin
+  /// Checks if current queue is [QueueType.origin], if yes, adds this queue as origin
   /// to all its songs. This is a required action for each addition to the queue. 
   static void _setOrigins() {
     if (state.queues.type == QueueType.origin) {
@@ -527,6 +534,25 @@ abstract class ContentControl {
         song.origin = songOrigin;
       }
     }
+  }
+
+  /// Checks whether the current origin contains a song.
+  /// If current queue is not origin, will always return `true`.
+  /// Intended to be used in queue insertion operations, see [playNext] for example.
+  static bool _doesOriginContains(Song song) {
+    final queues = state.queues;
+    if (queues._type == QueueType.origin) {
+      final currentOrigin = queues.origin!;
+      final originSongs = currentOrigin.songs;
+      final int index;
+      if (currentOrigin is DuplicatingSongOriginMixin) {
+        index = originSongs.indexWhere((el) => el.sourceId == song.sourceId && currentOrigin == song.origin);
+      } else {
+        index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
+      }
+      return index >= 0;
+    }
+    return true;
   }
 
   /// If the [song] is next (or currently playing), will duplicate it and queue it to be played next,
@@ -557,10 +583,8 @@ abstract class ContentControl {
       final song = songs[i].copyWith();
       deduplicateSong(song);
       currentQueue.insert(state.currentSongIndex + i + 1, song);
-      if (queues._type == QueueType.origin && contains) {
-        final originSongs = queues.origin!.songs;
-        final index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
-        contains = index >= 0;
+      if (contains) {
+        contains = _doesOriginContains(song);
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
@@ -584,10 +608,8 @@ abstract class ContentControl {
       song = song.copyWith();
       deduplicateSong(song);
       state.queues.current.add(song);
-      if (queues._type == QueueType.origin && contains) {
-        final originSongs = queues.origin!.songs;
-        final index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
-        contains = index >= 0;
+      if (contains) {
+        contains = _doesOriginContains(song);
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
@@ -645,20 +667,20 @@ abstract class ContentControl {
     setQueue(type: QueueType.arbitrary);
   }
 
-  /// Inserts [song] at [index] in the queue.
-  static void insertToQueue(int index, Song song) {
+  /// Inserts [songs] at [index] in the queue.
+  static void insertToQueue(int index, List<Song> songs) {
     // Save queue order
     _unshuffle();
     _setOrigins();
     final queues = state.queues;
-    song = song.copyWith();
-    deduplicateSong(song);
-    queues.current.insert(index, song);
     bool contains = true;
-    if (queues._type == QueueType.origin) {
-      final originSongs = queues.origin!.songs;
-      final index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
-      contains = index >= 0;
+    for (var song in songs) {
+      song = song.copyWith();
+      deduplicateSong(song);
+      queues.current.insert(index, song);
+      if (contains) {
+        contains = _doesOriginContains(song);
+      }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
   }
@@ -669,20 +691,28 @@ abstract class ContentControl {
   /// * fall back to the first song in [QueueType.all]
   /// * fall back to [QueueType.all]
   /// * stop the playback
-  static void removeFromQueue(Song song) {
+  static bool removeFromQueue(Song song) {
     final queues = state.queues;
+    final bool removed;
     if (queues.current.length == 1) {
-      resetQueue();
-      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
-      MusicPlayer.instance.pause();
-    } else {
-      if (song == state.currentSong) {
-        MusicPlayer.instance.setSong(state.queues.current.getPrev(song));
-        MusicPlayer.instance.pause();
+      removed = queues.current.remove(song);
+      if (removed) {
+        resetQueueAsFallback();
       }
-      queues.current.remove(song);
+    } else {
+      final current = song == state.currentSong;
+      Song? nextSong;
+      if (current) {
+        nextSong = state.queues.current.getNext(song);
+      }
+      removed = queues.current.remove(song);
+      if (removed && current) {
+        MusicPlayer.instance.pause();
+        MusicPlayer.instance.setSong(nextSong);
+      }
       setQueue(modified: true);
     }
+    return removed;
   }
 
   /// Removes a song at given [index] from the queue.
@@ -691,20 +721,21 @@ abstract class ContentControl {
   /// * fall back to the first song in [QueueType.all]
   /// * fall back to [QueueType.all]
   /// * stop the playback
-  static void removeFromQueueAt(int index) {
+  static Song? removeFromQueueAt(int index) {
     final queues = state.queues;
+    final Song? song;
     if (queues.current.length == 1) {
-      resetQueue();
-      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
-      MusicPlayer.instance.pause();
+      song = queues.current.removeAt(0);
+      resetQueueAsFallback();
     } else {
       if (index == state.currentSongIndex) {
-        MusicPlayer.instance.setSong(state.queues.current.getNextAt(index));
         MusicPlayer.instance.pause();
+        MusicPlayer.instance.setSong(state.queues.current.getNextAt(index));
       }
-      queues.current.removeAt(index);
+      song = queues.current.removeAt(index);
       setQueue(modified: true);
     }
+    return song;
   }
 
   /// Removes all items at given [indexes] from the queue.
@@ -714,12 +745,12 @@ abstract class ContentControl {
   /// * fall back to the first song in [QueueType.all]
   /// * fall back to [QueueType.all]
   /// * stop the playback
+  /// 
+  /// TODO: add return value ?
   static void removeAllFromQueueAt(List<int> indexes) {
     final queues = state.queues;
     if (indexes.length >= queues.current.length) {
-      resetQueue();
-      MusicPlayer.instance.setSong(state.queues.current.songs[0]);
-      MusicPlayer.instance.pause();
+      resetQueueAsFallback();
     } else {
       final containsCurrent = indexes.contains(state.currentSongIndex);
       if (containsCurrent) {
@@ -775,6 +806,21 @@ abstract class ContentControl {
       modified: false,
       shuffled: false,
     );
+  }
+
+  /// Resets queue to all songs, pauses the player and sets the first song as
+  /// current.
+  ///
+  /// This fucntion should be called if queue is found to be broken
+  /// and there's no straight way to figure out where to fallback.
+  static void resetQueueAsFallback() {
+    setQueue(
+      type: QueueType.allSongs,
+      modified: false,
+      shuffled: false,
+    );
+    MusicPlayer.instance.pause();
+    MusicPlayer.instance.setSong(state.queues.current.songs[0]);
   }
 
   /// Sets the queue with specified [type] and other parameters.
@@ -1019,20 +1065,35 @@ abstract class ContentControl {
       },
       album: () async {
         state.albums = await ContentChannel.retrieveAlbums();
-        if (disposed)
+        if (disposed) {
           return;
+        }
+        final origin = state.queues.origin;
+        if (origin is Album && state.albums[origin.id] == null) {
+          resetQueueAsFallback();
+        }
         sort<Album>(emitChangeEvent: false);
       },
       playlist: () async {
         state.playlists = await ContentChannel.retrievePlaylists();
-        if (disposed)
+        if (disposed) {
           return;
+        }
+        final origin = state.queues.origin;
+        if (origin is Playlist && state.playlists.firstWhereOrNull((el) => el == origin) == null) {
+          resetQueueAsFallback();
+        }
         sort<Playlist>(emitChangeEvent: false);
       },
       artist: () async {
         state.artists = await ContentChannel.retrieveArtists();
-        if (disposed)
+        if (disposed) {
           return;
+        }
+        final origin = state.queues.origin;
+        if (origin is Artist && state.artists.firstWhereOrNull((el) => el == origin) == null) {
+          resetQueueAsFallback();
+        }
         sort<Artist>(emitChangeEvent: false);
       },
     )();
@@ -1250,11 +1311,12 @@ abstract class ContentControl {
   /// ID that we don't know yet.
   ///
   /// To avoid this, both songs and playlists should be refetched.
-  static Future<void> refetchSongsAndPlaylists() {
-    return Future.wait([
-      refetch<Song>(),
-      refetch<Playlist>(),
+  static Future<void> refetchSongsAndPlaylists() async {
+    await Future.wait([
+      refetch<Song>(emitChangeEvent: false),
+      refetch<Playlist>(emitChangeEvent: false),
     ]);
+    stateNullable?.emitContentChange();
   }
 
   /// Creates a playlist with a given name.
@@ -1269,19 +1331,19 @@ abstract class ContentControl {
     try {
       // Update the playlist just in case they are outdated
       await refetch<Playlist>(emitChangeEvent: false);
-      // state.playlists.fold([], (prev, el) {
-      //   if (prev.)
-      //   return prev;
-      // });
-      // final duplicates = state.playlists.where((el) => el != playlist && el.name.startsWith(name));
-      // if ()
-      // final parenthesesRegexp = RegExp(r'\(([^)]+)\)');
-      // if
-      // RegExp(r'\(([^)]+)\)')
-      //   .allMatches(string)
-      //   .map((el) => el.group(1))
-      //   .toList();
-      // if ( != null)
+      state.playlists.fold<List<Object?>>([], (prev, el) {
+        if (el != playlist) {
+          // Regexp to search for names like "name (1)"
+          // Taken from https://stackoverflow.com/a/17779833/9710294
+          final regexp = RegExp(name.toString() + r' \(?:([^)]+)\)?');
+          final match = regexp.firstMatch(el.name);
+          if (match != null) {
+            prev.add(el);
+            prev.add(match.group(0));
+          }
+        }
+        return prev;
+      });
       await ContentChannel.renamePlaylist(playlist, name);
       await refetch<Song>();
       await refetch<Playlist>();
@@ -1452,7 +1514,7 @@ abstract class ContentControl {
 
 
 class ContentUtils {
-  /// Android unkown artist.
+  /// Android unknown artist.
   static const unknownArtist = '<unknown>';
 
   /// If artist is unknown returns localized artist.
