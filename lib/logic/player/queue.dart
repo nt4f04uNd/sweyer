@@ -153,7 +153,7 @@ class Queue implements _QueueOperations<Song> {
   /// it if doesn't find it.
   void compareAndRemoveObsolete(Queue queue) {
     songs.removeWhere((song) {
-      return queue.get(song) == null;
+      return queue.songs.firstWhereOrNull((el) => el.sourceId == song.sourceId) == null;
     });
   }
 }

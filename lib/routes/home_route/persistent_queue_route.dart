@@ -209,17 +209,23 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   }
 
   Future<void> _submitEditing() async {
-    setState(() {
-      editing = false;
-      editingSongs.clear();
-      reorderOperations.clear();
-    });
     if (_canSubmit) {
       await Future.wait([
         _commitRename(),
         _commitReorder(),
       ]);
+      setState(() {
+        editing = false;
+        editingSongs.clear();
+        reorderOperations.clear();
+      });
       await ContentControl.refetchSongsAndPlaylists();
+    } else {
+      setState(() {
+        editing = false;
+        editingSongs.clear();
+        reorderOperations.clear();
+      });
     }
   }
 
