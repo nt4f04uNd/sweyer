@@ -60,7 +60,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-
+    
     Widget Function(int)? builder;
     if (child == null) {
       builder = (index) {
@@ -68,9 +68,12 @@ class ContentSection<T extends Content> extends StatelessWidget {
         return ContentTile<T>(
           contentType: contentType,
           content: item,
-          index: index,
-          selected: selectionController?.data
-            .firstWhereOrNull((el) => el.data == item) != null,
+          selectionIndex: index,
+          selected: selectionController?.data.contains(SelectionEntry<T>(
+            data: item,
+            index: index,
+            origin: item is Song ? item.origin : null,
+          )) ?? false,
           selectionController: selectionController,
           onTap: () => contentTileTapHandler?.call(),
           horizontalPadding: 12.0,

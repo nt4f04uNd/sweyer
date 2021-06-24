@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
@@ -101,13 +102,12 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : index = null,
-       super(key: key);
+  }) : super(key: key);
 
   SongTile.selectable({
     Key? key,
     required this.song,
-    required int this.index,
+    required int selectionIndex,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
     bool longPressGestureEnabled = true,
@@ -123,6 +123,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
               selectionController is SelectionController<SelectionEntry<Song>>),
        super.selectable(
          key: key,
+         selectionIndex: selectionIndex,
          selected: selected,
          longPressGestureEnabled: longPressGestureEnabled,
          handleTapInSelection: handleTapInSelection,
@@ -130,7 +131,6 @@ class SongTile extends SelectableWidget<SelectionEntry> {
        );
 
   final Song song;
-  final int? index;
 
   /// Widget to be rendered at the end of the tile.
   final Widget? trailing;
@@ -154,16 +154,28 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   final Color backgroundColor;
 
   @override
-  SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
-    index: index!,
-    data: song,
-  );
-
-  @override
   _SongTileState createState() => _SongTileState();
 }
 
-class _SongTileState extends SelectableState<SongTile> with ContentTileComponentsMixin {
+class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> with ContentTileComponentsMixin {
+  @override
+  SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
+    index: selectionRoute
+      ? ContentControl.state.allSongs.getIndex(widget.song)
+      : widget.selectionIndex!,
+    data: widget.song,
+    origin: selectionRoute ? widget.song.origin : null,
+  );
+
+  @override
+  bool? get widgetSelected => selectionRoute
+    ? widget.selectionController!.data.contains(SelectionEntry<Song>(
+        index: ContentControl.state.allSongs.getIndex(widget.song),
+        data: widget.song,
+        origin: widget.song.origin,
+      ))
+    : super.widgetSelected;
+
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
 
   void _handleTap() {
@@ -171,7 +183,7 @@ class _SongTileState extends SelectableState<SongTile> with ContentTileComponent
       widget.onTap?.call();
       final song = widget.song;
       final player = MusicPlayer.instance;
-      if (!selectionRouteOf(context) && widget.clickBehavior == SongTileClickBehavior.play) {
+      if (!selectionRoute && widget.clickBehavior == SongTileClickBehavior.play) {
         playerRouteController.open();
         await player.setSong(song);
         await player.play();
@@ -229,11 +241,11 @@ class _SongTileState extends SelectableState<SongTile> with ContentTileComponent
           right: rightPadding,
         ),
         onTap: _handleTap,
-        onLongPress: toggleSelection,
+        onLongPress: handleLongPress,
         title: title,
         subtitle: subtitle,
         leading: albumArt,
-        trailing: selectable && selectionRouteOf(context)
+        trailing: selectionRoute
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -263,7 +275,6 @@ class _SongTileState extends SelectableState<SongTile> with ContentTileComponent
     }
     if (!selectable)
       return _buildTile(albumArt);
-    final selectionRoute = selectionRouteOf(context);
     return Stack(
       children: [
         AnimatedBuilder(

@@ -22,7 +22,10 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Selection animation duration.
 const Duration kSelectionDuration = Duration(milliseconds: 350);
 
-// TODO: comments
+/// Whether the [SelectionRoute] is currently opened in the given [context].
+///
+/// See [SelectableState.selectionRoute] for discussion of how selection works
+/// when this is `true`.
 bool selectionRouteOf(context) {
   return HomeRouter.maybeOf(context)?.selectionArguments != null;
 }
@@ -32,18 +35,24 @@ bool selectionRouteOf(context) {
 ///
 /// Usually this is a creator of [SelectionWidget].
 ///
-/// Mixin this to a parent of [SelectableWidget] and add [handleSelection],
-/// (or optionally [handleSelectionStatus]) as handler to listener to the controller(s).
-///
 /// For example see [TabsRoute].
-///
-/// TODO: comments
 mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
+  /// The selection controller initialized within [initSelectionController].
   late ContentSelectionController selectionController;
 
+  /// Home router of context.
   late HomeRouter? homeRouter = HomeRouter.maybeOf(context);
+
+  /// Whether the [SelectionRoute] is currently opened in this context.
   bool get selectionRoute => homeRouter?.selectionArguments != null;
 
+  /// Creates a selection controller.
+  ///
+  /// If [selectionRoute] is currently `true`, will instead listen to the
+  /// existing controller the selection route provides.
+  /// 
+  /// If [listen] is `true`, the [handleSelection] is attached to the controller.
+  /// If [listenStatus] is `true`, the [handleSelectionStatus] is attached to the controller.
   void initSelectionController(ValueGetter<ContentSelectionController> factory, {
     bool listen = true,
     bool listenStatus = false,
@@ -59,6 +68,8 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
       selectionController.addStatusListener(handleSelectionStatus);
   }
 
+  /// Disposes the created selection controller, or, when [selectionRoute] is `true`,
+  /// stops listening to the one selection route has provided.
   void disposeSelectionController() {
     if (selectionRoute) {
       selectionController.removeListener(handleSelection);
@@ -70,6 +81,8 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
 
   /// Listens to [SelectionController.addListener].
   /// By default just calls [setState].
+  /// 
+  /// Can be automatically bound with [initSelectionController].
   @protected
   void handleSelection() {
     /// [ContentSelectionController.dispose] delays the controller disposal
@@ -82,6 +95,8 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
 
   /// Listens to [SelectionController.addStatusListener].
   /// By default just calls [setState].
+  /// 
+  /// Can be automatically bound with [initSelectionController].
   @protected
   void handleSelectionStatus(AnimationStatus status) {
     /// [ContentSelectionController.dispose] delays the controller disposal
@@ -101,7 +116,8 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   /// Creates a widget, not selectable.
   const SelectableWidget({
     Key? key,
-  }) : selected = null,
+  }) : selectionIndex = null,
+       selected = null,
        longPressGestureEnabled = null,
        handleTapInSelection = null,
        selectionController = null,
@@ -110,11 +126,15 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   /// Creates a selectable widget.
   const SelectableWidget.selectable({
     Key? key,
-    required this.selectionController,
+    required int this.selectionIndex,
     required bool this.selected,
     required bool this.longPressGestureEnabled,
     required bool this.handleTapInSelection,
+    required this.selectionController,
   }) : super(key: key);
+
+  /// The index to pass to [SelectionEntry] in [SelectableState.toSelectionEntry].
+  final int? selectionIndex;
 
   /// Makes tiles aware whether they are selected in some global set.
   /// This will be used on first build, after this tile will have internal selection state.
@@ -139,9 +159,6 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   /// If `null`, widget will be considered as not selectable
   final SelectionController<T>? selectionController;
 
-  /// Converts this widget to the entry [selectionController] is holding.
-  T toSelectionEntry();
-
   @override
   // TODO: remove this ignore when https://github.com/dart-lang/linter/issues/2345 is resolved
   // ignore: no_logic_in_create_state
@@ -149,7 +166,7 @@ abstract class SelectableWidget<T> extends StatefulWidget {
 }
 
 /// A state to be used with [SelectableWidget].
-abstract class SelectableState<T extends SelectableWidget> extends State<T> with SingleTickerProviderStateMixin {
+abstract class SelectableState<E, W extends SelectableWidget> extends State<W> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   /// Returns animation that can be used for animating the selection.
@@ -165,45 +182,67 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   late Animation<double> _animation;
 
   /// Whether the widget is currently being selected.
-  bool get selected => _selected;
-  late bool _selected;
+  bool get selected => selectable && (_controller.status == AnimationStatus.forward ||
+                                      _controller.status == AnimationStatus.completed);
+
+  /// Used to update the [selected] value when the widget updates.
+  ///
+  /// When returns null, not used.
+  bool? get widgetSelected => null;
 
   /// Whether the widget can be selected.
   bool get selectable => widget.selectionController != null;
 
   /// Whether the widget is inside the selection route and is [selectable].
+  ///
+  /// When this is true the default scheme when the [SelectableWidget.index]
+  /// is passed to [toSelectionEntry] is ignored and custom rules are defined.
+  ///
+  /// Specifically:
+  ///  * songs from [SongOrigin]s are assigned with the index of them in global state,
+  ///    same for other content, so for example when song in album is selected, it is
+  ///    also selected in the all songs screen
+  ///  * the method above is not suitable for [DuplicatingSongOriginMixin], such as
+  ///    playlists, and content inside them should be considered unique.
+  ///    To accomplish that by [DuplicatingSongOriginMixin] the entry also receives
+  ///    the [SelectionEntry.origin].
   bool get selectionRoute => selectable && selectionRouteOf(context);
+
+  /// Converts this widget to the entry [selectionController] is holding.
+  /// 
+  /// See also a discussion in [SelectionEntry].
+  E toSelectionEntry();
 
   @override
   void initState() { 
     super.initState();
     if (!selectable)
       return;
-    _selected = widget.selected ?? false;
     _controller = AnimationController(vsync: this, duration: kSelectionDuration);
     _animation = buildAnimation(_controller);
-    if (_selected) {
+    if (widgetSelected ?? widget.selected!) {
       _controller.value = 1;
     }
   }
 
   @override
-  void didUpdateWidget(covariant T oldWidget) {
+  void didUpdateWidget(covariant W oldWidget) {
     if (selectable) {
-      if (widget.selectionController!.notInSelection && _selected) {
+      if (widget.selectionController!.notInSelection && selected) {
         /// We have to check if controller is closing, i.e. user pressed global close button to quit the selection.
         ///
         /// We are assuming that parent updates us, as we can't add owr own status listener to the selection controller,
         /// because it is quite expensive for the list.
-        _selected = false;
         _controller.value = widget.selectionController!.animation.value;
         _controller.reverse();
-      } else if (oldWidget.selected != widget.selected) {
-        _selected = widget.selected ?? false;
-        if (_selected) {
-          _controller.forward();
-        } else {
-          _controller.reverse();
+      } else {
+        final localWidgetSelected = widgetSelected;
+        if (oldWidget.selected != (localWidgetSelected ?? widget.selected)) {
+          if (localWidgetSelected ?? widget.selected!) {
+            _controller.forward();
+          } else {
+            _controller.reverse();
+          }
         }
       }
     }
@@ -238,16 +277,10 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// 
   /// Will return null if not [selectable], because it is common to pass it to [ListTile.onLongPress],
   /// and passing null will disable the long press gesture.
-  VoidCallback? get toggleSelection => !selectable || selectionRouteOf(context) || !widget.longPressGestureEnabled! ? null : () {
+  VoidCallback? get handleLongPress => !selectable || selectionRouteOf(context) || !widget.longPressGestureEnabled! ? null : () {
     if (!selectable)
       return;
-    setState(() {
-      _selected = !_selected;
-    });
-    if (_selected)
-      _select();
-    else
-      _unselect();
+    toggleSelection();
   };
 
   /// Checks whether widget is selectable and the selection controller
@@ -257,19 +290,29 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// otherwise calls the [onTap] callback.
   void handleTap(VoidCallback onTap) {
     if (selectable && !selectionRouteOf(context) && widget.selectionController!.inSelection && widget.handleTapInSelection!) {
-      toggleSelection!();
+      toggleSelection();
     } else {
       onTap();
     }
   }
 
-  void _select() {
-    widget.selectionController!.selectItem(widget.toSelectionEntry());
+  void toggleSelection() {
+    setState(() {
+      if (selected) {
+        unselect();
+      } else {
+        select();
+      }
+    });
+  }
+
+  void select() {
+    widget.selectionController!.selectItem(toSelectionEntry());
     _controller.forward();
   }
 
-  void _unselect() {
-    widget.selectionController!.unselectItem(widget.toSelectionEntry());
+  void unselect() {
+    widget.selectionController!.unselectItem(toSelectionEntry());
     _controller.reverse();
   }
 }

@@ -23,13 +23,12 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
   })  : horizontalPadding = horizontalPadding ?? _horizontalPadding,
-        index = null,
         super(key: key);
 
   const ArtistTile.selectable({
     Key? key,
     required this.artist,
-    required int this.index,
+    required int selectionIndex,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
     bool longPressGestureEnabled = true,
@@ -44,6 +43,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
        horizontalPadding = horizontalPadding ?? _horizontalPadding,
        super.selectable(
          key: key,
+         selectionIndex: selectionIndex,
          selected: selected,
          longPressGestureEnabled: longPressGestureEnabled,
          handleTapInSelection: handleTapInSelection,
@@ -51,7 +51,6 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
        );
 
   final Artist artist;
-  final int? index;
 
   /// Widget to be rendered at the end of the tile.
   final Widget? trailing;
@@ -70,16 +69,17 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   final Color backgroundColor;
 
   @override
-  SelectionEntry<Artist> toSelectionEntry() => SelectionEntry<Artist>(
-    index: index!,
-    data: artist,
-  );
-
-  @override
   _ArtistTileState createState() => _ArtistTileState();
 }
 
-class _ArtistTileState extends SelectableState<ArtistTile> with ContentTileComponentsMixin {
+class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTile> with ContentTileComponentsMixin {
+  @override
+  SelectionEntry<Artist> toSelectionEntry() => SelectionEntry<Artist>(
+    index: widget.selectionIndex!,
+    data: widget.artist,
+    origin: null,
+  );
+
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
@@ -100,7 +100,7 @@ class _ArtistTileState extends SelectableState<ArtistTile> with ContentTileCompo
       color: widget.backgroundColor,
       child: InkWell(
         onTap: _handleTap,
-        onLongPress: toggleSelection,
+        onLongPress: handleLongPress,
         splashFactory: NFListTileInkRipple.splashFactory,
         child: Padding(
           padding: EdgeInsets.symmetric(

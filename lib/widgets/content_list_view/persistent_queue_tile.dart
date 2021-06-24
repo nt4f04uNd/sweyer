@@ -33,13 +33,12 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.backgroundColor = Colors.transparent,
   }) : assert(!grid || !small),
        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-       index = null,
        super(key: key);
 
   const PersistentQueueTile.selectable({
     Key? key,
     required this.queue,
-    required int this.index,
+    required int selectionIndex,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
     bool longPressGestureEnabled = true,
@@ -60,6 +59,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
        horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
        super.selectable(
          key: key,
+         selectionIndex: selectionIndex,
          selected: selected,
          longPressGestureEnabled: longPressGestureEnabled,
          handleTapInSelection: handleTapInSelection,
@@ -67,7 +67,6 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
        );
 
   final T queue;
-  final int? index;
 
   /// Widget to be rendered at the end of the tile.
   final Widget? trailing;
@@ -103,16 +102,19 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   final Color? backgroundColor;
 
   @override
-  SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>(
-    index: index!,
-    data: queue,
-  );
-
-  @override
   _PersistentQueueTileState<T> createState() => _PersistentQueueTileState();
 }
 
-class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableState<PersistentQueueTile<T>> with ContentTileComponentsMixin {
+class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableState<SelectionEntry<T>, PersistentQueueTile<T>>
+  with ContentTileComponentsMixin {
+
+  @override
+  SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>(
+    index: widget.selectionIndex!,
+    data: widget.queue,
+    origin: null,
+  );
+
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
@@ -231,7 +233,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                 child: InkWell(
                   onTap: _handleTap,
                   splashColor: Constants.Theme.glowSplashColor.auto,
-                  onLongPress: toggleSelection,
+                  onLongPress: handleLongPress,
                   splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
                 ),
               )),
@@ -245,7 +247,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     }
     return InkWell(
       onTap: _handleTap,
-      onLongPress: toggleSelection,
+      onLongPress: handleLongPress,
       splashFactory: NFListTileInkRipple.splashFactory,
       child: child,
     );

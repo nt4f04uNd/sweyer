@@ -1646,6 +1646,8 @@ class ContentUtils {
 
   /// Receives a selection data set, extracts all types of contents,
   /// sorts them by index in ascending order and returns the result.
+  ///
+  /// See also discussion in [SelectionEntry].
   static SortAndPackResult selectionSortAndPack(Set<SelectionEntry<Content>> data) {
     final List<SelectionEntry<Song>> songs = [];
     final List<SelectionEntry<Album>> albums = [];

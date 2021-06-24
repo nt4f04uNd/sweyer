@@ -10,12 +10,10 @@ import 'package:sweyer/sweyer.dart';
 class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
   const AddToSelectionButton({
     Key? key,
-    required this.entryFactory,
-    required this.controller,
+    required this.onPressed,
   }) : super(key: key);
 
-  final ValueGetter<T> entryFactory;
-  final SelectionController<T> controller;
+  final VoidCallback onPressed;
 
   static const size = 36.0;
   /// The padding that is preferred between this action and other UI elements.
@@ -28,9 +26,7 @@ class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
       height: size,
       child: NFIconButton(
         icon: const Icon(Icons.add_rounded),
-        onPressed: () {
-          controller.toggleItem(entryFactory());
-        },
+        onPressed: onPressed,
       ),
     );
   }

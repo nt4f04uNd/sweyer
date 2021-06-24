@@ -71,23 +71,23 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Viewport scroll controller.
   final ScrollController? controller;
 
-  /// If specified, list will be built as [SongTile.selectable],
-  /// otherwise [SongTile] is used (in case if content is [Song]).
+  /// If specified, list will be built as [ContentTile.selectable],
+  /// otherwise [ContentTile] is used.
   final ContentSelectionController? selectionController;
 
   /// A widget to build before all items.
   final Widget? leading;
 
-  /// Returned value is passed to [SongTile.current] (in case if content is [Song]).
+  /// Returned value is passed to [ContentTile.current].
   final _ItemTest? currentTest;
 
-  /// Returned value is passed to [SongTile.selected] (in case if content is [Song]).
+  /// Returned value is passed to [ContentTile.selected].
   final _ItemTest? selectedTest;
 
-  /// Returned value is passed to [SongTile.longPressGestureEnabled] (in case if content is [Song]).
+  /// Returned value is passed to [ContentTile.longPressGestureEnabled].
   final _ItemTest? longPressGestureEnabledTest;
 
-  /// Returned value is passed to [SongTile.handleTapInSelection] (in case if content is [Song]).
+  /// Returned value is passed to [ContentTile.handleTapInSelection].
   final _ItemTest? handleTapInSelectionTest;
 
   /// Callback to be called on item tap.
@@ -193,12 +193,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
               final child = ContentTile<T>(
                 contentType: contentType,
                 content: item,
-                index: index,
+                selectionIndex: index,
                 selected: selectedTest != null
                   ? selectedTest(index)
                   : selectionController?.data.contains(SelectionEntry<T>(
                       data: item,
                       index: index,
+                      origin: item is Song ? item.origin : null,
                     ))
                   ?? false,
                 longPressGestureEnabled: longPressGestureEnabledTest?.call(index) ?? true,
@@ -265,12 +266,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
               child: ContentTile<T>(
                 contentType: contentType,
                 content: item,
-                index: index,
+                selectionIndex: index,
                 selected: selectedTest != null
                   ? selectedTest(index)
                   : selectionController?.data.contains(SelectionEntry<T>(
                       data: item,
                       index: index,
+                      origin: item is Song ? item.origin : null,
                     ))
                   ?? false,
                 longPressGestureEnabled: longPressGestureEnabledTest?.call(index)

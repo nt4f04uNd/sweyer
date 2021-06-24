@@ -7,6 +7,7 @@
 export 'home_route/home_route.dart';
 export 'settings_route/settings_route.dart';
 export 'dev_route.dart';
+export 'selection_route.dart';
 
 import 'dart:async';
 

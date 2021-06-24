@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -777,12 +778,10 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                                   playlist: () => delegate.results.playlists,
                                   artist: () => delegate.results.artists,
                                 )();
-                            return ContentListView(
+                            return ContentListView<Content>(
                               contentType: contentListContentType,
                               controller: delegate.singleListScrollController,
                               selectionController: delegate.selectionController,
-                              selectedTest: (index) => delegate.selectionController.data
-                                .firstWhereOrNull((el) => el.data == list[index]) != null,
                               onItemTap: () => delegate.handleContentTap(contentListContentType),
                               list: list,
                             );
@@ -972,6 +971,7 @@ class _SuggestionsState extends State<_Suggestions> {
                       l10n.searchHistoryPlaceholder,
                       textAlign: TextAlign.center,
                       style: TextStyle(
+                        fontWeight: FontWeight.w700,
                         color: ThemeControl.theme.hintColor,
                       ),
                     ),

@@ -21,7 +21,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.backgroundColor = Colors.transparent,
     this.songTileVariant = kSongTileVariant,
     this.songTileClickBehavior = kSongTileClickBehavior,
-    this.index,
+    this.selectionIndex,
     this.selected = false,
     this.longPressGestureEnabled = true,
     this.handleTapInSelection = true,
@@ -38,7 +38,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
   final SongTileVariant songTileVariant;
   final SongTileClickBehavior songTileClickBehavior;
 
-  final int? index;
+  final int? selectionIndex;
   final bool selected;
   final bool longPressGestureEnabled;
   final bool handleTapInSelection;
@@ -68,7 +68,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
         )
       : PersistentQueueTile<Q>.selectable(
           queue: content as Q,
-          index: index!,
+          selectionIndex: selectionIndex!,
           selectionController: selectionController!,
           selected: selected,
           longPressGestureEnabled: longPressGestureEnabled,
@@ -84,7 +84,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-      !selectable || selectable && index != null,
+      !selectable || selectable && selectionIndex != null,
       'If tile is selectable, an `index` must be provided'
     );
 
@@ -103,7 +103,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
           )
         : SongTile.selectable(
             song: content as Song,
-            index: index!,
+            selectionIndex: selectionIndex!,
             selectionController: selectionController,
             selected: selected,
             longPressGestureEnabled: longPressGestureEnabled,
@@ -129,7 +129,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
           )
         : ArtistTile.selectable(
             artist: content as Artist,
-            index: index!,
+            selectionIndex: selectionIndex!,
             selectionController: selectionController,
             selected: selected,
             longPressGestureEnabled: longPressGestureEnabled,
@@ -147,7 +147,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
 /// Common parts of the UI in content tile implementations.
 /// 
 /// TODO: comments
-mixin ContentTileComponentsMixin<T extends SelectableWidget<SelectionEntry>> on SelectableState<T> {
+mixin ContentTileComponentsMixin<E extends SelectionEntry, W extends SelectableWidget> on SelectableState<E, W> {
   final checmarkLargeSize = 28.0;
 
   Widget buildSelectionCheckmark({bool forceLarge = false, bool forSelectionRoute = false}) {
@@ -172,7 +172,7 @@ mixin ContentTileComponentsMixin<T extends SelectableWidget<SelectionEntry>> on 
       padding: const EdgeInsets.only(left: 4.0),
       child: GestureDetector(
         onTap: () {
-          widget.selectionController!.toggleItem(widget.toSelectionEntry());
+          toggleSelection();
         },
         behavior: HitTestBehavior.opaque,
         child: SizedBox(
@@ -185,8 +185,9 @@ mixin ContentTileComponentsMixin<T extends SelectableWidget<SelectionEntry>> on 
             child1: Material(
               color: Colors.transparent,
               child: AddToSelectionButton(
-                entryFactory: widget.toSelectionEntry,
-                controller: widget.selectionController!,
+                onPressed: () {
+                  toggleSelection();
+                },
               ),
             ),
             child2: buildSelectionCheckmark(forSelectionRoute: true),

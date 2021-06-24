@@ -344,7 +344,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                                     itemBuilder: (context, index) {
                                       return PersistentQueueTile<Album>.selectable(
                                         queue: albums[index],
-                                        index: index,
+                                        selectionIndex: index,
                                         selected: selectionController.data
                                           .firstWhereOrNull((el) => el.data == albums[index]) != null,
                                         selectionController: selectionController,
