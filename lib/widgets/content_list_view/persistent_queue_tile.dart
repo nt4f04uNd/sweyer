@@ -112,7 +112,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   _PersistentQueueTileState<T> createState() => _PersistentQueueTileState();
 }
 
-class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableState<PersistentQueueTile<T>> {
+class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableState<PersistentQueueTile<T>> with ContentTileComponentsMixin {
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
@@ -147,16 +147,6 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
-    );
-  }
-
-  Widget _buildAddToSelection() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: AddToSelectionButton(
-        entryFactory: widget.toSelectionEntry,
-        controller: widget.selectionController!,
-      ),
     );
   }
 
@@ -217,7 +207,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                 children: [
                   if (widget.trailing != null)
                     widget.trailing!,
-                  _buildAddToSelection(),
+                  buildAddToSelection(),
                 ],
               )
             else if (widget.trailing != null)
@@ -269,41 +259,28 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     final theme = ThemeControl.theme;
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
-      clipBehavior: Clip.none,
       children: [
         _buildTile(),
-        if (animation.status != AnimationStatus.dismissed)
+        if (!selectionRoute)
+          if(animation.status == AnimationStatus.dismissed)
+            const SizedBox.shrink()
+          else
+            Positioned(
+              left: artSize + (widget.grid ? -checmarkLargeSize - 10.0 : 2.0),
+              top: artSize + (widget.grid ? -checmarkLargeSize - 10.0 : -7.0),
+              child: buildSelectionCheckmark(forceLarge: widget.grid),
+            )
+        else if (widget.grid)
           Positioned(
-            left: artSize + (widget.grid ? -32.0 : 2.0) - 4.0,
-            top: artSize - (widget.grid ? 32.0 : 7.0) - 4.0,
-            child: GestureDetector(
-              onTap: !selectionRoute ? null : () {
-                widget.selectionController!.toggleItem(widget.toSelectionEntry());
-              },
-              child: SelectionCheckmark(
-                ignorePointer: !selectionRoute,
-                size: widget.grid ? 28.0 : 21.0,
-                animation: animation,
+            top: (widget.gridArtSize - AddToSelectionButton.size - 10.0).clamp(0.0, double.infinity),
+            right: 10.0,
+            child: Theme(
+              data: theme.copyWith(
+                iconTheme: theme.iconTheme.copyWith(color: Colors.white),
               ),
+              child: buildAddToSelection(),
             ),
           ),
-        if (selectionRoute && widget.grid)
-            Positioned(
-              top: (widget.gridArtSize - 4.0 - AddToSelectionButton.size).clamp(0.0, double.infinity),
-              right: 4.0,
-              child: ScaleTransition(
-                scale: ReverseAnimation(animation),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Theme(
-                    data: theme.copyWith(
-                      iconTheme: theme.iconTheme.copyWith(color: Colors.white),
-                    ),
-                    child: _buildAddToSelection(),
-                  ),
-                ),
-              ),
-            ),
       ],
     );
   }

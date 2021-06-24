@@ -79,7 +79,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   _ArtistTileState createState() => _ArtistTileState();
 }
 
-class _ArtistTileState extends SelectableState<ArtistTile> {
+class _ArtistTileState extends SelectableState<ArtistTile> with ContentTileComponentsMixin {
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
@@ -91,16 +91,6 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
     if (widget.current != null)
       return widget.current!;
     return ContentUtils.originIsCurrent(widget.artist);
-  }
-
-  Widget _buildAddToSelection() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: AddToSelectionButton(
-        entryFactory: widget.toSelectionEntry,
-        controller: widget.selectionController!,
-      ),
-    );
   }
 
   Widget _buildTile() {
@@ -150,7 +140,7 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
                 children: [
                   if (widget.trailing != null)
                     widget.trailing!,
-                  _buildAddToSelection(),
+                  buildAddToSelection(),
                 ],
               )
             else if (widget.trailing != null)
@@ -172,7 +162,7 @@ class _ArtistTileState extends SelectableState<ArtistTile> {
     return Stack(
       children: [
         _buildTile(),
-        if (animation.status != AnimationStatus.dismissed)
+        if (!selectionRoute && animation.status != AnimationStatus.dismissed)
           Positioned(
             left: kArtistTileArtSize - 4.0,
             bottom: 6.0,

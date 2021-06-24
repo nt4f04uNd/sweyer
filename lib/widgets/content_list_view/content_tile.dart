@@ -143,3 +143,57 @@ class ContentTile<T extends Content> extends StatelessWidget {
     )();
   }
 }
+
+/// Common parts of the UI in content tile implementations.
+/// 
+/// TODO: comments
+mixin ContentTileComponentsMixin<T extends SelectableWidget<SelectionEntry>> on SelectableState<T> {
+  final checmarkLargeSize = 28.0;
+
+  Widget buildSelectionCheckmark({bool forceLarge = false, bool forSelectionRoute = false}) {
+    if (animation.status == AnimationStatus.dismissed)
+      return const SizedBox.shrink();
+    return SelectionCheckmark(
+      ignorePointer: !forSelectionRoute,
+      scaleAnimation: !forSelectionRoute,
+      size: forceLarge || forSelectionRoute ? checmarkLargeSize : 21.0,
+      animation: animation,
+    );
+  }
+
+  Widget buildAddToSelection() {
+    Widget builder(Widget child, Animation<double> animation) {
+      return ScaleTransition(
+        scale: animation,
+        child: child,
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: GestureDetector(
+        onTap: () {
+          widget.selectionController!.toggleItem(widget.toSelectionEntry());
+        },
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          height: AddToSelectionButton.size,
+          width: AddToSelectionButton.size,
+          child: AnimationSwitcher(
+            animation: animation,
+            builder1: builder,
+            builder2: builder,
+            child1: Material(
+              color: Colors.transparent,
+              child: AddToSelectionButton(
+                entryFactory: widget.toSelectionEntry,
+                controller: widget.selectionController!,
+              ),
+            ),
+            child2: buildSelectionCheckmark(forSelectionRoute: true),
+            alignment: Alignment.center,
+          ),
+        ),
+      ),
+    );
+  }
+}

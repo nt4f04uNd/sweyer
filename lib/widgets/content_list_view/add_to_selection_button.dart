@@ -18,6 +18,8 @@ class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
   final SelectionController<T> controller;
 
   static const size = 36.0;
+  /// The padding that is preferred between this action and other UI elements.
+  static const preferredPadding = 4.0;
 
   @override
   Widget build(BuildContext context) {

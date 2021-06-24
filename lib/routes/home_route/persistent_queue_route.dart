@@ -401,9 +401,14 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                         ? [
                                             _ActionIconButton(
                                               icon: const Icon(Icons.edit_rounded),
+                                              iconSize: 20.0,
                                               onPressed: selectionController.inSelection ? null : _startEditing,
                                             ),
-                                            const Spacer(),
+                                            _ActionIconButton(
+                                              icon: const Icon(Icons.add_rounded),
+                                              iconSize: 25.0,
+                                              onPressed: selectionController.inSelection ? null : _handleAddTracks,
+                                            ),
                                           ]
                                         : [
                                             _ActionIconButton(
@@ -489,15 +494,16 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         resizeToAvoidBottomInset: false,
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final showAddSongsAcrtion = isPlaylist && !selectionRoute;
+            final mediaQuery = MediaQuery.of(context);
+            final showAddSongsAction = isPlaylist && !selectionRoute;
             /// The height to add at the end of the scroll view to make the top info part of the route
             /// always be fully scrollable, even if there's not enough items for that.
             final additionalHeight = constraints.maxHeight -
               _appBarHeight -
               AppBarBorder.height -
-              MediaQuery.of(context).padding.top -
+              mediaQuery.padding.top -
               kSongTileHeight * songs.length -
-              (showAddSongsAcrtion ? kSongTileHeight : 0.0); // InListContentAction
+              (showAddSongsAction ? kSongTileHeight : 0.0); // InListContentAction
 
             return ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),
@@ -580,7 +586,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               songs: songs,
                             ),
                           ),
-                          if (showAddSongsAcrtion)
+                          if (showAddSongsAction)
                             SliverToBoxAdapter(
                               child: InListContentAction.song(
                                 onTap: editing || selectionController.inSelection ? null : _handleAddTracks,
@@ -597,10 +603,15 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                         child: Container(
                           height: additionalHeight,
                           alignment: Alignment.center,
-                          padding: const EdgeInsets.only(bottom: _infoSectionHeight * 2),
-                          child: songs.isNotEmpty ? null : Text(
-                            l10n.nothingHere,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          child: songs.isNotEmpty || showAddSongsAction ? null : Padding(
+                            padding: const EdgeInsets.only(bottom: _alwaysCanScrollExtent + 30.0),
+                            child: Text(
+                              l10n.nothingHere,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: ThemeControl.theme.hintColor,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -620,10 +631,12 @@ class _ActionIconButton extends StatefulWidget {
     Key? key,
     required this.icon,
     required this.onPressed,
+    this.iconSize = 21.0,
   }) : super(key: key);
 
   final Widget icon;
   final VoidCallback? onPressed;
+  final double iconSize;
 
   @override
   State<_ActionIconButton> createState() => _ActionIconButtonState();
@@ -682,7 +695,7 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
         ).ask(controller),
         child: NFIconButton(
           size: 30.0,
-          iconSize: 21.0,
+          iconSize: widget.iconSize,
           icon: widget.icon,
           onPressed: () {
             widget.onPressed?.call();

@@ -972,7 +972,7 @@ class _SuggestionsState extends State<_Suggestions> {
                       l10n.searchHistoryPlaceholder,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: ThemeControl.theme.hintColor,
                       ),
                     ),
                   ),

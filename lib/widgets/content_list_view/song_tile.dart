@@ -14,8 +14,9 @@ const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
 
 /// Describes how to respond to song tile clicks.
 enum SongTileClickBehavior {
-  /// Always start the clicked song from the beginning.
-  ///
+  /// Always start the clicked song from  play,
+
+  /// A  ///
   /// Expands that player route.
   play,
 
@@ -162,7 +163,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   _SongTileState createState() => _SongTileState();
 }
 
-class _SongTileState extends SelectableState<SongTile> {
+class _SongTileState extends SelectableState<SongTile> with ContentTileComponentsMixin {
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
 
   void _handleTap() {
@@ -191,16 +192,6 @@ class _SongTileState extends SelectableState<SongTile> {
 
   bool get current {
     return widget.current ?? ContentUtils.songIsCurrent(widget.song);
-  }
-
-  Widget _buildAddToSelection() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: AddToSelectionButton(
-        entryFactory: widget.toSelectionEntry,
-        controller: widget.selectionController!,
-      ),
-    );
   }
 
   Widget _buildTile(Widget albumArt, [double? rightPadding]) {
@@ -242,13 +233,13 @@ class _SongTileState extends SelectableState<SongTile> {
         title: title,
         subtitle: subtitle,
         leading: albumArt,
-        trailing: showAlbumArt && selectable && selectionRouteOf(context)
+        trailing: selectable && selectionRouteOf(context)
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (widget.trailing != null)
                   widget.trailing!,
-                _buildAddToSelection(),
+                buildAddToSelection(),
               ],
             )
           : widget.trailing,
@@ -279,42 +270,25 @@ class _SongTileState extends SelectableState<SongTile> {
           animation: animation,
           builder: (context, child) {
             var rightPadding = widget.horizontalPadding;
-            if (!showAlbumArt) {
+            if (!showAlbumArt && !selectionRoute) {
               if (animation.status == AnimationStatus.forward ||
                   animation.status == AnimationStatus.completed ||
                   animation.value > 0.2) {
                 rightPadding += 40.0;
               }
-              if (selectionRoute)
-                rightPadding += AddToSelectionButton.size;
             }
             return _buildTile(albumArt, rightPadding);
           },
         ),
-        if (selectionRoute || animation.status != AnimationStatus.dismissed)
+        if (!selectionRoute && animation.status != AnimationStatus.dismissed)
           Positioned(
             left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
             right: showAlbumArt ? null : 4.0 + widget.horizontalPadding,
             bottom: showAlbumArt ? 2.0 : selectionRoute ? 0.0 : 20.0,
-            child: showAlbumArt
-              ? animation.status == AnimationStatus.dismissed
-                ? const SizedBox.shrink()
-                : Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: SelectionCheckmark(animation: animation),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (animation.status != AnimationStatus.dismissed)
-                      SelectionCheckmark(animation: animation),
-                    if (selectionRoute)
-                       Material(
-                        color: Colors.transparent,
-                        child: _buildAddToSelection(),
-                      ),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: SelectionCheckmark(animation: animation),
+            ),
           ),
       ],
     );

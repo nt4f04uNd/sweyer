@@ -238,7 +238,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// 
   /// Will return null if not [selectable], because it is common to pass it to [ListTile.onLongPress],
   /// and passing null will disable the long press gesture.
-  VoidCallback? get toggleSelection => !selectable || !selectionRouteOf(context) && !widget.longPressGestureEnabled! ? null : () {
+  VoidCallback? get toggleSelection => !selectable || selectionRouteOf(context) || !widget.longPressGestureEnabled! ? null : () {
     if (!selectable)
       return;
     setState(() {
@@ -256,7 +256,7 @@ abstract class SelectableState<T extends SelectableWidget> extends State<T> with
   /// If yes, on taps will be handled by calling [toggleSelection],
   /// otherwise calls the [onTap] callback.
   void handleTap(VoidCallback onTap) {
-    if (selectable && widget.selectionController!.inSelection && !selectionRouteOf(context) && widget.handleTapInSelection!) {
+    if (selectable && !selectionRouteOf(context) && widget.selectionController!.inSelection && widget.handleTapInSelection!) {
       toggleSelection!();
     } else {
       onTap();
@@ -656,11 +656,13 @@ class SelectionCheckmark extends StatefulWidget {
     Key? key,
     required this.animation,
     this.ignorePointer = true,
+    this.scaleAnimation = true,
     this.size = 21.0,
   }) : super(key: key);
 
   final Animation<double> animation;
   final bool ignorePointer;
+  final bool scaleAnimation;
   final double size;
 
   @override
@@ -680,6 +682,8 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
   @override
   void didUpdateWidget(covariant SelectionCheckmark oldWidget) {
     if (oldWidget.animation != widget.animation) {
+      oldWidget.animation.removeStatusListener(_handleStatusChange);
+      widget.animation.addStatusListener(_handleStatusChange);
       _update();
     }
     super.didUpdateWidget(oldWidget);
@@ -707,7 +711,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
       ignoring: widget.ignorePointer,
       child: AnimatedBuilder(
         animation: widget.animation,
-        builder: (context, child) => ScaleTransition(
+        builder: (context, child) => !widget.scaleAnimation ? child! : ScaleTransition(
           scale: widget.animation,
           child: child,
         ),

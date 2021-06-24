@@ -494,7 +494,9 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
     } else if (drawerController.opened) {
       drawerController.close();
       return true;
-    } else if (selectionController != null && !selectionController.alwaysInSelection) {
+    // Don't try to close the alwaysInSelection controller, since it is not possible
+    } else if (selectionController != null &&
+              !selectionController.alwaysInSelection) {
       selectionController.close();
       return true;
     }

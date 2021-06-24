@@ -539,7 +539,7 @@ abstract class ContentControl {
   /// Checks whether the current origin contains a song.
   /// If current queue is not origin, will always return `true`.
   /// Intended to be used in queue insertion operations, see [playNext] for example.
-  static bool _doesOriginContains(Song song) {
+  static bool _doesOriginContain(Song song) {
     final queues = state.queues;
     if (queues._type == QueueType.origin) {
       final currentOrigin = queues.origin!;
@@ -584,7 +584,7 @@ abstract class ContentControl {
       deduplicateSong(song);
       currentQueue.insert(state.currentSongIndex + i + 1, song);
       if (contains) {
-        contains = _doesOriginContains(song);
+        contains = _doesOriginContain(song);
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
@@ -609,7 +609,7 @@ abstract class ContentControl {
       deduplicateSong(song);
       state.queues.current.add(song);
       if (contains) {
-        contains = _doesOriginContains(song);
+        contains = _doesOriginContain(song);
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
@@ -679,7 +679,7 @@ abstract class ContentControl {
       deduplicateSong(song);
       queues.current.insert(index, song);
       if (contains) {
-        contains = _doesOriginContains(song);
+        contains = _doesOriginContain(song);
       }
     }
     setQueue(type: contains ? null : QueueType.arbitrary);
