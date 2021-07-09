@@ -365,9 +365,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               ),
                             if (isAlbum)
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 8.0,
-                                ),
+                                padding: const EdgeInsets.only(top: 8.0),
                                 child: ArtistWidget(
                                   artist: album.artist,
                                   overflow: TextOverflow.clip,
@@ -378,22 +376,26 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   ),
                                 ),
                               ),
-                            Text(
-                              ContentUtils.joinDot([
-                                if (isAlbum)
-                                  l10n.album
-                                else
-                                  l10n.playlist,
-                                if (isAlbum)
-                                  album.year
-                                else
-                                  l10n.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
-                                ContentUtils.bulkDuration(songs),
-                              ]),
-                              style: TextStyle(
-                                color: ThemeControl.theme.textTheme.subtitle2!.color,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14.0,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3.0, bottom: 3.0),
+                              child: Text(
+                                ContentUtils.joinDot([
+                                  if (isAlbum)
+                                    l10n.album
+                                  else
+                                    l10n.playlist,
+                                  if (isAlbum)
+                                    album.year
+                                  else
+                                    l10n.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
+                                  ContentUtils.bulkDuration(songs),
+                                ]),
+                                style: TextStyle(
+                                  color: ThemeControl.theme.textTheme.subtitle2!.color,
+                                  height: 1.2,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14.0,
+                                ),
                               ),
                             ),
                             if (isPlaylist && !selectionRoute)

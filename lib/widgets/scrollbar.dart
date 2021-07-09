@@ -66,6 +66,7 @@ class AppScrollbar extends StatefulWidget {
       labelBuilder: !showLabel
         ? null
         : (context) {
+          final l10n = getl10n(context);
           final item = list[
             (controller.position.pixels / kSongTileHeight - 1)
             .clamp(0.0, list.length - 1).round()
@@ -75,7 +76,7 @@ class AppScrollbar extends StatefulWidget {
               song: () => (item as Song).title[0].toUpperCase(),
               album: () => (item as Album).album[0].toUpperCase(),
               playlist: () => (item as Playlist).name[0].toUpperCase(),
-              artist: () => (item as Artist).artist[0].toUpperCase(),
+              artist: () => ContentUtils.localizedArtist((item as Artist).artist[0], l10n).toUpperCase(),
             )(),
           );
         },

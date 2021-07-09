@@ -364,7 +364,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         } else if (origin is Artist) {
           text.add(TextSpan(text: '${l10n.artist} '));
           text.add(TextSpan(
-            text: origin.artist,
+            text: ContentUtils.localizedArtist(origin.artist, l10n),
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: ThemeControl.theme.colorScheme.onBackground,

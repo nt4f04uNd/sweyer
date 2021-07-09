@@ -48,6 +48,7 @@ class CenterContentScreen extends StatelessWidget {
             left: 0.0,
             right: 0.0,
             child: AppBar(
+              elevation: 0.0,
               backgroundColor: Colors.transparent,
               leading: const SettingsButton(),
             ),
