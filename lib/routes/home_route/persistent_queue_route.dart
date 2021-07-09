@@ -310,7 +310,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   children: [
                     ContentArt(
                       size: 130.0,
-                      highRes: true,
+                      defaultArtIcon: ContentUtils.persistentQueueIcon(queue),
+                      defaultArtIconScale: 2,
+                      assetHighRes: true,
                       assetScale: 1.5,
                       source: ContentArtSource.persistentQueue(queue),
                     ),

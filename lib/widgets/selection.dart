@@ -1486,7 +1486,7 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
         animation: controller.animation,
         child: NFIconButton(
           tooltip: l10n.goToAlbum,
-          icon: const Icon(Icons.album_rounded),
+          icon: const Icon(Album.icon),
           iconSize: 23.0,
           onPressed: () => _handleTap(controller),
         ),
@@ -1531,7 +1531,7 @@ class _GoToArtistSelectionAction extends StatelessWidget {
         animation: controller.animation,
         child: NFIconButton(
           tooltip: l10n.goToArtist,
-          icon: const Icon(Icons.person_rounded),
+          icon: const Icon(Album.icon),
           iconSize: 23.0,
           onPressed: () => _handleTap(controller),
         ),
@@ -1864,7 +1864,12 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
   }
 
   Widget _buildArt(T item) {
-    return ContentArt.persistentQueueTile(source: ContentArtSource(item));
+    assert(item is Song || item is PersistentQueue);
+
+    return ContentArt.persistentQueueTile(
+      source: ContentArtSource(item),
+      defaultArtIcon: item is PersistentQueue ? ContentUtils.persistentQueueIcon(item) : null,
+    );
   }
 
   @override

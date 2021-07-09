@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
@@ -12,6 +13,9 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   final int dateModified;
   final String name;
   final List<int> songIds;
+
+  /// An icon for this content type.
+  static const icon = Icons.queue_music_rounded;
 
   @override
   String get title => name;

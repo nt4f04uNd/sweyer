@@ -80,7 +80,7 @@ class ShowFunctions extends NFShowFunctions {
           trailing: NFButton(
             variant: NFButtonVariant.raised,
             text: l10n.details,
-            color: Colors.white,
+            color: theme.colorScheme.onPrimary,
             textStyle: const TextStyle(color: Colors.black),
             onPressed: () {
               globalKey.currentState!.close();

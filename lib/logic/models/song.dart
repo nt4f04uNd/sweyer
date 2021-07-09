@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Represends a song.
@@ -66,6 +67,9 @@ class Song extends Content {
   /// A supplementary ID map, inserted by origins that allow duplication,
   /// like [Playlist].
   Map<String, int>? idMap;
+
+  /// An icon for this content type.
+  static const icon = Icons.music_note_rounded;
 
   @override
   List<Object?> get props => [id];

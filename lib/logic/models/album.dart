@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Album extends PersistentQueue {
@@ -14,6 +15,9 @@ class Album extends PersistentQueue {
   final int firstYear;
   final int? lastYear;
   final int numberOfSongs;
+
+  /// An icon for this content type.
+  static const icon = Icons.album_rounded;
 
   @override
   String get title => album;

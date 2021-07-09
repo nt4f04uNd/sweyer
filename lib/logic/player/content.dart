@@ -32,12 +32,16 @@ extension QuickActionSerialization on QuickAction {
 }
 
 /// Picks some value based on the provided `T` type of [Content].
-/// 
+///
 /// Instead of `T`, you can explicitly specify [contentType].
-/// 
+///
 /// The [fallback] can be specified in cases when the type is [Content].
 /// Generally, it's better never use it, but in some cases, like selection actions,
 /// that can react to [ContentSelectionController]s of mixed types, it is relevant to use it.
+///
+/// The point of this function is to structurize and generalize the places where multiple contents
+/// an be used. It also allows to ensure that every existing content in the app is supported in all
+/// places it should be supported, this is extra useful when new content type is added.
 V contentPick<T extends Content, V>({
   Type? contentType,
   required V song,
@@ -55,6 +59,27 @@ V contentPick<T extends Content, V>({
       return playlist;
     case Artist:
       return artist;
+    case Content:
+      if (fallback != null)
+        return fallback;
+      throw UnimplementedError();
+    default:
+      throw UnimplementedError();
+  }
+}
+
+/// Analogue of [contentPick] for [PersistentQueue]s.
+V persistentQueuePick<T extends PersistentQueue, V>({
+  Type? contentType,
+  required V album,
+  required V playlist,
+  V? fallback,
+}) {
+  switch (contentType ?? T) {
+    case Album:
+      return album;
+    case Playlist:
+      return playlist;
     case Content:
       if (fallback != null)
         return fallback;
@@ -1554,6 +1579,15 @@ class ContentUtils {
   static bool originIsCurrent(SongOrigin origin) {
     return origin == ContentControl.state.currentSongOrigin ||
            origin == ContentControl.state.queues.origin;
+  }
+
+  /// Returns a default icon for a [PersistentQueue].
+  static IconData persistentQueueIcon(PersistentQueue queue) {
+    return persistentQueuePick<PersistentQueue, IconData>(
+      contentType: queue.runtimeType,
+      album: Album.icon,
+      playlist: Playlist.icon,
+    );
   }
 
   /// Computes the duration of mulitple [songs] and returs it as formatted string.

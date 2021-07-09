@@ -115,6 +115,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                 padding: const EdgeInsets.only(right: 8.0),
                 child: ContentArt.artistTile(
                   source: source,
+                  defaultArtIcon: Artist.icon,
                   current: current,
                 ),
               ),

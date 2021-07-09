@@ -165,7 +165,9 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
           children: [
             ContentArt(
               size: widget.gridArtSize,
-              highRes: true,
+              defaultArtIconScale: (widget.gridArtSize / kPersistentQueueTileArtSize) / 1.5,
+              defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
+              assetHighRes: true,
               currentIndicatorScale: widget.gridCurrentIndicatorScale,
               assetScale: widget.gridArtAssetScale,
               source: source,
@@ -190,10 +192,12 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
               child: widget.small
                 ? ContentArt.songTile(
                     source: source,
+                    defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
                     current: current,
                   )
                 : ContentArt.persistentQueueTile(
                     source: source,
+                    defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
                     current: current,
                   ),
             ),
@@ -277,7 +281,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             top: (widget.gridArtSize - AddToSelectionButton.size - 10.0).clamp(0.0, double.infinity),
             right: 10.0,
             child: Theme(
-              data: theme.copyWith(
+              data: theme.copyWith(// TODO: probably add some dimming so it's better seen no matter the picture?
                 iconTheme: theme.iconTheme.copyWith(color: Colors.white),
               ),
               child: buildAddToSelection(),

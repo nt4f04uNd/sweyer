@@ -158,9 +158,11 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                 Stack(
                   children: [
                     ContentArt(
-                      highRes: true,
+                      assetHighRes: true,
                       size: artSize,
                       borderRadius: 0.0,
+                      defaultArtIcon: Artist.icon,
+                      defaultArtIconScale: 4.5,
                       // onLoad: (image) async {
                         // palette = await compute<ui.Image, PaletteGenerator>(_isolate, image);
                         // palette = await _isolate(image);

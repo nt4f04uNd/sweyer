@@ -102,25 +102,25 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       _TabCollapse(
         index: 0,
         tabController: tabController,
-        icon: const Icon(Icons.music_note_rounded),
+        icon: const Icon(Song.icon),
         label: l10n.tracks,
       ),
       _TabCollapse(
         index: 1,
         tabController: tabController,
-        icon: const Icon(Icons.album_rounded),
+        icon: const Icon(Album.icon),
         label: l10n.albums,
       ),
       _TabCollapse(
         index: 2,
         tabController: tabController,
-        icon: const Icon(Icons.queue_music_rounded, size: 28.0),
+        icon: const Icon(Playlist.icon, size: 28.0),
         label: l10n.playlists,
       ),
       _TabCollapse(
         index: 3,
         tabController: tabController,
-        icon: const Icon(Icons.person_rounded),
+        icon: const Icon(Album.icon),
         label: l10n.artists,
       ),
     ];
@@ -417,6 +417,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final theme = ThemeControl.theme;
     final list = ContentControl.getContent<T>();
     final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
     final selectionController = widget.selectionController;
@@ -424,9 +425,9 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
     return RefreshIndicator(
       key: key,
       strokeWidth: 2.5,
-      color: Colors.white,
+      color: theme.colorScheme.onPrimary,
+      backgroundColor: theme.colorScheme.primary,
       onRefresh: ContentControl.refetchAll,
-      backgroundColor: ThemeControl.theme.colorScheme.primary,
       notificationPredicate: (notification) {
         return selectionController.notInSelection &&
                notification.depth == 0;

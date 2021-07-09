@@ -83,10 +83,12 @@ class ContentArt extends StatefulWidget {
     required this.source,
     this.color,
     this.size,
+    this.defaultArtIcon,
+    this.defaultArtIconScale = 1.0,
     this.assetScale = 1.0,
+    this.assetHighRes = false,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
-    this.highRes = false,
     this.currentIndicatorScale,
     this.onLoad,
     this.loadAnimationDuration = kArtLoadAnimationDuration,
@@ -97,13 +99,15 @@ class ContentArt extends StatefulWidget {
     Key? key,
     required this.source,
     this.color,
+    this.defaultArtIcon,
+    this.defaultArtIconScale = 1.0,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
     this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kSongTileArtSize,
-       highRes = false,
+       assetHighRes = false,
        currentIndicatorScale = null,
        super(key: key);
 
@@ -113,13 +117,15 @@ class ContentArt extends StatefulWidget {
     Key? key,
     required this.source,
     this.color,
+    this.defaultArtIcon,
+    this.defaultArtIconScale = 1.0,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.current = false,
     this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kPersistentQueueTileArtSize,
-       highRes = false,
+       assetHighRes = false,
        currentIndicatorScale = 1.17,
        super(key: key);
 
@@ -129,13 +135,15 @@ class ContentArt extends StatefulWidget {
     Key? key,
     required this.source,
     this.color,
+    this.defaultArtIcon,
+    this.defaultArtIconScale = 1.0,
     this.assetScale = 1.0,
     this.borderRadius = kArtistTileArtSize,
     this.current = false,
     this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   }) : size = kPersistentQueueTileArtSize,
-       highRes = false,
+       assetHighRes = false,
        currentIndicatorScale = 1.1,
        super(key: key);
 
@@ -146,12 +154,14 @@ class ContentArt extends StatefulWidget {
     required this.source,
     this.size,
     this.color,
+    this.defaultArtIcon,
+    this.defaultArtIconScale = 1.0,
     this.assetScale = 1.0,
     this.borderRadius = kArtBorderRadius,
     this.onLoad,
     this.loadAnimationDuration = const Duration(milliseconds: 500),
-  }) : current = false,
-       highRes = true,
+  }) : assetHighRes = true,
+       current = false,
        currentIndicatorScale = null,
        super(key: key);
 
@@ -164,8 +174,24 @@ class ContentArt extends StatefulWidget {
   /// Album art size.
   final double? size;
 
+  /// Icon to show as default image instead of the app logo.
+  ///
+  /// Will be ignored if [source] is created from [Song], since the song default art
+  /// are inteded to use an app logo.
+  final IconData? defaultArtIcon;
+
+  /// Scale that will be applied to the [defaultArtIcon].
+  final double defaultArtIconScale;
+
   /// Scale that will be applied to the asset image contents.
   final double assetScale;
+
+  /// Whether the default album art is should be rendered with hight resolution.
+  /// Defaults to `false`.
+  ///
+  /// This changes image contents, so size of it might be different and you probably
+  /// want to change [assetScale].
+  final bool assetHighRes;
 
   /// Album art border radius.
   /// Defaults to [kArtBorderRadius].
@@ -175,13 +201,6 @@ class ContentArt extends StatefulWidget {
   /// When album art does exist, will dim it a bit and overlay the indicator.
   /// Otherwise, will replace the logo placeholder image without dimming the background.
   final bool current;
-
-  /// Whether the album art is should be rendered with hight resolution (like it does in [AlbumArtPlayerRoute]).
-  /// Defaults to `false`.
-  ///
-  /// This changes image placeholder contents, so size of it might be different and you probably
-  /// want to change [assetScale].
-  final bool highRes;
 
   /// SCale for the [CurrentIndicator].
   final double? currentIndicatorScale;
@@ -555,9 +574,14 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       if (!state.mounted)
         return;
-      final info = await artist.fetchInfo();
-      _url = info.imageUrl;
-      setLoading(_SourceLoading.loaded);
+      try {
+        final info = await artist.fetchInfo();
+        _url = info.imageUrl;
+      } catch (ex, stack) {
+        FirebaseCrashlytics.instance.recordError(ex, stack);
+      } finally {
+        setLoading(_SourceLoading.loaded);
+      }
     });
   }
 
@@ -652,11 +676,12 @@ class _ContentArtState extends State<ContentArt> {
       final size = _getSize(true);
       switch (songs.length) {
         case 0:
-          _loaders = [_SongArtSourceLoader(
+          final loader = _SongArtSourceLoader(
             state: this,
             song: null,
-            size: widget.size,
-          )];
+            size: size,
+          );
+          _loaders = List.generate(4, (index) => loader);
           break;
         case 1:
           final loader = _SongArtSourceLoader(
@@ -837,25 +862,46 @@ class _ContentArtState extends State<ContentArt> {
       ? cacheSize
       : cacheSize * widget.assetScale
     )?.round();
-    Widget child = Image.asset(
-      widget.highRes
-          ? Constants.Assets.ASSET_LOGO_MASK
-          : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
-      width: size,
-      height: size,
-      cacheWidth: _cacheSize,
-      cacheHeight: _cacheSize,
-      color: widget.color != null
-          ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
-          : ThemeControl.colorForBlend,
-      colorBlendMode: BlendMode.plus,
-      frameBuilder: frameBuilder,
-      fit: BoxFit.cover,
-    );
-    if (widget.assetScale != 1.0) {
-      child = Transform.scale(scale: widget.assetScale, child: child);
-      if (forPlaylist) {
-        child = ClipRRect(child: child);
+    Widget child;
+    if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
+      // We should show the art now.
+      _deliverLoad();
+      final theme = ThemeControl.theme;
+      child = Container(
+        alignment: Alignment.center,
+        color: theme.colorScheme.primary,
+        width: widget.size,
+        height: widget.size,
+        child: Icon(
+          widget.defaultArtIcon,
+          color: theme.colorScheme.onPrimary,
+          size: 32.0,
+        ),
+      );
+      if (widget.defaultArtIconScale != 1.0) {
+        child = Transform.scale(scale: widget.defaultArtIconScale, child: child);
+      }
+    } else {
+      child = Image.asset(
+        widget.assetHighRes
+            ? Constants.Assets.ASSET_LOGO_MASK
+            : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
+        width: size,
+        height: size,
+        cacheWidth: _cacheSize,
+        cacheHeight: _cacheSize,
+        color: widget.color != null
+            ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
+            : ThemeControl.colorForBlend,
+        colorBlendMode: BlendMode.plus,
+        frameBuilder: frameBuilder,
+        fit: BoxFit.cover,
+      );
+      if (widget.assetScale != 1.0) {
+        child = Transform.scale(scale: widget.assetScale, child: child);
+        if (forPlaylist) {
+          child = ClipRRect(child: child);
+        }
       }
     }
     return child;
@@ -908,14 +954,15 @@ class _ContentArtState extends State<ContentArt> {
           children: [
             Row(
               children: [
-                _loaders[0].getImage(cacheSize) ?? defaultArt!,
-                _loaders[1].getImage(cacheSize) ?? defaultArt!,
+                // TODO: there's unwanted 1 pixel gap, remove the transform that is used as workaround when this is resolved https://github.com/flutter/flutter/issues/14288
+                Transform.scale(scale: 1.01, child: _loaders[0].getImage(cacheSize) ?? defaultArt!),
+                Transform.scale(scale: 1.01, child: _loaders[1].getImage(cacheSize) ?? defaultArt!),
               ],
             ),
             Row(
               children: [
-                _loaders[2].getImage(cacheSize) ?? defaultArt!,
-                _loaders[3].getImage(cacheSize) ?? defaultArt!,
+                Transform.scale(scale: 1.01, child: _loaders[2].getImage(cacheSize) ?? defaultArt!),
+                Transform.scale(scale: 1.01, child: _loaders[3].getImage(cacheSize) ?? defaultArt!),
               ],
             ),
           ],

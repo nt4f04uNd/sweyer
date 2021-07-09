@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Artist extends SongOrigin {
@@ -12,6 +13,9 @@ class Artist extends SongOrigin {
   final String artist;
   final int numberOfAlbums;
   final int numberOfTracks;
+
+  /// An icon for this content type.
+  static const icon = Icons.person_rounded;
 
   @override
   List<Object> get props => [id];
