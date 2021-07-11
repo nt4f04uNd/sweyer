@@ -20,10 +20,11 @@ final _testSong = Song(
   duration: 0,
   size: 0,
   data: 'data_data_data_data_data_data_data_data',
-  origin: _testAlbum,
   isFavorite: false,
   generationAdded: 0,
   generationModified: 0,
+  origin: _testAlbum,
+  duplicationIndex: 0,
 );
 
 const _testAlbum = Album(

@@ -210,7 +210,7 @@ class _QueuePool {
   bool _shuffled = false;
 }
 
-class _ContentState {
+class ContentState {
   final _QueuePool queues = _QueuePool({
     _PoolQueueType.queue: Queue([]),
     _PoolQueueType.shuffled: Queue([]),
@@ -232,9 +232,9 @@ class _ContentState {
   /// work with `Map<String, dynamic>`. Convertion to int doesn't seem to be a
   /// benefit, so keeping this as string.
   /// 
-  /// See [ContentControl.deduplicateSong] for discussion about the
+  /// See [ContentUtils.deduplicateSong] for discussion about the
   /// logic behind this.
-  Map<String, int> idMap = {};
+  IdMap idMap = {};
 
   /// When true, [idMap] will be saved in the next [setQueue] call.
   bool idMapDirty = false;
@@ -347,13 +347,13 @@ abstract class ContentControl {
   ///
   /// This getter only can be called when it's known for sure
   /// that this will be not `null`,  otherwise it will throw.
-  static _ContentState get state => _stateSubject.value!;
+  static ContentState get state => _stateSubject.value!;
   /// Same as [state], but can be `null`, which means that the state was disposed.
-  static _ContentState? get stateNullable => _stateSubject.value;
+  static ContentState? get stateNullable => _stateSubject.value;
 
   /// Notifies when [state] is changed created or disposed.
-  static Stream<_ContentState?> get onStateCreateRemove => _stateSubject.stream;
-  static final BehaviorSubject<_ContentState?> _stateSubject = BehaviorSubject();
+  static Stream<ContentState?> get onStateCreateRemove => _stateSubject.stream;
+  static final BehaviorSubject<ContentState?> _stateSubject = BehaviorSubject();
 
   // /// Recently pressed quick action.
   // static final quickAction = BehaviorSubject<QuickAction>();
@@ -377,7 +377,7 @@ abstract class ContentControl {
   /// Also handles no-permissions situations.
   static Future<void> init() async {
     if (stateNullable == null) {
-      _stateSubject.add(_ContentState());
+      _stateSubject.add(ContentState());
     }
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     _sdkInt = androidInfo.version.sdkInt;
@@ -451,88 +451,17 @@ abstract class ContentControl {
 
   //****************** Queue manipulation methods *****************************************************
 
-  /// Returns the original song ID.
-  static int getSourceId(int id) {
-    if (id < 0)
-      id = ContentControl.state.idMap[id.toString()]!;
-    if (id < 0)
-      id = ContentControl.state.idMap[id.toString()]!;
-    if (id < 0)
-      throw StateError('');
-    return id;
-  }
-
-  /// Checks the [song] for being a duplicate within the [source], and if
-  /// it is, changes its ID and saves the mapping to the original source ID to
-  /// [_ContentState.idMap].
-  /// 
-  /// To distinct songs that were deduplicated while inserting to queue,
-  /// and songs that were deduplicated because their origin allows duplicating
-  /// (for example a [Playlist]) - reference depth in map can be up to 2 levels.
-  /// 
-  /// For example:
-  /// 
-  /// ```
-  /// {
-  ///   '-1': 0,
-  ///   '-2': -1,
-  ///   '-3': -1,
-  ///   '-4': -3,
-  /// }
-  /// ```
-  /// 
-  /// In this map:
-  ///  * 0 is original song
-  ///  * -1 might be both queue or playlist duplicate of 0
-  ///  * -2 and -3 can only be queue insertion duplicates, they cannot be created from
-  ///    duplicating songs in the playlist
-  ///  * -4 is forbidden and should not ever appear !
-  ///
-  /// The [inserted] parameter tells whether the [song] was already inserted
-  /// in the source. It adjusts the amount of candidates needed for song
-  /// to be considired a duplicate.
-  /// 
-  /// If [source] is `null`, current queue will be used.
-  /// When using non `null` [source], the [idMap] is also required.
-  ///
-  /// When [idMap] is `null`, also sets [_ContentState.idMapDirty] to `true`,
-  /// so [_ContentState.idMap] will be saved in the next call of [setQueue].
-  ///
-  /// Should be called whenever song is added to queue.
-  static void deduplicateSong(Song song, {
-    bool inserted = false,
-    List<Song>? source,
-    Map<String, int>? idMap,
-  }) {
-    assert(
-      source == null || idMap != null,
-      "When using a custom source, the custom idMap is also required"
+  /// Must be called before the song is instreted to the current queue,
+  /// calls [ContentUtils.deduplicateSong].
+  static void _deduplicateSong(Song song) {
+    final result = ContentUtils.deduplicateSong(
+      song: song,
+      index: null,
+      list: state.queues.current.songs,
+      idMap: state.idMap,
     );
-    source ??= state.queues.current.songs;
-    assert(() {
-      final originalSong = state.allSongs.byId.get(song.sourceId);
-      if (identical(originalSong, song)) {
-        throw ArgumentError(
-          "Tried to handle duplicate on the original song. This may lead " 
-          "to that the source song ID is lost, copy the song first.",
-        );
-      }
-      return true;
-    }());
-    final candidates = source.where((el) => el.id == song.id);
-    if (candidates.length > (inserted ? 1 : 0)) {
-      final map = idMap ?? state.idMap;
-      final newId = -(map.length + 1);
-      final id = song.id;
-      if (id < 0 && map[id.toString()]! < 0) {
-        map[newId.toString()] = map[id.toString()]!;
-      } else {
-        map[newId.toString()] = id;
-      }
-      song.id = newId;
-      if (idMap == null) {
-        state.idMapDirty = true;
-      }
+    if (result) {
+      state.idMapDirty = true;
     }
   }
 
@@ -571,6 +500,8 @@ abstract class ContentControl {
       final originSongs = currentOrigin.songs;
       final int index;
       if (currentOrigin is DuplicatingSongOriginMixin) {
+        // Duplicating song origins should be a unique container, so that songs that are outside them
+        // are considered to be not contained in them, even if they have the same source IDs.
         index = originSongs.indexWhere((el) => el.sourceId == song.sourceId && currentOrigin == song.origin);
       } else {
         index = originSongs.indexWhere((el) => el.sourceId == song.sourceId);
@@ -606,7 +537,7 @@ abstract class ContentControl {
     bool contains = true;
     for (int i = 0; i < songs.length; i++) {
       final song = songs[i].copyWith();
-      deduplicateSong(song);
+      _deduplicateSong(song);
       currentQueue.insert(state.currentSongIndex + i + 1, song);
       if (contains) {
         contains = _doesOriginContain(song);
@@ -624,14 +555,13 @@ abstract class ContentControl {
   /// and add the [songs] there.
   static void addToQueue(List<Song> songs) {
     assert(songs.isNotEmpty);
-    final queues = state.queues;
     // Save queue order
     _unshuffle();
     _setOrigins();
     bool contains = true;
     for (var song in songs) {
       song = song.copyWith();
-      deduplicateSong(song);
+      _deduplicateSong(song);
       state.queues.current.add(song);
       if (contains) {
         contains = _doesOriginContain(song);
@@ -661,7 +591,7 @@ abstract class ContentControl {
     for (var song in songs) {
       song = song.copyWith();
       song.origin = origin;
-      deduplicateSong(song);
+      _deduplicateSong(song);
       currentQueue.insert(currentIndex + i + 1, song);
       i++;
     }
@@ -686,7 +616,7 @@ abstract class ContentControl {
     for (var song in songs) {
       song = song.copyWith();
       song.origin = origin;
-      deduplicateSong(song);
+      _deduplicateSong(song);
       state.queues.current.add(song);
     }
     setQueue(type: QueueType.arbitrary);
@@ -697,12 +627,11 @@ abstract class ContentControl {
     // Save queue order
     _unshuffle();
     _setOrigins();
-    final queues = state.queues;
     bool contains = true;
     for (var song in songs) {
       song = song.copyWith();
-      deduplicateSong(song);
-      queues.current.insert(index, song);
+      _deduplicateSong(song);
+      state.queues.current.insert(index, song);
       if (contains) {
         contains = _doesOriginContain(song);
       }
@@ -872,7 +801,7 @@ abstract class ContentControl {
   ///   Otherwise it can be omitted and for updating other paramters only.
   ///
   ///   With playlist origin the [Playlist.idMap] will be used to update the
-  ///   [_ContentState.idMap].
+  ///   [ContentState.idMap].
   /// * [searchQuery] is the search query the playlist was searched by,
   ///   only applied when [type] is [QueueType.searched].
   ///   Similarly as for [origin], when [QueueType.searched] is set and currently it's not searched,
@@ -1211,7 +1140,7 @@ abstract class ContentControl {
   }
 
   /// Sorts songs, albums, etc.
-  /// See [_ContentState.sorts].
+  /// See [ContentState.sorts].
   static void sort<T extends Content>({ Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
     sort ??= sorts.getValue<T>() as Sort<T>;
@@ -1448,15 +1377,13 @@ abstract class ContentControl {
     try {
       final rawQueue = await state.queues._queueSerializer.read();
       for (final item in rawQueue) {
-        final id = item['id'];
-        var song = state.allSongs.byId.get(ContentControl.getSourceId(id));
+        final id = item.id;
+        final origin = SongOrigin.originFromEntry(item.originEntry);
+        var song = state.allSongs.byId.get(ContentUtils.getSourceId(id, origin: origin));
         if (song != null) {
           song = song.copyWith(id: id);
-          final rawOrigin = item['origin'];
-          if (rawOrigin != null) {
-            final origin = SongOrigin.originFromMap(rawOrigin);
-            song.origin = origin;
-          }
+          song.duplicationIndex = item.duplicationIndex;
+          song.origin = origin;
           queueSongs.add(song);
         }
       }
@@ -1473,15 +1400,13 @@ abstract class ContentControl {
       if (shuffled == true) {
         final rawShuffledQueue = await state.queues._shuffledSerializer.read();
         for (final item in rawShuffledQueue) {
-          final id = item['id'];
-          var song = state.allSongs.byId.get(ContentControl.getSourceId(id));
+          final id = item.id;
+          final origin = SongOrigin.originFromEntry(item.originEntry);
+          var song = state.allSongs.byId.get(ContentUtils.getSourceId(id, origin: origin));
           if (song != null) {
             song = song.copyWith(id: id);
-            final rawOrigin = item['origin'];
-            if (rawOrigin != null) {
-              final origin = SongOrigin.originFromMap(rawOrigin);
-              song.origin = origin;
-            }
+            song.duplicationIndex = item.duplicationIndex;
+            song.origin = origin;
             shuffledSongs.add(song);
           }
         }
@@ -1719,6 +1644,75 @@ class ContentUtils {
       playlists.map((el) => el.data).toList(),
       artists.map((el) => el.data).toList(),
     );
+  }
+
+  /// Returns the source song ID based of the provided id map.
+  ///
+  /// If [idMap] is null, [ContentState.idMap] will be used.
+  static int getSourceId(int id, {required SongOrigin? origin, IdMap? idMap}) {
+    return id < 0
+      ? (idMap ?? ContentControl.state.idMap)[IdMapKey(id: id, originEntry: origin?.toSongOriginEntry())]!
+      : id;
+  }
+
+  /// Checks the [song] for being a duplicate within the [origin], and if
+  /// it is, changes its ID and saves the mapping to the original source ID to
+  /// an [idMap].
+  ///
+  /// The [index] should be non-null if the [origin] is [DuplicatingSongOriginMixin], which create their own id map.
+  /// This is needed to later distinguish this key within the [ContentState.idMap].
+  /// See the [PersistentQueueRoute] `currentTest` condition for example.
+  /// If [index] is null, the function will try to set an automatic index.
+  ///
+  /// The [list] is the list of songs contained in this origin.
+  ///
+  /// This must be called before the song is inserted to the queue, otherwise
+  /// the song might be conidiered as a duplicate of itself, which will be incorrect.
+  /// The function asserts that.
+  ///
+  /// Marks the queue as dirty, so the next [setQueue] will save it.
+  /// 
+  /// The returned value indicates whether the duplicate song was found and
+  /// [source] was changed.
+  static bool deduplicateSong({
+    required Song song,
+    required int? index,
+    required List<Song> list,
+    required IdMap idMap,
+  }) {
+    assert(() {
+      final sourceSong = ContentControl.state.allSongs.byId.get(song.sourceId);
+      if (identical(sourceSong, song)) {
+        throw ArgumentError(
+          "Tried to handle duplicate on the source song in `allSongs`. This may lead " 
+          "to that the source song ID is lost, copy the song first",
+        );
+      }
+      return true;
+    }());
+    assert(() {
+      final sameSong = list.firstWhereOrNull((el) => identical(el, song));
+      if (identical(sameSong, song)) {
+        throw ArgumentError(
+          "The provided `song` is contained in the given `list`. This is incorrect " 
+          "usage of this function, it should be called before the song is inserted to "
+          "the `list`",
+        );
+      }
+      return true;
+    }());
+    final candidates = list.where((el) => el.id == song.id);
+    if (candidates.isNotEmpty) {
+      final map = idMap;
+      final newId = -(map.length + 1);
+      map[IdMapKey(
+        id: newId,
+        originEntry: song.origin?.toSongOriginEntry(),
+      )] = song.sourceId;
+      song.id = newId;
+      return true;
+    }
+    return false;
   }
 }
 

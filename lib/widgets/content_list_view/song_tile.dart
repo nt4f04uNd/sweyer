@@ -164,7 +164,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
       ? ContentControl.state.allSongs.getIndex(widget.song)
       : widget.selectionIndex!,
     data: widget.song,
-    origin: selectionRoute ? widget.song.origin : null,
+    origin: selectionRoute && widget.song.origin is DuplicatingSongOriginMixin ? widget.song.origin : null,
   );
 
   @override
@@ -172,7 +172,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
     ? widget.selectionController!.data.contains(SelectionEntry<Song>(
         index: ContentControl.state.allSongs.getIndex(widget.song),
         data: widget.song,
-        origin: widget.song.origin,
+        origin: widget.song.origin is DuplicatingSongOriginMixin ? widget.song.origin : null,
       ))
     : super.widgetSelected;
 

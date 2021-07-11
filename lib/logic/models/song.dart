@@ -60,13 +60,24 @@ class Song extends Content {
   /// For true source origins like [Album] or [Playlist] this will can only be set
   /// on queue insertions, like [ContentContol.playNext].
   ///
-  /// For [DuplicatingSongOriginMixin] that allow duplication is set by them within
+  /// For [DuplicatingSongOriginMixin], that allow duplication, set by them within
   /// the [SongOrigin.songs] getter.
   SongOrigin? origin;
 
+  /// Index of a duplicate song within its duplicates in its queue.
+  ///
+  /// For example if there are 4 duplicates a song in the queue,
+  /// and the song is inserted to the end, its duplication index will be 
+  /// last `index + 1`, i.e `3 + 1 = 4`.
+  ///
+  /// Set by [DuplicatingSongOriginMixin]s.
+  int? duplicationIndex;
+
   /// A supplementary ID map, inserted by origins that allow duplication,
   /// like [Playlist].
-  Map<String, int>? idMap;
+  ///
+  /// Not copied with [copyWith].
+  IdMap? idMap;
 
   /// An icon for this content type.
   static const icon = Icons.music_note_rounded;
@@ -75,7 +86,11 @@ class Song extends Content {
   List<Object?> get props => [id];
 
   /// Returns source song ID.
-  int get sourceId => idMap?[id.toString()] ?? ContentControl.getSourceId(id);
+  int get sourceId => ContentUtils.getSourceId(
+    id,
+    origin: origin,
+    idMap: idMap,
+  );
 
   /// Returns the song artist.
   Artist getArtist() => ContentControl.state.artists.firstWhere((el) => el.id == artistId);
@@ -107,6 +122,7 @@ class Song extends Content {
     required this.isFavorite,
     required this.generationAdded,
     required this.generationModified,
+    this.duplicationIndex,
     this.origin,
   });
 
@@ -195,7 +211,8 @@ abstract class SongCopyWith {
     bool? isFavorite,
     int? generationAdded,
     int? generationModified,
-    PersistentQueue? origin,
+    int? duplicationIndex,
+    SongOrigin? origin,
   });
 }
 
@@ -228,8 +245,8 @@ class _SongCopyWith extends SongCopyWith {
     Object? isFavorite = _undefined,
     Object? generationAdded = _undefined,
     Object? generationModified = _undefined,
+    Object? duplicationIndex = _undefined,
     Object? origin = _undefined,
-    Object? supplementaryId = _undefined,
   }) {
     return Song(
       id: id == _undefined ? value.id : id as int,
@@ -249,6 +266,7 @@ class _SongCopyWith extends SongCopyWith {
       isFavorite: isFavorite == _undefined ? value.isFavorite : isFavorite as bool?,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
       generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
+      duplicationIndex: duplicationIndex == _undefined ? value.duplicationIndex : duplicationIndex as int?,
       origin: origin == _undefined ? value.origin : origin as SongOrigin?,
     );
   }

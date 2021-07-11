@@ -70,7 +70,7 @@ abstract class Prefs {
   /// Last [SongOrigin].
   static final songOrigin = NullableJsonPref<SongOrigin>(
     'song_origin',
-    fromJson: (value) => value == null ? null : SongOrigin.originFromMap(value as Map),
+    fromJson: (value) => value == null ? null : SongOrigin.originFromEntry(SongOriginEntry.fromMap(value as Map)),
     toJson: (value) => value?.toSongOriginEntry().toMap(),
   );
 

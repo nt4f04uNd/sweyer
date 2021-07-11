@@ -567,28 +567,10 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             reorderingEnabled: editing,
                             onReorder: _handleReorder,
                             currentTest: (index) {
-                              final idMap = ContentControl.state.idMap;
-                              final id = songs[index].id;
-                              final currentId = ContentControl.state.currentSong.id;
-                              // Entries where the item ID is referenced as value
-                              final entries = idMap.entries.where((el) => el.value == id);
+                              final song = songs[index];
                               return ContentUtils.originIsCurrent(queue) &&
-                                    (isAlbum && songs[index].sourceId == ContentControl.state.currentSong.sourceId ||
-                                    isPlaylist && ((id == currentId) ||
-                                    // For neganive values we definitely know this is a queue duplicate
-                                    // and just check for equalit for the current song
-                                    id < 0 && entries.isNotEmpty && entries.any((entry) => entry.key == currentId.toString()) ||
-                                    id > 0 && entries.isNotEmpty && (entries.any((entry) {
-                                      // Whe don't know yet whether the entry is duplicated from the playlist
-                                      // or from inserting to the queue, so check the playlist id map and exclude
-                                      // playlist duplications and only then check for other things
-                                      return playlist.idMap[entry.key] == null &&
-                                              (entry.key == currentId.toString() ||
-                                              // Check if there are any entries where key is referenced as value
-                                              // that are equal to the current song
-                                              idMap.entries.where((el) => el.value.toString() == entry.key)
-                                                .any((entry) => entry.key == currentId.toString()));
-                                    }))));
+                                     song.sourceId == ContentControl.state.currentSong.sourceId &&
+                                     (!isPlaylist || (isPlaylist && song.duplicationIndex == ContentControl.state.currentSong.duplicationIndex));
                             },
                             songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
                             onItemTap: () => ContentControl.setOriginQueue(

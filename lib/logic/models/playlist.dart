@@ -27,8 +27,8 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   bool get playable => songIds.isNotEmpty;
 
   @override
-  Map<String, int> get idMap => _idMap;
-  late Map<String, int> _idMap;
+  IdMap get idMap => _idMap;
+  late IdMap _idMap;
 
   /// For each array of songs a new instance of [idMap] will be created
   /// and assonged to each [Song.idMap].
@@ -38,6 +38,9 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   @override
   List<Song> get songs {
     _idMap = {};
+    // Key - song id
+    // Value - duplication index
+    final _duplicationIndexMap = <int, int>{};
     final List<Song> found = [];
     final List<int> notFoundIndices = [];
     for (int i = 0; i < songIds.length; i++) {
@@ -46,18 +49,20 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
         final copiedSong = song.copyWith();
         copiedSong.origin = this;
         copiedSong.idMap = idMap;
+        final id = copiedSong.id;
+        final duplicationIndex = _duplicationIndexMap[id] ??= 0;
+        copiedSong.duplicationIndex = duplicationIndex;
+        ContentUtils.deduplicateSong(
+          song: copiedSong,
+          index: duplicationIndex,
+          list: found,
+          idMap: idMap,
+        );
+        _duplicationIndexMap[id] = _duplicationIndexMap[id]! + 1;
         found.add(copiedSong);
       } else {
         notFoundIndices.add(songIds[i]);
       }
-    }
-    for (final song in found) {
-      ContentControl.deduplicateSong(
-        song,
-        inserted: true,
-        source: found,
-        idMap: idMap,
-      );
     }
     for (int i = notFoundIndices.length - 1; i >= 0; i--) {
       songIds.remove(i);

@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:collection/collection.dart';
@@ -41,6 +42,8 @@ abstract class Content with EquatableMixin {
 /// This class represents not duplicating, a.k.a. `true source` song origins.
 /// For origins to allow duplication, see a protocol in [DuplicatingSongOriginMixin].
 /// 
+/// The [songs] getter must set the [Song.origin]s.
+///
 /// Examples:
 ///  * [Album]
 ///  * [Artist]
@@ -57,17 +60,16 @@ abstract class SongOrigin extends Content {
   SongOriginEntry toSongOriginEntry();
 
   /// Creates origin from map.
-  static SongOrigin? originFromMap(Map map) {
-    final originEntry = SongOriginEntry.fromMap(map);
-    if (originEntry == null)
+  static SongOrigin? originFromEntry(SongOriginEntry? entry) {
+    if (entry == null)
       return null;
-    switch (originEntry.type) {
+    switch (entry.type) {
       case SongOriginType.album:
-        return ContentControl.state.albums[originEntry.id];
+        return ContentControl.state.albums[entry.id];
       case SongOriginType.playlist:
-        return ContentControl.state.playlists.firstWhereOrNull((el) => el.id == originEntry.id);
+        return ContentControl.state.playlists.firstWhereOrNull((el) => el.id == entry.id);
       case SongOriginType.artist:
-        return ContentControl.state.artists.firstWhereOrNull((el) => el.id == originEntry.id);
+        return ContentControl.state.artists.firstWhereOrNull((el) => el.id == entry.id);
       default:
         throw UnimplementedError();
     }
@@ -77,8 +79,9 @@ abstract class SongOrigin extends Content {
 /// Song origin that allows duplication within the [songs].
 /// 
 /// Classes that are mixed in with this should in [songs] getter:
-/// * create and fill the [idMap]
-/// * set the [Song.idMap] and [Song.origin]
+/// * set the [Song.origin]
+/// * set a [Song.duplicationIndex]
+/// * create, fill and set a [Song.idMap]
 /// * call [debugAssertSongsAreValid] at the ennd of the getter, to check
 ///   that everything is set correctly.
 ///
@@ -86,7 +89,7 @@ abstract class SongOrigin extends Content {
 ///  * [Playlist]
 mixin DuplicatingSongOriginMixin on SongOrigin {
   /// Must be created and filled automatically each time the [songs] is called.
-  Map<String, int>? get idMap;
+  IdMap? get idMap;
 
   /// Ensures that [idMap] is initialized and receieved [Song.idMap]
   /// and the [Song.origin].
@@ -118,16 +121,17 @@ class SongOriginType {
 }
 
 /// Model used to serialize song origin.
+@immutable
 class SongOriginEntry {
-  SongOriginEntry({
+  const SongOriginEntry({
     required this.type,
     required this.id,
   });
 
-  SongOriginType type;
-  int id;
+  final SongOriginType type;
+  final int id;
 
-  /// Will return null of map doesn't contain origin.
+  /// Will return null if map is not valid.
   static SongOriginEntry? fromMap(Map map) {
     final rawType = map['origin_type'];
     if (rawType == null)
@@ -144,4 +148,73 @@ class SongOriginEntry {
     'origin_type': type._value,
     'origin_id': id,
   };
+
+  @override
+  int get hashCode => hashValues(type, id);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SongOriginEntry &&
+           other.type == type &&
+           other.id == id;
+  }
+}
+
+/// See [ContentUtils.deduplicateSong].
+typedef IdMap = Map<IdMapKey, int>;
+
+/// The key used in [IdMap]s.
+@immutable
+class IdMapKey {
+  const IdMapKey({
+    required this.id,
+    required this.originEntry,
+  }) : assert(id < 0);
+
+  /// The id of song, this map key is associated with.
+  /// Must be negative per the ID map rules.
+  final int id;
+
+  /// The origin entry of song, this map key is associated with.
+  final SongOriginEntry? originEntry;
+
+  /// Will return null if map is not valid.
+  static IdMapKey? fromMap(Map map) {
+    final id = map['id'];
+    if (id == null)
+      return null;
+    SongOriginEntry? originEntry;
+    if (map.length > 1) {
+      final rawOriginEntry = map['origin'];
+      if (rawOriginEntry != null) {
+        originEntry = SongOriginEntry.fromMap(rawOriginEntry);
+      }
+    }
+    return IdMapKey(
+      id: id,
+      originEntry: originEntry,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    if (originEntry != null)
+      'origin': originEntry!.toMap(),
+  };
+
+  @override
+  int get hashCode => hashValues(id, originEntry);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is IdMapKey &&
+           other.id == id &&
+           other.originEntry == originEntry;
+  }
 }

@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -38,10 +37,13 @@ class SelectionEntry<T extends Content> {
   ///    the content for further usage
   final int index;
 
-  /// If song origin is [DuplicatingSongOriginMixin], this will be non-null.
+  /// Might be used to scope the selection to origins.
   ///
   /// See discussion in [SelectableState.selectionRoute] for example.
   final SongOrigin? origin;
+
+  @override
+  int get hashCode => hashValues(data, index, origin);
 
   @override
   bool operator ==(Object other) {
@@ -56,7 +58,4 @@ class SelectionEntry<T extends Content> {
         && other.index == index
         && other.origin == origin;
   }
-
-  @override
-  int get hashCode => hashValues(data, index, origin);
 }

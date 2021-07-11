@@ -205,7 +205,8 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
   ///  * the method above is not suitable for [DuplicatingSongOriginMixin], such as
   ///    playlists, and content inside them should be considered unique.
   ///    To accomplish that by [DuplicatingSongOriginMixin] the entry also receives
-  ///    the [SelectionEntry.origin].
+  ///    the [SelectionEntry.origin], so the entries selected in it are scoped to this
+  ///    particular origin.
   bool get selectionRoute => selectable && selectionRouteOf(context);
 
   /// Converts this widget to the entry [selectionController] is holding.
@@ -1351,6 +1352,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
     final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
     ContentControl.setQueue(
       type: QueueType.arbitrary,
+      shuffled: false,
       songs: songs,
     );
     MusicPlayer.instance.setSong(songs.first);

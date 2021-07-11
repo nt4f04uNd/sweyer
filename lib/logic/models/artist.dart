@@ -28,7 +28,7 @@ class Artist extends SongOrigin {
   List<Song> get songs {
     return ContentControl.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
       if (el.artistId == id) {
-        prev.add(el.copyWith());
+        prev.add(el.copyWith(origin: this));
       }
       return prev;
     }).toList();
