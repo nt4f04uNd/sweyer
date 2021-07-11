@@ -15,7 +15,7 @@ class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
 
   final VoidCallback onPressed;
 
-  static const size = 36.0;
+  static const size = kSongTileArtSize;
   /// The padding that is preferred between this action and other UI elements.
   static const preferredPadding = 4.0;
 
@@ -26,6 +26,7 @@ class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
       height: size,
       child: NFIconButton(
         icon: const Icon(Icons.add_rounded),
+        size: size,
         onPressed: onPressed,
       ),
     );

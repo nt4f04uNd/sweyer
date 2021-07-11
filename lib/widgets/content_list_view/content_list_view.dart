@@ -43,9 +43,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.leading,
     this.currentTest,
     this.selectedTest,
-    this.longPressGestureEnabledTest,
+    this.longPressSelectionGestureEnabledTest,
     this.handleTapInSelectionTest,
     this.onItemTap,
+    this.enableSongDefaultOnTap = true,
     this.songTileVariant = kSongTileVariant,
     this.songTileClickBehavior = kSongTileClickBehavior,
     this.padding = EdgeInsets.zero,
@@ -84,14 +85,17 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Returned value is passed to [ContentTile.selected].
   final _ItemTest? selectedTest;
 
-  /// Returned value is passed to [ContentTile.longPressGestureEnabled].
-  final _ItemTest? longPressGestureEnabledTest;
+  /// Returned value is passed to [ContentTile.longPressSelectionGestureEnabled].
+  final _ItemTest? longPressSelectionGestureEnabledTest;
 
   /// Returned value is passed to [ContentTile.handleTapInSelection].
   final _ItemTest? handleTapInSelectionTest;
 
   /// Callback to be called on item tap.
   final VoidCallback? onItemTap;
+
+  /// Passed to [Song.enableDefaultOnTap].
+  final bool enableSongDefaultOnTap;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -143,11 +147,12 @@ class ContentListView<T extends Content> extends StatelessWidget {
               leading: leading,
               currentTest: currentTest,
               selectedTest: selectedTest,
-              longPressGestureEnabledTest: longPressGestureEnabledTest,
+              longPressSelectionGestureEnabledTest: longPressSelectionGestureEnabledTest,
               handleTapInSelectionTest: handleTapInSelectionTest,
               songTileVariant: songTileVariant,
               songTileClickBehavior: songTileClickBehavior,
               onItemTap: onItemTap,
+              enableSongDefaultOnTap: enableSongDefaultOnTap,
             ),
           ),
         ],
@@ -175,11 +180,12 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Widget? leading,
     _ItemTest? currentTest,
     _ItemTest? selectedTest,
-    _ItemTest? longPressGestureEnabledTest,
+    _ItemTest? longPressSelectionGestureEnabledTest,
     _ItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     VoidCallback? onItemTap,
+    bool enableSongDefaultOnTap = true,
   }) {
     return MultiSliver(
       children: [
@@ -202,12 +208,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
                       origin: item is Song ? item.origin : null,
                     ))
                   ?? false,
-                longPressGestureEnabled: longPressGestureEnabledTest?.call(index) ?? true,
+                longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
                 handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
                 selectionController: selectionController,
                 trailing: itemTrailingBuilder?.call(context, index),
                 current: currentTest?.call(index),
                 onTap: onItemTap,
+                enableSongDefaultOnTap: enableSongDefaultOnTap,
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
               );
@@ -242,11 +249,12 @@ class ContentListView<T extends Content> extends StatelessWidget {
     Widget? leading,
     _ItemTest? currentTest,
     _ItemTest? selectedTest,
-    _ItemTest? longPressGestureEnabledTest,
+    _ItemTest? longPressSelectionGestureEnabledTest,
     _ItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     VoidCallback? onItemTap,
+    bool enableSongDefaultOnTap = true,
   }) {
     return MultiSliver(
       children: [
@@ -275,13 +283,14 @@ class ContentListView<T extends Content> extends StatelessWidget {
                       origin: item is Song ? item.origin : null,
                     ))
                   ?? false,
-                longPressGestureEnabled: longPressGestureEnabledTest?.call(index)
+                longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index)
                   ?? !reorderingEnabled,
                 handleTapInSelection: handleTapInSelectionTest?.call(index)
                   ?? !reorderingEnabled,
                 selectionController: selectionController,
                 current: currentTest?.call(index),
                 onTap: onItemTap,
+                enableSongDefaultOnTap: enableSongDefaultOnTap,
                 backgroundColor: ThemeControl.theme.colorScheme.background,
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,

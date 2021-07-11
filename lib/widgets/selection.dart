@@ -118,7 +118,7 @@ abstract class SelectableWidget<T> extends StatefulWidget {
     Key? key,
   }) : selectionIndex = null,
        selected = null,
-       longPressGestureEnabled = null,
+       longPressSelectionGestureEnabled = null,
        handleTapInSelection = null,
        selectionController = null,
        super(key: key);
@@ -128,7 +128,7 @@ abstract class SelectableWidget<T> extends StatefulWidget {
     Key? key,
     required int this.selectionIndex,
     required bool this.selected,
-    required bool this.longPressGestureEnabled,
+    required bool this.longPressSelectionGestureEnabled,
     required bool this.handleTapInSelection,
     required this.selectionController,
   }) : super(key: key);
@@ -140,10 +140,10 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   /// This will be used on first build, after this tile will have internal selection state.
   final bool? selected;
 
-  /// Whether the selection gesture is enabled.
+  /// Whether the long press selection gesture is enabled.
   ///
   /// Will be force treated as `false` if [selectionRouteOf] is `true`.
-  final bool? longPressGestureEnabled;
+  final bool? longPressSelectionGestureEnabled;
 
   /// Whether in selection the tap handling is enabled.
   ///
@@ -278,7 +278,7 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
   /// 
   /// Will return null if not [selectable], because it is common to pass it to [ListTile.onLongPress],
   /// and passing null will disable the long press gesture.
-  VoidCallback? get handleLongPress => !selectable || selectionRouteOf(context) || !widget.longPressGestureEnabled! ? null : () {
+  VoidCallback? get handleLongPress => !selectable || selectionRouteOf(context) || !widget.longPressSelectionGestureEnabled! ? null : () {
     if (!selectable)
       return;
     toggleSelection();

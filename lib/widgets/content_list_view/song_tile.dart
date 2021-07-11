@@ -4,7 +4,6 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
@@ -98,6 +97,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.trailing,
     this.current,
     this.onTap,
+    this.enableDefaultOnTap = true,
     this.variant = kSongTileVariant,
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
@@ -110,11 +110,12 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     required int selectionIndex,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
-    bool longPressGestureEnabled = true,
+    bool longPressSelectionGestureEnabled = true,
     bool handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
+    this.enableDefaultOnTap = true,
     this.variant = kSongTileVariant,
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
@@ -125,7 +126,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
          key: key,
          selectionIndex: selectionIndex,
          selected: selected,
-         longPressGestureEnabled: longPressGestureEnabled,
+         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
          handleTapInSelection: handleTapInSelection,
          selectionController: selectionController,
        );
@@ -141,6 +142,11 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   /// If not specified, by default uses [ContentUtils.songIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
+
+  /// Whether to handle taps by default.
+  /// By default plays song on tap.
+  final bool enableDefaultOnTap;
+
   final SongTileVariant variant;
 
   /// How to respond to tile clicks.
@@ -240,7 +246,9 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
           left: widget.horizontalPadding,
           right: rightPadding,
         ),
-        onTap: _handleTap,
+        onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
+          ? _handleTap
+          : null,
         onLongPress: handleLongPress,
         title: title,
         subtitle: subtitle,
@@ -295,7 +303,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
           Positioned(
             left: showAlbumArt ? 34.0 + widget.horizontalPadding : null,
             right: showAlbumArt ? null : 4.0 + widget.horizontalPadding,
-            bottom: showAlbumArt ? 2.0 : selectionRoute ? 0.0 : 20.0,
+            bottom: showAlbumArt ? 2.0 : 20.0,
             child: Padding(
               padding: const EdgeInsets.only(right: 6.0),
               child: SelectionCheckmark(animation: animation),

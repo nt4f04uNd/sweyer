@@ -31,7 +31,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     required int selectionIndex,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
-    bool longPressGestureEnabled = true,
+    bool longPressSelectionGestureEnabled = true,
     bool handleTapInSelection = true,
     this.trailing,
     this.current,
@@ -45,7 +45,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
          key: key,
          selectionIndex: selectionIndex,
          selected: selected,
-         longPressGestureEnabled: longPressGestureEnabled,
+         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
          handleTapInSelection: handleTapInSelection,
          selectionController: selectionController,
        );

@@ -175,7 +175,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       title: (context) => getl10n(context).addToPlaylist,
       onSubmit: (entries) {
         ContentControl.insertSongsInPlaylist(
-          index: songs.length,
+          index: songs.length + 1,
           songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged),
           playlist: playlist,
         );
@@ -573,6 +573,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                      (!isPlaylist || (isPlaylist && song.duplicationIndex == ContentControl.state.currentSong.duplicationIndex));
                             },
                             songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
+                            enableSongDefaultOnTap: !editing,
                             onItemTap: () => ContentControl.setOriginQueue(
                               origin: queue,
                               songs: songs,

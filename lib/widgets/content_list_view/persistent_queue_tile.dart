@@ -41,7 +41,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     required int selectionIndex,
     required SelectionController<SelectionEntry>? selectionController,
     bool selected = false,
-    bool longPressGestureEnabled = true,
+    bool longPressSelectionGestureEnabled = true,
     bool handleTapInSelection = true,
     this.trailing,
     this.current,
@@ -61,7 +61,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
          key: key,
          selectionIndex: selectionIndex,
          selected: selected,
-         longPressGestureEnabled: longPressGestureEnabled,
+         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
          handleTapInSelection: handleTapInSelection,
          selectionController: selectionController,
        );
@@ -262,6 +262,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     if (!selectable)
       return _buildTile();
 
+    const checkmarkGridMargin = 10.0;
     final theme = ThemeControl.theme;
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
@@ -272,14 +273,15 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             const SizedBox.shrink()
           else
             Positioned(
-              left: artSize + (widget.grid ? -checmarkLargeSize - 10.0 : 2.0),
-              top: artSize + (widget.grid ? -checmarkLargeSize - 10.0 : -7.0),
+              left: artSize + (widget.grid ? -checmarkLargeSize - checkmarkGridMargin : 2.0),
+              top: artSize + (widget.grid ? -checmarkLargeSize - checkmarkGridMargin : -7.0),
               child: buildSelectionCheckmark(forceLarge: widget.grid),
             )
         else if (widget.grid)
           Positioned(
-            top: (widget.gridArtSize - AddToSelectionButton.size - 10.0).clamp(0.0, double.infinity),
-            right: 10.0,
+            top: (widget.gridArtSize - AddToSelectionButton.size - checkmarkGridMargin).clamp(0.0, double.infinity),
+            // 8 padding is already in `buildAddToSelection`, so add 10 more to reach `checkmarkMargin`
+            right: 2.0,
             child: Theme(
               data: theme.copyWith(// TODO: probably add some dimming so it's better seen no matter the picture?
                 iconTheme: theme.iconTheme.copyWith(color: Colors.white),

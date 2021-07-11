@@ -1502,8 +1502,9 @@ class ContentUtils {
 
   /// Checks whether a song origin is currently playing.
   static bool originIsCurrent(SongOrigin origin) {
-    return origin == ContentControl.state.currentSongOrigin ||
-           origin == ContentControl.state.queues.origin;
+    final queues = ContentControl.state.queues;
+    return queues.type == QueueType.origin && origin == queues.origin ||
+           queues.type != QueueType.origin && origin == ContentControl.state.currentSongOrigin;
   }
 
   /// Returns a default icon for a [PersistentQueue].
@@ -1724,7 +1725,7 @@ class ShuffleResult {
 }
 
 
-/// Result of [ContentUtils.sortAndPack].
+/// Result of [ContentUtils.selectionSortAndPack].
 class SortAndPackResult {
   final List<Song> songs;
   final List<Album> albums;

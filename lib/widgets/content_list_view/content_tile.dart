@@ -17,13 +17,14 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.trailing,
     this.current,
     this.onTap,
+    this.enableSongDefaultOnTap = true,
     this.horizontalPadding,
     this.backgroundColor = Colors.transparent,
     this.songTileVariant = kSongTileVariant,
     this.songTileClickBehavior = kSongTileClickBehavior,
     this.selectionIndex,
     this.selected = false,
-    this.longPressGestureEnabled = true,
+    this.longPressSelectionGestureEnabled = true,
     this.handleTapInSelection = true,
     this.selectionController,
   }) : super(key: key);
@@ -33,6 +34,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
   final Widget? trailing;
   final bool? current;
   final VoidCallback? onTap;
+  final bool enableSongDefaultOnTap;
   final double? horizontalPadding;
   final Color backgroundColor;
   final SongTileVariant songTileVariant;
@@ -40,7 +42,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
 
   final int? selectionIndex;
   final bool selected;
-  final bool longPressGestureEnabled;
+  final bool longPressSelectionGestureEnabled;
   final bool handleTapInSelection;
   final ContentSelectionController? selectionController;
 
@@ -71,7 +73,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
           selectionIndex: selectionIndex!,
           selectionController: selectionController!,
           selected: selected,
-          longPressGestureEnabled: longPressGestureEnabled,
+          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
           handleTapInSelection: handleTapInSelection,
           trailing: trailing,
           current: current,
@@ -96,6 +98,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
             trailing: trailing,
             current: current,
             onTap: onTap,
+            enableDefaultOnTap: enableSongDefaultOnTap,
             horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
             backgroundColor: backgroundColor,
             variant: songTileVariant,
@@ -106,11 +109,12 @@ class ContentTile<T extends Content> extends StatelessWidget {
             selectionIndex: selectionIndex!,
             selectionController: selectionController,
             selected: selected,
-            longPressGestureEnabled: longPressGestureEnabled,
+            longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
             handleTapInSelection: handleTapInSelection,
             trailing: trailing,
             current: current,
             onTap: onTap,
+            enableDefaultOnTap: enableSongDefaultOnTap,
             horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
             backgroundColor: backgroundColor,
             variant: songTileVariant,
@@ -132,7 +136,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
             selectionIndex: selectionIndex!,
             selectionController: selectionController,
             selected: selected,
-            longPressGestureEnabled: longPressGestureEnabled,
+            longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
             handleTapInSelection: handleTapInSelection,
             trailing: trailing,
             current: current,
@@ -169,7 +173,7 @@ mixin ContentTileComponentsMixin<E extends SelectionEntry, W extends SelectableW
       );
     }
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
+      padding: const EdgeInsets.only(left: 4.0, right: 8.0),
       child: GestureDetector(
         onTap: () {
           toggleSelection();

@@ -211,7 +211,7 @@ abstract class ContentChannel {
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
   static Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
     assert(songs.isNotEmpty);
-    assert(index >= 0 && index <= playlist.songIds.length);
+    assert(index >= 0 && index <= playlist.songIds.length + 1);
     try {
       return await _channel.invokeMethod<void>(
         'insertSongsInPlaylist',

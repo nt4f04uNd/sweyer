@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Creates a content section, which a few content tiles and a header with name
