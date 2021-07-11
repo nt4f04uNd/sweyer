@@ -413,16 +413,21 @@ public enum ContentChannel {
                });
                break;
             }
-            case "removeSongsFromPlaylist": {
+            case "removeFromPlaylistAt": {
                Handler handler = new Handler(Looper.getMainLooper());
                Executors.newSingleThreadExecutor().execute(() -> {
                   try {
                      Long id = GeneralHandler.getLong(call.argument("id"));
                      if (playlistExists(id)) {
-                        ArrayList<Object> songIds = call.argument("songIds");
-                        ArrayList<String> stringSongIds = new ArrayList<>();
-                        for (Object songId : songIds) {
-                           stringSongIds.add(songId.toString());
+                        ArrayList<Object> indexes = call.argument("indexes");
+                        ArrayList<String> stringIndexes = new ArrayList<>();
+                        for (Object index : indexes) {
+                           // Android seems to require indexes to be offsetted by 1.
+                           //
+                           // It might be because when songs are inserted into the playlist,
+                           // the indexing is quite similar an there it makes sense, because we need
+                           // to be able to insert to `playlistLength + 1` position.
+                           stringIndexes.add(String.valueOf(GeneralHandler.getLong(index) + 1));
                         }
                         ContentResolver resolver = getContentResolver();
                         Uri uri;
@@ -433,8 +438,8 @@ public enum ContentChannel {
                         }
                         int deletedRows = resolver.delete(
                                 uri,
-                                FetchHandler.buildWhereForCount(MediaStore.Audio.Playlists.Members.AUDIO_ID, songIds.size()),
-                                stringSongIds.toArray(new String[0])
+                                FetchHandler.buildWhereForCount(MediaStore.Audio.Playlists.Members.PLAY_ORDER, indexes.size()),
+                                stringIndexes.toArray(new String[0])
                         );
                         if (deletedRows > 0) {
                            resolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null);

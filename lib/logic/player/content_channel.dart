@@ -244,14 +244,14 @@ abstract class ContentChannel {
 
   /// Throws:
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
-  static Future<void> removeSongsFromPlaylist({ required List<Song> songs, required Playlist playlist }) async {
-    assert(songs.isNotEmpty);
+  static Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
+    assert(indexes.isNotEmpty);
     try {
       return await _channel.invokeMethod<void>(
-        'removeSongsFromPlaylist',
+        'removeFromPlaylistAt',
         {
           'id': playlist.id,
-          'songIds': songs.map((el) => el.sourceId).toList(),
+          'indexes': indexes,
         },
       );
     } on PlatformException catch(ex) {

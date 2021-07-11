@@ -1602,8 +1602,8 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
       list: list,
       localizedAction: (l10n) => l10n.remove,
       onSubmit: () {
-        ContentControl.removeSongsFromPlaylist(
-          songs: controller.data.map((el) => el.data).toList(),
+        ContentControl.removeFromPlaylistAt(
+          indexes: controller.data.map((el) => el.index).toList(),
           playlist: playlist,
         );
       },

@@ -1324,9 +1324,9 @@ abstract class ContentControl {
     }
   }
 
-  /// Removes songs from playlist.
-  static Future<void> removeSongsFromPlaylist({ required List<Song> songs, required Playlist playlist }) async {
-    await ContentChannel.removeSongsFromPlaylist(songs: songs, playlist: playlist);
+  /// Removes songs from playlist at given [indexes].
+  static Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
+    await ContentChannel.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
