@@ -1311,7 +1311,6 @@ abstract class ContentControl {
           }
         }
       }
-      assert(max != null);
       if (max != null) {
         name = '$name (${max + 1})';
       }
