@@ -656,7 +656,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             },
                             songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
                             enableSongDefaultOnTap: !editing,
-                            onItemTap: (index) => ContentControl.setOriginQueue(
+                            onItemTap: editing ? null : (index) => ContentControl.setOriginQueue(
                               origin: queue,
                               songs: songs,
                             ),

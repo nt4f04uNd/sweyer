@@ -55,13 +55,10 @@ class Song extends Content {
   final int? generationModified;
 
   /// The origin this song comes from.
-  /// This will help determining where the song comes from to show [CurrentIndicator]s.
-  //
-  /// For true source origins like [Album] or [Playlist] this will can only be set
-  /// on queue insertions, like [ContentContol.playNext].
   ///
-  /// For [DuplicatingSongOriginMixin], that allow duplication, set by them within
-  /// the [SongOrigin.songs] getter.
+  /// Particularly, this will help determining where the song comes from to show [CurrentIndicator]s.
+  ///
+  /// Set by [SongOrigin.songs] getters.
   SongOrigin? origin;
 
   /// Index of a duplicate song within its duplicates in its queue.

@@ -433,7 +433,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
     final origin = ContentControl.state.queues.origin;
-    final horizontalPadding = origin is Album ? 12.0 : 20.0;
+    final horizontalPadding = origin != null ? 12.0 : 20.0;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(

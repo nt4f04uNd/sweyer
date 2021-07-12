@@ -164,13 +164,24 @@ class PersistentQueueArguments<T extends PersistentQueue> extends Equatable {
   List<Object> get props => [queue, editing];
 }
 
-class ArtistContentArguments<T> {
+/// The artist `T` content.
+///
+/// Only [Song] and [Album] are valid.
+class ArtistContentArguments<T extends Content> {
   ArtistContentArguments({
     required this.artist,
     required this.list,
-  });
+  }) : assert(T == Song || T == Album);
 
+  /// Artist the contents of which to view.
   final Artist artist;
+
+  /// The list of artist content for initial render.
+  ///
+  /// Further this will be updated automatically on [ContentState.onContentChange].
+  ///
+  /// Because this is created in [ArtistRoute], there we already have a list
+  /// of artist content.
   final List<T> list;
 }
 
