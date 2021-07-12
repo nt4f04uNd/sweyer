@@ -120,7 +120,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       _TabCollapse(
         index: 3,
         tabController: tabController,
-        icon: const Icon(Album.icon),
+        icon: const Icon(Artist.icon),
         label: l10n.artists,
       ),
     ];
