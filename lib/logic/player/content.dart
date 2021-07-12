@@ -1273,38 +1273,72 @@ abstract class ContentControl {
     stateNullable?.emitContentChange();
   }
 
+  /// Checks if there's are playlists with names like "name" and "name (1)" and:
+  /// * if yes, increases the number by one from the max and returns string with it
+  /// * else returns the string unmodified.
+  static Future<String> correctPlaylistName(String name) async {
+     // Update the playlist in case they are outdated
+    await refetch<Playlist>(emitChangeEvent: false);
+
+    // If such name already exists, find the max duplicate number and make the name
+    // "name (max + 1)" instead.
+    if (state.playlists.firstWhereOrNull((el) => el.name == name) != null) {
+      // Regexp to search for names like "name" and "name (1)"
+      // Things like "name (1)(1)" will not be matched
+      //
+      // Part of it is taken from https://stackoverflow.com/a/17779833/9710294
+      //
+      // Explanation:
+      // * `name`: playlist name
+      // * `(`: begin optional capturing group, because we need to match the name without parentheses
+      // * ` `: match space
+      // * `\(`: match an opening parentheses
+      // * `(`: begin capturing group
+      // * `[^)]+`: match one or more non ) characters
+      // * `)`: end capturing group
+      // * `\)` : match closing parentheses
+      // * `)?`: close optional capturing group\
+      // * `$`: match string end
+      final regexp = RegExp(name.toString() + r'( \(([^)]+)\))?$');
+      int? max; 
+      for (final el in state.playlists) {
+        final match = regexp.firstMatch(el.name);
+        if (match != null) {
+          final capturedNumber = match.group(2);
+          final number = capturedNumber == null ? 0 : int.tryParse(capturedNumber);
+          if (number != null && (max == null || max < number)) {
+            max = number;
+          }
+        }
+      }
+      assert(max != null);
+      if (max != null) {
+        name = '$name (${max + 1})';
+      }
+    }
+  
+    return name;
+  }
+
   /// Creates a playlist with a given name.
   static Future<void> createPlaylist(String name) async {
+    name = await correctPlaylistName(name);
     await ContentChannel.createPlaylist(name);
     await refetchSongsAndPlaylists();
   }
 
-  /// Renames a playlist and returns a boolean indicating whether the
-  /// operation was successful.
-  static Future<bool> renamePlaylist(Playlist playlist, String name) async {
+  /// Renames a playlist and:
+  /// * if operation was successful returns a corrected with [correctPlaylistName] name
+  /// * else returns null
+  static Future<String?> renamePlaylist(Playlist playlist, String name) async {
     try {
-      // Update the playlist just in case they are outdated
-      await refetch<Playlist>(emitChangeEvent: false);
-      state.playlists.fold<List<Object?>>([], (prev, el) {
-        if (el != playlist) {
-          // Regexp to search for names like "name (1)"
-          // Taken from https://stackoverflow.com/a/17779833/9710294
-          final regexp = RegExp(name.toString() + r' \(?:([^)]+)\)?');
-          final match = regexp.firstMatch(el.name);
-          if (match != null) {
-            prev.add(el);
-            prev.add(match.group(0));
-          }
-        }
-        return prev;
-      });
+      name = await correctPlaylistName(name);
       await ContentChannel.renamePlaylist(playlist, name);
-      await refetch<Song>();
-      await refetch<Playlist>();
-      return true;
+      await refetchSongsAndPlaylists();
+      return name;
     } on ContentChannelException catch(ex) {
       if (ex == ContentChannelException.playlistNotExists)
-        return false;
+        return null;
       rethrow;
     }
   }

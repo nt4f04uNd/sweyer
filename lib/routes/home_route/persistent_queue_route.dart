@@ -322,9 +322,11 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   Future<void> _commitRename() async {
     if (!_renamed)
       return;
-    final result = await ContentControl.renamePlaylist(playlist, textEditingController.text);
-    if (!result) {
+    final correctedName = await ContentControl.renamePlaylist(playlist, textEditingController.text);
+    if (correctedName == null) {
       _quitBecauseNotFound();
+    } else {
+      textEditingController.text = correctedName;
     }
   }
 
