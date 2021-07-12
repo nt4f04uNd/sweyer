@@ -47,6 +47,44 @@ abstract class JsonSerializer<R, S> {
   Future<void> save(S data);
 }
 
+/// Serializes a list of integers.
+class IntListSerializer extends JsonSerializer<List<int>, List<int>> {
+  const IntListSerializer(this.fileName);
+
+  @override
+  final String fileName;
+
+  @override
+  List<int> get initialValue => [];
+
+  @override
+  Future<List<int>> read() async {
+    try {
+      final file = await getFile();
+      final jsonContent = await file.readAsString();
+      return jsonDecode(jsonContent).cast<int>();
+    } catch (ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in IntListSerializer.read, fileName: $fileName',
+      );
+      ShowFunctions.instance.showError(
+        errorDetails: buildErrorReport(ex, stack),
+      );
+      debugPrint('$fileName: error reading integer list json, setting to empty list');
+      return [];
+    }
+  }
+
+  @override
+  Future<void> save(List<int> data) async {
+    final file = await getFile();
+    await file.writeAsString(jsonEncode(data));
+    // debugPrint('$fileName: json saved');
+  }
+}
+
 /// Item for [QueueSerializer].
 class _SerializedQueueItem {
   const _SerializedQueueItem({
@@ -85,6 +123,7 @@ class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<So
 
   @override
   final String fileName;
+
   @override
   List<Song> get initialValue => [];
 
@@ -115,7 +154,7 @@ class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<So
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
-      debugPrint('$fileName: Error reading songs json, setting to empty songs list');
+      debugPrint('$fileName: error reading songs json, setting to empty songs list');
       return [];
     }
   }
@@ -142,6 +181,7 @@ class IdMapSerializer extends JsonSerializer<IdMap, IdMap> {
 
   @override
   String get fileName => 'id_map.json';
+
   @override
   IdMap get initialValue => {};
 
@@ -182,7 +222,7 @@ class IdMapSerializer extends JsonSerializer<IdMap, IdMap> {
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
-      debugPrint('$fileName: Error reading songs json, setting to empty songs list');
+      debugPrint('$fileName: error reading id map json, setting to empty map');
       return {};
     }
   }
