@@ -20,6 +20,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.trailing,
     this.current,
     this.onTap,
+    this.enableDefaultOnTap = true,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
   })  : horizontalPadding = horizontalPadding ?? _horizontalPadding,
@@ -36,6 +37,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.trailing,
     this.current,
     this.onTap,
+    this.enableDefaultOnTap = true,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
   }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
@@ -61,6 +63,10 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
+
+  /// Whether to handle taps by default.
+  /// By default plays song on tap.
+  final bool enableDefaultOnTap;
 
   final double horizontalPadding;
 
@@ -99,7 +105,9 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
     return Material(
       color: widget.backgroundColor,
       child: InkWell(
-        onTap: _handleTap,
+        onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
+          ? _handleTap
+          : widget.onTap,
         onLongPress: handleLongPress,
         splashFactory: NFListTileInkRipple.splashFactory,
         child: Padding(

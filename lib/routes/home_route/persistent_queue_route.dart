@@ -204,7 +204,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   setListState = setState;
                   return ContentListView<Song>(
                     list: songs,
-                    enableSongDefaultOnTap: false,
+                    enableDefaultOnTap: false,
                     leading: InListContentAction.song(
                       color: selectedSong == null ? selectedTileColor : null,
                       splashColor: selectedSong == null ? selectedSplashColor : null,
@@ -255,7 +255,6 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             index = 1;
           }
         }
-        print(selectedSong);
         ContentControl.insertSongsInPlaylist(
           index: index,
           songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged),
@@ -657,7 +656,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                      (!isPlaylist || (isPlaylist && song.duplicationIndex == ContentControl.state.currentSong.duplicationIndex));
                             },
                             songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
-                            enableSongDefaultOnTap: !editing,
+                            enableDefaultOnTap: !editing,
                             onItemTap: editing ? null : (index) => ContentControl.setOriginQueue(
                               origin: queue,
                               songs: songs,

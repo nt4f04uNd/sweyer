@@ -7,6 +7,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart'
     hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
@@ -48,6 +49,75 @@ class ShowFunctions extends NFShowFunctions {
       query: query,
       openKeyboard: openKeyboard,
     )));
+  }
+
+  /// Shows a dialog to create a playlist.
+  Future<void> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
+    final l10n = getl10n(context);
+    final theme = ThemeControl.theme;
+    final TextEditingController controller = TextEditingController();
+    final AnimationController animationController = AnimationController(
+      vsync: vsync,
+      duration: const Duration(milliseconds: 300),
+    );
+    controller.addListener(() {
+      if (controller.text.trim().isNotEmpty)
+        animationController.forward();
+      else
+        animationController.reverse();
+    });
+    final animation = ColorTween(
+      begin: theme.disabledColor,
+      end: theme.colorScheme.onSecondary,
+    ).animate(CurvedAnimation(
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+      parent: animationController,
+    ));
+    bool submitted = false;
+    Future<void> submit(BuildContext context) async {
+      if (!submitted) {
+        submitted = true;
+        await ContentControl.createPlaylist(controller.text);
+        Navigator.of(context).maybePop();
+      }
+    }
+    await ShowFunctions.instance.showDialog(
+      context,
+      ui: Constants.UiTheme.modalOverGrey.auto,
+      title: Text(l10n.newPlaylist),
+      content: Builder(
+        builder: (context) => AppTextField(
+          autofocus: true,
+          controller: controller,
+          onSubmit: (value) {
+            submit(context);
+          },
+          onDispose: () {
+            controller.dispose();
+            animationController.dispose();
+          },
+        ),
+      ),
+      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+      acceptButton: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) => IgnorePointer(
+          ignoring: const IgnoringStrategy(
+            dismissed: true,
+            reverse: true,
+          ).ask(animation),
+          child: NFButton(
+            text: l10n.create,
+            textStyle: TextStyle(color: animation.value),
+            splashColor: Constants.Theme.glowSplashColor.auto,
+            onPressed: () async {
+              submit(context);
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   /// Will show up a snack bar notification that something's went wrong

@@ -137,3 +137,26 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
     );
   }
 }
+
+class CreatePlaylistInListAction extends StatefulWidget {
+  const CreatePlaylistInListAction({Key? key}) : super(key: key);
+
+  @override
+  State<CreatePlaylistInListAction> createState() => _CreatePlaylistInListActionState();
+}
+
+class _CreatePlaylistInListActionState extends State<CreatePlaylistInListAction> with TickerProviderStateMixin {
+  void _handleTap() {
+    ShowFunctions.instance.showCreatePlaylist(this, context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    return InListContentAction.persistentQueue(
+      onTap: _handleTap,
+      icon: Icons.add_rounded,
+      text: l10n.newPlaylist,
+    );
+  }
+}

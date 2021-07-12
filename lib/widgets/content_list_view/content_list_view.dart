@@ -53,7 +53,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.handleTapInSelectionTest,
     this.onItemTap,
     this.backgroundColorBuilder,
-    this.enableSongDefaultOnTap = true,
+    this.enableDefaultOnTap = true,
     this.songTileVariant = kSongTileVariant,
     this.songTileClickBehavior = kSongTileClickBehavior,
     this.padding = EdgeInsets.zero,
@@ -105,7 +105,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   final _ColorBuilder? backgroundColorBuilder;
 
   /// Passed to [Song.enableDefaultOnTap].
-  final bool enableSongDefaultOnTap;
+  final bool enableDefaultOnTap;
 
   /// Passed to [SongTile.variant].
   final SongTileVariant songTileVariant;
@@ -163,7 +163,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
               songTileClickBehavior: songTileClickBehavior,
               onItemTap: onItemTap,
               backgroundColorBuilder: backgroundColorBuilder,
-              enableSongDefaultOnTap: enableSongDefaultOnTap,
+              enableDefaultOnTap: enableDefaultOnTap,
             ),
           ),
         ],
@@ -197,7 +197,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     ValueSetter<int>? onItemTap,
     _ColorBuilder? backgroundColorBuilder,
-    bool enableSongDefaultOnTap = true,
+    bool enableDefaultOnTap = true,
   }) {
     return MultiSliver(
       children: [
@@ -227,7 +227,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 current: currentTest?.call(index),
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 backgroundColor: backgroundColorBuilder == null ? Colors.transparent : backgroundColorBuilder(index),
-                enableSongDefaultOnTap: enableSongDefaultOnTap,
+                enableDefaultOnTap: enableDefaultOnTap,
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
               );
@@ -268,7 +268,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     ValueSetter<int>? onItemTap,
     _ColorBuilder? backgroundColorBuilder,
-    bool enableSongDefaultOnTap = true,
+    bool enableDefaultOnTap = true,
   }) {
     return MultiSliver(
       children: [
@@ -304,7 +304,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 selectionController: selectionController,
                 current: currentTest?.call(index),
                 onTap: onItemTap == null ? null : () => onItemTap(index),
-                enableSongDefaultOnTap: enableSongDefaultOnTap,
+                enableDefaultOnTap: enableDefaultOnTap,
                 backgroundColor: backgroundColorBuilder == null
                   ? ThemeControl.theme.colorScheme.background
                   : backgroundColorBuilder(index),

@@ -24,6 +24,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.trailing,
     this.current,
     this.onTap,
+    this.enableDefaultOnTap = true,
     this.small = false,
     this.grid = false,
     this.gridArtSize = _gridArtSize,
@@ -46,6 +47,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.trailing,
     this.current,
     this.onTap,
+    this.enableDefaultOnTap = true,
     this.small = false,
     this.grid = false,
     this.gridArtSize = _gridArtSize,
@@ -77,6 +79,10 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
+
+  /// Whether to handle taps by default.
+  /// By default opens the [PersistentQueueRoute].
+  final bool enableDefaultOnTap;
 
   /// Creates a small variant of the tile with the sizes of [SelectableTile].
   final bool small;
@@ -226,6 +232,10 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       );
     }
 
+    final onTap = widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
+      ? _handleTap
+      : widget.onTap;
+
     if (widget.grid) {
       return Stack(
         children: [
@@ -235,7 +245,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
               delegate: _BoxyDelegate(() => Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: _handleTap,
+                  onTap: onTap,
                   splashColor: Constants.Theme.glowSplashColor.auto,
                   onLongPress: handleLongPress,
                   splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
@@ -250,7 +260,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       );
     }
     return InkWell(
-      onTap: _handleTap,
+      onTap: onTap,
       onLongPress: handleLongPress,
       splashFactory: NFListTileInkRipple.splashFactory,
       child: child,

@@ -123,6 +123,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
       acceptButton: const SizedBox.shrink(),
       content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: SortFeature
           .getValuesForContent<T>()
           .map((el) => buildItem(el))

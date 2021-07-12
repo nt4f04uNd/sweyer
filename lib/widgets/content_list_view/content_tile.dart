@@ -17,7 +17,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.trailing,
     this.current,
     this.onTap,
-    this.enableSongDefaultOnTap = true,
+    this.enableDefaultOnTap = true,
     this.horizontalPadding,
     this.backgroundColor = Colors.transparent,
     this.songTileVariant = kSongTileVariant,
@@ -34,7 +34,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
   final Widget? trailing;
   final bool? current;
   final VoidCallback? onTap;
-  final bool enableSongDefaultOnTap;
+  final bool enableDefaultOnTap;
   final double? horizontalPadding;
   final Color backgroundColor;
   final SongTileVariant songTileVariant;
@@ -63,6 +63,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
       ? PersistentQueueTile<Q>(
           queue: content as Q,
           onTap: onTap,
+          enableDefaultOnTap: enableDefaultOnTap,
           trailing: trailing,
           current: current,
           horizontalPadding: horizontalPadding,
@@ -78,6 +79,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
           trailing: trailing,
           current: current,
           onTap: onTap,
+          enableDefaultOnTap: enableDefaultOnTap,
           horizontalPadding: horizontalPadding,
           backgroundColor: backgroundColor,
         );
@@ -98,7 +100,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
             trailing: trailing,
             current: current,
             onTap: onTap,
-            enableDefaultOnTap: enableSongDefaultOnTap,
+            enableDefaultOnTap: enableDefaultOnTap,
             horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
             backgroundColor: backgroundColor,
             variant: songTileVariant,
@@ -114,7 +116,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
             trailing: trailing,
             current: current,
             onTap: onTap,
-            enableDefaultOnTap: enableSongDefaultOnTap,
+            enableDefaultOnTap: enableDefaultOnTap,
             horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
             backgroundColor: backgroundColor,
             variant: songTileVariant,
@@ -128,6 +130,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
             trailing: trailing,
             current: current,
             onTap: onTap,
+            enableDefaultOnTap: enableDefaultOnTap,
             horizontalPadding: horizontalPadding,
             backgroundColor: backgroundColor,
           )
@@ -141,6 +144,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
             trailing: trailing,
             current: current,
             onTap: onTap,
+            enableDefaultOnTap: enableDefaultOnTap,
             horizontalPadding: horizontalPadding,
             backgroundColor: backgroundColor,
           ),

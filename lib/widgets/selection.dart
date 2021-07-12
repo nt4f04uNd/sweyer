@@ -467,31 +467,32 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   static ValueGetter<List<Widget>> _getActions<T extends Content>() {
-    const playActions = <Widget>[
+    const commonActions = <Widget>[
       _PlayAsQueueSelectionAction(),
       _ShuffleAsQueueSelectionAction(),
+      _AddToPlaylistSelectionAction(),
     ];
     return contentPick<T, ValueGetter<List<Widget>>>(
-      song: () => playActions + const [
+      song: () => commonActions + const [
         _GoToArtistSelectionAction(),
         _GoToAlbumSelectionAction(),
         _PlayNextSelectionAction<Song>(),
         _AddToQueueSelectionAction<Song>(),
       ],
-      album: () => playActions + const [
+      album: () => commonActions + const [
         _PlayNextSelectionAction<Album>(),
         _AddToQueueSelectionAction<Album>(),
       ],
-      playlist: () => playActions + const [
+      playlist: () => commonActions + const [
         _EditPlaylistSelectionAction(),
         _PlayNextSelectionAction<Playlist>(),
         _AddToQueueSelectionAction<Playlist>(),
       ],
-      artist: () => playActions + const [
+      artist: () => commonActions + const [
         _PlayNextSelectionAction<Artist>(),
         _AddToQueueSelectionAction<Artist>(),
       ],
-      fallback: () => playActions + const [
+      fallback: () => commonActions + const [
         _GoToArtistSelectionAction(),
         _GoToAlbumSelectionAction(),
         _EditPlaylistSelectionAction(),
@@ -1533,7 +1534,7 @@ class _GoToArtistSelectionAction extends StatelessWidget {
         animation: controller.animation,
         child: NFIconButton(
           tooltip: l10n.goToArtist,
-          icon: const Icon(Album.icon),
+          icon: const Icon(Artist.icon),
           iconSize: 23.0,
           onPressed: () => _handleTap(controller),
         ),
@@ -1580,6 +1581,86 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
 }
 
 //*********** Content related actions ***********
+
+/// Action that adds songs to playlist(s).
+/// All types of contents are supported.
+class _AddToPlaylistSelectionAction extends StatelessWidget {
+  const _AddToPlaylistSelectionAction({Key? key}) : super(key: key);
+
+  void _handleTap(BuildContext context, ContentSelectionController controller) {
+    // TODO: splash goes out of dialog border radius
+    ShowFunctions.instance.showDialog(
+      context,
+      ui: Constants.UiTheme.modalOverGrey.auto,
+      title: Builder(
+        builder: (context) {
+          final l10n = getl10n(context);
+          return Text(l10n.addToPlaylist);
+        },
+      ),
+      contentPadding: const EdgeInsets.only(top: 14.0, bottom: 0.0),
+      content: StreamBuilder(
+        stream: ContentControl.state.onContentChange,
+        builder: (context, snapshot) {
+          final playlists = ContentControl.state.playlists;
+          final screenSize = MediaQuery.of(context).size;
+          return SizedBox(
+            height: kSongTileHeight + playlists.length * kPersistentQueueTileHeight,
+            width: screenSize.width,
+            child: ScrollConfiguration(
+              behavior: const GlowlessScrollBehavior(),
+              child: ContentListView<Playlist>(
+                list: playlists,
+                leading: const CreatePlaylistInListAction(),
+                enableDefaultOnTap: false,
+                onItemTap: (index) {
+                  final playlist = playlists[index];
+                  ContentControl.insertSongsInPlaylist(
+                    index: playlist.length + 1,
+                    songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged),
+                    playlist: playlist,
+                  );
+                  Navigator.pop(context);
+                  controller.close();
+                },
+              ),
+            ),
+          );
+        },
+      ),
+      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+      acceptButton: const SizedBox(),
+      // acceptButton: Builder(
+      //   builder: (context) => NFButton.accept(
+      //     text: getl10n(context).add,
+      //     splashColor: Constants.Theme.glowSplashColor.auto,
+      //     onPressed: () {
+      //       // onSubmit();
+      //       controller.close();
+      //     },
+      //   ),
+      // ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    return _ActionBuilder(
+      controller: controller,
+      shown: () => true,
+      builder: (context, child) => EmergeAnimation(
+        animation: controller.animation,
+        child: NFIconButton(
+          tooltip: l10n.addToPlaylist,
+          icon: const Icon(Icons.playlist_add_rounded),
+          onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(context, controller),
+        ),
+      ),
+    );
+  }
+}
 
 /// Action that removes a song from playlist.
 class RemoveFromPlaylistSelectionAction extends StatelessWidget {
@@ -1762,33 +1843,35 @@ void _showActionConfirmationDialog<E extends Content>({
         );
       },
     ),
-    content: Builder(
-      builder: (context) {
-        final l10n = getl10n(context);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              TextSpan(
-                style: const TextStyle(fontSize: 15.0),
-                children: [
-                  TextSpan(text: "${l10n.areYouSureYouWantTo} ${localizedAction(l10n).toLowerCase()}"),
-                  TextSpan(
-                    text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
-                    style: entry != null
-                        ? const TextStyle(fontWeight: FontWeight.w700)
-                        : null,
-                  ),
-                ],
+    content: SingleChildScrollView(
+      child: Builder(
+        builder: (context) {
+          final l10n = getl10n(context);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  style: const TextStyle(fontSize: 15.0),
+                  children: [
+                    TextSpan(text: "${l10n.areYouSureYouWantTo} ${localizedAction(l10n).toLowerCase()}"),
+                    TextSpan(
+                      text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
+                      style: entry != null
+                          ? const TextStyle(fontWeight: FontWeight.w700)
+                          : null,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8.0),
-            _DeletionArtsPreview<E>(
-              list: list.toList(),
-            ),
-          ],
-        );
-      },
+              const SizedBox(height: 8.0),
+              _DeletionArtsPreview<E>(
+                list: list.toList(),
+              ),
+            ],
+          );
+        },
+      ),
     ),
     buttonSplashColor: Constants.Theme.glowSplashColor.auto,
     acceptButton: Builder(
