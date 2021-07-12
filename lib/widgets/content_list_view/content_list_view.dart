@@ -15,10 +15,16 @@ import 'package:flutter/material.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Signature used for [ContentListView.currentTest] and [ContentListView.selected].
+/// Signature used for [ContentListView.currentTest], [ContentListView.selected] and
+/// other similar callbacks.
 ///
 /// The argument [index] is index of the item.
 typedef _ItemTest = bool Function(int index);
+
+/// Signature used for [ContentListView.backgroundColorBuilder].
+///
+/// The argument [index] is index of the item.
+typedef _ColorBuilder = Color Function(int index);
 
 /// Signature used for [ContentListView.itemBuilder].
 ///
@@ -46,6 +52,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.longPressSelectionGestureEnabledTest,
     this.handleTapInSelectionTest,
     this.onItemTap,
+    this.backgroundColorBuilder,
     this.enableSongDefaultOnTap = true,
     this.songTileVariant = kSongTileVariant,
     this.songTileClickBehavior = kSongTileClickBehavior,
@@ -92,7 +99,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
   final _ItemTest? handleTapInSelectionTest;
 
   /// Callback to be called on item tap.
-  final VoidCallback? onItemTap;
+  final ValueSetter<int>? onItemTap;
+
+  /// Builds a background color for an item.
+  final _ColorBuilder? backgroundColorBuilder;
 
   /// Passed to [Song.enableDefaultOnTap].
   final bool enableSongDefaultOnTap;
@@ -152,6 +162,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
               songTileVariant: songTileVariant,
               songTileClickBehavior: songTileClickBehavior,
               onItemTap: onItemTap,
+              backgroundColorBuilder: backgroundColorBuilder,
               enableSongDefaultOnTap: enableSongDefaultOnTap,
             ),
           ),
@@ -184,7 +195,8 @@ class ContentListView<T extends Content> extends StatelessWidget {
     _ItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
-    VoidCallback? onItemTap,
+    ValueSetter<int>? onItemTap,
+    _ColorBuilder? backgroundColorBuilder,
     bool enableSongDefaultOnTap = true,
   }) {
     return MultiSliver(
@@ -213,7 +225,8 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 selectionController: selectionController,
                 trailing: itemTrailingBuilder?.call(context, index),
                 current: currentTest?.call(index),
-                onTap: onItemTap,
+                onTap: onItemTap == null ? null : () => onItemTap(index),
+                backgroundColor: backgroundColorBuilder == null ? Colors.transparent : backgroundColorBuilder(index),
                 enableSongDefaultOnTap: enableSongDefaultOnTap,
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
@@ -253,7 +266,8 @@ class ContentListView<T extends Content> extends StatelessWidget {
     _ItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
-    VoidCallback? onItemTap,
+    ValueSetter<int>? onItemTap,
+    _ColorBuilder? backgroundColorBuilder,
     bool enableSongDefaultOnTap = true,
   }) {
     return MultiSliver(
@@ -289,9 +303,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
                   ?? !reorderingEnabled,
                 selectionController: selectionController,
                 current: currentTest?.call(index),
-                onTap: onItemTap,
+                onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableSongDefaultOnTap: enableSongDefaultOnTap,
-                backgroundColor: ThemeControl.theme.colorScheme.background,
+                backgroundColor: backgroundColorBuilder == null
+                  ? ThemeControl.theme.colorScheme.background
+                  : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
                 trailing: AnimatedSwitcher(

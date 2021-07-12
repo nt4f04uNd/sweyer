@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-06-24T00:42:27.075986",
+  "@@last_modified": "2021-07-12T18:42:09.930945",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -170,6 +170,16 @@
   },
   "newPlaylist": "New playlist",
   "@newPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "trackAfterWhichToInsert": "Track after which to insert",
+  "@trackAfterWhichToInsert": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "insertAtTheBeginning": "Insert at the beginning",
+  "@insertAtTheBeginning": {
     "type": "text",
     "placeholders": {}
   },

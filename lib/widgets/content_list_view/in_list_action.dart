@@ -15,6 +15,8 @@ class InListContentAction extends StatefulWidget {
     required this.icon,
     required this.text,
     required this.onTap,
+    this.color,
+    this.splashColor,
   }) : horizontalPadding = kSongTileHorizontalPadding,
        super(key: key);
 
@@ -24,12 +26,16 @@ class InListContentAction extends StatefulWidget {
     required this.icon,
     required this.text,
     required this.onTap,
+    this.color,
+    this.splashColor,
   }) : horizontalPadding = kPersistentQueueTileHorizontalPadding,
        super(key: key);
 
   final IconData icon;
   final String text;
   final VoidCallback? onTap;
+  final Color? color;
+  final Color? splashColor;
   final double horizontalPadding;
 
   @override
@@ -50,6 +56,8 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
     reverseCurve: Curves.easeInCubic,
   ));
 
+  Color? previousColor;
+
   bool get enabled => widget.onTap != null;
 
   @override
@@ -62,6 +70,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
   
   @override
   void didUpdateWidget(covariant InListContentAction oldWidget) {
+    previousColor = oldWidget.color;
     if (oldWidget.onTap != widget.onTap) {
       if (enabled) {
         controller.forward();
@@ -82,36 +91,46 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: fadeAnimation,
-      child: NFInkWell(
-        onTap: widget.onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
-          height: kSongTileHeight,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                height: kSongTileArtSize,
-                width: kSongTileArtSize,
-                decoration: BoxDecoration(
-                  color: Constants.Theme.glowSplashColor.auto,
-                  borderRadius: const BorderRadius.all(Radius.circular(kArtBorderRadius)),
+      child: TweenAnimationBuilder<Color?>(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        tween: ColorTween(begin: previousColor, end: widget.color ?? Colors.transparent),
+        builder: (context, value, child) => Material(
+          color: value,
+          child: child,
+        ),
+        child: NFInkWell(
+          splashColor: widget.splashColor,
+          onTap: widget.onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
+            height: kSongTileHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  height: kSongTileArtSize,
+                  width: kSongTileArtSize,
+                  decoration: BoxDecoration(
+                    color: Constants.Theme.glowSplashColor.auto,
+                    borderRadius: const BorderRadius.all(Radius.circular(kArtBorderRadius)),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(widget.icon, size: 36.0),
                 ),
-                alignment: Alignment.center,
-                child: Icon(widget.icon, size: 36.0),
-              ),
-              Expanded(
-                child: Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    widget.text,
-                    overflow: TextOverflow.ellipsis,
-                    style: ThemeControl.theme.textTheme.headline6,
+                Expanded(
+                  child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      widget.text,
+                      overflow: TextOverflow.ellipsis,
+                      style: ThemeControl.theme.textTheme.headline6,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

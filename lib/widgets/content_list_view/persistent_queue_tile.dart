@@ -94,7 +94,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   /// Value passed to [ContentArt.currentIndicatorScale] when [grid] is `true`.
   final double gridCurrentIndicatorScale;
 
-  /// Tile horizontal padding. Ignored whne [grid] is `true`.
+  /// Tile horizontal padding. Ignored when [grid] is `true`.
   final double horizontalPadding;
 
   /// Background tile color.

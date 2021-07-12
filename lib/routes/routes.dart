@@ -11,6 +11,7 @@ export 'selection_route.dart';
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide LicensePage;
 import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
@@ -126,6 +127,7 @@ class SelectionArguments {
   SelectionArguments({
     required this.title,
     required this.onSubmit,
+    this.settingsPageBuilder,
   });
 
   /// Builder for title to display in the app bar.
@@ -133,6 +135,11 @@ class SelectionArguments {
 
   /// Fired when user pressed a done button.
   final ValueSetter<Set<SelectionEntry>> onSubmit;
+
+  /// If non-null, near submit button there will be shown a settings button,
+  /// and if it's pressed, the new route is opened which shows the result of
+  /// this function invocation.
+  final WidgetBuilder? settingsPageBuilder;
 
   /// Created and set in [SelectionRoute].
   late ContentSelectionController selectionController;

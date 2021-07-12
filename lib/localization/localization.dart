@@ -367,6 +367,20 @@ class AppLocalizations {
     );
   }
 
+  String get trackAfterWhichToInsert {
+    return Intl.message(
+      "Track after which to insert",
+      name: 'trackAfterWhichToInsert',
+    );
+  }
+
+  String get insertAtTheBeginning {
+    return Intl.message(
+      "Insert at the beginning",
+      name: 'insertAtTheBeginning',
+    );
+  }
+
   //* Generic ******************
 
   /// Displayed in list headers in button to play it.

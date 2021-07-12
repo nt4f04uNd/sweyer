@@ -179,6 +179,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "trackAfterWhichToInsert": "Трек, после которого вставить",
+  "@trackAfterWhichToInsert": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "insertAtTheBeginning": "Вставить в начало",
+  "@insertAtTheBeginning": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playContentList": "Включить",
   "@playContentList": {
     "type": "text",

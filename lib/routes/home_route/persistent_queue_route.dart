@@ -13,6 +13,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer/constants.dart' as Constants;
 
 class _ReorderOperation {
   final int oldIndex;
@@ -171,11 +172,92 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   }
 
   void _handleAddTracks() {
+    // With null it will be considered as "insert to the start"
+    Song? selectedSong = songs.lastOrNull;
+    bool tapped = false;
     AppRouter.instance.goto(AppRoutes.selection.withArguments(SelectionArguments(
       title: (context) => getl10n(context).addToPlaylist,
+      settingsPageBuilder: (context) {
+        final l10n = getl10n(context);
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              l10n.trackAfterWhichToInsert,
+              style: const TextStyle(fontSize: 20.0),
+            ),
+            leading: const NFBackButton(),
+          ),
+          body: StreamBuilder(
+            stream: ContentControl.state.onContentChange,
+            builder: (context, snapshot) {
+              final selectedTileColor = ThemeControl.theme.colorScheme.primary;
+              final selectedSplashColor = Constants.Theme.glowSplashColorOnContrast.auto;
+              late StateSetter setListState;
+              if (!tapped || selectedSong != null && !songs.contains(selectedSong)) {
+                // Set last song on start and when the songs update and selected song was deleted
+                selectedSong = songs.lastOrNull;
+              }
+              return StreamBuilder(
+                stream: ContentControl.state.onSongChange,
+                builder: (context, snapshot) => StatefulBuilder(
+                builder: (context, setState) {
+                  setListState = setState;
+                  return ContentListView<Song>(
+                    list: songs,
+                    enableSongDefaultOnTap: false,
+                    leading: InListContentAction.song(
+                      color: selectedSong == null ? selectedTileColor : null,
+                      splashColor: selectedSong == null ? selectedSplashColor : null,
+                      icon: SweyerIcons.play_next,
+                      text: l10n.insertAtTheBeginning,
+                      onTap: () {
+                        setListState(() {
+                          tapped = true;
+                          selectedSong = null;
+                        });
+                      },
+                    ),
+                    backgroundColorBuilder: (index) {
+                      if (selectedSong == songs[index])
+                        return selectedTileColor;
+                      return Colors.transparent;
+                    },
+                    itemBuilder: (context, index, child) {
+                      final theme = Theme.of(context);
+                      return Theme(
+                        data: theme.copyWith(
+                          splashColor: selectedSong == songs[index] ? selectedSplashColor : theme.splashColor,
+                        ),
+                        child: child,
+                      );
+                    },
+                    onItemTap: (index) {
+                      setListState(() {
+                        tapped = true;
+                        selectedSong = songs[index];
+                      });
+                    },
+                  );
+                }
+                ),
+              );
+            },
+          ),
+        );
+      },
       onSubmit: (entries) {
+        int index;
+        if (selectedSong == null) {
+          index = 1;
+        } else {
+          index = songs.indexOf(selectedSong!) + 2;
+          if (index <= 0) {
+            index = 1;
+          }
+        }
+        print(selectedSong);
         ContentControl.insertSongsInPlaylist(
-          index: songs.length + 1,
+          index: index,
           songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged),
           playlist: playlist,
         );
@@ -574,7 +656,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             },
                             songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
                             enableSongDefaultOnTap: !editing,
-                            onItemTap: () => ContentControl.setOriginQueue(
+                            onItemTap: (index) => ContentControl.setOriginQueue(
                               origin: queue,
                               songs: songs,
                             ),

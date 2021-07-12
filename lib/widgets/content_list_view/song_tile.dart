@@ -164,6 +164,14 @@ class SongTile extends SelectableWidget<SelectionEntry> {
 }
 
 class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> with ContentTileComponentsMixin {
+  Color? previousBackgroundColor;
+
+  @override
+  void didUpdateWidget(SongTile oldWidget) {
+    previousBackgroundColor = oldWidget.backgroundColor;
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
     index: selectionRoute
@@ -237,8 +245,14 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
       subtitle = translate(subtitle);
     }
 
-    return Material(
-      color: widget.backgroundColor,
+    return TweenAnimationBuilder<Color?>(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      tween: ColorTween(begin: previousBackgroundColor, end: widget.backgroundColor),
+      builder: (context, value, child) => Material(
+        color: value,
+        child: child,
+      ),
       child: NFListTile(
         dense: true,
         isThreeLine: false,
@@ -248,7 +262,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         ),
         onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
           ? _handleTap
-          : null,
+          : widget.onTap,
         onLongPress: handleLongPress,
         title: title,
         subtitle: subtitle,

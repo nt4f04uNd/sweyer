@@ -781,7 +781,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                               contentType: contentListContentType,
                               controller: delegate.singleListScrollController,
                               selectionController: delegate.selectionController,
-                              onItemTap: () => delegate.handleContentTap(contentListContentType),
+                              onItemTap: (index) => delegate.handleContentTap(contentListContentType),
                               list: list,
                             );
                           }()

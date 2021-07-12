@@ -436,11 +436,11 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         list: list,
         showScrollbarLabel: showLabel,
         selectionController: selectionController,
-        onItemTap: contentPick<T, VoidCallback>(
-          song: ContentControl.resetQueue,
-          album: () {},
-          playlist: () {},
-          artist: () {},
+        onItemTap: contentPick<T, ValueSetter<int>>(
+          song: (index) => ContentControl.resetQueue,
+          album: (index) {},
+          playlist: (index) {},
+          artist: (index) {},
         ),
         leading: Column(
           children: [
