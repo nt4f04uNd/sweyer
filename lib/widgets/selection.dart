@@ -1965,11 +1965,12 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     });
   }
 
-  Widget _buildArt(T item) {
+  Widget _buildArt(T item, double size) {
     assert(item is Song || item is PersistentQueue);
 
-    return ContentArt.persistentQueueTile(
+    return ContentArt(
       source: ContentArtSource(item),
+      size: size,
       defaultArtIcon: item is PersistentQueue ? ContentUtils.persistentQueueIcon(item) : null,
     );
   }
@@ -2003,6 +2004,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
               // The amount of previews to show in "more" grid, so they fill
               // the entire available space
               final int gridPreviewsPerRow = intermediatePreviewsPerRow.ceil();
+              final double gridItemSize = (constraints.maxWidth - spacing * (gridPreviewsPerRow - 1)) / gridPreviewsPerRow;
               final exceeded = widget.list.length > previewsPerRow;
               final List<T> previews = exceeded
                 ? widget.list.sublist(0, (constraints.maxWidth - correctedMoreTextWidth) ~/ (itemSize + spacing))
@@ -2045,7 +2047,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                               itemCount: length,
                               itemBuilder: (context, index) {
                                 if (!exceeded || index != length - 1) {
-                                  return _buildArt(previews[index]);
+                                  return _buildArt(previews[index], itemSize);
                                 }
                                 return Container(
                                   width: correctedMoreTextWidth,
@@ -2053,7 +2055,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                                   alignment: Alignment.center,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                      vertical: 2.0,
+                                      vertical: 10.0,
                                       horizontal: 10.0,
                                     ),
                                     decoration: BoxDecoration(
@@ -2065,6 +2067,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 14.0,
+                                        height: 1,
                                         fontWeight: FontWeight.w800,
                                         color: theme.colorScheme.background,
                                       ),
@@ -2084,7 +2087,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                                 crossAxisSpacing: spacing,
                                 mainAxisSpacing: spacing,
                               ),
-                              itemBuilder: (context, index) => _buildArt(widget.list[index]),
+                              itemBuilder: (context, index) => _buildArt(widget.list[index], gridItemSize),
                               itemCount: widget.list.length,
                             ),
                           ),
