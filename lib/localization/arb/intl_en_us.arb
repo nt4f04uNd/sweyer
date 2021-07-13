@@ -184,6 +184,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "saveQueueAsPlaylist": "Save queue as playlist",
+  "@saveQueueAsPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playContentList": "Play",
   "@playContentList": {
     "type": "text",
@@ -216,6 +221,16 @@
   },
   "save": "Save",
   "@save": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saved": "Saved",
+  "@saved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "view": "View",
+  "@view": {
     "type": "text",
     "placeholders": {}
   },

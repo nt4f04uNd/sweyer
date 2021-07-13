@@ -218,7 +218,7 @@ abstract class ContentChannel {
         {
           'id': playlist.id,
           'index': index,
-          'songIds': songs.map((el) => el.id).toList(),
+          'songIds': songs.map((el) => el.sourceId).toList(),
         },
       );
     } on PlatformException catch(ex) {

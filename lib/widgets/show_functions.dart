@@ -7,6 +7,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart'
     hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:collection/collection.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
@@ -52,7 +53,7 @@ class ShowFunctions extends NFShowFunctions {
   }
 
   /// Shows a dialog to create a playlist.
-  Future<void> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
+  Future<Playlist?> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
     final TextEditingController controller = TextEditingController();
@@ -75,11 +76,12 @@ class ShowFunctions extends NFShowFunctions {
       parent: animationController,
     ));
     bool submitted = false;
+    late String name;
     Future<void> submit(BuildContext context) async {
       if (!submitted) {
         submitted = true;
-        await ContentControl.createPlaylist(controller.text);
-        Navigator.of(context).maybePop();
+        name = await ContentControl.createPlaylist(controller.text);
+        Navigator.of(context).maybePop(name);
       }
     }
     await ShowFunctions.instance.showDialog(
@@ -118,6 +120,7 @@ class ShowFunctions extends NFShowFunctions {
         ),
       ),
     );
+    return ContentControl.state.playlists.firstWhereOrNull((el) => el.name == name); 
   }
 
   /// Will show up a snack bar notification that something's went wrong

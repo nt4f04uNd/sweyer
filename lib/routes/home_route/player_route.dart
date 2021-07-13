@@ -5,6 +5,7 @@
 
 import 'dart:async';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 
@@ -546,6 +547,11 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                         ],
                       ),
                     ),
+                     Column(
+                      children: const [
+                        _SaveQueueAsPlaylistAction(),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -935,6 +941,83 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SaveQueueAsPlaylistAction extends StatefulWidget {
+  const _SaveQueueAsPlaylistAction({Key? key}) : super(key: key);
+
+  @override
+  State<_SaveQueueAsPlaylistAction> createState() => _SaveQueueAsPlaylistActionState();
+}
+
+class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> with TickerProviderStateMixin {
+  Future<void> _handleTap() async {
+    final l10n = getl10n(context);
+    final theme = ThemeControl.theme;
+    final songs = ContentControl.state.queues.current.songs;
+    final playlist = await ShowFunctions.instance.showCreatePlaylist(this, context);
+    bool success = false;
+    if (playlist != null) {
+      try {
+        await ContentControl.insertSongsInPlaylist(
+          index: 1,
+          songs: songs,
+          playlist: playlist,
+        );
+        success = true;
+      } catch (ex, stack) {
+        FirebaseCrashlytics.instance.recordError(
+          ex,
+          stack,
+          reason: 'in _SaveQueueAsPlaylistActionState',
+        );
+      }
+    }
+    if (success) {
+      final key = GlobalKey<NFSnackbarEntryState>();
+      NFSnackbarController.showSnackbar(NFSnackbarEntry(
+        globalKey: key,
+        important: true,
+        child: NFSnackbar(
+          leading: const Icon(Icons.done_rounded),
+          padding: const EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 0.0,
+            bottom: 0.0,
+          ),
+          title: Text(l10n.saved, style: const TextStyle(fontSize: 15.0)),
+          trailing: AppButton(
+            text: l10n.view,
+            onPressed: () {
+              key.currentState!.close();
+              HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlist!));
+            },
+          ),
+        ),
+      ));
+    } else {
+      NFSnackbarController.showSnackbar(NFSnackbarEntry(
+        important: true,
+        child: NFSnackbar(
+          leading: const Icon(Icons.error_outline_rounded),
+          title: Text(l10n.oopsErrorOccurred, style: const TextStyle(fontSize: 15.0)),
+          color: theme.colorScheme.error,
+        ),
+      ));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    return NFIconButton(
+      icon: const Icon(Icons.queue_rounded),
+      iconSize: 23.0,
+      tooltip: l10n.saveQueueAsPlaylist,
+      onPressed: _handleTap,
     );
   }
 }

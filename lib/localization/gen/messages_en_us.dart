@@ -11,6 +11,7 @@
 
 // @dart = 2.7
 
+
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
 
@@ -115,6 +116,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "removeFromQueue" : MessageLookupByLibrary.simpleMessage("Remove from queue"),
     "reset" : MessageLookupByLibrary.simpleMessage("Reset"),
     "save" : MessageLookupByLibrary.simpleMessage("Save"),
+    "saveQueueAsPlaylist" : MessageLookupByLibrary.simpleMessage("Save queue as playlist"),
+    "saved" : MessageLookupByLibrary.simpleMessage("Saved"),
     "search" : MessageLookupByLibrary.simpleMessage("Search"),
     "searchClearHistory" : MessageLookupByLibrary.simpleMessage("Clear search history?"),
     "searchHistory" : MessageLookupByLibrary.simpleMessage("Search history"),
@@ -142,6 +145,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tracks" : MessageLookupByLibrary.simpleMessage("Tracks"),
     "tracksPlural" : m4,
     "upNext" : MessageLookupByLibrary.simpleMessage("Up next"),
+    "view" : MessageLookupByLibrary.simpleMessage("View"),
     "year" : MessageLookupByLibrary.simpleMessage("Year")
   };
 }

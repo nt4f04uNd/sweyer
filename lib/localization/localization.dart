@@ -381,6 +381,13 @@ class AppLocalizations {
     );
   }
 
+  String get saveQueueAsPlaylist {
+    return Intl.message(
+      "Save queue as playlist",
+      name: 'saveQueueAsPlaylist',
+    );
+  }
+
   //* Generic ******************
 
   /// Displayed in list headers in button to play it.
@@ -431,6 +438,20 @@ class AppLocalizations {
     return Intl.message(
       "Save",
       name: 'save',
+    );
+  }
+
+  String get saved {
+    return Intl.message(
+      "Saved",
+      name: 'saved',
+    );
+  }
+
+  String get view {
+    return Intl.message(
+      "View",
+      name: 'view',
     );
   }
 

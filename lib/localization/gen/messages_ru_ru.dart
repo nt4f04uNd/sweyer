@@ -115,6 +115,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "removeFromQueue" : MessageLookupByLibrary.simpleMessage("Убрать из очереди"),
     "reset" : MessageLookupByLibrary.simpleMessage("Сбросить"),
     "save" : MessageLookupByLibrary.simpleMessage("Сохранить"),
+    "saveQueueAsPlaylist" : MessageLookupByLibrary.simpleMessage("Сохранить очередь как плейлист"),
+    "saved" : MessageLookupByLibrary.simpleMessage("Сохранено"),
     "search" : MessageLookupByLibrary.simpleMessage("Искать"),
     "searchClearHistory" : MessageLookupByLibrary.simpleMessage("Очистить историю поиска?"),
     "searchHistory" : MessageLookupByLibrary.simpleMessage("История поиска"),
@@ -142,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tracks" : MessageLookupByLibrary.simpleMessage("Треки"),
     "tracksPlural" : m4,
     "upNext" : MessageLookupByLibrary.simpleMessage("Далее"),
+    "view" : MessageLookupByLibrary.simpleMessage("View"),
     "year" : MessageLookupByLibrary.simpleMessage("Год")
   };
 }

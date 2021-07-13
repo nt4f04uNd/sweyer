@@ -1319,11 +1319,12 @@ abstract class ContentControl {
     return name;
   }
 
-  /// Creates a playlist with a given name.
-  static Future<void> createPlaylist(String name) async {
+  /// Creates a playlist with a given name and returns a corrected with [correctPlaylistName] name.
+  static Future<String> createPlaylist(String name) async {
     name = await correctPlaylistName(name);
     await ContentChannel.createPlaylist(name);
     await refetchSongsAndPlaylists();
+    return name;
   }
 
   /// Renames a playlist and:

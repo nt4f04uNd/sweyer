@@ -189,6 +189,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "saveQueueAsPlaylist": "Сохранить очередь как плейлист",
+  "@saveQueueAsPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playContentList": "Включить",
   "@playContentList": {
     "type": "text",
@@ -221,6 +226,16 @@
   },
   "save": "Сохранить",
   "@save": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saved": "Сохранено",
+  "@saved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "view": "View",
+  "@view": {
     "type": "text",
     "placeholders": {}
   },
