@@ -411,7 +411,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
         selectionController: selectionController,
         onItemTap: contentPick<Content, ValueSetter<int>>(
           contentType: contentType,
-          song: (index) => ContentControl.resetQueue,
+          song: (index) => ContentControl.resetQueue(),
           album: (index) {},
           playlist: (index) {},
           artist: (index) {},

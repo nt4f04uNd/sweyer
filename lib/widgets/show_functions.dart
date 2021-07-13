@@ -76,7 +76,7 @@ class ShowFunctions extends NFShowFunctions {
       parent: animationController,
     ));
     bool submitted = false;
-    late String name;
+    String? name;
     Future<void> submit(BuildContext context) async {
       if (!submitted) {
         submitted = true;
@@ -120,7 +120,7 @@ class ShowFunctions extends NFShowFunctions {
         ),
       ),
     );
-    return ContentControl.state.playlists.firstWhereOrNull((el) => el.name == name); 
+    return name == null ? null : ContentControl.state.playlists.firstWhereOrNull((el) => el.name == name); 
   }
 
   /// Will show up a snack bar notification that something's went wrong

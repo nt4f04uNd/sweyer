@@ -434,7 +434,6 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
     final origin = ContentControl.state.queues.origin;
-    final horizontalPadding = origin != null ? 12.0 : 20.0;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
@@ -447,9 +446,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
       child: Container(
         height: appBarHeight,
         margin: EdgeInsets.only(top: topScreenPadding),
-        padding: EdgeInsets.only(
-          left: horizontalPadding,
-          right: horizontalPadding,
+        padding: const EdgeInsets.only(
           top: 24.0,
           bottom: 0.0,
         ),
@@ -465,7 +462,11 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                   parent: widget.selectionController.animation,
                 ),
                 child2: Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0, left: 30.0),
+                  padding: const EdgeInsets.only(
+                    bottom: 10.0,
+                    left: 42.0,
+                    right: 12.0,
+                  ),
                   child: Row(
                     children: [
                       SelectionCounter(controller: widget.selectionController),
@@ -482,91 +483,97 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                     ],
                   ),
                 ),
-                child1: Row(
-                  children: [
-                    if (origin != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
-                        child: ContentArt(
-                          source: ContentArtSource.origin(origin),
-                          borderRadius: _getBorderRadius(origin),
-                          size: kSongTileArtSize - 8.0,
+                child1: Padding(
+                  padding: EdgeInsets.only(
+                    left: origin != null ? 12.0 : 20.0,
+                    right: 12.0,
+                  ),
+                  child: Row(
+                    children: [
+                      if (origin != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
+                          child: ContentArt(
+                            source: ContentArtSource.origin(origin),
+                            borderRadius: _getBorderRadius(origin),
+                            size: kSongTileArtSize - 8.0,
+                          ),
+                        ),
+                      Flexible(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: [
+                                Text(
+                                  l10n.upNext,
+                                  style: theme.textTheme.headline6!.copyWith(
+                                    fontSize: 24,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                _crossFade(
+                                  !ContentControl.state.queues.modified,
+                                  const SizedBox(height: 18.0),
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 5.0),
+                                    child: Icon(
+                                      Icons.edit_rounded,
+                                      size: 18.0,
+                                    ),
+                                  )
+                                ),
+                                _crossFade(
+                                  !ContentControl.state.queues.shuffled,
+                                  const SizedBox(height: 20.0),
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 2.0),
+                                    child: Icon(
+                                      Icons.shuffle_rounded,
+                                      size: 20.0,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: AnimatedSwitcher(
+                                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                      return Stack(
+                                        alignment: Alignment.centerLeft,
+                                        children: <Widget>[
+                                          ...previousChildren,
+                                          if (currentChild != null) currentChild,
+                                        ],
+                                      );
+                                    },
+                                    duration: const Duration(milliseconds: 400),
+                                    switchInCurve: Curves.easeOut,
+                                    switchOutCurve: Curves.easeIn,
+                                    child: _buildTitleText(_getQueueType(l10n)),
+                                  ),
+                                ),
+                                if (origin != null || type == QueueType.searched)
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 18.0,
+                                    color: theme.textTheme.subtitle2!.color,
+                                  ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    Flexible(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            children: [
-                              Text(
-                                l10n.upNext,
-                                style: theme.textTheme.headline6!.copyWith(
-                                  fontSize: 24,
-                                  height: 1.2,
-                                ),
-                              ),
-                              _crossFade(
-                                !ContentControl.state.queues.modified,
-                                const SizedBox(height: 18.0),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 5.0),
-                                  child: Icon(
-                                    Icons.edit_rounded,
-                                    size: 18.0,
-                                  ),
-                                )
-                              ),
-                              _crossFade(
-                                !ContentControl.state.queues.shuffled,
-                                const SizedBox(height: 20.0),
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 2.0),
-                                  child: Icon(
-                                    Icons.shuffle_rounded,
-                                    size: 20.0,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Flexible(
-                                child: AnimatedSwitcher(
-                                  layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                                    return Stack(
-                                      alignment: Alignment.centerLeft,
-                                      children: <Widget>[
-                                        ...previousChildren,
-                                        if (currentChild != null) currentChild,
-                                      ],
-                                    );
-                                  },
-                                  duration: const Duration(milliseconds: 400),
-                                  switchInCurve: Curves.easeOut,
-                                  switchOutCurve: Curves.easeIn,
-                                  child: _buildTitleText(_getQueueType(l10n)),
-                                ),
-                              ),
-                              if (origin != null || type == QueueType.searched)
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 18.0,
-                                  color: theme.textTheme.subtitle2!.color,
-                                ),
-                            ],
-                          ),
+                      Column(
+                        children: const [
+                          _SaveQueueAsPlaylistAction(),
                         ],
-                      ),
-                    ),
-                    Column(
-                      children: const [
-                        _SaveQueueAsPlaylistAction(),
-                      ],
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -968,12 +975,14 @@ class _SaveQueueAsPlaylistAction extends StatefulWidget {
 
 class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> with TickerProviderStateMixin {
   Future<void> _handleTap() async {
+    
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
     final songs = ContentControl.state.queues.current.songs;
     final playlist = await ShowFunctions.instance.showCreatePlaylist(this, context);
-    bool success = false;
+
     if (playlist != null) {
+      bool success = false;
       try {
         await ContentControl.insertSongsInPlaylist(
           index: 1,
@@ -987,40 +996,41 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
           stack,
           reason: 'in _SaveQueueAsPlaylistActionState',
         );
+      } finally {
+        if (success) {
+          final key = GlobalKey<NFSnackbarEntryState>();
+          NFSnackbarController.showSnackbar(NFSnackbarEntry(
+            globalKey: key,
+            important: true,
+            child: NFSnackbar(
+              leading: Icon(Icons.done_rounded, color: theme.colorScheme.onPrimary),
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                top: 0.0,
+                bottom: 0.0,
+              ),
+              title: Text(l10n.saved, style: TextStyle(fontSize: 15.0, color: theme.colorScheme.onPrimary)),
+              trailing: AppButton(
+                text: l10n.view,
+                onPressed: () {
+                  key.currentState!.close();
+                  HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlist));
+                },
+              ),
+            ),
+          ));
+        } else {
+          NFSnackbarController.showSnackbar(NFSnackbarEntry(
+            important: true,
+            child: NFSnackbar(
+              leading: Icon(Icons.error_outline_rounded, color: theme.colorScheme.onError),
+              title: Text(l10n.oopsErrorOccurred, style: TextStyle(fontSize: 15.0, color: theme.colorScheme.onError)),
+              color: theme.colorScheme.error,
+            ),
+          ));
+        }
       }
-    }
-    if (success) {
-      final key = GlobalKey<NFSnackbarEntryState>();
-      NFSnackbarController.showSnackbar(NFSnackbarEntry(
-        globalKey: key,
-        important: true,
-        child: NFSnackbar(
-          leading: const Icon(Icons.done_rounded),
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 0.0,
-            bottom: 0.0,
-          ),
-          title: Text(l10n.saved, style: const TextStyle(fontSize: 15.0)),
-          trailing: AppButton(
-            text: l10n.view,
-            onPressed: () {
-              key.currentState!.close();
-              HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlist!));
-            },
-          ),
-        ),
-      ));
-    } else {
-      NFSnackbarController.showSnackbar(NFSnackbarEntry(
-        important: true,
-        child: NFSnackbar(
-          leading: const Icon(Icons.error_outline_rounded),
-          title: Text(l10n.oopsErrorOccurred, style: const TextStyle(fontSize: 15.0)),
-          color: theme.colorScheme.error,
-        ),
-      ));
     }
   }
 
