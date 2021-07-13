@@ -77,9 +77,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       vsync: AppRouter.instance.navigatorKey.currentState!,
       context: context,
       closeButton: true,
-      counter: true,
       ignoreWhen: () => playerRouteController.opened,
-      additionalActionsBuilder: additionalActionsBuilder,
     ));
 
     playerRouteController.addListener(_handlePlayerRouteController);
@@ -94,16 +92,6 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     appBarController.dispose();
     scrollController.removeListener(_handleScroll);
     super.dispose();
-  }
-
-  List<Widget> additionalActionsBuilder(context) {
-    if (isAlbum)
-      return const [];
-    if (isPlaylist)
-      return [
-        RemoveFromPlaylistSelectionAction(playlist: playlist),
-      ];
-    throw UnimplementedError();
   }
 
   void _handlePlayerRouteController() {
@@ -617,16 +605,42 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                         leading: child,
                         titleSpacing: 0.0,
                         backgroundColor: appBarController.isDismissed
-                            ? theme.colorScheme.background
-                            : theme.colorScheme.background.withOpacity(0.0),
-                        title: AnimatedOpacity(
-                          opacity: 1.0 - appBarController.value > 0.35
-                            ? 1.0
-                            : 0.0,
-                          curve: Curves.easeOut,
-                          duration: const Duration(milliseconds: 400),
-                          child: Text(queue.title),
+                          ? theme.colorScheme.background
+                          : theme.colorScheme.background.withOpacity(0.0),
+                        title: AnimationSwitcher(
+                          animation: CurvedAnimation(
+                            curve: Curves.easeOutCubic,
+                            reverseCurve: Curves.easeInCubic,
+                            parent: selectionController.animation,
+                          ),
+                          child1: AnimatedOpacity(
+                            opacity: 1.0 - appBarController.value > 0.35
+                              ? 1.0
+                              : 0.0,
+                            curve: Curves.easeOut,
+                            duration: const Duration(milliseconds: 400),
+                            child: Text(queue.title),
+                          ),
+                          child2: SelectionCounter(controller: selectionController),
                         ),
+                        actions: [
+                          if (isPlaylist)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                              child: AnimationSwitcher(
+                                animation: CurvedAnimation(
+                                  curve: Curves.easeOutCubic,
+                                  reverseCurve: Curves.easeInCubic,
+                                  parent: selectionController.animation,
+                                ),
+                                builder2: SelectionAppBar.defaultSelectionActionsBuilder,
+                                child1: const SizedBox.shrink(),
+                                child2: Row(children: [
+                                  RemoveFromPlaylistSelectionAction(playlist: playlist, controller: selectionController),
+                                ]),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
 

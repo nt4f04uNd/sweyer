@@ -41,9 +41,8 @@ class _PlayerRouteState extends State<PlayerRoute>
     initSelectionController(() => ContentSelectionController.create<Song>(
         vsync: this,
         context: context,
-        counter: true,
         closeButton: true,
-        additionalActionsBuilder: (context) => const [
+        additionalPlayActionsBuilder: (context) => const [
           RemoveFromQueueSelectionAction(),
         ],
       ),
@@ -384,6 +383,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   Text _buildTitleText(List<TextSpan> text) {
     return Text.rich(
       TextSpan(children: text),
+      key: ValueKey(text.fold<String>('', (prev, el) => prev + el.text!)),
       overflow: TextOverflow.ellipsis,
       style: ThemeControl.theme.textTheme.subtitle2!.copyWith(
         fontSize: 14.0,
@@ -457,70 +457,97 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           child: RepaintBoundary(
             child: GestureDetector(
               onTap: _handleTitleTap,
-              child: Row(
-                children: [
-                  if (origin != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
-                      child: ContentArt(
-                        source: ContentArtSource.origin(origin),
-                        borderRadius: _getBorderRadius(origin),
-                        size: kSongTileArtSize - 8.0,
+              child: AnimationSwitcher(
+                animation: CurvedAnimation(
+                  curve: Curves.easeOutCubic,
+                  reverseCurve: Curves.easeInCubic,
+                  parent: widget.selectionController.animation,
+                ),
+                child2: Padding(
+                  padding: const EdgeInsets.only(top: 10.0, left: 30.0),
+                  child: SelectionCounter(controller: widget.selectionController),
+                ),
+                child1: Row(
+                  children: [
+                    if (origin != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
+                        child: ContentArt(
+                          source: ContentArtSource.origin(origin),
+                          borderRadius: _getBorderRadius(origin),
+                          size: kSongTileArtSize - 8.0,
+                        ),
+                      ),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: [
+                              Text(
+                                l10n.upNext,
+                                style: theme.textTheme.headline6!.copyWith(
+                                  fontSize: 24,
+                                  height: 1.2,
+                                ),
+                              ),
+                              _crossFade(
+                                !ContentControl.state.queues.modified,
+                                const SizedBox(height: 18.0),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 5.0),
+                                  child: Icon(
+                                    Icons.edit_rounded,
+                                    size: 18.0,
+                                  ),
+                                )
+                              ),
+                              _crossFade(
+                                !ContentControl.state.queues.shuffled,
+                                const SizedBox(height: 20.0),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 2.0),
+                                  child: Icon(
+                                    Icons.shuffle_rounded,
+                                    size: 20.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: AnimatedSwitcher(
+                                  layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                    return Stack(
+                                      alignment: Alignment.centerLeft,
+                                      children: <Widget>[
+                                        ...previousChildren,
+                                        if (currentChild != null) currentChild,
+                                      ],
+                                    );
+                                  },
+                                  duration: const Duration(milliseconds: 400),
+                                  switchInCurve: Curves.easeOut,
+                                  switchOutCurve: Curves.easeIn,
+                                  child: _buildTitleText(_getQueueType(l10n)),
+                                ),
+                              ),
+                              if (origin != null || type == QueueType.searched)
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 18.0,
+                                  color: theme.textTheme.subtitle2!.color,
+                                ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          children: [
-                            Text(
-                              l10n.upNext,
-                              style: theme.textTheme.headline6!.copyWith(
-                                fontSize: 24,
-                                height: 1.2,
-                              ),
-                            ),
-                            _crossFade(
-                              !ContentControl.state.queues.modified,
-                              const SizedBox(height: 18.0),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 5.0),
-                                child: Icon(
-                                  Icons.edit_rounded,
-                                  size: 18.0,
-                                ),
-                              )
-                            ),
-                            _crossFade(
-                              !ContentControl.state.queues.shuffled,
-                              const SizedBox(height: 20.0),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 2.0),
-                                child: Icon(
-                                  Icons.shuffle_rounded,
-                                  size: 20.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Flexible(child: _buildTitleText(_getQueueType(l10n))),
-                            if (origin != null || type == QueueType.searched)
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 18.0,
-                                color: theme.textTheme.subtitle2!.color,
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

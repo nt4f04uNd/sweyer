@@ -79,7 +79,6 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
       vsync: AppRouter.instance.navigatorKey.currentState!,
       context: context,
       closeButton: true,
-      counter: true,
       ignoreWhen: () => playerRouteController.opened,
     ));
   
@@ -400,24 +399,33 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         height: _fullAppBarHeight,
                         child: AppBar(
                           elevation: 0.0,
-                          automaticallyImplyLeading: false,
                           leading: child,
+                          automaticallyImplyLeading: false,
                           titleSpacing: 0.0,
                           backgroundColor: appBarController.isDismissed
-                              ? theme.colorScheme.background
-                              : theme.colorScheme.background.withOpacity(0.0),
-                          title: AnimatedOpacity(
-                            opacity: _appBarTitleVisible
-                              ? 1.0
-                              : 0.0,
-                            curve: Curves.easeOut,
-                            duration: const Duration(milliseconds: 400),
-                            child: RepaintBoundary(
-                              child: Text(
-                              ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                            ? theme.colorScheme.background
+                            : theme.colorScheme.background.withOpacity(0.0),
+                          title: AnimationSwitcher(
+                            animation: CurvedAnimation(
+                              curve: Curves.easeOutCubic,
+                              reverseCurve: Curves.easeInCubic,
+                              parent: selectionController.animation,
                             ),
+                            child1: AnimatedOpacity(
+                              opacity: _appBarTitleVisible
+                                ? 1.0
+                                : 0.0,
+                              curve: Curves.easeOut,
+                              duration: const Duration(milliseconds: 400),
+                              child: RepaintBoundary(
+                                child: Text(
+                                  ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                                ),
+                              ),
                             ),
+                            child2: SelectionCounter(controller: selectionController),
                           ),
+                          actions: const [],
                           bottom: PreferredSize(
                             preferredSize: const Size.fromHeight(AppBarBorder.height),
                             child: scrollController.offset <= _artScrollExtent

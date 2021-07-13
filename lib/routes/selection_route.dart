@@ -29,37 +29,37 @@ class _SelectionRouteState extends State<SelectionRoute> {
     controller = ContentSelectionController.createAlwaysInSelection(
       context: context,
       actionsBuilder: (context) {
-      final l10n = getl10n(context);
-      final settingsPageBuilder = widget.selectionArguments.settingsPageBuilder;
-      return [
-        if (settingsPageBuilder != null)
-          NFIconButton(
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () async {
-              if (!settingsOpened) {
-                settingsOpened = true;
-                await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
-                  child: Builder(builder: (context) => settingsPageBuilder(context)),
-                  transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
-                ));
-                settingsOpened = false;
-              }
-            },
+        final l10n = getl10n(context);
+        final settingsPageBuilder = widget.selectionArguments.settingsPageBuilder;
+        return [
+          if (settingsPageBuilder != null)
+            NFIconButton(
+              icon: const Icon(Icons.settings_rounded),
+              onPressed: () async {
+                if (!settingsOpened) {
+                  settingsOpened = true;
+                  await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
+                    child: Builder(builder: (context) => settingsPageBuilder(context)),
+                    transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
+                  ));
+                  settingsOpened = false;
+                }
+              },
+            ),
+          const SizedBox(width: 6.0),
+          AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) => AppButton(
+              text: l10n.done,
+              onPressed: controller.data.isEmpty ? null : () {
+                widget.selectionArguments.onSubmit(controller.data);
+                Navigator.of(this.context).pop();
+              },
+            ),
           ),
-        const SizedBox(width: 6.0),
-        AnimatedBuilder(
-          animation: controller,
-          builder: (context, child) => AppButton(
-            text: l10n.done,
-            onPressed: controller.data.isEmpty ? null : () {
-              widget.selectionArguments.onSubmit(controller.data);
-              Navigator.of(this.context).pop();
-            },
-          ),
-        ),
-      ];
-    },
-  );
+        ];
+      },
+    );
     widget.selectionArguments.selectionController = controller;
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       if (mounted) {
