@@ -624,22 +624,31 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                           child2: SelectionCounter(controller: selectionController),
                         ),
                         actions: [
-                          if (isPlaylist)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-                              child: AnimationSwitcher(
-                                animation: CurvedAnimation(
-                                  curve: Curves.easeOutCubic,
-                                  reverseCurve: Curves.easeInCubic,
-                                  parent: selectionController.animation,
-                                ),
-                                builder2: SelectionAppBar.defaultSelectionActionsBuilder,
-                                child1: const SizedBox.shrink(),
-                                child2: Row(children: [
-                                  RemoveFromPlaylistSelectionAction(playlist: playlist, controller: selectionController),
-                                ]),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                            child: AnimationSwitcher(
+                              animation: CurvedAnimation(
+                                curve: Curves.easeOutCubic,
+                                reverseCurve: Curves.easeInCubic,
+                                parent: selectionController.animation,
                               ),
+                              builder2: SelectionAppBar.defaultSelectionActionsBuilder,
+                              child1: const SizedBox.shrink(),
+                              child2: Row(children: [
+                                if (isPlaylist && !selectionRoute)
+                                  RemoveFromPlaylistSelectionAction(playlist: playlist, controller: selectionController),
+                                SelectAllSelectionAction<Song>(
+                                  controller: selectionController,
+                                  entryFactory: (content, index) => SelectionEntry<Song>.fromContent(
+                                    content: content,
+                                    index: index,
+                                    context: context,
+                                  ),
+                                  getAll: () => songs,
+                                ),
+                              ]),
                             ),
+                          ),
                         ],
                       ),
                     ),

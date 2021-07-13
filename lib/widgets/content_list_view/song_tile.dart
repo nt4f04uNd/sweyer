@@ -173,21 +173,15 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
   }
 
   @override
-  SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>(
-    index: selectionRoute
-      ? ContentControl.state.allSongs.getIndex(widget.song)
-      : widget.selectionIndex!,
-    data: widget.song,
-    origin: selectionRoute && widget.song.origin is DuplicatingSongOriginMixin ? widget.song.origin : null,
+  SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>.fromContent(
+    content: widget.song,
+    index: widget.selectionIndex!,
+    context: context,
   );
 
   @override
   bool? get widgetSelected => selectionRoute
-    ? widget.selectionController!.data.contains(SelectionEntry<Song>(
-        index: ContentControl.state.allSongs.getIndex(widget.song),
-        data: widget.song,
-        origin: widget.song.origin is DuplicatingSongOriginMixin ? widget.song.origin : null,
-      ))
+    ? widget.selectionController!.data.contains(toSelectionEntry())
     : super.widgetSelected;
 
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;

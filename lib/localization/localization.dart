@@ -660,7 +660,6 @@ class AppLocalizations {
     );
   }
 
-  // TODO: currently unused
   String get goToArtist {
     return Intl.message(
       "Go to artist",
@@ -704,7 +703,6 @@ class AppLocalizations {
     );
   }
 
-  // TODO: currently unused
   String get removeFromQueue {
     return Intl.message(
       "Remove from queue",
@@ -720,7 +718,6 @@ class AppLocalizations {
     );
   }
 
-  // TODO: currently unused
   String get selectAll {
     return Intl.message(
       "Select all",
@@ -786,8 +783,9 @@ class AppLocalizations {
     );
   }
 
-  String sortFeature<T extends Content>(SortFeature<T> feature) {
+  String sortFeature<T extends Content>(SortFeature<T> feature, [Type contentType]) {
     return contentPick<T, ValueGetter<String>>(
+      contentType: contentType,
       song: () {
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:

@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -621,11 +622,46 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                   padding: const EdgeInsets.only(top: 15.0),
                   child: SelectionCounter(controller: stateDelegate.selectionController),
                 ),
-                actionsSelection: selectionRoute ? const [] : [
-                  DeleteSongsAppBarAction<Content>(
-                    controller: stateDelegate.selectionController,
-                  )
-                ],
+                actionsSelection: selectionRoute
+                  ? [
+                      SelectAllSelectionAction<Content>(
+                        controller: selectionController,
+                        entryFactory: (content, index) => SelectionEntry.fromContent(
+                          content: content,
+                          index: index,
+                          context: context,
+                        ),
+                        getAll: () => stateDelegate.results.map.getValue(stateDelegate.contentType),
+                      ),
+                      ]
+                  : [
+                    DeleteSongsAppBarAction<Content>(
+                      controller: stateDelegate.selectionController,
+                    ),
+                    ValueListenableBuilder<Type?>(
+                      valueListenable: stateDelegate.onContentTypeChange,
+                      builder: (context, contentType, child) => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (child, animation) => EmergeAnimation(
+                          animation: animation,
+                          child: child,
+                        ),
+                        child: stateDelegate.contentType == null
+                          ? const SizedBox.shrink()
+                          : SelectAllSelectionAction<Content>(
+                              controller: selectionController,
+                              entryFactory: (content, index) => SelectionEntry.fromContent(
+                                content: content,
+                                index: index,
+                                context: context,
+                              ),
+                              getAll: () => stateDelegate.results.map.getValue(contentType),
+                            ),
+                      ),
+                    ),
+                  ],
                 elevationSelection: 0.0,
                 elevation: theme.appBarTheme.elevation!,
                 toolbarHeight: kToolbarHeight,

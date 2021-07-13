@@ -80,10 +80,10 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
 
 class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTile> with ContentTileComponentsMixin {
   @override
-  SelectionEntry<Artist> toSelectionEntry() => SelectionEntry<Artist>(
+  SelectionEntry<Artist> toSelectionEntry() => SelectionEntry<Artist>.fromContent(
+    content: widget.artist,
     index: widget.selectionIndex!,
-    data: widget.artist,
-    origin: null,
+    context: context,
   );
 
   void _handleTap() {

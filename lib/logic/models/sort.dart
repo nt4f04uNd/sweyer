@@ -13,8 +13,9 @@ abstract class SortFeature<T extends Content> extends Enum<String> {
   const SortFeature._(String value) : super(value);
 
   /// Returns sort feature values for a given content.
-  static List<SortFeature> getValuesForContent<T extends Content>() {
+  static List<SortFeature> getValuesForContent<T extends Content>([Type? contentType]) {
     return contentPick<T, ValueGetter<List<SortFeature>>>(
+      contentType: contentType,
       song: () => SongSortFeature.values,
       album: () => AlbumSortFeature.values,
       playlist: () => PlaylistSortFeature.values,

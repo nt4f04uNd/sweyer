@@ -214,10 +214,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 selectionIndex: index,
                 selected: selectedTest != null
                   ? selectedTest(index)
-                  : selectionController?.data.contains(SelectionEntry<T>(
-                      data: item,
+                  : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                      content: item,
                       index: index,
-                      origin: item is Song ? item.origin : null,
+                      context: context,
                     ))
                   ?? false,
                 longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
@@ -291,10 +291,10 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 selectionIndex: index,
                 selected: selectedTest != null
                   ? selectedTest(index)
-                  : selectionController?.data.contains(SelectionEntry<T>(
-                      data: item,
+                  : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                      content: item,
                       index: index,
-                      origin: item is Song ? item.origin : null,
+                      context: context,
                     ))
                   ?? false,
                 longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index)

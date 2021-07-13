@@ -12,6 +12,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -46,6 +47,8 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
   /// Whether the [SelectionRoute] is currently opened in this context.
   bool get selectionRoute => homeRouter?.selectionArguments != null;
 
+  Type? _savedPrimaryContentType;
+
   /// Creates a selection controller.
   ///
   /// If [selectionRoute] is currently `true`, will instead listen to the
@@ -59,6 +62,7 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
   }) {
     if (selectionRoute) {
       selectionController = homeRouter!.selectionArguments!.selectionController;
+      _savedPrimaryContentType = selectionController.primaryContentType;
     } else {
       selectionController = factory();
     }
@@ -74,6 +78,9 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
     if (selectionRoute) {
       selectionController.removeListener(handleSelection);
       selectionController.removeStatusListener(handleSelectionStatus);
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        selectionController.primaryContentType = _savedPrimaryContentType;
+      });
     } else {
       selectionController.dispose();
     }
@@ -1228,16 +1235,16 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
           } else {
             throw UnimplementedError();
           }
-          assert(() {
-            contentPick<Song, void>(
-              song: null,
-              album: null,
-              playlist: null,
-              artist: null,
-            );
-            return true;
-          }());
         }
+        assert(() {
+          contentPick<Song, void>(
+            song: null,
+            album: null,
+            playlist: null,
+            artist: null,
+          );
+          return true;
+        }());
         _handleSongs(songs);
         _handleOrigins(albums);
         _handleOrigins(playlists);
@@ -1317,16 +1324,16 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
           } else {
             throw UnimplementedError();
           }
-          assert(() {
-            contentPick<Song, void>(
-              song: null,
-              album: null,
-              playlist: null,
-              artist: null,
-            );
-            return true;
-          }());
         }
+        assert(() {
+          contentPick<Song, void>(
+            song: null,
+            album: null,
+            playlist: null,
+            artist: null,
+          );
+          return true;
+        }());
         _handleSongs(songs);
         _handleOrigins(albums);
         _handleOrigins(playlists);
@@ -2129,5 +2136,75 @@ class _BoxyArtsPreviewDelegate extends BoxyDelegate {
   @override
   double maxIntrinsicHeight(double width) {
     return maxHeight;
+  }
+}
+
+//*********** Selection meta actions ***********
+
+/// Action that selects all content, usually based on the current
+/// [ContentSelectionController.primaryContentType].
+class SelectAllSelectionAction<T extends Content> extends StatelessWidget {
+  const SelectAllSelectionAction({
+    Key? key,
+    required this.controller,
+    required this.entryFactory,
+    required this.getAll,
+  }) : super(key: key);
+
+  final ContentSelectionController controller;
+
+  final SelectionEntry<T> Function(T, int index) entryFactory;
+
+  /// Should return a list of all content to select, all
+  /// values must be of the same type, for example it cannot
+  /// contain both [Song]s and [Album]s.
+  final ValueGetter<List<T>> getAll;
+
+  void _handleTap(BuildContext context) {
+    final all = getAll();
+    if (all.isNotEmpty) {
+      // TODO: selectAll method for the selection controller maybe? (not this "all", but a list of items)
+      final first = all.first;
+      assert(all.every((el) => el.runtimeType == first.runtimeType));
+
+      final selectedOfThisType = controller.data.where((el) => el.runtimeType == entryFactory(first, 0).runtimeType);
+      bool allSelected = true;
+      for (int i = 0; i < all.length; i++) {
+        if (!selectedOfThisType.contains(entryFactory(all[i], i))) {
+          allSelected = false;
+          break;
+        }
+      }
+      if (allSelected) {
+        for (int i = 0; i < all.length; i++) {
+          controller.data.remove(entryFactory(all[i], i));
+        }
+        // ignore: invalid_use_of_protected_member
+        controller.notifyListeners();
+      } else {
+        for (int i = 0; i < all.length; i++)
+          controller.data.add(entryFactory(all[i], i));
+        // ignore: invalid_use_of_protected_member
+        controller.notifyListeners();
+      }
+      if (controller.data.isEmpty) {
+        controller.close();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    return _ActionBuilder(
+      controller: controller,
+      shown: () => true,
+      builder: (context, child) => child!,
+      child: NFIconButton(
+        tooltip: l10n.selectAll,
+        icon: const Icon(Icons.select_all_rounded),
+        onPressed: () => _handleTap(context),
+      ),
+    );
   }
 }

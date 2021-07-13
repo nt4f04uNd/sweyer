@@ -68,10 +68,10 @@ class ContentSection<T extends Content> extends StatelessWidget {
           contentType: contentType,
           content: item,
           selectionIndex: index,
-          selected: selectionController?.data.contains(SelectionEntry<T>(
-            data: item,
+          selected: selectionController?.data.contains(SelectionEntry<T>.fromContent(
+            content: item,
             index: index,
-            origin: item is Song ? item.origin : null,
+            context: context,
           )) ?? false,
           selectionController: selectionController,
           onTap: () => contentTileTapHandler?.call(),

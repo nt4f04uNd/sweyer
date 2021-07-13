@@ -1141,10 +1141,11 @@ abstract class ContentControl {
 
   /// Sorts songs, albums, etc.
   /// See [ContentState.sorts].
-  static void sort<T extends Content>({ Sort<T>? sort, bool emitChangeEvent = true }) {
+  static void sort<T extends Content>({ Type? contentType, Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
-    sort ??= sorts.getValue<T>() as Sort<T>;
+    sort ??= sorts.getValue<T>(contentType) as Sort<T>;
     contentPick<T, VoidCallback>(
+      contentType: contentType,
       song: () {
         final _sort = sort! as SongSort;
         sorts.setValue<Song>(_sort);

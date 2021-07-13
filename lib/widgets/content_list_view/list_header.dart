@@ -55,6 +55,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// for other widgets.
   const ContentListHeader({
     Key? key,
+    this.contentType,
     required this.count,
     this.selectionController,
     this.leading,
@@ -64,12 +65,15 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// Creates a header that shows only count.
   const ContentListHeader.onlyCount({
     Key? key,
+    this.contentType,
     required this.count,
   }) : _onlyCount = true,
        selectionController = null,
        leading = null,
        trailing = null,
        super(key: key);
+
+  final Type? contentType;
 
   final bool _onlyCount;
 
@@ -86,7 +90,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// Additional widget to place before [count].
   final Widget? trailing;
 
-  Sort<T> getSort() => ContentControl.state.sorts.getValue<T>() as Sort<T>;
+  Sort<T> getSort() => ContentControl.state.sorts.getValue<T>(contentType) as Sort<T>;
 
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
@@ -99,13 +103,14 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         child: Builder( // i need the proper context to pop the dialog
           builder: (context) => _RadioListTile<SortFeature>(
             title: Text(
-              l10n.sortFeature<T>(feature as SortFeature<T>).toLowerCase(),
+              l10n.sortFeature<T>(feature as SortFeature<T>, contentType).toLowerCase(),
               style: ThemeControl.theme.textTheme.subtitle1,
             ),
             value: feature,
             groupValue: sort.feature,
             onChanged: (_) {
               ContentControl.sort(
+                contentType: contentType,
                 sort: sort.copyWith(feature: feature).withDefaultOrder,
               );
               Navigator.pop(context);
@@ -125,7 +130,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: SortFeature
-          .getValuesForContent<T>()
+          .getValuesForContent<T>(contentType)
           .map((el) => buildItem(el))
           .toList(),
       ),
@@ -136,7 +141,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, right: 10.0),
       child: Text(
-        l10n.contentsPluralWithCount<T>(count),
+        l10n.contentsPluralWithCount<T>(count, contentType),
         softWrap: false,
         overflow: TextOverflow.fade,
         style: textStyle,
@@ -186,6 +191,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                 : Icons.south_rounded),
               onPressed: () {
                 ContentControl.sort(
+                  contentType: contentType,
                   sort: sort.copyWith(orderAscending: !sort.orderAscending),
                 );
               },
@@ -199,7 +205,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                     vertical: 2.0,
                   ),
                   child: Text(
-                    l10n.sortFeature<T>(sort.feature),
+                    l10n.sortFeature<T>(sort.feature, contentType),
                     softWrap: false,
                     overflow: TextOverflow.fade,
                     style: textStyle,

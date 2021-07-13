@@ -54,6 +54,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   bool tabBarDragged = false;
   static late bool _mainTabsCreated = false;
 
+  Type indexToContentType(int index) {
+    return Content.enumerate()[index];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +86,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       vsync: this,
       length: 4,
     );
+    _updatePrimaryContentType();
+    tabController.addListener(() {
+      _updatePrimaryContentType();
+    });
   }
 
   @override
@@ -94,6 +102,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     disposeSelectionController();
     tabController.dispose();
     super.dispose();
+  }
+
+  void _updatePrimaryContentType() {
+    selectionController.primaryContentType = indexToContentType(tabController.index);
   }
 
   List<Widget> _buildTabs() {
@@ -181,10 +193,41 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       onMenuPressed: () {
         drawerController.open();
       },
-      actions: selectionRoute ? const [] : [searchButton],
-      actionsSelection: !selectionRoute
-        ? [DeleteSongsAppBarAction<Content>(controller: selectionController)]
-        : [searchButton],
+      actions: selectionRoute ? const [] : [
+        Visibility(
+          visible: false,
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
+          child: DeleteSongsAppBarAction<Content>(controller: selectionController),
+        ),
+        searchButton,
+      ],
+      actionsSelection: selectionRoute
+        ? [
+            SelectAllSelectionAction(
+              controller: selectionController,
+              entryFactory: (Content content, index) => SelectionEntry.fromContent(
+                content: content,
+                index: index,
+                context: context,
+              ),
+              getAll: () => ContentControl.getContent(selectionController.primaryContentType!),
+            ),
+            searchButton
+          ]
+        : [
+            DeleteSongsAppBarAction<Content>(controller: selectionController),
+            SelectAllSelectionAction(
+              controller: selectionController,
+              entryFactory: (Content content, index) => SelectionEntry.fromContent(
+                content: content,
+                index: index,
+                context: context,
+              ),
+              getAll: () => ContentControl.getContent(selectionController.primaryContentType!),
+            ),
+        ],
       title: Padding(
         padding: const EdgeInsets.only(left: 15.0),
         child: selectionRoute ? const SizedBox.shrink() : Text(
@@ -227,10 +270,11 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                           controller: tabController,
                           physics: const _TabsScrollPhysics(),
                           children: [
-                            _ContentTab<Song>(selectionController: selectionController),
-                            _ContentTab<Album>(selectionController: selectionController),
-                            _ContentTab<Playlist>(selectionController: selectionController),
-                            _ContentTab<Artist>(selectionController: selectionController),
+                            for (final contentType in Content.enumerate())
+                              _ContentTab(
+                                contentType: contentType,
+                                selectionController: selectionController,
+                              ),
                           ],
                         ),
                       ),
@@ -309,27 +353,31 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 }
 
 
-class _ContentTab<T extends Content> extends StatefulWidget {
+class _ContentTab extends StatefulWidget {
   _ContentTab({
     Key? key,
+    required this.contentType,
     required this.selectionController,
   }) : super(key: key);
 
+  final Type contentType;
   final ContentSelectionController selectionController;
 
   @override
-  _ContentTabState<T> createState() => _ContentTabState();
+  _ContentTabState createState() => _ContentTabState();
 }
 
-class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with AutomaticKeepAliveClientMixin<_ContentTab<T>>, TickerProviderStateMixin {
+class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientMixin<_ContentTab>, TickerProviderStateMixin {
   @override
   bool get wantKeepAlive => true;
 
   final key = GlobalKey<RefreshIndicatorState>();
 
   bool get showLabel {
-    final SortFeature feature = ContentControl.state.sorts.getValue<T>().feature;
-    return contentPick<T, bool>(
+    final contentType = widget.contentType;
+    final SortFeature feature = ContentControl.state.sorts.getValue(contentType).feature;
+    return contentPick<Content, bool>(
+      contentType: contentType,
       song: feature == SongSortFeature.title,
       album: feature == AlbumSortFeature.title,
       playlist: feature == PlaylistSortFeature.name,
@@ -341,7 +389,8 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
   Widget build(BuildContext context) {
     super.build(context);
     final theme = ThemeControl.theme;
-    final list = ContentControl.getContent<T>();
+    final contentType = widget.contentType;
+    final list = ContentControl.getContent(contentType);
     final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
     final selectionController = widget.selectionController;
     final selectionRoute = selectionRouteOf(context);
@@ -355,11 +404,13 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         return selectionController.notInSelection &&
                notification.depth == 0;
       },
-      child: ContentListView<T>(
+      child: ContentListView(
+        contentType: contentType,
         list: list,
         showScrollbarLabel: showLabel,
         selectionController: selectionController,
-        onItemTap: contentPick<T, ValueSetter<int>>(
+        onItemTap: contentPick<Content, ValueSetter<int>>(
+          contentType: contentType,
           song: (index) => ContentControl.resetQueue,
           album: (index) {},
           playlist: (index) {},
@@ -368,9 +419,10 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
         leading: Column(
           children: [
             if (selectionRoute)
-              ContentListHeader<T>.onlyCount(count: list.length)
+              ContentListHeader.onlyCount(contentType: contentType, count: list.length)
             else
-              ContentListHeader<T>(
+              ContentListHeader(
+                contentType: contentType,
                 count: list.length,
                 selectionController: selectionController,
                 trailing: Padding(
@@ -398,7 +450,8 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                             AnimatedContentListHeaderAction(
                               icon: const Icon(Icons.shuffle_rounded),
                               onPressed: showDisabledActions ? null : () {
-                                  contentPick<T, VoidCallback>(
+                                contentPick<Content, VoidCallback>(
+                                  contentType: contentType,
                                   song: () {
                                     ContentControl.setQueue(
                                       type: QueueType.allSongs,
@@ -443,7 +496,8 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                             AnimatedContentListHeaderAction(
                               icon: const Icon(Icons.play_arrow_rounded),
                               onPressed: showDisabledActions ? null : () {
-                                contentPick<T, VoidCallback>(
+                                contentPick<Content, VoidCallback>(
+                                  contentType: contentType,
                                   song: () => ContentControl.resetQueue(),
                                   album: () => ContentControl.setQueue(
                                     type: QueueType.allAlbums,
@@ -468,7 +522,7 @@ class _ContentTabState<T extends Content> extends State<_ContentTab<T>> with Aut
                   ),
                 ),
               ),
-            if (T == Playlist && !selectionRoute)
+            if (contentType == Playlist && !selectionRoute)
               const CreatePlaylistInListAction(),
           ],
         ),

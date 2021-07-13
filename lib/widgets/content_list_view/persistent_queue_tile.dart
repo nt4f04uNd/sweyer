@@ -115,10 +115,10 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   with ContentTileComponentsMixin {
 
   @override
-  SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>(
+  SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>.fromContent(
+    content: widget.queue,
     index: widget.selectionIndex!,
-    data: widget.queue,
-    origin: null,
+    context: context,
   );
 
   void _handleTap() {

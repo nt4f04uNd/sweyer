@@ -15,6 +15,46 @@ class SelectionEntry<T extends Content> {
     required this.origin,
   });
 
+  /// Creates a selection entry from a content.
+  ///
+  /// Default selection entry factory used throughout the app.
+  factory SelectionEntry.fromContent({
+    required T content,
+    required int index,
+    required BuildContext context,
+  }) {
+    return contentPick<T, ValueGetter<SelectionEntry<T>>>(
+      contentType: content.runtimeType,
+      song: () {
+        final song = content as Song;
+        return SelectionEntry<Song>(
+          data: content,
+          index: selectionRouteOf(context)
+            ? ContentControl.state.allSongs.getIndex(song)
+            : index,
+          origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin
+            ? song.origin
+            : null,
+        ) as SelectionEntry<T>;
+      },
+      album: () => SelectionEntry<Album>(
+        index: index,
+        data: content as Album,
+        origin: null,
+      ) as SelectionEntry<T>,
+      playlist: () => SelectionEntry<Playlist>(
+        index: index,
+        data: content as Playlist,
+        origin: null,
+      ) as SelectionEntry<T>,
+      artist: () => SelectionEntry<Artist>(
+        index: index,
+        data: content as Artist,
+        origin: null,
+      ) as SelectionEntry<T>,
+    )();
+  }
+
   /// The content data.
   final T data;
 
@@ -52,7 +92,7 @@ class SelectionEntry<T extends Content> {
     //
     // if (other.runtimeType != runtimeType)
     //   return false;
-  
+
     return other is SelectionEntry 
         && other.data == data
         && other.index == index

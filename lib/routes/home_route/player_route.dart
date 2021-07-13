@@ -465,8 +465,22 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                   parent: widget.selectionController.animation,
                 ),
                 child2: Padding(
-                  padding: const EdgeInsets.only(top: 10.0, left: 30.0),
-                  child: SelectionCounter(controller: widget.selectionController),
+                  padding: const EdgeInsets.only(bottom: 10.0, left: 30.0),
+                  child: Row(
+                    children: [
+                      SelectionCounter(controller: widget.selectionController),
+                      const Spacer(),
+                      SelectAllSelectionAction<Song>(
+                        controller: widget.selectionController,
+                        entryFactory: (content, index) => SelectionEntry<Song>.fromContent(
+                          content: content,
+                          index: index,
+                          context: context,
+                        ),
+                        getAll: () => ContentControl.state.queues.current.songs,
+                      ),
+                    ],
+                  ),
                 ),
                 child1: Row(
                   children: [
@@ -547,7 +561,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                         ],
                       ),
                     ),
-                     Column(
+                    Column(
                       children: const [
                         _SaveQueueAsPlaylistAction(),
                       ],

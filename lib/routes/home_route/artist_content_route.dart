@@ -52,13 +52,46 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
     final l10n = getl10n(context);
     final artist = widget.arguments.artist;
     final selectionRoute = selectionRouteOf(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(ContentUtils.localizedArtist(artist.artist, l10n)),
-        leading: const NFBackButton(),
-      ),
-      body: ContentSelectionControllerCreator<T>(
-        builder: (context, selectionController, child) => StreamBuilder(
+    return ContentSelectionControllerCreator<T>(
+      builder: (context, selectionController, child) => Scaffold(
+        appBar: AppBar(
+          title: AnimationSwitcher(
+            animation: CurvedAnimation(
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+              parent: selectionController.animation,
+            ),
+            child1: Text(ContentUtils.localizedArtist(artist.artist, l10n)),
+            child2: SelectionCounter(controller: selectionController),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+              child: AnimationSwitcher(
+                animation: CurvedAnimation(
+                  curve: Curves.easeOutCubic,
+                  reverseCurve: Curves.easeInCubic,
+                  parent: selectionController.animation,
+                ),
+                builder2: SelectionAppBar.defaultSelectionActionsBuilder,
+                child1: const SizedBox.shrink(),
+                child2: Row(children: [
+                  SelectAllSelectionAction<T>(
+                    controller: selectionController,
+                    entryFactory: (content, index) => SelectionEntry<T>.fromContent(
+                      content: content,
+                      index: index,
+                      context: context,
+                    ),
+                    getAll: () => list,
+                  ),
+                ]),
+              ),
+            ),
+          ],
+          leading: const NFBackButton(),
+        ),
+        body: StreamBuilder(
           stream: ContentControl.state.onSongChange,
           builder: (context, snapshot) => ContentListView<T>(
             list: list,
