@@ -39,23 +39,29 @@ packages:
   audio_service:
     dependency: "direct main"
     description:
-      path: "C:/dev/projects/native/audio_service/audio_service"
-      relative: false
-    source: path
+      path: audio_service
+      ref: sweyer
+      resolved-ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d
+      url: "https://github.com/nt4f04uNd/audio_service"
+    source: git
     version: "0.16.2"
   audio_service_platform_interface:
     dependency: transitive
     description:
-      path: "../../audio_service/audio_service_platform_interface"
-      relative: true
-    source: path
+      path: audio_service_platform_interface
+      ref: sweyer
+      resolved-ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d
+      url: "https://github.com/nt4f04und/audio_service.git"
+    source: git
     version: "1.0.0"
   audio_service_web:
     dependency: transitive
     description:
-      path: "../../audio_service/audio_service_web"
-      relative: true
-    source: path
+      path: audio_service_web
+      ref: sweyer
+      resolved-ref: f088b43a75a58d3fa4ce4f292c9ab392cfe8bf3d
+      url: "https://github.com/nt4f04und/audio_service.git"
+    source: git
     version: "0.16.2"
   audio_session:
     dependency: transitive
@@ -455,9 +461,11 @@ packages:
   nt4f04unds_widgets:
     dependency: "direct main"
     description:
-      path: "c:/dev/projects/native/nt4f04unds_widgets/"
-      relative: false
-    source: path
+      path: "."
+      ref: "1.1.5"
+      resolved-ref: "964447ad63670edd98812ce612b2e082a2f51b94"
+      url: "https://github.com/nt4f04uNd/nt4f04unds_widgets/"
+    source: git
     version: "1.1.5"
   octo_image:
     dependency: transitive
@@ -816,4 +824,4 @@ packages:
     version: "3.1.0"
 sdks:
   dart: ">=2.13.0 <3.0.0"
-  flutter: ">=2.3.0-0.0.pre"
+  flutter: ">=2.4.0-5.0.pre.73"
