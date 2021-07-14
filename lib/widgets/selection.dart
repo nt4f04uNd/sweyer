@@ -2014,7 +2014,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
 
               final animation = Tween(
                 begin: itemSize,
-                end: math.min(itemSize * rows + (rows - 1) * spacing, mediaQuery.size.height),
+                end: math.min(itemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
               ).animate(CurvedAnimation(
                 curve: Curves.easeOut,
                 reverseCurve: Curves.easeInCubic,
