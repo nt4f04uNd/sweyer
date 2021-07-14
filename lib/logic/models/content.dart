@@ -65,11 +65,11 @@ abstract class SongOrigin extends Content {
       return null;
     switch (entry.type) {
       case SongOriginType.album:
-        return ContentControl.state.albums[entry.id];
+        return ContentControl.getContentById<Album>(entry.id);
       case SongOriginType.playlist:
-        return ContentControl.state.playlists.firstWhereOrNull((el) => el.id == entry.id);
+        return ContentControl.getContentById<Playlist>(entry.id);
       case SongOriginType.artist:
-        return ContentControl.state.artists.firstWhereOrNull((el) => el.id == entry.id);
+        return ContentControl.getContentById<Artist>(entry.id);
       default:
         throw UnimplementedError();
     }

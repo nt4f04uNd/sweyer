@@ -17,20 +17,170 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
+/// Represents the path in browsed library.
+///
+/// There may be:
+/// * nested paths, like [albums] - which can have an [id]
+/// * and not nested paths - like [songs], which just displays all songs
 class _BrowseParent extends Enum {
-  const _BrowseParent(String value, [this.id]) : super(value);
+  const _BrowseParent(String value, {this.id, required this.nested}) : super(value);
+
+  final bool nested;
 
   /// This property is non-null for entries that have id, for currently only for albums.
   final int? id;
   bool get hasId => id != null;
 
-  static const root = _BrowseParent('root');
-  static const tracks = _BrowseParent('tracks');
-  static const albums = _BrowseParent('albums');
+  /// Shows all other parents.
+  static const root = _BrowseParent('root', nested: false);
+
+  /// Path for all songs.
+  static const songs = _BrowseParent('songs', nested: false);
+
+  /// Path for all albums.
+  static const albums = _BrowseParent('albums', nested: true);
+
+  /// Path for all playlists.
+  static const playlists = _BrowseParent('playlists', nested: true);
+
+  /// Path for all artists.
+  static const artists = _BrowseParent('artists', nested: true);
 
   _BrowseParent withId(int id) {
-    assert(this == albums, 'This parent cannot have id');
-    return _BrowseParent(value, id); 
+    assert(nested, "This parent cannot have and id, because it's not nested");
+    return _BrowseParent(value, id: id, nested: false); 
+  }
+}
+
+class _BrowserParentProvider {
+  /// Current parent.
+  _BrowseParent _parent = _BrowseParent.root;
+  _BrowseParent get parent => _parent;
+
+  /// Handles [AudioHandler.getChildren] call.
+  List<MediaItem> handleGetChildren(String parentMediaId) {
+    final id = int.tryParse(parentMediaId);
+    if (id != null) {
+        _parent = _parent.withId(id);
+    } else {
+      switch (parentMediaId) {
+        case 'root':
+          _parent = _BrowseParent.root; break;
+        case 'songs':
+          _parent = _BrowseParent.songs; break;
+        case 'albums':
+          _parent = _BrowseParent.albums; break;
+        case 'playlists':
+          _parent = _BrowseParent.playlists; break;
+        case 'artists':
+          _parent = _BrowseParent.artists; break;
+      }
+    }
+
+    switch (parentMediaId) {
+      case AudioService.recentRootId:
+        return ContentControl.state.queues.current
+          .songs
+          .map((song) => song.toMediaItem())
+          .toList();
+      case 'root':
+        return [
+          MediaItem(
+            id: _BrowseParent.songs.value,
+            album: '',
+            title: staticl10n.contents<Song>(),
+            playable: false,
+          ),
+          MediaItem(
+            id: _BrowseParent.albums.value,
+            album: '',
+            title: staticl10n.contents<Album>(),
+            playable: false,
+          ),
+          MediaItem(
+            id: _BrowseParent.playlists.value,
+            album: '',
+            title: staticl10n.contents<Playlist>(),
+            playable: false,
+          ),
+          MediaItem(
+            id: _BrowseParent.artists.value,
+            album: '',
+            title: staticl10n.contents<Artist>(),
+            playable: false,
+          ),
+        ];
+      case 'songs':
+        return ContentControl.getContent<Song>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      case 'albums':
+        return ContentControl.getContent<Album>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      case 'playlists':
+        return ContentControl.getContent<Playlist>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      case 'artists':
+        return ContentControl.getContent<Artist>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      default:
+        if (id == null) {
+          throw StateError('');
+        }
+        switch (_parent.value) {
+          case 'albums':
+            return ContentControl.getContentById<Album>(id)
+              !.songs
+              .map((song) => song.toMediaItem())
+              .toList();
+          case 'playlists':
+            return ContentControl.getContentById<Playlist>(id)
+              !.songs
+              .map((song) => song.toMediaItem())
+              .toList();
+          case 'artists':
+            return ContentControl.getContentById<Artist>(id)
+              !.songs
+              .map((song) => song.toMediaItem())
+              .toList();
+          default:
+            throw UnimplementedError();
+        }
+    }
+  }
+
+  /// Updates the queue.
+  /// Should be called when media item changes.
+  void handleMediaItemChange() {
+    if (!parent.hasId) {
+      ContentControl.resetQueue();
+    } else {
+      switch (parent.value) {
+        case 'albums':
+          final album = ContentControl.getContentById<Album>(parent.id!);
+          if (album != null) {
+            ContentControl.setOriginQueue(origin: album, songs: album.songs);
+          }
+          break;
+        case 'playlists':
+          final playlist = ContentControl.getContentById<Playlist>(parent.id!);
+          if (playlist != null) {
+            ContentControl.setOriginQueue(origin: playlist, songs: playlist.songs);
+          }
+          break;
+        case 'artists':
+          final artist = ContentControl.getContentById<Artist>(parent.id!);
+          if (artist != null) {
+            ContentControl.setOriginQueue(origin: artist, songs: artist.songs);
+          }
+          break;
+        default:
+          throw UnimplementedError();
+      }
+    }
   }
 }
 
@@ -81,32 +231,6 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     WidgetsBinding.instance!.removeObserver(this);
   }
 
-  
-  T _parentWithIdPick<T>({ required T albums }) {
-    assert(parent.hasId);
-    switch(parent.value) {
-      case 'albums':
-        return albums;
-      default:
-        throw UnimplementedError();
-    }
-  }
-
-  void _handleMediaItemChange() {
-    if (!parent.hasId) {
-      ContentControl.resetQueue();
-    } else {
-      _parentWithIdPick<VoidCallback>(
-        albums: () {
-          final album = ContentControl.state.albums[parent.id!];
-          if (album != null) {
-            ContentControl.setOriginQueue(origin: album, songs: album.songs);
-          }
-        },
-      )();
-    }
-  }
-
   @override
   Future<void> prepare() {
     return player.setSong(ContentControl.state.currentSong);
@@ -114,7 +238,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> prepareFromMediaId(String mediaId, [Map<String, dynamic>? extras]) async {
-    _handleMediaItemChange();
+    parentProvider.handleMediaItemChange();
     final song = ContentControl.state.allSongs.byId.get(int.parse(mediaId));
     if (song != null) {
       await player.setSong(song);
@@ -144,7 +268,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> playFromMediaId(String mediaId, [Map<String, dynamic>? extras]) async {
-    _handleMediaItemChange();
+    parentProvider.handleMediaItemChange();
     final song = ContentControl.state.allSongs.byId.get(int.parse(mediaId));
     if (song != null) {
       await player.setSong(song);
@@ -341,67 +465,11 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     return player.setSpeed(speed);
   }
 
-  /// Current parent.
-  _BrowseParent parent = _BrowseParent.root;
+  final parentProvider = _BrowserParentProvider();
 
   @override
   Future<List<MediaItem>> getChildren(String parentMediaId, [Map<String, dynamic>? options]) async {
-    if (parentMediaId != AudioService.recentRootId) {
-      final id = int.tryParse(parentMediaId);
-      if (id != null) {
-        parent = _BrowseParent.albums.withId(id);
-      } else {
-        switch (parentMediaId) {
-          case AudioService.browsableRootId:
-            parent = _BrowseParent.root;
-            break;
-          case 'tracks':
-            parent = _BrowseParent.tracks;
-            break;
-          case 'albums':
-            parent = _BrowseParent.albums;
-            break;
-          default:
-            throw ArgumentError();
-        }
-      }
-    }
-    switch (parentMediaId) {
-      case AudioService.recentRootId:
-        return ContentControl.state.queues.current
-            .songs
-            .map((song) => song.toMediaItem())
-            .toList();
-      case AudioService.browsableRootId:
-        return [
-          MediaItem(
-            id: 'tracks',
-            album: '',
-            title: staticl10n.tracks,
-            playable: false,
-          ),
-          MediaItem(
-            id: 'albums',
-            album: '',
-            title: staticl10n.albums,
-            playable: false,
-          ),
-        ];
-      case 'tracks':
-        return ContentControl.state.allSongs
-            .songs
-            .map((song) => song.toMediaItem())
-            .toList();
-      case 'albums':
-        return ContentControl.state.albums.values
-            .map((album) => album.toMediaItem())
-            .toList();
-      default:
-        return ContentControl.state.albums[int.parse(parentMediaId)]!
-            .songs
-            .map((song) => song.toMediaItem())
-            .toList();
-    }
+    return parentProvider.handleGetChildren(parentMediaId);
   }
 
   @override

@@ -982,6 +982,13 @@ abstract class ContentControl {
     )();
   }
 
+  /// Returns content of specified type with ID.
+  static T? getContentById<T extends Content>(int id, [Type? contentType]) {
+    if ((contentType ?? T) == Album)
+      return state.albums[id] as T?;
+    return getContent<T>(contentType).firstWhereOrNull((el) => el.id == id);
+  }
+
   /// Refetches all the content.
   static Future<void> refetchAll() async {
     await Future.wait([
