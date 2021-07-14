@@ -1989,8 +1989,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
         minWidth: itemSize + correctedMoreTextWidth,
         // Width for N arts with spacing between them, excluding
         // the spacing at the end.
-        maxWidth: itemSize * maxArts +
-                  spacing * (math.max(0, maxArts - 1)),
+        maxWidth: itemSize * maxArts + spacing * (math.max(0, maxArts - 1)),
         minHeight: itemSize,
         maxHeight: double.infinity,
       ),
@@ -1999,7 +1998,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
           animation: controller,
           builder: (context, child) => LayoutBuilder(
             builder: (context, constraints) {
-              final double intermediatePreviewsPerRow = constraints.maxWidth / (itemSize + spacing);
+              final double intermediatePreviewsPerRow = math.min(constraints.maxWidth / (itemSize + spacing), maxArts.toDouble());
               final int previewsPerRow = intermediatePreviewsPerRow.toInt();
               // The amount of previews to show in "more" grid, so they fill
               // the entire available space
@@ -2014,7 +2013,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
 
               final animation = Tween(
                 begin: itemSize,
-                end: math.min(itemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
+                end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
               ).animate(CurvedAnimation(
                 curve: Curves.easeOut,
                 reverseCurve: Curves.easeInCubic,
