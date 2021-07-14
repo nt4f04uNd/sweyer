@@ -5,7 +5,7 @@ repository: https://github.com/nt4f04uNd/sweyer
 issue_tracker: https://github.com/nt4f04uNd/sweyer/issues
 publish_to: none
 version: 1.0.4+6
- 
+
 environment:
   sdk: '>=2.13.0 <3.0.0'
   flutter: 2.2.0-11.0.pre.158 # https://github.com/nt4f04uNd/flutter/tree/sweyer
