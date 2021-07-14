@@ -16,6 +16,8 @@ class InListContentAction extends StatefulWidget {
     required this.text,
     required this.onTap,
     this.color,
+    this.iconColor,
+    this.textColor,
     this.splashColor,
   }) : horizontalPadding = kSongTileHorizontalPadding,
        super(key: key);
@@ -27,6 +29,8 @@ class InListContentAction extends StatefulWidget {
     required this.text,
     required this.onTap,
     this.color,
+    this.iconColor,
+    this.textColor,
     this.splashColor,
   }) : horizontalPadding = kPersistentQueueTileHorizontalPadding,
        super(key: key);
@@ -35,6 +39,8 @@ class InListContentAction extends StatefulWidget {
   final String text;
   final VoidCallback? onTap;
   final Color? color;
+  final Color? textColor;
+  final Color? iconColor;
   final Color? splashColor;
   final double horizontalPadding;
 
@@ -117,7 +123,11 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                     borderRadius: const BorderRadius.all(Radius.circular(kArtBorderRadius)),
                   ),
                   alignment: Alignment.center,
-                  child: Icon(widget.icon, size: 36.0),
+                  child: Icon(
+                    widget.icon,
+                    size: 36.0,
+                    color: widget.iconColor,
+                  ),
                 ),
                 Expanded(
                   child: Padding(
@@ -125,7 +135,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                     child: Text(
                       widget.text,
                       overflow: TextOverflow.ellipsis,
-                      style: ThemeControl.theme.textTheme.headline6,
+                      style: ThemeControl.theme.textTheme.headline6?.copyWith(color: widget.textColor),
                     ),
                   ),
                 ),

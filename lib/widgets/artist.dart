@@ -32,7 +32,7 @@ class ArtistWidget extends StatelessWidget {
         trailingText,
       ]),
       overflow: overflow,
-      style: ThemeControl.theme.textTheme.subtitle2!.merge(textStyle),
+      style: Theme.of(context).textTheme.subtitle2!.merge(textStyle),
     );
   }
 }

@@ -82,6 +82,7 @@ public class DeletionService extends Service {
             // Delete file from `MediaStore`
             resolver.delete(uri, where, selectionArgs);
             resolver.notifyChange(uri, null);
+            ContentChannel.instance.sendResultFromIntent(true);
          }
          stopSelf();
       });

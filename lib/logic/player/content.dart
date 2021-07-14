@@ -995,7 +995,8 @@ abstract class ContentControl {
       for (final contentType in Content.enumerate())
         refetch(contentType: contentType),
     ]);
-    await MusicPlayer.instance.restoreLastSong();
+    if (!disposed)
+      await MusicPlayer.instance.restoreLastSong();
   }
 
   /// Refetches content by the `T` content type.

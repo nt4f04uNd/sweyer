@@ -253,12 +253,8 @@ public enum ContentChannel {
                Intent serviceIntent = new Intent(GeneralHandler.getAppContext(), DeletionService.class);
                serviceIntent.putExtra("songs", (ArrayList<HashMap<?, ?>>) call.argument("songs"));
                GeneralHandler.getAppContext().startService(serviceIntent);
-               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                  // Save the result to report to the flutter code later in `sendDeletionResult`
-                  this.result = result;
-               } else {
-                  result.success(true);
-               }
+               // Save the result to report to the flutter code later in `sendResultFromIntent(`
+               this.result = result;
                break;
             }
             case "createPlaylist": {

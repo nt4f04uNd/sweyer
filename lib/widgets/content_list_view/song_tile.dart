@@ -216,7 +216,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
 
   Widget _buildTile(Widget albumArt, [double? rightPadding]) {
     rightPadding ??= widget.horizontalPadding;
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     Widget title = Text(
       widget.song.title,
       overflow: TextOverflow.ellipsis,

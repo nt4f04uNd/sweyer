@@ -195,6 +195,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                     enableDefaultOnTap: false,
                     leading: InListContentAction.song(
                       color: selectedSong == null ? selectedTileColor : null,
+                      iconColor: selectedSong == null ? ThemeControl.theme.colorScheme.onPrimary : null,
+                      textColor: selectedSong == null ? ThemeControl.theme.colorScheme.onPrimary : null,
                       splashColor: selectedSong == null ? selectedSplashColor : null,
                       icon: SweyerIcons.play_next,
                       text: l10n.insertAtTheBeginning,
@@ -211,10 +213,17 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                       return Colors.transparent;
                     },
                     itemBuilder: (context, index, child) {
-                      final theme = Theme.of(context);
+                      final theme = ThemeControl.theme;
+                      final selected = selectedSong == songs[index];
                       return Theme(
                         data: theme.copyWith(
-                          splashColor: selectedSong == songs[index] ? selectedSplashColor : theme.splashColor,
+                          splashColor: selected ? selectedSplashColor : theme.splashColor,
+                          textTheme: theme.textTheme.copyWith(
+                            // Title
+                            headline6: theme.textTheme.headline6?.copyWith(color: selected ? theme.colorScheme.onPrimary : null),
+                            // Subtitle
+                            subtitle2: theme.textTheme.subtitle2?.copyWith(color: selected ? theme.colorScheme.onPrimary : null),
+                          )
                         ),
                         child: child,
                       );
