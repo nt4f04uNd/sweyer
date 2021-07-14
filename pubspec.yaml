@@ -12,6 +12,7 @@ environment:
   # See https://github.com/nt4f04uNd/flutter/tree/sweyer
   # For this release it's https://github.com/flutter/flutter/commit/252f6a02855194f17678dd29254cf6216f049f14
   # with cherry-picked https://github.com/flutter/flutter/pull/82687 and https://github.com/flutter/flutter/pull/85499 for scrollbar fixes
+  # The HEAD is https://github.com/nt4f04uNd/flutter/commit/e298ed772fa188dc1df57a4c769be5781390ca33
 
 dependencies:
   flutter:
