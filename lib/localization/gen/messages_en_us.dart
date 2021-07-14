@@ -24,13 +24,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m0(count) => "${Intl.plural(count, zero: 'Albums', one: 'Album', two: 'Albums', few: 'Albums', many: 'Albums', other: 'Albums')}";
 
-  static m1(count) => "${Intl.plural(count, zero: 'Artists', one: 'Artist', two: 'Artists', few: 'Artists', many: 'Artists', other: 'Artists')}";
+  static m1(count) => "And ${count} more";
 
-  static m2(remainingClicks) => "only ${remainingClicks} clicks remaining...";
+  static m2(count) => "${Intl.plural(count, zero: 'Artists', one: 'Artist', two: 'Artists', few: 'Artists', many: 'Artists', other: 'Artists')}";
 
-  static m3(count) => "${Intl.plural(count, zero: 'Playlists', one: 'Playlist', two: 'Playlists', few: 'Playlists', many: 'Playlists', other: 'Playlists')}";
+  static m3(remainingClicks) => "only ${remainingClicks} clicks remaining...";
 
-  static m4(count) => "${Intl.plural(count, zero: 'Tracks', one: 'Track', two: 'Tracks', few: 'Tracks', many: 'Tracks', other: 'Tracks')}";
+  static m4(count) => "${Intl.plural(count, zero: 'Playlists', one: 'Playlist', two: 'Playlists', few: 'Playlists', many: 'Playlists', other: 'Playlists')}";
+
+  static m5(count) => "${Intl.plural(count, zero: 'Tracks', one: 'Track', two: 'Tracks', few: 'Tracks', many: 'Tracks', other: 'Tracks')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -50,13 +52,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowAccessToExternalStorageManually" : MessageLookupByLibrary.simpleMessage("Allow access to storage manually"),
     "almostThere" : MessageLookupByLibrary.simpleMessage("You\'re almost there"),
     "and" : MessageLookupByLibrary.simpleMessage("And"),
+    "andNMore" : m1,
     "arbitraryQueue" : MessageLookupByLibrary.simpleMessage("Arbitrary queue"),
     "areYouSure" : MessageLookupByLibrary.simpleMessage("Are you sure?"),
     "areYouSureYouWantTo" : MessageLookupByLibrary.simpleMessage("Are you sure you want to"),
     "artistNotFound" : MessageLookupByLibrary.simpleMessage("Artist not found"),
     "artistUnknown" : MessageLookupByLibrary.simpleMessage("Unknown artist"),
     "artists" : MessageLookupByLibrary.simpleMessage("Artists"),
-    "artistsPlural" : m1,
+    "artistsPlural" : m2,
     "byQuery" : MessageLookupByLibrary.simpleMessage("By query"),
     "create" : MessageLookupByLibrary.simpleMessage("Create"),
     "dateAdded" : MessageLookupByLibrary.simpleMessage("Date added"),
@@ -92,7 +95,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "numberOfAlbums" : MessageLookupByLibrary.simpleMessage("Number of albums"),
     "numberOfTracks" : MessageLookupByLibrary.simpleMessage("Number of tracks"),
     "onThePathToDevMode" : MessageLookupByLibrary.simpleMessage("Something should happen now..."),
-    "onThePathToDevModeClicksRemaining" : m2,
+    "onThePathToDevModeClicksRemaining" : m3,
     "onThePathToDevModeLastClick" : MessageLookupByLibrary.simpleMessage("only 1 click remaining..."),
     "oopsErrorOccurred" : MessageLookupByLibrary.simpleMessage("Oops! An error occurred"),
     "openAppSettingsError" : MessageLookupByLibrary.simpleMessage("Error opening the app settings"),
@@ -106,7 +109,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "playbackError" : MessageLookupByLibrary.simpleMessage("An error occurred during the playback"),
     "playlistDoesNotExistError" : MessageLookupByLibrary.simpleMessage("Can\'t find the playlist, perhaps it was deleted"),
     "playlists" : MessageLookupByLibrary.simpleMessage("Playlists"),
-    "playlistsPlural" : m3,
+    "playlistsPlural" : m4,
     "pressOnceAgainToExit" : MessageLookupByLibrary.simpleMessage("Press once again to exit"),
     "previous" : MessageLookupByLibrary.simpleMessage("Previous"),
     "quitDevMode" : MessageLookupByLibrary.simpleMessage("Quit the developer mode"),
@@ -143,7 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "title" : MessageLookupByLibrary.simpleMessage("Title"),
     "trackAfterWhichToInsert" : MessageLookupByLibrary.simpleMessage("Track after which to insert"),
     "tracks" : MessageLookupByLibrary.simpleMessage("Tracks"),
-    "tracksPlural" : m4,
+    "tracksPlural" : m5,
     "upNext" : MessageLookupByLibrary.simpleMessage("Up next"),
     "view" : MessageLookupByLibrary.simpleMessage("View"),
     "year" : MessageLookupByLibrary.simpleMessage("Year")

@@ -259,6 +259,13 @@
     "type": "text",
     "placeholders": {}
   },
+  "andNMore": "И еще {count}",
+  "@andNMore": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
   "done": "Готово",
   "@done": {
     "type": "text",

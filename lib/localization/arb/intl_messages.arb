@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-07-13T15:26:10.743904",
+  "@@last_modified": "2021-07-14T21:24:45.452638",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -252,6 +252,13 @@
   "@more": {
     "type": "text",
     "placeholders": {}
+  },
+  "andNMore": "And {count} more",
+  "@andNMore": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
   },
   "done": "Done",
   "@done": {

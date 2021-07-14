@@ -471,6 +471,7 @@ class AppLocalizations {
     );
   }
 
+  // TODO: currently unused
   String get and {
     return Intl.message(
       "And",
@@ -478,6 +479,7 @@ class AppLocalizations {
     );
   }
 
+  // TODO: currently unused
   String get more {
     return Intl.message(
       "More",
@@ -487,7 +489,11 @@ class AppLocalizations {
 
   /// "And 3 more"
   String andNMore(int count) {
-    return "${and.toLowerCase()} $count ${more.toLowerCase()}";
+    return Intl.message(
+      "And $count more",
+      args: [count],
+      name: 'andNMore',
+    );
   }
 
   String get done {

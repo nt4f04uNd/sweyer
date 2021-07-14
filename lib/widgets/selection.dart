@@ -2062,7 +2062,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                                       borderRadius: const BorderRadius.all(Radius.circular(100.0)),
                                     ),
                                     child: Text(
-                                      '${l10n.and} ${widget.list.length - previews.length} ${l10n.more.toLowerCase()}',
+                                      l10n.andNMore(widget.list.length - previews.length),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 14.0,

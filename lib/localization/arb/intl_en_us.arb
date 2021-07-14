@@ -254,6 +254,13 @@
     "type": "text",
     "placeholders": {}
   },
+  "andNMore": "And {count} more",
+  "@andNMore": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
   "done": "Done",
   "@done": {
     "type": "text",

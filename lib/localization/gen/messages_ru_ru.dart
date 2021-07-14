@@ -23,13 +23,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m0(count) => "${Intl.plural(count, zero: 'Альбомов', one: 'Альбом', two: 'Альбома', few: 'Альбома', many: 'Альбомов', other: 'Альбома')}";
 
-  static m1(count) => "${Intl.plural(count, zero: 'Исполнителей', one: 'Исполнитель', two: 'Исполнителя', few: 'Исполнителя', many: 'Исполнителей', other: 'Исполнителя')}";
+  static m1(count) => "И еще ${count}";
 
-  static m2(remainingClicks) => "осталось всего ${remainingClicks} клика...";
+  static m2(count) => "${Intl.plural(count, zero: 'Исполнителей', one: 'Исполнитель', two: 'Исполнителя', few: 'Исполнителя', many: 'Исполнителей', other: 'Исполнителя')}";
 
-  static m3(count) => "${Intl.plural(count, zero: 'Плейлистов', one: 'Плейлист', two: 'Плейлиста', few: 'Плейлиста', many: 'Плейлистов', other: 'Плейлиста')}";
+  static m3(remainingClicks) => "осталось всего ${remainingClicks} клика...";
 
-  static m4(count) => "${Intl.plural(count, zero: 'Треков', one: 'Трек', two: 'Трека', few: 'Трека', many: 'Треков', other: 'Трека')}";
+  static m4(count) => "${Intl.plural(count, zero: 'Плейлистов', one: 'Плейлист', two: 'Плейлиста', few: 'Плейлиста', many: 'Плейлистов', other: 'Плейлиста')}";
+
+  static m5(count) => "${Intl.plural(count, zero: 'Треков', one: 'Трек', two: 'Трека', few: 'Трека', many: 'Треков', other: 'Трека')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -49,13 +51,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowAccessToExternalStorageManually" : MessageLookupByLibrary.simpleMessage("Предоставьте доступ к хранилищу вручную"),
     "almostThere" : MessageLookupByLibrary.simpleMessage("Вы почти у цели"),
     "and" : MessageLookupByLibrary.simpleMessage("И"),
+    "andNMore" : m1,
     "arbitraryQueue" : MessageLookupByLibrary.simpleMessage("Произвольная очередь"),
     "areYouSure" : MessageLookupByLibrary.simpleMessage("Вы уверены?"),
     "areYouSureYouWantTo" : MessageLookupByLibrary.simpleMessage("Вы точно хотите"),
     "artistNotFound" : MessageLookupByLibrary.simpleMessage("Исполнитель не найден"),
     "artistUnknown" : MessageLookupByLibrary.simpleMessage("Неизвестный исполнитель"),
     "artists" : MessageLookupByLibrary.simpleMessage("Исполнители"),
-    "artistsPlural" : m1,
+    "artistsPlural" : m2,
     "byQuery" : MessageLookupByLibrary.simpleMessage("По запросу"),
     "create" : MessageLookupByLibrary.simpleMessage("Создать"),
     "dateAdded" : MessageLookupByLibrary.simpleMessage("Дата добавления"),
@@ -91,7 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "numberOfAlbums" : MessageLookupByLibrary.simpleMessage("Количество альбомов"),
     "numberOfTracks" : MessageLookupByLibrary.simpleMessage("Количество треков"),
     "onThePathToDevMode" : MessageLookupByLibrary.simpleMessage("Сейчас должно что-то произойти..."),
-    "onThePathToDevModeClicksRemaining" : m2,
+    "onThePathToDevModeClicksRemaining" : m3,
     "onThePathToDevModeLastClick" : MessageLookupByLibrary.simpleMessage("остался всего 1 клик..."),
     "oopsErrorOccurred" : MessageLookupByLibrary.simpleMessage("Упс! Произошла ошибка"),
     "openAppSettingsError" : MessageLookupByLibrary.simpleMessage("Произошла ошибка при открытии настроек приложения"),
@@ -105,7 +108,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "playbackError" : MessageLookupByLibrary.simpleMessage("Произошла ошибка при воспроизведении"),
     "playlistDoesNotExistError" : MessageLookupByLibrary.simpleMessage("Плейлист не найден, возможно, он был удален"),
     "playlists" : MessageLookupByLibrary.simpleMessage("Плейлисты"),
-    "playlistsPlural" : m3,
+    "playlistsPlural" : m4,
     "pressOnceAgainToExit" : MessageLookupByLibrary.simpleMessage("Нажмите еще раз для выхода"),
     "previous" : MessageLookupByLibrary.simpleMessage("Назад"),
     "quitDevMode" : MessageLookupByLibrary.simpleMessage("Выйти из режима разработчика"),
@@ -142,7 +145,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "title" : MessageLookupByLibrary.simpleMessage("Название"),
     "trackAfterWhichToInsert" : MessageLookupByLibrary.simpleMessage("Трек, после которого вставить"),
     "tracks" : MessageLookupByLibrary.simpleMessage("Треки"),
-    "tracksPlural" : m4,
+    "tracksPlural" : m5,
     "upNext" : MessageLookupByLibrary.simpleMessage("Далее"),
     "view" : MessageLookupByLibrary.simpleMessage("View"),
     "year" : MessageLookupByLibrary.simpleMessage("Год")
