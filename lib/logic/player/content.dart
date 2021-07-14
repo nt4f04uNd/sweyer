@@ -1286,7 +1286,7 @@ abstract class ContentControl {
   /// * if yes, increases the number by one from the max and returns string with it
   /// * else returns the string unmodified.
   static Future<String> correctPlaylistName(String name) async {
-     // Update the playlist in case they are outdated
+    // Update the playlist in case they are outdated
     await refetch<Playlist>(emitChangeEvent: false);
 
     // If such name already exists, find the max duplicate number and make the name
