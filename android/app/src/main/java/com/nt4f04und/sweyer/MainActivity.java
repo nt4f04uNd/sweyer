@@ -9,16 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.nt4f04und.sweyer.channels.GeneralChannel;
+import androidx.annotation.Nullable;
+
 import com.nt4f04und.sweyer.channels.ContentChannel;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
-
-import androidx.annotation.Nullable;
+import com.ryanheise.audioservice.AudioServicePlugin;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.BinaryMessenger;
-import com.ryanheise.audioservice.AudioServicePlugin;
 
 public class MainActivity extends FlutterActivity {
 
@@ -27,8 +26,7 @@ public class MainActivity extends FlutterActivity {
       super.onCreate(savedInstanceState);
       GeneralHandler.init(getApplicationContext());
       BinaryMessenger messenger = getBinaryMessenger();
-      GeneralChannel.instance.init(messenger, this);
-      ContentChannel.instance.init(messenger);
+      ContentChannel.instance.init(messenger, this);
    }
 
    BinaryMessenger getBinaryMessenger() {
@@ -43,15 +41,14 @@ public class MainActivity extends FlutterActivity {
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       super.onActivityResult(requestCode, resultCode, data);
-      if (requestCode == Constants.intents.PERMANENT_DELETION_REQUEST) {
-         // Report deletion intent result on android R
-         ContentChannel.instance.sendDeletionResult(resultCode == RESULT_OK);
+      if (requestCode == Constants.intents.PERMANENT_DELETION_REQUEST.value ||
+              requestCode == Constants.intents.FAVORITE_REQUEST.value) {
+         ContentChannel.instance.sendResultFromIntent(resultCode == RESULT_OK);
       }
    }
 
    @Override
    protected void onDestroy() {
-      GeneralChannel.instance.destroy();
       ContentChannel.instance.destroy();
       super.onDestroy();
    }

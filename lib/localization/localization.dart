@@ -3,6 +3,9 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+// TODO: remove this (and other similar) when intl_translation supports nnbd https://github.com/dart-lang/intl_translation/issues/134
+// @dart = 2.7
+
 import 'dart:async';
 
 import 'package:intl/intl.dart';
@@ -47,12 +50,12 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  //* Used in notification
+  //* Used in notification ******************
   
   /// Used as notification channel name.
   String get playback {
     return Intl.message(
-      'Playback',
+      "Playback",
       name: 'playback',
     );
   }
@@ -60,89 +63,89 @@ class AppLocalizations {
   /// Used as notification channel description.
   String get playbackControls {
     return Intl.message(
-      'Playback controls',
+      "Playback controls",
       name: 'playbackControls',
     );
   }
 
   String get play {
     return Intl.message(
-      'Play',
+      "Play",
       name: 'play',
     );
   }
 
   String get pause {
     return Intl.message(
-      'Pause',
+      "Pause",
       name: 'pause',
     );
   }
 
   String get stop {
     return Intl.message(
-      'Stop',
+      "Stop",
       name: 'stop',
     );
   }
 
   String get next {
     return Intl.message(
-      'Next',
+      "Next",
       name: 'next',
     );
   }
 
   String get previous {
     return Intl.message(
-      'Previous',
+      "Previous",
       name: 'previous',
     );
   }
 
   String get loopOff {
     return Intl.message(
-      'Loop off',
+      "Loop off",
       name: 'loopOff',
     );
   }
 
   String get loopOn {
     return Intl.message(
-      'Loop on',
+      "Loop on",
       name: 'loopOn',
     );
   }
-  //*------------------------------------
 
-  //* Quick actions
+  //* Quick actions ******************
   
   String get search {
     return Intl.message(
-      'Search',
+      "Search",
       name: 'search',
     );
   }
 
   String get shuffleAll {
     return Intl.message(
-      'Shuffle all',
+      "Shuffle all",
       name: 'shuffleAll',
     );
   }
 
   String get playRecent {
     return Intl.message(
-      'Play recent',
+      "Play recent",
       name: 'playRecent',
     );
   }
-  //*------------------------------------
+
+  //* Content ******************
 
   /// Label for unknown artist.
   String get artistUnknown {
     return Intl.message(
-      'Unknown artist',
+      "Unknown artist",
       name: 'artistUnknown',
     );
   }
@@ -155,29 +158,63 @@ class AppLocalizations {
     return albumsPlural(1);
   }
 
+  String get playlist {
+    return playlistsPlural(1);
+  }
+
+  String get artist {
+    return artistsPlural(1);
+  }
+
   String get tracks {
     return Intl.message(
-      'Tracks',
+      "Tracks",
       name: 'tracks',
     );
   }
 
   String get albums {
     return Intl.message(
-      'Albums',
+      "Albums",
       name: 'albums',
     );
+  }
+
+  String get playlists {
+    return Intl.message(
+      "Playlists",
+      name: 'playlists',
+    );
+  }
+
+  String get artists {
+    return Intl.message(
+      "Artists",
+      name: 'artists',
+    );
+  }
+
+  /// Picks a string of a [Content] in plural form.
+  /// For example "tracks".
+  String contents<T extends Content>([Type contentType]) {
+    return contentPick<T, ValueGetter<String>>(
+      contentType: contentType,
+      song: () => tracks,
+      album: () => albums,
+      playlist: () => playlists,
+      artist: () => artists,
+    )();
   }
 
   String tracksPlural(int count) {
     return Intl.plural(
       count,
-      zero: 'Tracks',
-      one: 'Track',
-      two: 'Tracks',
-      few: 'Tracks',
-      many: 'Tracks',
-      other: 'Tracks',
+      zero: "Tracks",
+      one: "Track",
+      two: "Tracks",
+      few: "Tracks",
+      many: "Tracks",
+      other: "Tracks",
       args: [count],
       name: 'tracksPlural',
     );
@@ -186,14 +223,72 @@ class AppLocalizations {
   String albumsPlural(int count) {
     return Intl.plural(
       count,
-      zero: 'Albums',
-      one: 'Album',
-      two: 'Albums',
-      few: 'Albums',
-      many: 'Albums',
-      other: 'Albums',
+      zero: "Albums",
+      one: "Album",
+      two: "Albums",
+      few: "Albums",
+      many: "Albums",
+      other: "Albums",
       args: [count],
       name: 'albumsPlural',
+    );
+  }
+
+  String playlistsPlural(int count) {
+    return Intl.plural(
+      count,
+      zero: "Playlists",
+      one: "Playlist",
+      two: "Playlists",
+      few: "Playlists",
+      many: "Playlists",
+      other: "Playlists",
+      args: [count],
+      name: 'playlistsPlural',
+    );
+  }
+
+  String artistsPlural(int count) {
+    return Intl.plural(
+      count,
+      zero: "Artists",
+      one: "Artist",
+      two: "Artists",
+      few: "Artists",
+      many: "Artists",
+      other: "Artists",
+      args: [count],
+      name: 'artistsPlural',
+    );
+  }
+
+  /// Returns string in form "5 songs".
+  String contentsPluralWithCount<T extends Content>(int count, [Type contentType]) {
+    return '$count ${contentsPlural<T>(count, contentType).toLowerCase()}';
+  }
+
+  /// Calls a `plural` getter from Intl for a [Content].
+  String contentsPlural<T extends Content>(int count, [Type contentType]) {
+    return contentPick<T, ValueGetter<String>>(
+      contentType: contentType,
+      song: () => tracksPlural(count),
+      album: () => albumsPlural(count),
+      playlist: () => playlistsPlural(count),
+      artist: () => artistsPlural(count),
+    )();
+  }
+
+  String get albumNotFound {
+    return Intl.message(
+      "Album not found",
+      name: 'albumNotFound',
+    );
+  }
+
+  String get artistNotFound {
+    return Intl.message(
+      "Artist not found",
+      name: 'artistNotFound',
     );
   }
 
@@ -204,36 +299,32 @@ class AppLocalizations {
     );
   }
 
-  String get playlist {
+  String get allAlbums {
     return Intl.message(
-      "Playlist",
-      name: 'playlist',
+      "All albums",
+      name: 'allAlbums',
+    );
+  }
+
+  String get allPlaylists {
+    return Intl.message(
+      "All playlists",
+      name: 'allPlaylists',
+    );
+  }
+
+  String get allArtists {
+    return Intl.message(
+      "All artitst",
+      name: 'allArtists',
     );
   }
 
   String get arbitraryQueue {
     return Intl.message(
-      'Arbitrary queue',
+      "Arbitrary queue",
       name: 'arbitraryQueue',
     );
-  }
-
-  String get allAlbums {
-    return Intl.message(
-      'All albums',
-      name: 'allAlbums',
-    );
-  }
-
-  /// Converts [ArbitraryQueueOrigin] to human readable text.
-  /// Returns `null` from `null` argument.
-  String arbitraryQueueOrigin(ArbitraryQueueOrigin origin) {
-    if (origin == null)
-      return null;
-    switch (origin) {
-      case ArbitraryQueueOrigin.allAlbums: return allAlbums;
-      default: throw UnimplementedError();
-    }
   }
 
   // NOTE: currently unused
@@ -258,6 +349,46 @@ class AppLocalizations {
       name: 'byQuery',
     );
   }
+
+  /// Should be in plural form
+  String get selectedPlural {
+    return Intl.message(
+      "Selected",
+      name: 'selectedPlural',
+    );
+  }
+
+  //* Playlists **********
+
+  String get newPlaylist {
+    return Intl.message(
+      "New playlist",
+      name: 'newPlaylist',
+    );
+  }
+
+  String get trackAfterWhichToInsert {
+    return Intl.message(
+      "Track after which to insert",
+      name: 'trackAfterWhichToInsert',
+    );
+  }
+
+  String get insertAtTheBeginning {
+    return Intl.message(
+      "Insert at the beginning",
+      name: 'insertAtTheBeginning',
+    );
+  }
+
+  String get saveQueueAsPlaylist {
+    return Intl.message(
+      "Save queue as playlist",
+      name: 'saveQueueAsPlaylist',
+    );
+  }
+
+  //* Generic ******************
 
   /// Displayed in list headers in button to play it.
   String get playContentList {
@@ -284,149 +415,189 @@ class AppLocalizations {
 
   String get areYouSure {
     return Intl.message(
-      'Are you sure?',
+      "Are you sure?",
       name: 'areYouSure',
+    );
+  }
+
+  String get areYouSureYouWantTo {
+    return Intl.message(
+      "Are you sure you want to",
+      name: 'areYouSureYouWantTo',
     );
   }
 
   String get reset {
     return Intl.message(
-      'Reset',
+      "Reset",
       name: 'reset',
     );
   }
 
   String get save {
     return Intl.message(
-      'Save',
+      "Save",
       name: 'save',
     );
   }
 
-  // todo: currently unused
+  String get saved {
+    return Intl.message(
+      "Saved",
+      name: 'saved',
+    );
+  }
+
+  String get view {
+    return Intl.message(
+      "View",
+      name: 'view',
+    );
+  }
+
+  // TODO: currently unused
   String get secondsShorthand {
     return Intl.message(
-      's',
+      "s",
       name: 'secondsShorthand',
     );
   }
 
-  // todo: currently unused
+  // TODO: currently unused
   String get minutesShorthand {
     return Intl.message(
-      'min',
+      "min",
       name: 'minutesShorthand',
+    );
+  }
+
+  // TODO: currently unused
+  String get and {
+    return Intl.message(
+      "And",
+      name: 'and',
+    );
+  }
+
+  // TODO: currently unused
+  String get more {
+    return Intl.message(
+      "More",
+      name: 'more',
+    );
+  }
+
+  /// "And 3 more"
+  String andNMore(int count) {
+    return Intl.message(
+      "And $count more",
+      args: [count],
+      name: 'andNMore',
+    );
+  }
+
+  String get done {
+    return Intl.message(
+      "Done",
+      name: 'done',
+    );
+  }
+
+  String get create {
+    return Intl.message(
+      "Create",
+      name: 'create',
+    );
+  }
+
+  String get add {
+    return Intl.message(
+      "Add",
+      name: 'add',
     );
   }
 
   String get remove {
     return Intl.message(
-      'Remove',
+      "Remove",
       name: 'remove',
     );
   }
 
   String get delete {
     return Intl.message(
-      'Delete',
+      "Delete",
       name: 'delete',
     );
   }
 
   String get deletion {
     return Intl.message(
-      'Deletion',
+      "Deletion",
       name: 'deletion',
-    );
-  }
-
-  String get deletionError {
-    return Intl.message(
-      'Deletion error',
-      name: 'deletionError',
     );
   }
 
   String get edit {
     return Intl.message(
-      'Edit',
+      "Edit",
       name: 'edit',
     );
   }
 
   String get refresh {
     return Intl.message(
-      'Refresh',
+      "Refresh",
       name: 'refresh',
     );
   }
 
   String get grant {
     return Intl.message(
-      'Grant',
+      "Grant",
       name: 'grant',
     );
   }
 
-  String get errorMessage {
+  String get nothingHere {
     return Intl.message(
-      'Oops! An error occurred',
-      name: 'errorMessage',
-    );
-  }
-
-  String get errorDetails {
-    return Intl.message(
-      'Error details',
-      name: 'errorDetails',
-    );
-  }
-
-  String get playbackErrorMessage {
-    return Intl.message(
-      'An error occurred during the playback, removing the track',
-      name: 'playbackErrorMessage',
+      "There's nothing here",
+      name: 'nothingHere',
     );
   }
 
   String get details {
     return Intl.message(
-      'Details',
+      "Details",
       name: 'details',
     );
   }
 
   String get songInformation {
     return Intl.message(
-      'Track information',
+      "Track information",
       name: 'songInformation',
     );
   }
 
+  // TODO: currently unused
   String get editMetadata {
     return Intl.message(
-      'Edit metadata',
+      "Edit metadata",
       name: 'editMetadata',
-    );
-  }
-
-  String get unknownRoute {
-    return Intl.message(
-      'Unknown route!',
-      name: 'unknownRoute',
     );
   }
 
   String get found {
     return Intl.message(
-      'Found',
+      "Found",
       name: 'found',
     );
   }
 
   String get upNext {
     return Intl.message(
-      'Up next',
+      "Up next",
       name: 'upNext',
     );
   }
@@ -473,13 +644,14 @@ class AppLocalizations {
     );
   }
 
-  String get openAppSettingsError {
+  String get selected {
     return Intl.message(
-      "Error opening the app settings",
-      name: 'openAppSettingsError',
+      "Selected",
+      name: 'selected',
     );
   }
 
+  // TODO: currently unused
   String get actions {
     return Intl.message(
       "Actions",
@@ -494,6 +666,13 @@ class AppLocalizations {
     );
   }
 
+  String get goToArtist {
+    return Intl.message(
+      "Go to artist",
+      name: 'goToArtist',
+    );
+  }
+
   String get playNext {
     return Intl.message(
       "Play next",
@@ -501,6 +680,28 @@ class AppLocalizations {
     );
   }
 
+  String get addToPlaylist {
+    return Intl.message(
+      "Add to playlist",
+      name: 'addToPlaylist',
+    );
+  }
+
+  String get removeFromPlaylist {
+    return Intl.message(
+      "Remove from playlist",
+      name: 'removeFromPlaylist',
+    );
+  }
+
+  // TODO: currently unused
+  String get addToFavorites {
+    return Intl.message(
+      "Add to favorites",
+      name: 'addToFavorites',
+    );
+  }
+  
   String get addToQueue {
     return Intl.message(
       "Add to queue",
@@ -508,67 +709,89 @@ class AppLocalizations {
     );
   }
 
+  String get removeFromQueue {
+    return Intl.message(
+      "Remove from queue",
+      name: 'removeFromQueue',
+    );
+  }
+
+  // TODO: currently unused
+  String get share {
+    return Intl.message(
+      "Share",
+      name: 'share',
+    );
+  }
+
+  String get selectAll {
+    return Intl.message(
+      "Select all",
+      name: 'selectAll',
+    );
+  }
+
+  //* Sort *****************
+
   String get sort {
     return Intl.message(
-      'Sort',
+      "Sort",
       name: 'sort',
     );
   }
-
-  String get artist {
+  
+  String get title {
     return Intl.message(
-      'Artist',
-      name: 'artist',
+      "Title",
+      name: 'title',
     );
   }
 
-  String get title {
+  String get name {
     return Intl.message(
-      'Title',
-      name: 'title',
+      "Name",
+      name: 'name',
     );
   }
 
   String get dateModified {
     return Intl.message(
-      'Date modified',
+      "Date modified",
       name: 'dateModified',
     );
   }
 
   String get dateAdded {
     return Intl.message(
-      'Date added',
+      "Date added",
       name: 'dateAdded',
     );
   }
 
   String get year {
     return Intl.message(
-      'Year',
+      "Year",
       name: 'year',
     );
   }
 
   String get numberOfTracks {
     return Intl.message(
-      'Number of tracks',
+      "Number of tracks",
       name: 'numberOfTracks',
     );
   }
 
-  /// Picks a string of a [Content] in plural form.
-  /// For example "tracks".
-  String contents<T extends Content>([Type contentType]) {
-    return contentPick<T, String Function()>(
-      contentType: contentType,
-      song: () => tracks,
-      album: () => albums,
-    )();
+  String get numberOfAlbums {
+    return Intl.message(
+      "Number of albums",
+      name: 'numberOfAlbums',
+    );
   }
 
-  String sortFeature<T extends Content>(SortFeature<T> feature) {
-    return contentPick<T, String Function()>(
+  String sortFeature<T extends Content>(SortFeature<T> feature, [Type contentType]) {
+    return contentPick<T, ValueGetter<String>>(
+      contentType: contentType,
       song: () {
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
@@ -599,30 +822,37 @@ class AppLocalizations {
             throw UnimplementedError();
         }
       },
+      playlist: () {
+        switch (feature as PlaylistSortFeature) {
+          case PlaylistSortFeature.dateModified:
+            return dateModified;
+          case PlaylistSortFeature.dateAdded:
+            return dateAdded;
+          case PlaylistSortFeature.name:
+            return title;
+          default:
+            throw UnimplementedError();
+        }
+      },
+      artist: () {
+        switch (feature as ArtistSortFeature) {
+          case ArtistSortFeature.name:
+            return name;
+          case ArtistSortFeature.numberOfAlbums:
+            return numberOfAlbums;
+          case ArtistSortFeature.numberOfTracks:
+            return numberOfTracks;
+          default:
+            throw UnimplementedError();
+        }
+      },
     )();
   }
 
-  //****************** Prompts ******************
-  // Specific section for prompts localizations that are not concretely tied with some route
-  /// The description is being splitted into rich text there.
-  String get deletionPromptDescriptionP1 {
-    return Intl.message(
-      'Are you sure you want to delete ',
-      name: 'deletionPromptDescriptionP1',
-    );
-  }
-
-  String get deletionPromptDescriptionP2 {
-    return Intl.message(
-      ' selected tracks?',
-      name: 'deletionPromptDescriptionP2',
-    );
-  }
-
-  //****************** Dev route ******************
+  //* Dev route ******************
   String get devModeGreet {
     return Intl.message(
-      'Done! You are now a developer',
+      "Done! You are now a developer",
       name: 'devModeGreet',
     );
   }
@@ -630,7 +860,7 @@ class AppLocalizations {
   /// Shown when user tapped 4 times on app logo
   String get onThePathToDevMode {
     return Intl.message(
-      'Something should happen now...',
+      "Something should happen now...",
       name: 'onThePathToDevMode',
     );
   }
@@ -654,95 +884,81 @@ class AppLocalizations {
 
   String get devTestToast {
     return Intl.message(
-      'Test toast',
+      "Test toast",
       name: 'devTestToast',
-    );
-  }
-
-  String get devErrorSnackbar {
-    return Intl.message(
-      'Show error snackbar',
-      name: 'devErrorSnackbar',
-    );
-  }
-
-  String get devImportantSnackbar {
-    return Intl.message(
-      'Show important snackbar',
-      name: 'devImportantSnackbar',
     );
   }
 
   String get devAnimationsSlowMo {
     return Intl.message(
-      'Slow down animations',
+      "Slow down animations",
       name: 'devAnimationsSlowMo',
     );
   }
 
   String get quitDevMode {
     return Intl.message(
-      'Quit the developer mode',
+      "Quit the developer mode",
       name: 'quitDevMode',
     );
   }
 
   String get quitDevModeDescription {
     return Intl.message(
-      'Stop being a developer?',
+      "Stop being a developer?",
       name: 'quitDevModeDescription',
     );
   }
 
-  //****************** Settings routes (extended is also included) ******************
+  //* Settings routes ******************
 
   String get settings {
     return Intl.message(
-      'Settings',
+      "Settings",
       name: 'settings',
     );
   }
 
   String get general {
     return Intl.message(
-      'General',
+      "General",
       name: 'general',
     );
   }
 
   String get theme {
     return Intl.message(
-      'Theme',
+      "Theme",
       name: 'theme',
     );
   }
 
   String get settingLightMode {
     return Intl.message(
-      'Light mode',
+      "Light mode",
       name: 'settingLightMode',
     );
   }
 
-  //****************** Search route ******************
+  //* Search route ******************
 
   String get searchHistory {
     return Intl.message(
-      'Search history',
+      "Search history",
       name: 'searchHistory',
     );
   }
 
   String get searchHistoryPlaceholder {
     return Intl.message(
-      'Your search history will be displayed here',
+      "Your search history will be displayed here",
       name: 'searchHistoryPlaceholder',
     );
   }
 
   String get searchNothingFound {
     return Intl.message(
-      'Nothing found',
+      "Nothing found",
       name: 'searchNothingFound',
     );
   }
@@ -751,22 +967,65 @@ class AppLocalizations {
   /// The description is being splitted into rich text there.
   String get searchHistoryRemoveEntryDescriptionP1 {
     return Intl.message(
-      'Are you sure you want to remove ',
+      "Are you sure you want to remove ",
       name: 'searchHistoryRemoveEntryDescriptionP1',
     );
   }
 
   String get searchHistoryRemoveEntryDescriptionP2 {
     return Intl.message(
-      ' from your search history?',
+      " from your search history?",
       name: 'searchHistoryRemoveEntryDescriptionP2',
     );
   }
 
   String get searchClearHistory {
     return Intl.message(
-      'Clear search history?',
+      "Clear search history?",
       name: 'searchClearHistory',
+    );
+  }
+
+  //* Errors ******************
+  String get oopsErrorOccurred {
+    return Intl.message(
+      "Oops! An error occurred",
+      name: 'oopsErrorOccurred',
+    );
+  }
+
+  String get errorDetails {
+    return Intl.message(
+      "Error details",
+      name: 'errorDetails',
+    );
+  }
+
+  String get deletionError {
+    return Intl.message(
+      "Deletion error",
+      name: 'deletionError',
+    );
+  }
+
+  String get playlistDoesNotExistError {
+    return Intl.message(
+      "Can't find the playlist, perhaps it was deleted",
+      name: 'playlistDoesNotExistError',
+    );
+  }
+
+  String get playbackError {
+    return Intl.message(
+      "An error occurred during the playback",
+      name: 'playbackError',
+    );
+  }
+
+  String get openAppSettingsError {
+    return Intl.message(
+      "Error opening the app settings",
+      name: 'openAppSettingsError',
     );
   }
 }

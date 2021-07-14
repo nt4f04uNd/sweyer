@@ -5,33 +5,47 @@
    "version": "0.2.0",
    "configurations": [
       {
-         "name": "Flutter Profile",
-         "type": "dart",
-         "request": "launch",
-         "program": "lib/main.dart",
-         "flutterMode": "profile"
-      },
-      {
-         "name": "Flutter Release",
-         "type": "dart",
-         "request": "launch",
-         "program": "lib/main.dart",
-         "flutterMode": "release"
-      },
-      {
-         "name": "Flutter Dev",
-         "type": "dart",
-         "request": "launch",
-         "program": "lib/main.dart"
-      },
-      {
-         "name": "Flutter Dev (fast-start)",
+         "name": "dev",
          "type": "dart",
          "request": "launch",
          "program": "lib/main.dart",
          "args": [
-            "--fast-start"
+            // TODO: remove this when intl_translation supports nnbd https://github.com/dart-lang/intl_translation/issues/134
+            "--no-sound-null-safety"
+         ],
+         "codeLens": {
+            "for": [
+               "run-file",
+               "debug-file",
+               "run-test",
+               "run-test-file",
+               "debug-test",
+               "debug-test-file",
+            ],
+            // TODO: remove this intl_translation supports nnbd
+            // See also https://github.com/Dart-Code/Dart-Code/issues/3356
+            "title": "${debugType} (--no-sound-null-safety)"
+         }
+      },
+      {
+         "name": "profile",
+         "type": "dart",
+         "request": "launch",
+         "program": "lib/main.dart",
+         "flutterMode": "profile",
+         "args": [
+            "--no-sound-null-safety"
          ]
       },
+      {
+         "name": "release",
+         "type": "dart",
+         "request": "launch",
+         "program": "lib/main.dart",
+         "flutterMode": "release",
+         "args": [
+            "--no-sound-null-safety"
+         ]
+      }
    ]
 }

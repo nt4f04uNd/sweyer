@@ -10,41 +10,33 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.nt4f04und.sweyer.Constants;
-import com.nt4f04und.sweyer.channels.GeneralChannel;
+import com.nt4f04und.sweyer.channels.ContentChannel;
+import com.nt4f04und.sweyer.handlers.FetchHandler;
 import com.nt4f04und.sweyer.handlers.GeneralHandler;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import androidx.annotation.Nullable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DeletionService extends Service {
-
-   /// Produces the `where` parameter for deleting songs from the `MediaStore`
-   /// Creates the string like "_data IN (?, ?, ?, ...)"
-   private static String buildWhereClauseForDeletion(int count) {
-      StringBuilder builder = new StringBuilder(MediaStore.Audio.Media.DATA);
-      builder.append(" IN (");
-      for (int i = 0; i < count - 1; i++) {
-         builder.append("?, ");
-      }
-      builder.append("?)");
-      return builder.toString();
-   }
-
    @Override
    public int onStartCommand(Intent intent, int flags, int startId) {
-      AsyncTask.execute(() -> {
+      ExecutorService executor = Executors.newSingleThreadExecutor();
+      Handler handler = new Handler(Looper.getMainLooper());
+      executor.submit(() -> {
          ArrayList<HashMap<String, Object>> songs = (ArrayList<HashMap<String, Object>>) intent.getSerializableExtra("songs");
          ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
 
@@ -56,33 +48,17 @@ public class DeletionService extends Service {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
             for (HashMap<String, Object> song : songs) {
-               Object rawId = song.get("id");
-               Long id;
-               if (rawId instanceof Long) {
-                  id = (Long) rawId;
-               } else if (rawId instanceof Integer) {
-                  id = Long.valueOf((Integer) rawId);
-               } else {
-                  throw new IllegalArgumentException();
-               }
+               Long id = GeneralHandler.getLong(song.get("id"));
                uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
-                    GeneralChannel.instance.activity.getContentResolver(),
+                    GeneralHandler.getAppContext().getContentResolver(),
                     uris
             );
-            try {
-               // On R we are now to request an OS permission for file deletions
-               GeneralChannel.instance.activity.startIntentSenderForResult(
-                       pendingIntent.getIntentSender(),
-                       Constants.intents.PERMANENT_DELETION_REQUEST,
-                       null,
-                       0,
-                       0,
-                       0);
-            } catch (IntentSender.SendIntentException e) {
-               Log.e(Constants.LogTag, "DELETION_INTENT_ERROR: " + e.getMessage());
-            }
+            handler.post(() -> {
+               // On R it's required to request an OS permission for file deletions
+               ContentChannel.instance.startIntentSenderForResult(pendingIntent, Constants.intents.PERMANENT_DELETION_REQUEST);
+            });
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();
             // Delete files and populate `songListSuccessful` with successful uris
@@ -101,11 +77,14 @@ public class DeletionService extends Service {
             }
 
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            String where = buildWhereClauseForDeletion(songs.size());
+            String where = FetchHandler.buildWhereForCount(MediaStore.Audio.Media.DATA, songs.size());
             String[] selectionArgs = songListSuccessful.toArray(new String[0]);
             // Delete file from `MediaStore`
             resolver.delete(uri, where, selectionArgs);
+            resolver.notifyChange(uri, null);
+            ContentChannel.instance.sendResultFromIntent(true);
          }
+         stopSelf();
       });
       return super.onStartCommand(intent, flags, startId);
    }

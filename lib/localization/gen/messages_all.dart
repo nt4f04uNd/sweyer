@@ -9,6 +9,9 @@
 // ignore_for_file:prefer_single_quotes, prefer_generic_function_type_aliases
 // ignore_for_file:comment_references
 
+// @dart = 2.7
+
+
 import 'dart:async';
 
 import 'package:intl/intl.dart';

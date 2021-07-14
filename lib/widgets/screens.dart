@@ -4,15 +4,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// The screen that contains the text message and the widget slot.
 class CenterContentScreen extends StatelessWidget {
   const CenterContentScreen({
-    Key key,
-    this.text,
-    this.widget,
+    Key? key,
+    required this.text,
+    required this.widget,
   }) : super(key: key);
 
   final String text;
@@ -48,12 +47,10 @@ class CenterContentScreen extends StatelessWidget {
             top: 0.0,
             left: 0.0,
             right: 0.0,
-            child: PreferredSize(
-              preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-              child: AppBar(
-                backgroundColor: Colors.transparent,
-                leading: const SettingsButton(),
-              ),
+            child: AppBar(
+              elevation: 0.0,
+              backgroundColor: Colors.transparent,
+              leading: const SettingsButton(),
             ),
           ),
         ],

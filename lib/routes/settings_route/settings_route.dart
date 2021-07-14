@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:package_info/package_info.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,7 +16,7 @@ import 'package:url_launcher/url_launcher.dart';
 // import 'licenses_route.dart';
 
 class SettingsRoute extends StatefulWidget {
-  const SettingsRoute({Key key}) : super(key: key);
+  const SettingsRoute({Key? key}) : super(key: key);
   @override
   _SettingsRouteState createState() => _SettingsRouteState();
 }
@@ -33,9 +33,12 @@ class _SettingsRouteState extends State<SettingsRoute> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return NFPageBase(
-      name: l10n.settings,
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.settings),
+        leading: const NFBackButton(),
+      ),
+      body: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -69,7 +72,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 }
 
 class _Footer extends StatefulWidget {
-  _Footer({Key key}) : super(key: key);
+  _Footer({Key? key}) : super(key: key);
 
   @override
   _FooterState createState() => _FooterState();
@@ -83,20 +86,16 @@ class _FooterState extends State<_Footer> {
   String appVersion = '';
 
   String get appName {
-    var postFix = '';
-    if (appVersion != null) {
-      postFix = '@$appVersion';
-    }
-    return Constants.Config.APPLICATION_TITLE + postFix;
+    return Constants.Config.APPLICATION_TITLE + '@$appVersion';
   }
 
   @override
   void initState() {
     super.initState();
-    _fetch();
+    _init();
   }
 
-  Future<void> _fetch() async {
+  Future<void> _init() async {
     final info = await PackageInfo.fromPlatform();
     if (mounted) {
       setState(() {
@@ -115,7 +114,7 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleSecretLogoClick() {
-    if (ContentControl.devMode.value)
+    if (Prefs.devMode.get())
       return;
     final int remainingClicks = clicksForDevMode - 1 - _clickCount;
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
@@ -128,7 +127,7 @@ class _FooterState extends State<_Footer> {
     if (remainingClicks < 0) {
       return;
     } else if (remainingClicks == 0) {
-      ContentControl.setDevMode(true);
+      Prefs.devMode.set(true);
       NFSnackbarController.showSnackbar(
         NFSnackbarEntry(
           important: true,
@@ -137,7 +136,7 @@ class _FooterState extends State<_Footer> {
             leading: Icon(
               Icons.adb_rounded,
               color: Colors.white,
-              size: Constants.iconSize * textScaleFactor,
+              size: NFConstants.iconSize * textScaleFactor,
             ),
             title: Text(l10n.devModeGreet, style: textStyle),
             color: Constants.AppColors.androidGreen,
@@ -202,14 +201,14 @@ class _FooterState extends State<_Footer> {
                     appName,
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: ThemeControl.theme.textTheme.headline6.color,
+                      color: ThemeControl.theme.textTheme.headline6!.color,
                     ),
                   ),
                   Text(
                     'Copyright (c) 2019, nt4f04uNd',
                     style: Theme.of(context)
                         .textTheme
-                        .caption
+                        .caption!
                         .copyWith(height: 1.0),
                   ),
                 ],

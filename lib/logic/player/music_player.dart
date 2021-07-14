@@ -3,6 +3,8 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
+export 'backend.dart';
+export 'content_channel.dart';
 export 'content.dart';
 export 'queue.dart';
 export 'serialization.dart';
@@ -10,26 +12,175 @@ export 'serialization.dart';
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 
+/// Represents the path in browsed library.
+///
+/// There may be:
+/// * nested paths, like [albums] - which can have an [id]
+/// * and not nested paths - like [songs], which just displays all songs
 class _BrowseParent extends Enum {
-  const _BrowseParent(String value, [this.id]) : super(value);
+  const _BrowseParent(String value, {this.id, required this.nested}) : super(value);
+
+  final bool nested;
 
   /// This property is non-null for entries that have id, for currently only for albums.
-  final int id;
+  final int? id;
   bool get hasId => id != null;
 
-  static const root = _BrowseParent('root');
-  static const tracks = _BrowseParent('tracks');
-  static const albums = _BrowseParent('albums');
+  /// Shows all other parents.
+  static const root = _BrowseParent('root', nested: false);
+
+  /// Path for all songs.
+  static const songs = _BrowseParent('songs', nested: false);
+
+  /// Path for all albums.
+  static const albums = _BrowseParent('albums', nested: true);
+
+  /// Path for all playlists.
+  static const playlists = _BrowseParent('playlists', nested: true);
+
+  /// Path for all artists.
+  static const artists = _BrowseParent('artists', nested: true);
 
   _BrowseParent withId(int id) {
-    assert(this == albums, 'This parent cannot have id');
-    return _BrowseParent(value, id); 
+    assert(nested, "This parent cannot have and id, because it's not nested");
+    return _BrowseParent(value, id: id, nested: false); 
+  }
+}
+
+class _BrowserParentProvider {
+  /// Current parent.
+  _BrowseParent _parent = _BrowseParent.root;
+  _BrowseParent get parent => _parent;
+
+  /// Handles [AudioHandler.getChildren] call.
+  List<MediaItem> handleGetChildren(String parentMediaId) {
+    final id = int.tryParse(parentMediaId);
+    if (id != null) {
+        _parent = _parent.withId(id);
+    } else {
+      switch (parentMediaId) {
+        case 'root':
+          _parent = _BrowseParent.root; break;
+        case 'songs':
+          _parent = _BrowseParent.songs; break;
+        case 'albums':
+          _parent = _BrowseParent.albums; break;
+        case 'playlists':
+          _parent = _BrowseParent.playlists; break;
+        case 'artists':
+          _parent = _BrowseParent.artists; break;
+      }
+    }
+
+    switch (parentMediaId) {
+      case AudioService.recentRootId:
+        return ContentControl.state.queues.current
+          .songs
+          .map((song) => song.toMediaItem())
+          .toList();
+      case 'root':
+        return [
+          MediaItem(
+            id: _BrowseParent.songs.value,
+            album: '',
+            title: staticl10n.contents<Song>(),
+            playable: false,
+          ),
+          MediaItem(
+            id: _BrowseParent.albums.value,
+            album: '',
+            title: staticl10n.contents<Album>(),
+            playable: false,
+          ),
+          MediaItem(
+            id: _BrowseParent.playlists.value,
+            album: '',
+            title: staticl10n.contents<Playlist>(),
+            playable: false,
+          ),
+          MediaItem(
+            id: _BrowseParent.artists.value,
+            album: '',
+            title: staticl10n.contents<Artist>(),
+            playable: false,
+          ),
+        ];
+      case 'songs':
+        return ContentControl.getContent<Song>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      case 'albums':
+        return ContentControl.getContent<Album>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      case 'playlists':
+        return ContentControl.getContent<Playlist>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      case 'artists':
+        return ContentControl.getContent<Artist>()
+          .map((el) => el.toMediaItem())
+          .toList();
+      default:
+        if (id == null) {
+          throw StateError('');
+        }
+        switch (_parent.value) {
+          case 'albums':
+            return ContentControl.getContentById<Album>(id)
+              !.songs
+              .map((song) => song.toMediaItem())
+              .toList();
+          case 'playlists':
+            return ContentControl.getContentById<Playlist>(id)
+              !.songs
+              .map((song) => song.toMediaItem())
+              .toList();
+          case 'artists':
+            return ContentControl.getContentById<Artist>(id)
+              !.songs
+              .map((song) => song.toMediaItem())
+              .toList();
+          default:
+            throw UnimplementedError();
+        }
+    }
+  }
+
+  /// Updates the queue.
+  /// Should be called when media item changes.
+  void handleMediaItemChange() {
+    if (!parent.hasId) {
+      ContentControl.resetQueue();
+    } else {
+      switch (parent.value) {
+        case 'albums':
+          final album = ContentControl.getContentById<Album>(parent.id!);
+          if (album != null) {
+            ContentControl.setOriginQueue(origin: album, songs: album.songs);
+          }
+          break;
+        case 'playlists':
+          final playlist = ContentControl.getContentById<Playlist>(parent.id!);
+          if (playlist != null) {
+            ContentControl.setOriginQueue(origin: playlist, songs: playlist.songs);
+          }
+          break;
+        case 'artists':
+          final artist = ContentControl.getContentById<Artist>(parent.id!);
+          if (artist != null) {
+            ContentControl.setOriginQueue(origin: artist, songs: artist.songs);
+          }
+          break;
+        default:
+          throw UnimplementedError();
+      }
+    }
   }
 }
 
@@ -39,16 +190,17 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   bool _disposed = false;
+  bool _running = false;
   MusicPlayer player = MusicPlayer.instance;
   final BehaviorSubject<void> contentChangeSubject = BehaviorSubject();
 
   Future<void> _init() async {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     
-    DateTime _lastEvent;
+    DateTime? _lastEvent;
     player.positionStream.listen((event) {
       final now = DateTime.now();
-      if (_lastEvent == null || now.difference(_lastEvent) > const Duration(milliseconds: 1000)) {
+      if (_lastEvent == null || now.difference(_lastEvent!) > const Duration(milliseconds: 1000)) {
         _lastEvent = now;
         _setState();
       }
@@ -56,6 +208,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     player.playingStream.listen((playing) {
       _setState();
       _lastEvent = DateTime.now();
+      if (playing)
+        _running = true;
     });
     player.loopingStream.listen((event) => _setState());
     ContentControl.state.onSongChange.listen((song) {
@@ -74,33 +228,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   void dispose() {
     _disposed = true;
-    WidgetsBinding.instance.removeObserver(this);
-  }
-
-  
-  T _parentWithIdPick<T>({ @required T albums }) {
-    assert(parent.hasId);
-    switch(parent.value) {
-      case 'albums':
-        return albums;
-      default:
-        throw UnimplementedError();
-    }
-  }
-
-  void _handleMediaItemChange() {
-    if (!parent.hasId) {
-      ContentControl.resetQueue();
-    } else {
-      _parentWithIdPick<VoidCallback>(
-        albums: () {
-          final album = ContentControl.state.albums[parent.id];
-          if (album != null) {
-            ContentControl.setPersistentQueue(queue: album, songs: album.songs);
-          }
-        },
-      )();
-    }
+    WidgetsBinding.instance!.removeObserver(this);
   }
 
   @override
@@ -109,8 +237,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> prepareFromMediaId(String mediaId, [Map<String, dynamic> extras]) async {
-    _handleMediaItemChange();
+  Future<void> prepareFromMediaId(String mediaId, [Map<String, dynamic>? extras]) async {
+    parentProvider.handleMediaItemChange();
     final song = ContentControl.state.allSongs.byId.get(int.parse(mediaId));
     if (song != null) {
       await player.setSong(song);
@@ -118,7 +246,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> prepareFromSearch(String query, [Map<String, dynamic> extras]) async {
+  Future<void> prepareFromSearch(String query, [Map<String, dynamic>? extras]) async {
     final songs = ContentControl.search<Song>(query);
     if (songs.isNotEmpty) {
       ContentControl.setSearchedQueue(query, songs);
@@ -127,7 +255,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> prepareFromUri(Uri uri, [Map<String, dynamic> extras]) {
+  Future<void> prepareFromUri(Uri uri, [Map<String, dynamic>? extras]) {
     // TODO: implement prepareFromUri
     throw UnimplementedError();
     return super.prepareFromUri(uri, extras);
@@ -139,8 +267,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> playFromMediaId(String mediaId, [Map<String, dynamic> extras]) async {
-    _handleMediaItemChange();
+  Future<void> playFromMediaId(String mediaId, [Map<String, dynamic>? extras]) async {
+    parentProvider.handleMediaItemChange();
     final song = ContentControl.state.allSongs.byId.get(int.parse(mediaId));
     if (song != null) {
       await player.setSong(song);
@@ -149,7 +277,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> playFromSearch(String query, [Map<String, dynamic> extras]) async {
+  Future<void> playFromSearch(String query, [Map<String, dynamic>? extras]) async {
     final songs = ContentControl.search<Song>(query);
     if (songs.isNotEmpty) {
       ContentControl.setSearchedQueue(query, songs);
@@ -159,7 +287,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> playFromUri(Uri uri, [Map<String, dynamic> extras]) {
+  Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) {
     // TODO: implement playFromUri
     throw UnimplementedError();
     return super.playFromUri(uri, extras);
@@ -177,7 +305,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   @override
   Future<void> pause() => player.pause();
 
-  Timer hookTimer;
+  Timer? hookTimer;
   int hookPressedCount = 0;
 
   @override
@@ -207,6 +335,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> stop() async {
+    _running = false;
     // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
     // await player.stop();
     await player.pause();
@@ -224,7 +353,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   @override
   Future<void> addQueueItems(List<MediaItem> mediaItems) async {
     final songs = mediaItems.map((mediaItem) {
-      return ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
+      return ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id))!;
     });
     if (songs.isNotEmpty) {
       ContentControl.addToQueue(songs.toList());
@@ -235,7 +364,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   Future<void> insertQueueItem(int index, MediaItem mediaItem) async {
     final song = ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id));
     if (song != null) {
-      ContentControl.insertToQueue(index, song);
+      ContentControl.insertToQueue(index, [song]);
     }
   }
 
@@ -243,10 +372,11 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   Future<void> updateQueue(List<MediaItem> queue) async {
     if (queue.isNotEmpty) {
       final songs = queue.map((el) {
-        return ContentControl.state.allSongs.byId.get(int.parse(el.id));
+        return ContentControl.state.allSongs.byId.get(int.parse(el.id))!;
       }).toList();
       ContentControl.setQueue(
         type: QueueType.arbitrary,
+        shuffled: false,
         songs: songs,
       );
       if (!songs.contains(ContentControl.state.currentSong)) {
@@ -265,7 +395,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   @override
   Future<void> removeQueueItem(MediaItem mediaItem) async {
     ContentControl.removeFromQueue(
-      ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id)),
+      ContentControl.state.allSongs.byId.get(int.parse(mediaItem.id))!,
     );
   }
 
@@ -294,13 +424,13 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 
   @override
-  Future<void> seek(Duration position) {
+  Future<void> seek(Duration position) async {
+    await player.seek(position);
     _setState();
-    return player.seek(position);
   }
 
   @override
-  Future<void> setRating(Rating rating, Map extras) {
+  Future<void> setRating(Rating rating, Map? extras) {
     // TODO: implement setRating
     throw UnimplementedError();
     return super.setRating(rating, extras);
@@ -335,67 +465,11 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     return player.setSpeed(speed);
   }
 
-  /// Current parent.
-  _BrowseParent parent = _BrowseParent.root;
+  final parentProvider = _BrowserParentProvider();
 
   @override
-  Future<List<MediaItem>> getChildren(String parentMediaId, [Map<String, dynamic> options]) async {
-    if (parentMediaId != AudioService.recentRootId) {
-      final id = int.tryParse(parentMediaId);
-      if (id != null) {
-        parent = _BrowseParent.albums.withId(id);
-      } else {
-        switch (parentMediaId) {
-          case AudioService.browsableRootId:
-            parent = _BrowseParent.root;
-            break;
-          case 'tracks':
-            parent = _BrowseParent.tracks;
-            break;
-          case 'albums':
-            parent = _BrowseParent.albums;
-            break;
-          default:
-            throw ArgumentError();
-        }
-      }
-    }
-    switch (parentMediaId) {
-      case AudioService.recentRootId:
-        return ContentControl.state.queues.current
-            .songs
-            .map((song) => song.toMediaItem())
-            .toList();
-      case AudioService.browsableRootId:
-        return [
-          MediaItem(
-            id: 'tracks',
-            album: '',
-            title: staticl10n.tracks,
-            playable: false,
-          ),
-          MediaItem(
-            id: 'albums',
-            album: '',
-            title: staticl10n.albums,
-            playable: false,
-          ),
-        ];
-      case 'tracks':
-        return ContentControl.state.allSongs
-            .songs
-            .map((song) => song.toMediaItem())
-            .toList();
-      case 'albums':
-        return ContentControl.state.albums.values
-            .map((album) => album.toMediaItem())
-            .toList();
-      default:
-        return ContentControl.state.albums[int.parse(parentMediaId)]
-            .songs
-            .map((song) => song.toMediaItem())
-            .toList();
-    }
+  Future<List<MediaItem>> getChildren(String parentMediaId, [Map<String, dynamic>? options]) async {
+    return parentProvider.handleGetChildren(parentMediaId);
   }
 
   @override
@@ -410,11 +484,11 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<MediaItem> getMediaItem(String mediaId) async {
-    return ContentControl.state.allSongs.byId.get(int.parse(mediaId)).toMediaItem();
+    return ContentControl.state.allSongs.byId.get(int.parse(mediaId))!.toMediaItem();
   }
 
   @override
-  Future<List<MediaItem>> search(String query, [Map<String, dynamic> extras]) async {
+  Future<List<MediaItem>> search(String query, [Map<String, dynamic>? extras]) async {
     return ContentControl.search<Song>(query)
       .map((song) => song.toMediaItem())
       .toList();
@@ -429,12 +503,13 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       case 'pause':
       case 'play': return player.playPause();
       case 'play_next': return player.playNext();
-      case 'stop': stop();
+      case 'stop': return stop();
+      default: throw UnimplementedError();
     }
   }
 
   @override
-  Future<void> didChangeLocales(List<Locale> locales) async {
+  Future<void> didChangeLocales(List<Locale>? locales) async {
     await AppLocalizations.init();
     mediaItem.add(ContentControl.state.currentSong.toMediaItem());
     queue.add(ContentControl.state.queues.current
@@ -451,14 +526,14 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   /// Broadcasts the current state to all clients.
   void _setState() {
-    if (_disposed)
+    if (_disposed || !_running)
       return;
     final playing = player.playing;
     final l10n = staticl10n;
-    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark
+    final color = WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
       ? 'white'
       : 'black';
-    playbackState.add(playbackState.value.copyWith(
+    playbackState.add(playbackState.value!.copyWith(
       controls: [
         // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
         if (player.looping)
@@ -542,7 +617,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
         ProcessingState.completed: AudioProcessingState.completed,
       }[ // Excluding idle state because it makes notification to reappear.
         player.processingState == ProcessingState.idle
-          ? AudioProcessingState.loading
+          ? ProcessingState.loading
           : player.processingState
       ],
       playing: playing,
@@ -557,18 +632,18 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 /// Player that plays the content provided by provided [ContentControl].
 class MusicPlayer extends AudioPlayer {
   MusicPlayer._();
-  static MusicPlayer _instance;
+  static MusicPlayer? _instance;
   static MusicPlayer get instance {
     return _instance ??= MusicPlayer._();
   }
 
-  static _AudioHandler _handler;
+  static _AudioHandler? _handler;
 
   /// Updates service state media item.
   void updateServiceMediaItem() {
     final song = ContentControl.state.currentSongNullable;
-    if (song != null) {
-      _handler.mediaItem.add(song.toMediaItem());
+    if (song != null && _handler!._running) {
+      _handler!.mediaItem.add(song.toMediaItem());
     }
   }
 
@@ -605,13 +680,13 @@ class MusicPlayer extends AudioPlayer {
     });
 
     positionStream.listen((position) { 
-      Prefs.songPositionInt.set(position.inSeconds);
+      Prefs.songPosition.set(position.inSeconds);
     });
 
     // Restore from prefs.
     await Future.wait([
-      seek(Duration(seconds: await Prefs.songPositionInt.get())),
-      setLoopMode(await Prefs.loopModeBool.get()
+      seek(Duration(seconds: Prefs.songPosition.get())),
+      setLoopMode(Prefs.loopMode.get()
         ? LoopMode.one
         : LoopMode.off),
     ]);
@@ -631,10 +706,13 @@ class MusicPlayer extends AudioPlayer {
     final current = ContentControl.state.queues.current;
     // songsEmpty condition is here to avoid errors when trying to get first song index
     if (current.isNotEmpty) {
-      final songId = await Prefs.songIdInt.get();
-      await setSong(songId == null
-        ? current.songs[0]
-        : current.byId.get(songId) ?? current.songs[0]);
+      final songId = Prefs.songId.get();
+      await setSong(
+        songId == null
+          ? current.songs[0]
+          : current.byId.get(songId) ?? current.songs[0],
+        fromBeginningWhenSame: false,
+      );
     }
   }
 
@@ -650,7 +728,7 @@ class MusicPlayer extends AudioPlayer {
       mode = LoopMode.off;
     }
     await super.setLoopMode(mode);
-    Prefs.loopModeBool.set(looping);
+    Prefs.loopMode.set(looping);
   }
 
   /// Switches the [looping].
@@ -658,31 +736,29 @@ class MusicPlayer extends AudioPlayer {
     return setLoopMode(looping ? LoopMode.off : LoopMode.one);
   }
 
-  static bool _hasDuplicates(Song song) {
-    final queues = ContentControl.state.queues;
-    return (queues.type != QueueType.all || queues.modified) &&
-            queues.current.songs.where((el) => el.id == song.id).length > 1;
-  }
-
   /// Prepare the [song] to be played.
-  Future<void> setSong(Song song, { bool fromBeginning = false, bool duplicate }) async {
+  /// The song position is set to 0.
+  ///
+  /// Calling this function with the same song will just seek to the
+  /// beginning. To disable this [fromBeginningWhenSame] can be set to false.
+  Future<void> setSong(Song? song, { bool fromBeginningWhenSame = true }) async {
     song ??= ContentControl.state.allSongs.songs[0];
+    final previousCurrentSong = ContentControl.state.currentSongNullable;
     ContentControl.state.changeSong(song);
+    if (previousCurrentSong == ContentControl.state.currentSong) {
+      if (fromBeginningWhenSame)
+        await seek(Duration.zero);
+      return;
+    }
     try {
-      final _duplicate = duplicate ?? _hasDuplicates(song);
-      if (_duplicate && duplicate == null) {
-        ContentControl.handleDuplicate(song);
-      }
-
       await setAudioSource(
         ProgressiveAudioSource(Uri.parse(song.contentUri)),
-        initialPosition: fromBeginning ? const Duration() : null,
       );
     } catch (e) {
       if (e is PlayerInterruptedException) {
-
+        // Do nothing
       } else if (e is PlayerException) {
-        final message = getl10n(AppRouter.instance.navigatorKey.currentContext).playbackErrorMessage;
+        final message = getl10n(AppRouter.instance.navigatorKey.currentContext!).playbackError;
         ShowFunctions.instance.showToast(msg: message);
         playNext(song: song);
         ContentControl.state.allSongs.remove(song);
@@ -696,7 +772,7 @@ class MusicPlayer extends AudioPlayer {
 
   /// The [index] parameter is made no-op.
   @override
-  Future<void> seek(Duration position, {void index}) async {
+  Future<void> seek(Duration? position, {void index}) async {
     return super.seek(position);
   }
 
@@ -709,80 +785,38 @@ class MusicPlayer extends AudioPlayer {
   }
 
   /// Plays the song after current, or if speceified, then after [song].
-  Future<void> playNext({ Song song }) async {
+  Future<void> playNext({ Song? song }) async {
     song = ContentControl.state.queues.current.getNext(
       song ?? ContentControl.state.currentSong,
     );
     if (song != null) {
-      await setSong(song, fromBeginning: true);
+      await setSong(song);
       await play();
     } else {
       final songs = ContentControl.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
-        await setSong(song, fromBeginning: true);
+        await setSong(song);
         await play();
       }
     }
   }
 
   /// Plays the song before current, or if speceified, then before [song].
-  Future<void> playPrev({ Song song }) async {
+  Future<void> playPrev({ Song? song }) async {
     song = ContentControl.state.queues.current.getPrev(
       song ?? ContentControl.state.currentSong,
     );
     if (song != null) {
-      await setSong(song, fromBeginning: true);
+      await setSong(song);
       await play();
     } else {
       final songs = ContentControl.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
-        await setSong(song, fromBeginning: true);
+        await setSong(song);
         await play();
       }
     }
   }
-
-  /// Function that handles click on track tile.
-  ///
-  /// Opens player route.
-  Future<void> handleSongClick(
-    BuildContext context,
-    Song clickedSong, {
-    SongClickBehavior behavior = SongClickBehavior.play,
-  }) async {
-    final hasDuplicates = _hasDuplicates(clickedSong);
-    if (hasDuplicates) {
-      ContentControl.handleDuplicate(clickedSong);
-    }
-    final isSame = clickedSong == ContentControl.state.currentSong;
-    if (behavior == SongClickBehavior.play) {
-      playerRouteController.open();
-      await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
-      await play();
-    } else {
-      if (isSame) {
-        if (!playing) {
-          playerRouteController.open();
-          await play();
-        } else {
-          await pause();
-        }
-      } else {
-        playerRouteController.open();
-        await setSong(clickedSong, duplicate: hasDuplicates, fromBeginning: true);
-        await play();
-      }
-    }
-  }
-}
-
-/// Describes how to respond to song tile clicks.
-enum SongClickBehavior {
-  /// Always start the clicked song from the beginning.
-  play,
-
-  /// Allow play/pause on the clicked song.
-  playPause
 }

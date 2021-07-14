@@ -10,9 +10,9 @@ import 'package:sweyer/sweyer.dart';
 /// Creates slider with labels of min and max values
 class LabelledSlider extends StatelessWidget {
   const LabelledSlider({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
     this.min = 0.0,
@@ -25,10 +25,7 @@ class LabelledSlider extends StatelessWidget {
     this.minLabel,
     this.maxLabel,
     this.themeData = const SliderThemeData(),
-  })  : assert(value != null),
-        assert(min != null),
-        assert(max != null),
-        assert(min <= max),
+  })  : assert(min <= max),
         assert(value >= min && value <= max),
         assert(divisions == null || divisions > 0),
         super(key: key);
@@ -40,10 +37,10 @@ class LabelledSlider extends StatelessWidget {
   final ValueChanged<double> onChanged;
 
   /// See [Slider.onChangeStart]
-  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double>? onChangeStart;
 
   /// See [Slider.onChangeEnd]
-  final ValueChanged<double> onChangeEnd;
+  final ValueChanged<double>? onChangeEnd;
 
   /// See [Slider.min]
   final double min;
@@ -52,25 +49,25 @@ class LabelledSlider extends StatelessWidget {
   final double max;
 
   /// See [Slider.divisions]
-  final int divisions;
+  final int? divisions;
 
   /// See [Slider.label]
-  final String label;
+  final String? label;
 
   /// See [Slider.activeColor]
-  final Color activeColor;
+  final Color? activeColor;
 
   /// See [Slider.inactiveColor]
-  final Color inactiveColor;
+  final Color? inactiveColor;
 
   /// See [Slider.semanticFormatterCallback]
-  final SemanticFormatterCallback semanticFormatterCallback;
+  final SemanticFormatterCallback? semanticFormatterCallback;
 
   /// Label to display min value before the slider
-  final String minLabel;
+  final String? minLabel;
 
   /// Label to display max value after the slider
-  final String maxLabel;
+  final String? maxLabel;
 
   final SliderThemeData themeData;
 
@@ -83,7 +80,7 @@ class LabelledSlider extends StatelessWidget {
         //******** Min Label ********
         if (minLabel != null)
           Text(
-            minLabel,
+            minLabel!,
             style: const TextStyle(fontSize: 13),
           ),
 
@@ -93,7 +90,7 @@ class LabelledSlider extends StatelessWidget {
             height: 30.0,
             child: SliderTheme(
               data: SliderThemeData(
-                trackShape: themeData.trackShape ?? const TrackShapeWithMargin(),
+                trackShape: themeData.trackShape ?? const TrackShapeWithMargin(horizontalMargin: 12.0),
                 valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
                 overlayColor: Colors.transparent,
                 activeTrackColor: activeColor ?? ThemeControl.theme.colorScheme.primary,
@@ -117,36 +114,10 @@ class LabelledSlider extends StatelessWidget {
         //******** Max Label ********
         if (maxLabel != null)
           Text(
-            maxLabel,
+            maxLabel!,
             style: const TextStyle(fontSize: 13),
           ),
       ],
     );
-  }
-}
-
-/// Put it into slider theme to make custom track margin
-class TrackShapeWithMargin extends RoundedRectSliderTrackShape {
-  const TrackShapeWithMargin({
-    this.horizontalMargin = 12.0,
-  });
-
-  /// Margin to be applied for each side horizontally
-  final double horizontalMargin;
-
-  @override
-  Rect getPreferredRect({
-    @required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    @required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    final double trackHeight = sliderTheme.trackHeight;
-    final double trackLeft = offset.dx + horizontalMargin;
-    final double trackTop =
-        offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width - horizontalMargin * 2;
-    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }

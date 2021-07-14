@@ -7,13 +7,14 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide SearchDelegate;
-import 'package:collection/collection.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
 
@@ -23,7 +24,9 @@ class _Notifier extends ChangeNotifier {
   }
 }
 
-class SearchDelegate {
+class ContentSearchDelegate {
+  ContentSearchDelegate();
+
   /// Whether to automatically open the keyboard when page is opened.
   bool autoKeyboard = false;
 
@@ -33,11 +36,14 @@ class SearchDelegate {
     _setStateNotifier.notify();
   }
 
+  /// Used in [HomeRouter.drawerCanBeOpened].
+  bool get chipsBarDragged => _chipsBarDragged;
+  bool _chipsBarDragged = false;
+
   /// The current query string shown in the [AppBar].
   String get query => _queryTextController.text;
   final TextEditingController _queryTextController = TextEditingController();
   set query(String value) {
-    assert(query != null);
     _queryTextController.text = value;
   }
 }
@@ -45,13 +51,15 @@ class SearchDelegate {
 
 /// Search results container.
 class _Results {
-  Map<Type, List<Content>> map = {
-    Song: [],
-    Album: [],
-  };
+  ContentMap<List<Content>> map = ContentMap({
+    for (final contentType in Content.enumerate())
+      contentType: [],
+  });
 
-  List<Song> get songs => map[Song];
-  List<Album> get albums => map[Album];
+  List<Song> get songs => map.getValue<Song>().cast<Song>();
+  List<Album> get albums => map.getValue<Album>().cast<Album>();
+  List<Playlist> get playlists => map.getValue<Playlist>().cast<Playlist>();
+  List<Artist> get artists => map.getValue<Artist>().cast<Artist>();
 
   bool get empty => map.values.every((element) => element.isEmpty);
   bool get notEmpty => map.values.any((element) => element.isNotEmpty);
@@ -62,23 +70,21 @@ class _Results {
     }
   }
 
-  void search(query) {
-    map[Song] = ContentControl.search<Song>(query);
-    map[Album] = ContentControl.search<Album>(query);
+  void search(String query) {
+    for (final contentType in Content.enumerate()) {
+      map.setValue(
+        ContentControl.search(query, contentType: contentType),
+        key: contentType,
+      );
+    }
   }
 }
 
 class _SearchStateDelegate {
-  _SearchStateDelegate(this.searchDelegate)
+  _SearchStateDelegate(this.selectionController, this.searchDelegate)
     : scrollController = ScrollController(),
-    singleListScrollController = ScrollController(),
-    selectionController = ContentSelectionController.forContent(
-      AppRouter.instance.navigatorKey.currentState,
-      closeButton: true,
-      ignoreWhen: () => playerRouteController.opened || HomeRouter.instance.routes.last != HomeRoutes.search,
-    )
-  {
-    selectionController.addListener(setState);
+    singleListScrollController = ScrollController()
+    {
     /// Initalize [prevQuery] and [trimmedQuery] values.
     onQueryChange();
   }
@@ -89,10 +95,9 @@ class _SearchStateDelegate {
   final ScrollController scrollController;
   final ScrollController singleListScrollController;
   final ContentSelectionController selectionController;
-  final SearchDelegate searchDelegate;
+  final ContentSearchDelegate searchDelegate;
   /// Used to check whether the body is scrolled.
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
-  final ValueNotifier<Type> contentTypeNotifier = ValueNotifier(null);
   _Results results = _Results();
   String prevQuery = '';
   String trimmedQuery = '';
@@ -102,11 +107,9 @@ class _SearchStateDelegate {
     scrollController.dispose();
     singleListScrollController.dispose();
     bodyScrolledNotifier.dispose();
-    contentTypeNotifier.dispose();
-    selectionController.dispose();
   }
 
-  static _SearchStateDelegate _of(BuildContext context) {
+  static _SearchStateDelegate? _of(BuildContext context) {
     return _DelegateProvider.of(context).delegate;
   }
 
@@ -116,17 +119,35 @@ class _SearchStateDelegate {
     searchDelegate.setState();
   }
 
+  ValueListenable<Type?> get onContentTypeChange => selectionController.onContentTypeChange;
+
   /// Content type to filter results by.
   ///
-  /// When null results are displayed as list of sections, see [_ContentSection].
-  Type get contentType => contentTypeNotifier.value;
-  set contentType(Type value) {
-    contentTypeNotifier.value = value;
+  /// When null results are displayed as list of sections, see [ContentSection].
+  Type? get contentType => selectionController.primaryContentType;
+  set contentType(Type? value) {
+    selectionController.primaryContentType = value;
     bodyScrolledNotifier.value = false;
+    if (value != null) {
+      // Scroll to chip
+      ensureVisible(
+        chipContextMap.getValue(value),
+        duration: kTabScrollDuration,
+        alignment: 0.5,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+      );
+    }
+  }
+
+  ContentMap<BuildContext> chipContextMap = ContentMap();
+  /// Saves chips context to be able to scroll it when [contentType] changes.
+  void registerChipContext(BuildContext context, Type contentType) {
+    chipContextMap.setValue(context, key: contentType);
   }
 
   void onSubmit() {
-    SearchHistory.instance.save(query);
+    
+    SearchHistory.instance.add(query);
   }
 
   void onQueryChange() {
@@ -140,16 +161,16 @@ class _SearchStateDelegate {
         bodyScrolledNotifier.value = false;
         results.search(trimmedQuery);
       }
-      if (scrollController?.hasClients ?? false)
+      if (scrollController.hasClients)
         scrollController.jumpTo(0);
-      if (singleListScrollController?.hasClients ?? false)
+      if (singleListScrollController.hasClients)
         singleListScrollController.jumpTo(0);
     }
     prevQuery = trimmedQuery;
   }
 
   /// Handles tap to different content tiles.
-  VoidCallback getContentTileTapHandler<T extends Content>([Type contentType]) {
+  void handleContentTap<T extends Content>([Type? contentType]) {
     return contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
@@ -157,47 +178,155 @@ class _SearchStateDelegate {
         ContentControl.setSearchedQueue(query, results.songs);
       },
       album: onSubmit,
-    );
+      playlist: onSubmit,
+      artist: onSubmit,
+    )();
+  }
+
+  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// given context visible.
+  ///
+  /// Copied from [Scrollable.ensureVisible].
+  static Future<void> ensureVisible(
+    BuildContext context, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+  }) {
+    final List<Future<void>> futures = <Future<void>>[];
+
+    // The `targetRenderObject` is used to record the first target renderObject.
+    // If there are multiple scrollable widgets nested, we should let
+    // the `targetRenderObject` as visible as possible to improve the user experience.
+    // Otherwise, let the outer renderObject as visible as possible maybe cause
+    // the `targetRenderObject` invisible.
+    // Also see https://github.com/flutter/flutter/issues/65100
+    RenderObject? targetRenderObject;
+    ScrollableState? scrollable = Scrollable.of(context);
+    while (scrollable != null) {
+      futures.add(_ensureVisible(
+        scrollable.position,
+        context.findRenderObject()!,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+        targetRenderObject: targetRenderObject,
+      ));
+
+      targetRenderObject = targetRenderObject ?? context.findRenderObject();
+      context = scrollable.context;
+      scrollable = Scrollable.of(context);
+    }
+
+    if (futures.isEmpty || duration == Duration.zero)
+      return Future<void>.value();
+    if (futures.length == 1)
+      return futures.single;
+    return Future.wait<void>(futures).then<void>((List<void> _) => null);
+  }
+
+  /// Copied from [ScrollPosition.ensureVisible].
+  ///
+  /// By default [ScrollPosition.ensureVisible] will always scroll to the
+  /// given alignment, no matter what. I need it to scroll only in certain
+  /// conditions, so I changed it a little bit.
+  static Future<void> _ensureVisible(
+    ScrollPosition position,
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+  }) {
+    assert(object.attached);
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
+
+    Rect? targetRect;
+    if (targetRenderObject != null && targetRenderObject != object) {
+      targetRect = MatrixUtils.transformRect(
+        targetRenderObject.getTransformTo(object),
+        object.paintBounds.intersect(targetRenderObject.paintBounds),
+      );
+    }
+
+    double target;
+    switch (alignmentPolicy) {
+      case ScrollPositionAlignmentPolicy.explicit:
+        target = viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
+        target = viewport.getOffsetToReveal(object, 1.0, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        if (target < position.pixels) {
+          target = position.pixels;
+        }
+        break;
+      case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
+        target = viewport.getOffsetToReveal(object, 0.0, rect: targetRect).offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        if (target > position.pixels) {
+          target = position.pixels;
+        }
+        break;
+    }
+
+    if (position.pixels > position.viewportDimension / 2 &&
+       (position.pixels - target).abs() < position.viewportDimension / 2 - 50) {
+      return Future<void>.value();
+    }
+
+    if (duration == Duration.zero) {
+      position.jumpTo(target);
+      return Future<void>.value();
+    }
+
+    return position.animateTo(target, duration: duration, curve: curve);
   }
 }
 
 class SearchPage extends Page<void> {
   const SearchPage({
-    LocalKey key,
-    @required this.delegate,
+    LocalKey? key,
+    required this.child,
     this.transitionSettings,
-    String name,
+    String? name,
   }) : super(key: key, name: name);
 
-  final SearchDelegate delegate;
-  final RouteTransitionSettings transitionSettings;
+  final Widget child;
+  final RouteTransitionSettings? transitionSettings;
 
   @override
-  _SearchPageRoute createRoute(BuildContext context) {
-    return _SearchPageRoute(page: this);
+  SearchPageRoute createRoute(BuildContext context) {
+    return SearchPageRoute(
+      settings: this,
+      child: child,
+      transitionSettings: transitionSettings,
+    );
   }
 }
 
-class _SearchPageRoute extends RouteTransition<_SearchPage> {
-  _SearchPageRoute({
-    @required this.page,
+class SearchPageRoute extends RouteTransition<SearchPage> {
+  SearchPageRoute({
+    required this.child,
+    RouteSettings? settings,
+    RouteTransitionSettings? transitionSettings,
   }) : super(
-         settings: page,
-         transitionSettings: page.transitionSettings,
+         settings: settings,
+         transitionSettings: transitionSettings,
        );
 
-  final SearchPage page;
+  final Widget child;
 
   @override
   bool get maintainState => true;
 
   @override
   Widget buildContent(BuildContext context) {
-    return _SearchPage(
-      route: this,
-      animation: animation,
-      delegate: page.delegate,
-    );
+    return child;
   }
 
   @override
@@ -213,33 +342,46 @@ class _SearchPageRoute extends RouteTransition<_SearchPage> {
   }
 }
 
-class _SearchPage<T> extends StatefulWidget {
-  const _SearchPage({
-    Key key,
-    this.route,
-    this.animation,
-    this.delegate,
+class SearchRoute extends StatefulWidget {
+  SearchRoute({
+    Key? key,
+    required this.delegate,
   }) : super(key: key);
 
-  final PageRoute route;
-  final Animation animation;
-  final SearchDelegate delegate;
+  final ContentSearchDelegate delegate;
 
   @override
-  State<StatefulWidget> createState() => _SearchPageState<T>();
+  _SearchRouteState createState() => _SearchRouteState();
 }
 
-class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderStateMixin {
-  _SearchStateDelegate stateDelegate;
+class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
+  late _SearchStateDelegate stateDelegate;
   FocusNode get focusNode => stateDelegate.focusNode;
+  late ModalRoute _route;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    stateDelegate = _SearchStateDelegate(widget.delegate);
+
+    initSelectionController(() => ContentSelectionController.create(
+      vsync: AppRouter.instance.navigatorKey.currentState!,
+      context: context,
+      closeButton: true,
+      ignoreWhen: () => playerRouteController.opened ||
+                        HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
+    ));
+
+    stateDelegate = _SearchStateDelegate(selectionController, widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
-    widget.animation.addStatusListener(_onAnimationStatusChanged);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      if (mounted) {
+        _route = ModalRoute.of(context)!;
+        _animation = _route.animation!;
+        _animation.addStatusListener(_onAnimationStatusChanged);
+      }
+    });
     focusNode.addListener(_onFocusChanged);
     playerRouteController.addStatusListener(_handlePlayerRouteStatusChange);
   }
@@ -247,9 +389,11 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   @override
   void dispose() {
     stateDelegate.dispose();
+    disposeSelectionController();
     widget.delegate._setStateNotifier.removeListener(_handleSetState);
     widget.delegate._queryTextController.removeListener(_onQueryChanged);
-    widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    widget.delegate._chipsBarDragged = false;
+    _animation.removeStatusListener(_onAnimationStatusChanged);
     playerRouteController.removeStatusListener(_handlePlayerRouteStatusChange);
     super.dispose();
   }
@@ -273,14 +417,14 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
     if (status != AnimationStatus.completed) {
       return;
     }
-    widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    _animation.removeStatusListener(_onAnimationStatusChanged);
     if (widget.delegate.autoKeyboard) {
       focusNode.requestFocus();
     }
   }
 
   @override
-  void didUpdateWidget(_SearchPage<T> oldWidget) {
+  void didUpdateWidget(SearchRoute oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
@@ -307,9 +451,9 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   ///
   /// The value provided for [result] is used as the return value.
   void close(BuildContext context, dynamic result) {
-    focusNode?.unfocus();
+    focusNode.unfocus();
     Navigator.of(context)
-      ..popUntil((Route<dynamic> route) => route == widget.route)
+      ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
 
@@ -336,10 +480,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
   Widget buildLeading() {
     return NFBackButton(
       onPressed: () {
-        final selectionController = stateDelegate.selectionController;
-        if (selectionController.inSelection) {
-          selectionController.close();
-        }
         close(context, null);
       },
     );
@@ -374,30 +514,50 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
           ? AppBarBorder.height + 34.0 + bottomPadding
           : AppBarBorder.height,
       ),
-      child: ValueListenableBuilder<Type>(
-        valueListenable: stateDelegate.contentTypeNotifier,
+      child: ValueListenableBuilder<Type?>(
+        valueListenable: stateDelegate.onContentTypeChange,
         builder: (context, contentTypeValue, child) {
-          return !showChips
-            ? child
-            : Column(
-              children: [
-                SizedBox(
-                  height: 34.0,
-                  child: ListView.separated(
+          if (!showChips)
+            return child!;
+
+          final List<Widget> children = [];
+          for (int i = 0; i < contentTypeEntries.length; i++) {
+            children.add(_ContentChip(
+              delegate: stateDelegate,
+              contentType: contentTypeEntries[i].key,
+            ));
+            if (i != contentTypeEntries.length - 1) {
+              children.add(const SizedBox(width: 8.0));
+            }
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 34.0,
+                child: GestureDetector(
+                  onPanDown: (_) {
+                    widget.delegate._chipsBarDragged = true;
+                  },
+                  onPanCancel: () {
+                    widget.delegate._chipsBarDragged = false;
+                  },
+                  onPanEnd: (_) {
+                    widget.delegate._chipsBarDragged = false;
+                  },
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.only(left: 12.0),
                     scrollDirection: Axis.horizontal,
-                    itemCount: contentTypeEntries.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 8.0),
-                    itemBuilder: (context, index) => _ContentChip(
-                      delegate: stateDelegate,
-                      contentType: contentTypeEntries[index].key,
-                    ),
+                    child: Row(
+                      children: children,
+                    )
                   ),
                 ),
-                const SizedBox(height: bottomPadding),
-                child,
-              ],
-            );
+              ),
+              const SizedBox(height: bottomPadding),
+              child!,
+            ],
+          );
         },
         child: ValueListenableBuilder<bool>(
           valueListenable: stateDelegate.bodyScrolledNotifier,
@@ -413,7 +573,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
     final theme = buildAppBarTheme();
     final bottom = buildBottom();
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
-    String routeName;
+    String? routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -425,6 +585,22 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
+    final title = Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: TextField(
+        selectionControls: NFTextSelectionControls(),
+        controller: widget.delegate._queryTextController,
+        focusNode: focusNode,
+        style: theme.textTheme.headline6,
+        textInputAction: TextInputAction.search,
+        onSubmitted: (String _) => stateDelegate.onSubmit(),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: searchFieldLabel,
+          hintStyle: theme.inputDecorationTheme.hintStyle,
+        ),
+      ),
+    );
     return RouteAwareWidget(
       onPushNext: _handlePushNext,
       child: Builder(
@@ -437,44 +613,66 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
             resizeToAvoidBottomInset: false,
             extendBodyBehindAppBar: true,
             appBar: PreferredSize(
-              preferredSize: Size.fromHeight(kNFAppBarPreferredSize + bottom.preferredSize.height),
+              preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
               child: SelectionAppBar(
                 selectionController: stateDelegate.selectionController,
                 onMenuPressed: null,
-                titleSelection: Padding(
+                showMenuButton: false,
+                titleSelection: selectionRoute ? title : Padding(
                   padding: const EdgeInsets.only(top: 15.0),
                   child: SelectionCounter(controller: stateDelegate.selectionController),
                 ),
-                actionsSelection: [
-                  DeleteSongsAppBarAction<Content>(
-                    controller: stateDelegate.selectionController,
-                  )
-                ],
+                actionsSelection: selectionRoute
+                  ? [
+                      SelectAllSelectionAction<Content>(
+                        controller: selectionController,
+                        entryFactory: (content, index) => SelectionEntry.fromContent(
+                          content: content,
+                          index: index,
+                          context: context,
+                        ),
+                        getAll: () => stateDelegate.results.map.getValue(stateDelegate.contentType),
+                      ),
+                      ]
+                  : [
+                    DeleteSongsAppBarAction<Content>(
+                      controller: stateDelegate.selectionController,
+                    ),
+                    ValueListenableBuilder<Type?>(
+                      valueListenable: stateDelegate.onContentTypeChange,
+                      builder: (context, contentType, child) => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        transitionBuilder: (child, animation) => EmergeAnimation(
+                          animation: animation,
+                          child: child,
+                        ),
+                        child: stateDelegate.contentType == null
+                          ? const SizedBox.shrink()
+                          : SelectAllSelectionAction<Content>(
+                              controller: selectionController,
+                              entryFactory: (content, index) => SelectionEntry.fromContent(
+                                content: content,
+                                index: index,
+                                context: context,
+                              ),
+                              getAll: () => stateDelegate.results.map.getValue(contentType),
+                            ),
+                      ),
+                    ),
+                  ],
                 elevationSelection: 0.0,
-                elevation: theme.appBarTheme.elevation,
+                elevation: theme.appBarTheme.elevation!,
+                toolbarHeight: kToolbarHeight,
                 backgroundColor: theme.primaryColor,
                 iconTheme: theme.primaryIconTheme,
                 textTheme: theme.primaryTextTheme,
                 brightness: theme.primaryColorBrightness,
                 leading: buildLeading(),
-                actions: buildActions(),
+                actions: selectionRoute ? const [] : buildActions(),
                 bottom: bottom,
-                title: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: TextField(
-                    selectionControls: NFTextSelectionControls(),
-                    controller: widget.delegate._queryTextController,
-                    focusNode: focusNode,
-                    style: theme.textTheme.headline6,
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: (String _) => stateDelegate.onSubmit(),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: searchFieldLabel,
-                      hintStyle: theme.inputDecorationTheme.hintStyle,
-                    ),
-                  ),
-                ),
+                title: !selectionRoute ? title : const SizedBox.shrink(),
               ),
             ),
             body: SafeArea(
@@ -496,26 +694,35 @@ class _SearchPageState<T> extends State<_SearchPage<T>> with TickerProviderState
 
 class _DelegateProvider extends InheritedWidget {
   const _DelegateProvider({
-    Key key, 
-    @required this.delegate,
-    Widget child,
+    Key? key, 
+    required this.delegate,
+    required Widget child,
   }) : super(key: key, child: child);
 
-  final _SearchStateDelegate delegate;
+  final _SearchStateDelegate? delegate;
 
   static _DelegateProvider of(BuildContext context) {
-    return context.getElementForInheritedWidgetOfExactType<_DelegateProvider>().widget as _DelegateProvider;
+    return context.getElementForInheritedWidgetOfExactType<_DelegateProvider>()!.widget as _DelegateProvider;
   }
 
   @override
   bool updateShouldNotify(_DelegateProvider oldWidget) => false;
 }
 
-class _DelegateBuilder extends StatelessWidget {
-  _DelegateBuilder({Key key}) : super(key: key);
+class _DelegateBuilder extends StatefulWidget {
+  _DelegateBuilder({Key? key}) : super(key: key);
+
+  @override
+  _DelegateBuilderState createState() => _DelegateBuilderState();
+}
+
+class _DelegateBuilderState extends State<_DelegateBuilder> {
+  // TODO: remove when https://github.com/flutter/flutter/issues/82046 is resolved
+  bool _onTop = true;
+  int _prevIndex = -1;
 
   Future<bool> _handlePop(_SearchStateDelegate delegate) async {
-    if (delegate.contentType != null) {
+    if (_onTop && delegate.contentType != null) {
       delegate.contentType = null;
       return true;
     }
@@ -530,106 +737,116 @@ class _DelegateBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final delegate = _SearchStateDelegate._of(context);
+    final delegate = _SearchStateDelegate._of(context)!;
     final results = delegate.results;
     final l10n = getl10n(context);
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) => _handleNotification(delegate, notification),
-      child: ValueListenableBuilder<Type>(
-        valueListenable: delegate.contentTypeNotifier,
-        builder: (context, contentType, child) {
-          if (delegate.trimmedQuery.isEmpty) {
-            return _Suggestions();
-          } else if (results.empty) {
-            // Displays a message that there's nothing found
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8.0),
-                    child: Icon(Icons.error_outline_rounded),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 80.0),
-                    child: Text(
-                      l10n.searchNothingFound,
-                      textAlign: TextAlign.center,
+    return RouteAwareWidget(
+      onPushNext: () => _onTop = false,
+      onPopNext: () => _onTop = true,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) => _handleNotification(delegate, notification),
+        child: ValueListenableBuilder<Type?>(
+          valueListenable: delegate.onContentTypeChange,
+          builder: (context, contentType, child) {
+            if (delegate.trimmedQuery.isEmpty) {
+              return _Suggestions();
+            } else if (results.empty) {
+              // Displays a message that there's nothing found
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: Icon(Icons.error_outline_rounded),
                     ),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            final contentTypeEntries = results.map.entries
-              .where((el) => el.value.isNotEmpty)
-              .toList();
-            final single = contentTypeEntries.length == 1;
-            final showSingleCategoryContentList = single || contentType != null;
-            final contentListContentType = single ? contentTypeEntries.single.key : contentType;
-            return NFBackButtonListener(
-              onBackButtonPressed: () => _handlePop(delegate),
-              child:
-              StreamBuilder(
-                stream: ContentControl.state.onSongChange,
-                builder: (context, snapshot) =>
-              StreamBuilder(stream: ContentControl.state.onContentChange,
-                builder: (context, snapshot) =>
-                PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  reverse: !single && contentType == null,
-                  transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                      transitionType: SharedAxisTransitionType.vertical,
-                      animation: animation,
-                      secondaryAnimation: secondaryAnimation,
-                      fillColor: Colors.transparent,
-                      child: child,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 80.0),
+                      child: Text(
+                        l10n.searchNothingFound,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  child: Container(
-                    key: ValueKey(contentType),
-                    child: showSingleCategoryContentList
-                        ? () {
-                          final list = single
-                            ? contentTypeEntries.single.value
-                            : contentPick<Content, List<Content>>(
-                                contentType: contentType,
-                                song: delegate.results.songs,
-                                album: delegate.results.albums,
-                              );
-                          return ContentListView(
-                            contentType: contentListContentType,
-                            controller: delegate.singleListScrollController,
-                            selectionController: delegate.selectionController,
-                            selectedTest: (index) =>delegate.selectionController.data
-                              .firstWhereOrNull((el) => el.data == list[index]) != null,
-                            onItemTap: delegate.getContentTileTapHandler(contentListContentType),
-                            list: list,
-                          );
-                        } ()
-                        : 
-                        // AppScrollbar( // TODO: enable this when i have more content on search screen
-                        //     controller: delegate.scrollController,
-                        //     child: 
-                            ListView(
+                  ],
+                ),
+              );
+            } else {
+              final contentTypeEntries = results.map.entries
+                .where((el) => el.value.isNotEmpty)
+                .toList();
+              final single = contentTypeEntries.length == 1;
+              final showSingleCategoryContentList = single || contentType != null;
+              final contentListContentType = single ? contentTypeEntries.single.key : contentType;
+              final index = contentType == null ? -1 : Content.enumerate().indexOf(contentType);
+              WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                _prevIndex = index;
+              });
+              return NFBackButtonListener(
+                onBackButtonPressed: () => _handlePop(delegate),
+                child:
+                StreamBuilder(
+                  stream: ContentControl.state.onSongChange,
+                  builder: (context, snapshot) =>
+                StreamBuilder(stream: ContentControl.state.onContentChange,
+                  builder: (context, snapshot) =>
+                  PageTransitionSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    reverse: !single && (contentType == null || index < _prevIndex),
+                    transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        fillColor: Colors.transparent,
+                        child: child,
+                      ),
+                    child: Container(
+                      key: ValueKey(contentType),
+                      child: showSingleCategoryContentList
+                          ? () {
+                            final list = single
+                              ? contentTypeEntries.single.value
+                              : contentPick<Content, ValueGetter<List<Content>>>(
+                                  contentType: contentType,
+                                  song: () => delegate.results.songs,
+                                  album: () => delegate.results.albums,
+                                  playlist: () => delegate.results.playlists,
+                                  artist: () => delegate.results.artists,
+                                )();
+                            return ContentListView<Content>(
+                              contentType: contentListContentType,
+                              controller: delegate.singleListScrollController,
+                              selectionController: delegate.selectionController,
+                              onItemTap: (index) => delegate.handleContentTap(contentListContentType),
+                              list: list,
+                            );
+                          }()
+                          : 
+                          // AppScrollbar( // TODO: enable this when i have more content on search screen
+                          //     controller: delegate.scrollController,
+                          //     child: 
+                              ListView(
                                 controller: delegate.scrollController,
                                 children: [
                                   for (final entry in contentTypeEntries)
                                     if (entry.value.isNotEmpty)
-                                      _ContentSection(
+                                      ContentSection(
                                         contentType: entry.key,
-                                        items: results.map[entry.key],
-                                        onTap: () => delegate.contentType = entry.key,
+                                        list: results.map.getValue(entry.key),
+                                        onHeaderTap: () => delegate.contentType = entry.key,
+                                        selectionController: delegate.selectionController,
+                                        contentTileTapHandler: () => delegate.handleContentTap(entry.key),
                                       ),
                                 ],
                               ),
                             ),
+                      ),
                     ),
                   ),
-                ),
-              );
-          }
-        },
+                );
+            }
+          },
+        ),
       ),
     );
   }
@@ -638,9 +855,9 @@ class _DelegateBuilder extends StatelessWidget {
 
 class _ContentChip extends StatefulWidget {
   const _ContentChip({
-    Key key,
-    @required this.delegate,
-    @required this.contentType,
+    Key? key,
+    required this.delegate,
+    required this.contentType,
   }) : super(key: key);
 
   final _SearchStateDelegate delegate;
@@ -653,7 +870,7 @@ class _ContentChip extends StatefulWidget {
 class _ContentChipState extends State<_ContentChip> with SingleTickerProviderStateMixin {
   static const borderRadius = BorderRadius.all(Radius.circular(50.0));
 
-  AnimationController controller;
+  late AnimationController controller;
   
   bool get active => widget.delegate.contentType == widget.contentType;
 
@@ -661,6 +878,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   void initState() { 
     super.initState();
     controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    widget.delegate.registerChipContext(context, widget.contentType);
     if (active) {
       controller.forward();
     }
@@ -685,7 +903,13 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
+    if (active) {
+      controller.forward();
+    } else {
+      controller.reverse();
+    }
     final l10n = getl10n(context);
+    final count = widget.delegate.results.map.getValue(widget.contentType).length;
     final colorScheme =  ThemeControl.theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
@@ -705,11 +929,6 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       begin: Constants.Theme.glowSplashColor.auto,
       end: Constants.Theme.glowSplashColorOnContrast.auto,
     ).animate(baseAnimation);
-    if (active) {
-      controller.forward();
-    } else {
-      controller.reverse();
-    }
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) => Material(
@@ -731,7 +950,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                   ),
                   backgroundColor: Colors.transparent,
                   label: Text(
-                    l10n.contents(widget.contentType),
+                    l10n.contentsPluralWithCount(count, widget.contentType),
                     style: TextStyle(
                       color: textColorAnimation.value,
                       fontWeight: FontWeight.w800,
@@ -746,102 +965,15 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   }
 }
 
-/// The search results are split into a few sections - songs, albums, etc.
-/// 
-/// This widget renders a tappable header for such sections, and the sections
-/// content.
-class _ContentSection<T extends Content> extends StatelessWidget {
-  const _ContentSection({
-    Key key,
-    this.contentType,
-    @required this.items,
-    @required this.onTap,
-  }) : super(key: key);
-
-  final Type contentType;
-  final List<Content> items;
-  final VoidCallback onTap;
-
-  String getHeaderText(BuildContext context) {
-    final l10n = getl10n(context);
-    return contentPick<T, String>(
-      contentType: contentType,
-      song: l10n.tracks,
-      album: l10n.albums,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final delegate = _SearchStateDelegate._of(context);
-    final builder = contentPick<T, Widget Function(int)>(
-      contentType: contentType,
-      song: (index) {
-        final song = items[index] as Song;
-        return SongTile.selectable(
-          index: index,
-          selected: delegate.selectionController.data
-            .firstWhereOrNull((el) => el.data == song) != null,
-          song: song,
-          selectionController: delegate.selectionController,
-          horizontalPadding: 12.0,
-          onTap: delegate.getContentTileTapHandler<Song>(),
-        );
-      },
-      album: (index) {
-        final album = items[index] as Album;
-        return AlbumTile.selectable(
-          index: index,
-          selected: delegate.selectionController.data
-            .firstWhereOrNull((el) => el.data == album) != null,
-          album: items[index] as Album,
-          selectionController: delegate.selectionController,
-          small: false,
-          horizontalPadding: 12.0,
-          onTap: delegate.getContentTileTapHandler<Album>(),
-        );
-      },
-    );
-    return Column(
-      children: [
-        NFInkWell(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
-            child: Row(
-              children: [
-                Text(
-                  getHeaderText(context),
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const Icon(Icons.chevron_right_rounded),
-              ],
-            ), 
-          ),
-        ),
-        Column(
-          children: [
-            for (int index = 0; index < math.min(5, items.length); index ++)
-              builder(index),
-          ],
-        )
-      ],
-    );
-  }
-}
-
 class _Suggestions extends StatefulWidget {
-  _Suggestions({Key key}) : super(key: key);
+  _Suggestions({Key? key}) : super(key: key);
 
   @override
   _SuggestionsState createState() => _SuggestionsState();
 }
 
 class _SuggestionsState extends State<_Suggestions> {
-  Future<void> _loadFuture;
+  Future<void>? _loadFuture;
 
   @override
   void initState() { 
@@ -862,7 +994,7 @@ class _SuggestionsState extends State<_Suggestions> {
         }
         return SizedBox(
           width: double.infinity,
-          child: SearchHistory.instance.history.isEmpty
+          child: SearchHistory.instance.history!.isEmpty
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.only(
@@ -874,7 +1006,8 @@ class _SuggestionsState extends State<_Suggestions> {
                       l10n.searchHistoryPlaceholder,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.7),
+                        fontWeight: FontWeight.w700,
+                        color: ThemeControl.theme.hintColor,
                       ),
                     ),
                   ),
@@ -885,7 +1018,7 @@ class _SuggestionsState extends State<_Suggestions> {
                     physics: const AlwaysScrollableScrollPhysics(
                       parent: ClampingScrollPhysics(),
                     ),
-                    itemCount: SearchHistory.instance.history.length + 1,
+                    itemCount: SearchHistory.instance.history!.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return const _SuggestionsHeader();
@@ -903,11 +1036,11 @@ class _SuggestionsState extends State<_Suggestions> {
 
 
 class _SuggestionsHeader extends StatelessWidget {
-  const _SuggestionsHeader({Key key}) : super(key: key);
+  const _SuggestionsHeader({Key? key}) : super(key: key);
 
   void clearHistory(BuildContext context) {
     SearchHistory.instance.clear();
-    _SearchStateDelegate._of(context).searchDelegate.setState();
+    _SearchStateDelegate._of(context)!.searchDelegate.setState();
   }
 
   @override
@@ -943,21 +1076,21 @@ class _SuggestionsHeader extends StatelessWidget {
 
 class _SuggestionTile extends StatelessWidget {
   const _SuggestionTile({
-    Key key,
-    @required this.index,
+    Key? key,
+    required this.index,
   }) : super(key: key);
 
   final int index;
 
   /// Deletes item from search history by its index.
   void _removeEntry(BuildContext context, int index) {
-    SearchHistory.instance.remove(index);
-    _SearchStateDelegate._of(context).searchDelegate.setState();
+    SearchHistory.instance.removeAt(index);
+    _SearchStateDelegate._of(context)!.searchDelegate.setState();
   }
 
   void _handleTap(context) {
-    final delegate = _SearchStateDelegate._of(context);
-    delegate.searchDelegate.query = SearchHistory.instance.history[index];
+    final delegate = _SearchStateDelegate._of(context)!;
+    delegate.searchDelegate.query = SearchHistory.instance.history![index];
     delegate.focusNode.unfocus();
   }
 
@@ -967,7 +1100,7 @@ class _SuggestionTile extends StatelessWidget {
     return NFListTile(
       onTap: () => _handleTap(context),
       title: Text(
-        SearchHistory.instance.history[index],
+        SearchHistory.instance.history![index],
         style: const TextStyle(
           fontSize: 15.5,
           fontWeight: FontWeight.w800,
@@ -994,7 +1127,7 @@ class _SuggestionTile extends StatelessWidget {
               children: [
                 TextSpan(text: l10n.searchHistoryRemoveEntryDescriptionP1),
                 TextSpan(
-                  text: '"${SearchHistory.instance.history[index]}"',
+                  text: '"${SearchHistory.instance.history![index]}"',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 TextSpan(text: l10n.searchHistoryRemoveEntryDescriptionP2),

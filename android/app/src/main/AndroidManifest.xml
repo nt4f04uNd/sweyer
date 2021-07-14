@@ -69,14 +69,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-
-        <service
-            android:name="com.nt4f04und.sweyer.services.MusicService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
-        </service>
-
+        
         <service android:name="com.ryanheise.audioservice.AudioService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />

@@ -8,13 +8,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
 class Seekbar extends StatefulWidget {
   const Seekbar({
-    Key key,
+    Key? key,
     this.color,
     this.player,
     this.duration,
@@ -23,19 +23,19 @@ class Seekbar extends StatefulWidget {
   /// Color of the actove slider part.
   /// 
   /// If non specified [ColorScheme.primary] color will be used.
-  final Color color;
+  final Color? color;
 
   /// Player to use instead of [MusicPlayer], which is used by default.
-  final AudioPlayer player;
+  final AudioPlayer? player;
 
   /// Predefined duration to use.
-  final Duration duration;
+  final Duration? duration;
 
   @override
   _SeekbarState createState() => _SeekbarState();
 }
 
-class _SeekbarState extends State<Seekbar> {
+class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
   // Duration of playing track.
   Duration _duration = Duration.zero;
 
@@ -43,23 +43,29 @@ class _SeekbarState extends State<Seekbar> {
   double _value = 0.0;
 
   /// Value to perform drag.
-  double _localValue;
+  late double _localValue;
 
   /// Is user dragging slider right now.
   bool _isDragging = false;
 
   /// Value to work with.
-  double get workingValue => _isDragging ? _localValue : _value;
+  double? get workingValue => _isDragging ? _localValue : _value;
 
-  StreamSubscription<Duration> _positionSubscription;
-  StreamSubscription<Song> _songChangeSubscription;
+  late StreamSubscription<Duration> _positionSubscription;
+  StreamSubscription<Song>? _songChangeSubscription;
 
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
+
+  late AnimationController animationController;
+  late Animation<double> thumbSizeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _duration = widget.duration ?? player.duration;
+    final duration = widget.duration ?? player.duration;
+    if (duration != null) {
+      _duration = duration;
+    }
     _value = _positionToValue(player.position);
     // Handle track position movement
     _positionSubscription = player.positionStream.listen((position) {
@@ -82,17 +88,30 @@ class _SeekbarState extends State<Seekbar> {
         });
       });
     }
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    thumbSizeAnimation = Tween(
+      begin: 7.0,
+      end: 9.0,
+    ).animate(CurvedAnimation(
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+      parent: animationController,
+    ));
   }
 
   @override
   void dispose() {
     _positionSubscription.cancel();
     _songChangeSubscription?.cancel();
+    animationController.dispose();
     super.dispose();
   }
 
   double _positionToValue(Duration position) {
-    return (position.inMilliseconds / math.max(_duration.inMilliseconds, 1)).clamp(0.0, 1.0);
+    return (position.inMilliseconds / math.max(_duration.inMilliseconds, 1.0)).clamp(0.0, 1.0);
   }
 
   // Drag functions
@@ -105,19 +124,19 @@ class _SeekbarState extends State<Seekbar> {
 
   void _handleChanged(double newValue) {
     setState(() {
-      if (!_isDragging)
-        _isDragging = true;
+      if (animationController.status != AnimationStatus.completed && animationController.status != AnimationStatus.forward)
+        animationController.forward();
       _localValue = newValue;
     });
   }
 
-  /// FIXME: https://github.com/nt4f04uNd/sweyer/issues/6
   Future<void> _handleChangeEnd(double newValue) async {
     await player.seek(_duration * newValue);
     if (mounted) {
       setState(() {
         _isDragging = false;
         _value = newValue;
+        animationController.reverse();
       });
     }
   }
@@ -137,25 +156,31 @@ class _SeekbarState extends State<Seekbar> {
             width: 36.0 * scaleFactor,
             transform: Matrix4.translationValues(5.0, 0.0, 0.0),
             child: Text(
-              formatDuration(_duration * workingValue),
+              formatDuration(_duration * workingValue!),
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6.color,
+                color: ThemeControl.theme.textTheme.headline6!.color,
               ),
             ),
           ),
           Expanded(
-            child: SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 2.0,
-                thumbColor: color,
-                overlayColor: color.withOpacity(0.12),
-                activeTrackColor:color,
-                inactiveTrackColor: Constants.Theme.sliderInactiveColor.auto,
-                thumbShape: const RoundSliderThumbShape(
-                  enabledThumbRadius: 7.5,
+            child: AnimatedBuilder(
+              animation: thumbSizeAnimation,
+              builder: (context, child) => SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 2.0,
+                  thumbColor: color,
+                  overlayColor: color.withOpacity(ThemeControl.isLight ? 0.12 : 0.24),
+                  activeTrackColor: color,
+                  inactiveTrackColor: Constants.Theme.sliderInactiveColor.auto,
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),
+                  thumbShape: RoundSliderThumbShape(
+                    pressedElevation: 3.0,
+                    enabledThumbRadius: thumbSizeAnimation.value,
+                  ),
                 ),
+                child: child!,
               ),
               child: Slider(
                 value: _isDragging ? _localValue : _value,
@@ -173,7 +198,7 @@ class _SeekbarState extends State<Seekbar> {
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6.color,
+                color: ThemeControl.theme.textTheme.headline6!.color,
               ),
             ),
           ),

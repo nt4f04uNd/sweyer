@@ -76,6 +76,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "playlists": "Плейлисты",
+  "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artists": "Исполнители",
+  "@artists": {
+    "type": "text",
+    "placeholders": {}
+  },
   "tracksPlural": "{count,plural, =0{Треков}=1{Трек}=2{Трека}few{Трека}many{Треков}other{Трека}}",
   "@tracksPlural": {
     "type": "text",
@@ -90,8 +100,47 @@
       "count": {}
     }
   },
+  "playlistsPlural": "{count,plural, =0{Плейлистов}=1{Плейлист}=2{Плейлиста}few{Плейлиста}many{Плейлистов}other{Плейлиста}}",
+  "@playlistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artistsPlural": "{count,plural, =0{Исполнителей}=1{Исполнитель}=2{Исполнителя}few{Исполнителя}many{Исполнителей}other{Исполнителя}}",
+  "@artistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "albumNotFound": "Альбом не найден",
+  "@albumNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistNotFound": "Исполнитель не найден",
+  "@artistNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
   "allTracks": "Все треки",
   "@allTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allAlbums": "Все альбомы",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allPlaylists": "Все плейлисты",
+  "@allPlaylists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allArtists": "Все исполнители",
+  "@allArtists": {
     "type": "text",
     "placeholders": {}
   },
@@ -102,11 +151,6 @@
   },
   "arbitraryQueue": "Произвольная очередь",
   "@arbitraryQueue": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "allAlbums": "Все альбомы",
-  "@allAlbums": {
     "type": "text",
     "placeholders": {}
   },
@@ -122,6 +166,31 @@
   },
   "byQuery": "По запросу",
   "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selectedPlural": "Выбранные",
+  "@selectedPlural": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newPlaylist": "Новый плейлист",
+  "@newPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "trackAfterWhichToInsert": "Трек, после которого вставить",
+  "@trackAfterWhichToInsert": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "insertAtTheBeginning": "Вставить в начало",
+  "@insertAtTheBeginning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saveQueueAsPlaylist": "Сохранить очередь как плейлист",
+  "@saveQueueAsPlaylist": {
     "type": "text",
     "placeholders": {}
   },
@@ -145,6 +214,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "areYouSureYouWantTo": "Вы точно хотите",
+  "@areYouSureYouWantTo": {
+    "type": "text",
+    "placeholders": {}
+  },
   "reset": "Сбросить",
   "@reset": {
     "type": "text",
@@ -155,6 +229,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "saved": "Сохранено",
+  "@saved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "view": "View",
+  "@view": {
+    "type": "text",
+    "placeholders": {}
+  },
   "secondsShorthand": "с",
   "@secondsShorthand": {
     "type": "text",
@@ -162,6 +246,38 @@
   },
   "minutesShorthand": "мин",
   "@minutesShorthand": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "and": "И",
+  "@and": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "more": "Еще",
+  "@more": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "andNMore": "И еще {count}",
+  "@andNMore": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "done": "Готово",
+  "@done": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "create": "Создать",
+  "@create": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "add": "Добавить",
+  "@add": {
     "type": "text",
     "placeholders": {}
   },
@@ -180,12 +296,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "deletionError": "Ошибка при удалении",
-  "@deletionError": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "edit": "Редактировать",
+  "edit": "Изменить",
   "@edit": {
     "type": "text",
     "placeholders": {}
@@ -200,18 +311,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "errorMessage": "Упс! Произошла ошибка",
-  "@errorMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorDetails": "Информация об ошибке",
-  "@errorDetails": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "playbackErrorMessage": "Произошла ошибка при воспроизведении, удаление трека",
-  "@playbackErrorMessage": {
+  "nothingHere": "Здесь ничего нет",
+  "@nothingHere": {
     "type": "text",
     "placeholders": {}
   },
@@ -227,11 +328,6 @@
   },
   "editMetadata": "Изменить информацию",
   "@editMetadata": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "unknownRoute": "Неизвестная страница!",
-  "@unknownRoute": {
     "type": "text",
     "placeholders": {}
   },
@@ -275,18 +371,23 @@
      "type": "text",
      "placeholders": {}
   },
-  "openAppSettingsError": "Произошла ошибка при открытии настроек приложения",
-  "@openAppSettingsError": {
-     "type": "text",
-     "placeholders": {}
+  "selected": "Выбрано",
+  "@selected": {
+    "type": "text",
+    "placeholders": {}
   },
   "actions": "Действия",
   "@actions": {
     "type": "text",
     "placeholders": {}
   },
-  "goToAlbum": "Открыть альбом",
+  "goToAlbum": "Перейти к альбому",
   "@goToAlbum": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "goToArtist": "Перейти к исполнителю",
+  "@goToArtist": {
     "type": "text",
     "placeholders": {}
   },
@@ -295,8 +396,33 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToPlaylist": "Добавить в плейлист",
+  "@addToPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToFavorites": "Добавить в избранное",
+  "@addToFavorites": {
+    "type": "text",
+    "placeholders": {}
+  },
   "addToQueue": "Добавить в очередь",
   "@addToQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromQueue": "Убрать из очереди",
+  "@removeFromQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "share": "Поделиться",
+  "@share": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selectAll": "Выбрать все",
+  "@selectAll": {
     "type": "text",
     "placeholders": {}
   },
@@ -312,6 +438,11 @@
   },
   "title": "Название",
   "@title": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "name": "Имя",
+  "@name": {
     "type": "text",
     "placeholders": {}
   },
@@ -335,13 +466,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "deletionPromptDescriptionP1": "Вы точно хотите удалить ",
-  "@deletionPromptDescriptionP1": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "deletionPromptDescriptionP2": " выбранные треки?",
-  "@deletionPromptDescriptionP2": {
+  "numberOfAlbums": "Количество альбомов",
+  "@numberOfAlbums": {
     "type": "text",
     "placeholders": {}
   },
@@ -369,16 +495,6 @@
   },
   "devTestToast": "Тестовый тост",
   "@devTestToast": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "devErrorSnackbar": "Показать снакбар с ошибкой",
-  "@devErrorSnackbar": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "devImportantSnackbar": "Показать важный снакбар",
-  "@devImportantSnackbar": {
     "type": "text",
     "placeholders": {}
   },
@@ -446,5 +562,35 @@
   "@searchClearHistory": {
     "type": "text",
     "placeholders": {}
+  },
+  "oopsErrorOccurred": "Упс! Произошла ошибка",
+  "@oopsErrorOccurred": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorDetails": "Информация об ошибке",
+  "@errorDetails": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionError": "Ошибка при удалении",
+  "@deletionError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistDoesNotExistError": "Плейлист не найден, возможно, он был удален",
+  "@playlistDoesNotExistError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackError": "Произошла ошибка при воспроизведении",
+  "@playbackError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openAppSettingsError": "Произошла ошибка при открытии настроек приложения",
+  "@openAppSettingsError": {
+     "type": "text",
+     "placeholders": {}
   }
 }

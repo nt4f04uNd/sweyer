@@ -1,5 +1,5 @@
 {
-  "@@last_modified": "2021-04-19T17:48:08.138682",
+  "@@last_modified": "2021-07-14T21:24:45.452638",
   "playback": "Playback",
   "@playback": {
     "type": "text",
@@ -75,6 +75,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "playlists": "Playlists",
+  "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artists": "Artists",
+  "@artists": {
+    "type": "text",
+    "placeholders": {}
+  },
   "tracksPlural": "{count,plural, =0{Tracks}=1{Track}=2{Tracks}few{Tracks}many{Tracks}other{Tracks}}",
   "@tracksPlural": {
     "type": "text",
@@ -89,23 +99,52 @@
       "count": {}
     }
   },
+  "playlistsPlural": "{count,plural, =0{Playlists}=1{Playlist}=2{Playlists}few{Playlists}many{Playlists}other{Playlists}}",
+  "@playlistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artistsPlural": "{count,plural, =0{Artists}=1{Artist}=2{Artists}few{Artists}many{Artists}other{Artists}}",
+  "@artistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "albumNotFound": "Album not found",
+  "@albumNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistNotFound": "Artist not found",
+  "@artistNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
   "allTracks": "All tracks",
   "@allTracks": {
     "type": "text",
     "placeholders": {}
   },
-  "playlist": "Playlist",
-  "@playlist": {
+  "allAlbums": "All albums",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allPlaylists": "All playlists",
+  "@allPlaylists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allArtists": "All artitst",
+  "@allArtists": {
     "type": "text",
     "placeholders": {}
   },
   "arbitraryQueue": "Arbitrary queue",
   "@arbitraryQueue": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "allAlbums": "All albums",
-  "@allAlbums": {
     "type": "text",
     "placeholders": {}
   },
@@ -121,6 +160,31 @@
   },
   "byQuery": "By query",
   "@byQuery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selectedPlural": "Selected",
+  "@selectedPlural": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newPlaylist": "New playlist",
+  "@newPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "trackAfterWhichToInsert": "Track after which to insert",
+  "@trackAfterWhichToInsert": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "insertAtTheBeginning": "Insert at the beginning",
+  "@insertAtTheBeginning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saveQueueAsPlaylist": "Save queue as playlist",
+  "@saveQueueAsPlaylist": {
     "type": "text",
     "placeholders": {}
   },
@@ -144,6 +208,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "areYouSureYouWantTo": "Are you sure you want to",
+  "@areYouSureYouWantTo": {
+    "type": "text",
+    "placeholders": {}
+  },
   "reset": "Reset",
   "@reset": {
     "type": "text",
@@ -154,6 +223,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "saved": "Saved",
+  "@saved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "view": "View",
+  "@view": {
+    "type": "text",
+    "placeholders": {}
+  },
   "secondsShorthand": "s",
   "@secondsShorthand": {
     "type": "text",
@@ -161,6 +240,38 @@
   },
   "minutesShorthand": "min",
   "@minutesShorthand": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "and": "And",
+  "@and": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "more": "More",
+  "@more": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "andNMore": "And {count} more",
+  "@andNMore": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "done": "Done",
+  "@done": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "create": "Create",
+  "@create": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "add": "Add",
+  "@add": {
     "type": "text",
     "placeholders": {}
   },
@@ -179,11 +290,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "deletionError": "Deletion error",
-  "@deletionError": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Edit",
   "@edit": {
     "type": "text",
@@ -199,18 +305,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "errorMessage": "Oops! An error occurred",
-  "@errorMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorDetails": "Error details",
-  "@errorDetails": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "playbackErrorMessage": "An error occurred during the playback, removing the track",
-  "@playbackErrorMessage": {
+  "nothingHere": "There's nothing here",
+  "@nothingHere": {
     "type": "text",
     "placeholders": {}
   },
@@ -226,11 +322,6 @@
   },
   "editMetadata": "Edit metadata",
   "@editMetadata": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "unknownRoute": "Unknown route!",
-  "@unknownRoute": {
     "type": "text",
     "placeholders": {}
   },
@@ -274,8 +365,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "openAppSettingsError": "Error opening the app settings",
-  "@openAppSettingsError": {
+  "selected": "Selected",
+  "@selected": {
     "type": "text",
     "placeholders": {}
   },
@@ -289,8 +380,28 @@
     "type": "text",
     "placeholders": {}
   },
+  "goToArtist": "Go to artist",
+  "@goToArtist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playNext": "Play next",
   "@playNext": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToPlaylist": "Add to playlist",
+  "@addToPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromPlaylist": "Remove from playlist",
+  "@removeFromPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToFavorites": "Add to favorites",
+  "@addToFavorites": {
     "type": "text",
     "placeholders": {}
   },
@@ -299,18 +410,33 @@
     "type": "text",
     "placeholders": {}
   },
+  "removeFromQueue": "Remove from queue",
+  "@removeFromQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "share": "Share",
+  "@share": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selectAll": "Select all",
+  "@selectAll": {
+    "type": "text",
+    "placeholders": {}
+  },
   "sort": "Sort",
   "@sort": {
     "type": "text",
     "placeholders": {}
   },
-  "artist": "Artist",
-  "@artist": {
+  "title": "Title",
+  "@title": {
     "type": "text",
     "placeholders": {}
   },
-  "title": "Title",
-  "@title": {
+  "name": "Name",
+  "@name": {
     "type": "text",
     "placeholders": {}
   },
@@ -334,13 +460,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "deletionPromptDescriptionP1": "Are you sure you want to delete ",
-  "@deletionPromptDescriptionP1": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "deletionPromptDescriptionP2": " selected tracks?",
-  "@deletionPromptDescriptionP2": {
+  "numberOfAlbums": "Number of albums",
+  "@numberOfAlbums": {
     "type": "text",
     "placeholders": {}
   },
@@ -368,16 +489,6 @@
   },
   "devTestToast": "Test toast",
   "@devTestToast": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "devErrorSnackbar": "Show error snackbar",
-  "@devErrorSnackbar": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "devImportantSnackbar": "Show important snackbar",
-  "@devImportantSnackbar": {
     "type": "text",
     "placeholders": {}
   },
@@ -443,6 +554,36 @@
   },
   "searchClearHistory": "Clear search history?",
   "@searchClearHistory": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "oopsErrorOccurred": "Oops! An error occurred",
+  "@oopsErrorOccurred": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorDetails": "Error details",
+  "@errorDetails": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionError": "Deletion error",
+  "@deletionError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistDoesNotExistError": "Can't find the playlist, perhaps it was deleted",
+  "@playlistDoesNotExistError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackError": "An error occurred during the playback",
+  "@playbackError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openAppSettingsError": "Error opening the app settings",
+  "@openAppSettingsError": {
     "type": "text",
     "placeholders": {}
   }

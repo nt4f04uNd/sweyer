@@ -26,7 +26,4 @@ abstract class AppColors {
   /// used for marking some parts as headers from the rest of UI in light mode
   static const Color whiteDarkened = Color(0xfff1f2f4);
   static const Color eee = Color(0xffeeeeee);
-
-  /// Color used for text in dark mode
-  static const Color almostWhite = Color(0xfffffffe);
 }

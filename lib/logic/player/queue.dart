@@ -3,23 +3,28 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12
-
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// The type of currently playing queue.
 enum QueueType {
   /// Queue of all songs.
-  all,
+  allSongs,
+
+  /// Queue of all albums.
+  allAlbums,
+
+  /// Queue of all playlists.
+  allPlaylists,
+
+  /// Queue of all artistt.
+  allArtists,
 
   /// Queue of searched tracks.
   searched,
 
-  /// Some persistent queue on user device, has an id.
-  /// See [PersistentQueue].
-  persistent,
+  /// Queue that has same [SongOrigin].
+  origin,
 
   /// Some arbitrary queue. Сannot have modified state.
   ///
@@ -28,10 +33,6 @@ enum QueueType {
   /// * after restoring shuffled queue (as the info about the queue it was shuffled from is lost on app restart)
   /// * in any other ways not described yet
   arbitrary,
-}
-
-extension QueueTypeSerialization on QueueType {
-  String get value => EnumToString.convertToString(this);
 }
 
 /// Class, representing a queue in application
@@ -115,8 +116,8 @@ class Queue implements _QueueOperations<Song> {
   }
 
   @override
-  void remove(Song song) {
-    byId.remove(song.id);
+  bool remove(Song song) {
+    return byId.remove(song.id);
   }
 
   @override
@@ -152,7 +153,7 @@ class Queue implements _QueueOperations<Song> {
   /// it if doesn't find it.
   void compareAndRemoveObsolete(Queue queue) {
     songs.removeWhere((song) {
-      return queue.get(song) == null;
+      return queue.songs.firstWhereOrNull((el) => el.sourceId == song.sourceId) == null;
     });
   }
 }
@@ -163,7 +164,7 @@ abstract class _QueueOperations<T> {
   bool contains(T arg);
 
   /// Removes song.
-  void remove(T arg);
+  bool remove(T arg);
 
   /// Retruns song.
   Song? get(T arg);
@@ -189,8 +190,16 @@ class _QueueOperationsById implements _QueueOperations<int> {
   }
 
   @override
-  void remove(int id) {
-    queue.songs.removeWhere((el) => el.id == id);
+  bool remove(int id) {
+    bool removed = false;
+    queue.songs.removeWhere((el) {
+      if (el.id == id) {
+        removed = true;
+        return true;
+      }
+      return false;
+    });
+    return removed;
   }
 
   @override

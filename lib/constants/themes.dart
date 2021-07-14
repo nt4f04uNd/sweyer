@@ -5,7 +5,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
 import 'package:sweyer/sweyer.dart';
 
 import 'colors.dart';
@@ -27,7 +26,7 @@ abstract class Theme {
 
   static const  _ThemeContainer<Color> menuItemColor = _ThemeContainer(
     light: Color(0xff3d3e42),
-    dark: AppColors.almostWhite,
+    dark: Colors.white,
   );
 
   /// Color that contrasts with the [ColorScheme.background].
@@ -54,10 +53,10 @@ abstract class Theme {
     dark: Colors.white.withOpacity(0.1),
   );
 
-  /// A [glowSplashColor] to draw over [contrast].
+  /// A [glowSplashColor] to draw over contrasting colors, like primary or [contrast].
   static final _ThemeContainer<Color> glowSplashColorOnContrast = _ThemeContainer(
     light: Colors.white.withOpacity(0.13),
-    dark: const Color(0x80cccccc),
+    dark: Colors.black.withOpacity(0.13),
   );
 
   static const Color _lightIconColor = Color(0xff616266);
@@ -68,7 +67,6 @@ abstract class Theme {
       fontFamily: 'Manrope',
       brightness: Brightness.light,
       //****************** Colors **********************
-      accentColor: Colors.white,
       backgroundColor: Colors.white,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade400,
@@ -167,14 +165,16 @@ abstract class Theme {
       ),
       appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
-        elevation: 0.0,
+        elevation: 2.0,
+        titleSpacing: 0.0,
+        toolbarHeight: NFConstants.toolbarHeight,
         color: AppColors.eee,
-        textTheme: TextTheme(
-          headline6: TextStyle(
-            color: AppColors.greyText,
-            fontWeight: FontWeight.w600,
-            fontSize: 20.0,
-          ),
+        backwardsCompatibility: false,
+        titleTextStyle: TextStyle(
+          color: AppColors.greyText,
+          fontWeight: FontWeight.w600,
+          fontSize: 21.0,
+          fontFamily: 'Roboto',
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -192,8 +192,6 @@ abstract class Theme {
       fontFamily: 'Manrope',
       brightness: Brightness.dark,
       //****************** Colors **********************
-      // accentColor: AppColors.grey,
-      accentColor: Colors.red,
       backgroundColor: Colors.black,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade800,
@@ -203,17 +201,17 @@ abstract class Theme {
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         background: Colors.black,
-        onBackground: AppColors.almostWhite,
+        onBackground: Colors.white,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
         primaryVariant: Color(0xff936bff),
-        onPrimary: AppColors.almostWhite,
+        onPrimary: Colors.white,
         secondary: AppColors.grey,
         secondaryVariant: Colors.black,
         // todo: temporarily used for text in [NFButtons], remove when it's removed
-        onSecondary: AppColors.almostWhite,
+        onSecondary: Colors.white,
         error: Color(0xffed3b3b),
-        onError: AppColors.almostWhite,
+        onError: Colors.white,
         /// For window headers (e.g. alert dialogs)
         surface: AppColors.grey,
         /// For dimmed text (e.g. in appbar)
@@ -247,20 +245,20 @@ abstract class Theme {
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
         button: TextStyle(fontWeight: FontWeight.w600),
-        headline1: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline2: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline3: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline4: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
-        headline5: TextStyle(fontWeight: FontWeight.w600, color: AppColors.almostWhite),
+        headline1: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headline2: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headline3: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headline4: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headline5: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         headline6: TextStyle(
           fontWeight: FontWeight.w700,
-          color: AppColors.almostWhite,
+          color: Colors.white,
           fontSize: 15.0,
         ),
         // Title in song tiles
         subtitle1: TextStyle(
           fontWeight: FontWeight.w600,
-          color: AppColors.almostWhite,
+          color: Colors.white,
         ),
         // Artist widget
         subtitle2: TextStyle(
@@ -278,12 +276,14 @@ abstract class Theme {
         brightness: Brightness.dark,
         color: AppColors.grey,
         elevation: 0.0,
-        textTheme: TextTheme(
-          headline6: TextStyle(
-            color: AppColors.almostWhite,
-            fontWeight: FontWeight.w600,
-            fontSize: 20.0,
-          ),
+        titleSpacing: 0.0,
+        toolbarHeight: NFConstants.toolbarHeight,
+        backwardsCompatibility: false,
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 21.0,
+          fontFamily: 'Roboto',
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
@@ -349,8 +349,7 @@ abstract class UiTheme {
   );
 
   /// Theme for the bottom sheet dialog.
-  static final _ThemeContainer<SystemUiOverlayStyle> bottomSheet =
-      _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> bottomSheet = _ThemeContainer(
     light: black.light.copyWith(
       systemNavigationBarColor: Colors.white,
       statusBarBrightness: Brightness.light,
@@ -369,14 +368,11 @@ abstract class UiTheme {
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.light,
     ),
-    dark: black.dark.copyWith(
-      statusBarColor: Colors.black,
-    ),
+    dark: black.dark,
   );
 
   /// Theme for the modal dialog that is displayed over [grey].
-  static final _ThemeContainer<SystemUiOverlayStyle> modalOverGrey =
-      _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> modalOverGrey = _ThemeContainer(
     light: modal.light.copyWith(
       systemNavigationBarColor: const Color(0xff6d6d6d),
     ),
@@ -388,7 +384,7 @@ abstract class UiTheme {
 
 /// Class to wrap some values, so they will have [light] and [dark] variants.
 class _ThemeContainer<T> {
-  const _ThemeContainer({@required this.light, @required this.dark});
+  const _ThemeContainer({required this.light, required this.dark});
   final T light;
   final T dark;
 
@@ -398,7 +394,7 @@ class _ThemeContainer<T> {
   /// Checks theme and automatically picks opposite value from the current brightness.
   T get autoReverse => ThemeControl.isDark ? light : dark;
 
-  _ThemeContainer<T> copyWith({T light, T dark}) {
+  _ThemeContainer<T> copyWith({T? light, T? dark}) {
     return _ThemeContainer(
       light: light ?? this.light,
       dark: dark ?? this.dark,

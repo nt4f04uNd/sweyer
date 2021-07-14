@@ -7,7 +7,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -15,8 +15,8 @@ import 'package:sweyer/constants.dart' as Constants;
 
 abstract class ThemeControl {
   static bool _ready = false;
-  static Color _colorForBlend;
-  static Brightness _brightness;
+  static late Color _colorForBlend;
+  static late Brightness _brightness;
 
   /// Whether the start up ui animation has ended.
   static bool get ready => _ready;
@@ -59,10 +59,10 @@ abstract class ThemeControl {
   /// Inits theme, fetches brightness from [Prefs].
   ///
   /// NOTE that this does NOT call [emitThemeChange].
-  static Future<void> init() async {
-    final lightTheme = await Settings.lightThemeBool.get();
+  static void init() {
+    final lightTheme = Settings.lightThemeBool.get();
     _brightness = lightTheme ? Brightness.light : Brightness.dark;
-    final primaryColor = Color(await Settings.primaryColorInt.get());
+    final primaryColor = Color(Settings.primaryColorInt.get());
     _applyPrimaryColor(primaryColor);
   }
 
@@ -78,7 +78,7 @@ abstract class ThemeControl {
       statusBarIconBrightness: Brightness.light,
     ));
     await Future.delayed(const Duration(milliseconds: 500));
-    if (SystemUiStyleController.lastUi.systemNavigationBarColor != Colors.black) {
+    if (SystemUiStyleController.lastUi.systemNavigationBarColor != Constants.UiTheme.black.auto.systemNavigationBarColor) {
       final ui = Constants.UiTheme.grey.auto;
       await SystemUiStyleController.animateSystemUiOverlay(
         to: ui,
@@ -90,10 +90,7 @@ abstract class ThemeControl {
   }
 
   /// Changes theme to opposite and saves new value to pref.
-  ///
-  /// By default performs an animation of system ui to [Constants.UiTheme.topGrey].
-  /// Optional [systemUiOverlayStyle] allows change that behavior.
-  static Future<void> switchTheme({ SystemUiStyleController systemUiOverlayStyle }) async {
+  static Future<void> switchTheme() async {
     _rebuildOperation?.cancel();
     _brightness = _brightness == Brightness.dark ? Brightness.light : Brightness.dark;
     Settings.lightThemeBool.set(_brightness == Brightness.light);
@@ -105,15 +102,18 @@ abstract class ThemeControl {
 
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
 
-    emitThemeChange(true);
-    _rebuildOperation = CancelableOperation.fromFuture(() async {
-      await Future.delayed(dilate(const Duration(milliseconds: 300)));
+    themeChaning.add(true);
+    _rebuildOperation = CancelableOperation<void>.fromFuture(
+      Future.delayed(dilate(const Duration(milliseconds: 300)))
+    )
+    ..value.then((value) async {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
-      emitThemeChange(false);
-    }());
+    })
+    ..value.then((value) => themeChaning.add(false));
+  
     await SystemUiStyleController.animateSystemUiOverlay(
-      to: systemUiOverlayStyle ?? Constants.UiTheme.black.auto,
+      to: Constants.UiTheme.black.auto,
       curve: Curves.easeIn,
       duration: const Duration(milliseconds: 160),
     );
@@ -124,19 +124,21 @@ abstract class ThemeControl {
     _rebuildOperation?.cancel();
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
-    emitThemeChange(true);
+    themeChaning.add(true);
     MusicPlayer.instance.updateServiceMediaItem();
-    _rebuildOperation = CancelableOperation.fromFuture(() async {
-      await Future.delayed(dilate(primaryColorChangeDuration));
+    _rebuildOperation = CancelableOperation<void>.fromFuture(
+      Future.delayed(dilate(primaryColorChangeDuration))
+    )
+    ..value.then((value) async {
       App.rebuildAllChildren();
       await Future.delayed(dilate(const Duration(milliseconds: 20)));
-      emitThemeChange(false);
-    }());
+    })
+    ..value.then((value) => themeChaning.add(false));
   }
 
   static void _applyPrimaryColor(Color color) {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
-    _colorForBlend = getColorForBlend(color);
+    _colorForBlend = ContentArt.getColorToBlendInDefaultArt(color);
     Constants.Theme.app = Constants.Theme.app.copyWith(
       light: Constants.Theme.app.light.copyWith(
         primaryColor: color,
@@ -183,26 +185,10 @@ abstract class ThemeControl {
     );
   }
 
-  static final StreamController<bool> _controller = StreamController<bool>.broadcast();
   static const Duration primaryColorChangeDuration = Duration(milliseconds: 240);
-  static CancelableOperation _rebuildOperation;
+  static CancelableOperation<void>? _rebuildOperation;
 
-  /// Gets stream of changes on theme.
-  ///
-  /// Boolean value emitted to the stream indicates that theme animation is now playing and
-  /// some interface that can be hidden for the animation optimization.
-  static Stream<bool> get onThemeChange => _controller.stream;
-  static bool get themeChaning => _themeChaning;
-
-  /// Whether the theme is curretly chaning.
-  static bool _themeChaning = false;
-
-  /// Emit theme change into stream
-  ///
-  /// The [value] indicates that theme animation is now playing and
-  /// some interface that can be hidden for the animation optimization.
-  static void emitThemeChange(bool value) {
-    _themeChaning = value;
-    _controller.add(value);
-  }
+  /// If `true` - that means theme animation is now being performed and
+  /// some interface can hidden for optimization sake.
+  static final BehaviorSubject<bool> themeChaning = BehaviorSubject.seeded(false);
 }

@@ -4,12 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'package:flutter/foundation.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+// 
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSettingsRoute extends StatefulWidget {
-  const GeneralSettingsRoute({Key key}) : super(key: key);
+  const GeneralSettingsRoute({Key? key}) : super(key: key);
   @override
   _GeneralSettingsRouteState createState() => _GeneralSettingsRouteState();
 }
@@ -22,9 +22,11 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return NFPageBase(
-      name: l10n.general,
-      child: ListView(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.general),
+      ),
+      body: ListView(
         physics: const NeverScrollableScrollPhysics(),
         children: const [
           // _MinFileDurationSlider(

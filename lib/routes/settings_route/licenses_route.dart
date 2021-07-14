@@ -6,8 +6,6 @@
 *  See ThirdPartyNotices.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12
-
 /// ###########################################################################################
 /// copied this from flutter https://github.com/flutter/flutter/commit/183f0e797a3bf8aa1b35b650150f7522d5d10377
 /// ###########################################################################################
@@ -15,14 +13,11 @@
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
 
-// TODO: remove all ignores when migrate to nnbd
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Flow;
 import 'package:flutter/scheduler.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
-// ignore: import_of_legacy_library_into_null_safe
+
 import 'package:sweyer/sweyer.dart';
 
 /// A page that shows licenses for software used by the application.
@@ -123,9 +118,7 @@ class _PackagesView extends StatefulWidget {
     Key? key,
     required this.isLateral,
     required this.selectedId,
-  // ignore: unnecessary_null_comparison
-  })   : assert(isLateral != null),
-        super(key: key);
+  }) : super(key: key);
 
   final bool isLateral;
   final ValueNotifier<int?> selectedId;
@@ -456,19 +449,15 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final Widget page;
     if (widget.scrollController == null) {
       page = Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-          child: AppBar(
-            elevation: 2.0,
-            leading: NFBackButton(
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            titleSpacing: 0.0,
-            title: _PackageLicensePageTitle(
-              title,
-              subtitle,
-              theme.appBarTheme.textTheme ?? theme.primaryTextTheme,
-            ),
+        appBar: AppBar(
+          leading: NFBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: _PackageLicensePageTitle(
+            title: title,
+            subtitle: subtitle,
+            titleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(fontSize: 20.0),
+            subtitleTextStyle: theme.appBarTheme.titleTextStyle?.copyWith(fontSize: 15.0),
           ),
         ),
         body: Center(
@@ -484,25 +473,23 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       page = CustomScrollView(
         controller: widget.scrollController,
         slivers: <Widget>[
-          PreferredSize(
-            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-            child: SliverAppBar(
-              automaticallyImplyLeading: false,
-              titleSpacing: 0.0,
-              pinned: true,
-              backgroundColor: theme.colorScheme.secondary,
-              title: _PackageLicensePageTitle(title, subtitle, theme.textTheme),
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            titleSpacing: 0.0,
+            pinned: true,
+            backgroundColor: theme.colorScheme.secondary,
+            title: _PackageLicensePageTitle(
+              title: title,
+              subtitle: subtitle,
+              titleTextStyle: theme.textTheme.headline6,
+              subtitleTextStyle: theme.textTheme.subtitle2,
             ),
           ),
           SliverPadding(
             padding: padding,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Localizations.override(
-                  locale: const Locale('en', 'US'),
-                  context: context,
-                  child: listWidgets[index],
-                ),
+                (BuildContext context, int index) => listWidgets[index],
                 childCount: listWidgets.length,
               ),
             ),
@@ -518,16 +505,18 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
 }
 
 class _PackageLicensePageTitle extends StatelessWidget {
-  const _PackageLicensePageTitle(
-    this.title,
-    this.subtitle,
-    this.theme, {
+  const _PackageLicensePageTitle({
     Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.titleTextStyle,
+    required this.subtitleTextStyle,
   }) : super(key: key);
 
   final String title;
   final String subtitle;
-  final TextTheme theme;
+  final TextStyle? titleTextStyle;
+  final TextStyle? subtitleTextStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -537,11 +526,8 @@ class _PackageLicensePageTitle extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(title, style: theme.headline6),
-          Text(
-            subtitle,
-            style: theme.subtitle2 ?? const TextStyle(fontSize: 15.0),
-          ),
+          Text(title, style: titleTextStyle),
+          Text(subtitle, style: subtitleTextStyle),
         ],
       ),
     );
@@ -635,15 +621,7 @@ class _MasterDetailFlow extends StatefulWidget {
     this.masterPageBuilder,
     this.masterViewWidth,
     this.title,
-  // ignore: unnecessary_null_comparison
-  })  : assert(masterViewBuilder != null),
-        // ignore: unnecessary_null_comparison
-        assert(automaticallyImplyLeading != null),
-        // ignore: unnecessary_null_comparison
-        assert(detailPageBuilder != null),
-        // ignore: unnecessary_null_comparison
-        assert(displayMode != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// Builder for the master view for lateral navigation.
   ///
@@ -852,8 +830,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       child: Navigator(
         key: _navigatorKey,
         initialRoute: 'initial',
-        onGenerateInitialRoutes:
-            (NavigatorState navigator, String initialRoute) {
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
           switch (focus) {
             case _Focus.master:
               return <Route<void>>[masterPageRoute];
@@ -903,8 +880,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
                   flexibleSpace: widget.flexibleSpace,
                   automaticallyImplyLeading: widget.automaticallyImplyLeading,
                   floatingActionButton: widget.floatingActionButton,
-                  floatingActionButtonLocation:
-                      widget.floatingActionButtonMasterPageLocation,
+                  floatingActionButtonLocation: widget.floatingActionButtonMasterPageLocation,
                   masterViewBuilder: widget.masterViewBuilder,
                   actionBuilder: widget.actionBuilder,
                 ),
@@ -922,11 +898,11 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
             onBackButtonPressed: () async {
               // No need for setState() as rebuild happens on navigation pop.
               focus = _Focus.master;
-              Navigator.of(context).pop();
-              return true;
+              return Navigator.of(context).maybePop();
             },
             child: BlockSemantics(
-                child: widget.detailPageBuilder(context, arguments, null)),
+              child: widget.detailPageBuilder(context, arguments, null),
+            ),
           );
         },
       ),
@@ -984,20 +960,15 @@ class _MasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-        child: AppBar(
-          elevation: 2.0,
-          titleSpacing: 0.0,
-          title: title,
-          leading: leading,
-          actions: actionBuilder == null
-              ? const <Widget>[]
-              : actionBuilder!(context, _ActionLevel.composite),
-          centerTitle: centerTitle,
-          flexibleSpace: flexibleSpace,
-          automaticallyImplyLeading: automaticallyImplyLeading,
-        ),
+      appBar: AppBar(
+        title: title,
+        leading: leading,
+        actions: actionBuilder == null
+            ? const <Widget>[]
+            : actionBuilder!(context, _ActionLevel.composite),
+        centerTitle: centerTitle,
+        flexibleSpace: flexibleSpace,
+        automaticallyImplyLeading: automaticallyImplyLeading,
       ),
       body: masterViewBuilder!(context, false),
       floatingActionButton: floatingActionButton,
@@ -1027,11 +998,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
     this.masterViewWidth,
-  // ignore: unnecessary_null_comparison
-  })  : assert(detailPageBuilder != null),
-        // ignore: unnecessary_null_comparison
-        assert(masterViewBuilder != null),
-        super(key: key);
+  }) : super(key: key);
 
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1080,15 +1047,13 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
 
   @override
   void openDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance!.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.openDetailPage(arguments);
   }
 
   @override
   void setInitialDetailPage(Object arguments) {
-    SchedulerBinding.instance!
-        .addPostFrameCallback((_) => _detailArguments.value = arguments);
+    SchedulerBinding.instance!.addPostFrameCallback((_) => _detailArguments.value = arguments);
     _MasterDetailFlow.of(context)!.setInitialDetailPage(arguments);
   }
 
@@ -1102,36 +1067,33 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           floatingActionButtonLocation: floatingActionButtonLocation,
           body: _masterPanel(context),
           floatingActionButton: widget.floatingActionButton,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-            child: AppBar(
-              titleSpacing: 0.0,
-              elevation: 2.0,
-              title: widget.title,
-              actions: widget.actionBuilder!(context, _ActionLevel.top),
-              leading: widget.leading,
-              automaticallyImplyLeading: widget.automaticallyImplyLeading,
-              centerTitle: widget.centerTitle,
-              // bottom: PreferredSize(
-              //   preferredSize: const Size.fromHeight(kToolbarHeight),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.start,
-              //     children: <Widget>[
-              //       ConstrainedBox(
-              //         constraints:
-              //             BoxConstraints.tightFor(width: masterViewWidth),
-              //         child: IconTheme(
-              //           data: Theme.of(context).primaryIconTheme,
-              //           child: ButtonBar(
-              //             children:
-              //                 widget.actionBuilder!(context, _ActionLevel.view),
-              //           ),
-              //         ),
-              //       )
-              //     ],
-              //   ),
-              // ),
-            ),
+          appBar: AppBar(
+            titleSpacing: 0.0,
+            elevation: 2.0,
+            title: widget.title,
+            actions: widget.actionBuilder!(context, _ActionLevel.top),
+            leading: widget.leading,
+            automaticallyImplyLeading: widget.automaticallyImplyLeading,
+            centerTitle: widget.centerTitle,
+            // bottom: PreferredSize(
+            //   preferredSize: const Size.fromHeight(kToolbarHeight),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.start,
+            //     children: <Widget>[
+            //       ConstrainedBox(
+            //         constraints:
+            //             BoxConstraints.tightFor(width: masterViewWidth),
+            //         child: IconTheme(
+            //           data: Theme.of(context).primaryIconTheme,
+            //           child: ButtonBar(
+            //             children:
+            //                 widget.actionBuilder!(context, _ActionLevel.view),
+            //           ),
+            //         ),
+            //       )
+            //     ],
+            //   ),
+            // ),
           ),
         ),
         // Detail view stacked above main scaffold and master view.
@@ -1192,17 +1154,14 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           ? Scaffold(
               backgroundColor: Colors.red,
               body: widget.masterViewBuilder(context, true),
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kNFAppBarPreferredSize),
-                child: AppBar(
-                  titleSpacing: 0.0,
-                  elevation: 2.0,
-                  title: widget.title,
-                  actions: widget.actionBuilder!(context, _ActionLevel.top),
-                  leading: widget.leading,
-                  automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                  centerTitle: widget.centerTitle,
-                ),
+              appBar: AppBar(
+                titleSpacing: 0.0,
+                elevation: 2.0,
+                title: widget.title,
+                actions: widget.actionBuilder!(context, _ActionLevel.top),
+                leading: widget.leading,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                centerTitle: widget.centerTitle,
               ),
             )
           : widget.masterViewBuilder(context, true),
@@ -1215,11 +1174,9 @@ class _DetailView extends StatelessWidget {
     Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
-  // ignore: unnecessary_null_comparison
-  })  : assert(builder != null),
-        _builder = builder,
-        _arguments = arguments,
-        super(key: key);
+  }) : _builder = builder,
+       _arguments = arguments,
+       super(key: key);
 
   final _DetailPageBuilder _builder;
   final Object? _arguments;

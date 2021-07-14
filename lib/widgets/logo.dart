@@ -10,8 +10,8 @@ import 'package:sweyer/sweyer.dart';
 /// Creates a Sweyer logo.
 class SweyerLogo extends StatelessWidget {
   const SweyerLogo({
-    Key key,
-    this.size,
+    Key? key,
+    this.size = kSongTileArtSize,
     this.color,
   }) : super(key: key);
 
@@ -19,17 +19,18 @@ class SweyerLogo extends StatelessWidget {
 
   /// Background color to be used instead of [ThemeControl.colorForBlend],
   /// which is applied by default.
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final cacheSize = (size * 1.65 * MediaQuery.of(context).devicePixelRatio).round();
     return ClipRRect(
       borderRadius: const BorderRadius.all(
         Radius.circular(8.0),
       ),
       child: SizedBox(
-        width: size ?? kSongTileArtSize,
-        height: size ?? kSongTileArtSize,
+        width: size,
+        height: size,
         child: Stack(
           children: [
             Transform.scale(
@@ -37,9 +38,12 @@ class SweyerLogo extends StatelessWidget {
               child: Image.asset(
                 Constants.Assets.ASSET_LOGO_MASK,
                 color: color != null
-                    ? getColorForBlend(color)
+                    ? ContentArt.getColorToBlendInDefaultArt(color!)
                     : ThemeControl.colorForBlend,
+                cacheHeight: cacheSize,
+                cacheWidth: cacheSize,
                 colorBlendMode: BlendMode.plus,
+                filterQuality: FilterQuality.high,
               ),
             ),
           ],

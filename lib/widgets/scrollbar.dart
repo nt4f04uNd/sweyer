@@ -6,9 +6,6 @@
 *  See ThirdPartyNotices.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-// @dart = 2.12
-
-
 /// ###########################################################################################
 /// copied this from flutter https://github.com/flutter/flutter/commit/02efffc134
 /// ###########################################################################################
@@ -16,7 +13,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:nt4f04unds_widgets/nt4f04unds_widgets.dart';
+
 import 'package:sweyer/sweyer.dart';
 
 const double _kScrollbarThickness = 8.0;
@@ -69,14 +66,17 @@ class AppScrollbar extends StatefulWidget {
       labelBuilder: !showLabel
         ? null
         : (context) {
+          final l10n = getl10n(context);
           final item = list[
             (controller.position.pixels / kSongTileHeight - 1)
             .clamp(0.0, list.length - 1).round()
           ];
           return NFScrollLabel(
-            text: contentPick<T, String Function()>(
+            text: contentPick<T, ValueGetter<String>>(
               song: () => (item as Song).title[0].toUpperCase(),
               album: () => (item as Album).album[0].toUpperCase(),
+              playlist: () => (item as Playlist).name[0].toUpperCase(),
+              artist: () => ContentUtils.localizedArtist((item as Artist).artist[0], l10n).toUpperCase(),
             )(),
           );
         },
