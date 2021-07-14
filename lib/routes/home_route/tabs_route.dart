@@ -144,6 +144,8 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     final navigatorKey = AppRouter.instance.navigatorKey;
     final homeNavigatorKey = homeRouter!.navigatorKey;
 
+    // When in selection route, the home router should be popped first,
+    // opposed to the normal situation, where the main app navigator comes first
     if (selectionRoute && homeNavigatorKey.currentState!.canPop()) {
       homeNavigatorKey.currentState!.pop();
       return true;
@@ -157,13 +159,15 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       return true;
     }
 
-    final now = DateTime.now();
-    // Show toast when user presses back button on main route, that
-    // asks from user to press again to confirm that he wants to quit the app
-    if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
-      _lastBackPressTime = now;
-      ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
-      return true;
+    if (!selectionRoute) {
+      final now = DateTime.now();
+      // Show toast when user presses back button on main route, that
+      // asks from user to press again to confirm that he wants to quit the app
+      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+        _lastBackPressTime = now;
+        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
+        return true;
+      }
     }
 
     return false;
