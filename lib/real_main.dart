@@ -168,6 +168,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         return NFTheme(
         data: App.nfThemeData,
           child: MaterialApp.router(
+            // debugShowCheckedModeBanner: false,
             // showPerformanceOverlay: true,
             // checkerboardRasterCacheImages: true,
             title: Constants.Config.APPLICATION_TITLE,

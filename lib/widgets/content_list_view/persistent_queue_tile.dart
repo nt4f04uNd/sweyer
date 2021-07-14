@@ -135,11 +135,12 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 
   Widget _buildInfo() {
+    final theme = ThemeControl.theme;
     final List<Widget> children = [
       Text(
         widget.queue.title,
         overflow: TextOverflow.ellipsis,
-        style: ThemeControl.theme.textTheme.headline6,
+        style: theme.textTheme.headline6,
       ),
     ];
     final queue = widget.queue;
@@ -148,6 +149,12 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
         artist: queue.artist,
         trailingText: queue.year.toString(),
         textStyle: const TextStyle(fontSize: 14.0, height: 1.0),
+      ));
+    } else if (queue is Playlist) {
+      final l10n = getl10n(context);
+      children.add(Text(
+        l10n.contentsPluralWithCount<Song>(queue.length),
+        style: theme.textTheme.subtitle2!.merge(const TextStyle(fontSize: 14.0, height: 1.0)),
       ));
     }
     return Column(
