@@ -527,7 +527,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                 ),
               ),
             if (contentType == Playlist && !selectionRoute)
-              const CreatePlaylistInListAction(),
+              CreatePlaylistInListAction(enabled: selectionController.notInSelection),
           ],
         ),
       )

@@ -88,6 +88,7 @@ public enum ContentChannel {
                   loadingSignals.put(id, signal);
                   Executors.newSingleThreadExecutor().execute(() -> {
                      byte[] bytes = null;
+                     boolean reported = false;
                      try {
                         Bitmap bitmap = contentResolver.loadThumbnail(
                                 Uri.parse(call.argument("uri")),
@@ -100,13 +101,18 @@ public enum ContentChannel {
                      } catch (OperationCanceledException ex) {
                         // do nothing
                      } catch (IOException e) {
-                        result.error(IO_ERROR, "loadThumbnail failed", Log.getStackTraceString(e));
-                     } finally {
-                        byte[] finalBytes = bytes;
+                        reported = true;
                         handler.post(() -> {
-                           loadingSignals.remove(id);
-                           result.success(finalBytes);
+                           result.error(IO_ERROR, "loadThumbnail failed", Log.getStackTraceString(e));
                         });
+                     } finally {
+                        if (!reported) {
+                           byte[] finalBytes = bytes;
+                           handler.post(() -> {
+                              loadingSignals.remove(id);
+                              result.success(finalBytes);
+                           });
+                        }
                      }
                   });
                } else {
@@ -277,7 +283,6 @@ public enum ContentChannel {
                      handler.post(() -> {
                         result.error(UNEXPECTED_ERROR, e.getMessage(), Log.getStackTraceString(e));
                      });
-
                   }
                });
                break;

@@ -149,7 +149,12 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
 }
 
 class CreatePlaylistInListAction extends StatefulWidget {
-  const CreatePlaylistInListAction({Key? key}) : super(key: key);
+  const CreatePlaylistInListAction({
+    Key? key ,
+    this.enabled = true,
+  }) : super(key: key);
+
+  final bool enabled;
 
   @override
   State<CreatePlaylistInListAction> createState() => _CreatePlaylistInListActionState();
@@ -164,7 +169,7 @@ class _CreatePlaylistInListActionState extends State<CreatePlaylistInListAction>
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     return InListContentAction.persistentQueue(
-      onTap: _handleTap,
+      onTap: widget.enabled ? _handleTap : null,
       icon: Icons.add_rounded,
       text: l10n.newPlaylist,
     );

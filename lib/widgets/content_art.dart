@@ -423,12 +423,23 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
       if (!state.mounted)
         return;
       _signal = CancellationSignal();
-      _bytes = await ContentChannel.loadAlbumArt(
-        uri: uri,
-        size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
-        signal: _signal!,
-      );
-      setLoading(_SourceLoading.loaded);
+      try {
+        _bytes = await ContentChannel.loadAlbumArt(
+          uri: uri,
+          size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
+          signal: _signal!,
+        );
+      } on ContentChannelException catch (ex, stack) {
+        if (ex != ContentChannelException.io) {
+          FirebaseCrashlytics.instance.recordError(
+            ex,
+            stack,
+            reason: 'in _SongScopedStorageArtSourceLoader.load',
+          );
+        }
+      } finally {
+        setLoading(_SourceLoading.loaded);
+      }
     });
   }
 
@@ -578,7 +589,11 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
         final info = await artist.fetchInfo();
         _url = info.imageUrl;
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(ex, stack);
+        FirebaseCrashlytics.instance.recordError(
+          ex,
+          stack,
+          reason: 'in _ArtistGeniusArtSourceLoader.load',
+        );
       } finally {
         setLoading(_SourceLoading.loaded);
       }
@@ -598,7 +613,11 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
       height: size,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stacktrace) {
-        FirebaseCrashlytics.instance.recordError(error, stacktrace);
+        FirebaseCrashlytics.instance.recordError(
+          error,
+          stacktrace,
+          reason: 'in _ArtistGeniusArtSourceLoader.getImage',
+        );
         return state._buildDefault();
       },
       frameBuilder: state.frameBuilder,

@@ -1,3 +1,8 @@
+## 1.0.5
+
+- Fixed crash when album art couldn't be loaded on Android 10+
+- Fixed that new playlist action in playlists tab could be tapped in selection
+
 ## 1.0.4
 
 - Added playlists and artists
