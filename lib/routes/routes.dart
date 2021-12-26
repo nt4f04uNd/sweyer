@@ -3,7 +3,6 @@
 *  Licensed under the BSD-style license. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-
 export 'home_route/home_route.dart';
 export 'settings_route/settings_route.dart';
 export 'dev_route.dart';
@@ -11,18 +10,13 @@ export 'selection_route.dart';
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide LicensePage;
 import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
 
-import 'home_route/home_route.dart';
-import 'settings_route/settings_route.dart';
 import 'settings_route/licenses_route.dart';
-import 'dev_route.dart';
-import 'selection_route.dart';
 
 final RouteObserver<Route> routeObserver = RouteObserver();
 final RouteObserver<Route> homeRouteObserver = RouteObserver();
@@ -304,7 +298,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
 
   @override
   List<AppRoutes<Object?>> get _routes => __routes;
-  final List<AppRoutes<Object?>> __routes = [AppRoutes.initial as AppRoutes<Object>];
+  final List<AppRoutes<Object?>> __routes = [AppRoutes.initial];
 
   @override
   Future<void> setNewRoutePath(AppRoutes configuration) async { }
@@ -473,7 +467,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
 
   @override
   List<HomeRoutes<Object?>> get _routes => __routes;
-  final List<HomeRoutes<Object?>> __routes = [HomeRoutes.tabs as HomeRoutes<Object>];
+  final List<HomeRoutes<Object?>> __routes = [HomeRoutes.tabs];
 
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();

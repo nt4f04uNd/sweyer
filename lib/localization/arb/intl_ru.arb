@@ -1,5 +1,4 @@
 {
-  "@@locale": "ru_ru",
   "@@last_modified": "2020-05-25T04:00:59.715314",
   "playback": "Воспроизведение",
   "@playback": {
@@ -398,6 +397,11 @@
   },
   "addToPlaylist": "Добавить в плейлист",
   "@addToPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromPlaylist": "Убрать из плейлиста",
+  "@removeFromPlaylist": {
     "type": "text",
     "placeholders": {}
   },

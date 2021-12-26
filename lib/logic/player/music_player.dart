@@ -88,25 +88,25 @@ class _BrowserParentProvider {
           MediaItem(
             id: _BrowseParent.songs.value,
             album: '',
-            title: staticl10n.contents<Song>(),
+            title: staticl10n.utils.contents<Song>(),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.albums.value,
             album: '',
-            title: staticl10n.contents<Album>(),
+            title: staticl10n.utils.contents<Album>(),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.playlists.value,
             album: '',
-            title: staticl10n.contents<Playlist>(),
+            title: staticl10n.utils.contents<Playlist>(),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.artists.value,
             album: '',
-            title: staticl10n.contents<Artist>(),
+            title: staticl10n.utils.contents<Artist>(),
             playable: false,
           ),
         ];
@@ -510,7 +510,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> didChangeLocales(List<Locale>? locales) async {
-    await AppLocalizations.init();
+    await initL10n();
     mediaItem.add(ContentControl.state.currentSong.toMediaItem());
     queue.add(ContentControl.state.queues.current
       .songs

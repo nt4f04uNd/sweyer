@@ -1,6 +1,9 @@
 ## 1.0.6
 
 - Fix scrollbar crash
+- Not important for users:
+  - bump dependencies and enable sound null-safety
+  - dropped unmaintained `intl_localizations` package in favour of Flutter's `gen_l10n`
 
 ## 1.0.5
 

@@ -8,17 +8,14 @@ version: 1.0.6+8
 
 environment:
   sdk: '>=2.13.0 <3.0.0'
-  flutter: 2.4.0-5.0.pre.73
-  # See https://github.com/nt4f04uNd/flutter/tree/sweyer
-  # For this release it's https://github.com/flutter/flutter/commit/252f6a02855194f17678dd29254cf6216f049f14
-  # with cherry-picked https://github.com/flutter/flutter/pull/82687 and https://github.com/flutter/flutter/pull/85499 for scrollbar fixes
-  # The HEAD is https://github.com/nt4f04uNd/flutter/commit/e298ed772fa188dc1df57a4c769be5781390ca33
+  flutter: ^2.8.0
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  intl: ^0.17.0
   uuid: ^3.0.4
   path: ^1.8.0
   async: ^2.5.0
@@ -35,7 +32,7 @@ dependencies:
   cloud_functions: ^1.1.2
   package_info: ^2.0.0
   url_launcher: ^6.0.3
-  flare_flutter: ^2.0.6 # TODO: update to 3.0.0 when https://github.com/2d-inc/Flare-Flutter/issues/301 is resolved
+  flare_flutter: ^3.0.2
   auto_size_text: ^3.0.0-nullsafety.0
   marquee: ^2.1.0
   equatable: ^2.0.0
@@ -46,7 +43,6 @@ dependencies:
   back_button_interceptor: ^5.0.0
   flutter_sticky_header: ^0.6.0
   palette_generator: ^0.3.0
-  multiple_localization: ^0.2.1
   cached_network_image: ^3.0.0
   flutter_cache_manager: ^3.1.1
 
@@ -89,18 +85,14 @@ dependencies:
 
     git:
       url: https://github.com/nt4f04uNd/nt4f04unds_widgets/
-      ref: 1.1.5
+      ref: 2.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # intl_translation: ^0.17.10+1
-  intl_translation:
-    git:
-      url: https://github.com/nt4f04uNd/intl_translation
-      ref: 01600ef565707e59dd24f99590b7da1edb6f9ca4
 
 flutter:
+  generate: true
   uses-material-design: true
 
   assets:

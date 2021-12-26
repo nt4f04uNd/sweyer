@@ -27,11 +27,4 @@ void main() {
   //   final b = f.cast<Map<String, dynamic>>();
   //   // print(b);
   // });
-
-  test('test3', () async {
-    await AppLocalizations.load(const Locale('ru', 'RU'));
-    await AppLocalizations.load(const Locale('en', 'EN'));
-    await AppLocalizations.load(const Locale('ru', 'RU'));
-    print(staticl10n.artistUnknown);
-  });
 }
