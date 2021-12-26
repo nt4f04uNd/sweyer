@@ -629,7 +629,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   }
 }
 
-/// Player that plays the content provided by provided [ContentControl].
+/// Player that plays the content provided by [ContentControl].
 class MusicPlayer extends AudioPlayer {
   MusicPlayer._();
   static MusicPlayer? _instance;

@@ -404,7 +404,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ///
   /// If [counter] is `true`, will show a couter in the actions bar title.
   ///
-  /// If [closeButton] is  `true`, will show a selection close button in the actions bar.
+  /// If [closeButton] is `true`, will show a selection close button in the actions bar.
   ///
   /// For other parameters, see the class properties. 
   @factory
@@ -1403,7 +1403,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
   }
 }
 
-/// Action that shulles and plays selected content as queue.
+/// Action that shuffles and plays selected content as queue.
 class _ShuffleAsQueueSelectionAction extends StatelessWidget {
   const _ShuffleAsQueueSelectionAction({Key? key})
       : super(key: key);

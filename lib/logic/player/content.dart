@@ -89,11 +89,11 @@ V persistentQueuePick<T extends PersistentQueue, V>({
   }
 }
 
-/// A [Map] container for the [Content] as key, and `T` as value entry.
+/// A [Map] container for the [Content] as key, and `V` as value entry.
 class ContentMap<V> {
   /// Creates a content map from initial value [map].
   ///
-  /// If none specified, will initialize the map with `null`s.
+  /// If none specified, will initialize with empty map.
   ContentMap([Map<Type, V>? map]) : _map = map ?? {};
 
   final Map<Type, V> _map;
@@ -133,7 +133,7 @@ enum _PoolQueueType {
   /// Any queue type to be displayed (searched or album or etc.).
   queue,
 
-  /// This queue is always produced from the other two.
+  /// This queue is always produced from the [queue].
   shuffled,
 }
 
@@ -201,7 +201,8 @@ class _QueuePool {
   ///
   /// Applied in certain conditions when user adds, removes
   /// or reorders songs in the queue.
-  /// [QueueType.custom] cannot be modified.
+  ///
+  /// [QueueType.arbitrary] cannot be modified.
   bool get modified => _modified;
   bool _modified = false;
 
@@ -456,7 +457,6 @@ abstract class ContentControl {
   static void _deduplicateSong(Song song) {
     final result = ContentUtils.deduplicateSong(
       song: song,
-      index: null,
       list: state.queues.current.songs,
       idMap: state.idMap,
     );
@@ -479,7 +479,7 @@ abstract class ContentControl {
   }
 
   /// Checks if current queue is [QueueType.origin], if yes, adds this queue as origin
-  /// to all its songs. This is a required action for each addition to the queue. 
+  /// to all its songs. This is a required action for each addition to the queue.
   static void _setOrigins() {
     if (state.queues.type == QueueType.origin) {
       final songs = state.queues.current.songs;
@@ -1001,8 +1001,6 @@ abstract class ContentControl {
 
   /// Refetches content by the `T` content type.
   ///
-  /// Instead of `T`, you can explicitly specify [contentType].
-  ///
   /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling [removeObsolete].
   /// (only works with [Song]s).
   static Future<void> refetch<T extends Content>({
@@ -1065,8 +1063,6 @@ abstract class ContentControl {
   }
 
   /// Searches for content by given [query] and the `T` content type.
-  ///
-  /// Instead of `T`, you can explicitly specify [contentType]..
   static List<T> search<T extends Content>(String query, { Type? contentType }) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
@@ -1193,10 +1189,12 @@ abstract class ContentControl {
   }
 
   /// Filters out non-source songs (with negative IDs), and asserts that.
+  ///
+  /// That ensure invalid items are never passed to platform and allows to catch
+  /// invalid states in debug mode.
   static Set<Song> _ensureSongsAreSource(Set<Song> songs) {
     return songs.fold<Set<Song>>({}, (prev, el) {
       if (el.id >= 0) {
-        // Taking precautions for release mode
         prev.add(el);
       } else {
         assert(false, "All IDs must be source (non-negative)");
@@ -1703,11 +1701,6 @@ class ContentUtils {
   /// it is, changes its ID and saves the mapping to the original source ID to
   /// an [idMap].
   ///
-  /// The [index] should be non-null if the [origin] is [DuplicatingSongOriginMixin], which create their own id map.
-  /// This is needed to later distinguish this key within the [ContentState.idMap].
-  /// See the [PersistentQueueRoute] `currentTest` condition for example.
-  /// If [index] is null, the function will try to set an automatic index.
-  ///
   /// The [list] is the list of songs contained in this origin.
   ///
   /// This must be called before the song is inserted to the queue, otherwise
@@ -1720,7 +1713,6 @@ class ContentUtils {
   /// [source] was changed.
   static bool deduplicateSong({
     required Song song,
-    required int? index,
     required List<Song> list,
     required IdMap idMap,
   }) {

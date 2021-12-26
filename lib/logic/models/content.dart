@@ -7,14 +7,10 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:equatable/equatable.dart';
-import 'package:collection/collection.dart';
 
 /// Represents some content in the app (songs, album, etc).
 ///
 /// Each type of content have an approprate [Sort]s implemented.
-///
-/// See also:
-/// * [ContentType], a list of all content types.
 abstract class Content with EquatableMixin {
   const Content();
 

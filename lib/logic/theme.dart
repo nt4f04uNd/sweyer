@@ -105,12 +105,11 @@ abstract class ThemeControl {
     themeChaning.add(true);
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(const Duration(milliseconds: 300)))
-    )
-    ..value.then((value) async {
+    ).then((value) async {
       App.rebuildAllChildren();
-      await Future.delayed(dilate(const Duration(milliseconds: 20)));
-    })
-    ..value.then((value) => themeChaning.add(false));
+    }).then((value) {
+      themeChaning.add(false);
+    });
   
     await SystemUiStyleController.animateSystemUiOverlay(
       to: Constants.UiTheme.black.auto,
@@ -128,12 +127,11 @@ abstract class ThemeControl {
     MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(primaryColorChangeDuration))
-    )
-    ..value.then((value) async {
+    ).then((value) async {
       App.rebuildAllChildren();
-      await Future.delayed(dilate(const Duration(milliseconds: 20)));
-    })
-    ..value.then((value) => themeChaning.add(false));
+    }).then((value) {
+      themeChaning.add(false);
+    });
   }
 
   static void _applyPrimaryColor(Color color) {
