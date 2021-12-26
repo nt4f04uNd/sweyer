@@ -9,7 +9,7 @@ import 'package:sweyer/sweyer.dart';
 
 class Album extends PersistentQueue {
   final String album;
-  final String albumArt;
+  final String? albumArt;
   final String artist;
   final int artistId;
   final int firstYear;
@@ -59,7 +59,7 @@ class Album extends PersistentQueue {
 
   /// Returns string in format `Album • year`. 
   String albumDotName(AppLocalizations l10n) {
-    return ContentUtils.appendYearWithDot(l10n.album, year);
+    return ContentUtils.appendYearWithDot(l10n.utils.album, year);
   }
 
   /// Returns the album artist.
@@ -107,7 +107,7 @@ class Album extends PersistentQueue {
     return Album(
       id: map['id'] as int,
       album: map['album'] as String,
-      albumArt: map['albumArt'] as String,
+      albumArt: map['albumArt'] as String?,
       artist: map['artist'] as String,
       artistId: map['artistId'] as int,
       firstYear: map['firstYear'] as int,

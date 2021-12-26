@@ -103,7 +103,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         child: Builder( // i need the proper context to pop the dialog
           builder: (context) => _RadioListTile<SortFeature>(
             title: Text(
-              l10n.sortFeature<T>(feature as SortFeature<T>, contentType).toLowerCase(),
+              l10n.utils.sortFeature<T>(feature as SortFeature<T>, contentType).toLowerCase(),
               style: ThemeControl.theme.textTheme.subtitle1,
             ),
             value: feature,
@@ -141,7 +141,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, right: 10.0),
       child: Text(
-        l10n.contentsPluralWithCount<T>(count, contentType),
+        l10n.utils.contentsPluralWithCount<T>(count, contentType),
         softWrap: false,
         overflow: TextOverflow.fade,
         style: textStyle,
@@ -205,7 +205,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                     vertical: 2.0,
                   ),
                   child: Text(
-                    l10n.sortFeature<T>(sort.feature, contentType),
+                    l10n.utils.sortFeature<T>(sort.feature, contentType),
                     softWrap: false,
                     overflow: TextOverflow.fade,
                     style: textStyle,

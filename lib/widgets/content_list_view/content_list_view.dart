@@ -34,8 +34,6 @@ typedef _ItemBuilder = Widget Function(BuildContext context, int index, Widget i
 /// Renders a list of content.
 ///
 /// Picks some value based on the provided `T` type of [Content].
-///
-/// Instead of `T`, you can explicitly specify [contentType].
 class ContentListView<T extends Content> extends StatelessWidget {
   /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
@@ -137,6 +135,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   Widget build(BuildContext context) {
     final localController = controller ?? ScrollController();
     return AppScrollbar.forContent<T>(
+      contentType: contentType,
       list: list,
       controller: localController,
       showLabel: showScrollbarLabel,

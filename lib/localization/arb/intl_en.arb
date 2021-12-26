@@ -1,14 +1,16 @@
 {
-  "@@last_modified": "2021-07-14T21:24:45.452638",
+  "@@last_modified": "2021-05-26T20:48:04.796046",
   "playback": "Playback",
   "@playback": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Used as notification channel name"
   },
   "playbackControls": "Playback controls",
   "@playbackControls": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": " Used as notification channel description"
   },
   "play": "Play",
   "@play": {
@@ -63,7 +65,8 @@
   "artistUnknown": "Unknown artist",
   "@artistUnknown": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Label for unknown artist"
   },
   "tracks": "Tracks",
   "@tracks": {
@@ -151,12 +154,14 @@
   "shuffled": "Shuffled",
   "@shuffled": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "NOTE: currently unused"
   },
   "modified": "Modified",
   "@modified": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "NOTE: currently unused"
   },
   "byQuery": "By query",
   "@byQuery": {
@@ -166,7 +171,8 @@
   "selectedPlural": "Selected",
   "@selectedPlural": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Should be in plural form"
   },
   "newPlaylist": "New playlist",
   "@newPlaylist": {
@@ -191,12 +197,14 @@
   "playContentList": "Play",
   "@playContentList": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Displayed in list headers in button to play it"
   },
   "shuffleContentList": "Shuffle",
   "@shuffleContentList": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Displayed in list headers in button to shuffle it"
   },
   "debug": "Debug",
   "@debug": {
@@ -236,29 +244,34 @@
   "secondsShorthand": "s",
   "@secondsShorthand": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "minutesShorthand": "min",
   "@minutesShorthand": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "and": "And",
   "@and": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "more": "More",
   "@more": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "andNMore": "And {count} more",
   "@andNMore": {
     "type": "text",
     "placeholders": {
       "count": {}
-    }
+    },
+    "description": "'And 3 more'"
   },
   "done": "Done",
   "@done": {
@@ -323,7 +336,8 @@
   "editMetadata": "Edit metadata",
   "@editMetadata": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "found": "Found",
   "@found": {
@@ -373,7 +387,8 @@
   "actions": "Actions",
   "@actions": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "goToAlbum": "Go to album",
   "@goToAlbum": {
@@ -403,7 +418,8 @@
   "addToFavorites": "Add to favorites",
   "@addToFavorites": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "addToQueue": "Add to queue",
   "@addToQueue": {
@@ -418,7 +434,8 @@
   "share": "Share",
   "@share": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "TODO: currently unused"
   },
   "selectAll": "Select all",
   "@selectAll": {
@@ -473,19 +490,22 @@
   "onThePathToDevMode": "Something should happen now...",
   "@onThePathToDevMode": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Shown when user tapped 4 times on app logo"
   },
   "onThePathToDevModeLastClick": "only 1 click remaining...",
   "@onThePathToDevModeLastClick": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "Shown when user is about to become a developer, part 2"
   },
   "onThePathToDevModeClicksRemaining": "only {remainingClicks} clicks remaining...",
   "@onThePathToDevModeClicksRemaining": {
     "type": "text",
     "placeholders": {
       "remainingClicks": {}
-    }
+    },
+    "description": "Shown when user is about to become a developer, part 2, plural"
   },
   "devTestToast": "Test toast",
   "@devTestToast": {
@@ -545,7 +565,8 @@
   "searchHistoryRemoveEntryDescriptionP1": "Are you sure you want to remove ",
   "@searchHistoryRemoveEntryDescriptionP1": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "The entry is the history entry to delete. The description is being splitted into rich text there."
   },
   "searchHistoryRemoveEntryDescriptionP2": " from your search history?",
   "@searchHistoryRemoveEntryDescriptionP2": {

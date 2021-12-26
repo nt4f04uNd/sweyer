@@ -344,7 +344,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
       case QueueType.origin:
         final origin = ContentControl.state.queues.origin!;
         if (origin is Album) {
-          text.add(TextSpan(text: '${l10n.album} '));
+          text.add(TextSpan(text: '${l10n.utils.album} '));
           text.add(TextSpan(
             text: origin.nameDotYear,
             style: TextStyle(
@@ -353,7 +353,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             ),
           ));
         } else if (origin is Playlist) {
-          text.add(TextSpan(text: '${l10n.playlist} '));
+          text.add(TextSpan(text: '${l10n.utils.playlist} '));
           text.add(TextSpan(
             text: origin.name,
             style: TextStyle(
@@ -362,7 +362,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             ),
           ));
         } else if (origin is Artist) {
-          text.add(TextSpan(text: '${l10n.artist} '));
+          text.add(TextSpan(text: '${l10n.utils.artist} '));
           text.add(TextSpan(
             text: ContentUtils.localizedArtist(origin.artist, l10n),
             style: TextStyle(

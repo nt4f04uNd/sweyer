@@ -49,6 +49,7 @@ class AppScrollbar extends StatefulWidget {
   @factory
   static AppScrollbar forContent<T extends Content>({
     Key? key,
+    Type? contentType,
     required List<T> list,
     required Widget child,
     required ScrollController controller,
@@ -73,10 +74,11 @@ class AppScrollbar extends StatefulWidget {
           ];
           return NFScrollLabel(
             text: contentPick<T, ValueGetter<String>>(
+              contentType: contentType,
               song: () => (item as Song).title[0].toUpperCase(),
               album: () => (item as Album).album[0].toUpperCase(),
               playlist: () => (item as Playlist).name[0].toUpperCase(),
-              artist: () => ContentUtils.localizedArtist((item as Artist).artist[0], l10n).toUpperCase(),
+              artist: () => ContentUtils.localizedArtist((item as Artist).artist, l10n)[0].toUpperCase(),
             )(),
           );
         },

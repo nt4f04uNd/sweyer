@@ -404,7 +404,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ///
   /// If [counter] is `true`, will show a couter in the actions bar title.
   ///
-  /// If [closeButton] is  `true`, will show a selection close button in the actions bar.
+  /// If [closeButton] is `true`, will show a selection close button in the actions bar.
   ///
   /// For other parameters, see the class properties. 
   @factory
@@ -1403,7 +1403,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
   }
 }
 
-/// Action that shulles and plays selected content as queue.
+/// Action that shuffles and plays selected content as queue.
 class _ShuffleAsQueueSelectionAction extends StatelessWidget {
   const _ShuffleAsQueueSelectionAction({Key? key})
       : super(key: key);
@@ -1590,7 +1590,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
-          tooltip: "${l10n.edit} ${l10n.playlist.toLowerCase()}",
+          tooltip: "${l10n.edit} ${l10n.utils.playlist.toLowerCase()}",
           icon: const Icon(Icons.edit_rounded, size: 21.0),
           // iconSize: 23.0,
           onPressed: () => _handleTap(controller),
@@ -1856,7 +1856,7 @@ void _showActionConfirmationDialog<E extends Content>({
       builder: (context) {
         final l10n = getl10n(context);
         return Text(
-          '${localizedAction(getl10n(context))} ${count > 1 ? '$count ' : ''}${l10n.contentsPlural<E>(count).toLowerCase()}',
+          '${localizedAction(getl10n(context))} ${count > 1 ? '$count ' : ''}${l10n.utils.contentsPlural<E>(count).toLowerCase()}',
         );
       },
     ),
@@ -1873,7 +1873,7 @@ void _showActionConfirmationDialog<E extends Content>({
                   children: [
                     TextSpan(text: "${l10n.areYouSureYouWantTo} ${localizedAction(l10n).toLowerCase()}"),
                     TextSpan(
-                      text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
+                      text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.utils.contents<E>().toLowerCase()}'}?',
                       style: entry != null
                           ? const TextStyle(fontWeight: FontWeight.w700)
                           : null,

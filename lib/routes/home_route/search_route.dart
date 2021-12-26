@@ -950,7 +950,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                   ),
                   backgroundColor: Colors.transparent,
                   label: Text(
-                    l10n.contentsPluralWithCount(count, widget.contentType),
+                    l10n.utils.contentsPluralWithCount(count, widget.contentType),
                     style: TextStyle(
                       color: textColorAnimation.value,
                       fontWeight: FontWeight.w800,

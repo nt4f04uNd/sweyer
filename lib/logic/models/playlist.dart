@@ -54,7 +54,6 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
         copiedSong.duplicationIndex = duplicationIndex;
         ContentUtils.deduplicateSong(
           song: copiedSong,
-          index: duplicationIndex,
           list: found,
           idMap: idMap,
         );
