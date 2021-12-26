@@ -86,8 +86,8 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
   if (kDebugMode) {
-    FirebaseFunctions.instance.useFunctionsEmulator(origin: 'http://localhost:5001');
-  
+    FirebaseFunctions.instance.useFunctionsEmulator('http://localhost/', 5001);
+
     // Force disable Crashlytics collection while doing every day development.
     // Temporarily toggle this to true if you want to test crash reporting in your app.
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
