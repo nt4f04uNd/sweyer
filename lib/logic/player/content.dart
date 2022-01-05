@@ -138,7 +138,7 @@ class ContentState {
 }
 
 @visibleForTesting
-class ContentSerializer {
+class ContentRepository {
   final songSort = Prefs.songSort;
   final albumSort = Prefs.albumSort;
   final playlistSort = Prefs.playlistSort;
@@ -166,7 +166,7 @@ class ContentControl extends Control {
   static ContentControl instance = ContentControl._();
 
   @visibleForTesting
-  late final serializer = ContentSerializer();
+  late final repository = ContentRepository();
 
   ContentState get state => _state!;
   ContentState? _state;
@@ -262,10 +262,10 @@ class ContentControl extends Control {
   /// Restores [sorts] from [Prefs].
   Future<void> _restoreSorts() async {
     state.sorts = ContentMap({
-      Song: serializer.songSort.get(),
-      Album: serializer.albumSort.get(),
-      Playlist: serializer.playlistSort.get(),
-      Artist: serializer.artistSort.get(),
+      Song: repository.songSort.get(),
+      Album: repository.albumSort.get(),
+      Playlist: repository.playlistSort.get(),
+      Artist: repository.artistSort.get(),
     });
   }
 
@@ -478,14 +478,14 @@ class ContentControl extends Control {
       song: () {
         final _sort = sort! as SongSort;
         sorts.setValue<Song>(_sort);
-        serializer.songSort.set(_sort);
+        repository.songSort.set(_sort);
         final comparator = _sort.comparator;
         state.allSongs.songs.sort(comparator);
       },
       album: () {
         final _sort = sort! as AlbumSort;
         sorts.setValue<Album>(_sort);
-        serializer.albumSort.set(_sort);
+        repository.albumSort.set(_sort);
         final comparator = _sort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()
           ..sort((a, b) {
@@ -495,14 +495,14 @@ class ContentControl extends Control {
       playlist: () {
         final _sort = sort! as PlaylistSort;
         sorts.setValue<Playlist>(_sort);
-        serializer.playlistSort.set(_sort);
+        repository.playlistSort.set(_sort);
         final comparator = _sort.comparator;
         state.playlists.sort(comparator);
       },
       artist: () {
         final _sort = sort! as ArtistSort;
         sorts.setValue<Artist>(_sort);
-        serializer.artistSort.set(_sort);
+        repository.artistSort.set(_sort);
         final comparator = _sort.comparator;
         state.artists.sort(comparator);
       },

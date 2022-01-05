@@ -4,7 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
 @visibleForTesting
-class PlaybackStateSerializer {
+class PlaybackStateRepository {
   final songId = Prefs.songId;
 }
 
@@ -26,7 +26,7 @@ class PlaybackControl extends Control {
   }
 
   @visibleForTesting
-  late final serializer = PlaybackStateSerializer();
+  late final repository = PlaybackStateRepository();
 
   /// A stream of changes on [currentSong].
   Stream<Song> get onSongChange => _songSubject.stream;
@@ -70,7 +70,7 @@ class PlaybackControl extends Control {
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
     if (song.id != currentSongNullable?.id)
-      serializer.songId.set(song.id);
+      repository.songId.set(song.id);
     if (!identical(song, currentSongNullable))
       _songSubject.add(song);
   }

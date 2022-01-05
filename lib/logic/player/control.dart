@@ -10,9 +10,9 @@ import 'package:sweyer/sweyer.dart';
 ///
 ///  * instance field
 ///  * state
-///  * serializer
+///  * repository
 ///  * streams
-///  * methods that modify state and call serializer methods
+///  * methods that modify state and call repository methods
 ///
 /// ## State
 ///
@@ -20,7 +20,7 @@ import 'package:sweyer/sweyer.dart';
 /// If the `state` is large, a separate class should be created for it and marked
 /// as [visibleForTesting], otherwise the control can declare it directly.
 ///
-/// The `serializer` should marked as [visibleForTesting] and contain methods that
+/// The `repository` should marked as [visibleForTesting] and contain methods that
 /// save entries from the `state`.
 ///
 /// Controls typically contain some `streams` that notify of the changes on the `state`.
@@ -28,7 +28,7 @@ import 'package:sweyer/sweyer.dart';
 /// ## Unit-testing
 ///
 /// To unit-test a `Control`, one would simply need to create `TestControl`, which
-/// mocks the `state` and `serializer`, and then set the `Control.instance`
+/// mocks the `state` and `repository`, and then set the `Control.instance`
 /// to the `TestControl`.
 ///
 /// Known controls:

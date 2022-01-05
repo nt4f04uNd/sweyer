@@ -300,8 +300,8 @@ class QueuesState {
 }
 
 @visibleForTesting
-class QueuesSerializer {
-  QueuesSerializer(this._state);
+class QueuesRepository {
+  QueuesRepository(this._state);
   final QueuesState _state;
 
   Future<void> init() {
@@ -351,7 +351,7 @@ class QueueControl extends Control {
   Future<void> init() async {
     super.init();
     _onQueueChangeSubject = PublishSubject();
-    await serializer.init();
+    await repository.init();
     await _restoreQueue();
   }
 
@@ -362,7 +362,7 @@ class QueueControl extends Control {
   }
 
   @visibleForTesting
-  late final serializer = QueuesSerializer(state);
+  late final repository = QueuesRepository(state);
 
   /// The state of the queues - themselves and meta information about them.
   final QueuesState state = QueuesState({
@@ -782,37 +782,37 @@ class QueueControl extends Control {
     if (type == QueueType.origin) {
       if (origin != null) {
         queues._origin = origin;
-        serializer.songOrigin.set(origin);
+        repository.songOrigin.set(origin);
         if (setIdMapFromPlaylist && origin is Playlist) {
           state.idMap.clear();
           state.idMap.addAll(origin.idMap);
           state.idMapDirty = false;
-          serializer.saveIdMap();
+          repository.saveIdMap();
         }
       }
     } else {
       queues._origin = null;
-      serializer.songOrigin.delete();
+      repository.songOrigin.delete();
     }
 
     if (type == QueueType.searched) {
       if (searchQuery != null) {
         queues._searchQuery = searchQuery;
-        serializer.searchQuery.set(searchQuery);
+        repository.searchQuery.set(searchQuery);
       }
     } else {
       queues._searchQuery = null;
-      serializer.searchQuery.delete();
+      repository.searchQuery.delete();
     }
 
     modified ??= queues._modified;
     shuffled ??= queues._shuffled;
 
     queues._type = type;
-    serializer.queueType.set(type);
+    repository.queueType.set(type);
 
     queues._modified = modified;
-    serializer.queueModified.set(modified);
+    repository.queueModified.set(modified);
 
     if (shuffled) {
       queues._shuffledQueue.setSongs(
@@ -833,10 +833,10 @@ class QueueControl extends Control {
     }
 
     queues._shuffled = shuffled;
-    serializer.queueShuffled.set(shuffled);
+    repository.queueShuffled.set(shuffled);
 
     if (save) {
-      serializer.saveCurrentQueue();
+      repository.saveCurrentQueue();
     }
 
     if (state.idMap.isNotEmpty &&
@@ -846,10 +846,10 @@ class QueueControl extends Control {
         type != QueueType.arbitrary) {
       state.idMap.clear();
       state.idMapDirty = false;
-      serializer.saveIdMap();
+      repository.saveIdMap();
     } else if (state.idMapDirty) {
       state.idMapDirty = false;
-      serializer.saveIdMap();
+      repository.saveIdMap();
     }
 
     if (emitChangeEvent) {
@@ -873,7 +873,7 @@ class QueueControl extends Control {
         emitChangeEvent: false,
       );
     } else {
-      serializer.saveCurrentQueue();
+      repository.saveCurrentQueue();
     }
 
     // Update current song.
@@ -896,16 +896,16 @@ class QueueControl extends Control {
   /// * If saved song origin songs are restored successfully, but the playlist itself cannot be found, will fall back to [QueueType.arbitrary].
   /// * In all other cases it will restore as it was.
   Future<void> _restoreQueue() async {
-    final shuffled = serializer.queueShuffled.get();
-    final modified = serializer.queueModified.get();
-    final songOrigin = serializer.songOrigin.get();
-    final type =  serializer.queueType.get();
+    final shuffled = repository.queueShuffled.get();
+    final modified = repository.queueModified.get();
+    final songOrigin = repository.songOrigin.get();
+    final type =  repository.queueType.get();
 
-    state.idMap = await serializer.idMap.read();
+    state.idMap = await repository.idMap.read();
 
     final List<Song> queueSongs = [];
     try {
-      final rawQueue = await serializer.queue.read();
+      final rawQueue = await repository.queue.read();
       for (final item in rawQueue) {
         final id = item.id;
         final origin = SongOrigin.originFromEntry(item.originEntry);
@@ -928,7 +928,7 @@ class QueueControl extends Control {
     final List<Song> shuffledSongs = [];
     try {
       if (shuffled == true) {
-        final rawShuffledQueue = await serializer.shuffled.read();
+        final rawShuffledQueue = await repository.shuffled.read();
         for (final item in rawShuffledQueue) {
           final id = item.id;
           final origin = SongOrigin.originFromEntry(item.originEntry);
@@ -985,7 +985,7 @@ class QueueControl extends Control {
         modified: modified,
         songs: songs,
         shuffleFrom: queueSongs,
-        searchQuery: serializer.searchQuery.get(),
+        searchQuery: repository.searchQuery.get(),
         save: false,
       );
     }
