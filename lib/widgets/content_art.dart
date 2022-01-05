@@ -32,7 +32,7 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
 /// Whether running on scoped storage, and should use bytes to load album
 /// arts from `MediaStore`.
-bool get _useScopedStorage => ContentControl.sdkInt >= 29;
+bool get _useScopedStorage => ContentControl.instance.sdkInt >= 29;
 
 class ContentArtSource {
   const ContentArtSource(Content content) : _content = content;

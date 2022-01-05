@@ -181,21 +181,21 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
 
   /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
   late StreamSubscription<Song> _songChangeSubscription;
-  late StreamSubscription<void> _contentChangeSubscription;
+  late StreamSubscription<void> _queueChangeSubscription;
 
-  QueueType get type => ContentControl.state.queues.type;
+  QueueType get type => QueueControl.instance.state.type;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      jumpToSong(ContentControl.state.currentSongIndex);
+      jumpToSong(PlaybackControl.instance.currentSongIndex);
     });
 
     widget.selectionController.addListener(handleSelection);
 
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) async {
-      if (ContentControl.state.allSongs.isNotEmpty) {
+    _queueChangeSubscription = QueueControl.instance.onQueueChanged.listen((event) async {
+      if (ContentControl.instance.state.allSongs.isNotEmpty) {
         setState(() {/* update ui list as data list may have changed */});
         if (!opened) {
           WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -206,7 +206,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         }
       }
     });
-    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription = PlaybackControl.instance.onSongChange.listen((event) async {
       setState(() {
         /* update current track indicator */
       });
@@ -220,7 +220,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   @override
   void dispose() {
     widget.selectionController.removeListener(handleSelection);
-    _contentChangeSubscription.cancel();
+    _queueChangeSubscription.cancel();
     _songChangeSubscription.cancel();
     super.dispose();
   }
@@ -229,7 +229,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   ///
   /// If optional [index] is provided - scrolls to it.
   Future<void> scrollToSong([int? index]) async {
-    index ??= ContentControl.state.currentSongIndex;
+    index ??= PlaybackControl.instance.currentSongIndex;
     final extent = index * kSongTileHeight;
     final pixels = scrollController.position.pixels;
     final min = scrollController.position.minScrollExtent;
@@ -257,7 +257,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   void jumpToSong([int? index]) {
     if (!mounted)
       return;
-    index ??= ContentControl.state.currentSongIndex;
+    index ??= PlaybackControl.instance.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
     scrollController.jumpTo((index * kSongTileHeight).clamp(min, max));
@@ -271,7 +271,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   void _handleTitleTap() {
     switch (type) {
       case QueueType.searched:
-        final query = ContentControl.state.queues.searchQuery!;
+        final query = QueueControl.instance.state.searchQuery!;
         ShowFunctions.instance.showSongsSearch(
           context,
           query: query,
@@ -280,7 +280,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         SearchHistory.instance.add(query);
         return;
       case QueueType.origin:
-        final origin = ContentControl.state.queues.origin!;
+        final origin = QueueControl.instance.state.origin!;
         if (origin is Album)
           HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(origin));
         else if (origin is Playlist)
@@ -309,7 +309,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
 
   List<TextSpan> _getQueueType(AppLocalizations l10n) {
     final List<TextSpan> text = [];
-    switch (ContentControl.state.queues.type) {
+    switch (QueueControl.instance.state.type) {
       case QueueType.allSongs:
         text.add(TextSpan(text: l10n.allTracks));
         break;
@@ -323,7 +323,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         text.add(TextSpan(text: l10n.allArtists));
         break;
       case QueueType.searched:
-        final query = ContentControl.state.queues.searchQuery!;
+        final query = QueueControl.instance.state.searchQuery!;
         text.add(TextSpan(
           text: '${l10n.found} ${l10n.byQuery.toLowerCase()} ',
         ));
@@ -336,7 +336,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         ));
         break;
       case QueueType.origin:
-        final origin = ContentControl.state.queues.origin!;
+        final origin = QueueControl.instance.state.origin!;
         if (origin is Album) {
           text.add(TextSpan(text: '${l10n.utils.album} '));
           text.add(TextSpan(
@@ -424,10 +424,10 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
 
   @override
   Widget build(BuildContext context) {
-    final currentSongIndex = ContentControl.state.currentSongIndex;
+    final currentSongIndex = PlaybackControl.instance.currentSongIndex;
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
-    final origin = ContentControl.state.queues.origin;
+    final origin = QueueControl.instance.state.origin;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
@@ -472,7 +472,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                           index: index,
                           context: context,
                         ),
-                        getAll: () => ContentControl.state.queues.current.songs,
+                        getAll: () => QueueControl.instance.state.current.songs,
                       ),
                     ],
                   ),
@@ -508,7 +508,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                   ),
                                 ),
                                 _crossFade(
-                                  !ContentControl.state.queues.modified,
+                                  !QueueControl.instance.state.modified,
                                   const SizedBox(height: 18.0),
                                   const Padding(
                                     padding: EdgeInsets.only(left: 5.0),
@@ -519,7 +519,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                   )
                                 ),
                                 _crossFade(
-                                  !ContentControl.state.queues.shuffled,
+                                  !QueueControl.instance.state.shuffled,
                                   const SizedBox(height: 20.0),
                                   const Padding(
                                     padding: EdgeInsets.only(left: 2.0),
@@ -575,7 +575,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         ),
       ),
     );
-    final list = ContentControl.state.queues.current.songs;
+    final list = QueueControl.instance.state.current.songs;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -583,7 +583,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           Padding(
             padding: EdgeInsets.only(top: appBarHeightWithPadding),
             child: ValueListenableBuilder<SelectionController?>(
-              valueListenable: ContentControl.state.selectionNotifier,
+              valueListenable: ContentControl.instance.selectionNotifier,
               builder: (context, value, child) {
                 return ContentListView<Song>(
                   list: list,
@@ -593,7 +593,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                     top: 4.0,
                     bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
                   ),
-                  songTileVariant: ContentControl.state.queues.origin is Album
+                  songTileVariant: QueueControl.instance.state.origin is Album
                     ? SongTileVariant.number
                     : SongTileVariant.albumArt,
                   songTileClickBehavior: SongTileClickBehavior.playPause,
@@ -766,7 +766,7 @@ class _InfoButton extends StatelessWidget {
         icon: const Icon(Icons.info_outline_rounded),
         size: 40.0,
         onPressed: () {
-          String songInfo = ContentControl.state.currentSong
+          String songInfo = PlaybackControl.instance.currentSong
             .toMap()
             .toString()
             .replaceAll(r', ', ',\n');
@@ -838,7 +838,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
       duration: const Duration(milliseconds: 420),
     );
     controller.addStatusListener(_handleStatus);
-    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription = PlaybackControl.instance.onSongChange.listen((event) async {
       if (useFade) {
         fadeController.reset();
         fadeController.forward();
@@ -898,7 +898,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
       reverseCurve: Curves.easeIn,
       parent: controller,
     ));
-    final currentSong = ContentControl.state.currentSong;
+    final currentSong = PlaybackControl.instance.currentSong;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -972,13 +972,13 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
     
     final l10n = getl10n(context);
     final theme = ThemeControl.theme;
-    final songs = ContentControl.state.queues.current.songs;
+    final songs = QueueControl.instance.state.current.songs;
     final playlist = await ShowFunctions.instance.showCreatePlaylist(this, context);
 
     if (playlist != null) {
       bool success = false;
       try {
-        await ContentControl.insertSongsInPlaylist(
+        await ContentControl.instance.insertSongsInPlaylist(
           index: 1,
           songs: songs,
           playlist: playlist,

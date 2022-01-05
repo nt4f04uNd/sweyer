@@ -192,7 +192,7 @@ class SqlSong {
     PersistentQueue? origin;
     assert(originType == 'album');
     if (originType == 'album') {
-      origin = ContentControl.state.albums[map['origin_id']];
+      origin = ContentControl.instance.state.albums[map['origin_id']];
     }
     return SqlSong(
       id: map['id'],

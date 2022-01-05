@@ -85,7 +85,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// Additional widget to place before [count].
   final Widget? trailing;
 
-  Sort<T> getSort() => ContentControl.state.sorts.getValue<T>(contentType) as Sort<T>;
+  Sort<T> getSort() => ContentControl.instance.state.sorts.getValue<T>(contentType) as Sort<T>;
 
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
@@ -104,7 +104,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
             value: feature,
             groupValue: sort.feature,
             onChanged: (_) {
-              ContentControl.sort(
+              ContentControl.instance.sort(
                 contentType: contentType,
                 sort: sort.copyWith(feature: feature).withDefaultOrder,
               );
@@ -185,7 +185,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                 ? Icons.north_rounded
                 : Icons.south_rounded),
               onPressed: () {
-                ContentControl.sort(
+                ContentControl.instance.sort(
                   contentType: contentType,
                   sort: sort.copyWith(orderAscending: !sort.orderAscending),
                 );

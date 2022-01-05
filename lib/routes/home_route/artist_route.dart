@@ -77,7 +77,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
       ignoreWhen: () => playerRouteController.opened,
     ));
   
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen(_handleContentChange);
+    _contentChangeSubscription = ContentControl.instance.onContentChange.listen(_handleContentChange);
   }
 
   @override
@@ -112,7 +112,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
   }
 
   void _quitBecauseNotFound() {
-    ContentControl.refetchAll();
+    ContentControl.instance.refetchAll();
     final l10n = getl10n(context);
     ShowFunctions.instance.showToast(msg: l10n.artistNotFound);
     Navigator.of(context).pop();
@@ -238,12 +238,12 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                 Expanded(
                   child: ShuffleQueueButton(
                     onPressed: () {
-                      ContentControl.setOriginQueue(
+                      QueueControl.instance.setOriginQueue(
                         origin: widget.artist,
                         songs: songs,
                         shuffled: true,
                       );
-                      MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                      MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                       MusicPlayer.instance.play();
                       playerRouteController.open();
                     },
@@ -253,7 +253,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                 Expanded(
                   child: PlayQueueButton(
                     onPressed: () {
-                      ContentControl.setOriginQueue(origin: widget.artist, songs: songs);
+                      QueueControl.instance.setOriginQueue(origin: widget.artist, songs: songs);
                       MusicPlayer.instance.setSong(songs[0]);
                       MusicPlayer.instance.play();
                       playerRouteController.open();
@@ -291,7 +291,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
           return ScrollConfiguration(
             behavior: const GlowlessScrollBehavior(),
             child: StreamBuilder(
-              stream: ContentControl.state.onSongChange,
+              stream: PlaybackControl.instance.onSongChange,
               builder: (context, snapshot) => Stack(
                 children: [
                   Positioned.fill(
@@ -315,7 +315,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                                 HomeRouter.of(context).goto(HomeRoutes.factory.artistContent<Song>(widget.artist, songs));
                               },
                               contentTileTapHandler: () {
-                                ContentControl.setOriginQueue(
+                                QueueControl.instance.setOriginQueue(
                                   origin: widget.artist,
                                   songs: songs,
                                 );

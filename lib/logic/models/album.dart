@@ -20,7 +20,7 @@ class Album extends PersistentQueue {
   /// Returns songs that belong to this album.
   @override
   List<Song> get songs {
-    return ContentControl.state.allSongs.songs
+    return ContentControl.instance.state.allSongs.songs
       .fold<List<Song>>([], (prev, el) {
         if (el.albumId == id) {
           prev.add(el.copyWith(origin: this));
@@ -44,7 +44,7 @@ class Album extends PersistentQueue {
   }
 
   Song get firstSong {
-    return ContentControl.state.allSongs.songs.firstWhere((el) => el.albumId == id);
+    return ContentControl.instance.state.allSongs.songs.firstWhere((el) => el.albumId == id);
   }
 
   /// Returns string in format `album name • year`. 
@@ -58,7 +58,7 @@ class Album extends PersistentQueue {
   }
 
   /// Returns the album artist.
-  Artist getArtist() => ContentControl.state.artists.firstWhere((el) => el.id == artistId);
+  Artist getArtist() => ContentControl.instance.state.artists.firstWhere((el) => el.id == artistId);
 
   const Album({
     required int id,

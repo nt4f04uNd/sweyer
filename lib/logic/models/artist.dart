@@ -21,7 +21,7 @@ class Artist extends SongOrigin {
   /// Returns songs for this artst.
   @override
   List<Song> get songs {
-    return ContentControl.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
+    return ContentControl.instance.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
       if (el.artistId == id) {
         prev.add(el.copyWith(origin: this));
       }
@@ -34,7 +34,7 @@ class Artist extends SongOrigin {
 
   /// Returns albums for this artst.
   List<Album> get albums {
-    return ContentControl.state.albums.values
+    return ContentControl.instance.state.albums.values
       .where((el) => el.artistId == id)
       .toList();
   }

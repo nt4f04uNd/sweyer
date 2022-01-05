@@ -71,7 +71,7 @@ class _Results {
   void search(String query) {
     for (final contentType in Content.enumerate()) {
       map.setValue(
-        ContentControl.search(query, contentType: contentType),
+        ContentControl.instance.search(query, contentType: contentType),
         key: contentType,
       );
     }
@@ -173,7 +173,7 @@ class _SearchStateDelegate {
       contentType: contentType,
       song: () {
         onSubmit();
-        ContentControl.setSearchedQueue(query, results.songs);
+        QueueControl.instance.setSearchedQueue(query, results.songs);
       },
       album: onSubmit,
       playlist: onSubmit,
@@ -784,9 +784,9 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                 onBackButtonPressed: () => _handlePop(delegate),
                 child:
                 StreamBuilder(
-                  stream: ContentControl.state.onSongChange,
+                  stream: PlaybackControl.instance.onSongChange,
                   builder: (context, snapshot) =>
-                StreamBuilder(stream: ContentControl.state.onContentChange,
+                StreamBuilder(stream: ContentControl.instance.onContentChange,
                   builder: (context, snapshot) =>
                   PageTransitionSwitcher(
                     duration: const Duration(milliseconds: 300),

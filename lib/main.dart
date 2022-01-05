@@ -100,7 +100,7 @@ Future<void> main() async {
     ThemeControl.init();
     ThemeControl.initSystemUi();
     await Permissions.init();
-    await ContentControl.init();
+    await ContentControl.instance.init();
     runApp(const App());
   }, reportError);
 }

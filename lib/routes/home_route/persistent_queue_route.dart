@@ -73,7 +73,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     ));
 
     playerRouteController.addListener(_handlePlayerRouteController);
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen(_handleContentChange);
+    _contentChangeSubscription = ContentControl.instance.onContentChange.listen(_handleContentChange);
   }
 
   @override
@@ -103,9 +103,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   PersistentQueue? _findOriginalQueue() {
     final queue = widget.arguments.queue;
     if (queue is Album) {
-      return ContentControl.state.albums[queue.id];
+      return ContentControl.instance.state.albums[queue.id];
     } else if (queue is Playlist) {
-      return ContentControl.state.playlists.firstWhereOrNull((el) => el == queue);
+      return ContentControl.instance.state.playlists.firstWhereOrNull((el) => el == queue);
     }
     throw UnimplementedError();
   }
@@ -137,7 +137,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   }
 
   void _quitBecauseNotFound() {
-    ContentControl.refetchAll();
+    ContentControl.instance.refetchAll();
     final l10n = getl10n(context);
     String message = '';
     if (isAlbum) {
@@ -168,7 +168,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             leading: const NFBackButton(),
           ),
           body: StreamBuilder(
-            stream: ContentControl.state.onContentChange,
+            stream: ContentControl.instance.onContentChange,
             builder: (context, snapshot) {
               final selectedTileColor = ThemeControl.theme.colorScheme.primary;
               final selectedSplashColor = Constants.Theme.glowSplashColorOnContrast.auto;
@@ -178,7 +178,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                 selectedSong = songs.lastOrNull;
               }
               return StreamBuilder(
-                stream: ContentControl.state.onSongChange,
+                stream: PlaybackControl.instance.onSongChange,
                 builder: (context, snapshot) => StatefulBuilder(
                 builder: (context, setState) {
                   setListState = setState;
@@ -244,7 +244,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             index = 1;
           }
         }
-        ContentControl.insertSongsInPlaylist(
+        ContentControl.instance.insertSongsInPlaylist(
           index: index,
           songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged),
           playlist: playlist,
@@ -289,7 +289,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         editingSongs.clear();
         reorderOperations.clear();
       });
-      await ContentControl.refetchSongsAndPlaylists();
+      await ContentControl.instance.refetchSongsAndPlaylists();
     } else {
       setState(() {
         editing = false;
@@ -310,7 +310,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   Future<void> _commitRename() async {
     if (!_renamed)
       return;
-    final correctedName = await ContentControl.renamePlaylist(playlist, textEditingController.text);
+    final correctedName = await ContentControl.instance.renamePlaylist(playlist, textEditingController.text);
     if (correctedName == null) {
       _quitBecauseNotFound();
     } else {
@@ -327,15 +327,15 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       final newIndex = operation.newIndex;
       final id = songIds.removeAt(oldIndex);
       songIds.insert(newIndex, id);
-      await ContentControl.moveSongInPlaylist(
+      await ContentControl.instance.moveSongInPlaylist(
         playlist: playlist,
         from: oldIndex,
         to: newIndex,
         emitChangeEvent: false,
       );
     }
-    final index = ContentControl.state.playlists.indexOf(playlist);
-    ContentControl.state.playlists[index] = playlist.copyWith(songIds: songIds);
+    final index = ContentControl.instance.state.playlists.indexOf(playlist);
+    ContentControl.instance.state.playlists[index] = playlist.copyWith(songIds: songIds);
   }
 
   void _handleReorder(int oldIndex, int newIndex) {
@@ -532,12 +532,12 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   Expanded(
                     child: ShuffleQueueButton(
                       onPressed: songs.isEmpty ? null : () {
-                        ContentControl.setOriginQueue(
+                        QueueControl.instance.setOriginQueue(
                           origin: queue,
                           songs: songs,
                           shuffled: true,
                         );
-                        MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                        MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                         MusicPlayer.instance.play();
                         if (!selectionController.inSelection)
                           playerRouteController.open();
@@ -548,7 +548,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   Expanded(
                     child: PlayQueueButton(
                       onPressed: songs.isEmpty ? null : () {
-                        ContentControl.setOriginQueue(origin: queue, songs: songs);
+                        QueueControl.instance.setOriginQueue(origin: queue, songs: songs);
                         MusicPlayer.instance.setSong(songs[0]);
                         MusicPlayer.instance.play();
                         if (!selectionController.inSelection)
@@ -590,7 +590,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             return ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),
               child: StreamBuilder(
-                stream: ContentControl.state.onSongChange,
+                stream: PlaybackControl.instance.onSongChange,
                 builder: (context, snapshot) => CustomScrollView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                   controller: scrollController,
@@ -676,12 +676,12 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             currentTest: (index) {
                               final song = songs[index];
                               return ContentUtils.originIsCurrent(queue) &&
-                                     song.sourceId == ContentControl.state.currentSong.sourceId &&
-                                     (!isPlaylist || (isPlaylist && song.duplicationIndex == ContentControl.state.currentSong.duplicationIndex));
+                                     song.sourceId == PlaybackControl.instance.currentSong.sourceId &&
+                                     (!isPlaylist || (isPlaylist && song.duplicationIndex == PlaybackControl.instance.currentSong.duplicationIndex));
                             },
                             songTileVariant: isAlbum ? SongTileVariant.number : SongTileVariant.albumArt,
                             enableDefaultOnTap: !editing,
-                            onItemTap: editing ? null : (index) => ContentControl.setOriginQueue(
+                            onItemTap: editing ? null : (index) => QueueControl.instance.setOriginQueue(
                               origin: queue,
                               songs: songs,
                             ),

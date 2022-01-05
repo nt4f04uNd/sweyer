@@ -75,7 +75,7 @@ class ShowFunctions extends NFShowFunctions {
     Future<void> submit(BuildContext context) async {
       if (!submitted) {
         submitted = true;
-        name = await ContentControl.createPlaylist(controller.text);
+        name = await ContentControl.instance.createPlaylist(controller.text);
         Navigator.of(context).maybePop(name);
       }
     }
@@ -115,7 +115,7 @@ class ShowFunctions extends NFShowFunctions {
         ),
       ),
     );
-    return name == null ? null : ContentControl.state.playlists.firstWhereOrNull((el) => el.name == name); 
+    return name == null ? null : ContentControl.instance.state.playlists.firstWhereOrNull((el) => el.name == name); 
   }
 
   /// Will show up a snack bar notification that something's went wrong

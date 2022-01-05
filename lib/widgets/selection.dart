@@ -517,7 +517,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   Color? _lastNavColor;
   OverlayEntry? _overlayEntry;
   SlidableController? _dismissibleRouteController;
-  ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.state.selectionNotifier;
+  ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.instance.selectionNotifier;
 
   /// Creates the actions bar overlay.
   void activate() {
@@ -572,7 +572,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     if (status == AnimationStatus.forward) {
       activate();
     } else if (status == AnimationStatus.reverse) {
-      if (!ContentControl.disposed) {
+      if (!ContentControl.instance.disposed.value) {
         _notifier.value = null;
       }
       _animateNavBack();
@@ -624,7 +624,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     for (final observer in NFWidgets.routeObservers!)
       observer.unsubscribe(this);
   
-    if (ContentControl.disposed) {
+    if (ContentControl.instance.disposed.value) {
       _removeOverlay();
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         _primaryContentTypeNotifier.dispose();
@@ -1186,7 +1186,7 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
     if (entries.isEmpty)
       return;
     entries.sort((a, b) => a.index.compareTo(b.index));
-    ContentControl.playNext(
+    QueueControl.instance.playNext(
       entries
         .map((el) => el.data)
         .toList(),
@@ -1199,7 +1199,7 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
     // Reverse order is proper here
     entries.sort((a, b) => b.index.compareTo(a.index));
     for (final entry in entries) {
-      ContentControl.playOriginNext(entry.data);
+      QueueControl.instance.playOriginNext(entry.data);
     }
   }
 
@@ -1276,7 +1276,7 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
     if (entries.isEmpty)
       return;
     entries.sort((a, b) => a.index.compareTo(b.index));
-    ContentControl.addToQueue(
+    QueueControl.instance.addToQueue(
       entries
         .map((el) => el.data)
         .toList(),
@@ -1288,7 +1288,7 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
       return;
     entries.sort((a, b) => a.index.compareTo(b.index));
     for (final entry in entries) {
-      ContentControl.addOriginToQueue(entry.data);
+      QueueControl.instance.addOriginToQueue(entry.data);
     }
   }
 
@@ -1363,7 +1363,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
-    ContentControl.setQueue(
+    QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: false,
       songs: songs,
@@ -1402,12 +1402,12 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
-    ContentControl.setQueue(
+    QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: true,
       shuffleFrom: songs,
     );
-    MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+    MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
     MusicPlayer.instance.play();
     playerRouteController.open();
     controller.close();
@@ -1440,7 +1440,7 @@ class RemoveFromQueueSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController<SelectionEntry<Song>> controller) {
     for (final entry in controller.data) {
-      final removed = ContentControl.removeFromQueue(entry.data);
+      final removed = QueueControl.instance.removeFromQueue(entry.data);
       assert(removed);
     }
     controller.close();
@@ -1611,9 +1611,9 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
       ),
       contentPadding: const EdgeInsets.only(top: 14.0, bottom: 0.0),
       content: StreamBuilder(
-        stream: ContentControl.state.onContentChange,
+        stream: ContentControl.instance.onContentChange,
         builder: (context, snapshot) {
-          final playlists = ContentControl.state.playlists;
+          final playlists = ContentControl.instance.state.playlists;
           final screenSize = MediaQuery.of(context).size;
           return SizedBox(
             height: kSongTileHeight + playlists.length * kPersistentQueueTileHeight,
@@ -1626,7 +1626,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
                 enableDefaultOnTap: false,
                 onItemTap: (index) {
                   final playlist = playlists[index];
-                  ContentControl.insertSongsInPlaylist(
+                  ContentControl.instance.insertSongsInPlaylist(
                     index: playlist.length + 1,
                     songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged),
                     playlist: playlist,
@@ -1696,7 +1696,7 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
       list: list,
       localizedAction: (l10n) => l10n.remove,
       onSubmit: () {
-        ContentControl.removeFromPlaylistAt(
+        ContentControl.instance.removeFromPlaylistAt(
           indexes: controller.data.map((el) => el.index).toList(),
           playlist: playlist,
         );
@@ -1755,9 +1755,9 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         .cast<SelectionEntry<Song>>()
         .toList()
         ..sort((a, b) => a.index.compareTo(b.index));
-      if (ContentControl.sdkInt >= 30) {
+      if (ContentControl.instance.sdkInt >= 30) {
         // On Android R the deletion is performed with OS dialog.
-        await ContentControl.deleteSongs(entries.map((e) => e.data).toSet());
+        await ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
         widget.controller.close();
       } else {
         // On all versions below show in app dialog.
@@ -1768,7 +1768,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
           list: list,
           localizedAction: (l10n) => l10n.delete,
           onSubmit: () {
-            ContentControl.deleteSongs(entries.map((e) => e.data).toSet());
+            ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
           },
         );
       }
@@ -1784,7 +1784,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         list: list,
         localizedAction: (l10n) => l10n.delete,
         onSubmit: () {
-          ContentControl.deletePlaylists(list);
+          ContentControl.instance.deletePlaylists(list);
         },
       );
     }

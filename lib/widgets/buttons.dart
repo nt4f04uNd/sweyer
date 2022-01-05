@@ -33,16 +33,16 @@ class ShuffleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return StreamBuilder(
-      stream: ContentControl.state.onContentChange,
+      stream: ContentControl.instance.onContentChange,
       builder: (context, snap) => AnimatedIconButton(
         icon: const Icon(Icons.shuffle_rounded),
         color: ThemeControl.theme.colorScheme.onSurface,
         size: 40.0,
         iconSize: textScaleFactor * NFConstants.iconSize,
-        active: ContentControl.state.queues.shuffled,
+        active: QueueControl.instance.state.shuffled,
         onPressed: () {
-          ContentControl.setQueue(
-            shuffled: !ContentControl.state.queues.shuffled,
+          QueueControl.instance.setQueue(
+            shuffled: !QueueControl.instance.state.shuffled,
           );
         },
       ),

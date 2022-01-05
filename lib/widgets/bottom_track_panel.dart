@@ -19,7 +19,7 @@ class TrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (ContentControl.state.allSongs.isEmpty) {
+    if (ContentControl.instance.state.allSongs.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -31,7 +31,7 @@ class TrackPanel extends StatelessWidget {
       ),
     );
     return StreamBuilder(
-      stream: ContentControl.state.onSongChange,
+      stream: PlaybackControl.instance.onSongChange,
       builder: (context, snapshot) {
         return FadeTransition(
           opacity: fadeAnimation,
@@ -78,9 +78,9 @@ class TrackPanel extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 NFMarquee(
-                                  key: ValueKey(ContentControl.state.currentSong.id),
+                                  key: ValueKey(PlaybackControl.instance.currentSong.id),
                                   fontWeight: FontWeight.w700,
-                                  text: ContentControl.state.currentSong.title,
+                                  text: PlaybackControl.instance.currentSong.title,
                                   fontSize: 16,
                                   velocity: 26.0,
                                   blankSpace: 40.0,
@@ -88,7 +88,7 @@ class TrackPanel extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 4.0),
                                   child: ArtistWidget(
-                                    artist: ContentControl.state.currentSong.artist,
+                                    artist: PlaybackControl.instance.currentSong.artist,
                                   ),
                                 ),
                               ],
@@ -158,7 +158,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
         _value = position;
       });
     });
-    _songChangeSubscription = ContentControl.state.onSongChange.listen((event) async {
+    _songChangeSubscription = PlaybackControl.instance.onSongChange.listen((event) async {
       _value = MusicPlayer.instance.position;
       setState(() {
         _duration = Duration(milliseconds: event.duration);
@@ -180,7 +180,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
 
   @override
   Widget build(BuildContext context) {
-    final song = ContentControl.state.currentSong;
+    final song = PlaybackControl.instance.currentSong;
     return CircularPercentIndicator(
       percent: _progress,
       animation: true,

@@ -191,7 +191,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         await player.setSong(song);
         await player.play();
       } else {
-        if (song == ContentControl.state.currentSong) {
+        if (song == PlaybackControl.instance.currentSong) {
           if (!player.playing) {
             await player.play();
           } else {

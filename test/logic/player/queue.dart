@@ -14,7 +14,7 @@ void main() {
   //   final song2 = SelectionEntry(data: Song(id: 0));
   //   final songs = [song1];
   //   expect(songs.contains(song2), true);
-  //   // print(ContentControl.state.sdkInt);
+  //   // print(ContentControl.instance.state.sdkInt);
   // });
 
   // test('test2', () async {

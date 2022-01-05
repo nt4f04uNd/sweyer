@@ -19,7 +19,7 @@ abstract class Permissions {
   static Future<void> requestClick() async {
     _permissionStorageStatus = await Permission.storage.request();
     if (_permissionStorageStatus == PermissionStatus.granted) {
-      await ContentControl.init();
+      await ContentControl.instance.init();
     } else if (_permissionStorageStatus == PermissionStatus.permanentlyDenied) {
       final l10n = staticl10n;
       await ShowFunctions.instance.showToast(

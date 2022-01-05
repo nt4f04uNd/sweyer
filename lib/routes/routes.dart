@@ -478,7 +478,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
 
   /// Whether the drawer can be opened.
   bool get drawerCanBeOpened {
-    final selectionController = ContentControl.state.selectionNotifier.value;
+    final selectionController = ContentControl.instance.selectionNotifier.value;
     return playerRouteController.closed &&
       (selectionController?.notInSelection ?? true) &&
       (routes.last.hasSameLocation(HomeRoutes.tabs) || routes.last.hasSameLocation(HomeRoutes.search)) &&
@@ -491,7 +491,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   /// 
   /// For example we want that player route would be closed first.
   bool handleNecessaryPop() {
-    final selectionController = ContentControl.state.selectionNotifier.value;
+    final selectionController = ContentControl.instance.selectionNotifier.value;
     if (playerRouteController.opened) {
       if (selectionController != null) {
         selectionController.close();
