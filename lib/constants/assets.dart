@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
-*  Copyright (c) nt4f04und. All rights reserved.
-*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
-*--------------------------------------------------------------------------------------------*/
-
 abstract class Assets {
   /// Main hi-res logo mask asset.
   static const ASSET_LOGO_MASK = 'assets/images/logo_mask.png';

@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
-*  Copyright (c) nt4f04und. All rights reserved.
-*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
-*--------------------------------------------------------------------------------------------*/
-
 export 'add_to_selection_button.dart';
 export 'artist_tile.dart';
 export 'content_tile.dart';
