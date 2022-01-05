@@ -213,7 +213,7 @@ class ContentControl extends Control {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       _sdkInt = androidInfo.version.sdkInt;
     }
-    if (Permissions.granted) {
+    if (Permissions.instance.granted) {
       // TODO: prevent initalizing if already initizlied
       _initializeCompleter = Completer();
       emitContentChange(); // update UI to show "Searching songs" screen

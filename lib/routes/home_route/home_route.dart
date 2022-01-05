@@ -45,7 +45,7 @@ class _InitialRouteState extends State<InitialRoute> {
             return StreamBuilder(
               stream: ContentControl.instance.onContentChange,
               builder: (context, snapshot) {
-                if (Permissions.notGranted) {
+                if (Permissions.instance.notGranted) {
                   _animateNotMainUi();
                   return const _NoPermissionsScreen();
                 }
@@ -191,7 +191,7 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
     setState(() {
       _fetching = true;
     });
-    await Permissions.requestClick();
+    await Permissions.instance.requestClick();
     if (mounted) {
       setState(() {
         _fetching = false;
