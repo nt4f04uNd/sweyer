@@ -84,25 +84,25 @@ class _BrowserParentProvider {
           MediaItem(
             id: _BrowseParent.songs.value,
             album: '',
-            title: staticl10n.utils.contents<Song>(),
+            title: staticl10n.contents<Song>(),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.albums.value,
             album: '',
-            title: staticl10n.utils.contents<Album>(),
+            title: staticl10n.contents<Album>(),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.playlists.value,
             album: '',
-            title: staticl10n.utils.contents<Playlist>(),
+            title: staticl10n.contents<Playlist>(),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.artists.value,
             album: '',
-            title: staticl10n.utils.contents<Artist>(),
+            title: staticl10n.contents<Artist>(),
             playable: false,
           ),
         ];

@@ -54,7 +54,7 @@ class Album extends PersistentQueue {
 
   /// Returns string in format `Album • year`. 
   String albumDotName(AppLocalizations l10n) {
-    return ContentUtils.appendYearWithDot(l10n.utils.album, year);
+    return ContentUtils.appendYearWithDot(l10n.album, year);
   }
 
   /// Returns the album artist.

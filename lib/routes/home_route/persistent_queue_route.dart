@@ -453,13 +453,13 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               child: Text(
                                 ContentUtils.joinDot([
                                   if (isAlbum)
-                                    l10n.utils.album
+                                    l10n.album
                                   else
-                                    l10n.utils.playlist,
+                                    l10n.playlist,
                                   if (isAlbum)
                                     album.year
                                   else
-                                    l10n.utils.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
+                                    l10n.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(

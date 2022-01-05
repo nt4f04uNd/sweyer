@@ -16,30 +16,23 @@ AppLocalizations get staticl10n {
   }
 }
 
-extension AppLocalizationsUtils on AppLocalizations {
-  _AppLocalizationsUtils get utils => _AppLocalizationsUtils(this);
-}
-
-class _AppLocalizationsUtils {
-  _AppLocalizationsUtils(this._l);
-  final AppLocalizations _l;
-
+extension AppLocalizationsExtension on AppLocalizations {
   //* Content ******************
 
   String get track {
-    return _l.tracksPlural(1);
+    return tracksPlural(1);
   }
 
   String get album {
-    return _l.albumsPlural(1);
+    return albumsPlural(1);
   }
 
   String get playlist {
-    return _l.playlistsPlural(1);
+    return playlistsPlural(1);
   }
 
   String get artist {
-    return _l.artistsPlural(1);
+    return artistsPlural(1);
   }
 
   /// Picks a string of a [Content] in plural form.
@@ -47,10 +40,10 @@ class _AppLocalizationsUtils {
   String contents<T extends Content>([Type? contentType]) {
     return contentPick<T, ValueGetter<String>>(
       contentType: contentType,
-      song: () => _l.tracks,
-      album: () => _l.albums,
-      playlist: () => _l.playlists,
-      artist: () => _l.artists,
+      song: () => tracks,
+      album: () => albums,
+      playlist: () => playlists,
+      artist: () => artists,
     )();
   }
 
@@ -63,10 +56,10 @@ class _AppLocalizationsUtils {
   String contentsPlural<T extends Content>(int count, [Type? contentType]) {
     return contentPick<T, ValueGetter<String>>(
       contentType: contentType,
-      song: () => _l.tracksPlural(count),
-      album: () => _l.albumsPlural(count),
-      playlist: () => _l.playlistsPlural(count),
-      artist: () => _l.artistsPlural(count),
+      song: () => tracksPlural(count),
+      album: () => albumsPlural(count),
+      playlist: () => playlistsPlural(count),
+      artist: () => artistsPlural(count),
     )();
   }
 
@@ -76,15 +69,15 @@ class _AppLocalizationsUtils {
       song: () {
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
-            return _l.dateModified;
+            return dateModified;
           case SongSortFeature.dateAdded:
-            return _l.dateAdded;
+            return dateAdded;
           case SongSortFeature.title:
-            return _l.title;
+            return title;
           case SongSortFeature.artist:
             return artist;
           case SongSortFeature.album:
-            return _l.albumsPlural(1);
+            return albumsPlural(1);
           default:
             throw UnimplementedError();
         }
@@ -92,13 +85,13 @@ class _AppLocalizationsUtils {
       album: () {
         switch (feature as AlbumSortFeature) {
           case AlbumSortFeature.title:
-            return _l.title;
+            return title;
           case AlbumSortFeature.artist:
             return artist;
           case AlbumSortFeature.year:
-            return _l.year;
+            return year;
           case AlbumSortFeature.numberOfSongs:
-            return _l.numberOfTracks;
+            return numberOfTracks;
           default:
             throw UnimplementedError();
         }
@@ -106,11 +99,11 @@ class _AppLocalizationsUtils {
       playlist: () {
         switch (feature as PlaylistSortFeature) {
           case PlaylistSortFeature.dateModified:
-            return _l.dateModified;
+            return dateModified;
           case PlaylistSortFeature.dateAdded:
-            return _l.dateAdded;
+            return dateAdded;
           case PlaylistSortFeature.name:
-            return _l.title;
+            return title;
           default:
             throw UnimplementedError();
         }
@@ -118,11 +111,11 @@ class _AppLocalizationsUtils {
       artist: () {
         switch (feature as ArtistSortFeature) {
           case ArtistSortFeature.name:
-            return _l.name;
+            return name;
           case ArtistSortFeature.numberOfAlbums:
-            return _l.numberOfAlbums;
+            return numberOfAlbums;
           case ArtistSortFeature.numberOfTracks:
-            return _l.numberOfTracks;
+            return numberOfTracks;
           default:
             throw UnimplementedError();
         }

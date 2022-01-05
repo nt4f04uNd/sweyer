@@ -136,9 +136,9 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     final theme = ThemeControl.theme;
     final artSize = mediaQuery.size.width;
     final summary = ContentUtils.joinDot([
-      l10n.utils.contentsPluralWithCount<Song>(songs.length),
+      l10n.contentsPluralWithCount<Song>(songs.length),
       if (albums.isNotEmpty)
-        l10n.utils.contentsPluralWithCount<Album>(albums.length),
+        l10n.contentsPluralWithCount<Album>(albums.length),
       ContentUtils.bulkDuration(songs),
     ]);
     return Column(
