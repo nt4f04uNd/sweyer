@@ -1,6 +1,5 @@
 export 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -8,15 +7,13 @@ import 'package:sweyer/sweyer.dart';
 AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context)!;
 
 /// Gets [AppLocalizations] without context.
-///
-/// If you want to use [AppLocalizations] without flutter app mounting,
-/// you have to call [initL10n] first.
-AppLocalizations get staticl10n => lookupAppLocalizations(WidgetsBinding.instance!.window.locale);
-
-/// Can be used to load the current locale delegate before/without Flutter app mounting
-/// to use [staticl10n].
-Future<void> initL10n() async {
-  await AppLocalizations.delegate.load(WidgetsBinding.instance!.window.locale);
+AppLocalizations get staticl10n {
+  try {
+    return lookupAppLocalizations(WidgetsBinding.instance!.window.locale);
+  } catch (ex) {
+    // Load default locale.
+    return lookupAppLocalizations(const Locale('en', 'US'));
+  }
 }
 
 extension AppLocalizationsUtils on AppLocalizations {

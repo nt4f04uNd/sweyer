@@ -504,7 +504,6 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> didChangeLocales(List<Locale>? locales) async {
-    await initL10n();
     mediaItem.add(ContentControl.state.currentSong.toMediaItem());
     queue.add(ContentControl.state.queues.current
       .songs

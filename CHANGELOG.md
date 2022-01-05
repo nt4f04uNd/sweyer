@@ -1,3 +1,7 @@
+## 1.0.7
+
+- Fix bug that localization didn't fallback to English as a default language
+
 ## 1.0.6
 
 - Fix scrollbar crash
