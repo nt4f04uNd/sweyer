@@ -4,7 +4,6 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as Constants;
 

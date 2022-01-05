@@ -6,10 +6,8 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 // import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sweyer/logic/logic.dart';
 import 'package:sweyer/sweyer.dart';
 
 // See content logic overview here

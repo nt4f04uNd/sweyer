@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui';
+
 import 'package:package_info/package_info.dart';
 import 'package:sweyer/sweyer.dart';
 

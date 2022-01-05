@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/logic/logic.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Generalizes all content tiles into one widget and exposes
