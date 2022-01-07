@@ -1485,7 +1485,7 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+    assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
            controller is ContentSelectionController<SelectionEntry<Song>>);
     final data = controller.data;
 
