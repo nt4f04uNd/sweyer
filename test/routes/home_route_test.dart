@@ -1,17 +1,13 @@
-import 'package:permission_handler/permission_handler.dart';
-
 import '../test.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
   setUp(() async {
     await setUpAppTest();
   });
 
   testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions', (WidgetTester tester) async {
     await setUpAppTest(() {
-      FakePermissions.instance.permissionStorageStatus = PermissionStatus.denied;
+      FakePermissions.instance.granted = false;
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, false);

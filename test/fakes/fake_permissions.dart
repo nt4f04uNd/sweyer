@@ -1,6 +1,5 @@
 // ignore_for_file: overridden_fields
 
-import 'package:permission_handler/permission_handler.dart';
 import '../test.dart';
 
 class FakePermissions extends Permissions {
@@ -10,13 +9,13 @@ class FakePermissions extends Permissions {
   static late FakePermissions instance;
 
   @override
-  PermissionStatus permissionStorageStatus = PermissionStatus.granted;
+  bool granted = true;
 
   @override
   Future<void> init() async {}
 
   @override
   Future<void> requestClick() async {
-    permissionStorageStatus = PermissionStatus.granted;
+    granted = true;
   }
 }
