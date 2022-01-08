@@ -1530,7 +1530,7 @@ class _GoToArtistSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+    assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
            controller is ContentSelectionController<SelectionEntry<Song>> ||
            controller is ContentSelectionController<SelectionEntry<Album>>);
     final data = controller.data;
@@ -1569,7 +1569,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+    assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
            controller is ContentSelectionController<SelectionEntry<Playlist>>);
     final data = controller.data;
 
@@ -1755,7 +1755,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         .cast<SelectionEntry<Song>>()
         .toList()
         ..sort((a, b) => a.index.compareTo(b.index));
-      if (ContentControl.instance.sdkInt >= 30) {
+      if (DeviceInfoControl.instance.sdkInt >= 30) {
         // On Android R the deletion is performed with OS dialog.
         await ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
         widget.controller.close();

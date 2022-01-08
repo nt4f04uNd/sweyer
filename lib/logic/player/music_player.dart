@@ -1,7 +1,6 @@
 export 'backend.dart';
 export 'content_channel.dart';
 export 'content.dart';
-export 'control.dart';
 export 'playback.dart';
 export 'queue.dart';
 export 'serialization.dart';

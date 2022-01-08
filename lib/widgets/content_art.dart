@@ -32,7 +32,7 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
 /// Whether running on scoped storage, and should use bytes to load album
 /// arts from `MediaStore`.
-bool get _useScopedStorage => ContentControl.instance.sdkInt >= 29;
+bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
 
 class ContentArtSource {
   const ContentArtSource(Content content) : _content = content;
@@ -419,7 +419,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
         return;
       _signal = CancellationSignal();
       try {
-        _bytes = await ContentChannel.loadAlbumArt(
+        _bytes = await ContentChannel.instance.loadAlbumArt(
           uri: uri,
           size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
@@ -525,7 +525,7 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   Future<void> _recreateArt() async {
     final ablumId = song.albumId;
     if (ablumId != null)
-      await ContentChannel.fixAlbumArt(song.albumId!);
+      await ContentChannel.instance.fixAlbumArt(song.albumId!);
     setLoading(_SourceLoading.loaded);
   }
 

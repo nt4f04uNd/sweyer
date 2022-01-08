@@ -319,13 +319,13 @@ class QueuesRepository {
   final queueShuffled = Prefs.queueShuffled;
 
   /// Serializes [PoolQueueType.queue].
-  final QueueSerializer queue = const QueueSerializer('queue.json');
+  final QueueSerializerType queue = const QueueSerializer('queue.json');
 
   /// Serializes [PoolQueueType.shuffled].
-  final QueueSerializer shuffled = const QueueSerializer('shuffled_queue.json');
+  final QueueSerializerType shuffled = const QueueSerializer('shuffled_queue.json');
 
   /// Serializes [QueuesState.idMap].
-  final IdMapSerializer idMap = IdMapSerializer.instance;
+  final IdMapSerializerType idMap = const IdMapSerializer();
 
   Future<void> saveCurrentQueue() {
     if (_state.shuffled) {
@@ -344,8 +344,7 @@ class QueuesRepository {
 
 /// Controls queues state and allows to perform related actions.
 class QueueControl extends Control {
-  QueueControl._();
-  static QueueControl instance = QueueControl._();
+  static QueueControl instance = QueueControl();
 
   @override
   Future<void> init() async {
@@ -357,8 +356,10 @@ class QueueControl extends Control {
 
   @override
   void dispose() {
+    if (!disposed.value) {
+      _onQueueChangeSubject.close();
+    }
     super.dispose();
-    _onQueueChangeSubject.close();
   }
 
   @visibleForTesting

@@ -97,6 +97,7 @@ Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
 
+    await DeviceInfoControl.instance.init();
     ThemeControl.init();
     ThemeControl.initSystemUi();
     await Permissions.instance.init();

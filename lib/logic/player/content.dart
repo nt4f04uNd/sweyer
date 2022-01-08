@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -162,8 +161,7 @@ class ContentRepository {
 /// * etc.
 ///
 class ContentControl extends Control {
-  ContentControl._();
-  static ContentControl instance = ContentControl._();
+  static ContentControl instance = ContentControl();
 
   @visibleForTesting
   late final repository = ContentRepository();
@@ -197,10 +195,6 @@ class ContentControl extends Control {
   bool get initializing => _initializeCompleter != null;
   Completer<void>? _initializeCompleter;
 
-  /// Android SDK integer.
-  late int _sdkInt;
-  int get sdkInt => _sdkInt;
-
   /// The main data app initialization function, inits all queues.
   /// Also handles no-permissions situations.
   @override
@@ -210,8 +204,6 @@ class ContentControl extends Control {
       _state = ContentState();
       _contentSubject = PublishSubject();
       selectionNotifier = ValueNotifier(null);
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
-      _sdkInt = androidInfo.version.sdkInt;
     }
     if (Permissions.instance.granted) {
       // TODO: prevent initalizing if already initizlied
@@ -338,7 +330,7 @@ class ContentControl extends Control {
     await contentPick<T, AsyncCallback>(
       contentType: contentType,
       song: () async {
-        state.allSongs.setSongs(await ContentChannel.retrieveSongs());
+        state.allSongs.setSongs(await ContentChannel.instance.retrieveSongs());
         if (_empty) {
           dispose();
           return;
@@ -349,7 +341,7 @@ class ContentControl extends Control {
         }
       },
       album: () async {
-        state.albums = await ContentChannel.retrieveAlbums();
+        state.albums = await ContentChannel.instance.retrieveAlbums();
         if (disposed.value) {
           return;
         }
@@ -360,7 +352,7 @@ class ContentControl extends Control {
         sort<Album>(emitChangeEvent: false);
       },
       playlist: () async {
-        state.playlists = await ContentChannel.retrievePlaylists();
+        state.playlists = await ContentChannel.instance.retrievePlaylists();
         if (disposed.value) {
           return;
         }
@@ -371,7 +363,7 @@ class ContentControl extends Control {
         sort<Playlist>(emitChangeEvent: false);
       },
       artist: () async {
-        state.artists = await ContentChannel.retrieveArtists();
+        state.artists = await ContentChannel.instance.retrieveArtists();
         if (disposed.value) {
           return;
         }
@@ -534,9 +526,9 @@ class ContentControl extends Control {
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
     // todo: implement
     songs = _ensureSongsAreSource(songs);
-    if (sdkInt >= 30) {
+    if (DeviceInfoControl.instance.sdkInt >= 30) {
       try {
-        final result = await ContentChannel.setSongsFavorite(songs, value);
+        final result = await ContentChannel.instance.setSongsFavorite(songs, value);
         if (result) {
           await refetch<Song>();
         }
@@ -573,14 +565,14 @@ class ContentControl extends Control {
     }
 
     // On Android R the deletion is performed with OS dialog.
-    if (sdkInt < 30) {
+    if (DeviceInfoControl.instance.sdkInt < 30) {
       _removeFromState();
     }
 
     try {
-      final result = await ContentChannel.deleteSongs(songs);
+      final result = await ContentChannel.instance.deleteSongs(songs);
       await refetchAll();
-      if (sdkInt >= 30 && result) {
+      if (DeviceInfoControl.instance.sdkInt >= 30 && result) {
         _removeFromState();
       }
     } catch (ex, stack) {
@@ -658,7 +650,7 @@ class ContentControl extends Control {
   /// Creates a playlist with a given name and returns a corrected with [correctPlaylistName] name.
   Future<String> createPlaylist(String name) async {
     name = await correctPlaylistName(name);
-    await ContentChannel.createPlaylist(name);
+    await ContentChannel.instance.createPlaylist(name);
     await refetchSongsAndPlaylists();
     return name;
   }
@@ -669,7 +661,7 @@ class ContentControl extends Control {
   Future<String?> renamePlaylist(Playlist playlist, String name) async {
     try {
       name = await correctPlaylistName(name);
-      await ContentChannel.renamePlaylist(playlist, name);
+      await ContentChannel.instance.renamePlaylist(playlist, name);
       await refetchSongsAndPlaylists();
       return name;
     } on ContentChannelException catch(ex) {
@@ -681,14 +673,14 @@ class ContentControl extends Control {
 
   /// Inserts songs in the playlist at the given [index].
   Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
-    await ContentChannel.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
+    await ContentChannel.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Moves song in playlist, returned value indicates whether the operation was successful.
   Future<void> moveSongInPlaylist({ required Playlist playlist, required int from, required int to, bool emitChangeEvent = true }) async {
     if (from != to) {
-      await ContentChannel.moveSongInPlaylist(playlist: playlist, from: from, to: to);
+      await ContentChannel.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
       if (emitChangeEvent)
         await refetchSongsAndPlaylists();
     }
@@ -696,14 +688,14 @@ class ContentControl extends Control {
 
   /// Removes songs from playlist at given [indexes].
   Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
-    await ContentChannel.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
+    await ContentChannel.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Deletes playlists.
   Future<void> deletePlaylists(List<Playlist> playlists) async {
     try {
-      await ContentChannel.removePlaylists(playlists);
+      await ContentChannel.instance.removePlaylists(playlists);
       await refetchSongsAndPlaylists();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(

@@ -1,29 +1,30 @@
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class Permissions {
-  Permissions._();
-  static Permissions instance = Permissions._();
+  static Permissions instance = Permissions();
 
   /// Whether storage permission is granted
-  late PermissionStatus _permissionStorageStatus;
+  @visibleForTesting
+  late PermissionStatus permissionStorageStatus;
 
   /// Returns true if permissions were granted
-  bool get granted => _permissionStorageStatus == PermissionStatus.granted;
+  bool get granted => permissionStorageStatus == PermissionStatus.granted;
 
   /// Returns true if permissions were not granted
   bool get notGranted => !granted;
 
   Future<void> init() async {
-    _permissionStorageStatus = await Permission.storage.status;
+    permissionStorageStatus = await Permission.storage.status;
   }
 
   Future<void> requestClick() async {
-    _permissionStorageStatus = await Permission.storage.request();
-    if (_permissionStorageStatus == PermissionStatus.granted) {
+    permissionStorageStatus = await Permission.storage.request();
+    if (permissionStorageStatus == PermissionStatus.granted) {
       await ContentControl.instance.init();
-    } else if (_permissionStorageStatus == PermissionStatus.permanentlyDenied) {
+    } else if (permissionStorageStatus == PermissionStatus.permanentlyDenied) {
       final l10n = staticl10n;
       await ShowFunctions.instance.showToast(
         msg: l10n.allowAccessToExternalStorageManually,

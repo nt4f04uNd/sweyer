@@ -4,14 +4,13 @@ import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
 @visibleForTesting
-class PlaybackStateRepository {
+class PlaybackRepository {
   final songId = Prefs.songId;
 }
 
 /// Controls information about currently playing content and allows to perform related actions.
 class PlaybackControl extends Control {
-  PlaybackControl._();
-  static PlaybackControl instance = PlaybackControl._();
+  static PlaybackControl instance = PlaybackControl();
 
   @override
   void init() {
@@ -21,12 +20,14 @@ class PlaybackControl extends Control {
 
   @override
   void dispose() {
+    if (!disposed.value) {
+      _songSubject.close();
+    }
     super.dispose();
-    _songSubject.close();
   }
 
   @visibleForTesting
-  late final repository = PlaybackStateRepository();
+  late final repository = PlaybackRepository();
 
   /// A stream of changes on [currentSong].
   Stream<Song> get onSongChange => _songSubject.stream;

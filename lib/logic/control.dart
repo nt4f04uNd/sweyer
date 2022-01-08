@@ -8,13 +8,11 @@ import 'package:sweyer/sweyer.dart';
 ///
 /// `Control` is a singleton service that has:
 ///
-///  * instance field
+///  * static instance field
 ///  * state
 ///  * repository
 ///  * streams
 ///  * methods that modify state and call repository methods
-///
-/// ## State
 ///
 /// The `state` should be a pure data and optionally some helping getter methods.
 /// If the `state` is large, a separate class should be created for it and marked
@@ -27,15 +25,16 @@ import 'package:sweyer/sweyer.dart';
 ///
 /// ## Unit-testing
 ///
-/// To unit-test a `Control`, one would simply need to create `TestControl`, which
-/// mocks the `state` and `repository`, and then set the `Control.instance`
+/// To unit-test a `Control`, one would simply need to create `MockControl`, which
+/// mocks the `state` and/or `repository`, and then set the `Control.instance`
 /// to the `TestControl`.
 ///
 /// Known controls:
 ///
-///   * [ContentControl] 
-///   * [PlaybackControl] 
-///   * [QueueControl] 
+///   * [ContentControl]
+///   * [QueueControl]
+///   * [PlaybackControl]
+///   * [DeviceInfoControl]
 abstract class Control {
   /// Initializes the control.
   ///
@@ -54,7 +53,6 @@ abstract class Control {
   /// Must be called when the control is no longer needed.
   @mustCallSuper
   void dispose() {
-    assert(!disposed.value);
     _disposed.value = true;
   }
 }

@@ -26,8 +26,6 @@ class ContentChannelException extends Enum with EquatableMixin {
   const ContentChannelException._(String value, [this._exception]) : super(value);
 
   PlatformException get exception => _exception!;
-  // TODO: https://github.com/dart-lang/linter/issues/2718
-  // ignore: use_late_for_private_fields_and_variables
   final PlatformException? _exception;
 
   @override
@@ -61,8 +59,10 @@ class ContentChannelException extends Enum with EquatableMixin {
 /// Communication bridge with the platform for all content-related methods.
 /// 
 /// Methods can thow various [ContentChannelException]s.
-abstract class ContentChannel {
+class ContentChannel {
   static const MethodChannel _channel = MethodChannel('content_channel');
+
+  static ContentChannel instance = ContentChannel();
 
   /// Loads album art on Android Q (SDK 29) and above.
   /// Calling this on versions below with throw.
@@ -72,7 +72,7 @@ abstract class ContentChannel {
   /// Throws:
   ///  * [ContentChannelException.io] when art fails to load
   ///  * [ContentChannelException.sdk] when it's called below Android 29
-  static Future<Uint8List?> loadAlbumArt({ required String uri, required Size size, required CancellationSignal signal }) async {
+  Future<Uint8List?> loadAlbumArt({ required String uri, required Size size, required CancellationSignal signal }) async {
     try {
       return await _channel.invokeMethod<Uint8List>(
         'loadAlbumArt',
@@ -98,19 +98,19 @@ abstract class ContentChannel {
   /// detect it and does not recreate the thumb, so we do this instead.
   ///
   /// See https://stackoverflow.com/questions/18606007/android-image-files-deleted-from-com-android-providers-media-albumthumbs-on-rebo
-  static Future<void> fixAlbumArt(int albumId) async {
+  Future<void> fixAlbumArt(int albumId) async {
     return _channel.invokeMethod<void>(
       'fixAlbumArt',
       {'id': albumId},
     );
   }
 
-  static Future<List<Song>> retrieveSongs() async {
+  Future<List<Song>> retrieveSongs() async {
     final maps = await _channel.invokeListMethod<Map>('retrieveSongs');
     return maps!.map((el) => Song.fromMap(el)).toList();
   }
 
-  static Future<Map<int, Album>> retrieveAlbums() async {
+  Future<Map<int, Album>> retrieveAlbums() async {
     final maps = await _channel.invokeListMethod<Map>('retrieveAlbums');
     final Map<int, Album> albums = {};
     for (final map in maps!) {
@@ -119,17 +119,17 @@ abstract class ContentChannel {
     return albums;
   }
 
-  static Future<List<Playlist>> retrievePlaylists() async {
+  Future<List<Playlist>> retrievePlaylists() async {
     final maps = await _channel.invokeListMethod<Map>('retrievePlaylists');
     return maps!.map((el) => Playlist.fromMap(el)).toList();
   }
 
-  static Future<List<Artist>> retrieveArtists() async {
+  Future<List<Artist>> retrieveArtists() async {
     final maps = await _channel.invokeListMethod<Map>('retrieveArtists');
     return maps!.map((el) => Artist.fromMap(el)).toList();
   }
 
-  static Future<List<Genre>> retrieveGenres() async {
+  Future<List<Genre>> retrieveGenres() async {
     final maps = await _channel.invokeListMethod<Map>('retrieveGenres');
     return maps!.map((el) => Genre.fromMap(el)).toList();
   }
@@ -141,7 +141,7 @@ abstract class ContentChannel {
   /// Throws:
   ///  * [ContentChannelException.sdk] when it's called below Android 30
   ///  * [ContentChannelException.intentSender]
-  static Future<bool> setSongsFavorite(Set<Song> songs, bool value) async {
+  Future<bool> setSongsFavorite(Set<Song> songs, bool value) async {
     try {
       final res = await _channel.invokeMethod<bool>(
         'setSongsFavorite',
@@ -162,7 +162,7 @@ abstract class ContentChannel {
   ///
   /// Throws:
   ///  * [ContentChannelException.intentSender]
-  static Future<bool> deleteSongs(Set<Song> songs) async {
+  Future<bool> deleteSongs(Set<Song> songs) async {
     try {
       final res = await _channel.invokeMethod<bool>(
         'deleteSongs',
@@ -174,7 +174,7 @@ abstract class ContentChannel {
     }
   }
 
-  static Future<void> createPlaylist(String name) async {
+  Future<void> createPlaylist(String name) async {
     try {
       return await _channel.invokeMethod<void>('createPlaylist', {'name': name});
     } on PlatformException catch(ex) {
@@ -184,7 +184,7 @@ abstract class ContentChannel {
 
   /// Throws:
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
-  static Future<void> renamePlaylist(Playlist playlist, String name) async {
+  Future<void> renamePlaylist(Playlist playlist, String name) async {
     try {
       return await _channel.invokeMethod<void>(
         'renamePlaylist',
@@ -198,13 +198,13 @@ abstract class ContentChannel {
     }
   }
 
-  static Future<void> removePlaylists(List<Playlist> playlists) async {
+  Future<void> removePlaylists(List<Playlist> playlists) async {
     return _channel.invokeMethod<void>('removePlaylists', {'ids': playlists.map((el) => el.id).toList()});
   }
 
   /// Throws:
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
-  static Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
+  Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
     assert(songs.isNotEmpty);
     assert(index >= 0 && index <= playlist.songIds.length + 1);
     try {
@@ -222,7 +222,7 @@ abstract class ContentChannel {
   }
 
   /// Moves song in playlist, returned value indicates whether the operation was successful.
-  static Future<bool> moveSongInPlaylist({ required Playlist playlist, required int from, required int to }) async {
+  Future<bool> moveSongInPlaylist({ required Playlist playlist, required int from, required int to }) async {
     assert(from >= 0);
     assert(to >= 0);
     assert(from != to);
@@ -239,7 +239,7 @@ abstract class ContentChannel {
 
   /// Throws:
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
-  static Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
+  Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
     assert(indexes.isNotEmpty);
     try {
       return await _channel.invokeMethod<void>(
@@ -255,7 +255,7 @@ abstract class ContentChannel {
   }
 
   /// Checks if open intent is view (user tried to open file with app).
-  static Future<bool> isIntentActionView() async {
+  Future<bool> isIntentActionView() async {
     final res = await _channel.invokeMethod<bool>('isIntentActionView');
     return res!;
   }
