@@ -42,7 +42,7 @@ class Artist extends SongOrigin {
   /// Whether this artist represents an unknown artist.
   bool get isUnknown => artist == ContentUtils.unknownArtist;
 
-  Future<GetArtistInfoResponse> fetchInfo() => Backend.getArtistInfo(artist);
+  Future<GetArtistInfoResponse> fetchInfo() => Backend.instance.getArtistInfo(artist);
 
   const Artist({
     required this.id,

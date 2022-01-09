@@ -19,11 +19,13 @@ class GetArtistInfoResponse {
 /// A namespace for connection methods with the backend.
 ///
 /// Backend source code is avilable here https://github.com/nt4f04uNd/sweyer-backend.
-abstract class Backend {
+class Backend {
+  static Backend instance = Backend();
+
   static const _version = 1;
   static const _cacheKey = 'backend';
 
-  static final _cacheManager = CacheManager(
+  final _cacheManager = CacheManager(
     Config(
       _cacheKey,
       maxNrOfCacheObjects: 500,
@@ -32,7 +34,7 @@ abstract class Backend {
   );
 
   /// Calls to the backend to find the info about artist.
-  static Future<GetArtistInfoResponse> getArtistInfo(String name) async {
+  Future<GetArtistInfoResponse> getArtistInfo(String name) async {
     final file = await _cacheManager.getSingleFile(name);
     if (!file.existsSync())
       return GetArtistInfoResponse(imageUrl: null);

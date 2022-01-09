@@ -52,6 +52,7 @@ void main() {
   });
 
   testWidgets('no songs screen - shows when the library is empty and pressing the button performs refetching', (WidgetTester tester) async {
+    // TODO: because of `MusicPlayer.instance.stop` at the end of `runAppTest`, this test will print an error in console, but not actually fail, because the exception is catched. Ideally I should somehow hide that
     await setUpAppTest(() {
       FakeContentChannel.instance.songs = [];
     });

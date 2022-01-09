@@ -7,6 +7,7 @@ export 'serialization.dart';
 
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
@@ -753,7 +754,7 @@ class MusicPlayer extends AudioPlayer {
         ProgressiveAudioSource(Uri.parse(song.contentUri)),
       );
     } catch (e) {
-      if (e is PlayerInterruptedException) {
+      if (e is PlayerInterruptedException || e is PlatformException && e.code == 'abort') {
         // Do nothing
       } else if (e is PlayerException) {
         final message = getl10n(AppRouter.instance.navigatorKey.currentContext!).playbackError;

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 /// arts from `MediaStore`.
 bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
 
-class ContentArtSource {
+class ContentArtSource with EquatableMixin {
   const ContentArtSource(Content content) : _content = content;
 
   const ContentArtSource.song(Song song)
@@ -58,6 +59,9 @@ class ContentArtSource {
     : _content = origin;
 
   final Content _content;
+
+  @override
+  List<Object?> get props => [_content];
 }
 
 /// Image that represents the content art.

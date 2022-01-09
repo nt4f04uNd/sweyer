@@ -1,3 +1,4 @@
+export 'fake_backend.dart';
 export 'fake_content_channel.dart';
 export 'fake_content.dart';
 export 'fake_device_info.dart';

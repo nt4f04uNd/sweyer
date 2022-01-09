@@ -4,11 +4,14 @@ export 'package:sweyer/sweyer.dart';
 
 export 'fakes/fakes.dart';
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flare_flutter/flare_testing.dart';
 
 import 'test.dart';
 
@@ -68,17 +71,34 @@ final ArtistCopyWith artistWith = _testArtist.copyWith;
 
 /// Default l10n delegate in tests.
 final l10n = AppLocalizationsEn();
+const kScreenSize = Size(kScreenWidth, kScreenHeight);
+const kScreenHeight = 800.0;
+const kScreenWidth = 600.0;
 
 /// Sets the fake data providers and initializes the app state.
 /// 
 /// The [configureFakes] callback can be used to modify the fake data providers
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
+  // Prepare flare.
+  FlareTesting.setup();
+
+  // Fake prefs values.
+  //
+  // Set empty values, because Windows implements shared_preferences
+  // without plugin code, thus works in tests, which is undesirable,
+  // because it changes test results
+  // https://github.com/flutter/flutter/issues/95951#issuecomment-1002972723
+  NFPrefs.prefs = null;
+  await NFPrefs.prefs?.clear();
+  SharedPreferences.setMockInitialValues({});
+
   // Reset any state
   DeviceInfoControl.instance.dispose();
   ContentControl.instance.dispose();
 
   // Set up fakes
+  Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
   Permissions.instance = FakePermissions();
   ContentChannel.instance = FakeContentChannel();
@@ -104,7 +124,11 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   await NFPrefs.initialize();
   await DeviceInfoControl.instance.init();
   ThemeControl.init();
-  ThemeControl.initSystemUi();
+
+  // TODO: UI animations break tests
+  // ThemeControl.initSystemUi();
+  SystemUiStyleController.setSystemUiOverlay(const SystemUiOverlayStyle());
+
   await Permissions.instance.init();
   await ContentControl.instance.init();
 
@@ -118,8 +142,15 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
 extension WidgetTesterExtension on WidgetTester {
   Future<void> runAppTest(AsyncCallback callback) async {
     // App only suppots vertical orientation, so switch tests to use it.
-    await binding.setSurfaceSize(const Size(600, 800));
-    await pumpWidget(const App());
+    await binding.setSurfaceSize(kScreenSize);
+    await pumpWidget(
+      Center(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window).copyWith(size: kScreenSize),
+          child: const App(),
+        ),
+      ),
+    );
     await pump();
     await callback();
     // Unpump, in case we have any real animations running,
@@ -127,5 +158,14 @@ extension WidgetTesterExtension on WidgetTester {
     await pumpWidget(const SizedBox());
     // Wait for ui animations.
     await pumpAndSettle();
+    // Don't leak player state throughout tests.
+    await MusicPlayer.instance.stop();
+  }
+
+  /// Expect the app to render a list of songs in [SongTile]s.
+  void expectSongTiles(Iterable<Song> songs) {
+    final songTiles = widgetList<SongTile>(find.byType(SongTile));
+    final foundSongs = songTiles.map((e) => e.song);
+    expect(foundSongs, songs);
   }
 }

@@ -104,25 +104,25 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   List<Widget> _buildTabs() {
     final l10n = getl10n(context);
     return [
-      _TabCollapse(
+      TabCollapse(
         index: 0,
         tabController: tabController,
         icon: const Icon(Song.icon),
         label: l10n.tracks,
       ),
-      _TabCollapse(
+      TabCollapse(
         index: 1,
         tabController: tabController,
         icon: const Icon(Album.icon),
         label: l10n.albums,
       ),
-      _TabCollapse(
+      TabCollapse(
         index: 2,
         tabController: tabController,
         icon: const Icon(Playlist.icon, size: 28.0),
         label: l10n.playlists,
       ),
-      _TabCollapse(
+      TabCollapse(
         index: 3,
         tabController: tabController,
         icon: const Icon(Artist.icon),
@@ -528,8 +528,8 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
   }
 }
 
-class _TabCollapse extends StatelessWidget {
-  const _TabCollapse({
+class TabCollapse extends StatelessWidget {
+  const TabCollapse({
     Key? key,
     required this.index,
     required this.tabController,

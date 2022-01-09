@@ -161,6 +161,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             // debugShowCheckedModeBanner: false,
             // showPerformanceOverlay: true,
             // checkerboardRasterCacheImages: true,
+            // TODO: remove when invesitage the https://github.com/flutter/flutter/issues/12994
+            useInheritedMediaQuery: true, // used in tests
             title: Constants.Config.APPLICATION_TITLE,
             color: ThemeControl.theme.colorScheme.primary,
             supportedLocales: Constants.Config.supportedLocales,
