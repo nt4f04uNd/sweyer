@@ -29,7 +29,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   /// and assonged to each [Song.idMap].
   ///
   /// The origin will also be set for interaction with queue instertions
-  /// at functions like [QueueControl.instance.playNext].
+  /// at functions like [QueueControl.playNext].
   @override
   List<Song> get songs {
     _idMap = {};

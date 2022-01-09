@@ -158,7 +158,7 @@ extension WidgetTesterExtension on WidgetTester {
     await pumpWidget(const SizedBox());
     // Wait for ui animations.
     await pumpAndSettle();
-    // Don't leak player state throughout tests.
+    // Don't leak player state between tests.
     await MusicPlayer.instance.stop();
   }
 

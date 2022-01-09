@@ -119,7 +119,6 @@ void main() {
       expect(PlaybackControl.instance.currentSong, songs[1]);
 
       await tester.tap(find.byIcon(Icons.skip_previous_rounded));
-      await tester.pumpAndSettle();
       expect(PlaybackControl.instance.currentSong, songs.first);
 
       await tester.tap(find.byIcon(Icons.skip_previous_rounded));
