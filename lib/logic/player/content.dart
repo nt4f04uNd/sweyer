@@ -507,7 +507,7 @@ class ContentControl extends Control {
 
   /// Filters out non-source songs (with negative IDs), and asserts that.
   ///
-  /// That ensure invalid items are never passed to platform and allows to catch
+  /// That ensures invalid items are never passed to platform and allows to catch
   /// invalid states in debug mode.
   Set<Song> _ensureSongsAreSource(Set<Song> songs) {
     return songs.fold<Set<Song>>({}, (prev, el) {

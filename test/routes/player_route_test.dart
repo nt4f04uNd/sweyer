@@ -69,7 +69,7 @@ void main() {
         (widget) =>
           widget is ContentArt &&
           widget.source == ContentArtSource.song(currentSong)),
-        findsNWidgets(4), // PlayerRoute shows uses two arts and animates between them
+        findsNWidgets(4), // PlayerRoute shows two arts and animates between them
       );
     });
   });

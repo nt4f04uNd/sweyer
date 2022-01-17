@@ -172,7 +172,7 @@ class QueueSerializer extends QueueSerializerType {
   }
 }
 
-/// The type for [QueueSeIdMapSerializerrializer].
+/// The type for [IdMapSerializer].
 typedef IdMapSerializerType = JsonSerializer<IdMap, IdMap>;
 
 /// Used to serialize song id map.
