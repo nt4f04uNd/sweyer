@@ -26,7 +26,7 @@ void main() {
     });
   });
 
-  testWidgets('PlaylistTile - tapping opens album route', (WidgetTester tester) async {
+  testWidgets('PlaylistTile - tapping opens playlist route', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Open playlists tab
       await tester.tap(find.byIcon(Playlist.icon));
@@ -39,7 +39,7 @@ void main() {
     });
   });
 
-  testWidgets('ArtistTile - tapping opens album route', (WidgetTester tester) async {
+  testWidgets('ArtistTile - tapping opens artist route', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Open artists tab
       await tester.tap(find.byIcon(Artist.icon));
