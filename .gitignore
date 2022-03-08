@@ -83,3 +83,10 @@ google-services.json
 untranslated-messages.txt
 
 .fvm/flutter_sdk
+
+# ignore golden failure outputs
+**/failures/*.png
+
+.project
+.classpath
+.settings
