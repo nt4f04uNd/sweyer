@@ -159,8 +159,6 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   final SelectionController<T>? selectionController;
 
   @override
-  // TODO: remove this ignore when https://github.com/dart-lang/linter/issues/2345 is resolved
-  // ignore: no_logic_in_create_state
   State<SelectableWidget<T>> createState();
 }
 
