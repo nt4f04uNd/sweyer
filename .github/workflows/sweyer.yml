@@ -1,0 +1,8 @@
+name: sweyer
+on: push
+
+jobs:
+  build:
+    uses: ./.github/workflows/flutter_package.yml
+    with:
+      min_coverage: 0
