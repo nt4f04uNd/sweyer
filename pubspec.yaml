@@ -90,6 +90,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  golden_toolkit: ^0.13.0
+
 flutter:
   generate: true
   uses-material-design: true

@@ -323,6 +323,13 @@ packages:
       url: "https://github.com/nt4f04uNd/fluttertoast/"
     source: git
     version: "8.0.3"
+  golden_toolkit:
+    dependency: "direct dev"
+    description:
+      name: golden_toolkit
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.0"
   http:
     dependency: transitive
     description:

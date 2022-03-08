@@ -1,7 +1,7 @@
 import 'dart:ui';
-
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import '../test.dart';
 
 /// A 50x50 blue square png.
@@ -21,6 +21,12 @@ const List<int> _kBlueSquarePng = <int>[
 class FakeContentChannel implements ContentChannel {
   FakeContentChannel() {
     instance = this;
+    const MethodChannel('content_channel').setMockMethodCallHandler((call) {
+      /// Ignore [CancellationSignal] calls
+      if (call.method == 'cancelAlbumArtLoading')
+        return null;
+      throw UnimplementedError('method is not mocked');
+    });
   }
   static late FakeContentChannel instance;
 

@@ -107,7 +107,12 @@ Future<void> main() async {
 }
 
 class App extends StatefulWidget {
-  const App({Key? key}) : super(key: key);
+  const App({
+    Key? key,
+    this.debugShowCheckedModeBanner = true,
+  }) : super(key: key);
+
+  final bool debugShowCheckedModeBanner;
 
   static NFThemeData nfThemeData = NFThemeData(
     systemUiStyle: Constants.UiTheme.black.auto,
@@ -158,10 +163,10 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         return NFTheme(
         data: App.nfThemeData,
           child: MaterialApp.router(
-            // debugShowCheckedModeBanner: false,
             // showPerformanceOverlay: true,
             // checkerboardRasterCacheImages: true,
-            // TODO: remove when invesitage the https://github.com/flutter/flutter/issues/12994
+            debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+            // TODO: remove when invesigate the https://github.com/flutter/flutter/issues/12994
             useInheritedMediaQuery: true, // used in tests
             title: Constants.Config.APPLICATION_TITLE,
             color: ThemeControl.theme.colorScheme.primary,
