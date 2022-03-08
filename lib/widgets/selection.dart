@@ -159,8 +159,6 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   final SelectionController<T>? selectionController;
 
   @override
-  // TODO: remove this ignore when https://github.com/dart-lang/linter/issues/2345 is resolved
-  // ignore: no_logic_in_create_state
   State<SelectableWidget<T>> createState();
 }
 
@@ -517,7 +515,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   Color? _lastNavColor;
   OverlayEntry? _overlayEntry;
   SlidableController? _dismissibleRouteController;
-  ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.state.selectionNotifier;
+  ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.instance.selectionNotifier;
 
   /// Creates the actions bar overlay.
   void activate() {
@@ -572,7 +570,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     if (status == AnimationStatus.forward) {
       activate();
     } else if (status == AnimationStatus.reverse) {
-      if (!ContentControl.disposed) {
+      if (!ContentControl.instance.disposed.value) {
         _notifier.value = null;
       }
       _animateNavBack();
@@ -624,7 +622,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     for (final observer in NFWidgets.routeObservers!)
       observer.unsubscribe(this);
   
-    if (ContentControl.disposed) {
+    if (ContentControl.instance.disposed.value) {
       _removeOverlay();
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         _primaryContentTypeNotifier.dispose();
@@ -1186,7 +1184,7 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
     if (entries.isEmpty)
       return;
     entries.sort((a, b) => a.index.compareTo(b.index));
-    ContentControl.playNext(
+    QueueControl.instance.playNext(
       entries
         .map((el) => el.data)
         .toList(),
@@ -1199,7 +1197,7 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
     // Reverse order is proper here
     entries.sort((a, b) => b.index.compareTo(a.index));
     for (final entry in entries) {
-      ContentControl.playOriginNext(entry.data);
+      QueueControl.instance.playOriginNext(entry.data);
     }
   }
 
@@ -1276,7 +1274,7 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
     if (entries.isEmpty)
       return;
     entries.sort((a, b) => a.index.compareTo(b.index));
-    ContentControl.addToQueue(
+    QueueControl.instance.addToQueue(
       entries
         .map((el) => el.data)
         .toList(),
@@ -1288,7 +1286,7 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
       return;
     entries.sort((a, b) => a.index.compareTo(b.index));
     for (final entry in entries) {
-      ContentControl.addOriginToQueue(entry.data);
+      QueueControl.instance.addOriginToQueue(entry.data);
     }
   }
 
@@ -1363,7 +1361,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
-    ContentControl.setQueue(
+    QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: false,
       songs: songs,
@@ -1402,12 +1400,12 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
-    ContentControl.setQueue(
+    QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: true,
       shuffleFrom: songs,
     );
-    MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+    MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
     MusicPlayer.instance.play();
     playerRouteController.open();
     controller.close();
@@ -1440,7 +1438,7 @@ class RemoveFromQueueSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController<SelectionEntry<Song>> controller) {
     for (final entry in controller.data) {
-      final removed = ContentControl.removeFromQueue(entry.data);
+      final removed = QueueControl.instance.removeFromQueue(entry.data);
       assert(removed);
     }
     controller.close();
@@ -1485,7 +1483,7 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+    assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
            controller is ContentSelectionController<SelectionEntry<Song>>);
     final data = controller.data;
 
@@ -1530,7 +1528,7 @@ class _GoToArtistSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+    assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
            controller is ContentSelectionController<SelectionEntry<Song>> ||
            controller is ContentSelectionController<SelectionEntry<Album>>);
     final data = controller.data;
@@ -1569,7 +1567,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    assert(controller is ContentSelectionController<SelectionEntry<Content>> ||
+    assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
            controller is ContentSelectionController<SelectionEntry<Playlist>>);
     final data = controller.data;
 
@@ -1582,7 +1580,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
-          tooltip: "${l10n.edit} ${l10n.utils.playlist.toLowerCase()}",
+          tooltip: "${l10n.edit} ${l10n.playlist.toLowerCase()}",
           icon: const Icon(Icons.edit_rounded, size: 21.0),
           // iconSize: 23.0,
           onPressed: () => _handleTap(controller),
@@ -1611,9 +1609,9 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
       ),
       contentPadding: const EdgeInsets.only(top: 14.0, bottom: 0.0),
       content: StreamBuilder(
-        stream: ContentControl.state.onContentChange,
+        stream: ContentControl.instance.onContentChange,
         builder: (context, snapshot) {
-          final playlists = ContentControl.state.playlists;
+          final playlists = ContentControl.instance.state.playlists;
           final screenSize = MediaQuery.of(context).size;
           return SizedBox(
             height: kSongTileHeight + playlists.length * kPersistentQueueTileHeight,
@@ -1626,7 +1624,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
                 enableDefaultOnTap: false,
                 onItemTap: (index) {
                   final playlist = playlists[index];
-                  ContentControl.insertSongsInPlaylist(
+                  ContentControl.instance.insertSongsInPlaylist(
                     index: playlist.length + 1,
                     songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged),
                     playlist: playlist,
@@ -1696,7 +1694,7 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
       list: list,
       localizedAction: (l10n) => l10n.remove,
       onSubmit: () {
-        ContentControl.removeFromPlaylistAt(
+        ContentControl.instance.removeFromPlaylistAt(
           indexes: controller.data.map((el) => el.index).toList(),
           playlist: playlist,
         );
@@ -1755,9 +1753,9 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         .cast<SelectionEntry<Song>>()
         .toList()
         ..sort((a, b) => a.index.compareTo(b.index));
-      if (ContentControl.sdkInt >= 30) {
+      if (DeviceInfoControl.instance.sdkInt >= 30) {
         // On Android R the deletion is performed with OS dialog.
-        await ContentControl.deleteSongs(entries.map((e) => e.data).toSet());
+        await ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
         widget.controller.close();
       } else {
         // On all versions below show in app dialog.
@@ -1768,7 +1766,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
           list: list,
           localizedAction: (l10n) => l10n.delete,
           onSubmit: () {
-            ContentControl.deleteSongs(entries.map((e) => e.data).toSet());
+            ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
           },
         );
       }
@@ -1784,7 +1782,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         list: list,
         localizedAction: (l10n) => l10n.delete,
         onSubmit: () {
-          ContentControl.deletePlaylists(list);
+          ContentControl.instance.deletePlaylists(list);
         },
       );
     }
@@ -1848,7 +1846,7 @@ void _showActionConfirmationDialog<E extends Content>({
       builder: (context) {
         final l10n = getl10n(context);
         return Text(
-          '${localizedAction(getl10n(context))} ${count > 1 ? '$count ' : ''}${l10n.utils.contentsPlural<E>(count).toLowerCase()}',
+          '${localizedAction(getl10n(context))} ${count > 1 ? '$count ' : ''}${l10n.contentsPlural<E>(count).toLowerCase()}',
         );
       },
     ),
@@ -1865,7 +1863,7 @@ void _showActionConfirmationDialog<E extends Content>({
                   children: [
                     TextSpan(text: "${l10n.areYouSureYouWantTo} ${localizedAction(l10n).toLowerCase()}"),
                     TextSpan(
-                      text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.utils.contents<E>().toLowerCase()}'}?',
+                      text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
                       style: entry != null
                           ? const TextStyle(fontWeight: FontWeight.w700)
                           : null,

@@ -97,16 +97,22 @@ Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
 
+    await DeviceInfoControl.instance.init();
     ThemeControl.init();
     ThemeControl.initSystemUi();
-    await Permissions.init();
-    await ContentControl.init();
+    await Permissions.instance.init();
+    await ContentControl.instance.init();
     runApp(const App());
   }, reportError);
 }
 
 class App extends StatefulWidget {
-  const App({Key? key}) : super(key: key);
+  const App({
+    Key? key,
+    this.debugShowCheckedModeBanner = true,
+  }) : super(key: key);
+
+  final bool debugShowCheckedModeBanner;
 
   static NFThemeData nfThemeData = NFThemeData(
     systemUiStyle: Constants.UiTheme.black.auto,
@@ -157,9 +163,11 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         return NFTheme(
         data: App.nfThemeData,
           child: MaterialApp.router(
-            // debugShowCheckedModeBanner: false,
             // showPerformanceOverlay: true,
             // checkerboardRasterCacheImages: true,
+            debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+            // TODO: remove when invesigate the https://github.com/flutter/flutter/issues/12994
+            useInheritedMediaQuery: true, // used in tests
             title: Constants.Config.APPLICATION_TITLE,
             color: ThemeControl.theme.colorScheme.primary,
             supportedLocales: Constants.Config.supportedLocales,

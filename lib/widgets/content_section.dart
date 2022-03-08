@@ -88,7 +88,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.utils.contents<T>(contentType),
+                  l10n.contents<T>(contentType),
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.w800,

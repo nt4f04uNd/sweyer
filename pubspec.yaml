@@ -8,7 +8,7 @@ version: 1.0.7+9
 
 environment:
   sdk: '>=2.13.0 <3.0.0'
-  flutter: ^2.8.0
+  flutter: ^2.10.3
 
 dependencies:
   flutter:
@@ -89,6 +89,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  golden_toolkit: ^0.13.0
 
 flutter:
   generate: true

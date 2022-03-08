@@ -2,24 +2,26 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-abstract class Permissions {
+class Permissions {
+  static Permissions instance = Permissions();
+
   /// Whether storage permission is granted
-  static late PermissionStatus _permissionStorageStatus;
+  late PermissionStatus _permissionStorageStatus;
 
   /// Returns true if permissions were granted
-  static bool get granted => _permissionStorageStatus == PermissionStatus.granted;
+  bool get granted => _permissionStorageStatus == PermissionStatus.granted;
 
   /// Returns true if permissions were not granted
-  static bool get notGranted => !granted;
+  bool get notGranted => !granted;
 
-  static Future<void> init() async {
+  Future<void> init() async {
     _permissionStorageStatus = await Permission.storage.status;
   }
 
-  static Future<void> requestClick() async {
+  Future<void> requestClick() async {
     _permissionStorageStatus = await Permission.storage.request();
     if (_permissionStorageStatus == PermissionStatus.granted) {
-      await ContentControl.init();
+      await ContentControl.instance.init();
     } else if (_permissionStorageStatus == PermissionStatus.permanentlyDenied) {
       final l10n = staticl10n;
       await ShowFunctions.instance.showToast(

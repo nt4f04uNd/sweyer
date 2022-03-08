@@ -23,6 +23,23 @@
          "request": "launch",
          "program": "lib/main.dart",
          "flutterMode": "release"
-      }
+      },
+      {
+         "name": "Golden",
+         "request": "launch",
+         "type": "dart",
+         "codeLens": {
+            "for": [
+               "run-test",
+               "run-test-file",
+               "debug-test",
+               "debug-test-file",
+            ],
+            "title": "${debugType} golden",
+         },
+         "args": [
+            "--update-goldens",
+         ]
+      },
    ]
 }

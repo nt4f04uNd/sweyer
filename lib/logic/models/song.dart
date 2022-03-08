@@ -85,10 +85,10 @@ class Song extends Content {
   );
 
   /// Returns the song artist.
-  Artist getArtist() => ContentControl.state.artists.firstWhere((el) => el.id == artistId);
+  Artist getArtist() => ContentControl.instance.state.artists.firstWhere((el) => el.id == artistId);
 
   /// Returns the album this song belongs to (if any).
-  Album? getAlbum() => albumId == null ? null : ContentControl.state.albums[albumId!];
+  Album? getAlbum() => albumId == null ? null : ContentControl.instance.state.albums[albumId!];
 
   /// Returns the album art for this (if any).
   String? get albumArt => getAlbum()?.albumArt;

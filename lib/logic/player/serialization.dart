@@ -81,8 +81,9 @@ class IntListSerializer extends JsonSerializer<List<int>, List<int>> {
 }
 
 /// Item for [QueueSerializer].
-class _SerializedQueueItem {
-  const _SerializedQueueItem({
+@visibleForTesting
+class SerializedQueueItem {
+  const SerializedQueueItem({
     required this.id,
     required this.duplicationIndex,
     required this.originEntry,
@@ -91,11 +92,10 @@ class _SerializedQueueItem {
   final int id;
   final int? duplicationIndex;
   final SongOriginEntry? originEntry;
-  
 
-  factory _SerializedQueueItem.fromMap(Map map) {
+  factory SerializedQueueItem.fromMap(Map map) {
     final rawOriginEntry = map['origin'];
-    return _SerializedQueueItem(
+    return SerializedQueueItem(
       id: map['id'],
       duplicationIndex: map['duplicationIndex'],
       originEntry: rawOriginEntry == null ? null : SongOriginEntry.fromMap(rawOriginEntry),
@@ -110,10 +110,13 @@ class _SerializedQueueItem {
   };
 }
 
+/// The type for [QueueSerializer].
+typedef QueueSerializerType = JsonSerializer<List<SerializedQueueItem>, List<Song>>;
+
 /// Used to serialize queue.
 ///
 /// Saves only songs ids, so you have to search indexes in 'all' queue to restore.
-class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<Song>> {
+class QueueSerializer extends QueueSerializerType {
   const QueueSerializer(this.fileName);
 
   @override
@@ -124,7 +127,7 @@ class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<So
 
   /// Returns a list of song ids.
   @override
-  Future<List<_SerializedQueueItem>> read() async {
+  Future<List<SerializedQueueItem>> read() async {
     try {
       final file = await getFile();
       final jsonContent = await file.readAsString();
@@ -139,7 +142,7 @@ class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<So
           return [];
         }
       }
-      return list.map((el) => _SerializedQueueItem.fromMap(el)).toList();
+      return list.map((el) => SerializedQueueItem.fromMap(el)).toList();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
         ex,
@@ -158,7 +161,7 @@ class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<So
   Future<void> save(List<Song> data) async {
     final file = await getFile();
     final json = jsonEncode(data.map((song) =>
-      _SerializedQueueItem(
+      SerializedQueueItem(
         id: song.id,
         duplicationIndex: song.duplicationIndex,
         originEntry: song.origin?.toSongOriginEntry()
@@ -169,10 +172,12 @@ class QueueSerializer extends JsonSerializer<List<_SerializedQueueItem>, List<So
   }
 }
 
+/// The type for [IdMapSerializer].
+typedef IdMapSerializerType = JsonSerializer<IdMap, IdMap>;
+
 /// Used to serialize song id map.
-class IdMapSerializer extends JsonSerializer<IdMap, IdMap> {
-  IdMapSerializer._();
-  static final instance = IdMapSerializer._();
+class IdMapSerializer extends IdMapSerializerType {
+  const IdMapSerializer();
 
   @override
   String get fileName => 'id_map.json';

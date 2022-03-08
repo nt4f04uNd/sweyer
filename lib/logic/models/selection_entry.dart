@@ -25,7 +25,7 @@ class SelectionEntry<T extends Content> {
         return SelectionEntry<Song>(
           data: content,
           index: selectionRouteOf(context)
-            ? ContentControl.state.allSongs.getIndex(song)
+            ? ContentControl.instance.state.allSongs.getIndex(song)
             : index,
           origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin
             ? song.origin

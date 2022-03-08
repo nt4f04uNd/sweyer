@@ -104,25 +104,25 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   List<Widget> _buildTabs() {
     final l10n = getl10n(context);
     return [
-      _TabCollapse(
+      TabCollapse(
         index: 0,
         tabController: tabController,
         icon: const Icon(Song.icon),
         label: l10n.tracks,
       ),
-      _TabCollapse(
+      TabCollapse(
         index: 1,
         tabController: tabController,
         icon: const Icon(Album.icon),
         label: l10n.albums,
       ),
-      _TabCollapse(
+      TabCollapse(
         index: 2,
         tabController: tabController,
         icon: const Icon(Playlist.icon, size: 28.0),
         label: l10n.playlists,
       ),
-      _TabCollapse(
+      TabCollapse(
         index: 3,
         tabController: tabController,
         icon: const Icon(Artist.icon),
@@ -209,7 +209,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                 index: index,
                 context: context,
               ),
-              getAll: () => ContentControl.getContent(selectionController.primaryContentType!),
+              getAll: () => ContentControl.instance.getContent(selectionController.primaryContentType!),
             ),
             searchButton
           ]
@@ -222,7 +222,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                 index: index,
                 context: context,
               ),
-              getAll: () => ContentControl.getContent(selectionController.primaryContentType!),
+              getAll: () => ContentControl.instance.getContent(selectionController.primaryContentType!),
             ),
         ],
       title: Padding(
@@ -254,10 +254,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                 child: Stack(
                   children: [
                     StreamBuilder(
-                      stream: ContentControl.state.onSongChange,
+                      stream: PlaybackControl.instance.onSongChange,
                       builder: (context, snapshot) => 
                     StreamBuilder(
-                      stream: ContentControl.state.onContentChange,
+                      stream: ContentControl.instance.onContentChange,
                       builder: (context, snapshot) => 
                     ScrollConfiguration(
                       behavior: const GlowlessScrollBehavior(),
@@ -372,7 +372,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
 
   bool get showLabel {
     final contentType = widget.contentType;
-    final SortFeature feature = ContentControl.state.sorts.getValue(contentType).feature;
+    final SortFeature feature = ContentControl.instance.state.sorts.getValue(contentType).feature;
     return contentPick<Content, bool>(
       contentType: contentType,
       song: feature == SongSortFeature.title,
@@ -387,7 +387,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
     super.build(context);
     final theme = ThemeControl.theme;
     final contentType = widget.contentType;
-    final list = ContentControl.getContent(contentType);
+    final list = ContentControl.instance.getContent(contentType);
     final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
     final selectionController = widget.selectionController;
     final selectionRoute = selectionRouteOf(context);
@@ -396,7 +396,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
       strokeWidth: 2.5,
       color: theme.colorScheme.onPrimary,
       backgroundColor: theme.colorScheme.primary,
-      onRefresh: ContentControl.refetchAll,
+      onRefresh: ContentControl.instance.refetchAll,
       notificationPredicate: (notification) {
         return selectionController.notInSelection &&
                notification.depth == 0;
@@ -408,7 +408,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
         selectionController: selectionController,
         onItemTap: contentPick<Content, ValueSetter<int>>(
           contentType: contentType,
-          song: (index) => ContentControl.resetQueue(),
+          song: (index) => QueueControl.instance.resetQueue(),
           album: (index) {},
           playlist: (index) {},
           artist: (index) {},
@@ -450,7 +450,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                                 contentPick<Content, VoidCallback>(
                                   contentType: contentType,
                                   song: () {
-                                    ContentControl.setQueue(
+                                    QueueControl.instance.setQueue(
                                       type: QueueType.allSongs,
                                       modified: false,
                                       shuffled: true,
@@ -459,7 +459,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                                   },
                                   album: () {
                                     final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
-                                    ContentControl.setQueue(
+                                    QueueControl.instance.setQueue(
                                       type: QueueType.allAlbums,
                                       shuffled: true,
                                       songs: shuffleResult.shuffledSongs,
@@ -468,7 +468,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                                   },
                                   playlist: () {
                                     final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Playlist>);
-                                    ContentControl.setQueue(
+                                    QueueControl.instance.setQueue(
                                       type: QueueType.allPlaylists,
                                       shuffled: true,
                                       songs: shuffleResult.shuffledSongs,
@@ -477,7 +477,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                                   },
                                   artist: () {
                                     final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Artist>);
-                                    ContentControl.setQueue(
+                                    QueueControl.instance.setQueue(
                                       type: QueueType.allArtists,
                                       shuffled: true,
                                       songs: shuffleResult.shuffledSongs,
@@ -485,7 +485,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                                     );
                                   },
                                 )();
-                                MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                                MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                                 MusicPlayer.instance.play();
                                 playerRouteController.open();
                               },
@@ -495,21 +495,21 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
                               onPressed: showDisabledActions ? null : () {
                                 contentPick<Content, VoidCallback>(
                                   contentType: contentType,
-                                  song: () => ContentControl.resetQueue(),
-                                  album: () => ContentControl.setQueue(
+                                  song: () => QueueControl.instance.resetQueue(),
+                                  album: () => QueueControl.instance.setQueue(
                                     type: QueueType.allAlbums,
                                     songs: ContentUtils.joinSongOrigins(list as List<Album>),
                                   ),
-                                  playlist: () => ContentControl.setQueue(
+                                  playlist: () => QueueControl.instance.setQueue(
                                     type: QueueType.allPlaylists,
                                     songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
                                   ),
-                                  artist: () => ContentControl.setQueue(
+                                  artist: () => QueueControl.instance.setQueue(
                                     type: QueueType.allArtists,
                                     songs: ContentUtils.joinSongOrigins(list as List<Artist>),
                                   ),
                                 )();
-                                MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                                MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                                 MusicPlayer.instance.play();
                                 playerRouteController.open();
                               },
@@ -528,8 +528,8 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
   }
 }
 
-class _TabCollapse extends StatelessWidget {
-  const _TabCollapse({
+class TabCollapse extends StatelessWidget {
+  const TabCollapse({
     Key? key,
     required this.index,
     required this.tabController,

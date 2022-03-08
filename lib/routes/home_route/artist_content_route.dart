@@ -23,7 +23,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
   void initState() { 
     super.initState();
     list = widget.arguments.list;
-    _contentChangeSubscription = ContentControl.state.onContentChange.listen((event) {
+    _contentChangeSubscription = ContentControl.instance.onContentChange.listen((event) {
       setState(() {
         // Update contents
         list = contentPick<T, ValueGetter<List<T>>>(
@@ -87,7 +87,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
           leading: const NFBackButton(),
         ),
         body: StreamBuilder(
-          stream: ContentControl.state.onSongChange,
+          stream: PlaybackControl.instance.onSongChange,
           builder: (context, snapshot) => ContentListView<T>(
             list: list,
             selectionController: selectionController,
@@ -105,7 +105,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           onPressed: () {
                             contentPick<T, VoidCallback>(
                               song: () {
-                                ContentControl.setOriginQueue(
+                                QueueControl.instance.setOriginQueue(
                                   origin: artist,
                                   shuffled: true,
                                   songs: list as List<Song>,
@@ -113,7 +113,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                               },
                               album: () {
                                 final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
-                                ContentControl.setOriginQueue(
+                                QueueControl.instance.setOriginQueue(
                                   origin: artist,
                                   shuffled: true,
                                   songs: shuffleResult.songs,
@@ -123,7 +123,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                               playlist: () => throw UnimplementedError(),
                               artist: () => throw UnimplementedError(),
                             )();
-                            MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                            MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                             MusicPlayer.instance.play();
                             playerRouteController.open();
                           },
@@ -133,13 +133,13 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           onPressed: () {
                             contentPick<T, VoidCallback>(
                               song: () {
-                                ContentControl.setOriginQueue(
+                                QueueControl.instance.setOriginQueue(
                                   origin: artist,
                                   songs: list as List<Song>,
                                 );
                               },
                               album: () {
-                                ContentControl.setOriginQueue(
+                                QueueControl.instance.setOriginQueue(
                                   origin: artist,
                                   songs: ContentUtils.joinSongOrigins(list as List<Album>),
                                 );
@@ -147,7 +147,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                               playlist: () => throw UnimplementedError(),
                               artist: () => throw UnimplementedError(),
                             )();
-                            MusicPlayer.instance.setSong(ContentControl.state.queues.current.songs[0]);
+                            MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                             MusicPlayer.instance.play();
                             playerRouteController.open();
                           },

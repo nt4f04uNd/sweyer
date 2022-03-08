@@ -56,11 +56,11 @@ abstract class SongOrigin extends Content {
       return null;
     switch (entry.type) {
       case SongOriginType.album:
-        return ContentControl.getContentById<Album>(entry.id);
+        return ContentControl.instance.getContentById<Album>(entry.id);
       case SongOriginType.playlist:
-        return ContentControl.getContentById<Playlist>(entry.id);
+        return ContentControl.instance.getContentById<Playlist>(entry.id);
       case SongOriginType.artist:
-        return ContentControl.getContentById<Artist>(entry.id);
+        return ContentControl.instance.getContentById<Artist>(entry.id);
       default:
         throw UnimplementedError();
     }

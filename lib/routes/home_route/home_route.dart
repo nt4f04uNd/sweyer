@@ -35,25 +35,25 @@ class _InitialRouteState extends State<InitialRoute> {
     return RouteAwareWidget(
       onPushNext: () => _onTop = false,
       onPopNext: () => _onTop = true,
-      child: StreamBuilder(
-        stream: ContentControl.onStateCreateRemove,
-        builder: (context, snapshot) {
-          if (ContentControl.stateNullable == null) {
+      child: ValueListenableBuilder(
+        valueListenable: ContentControl.instance.disposed,
+        builder: (context, value, child) {
+          if (ContentControl.instance.stateNullable == null) {
             _animateNotMainUi();
             return const _SongsEmptyScreen();
           } else {
             return StreamBuilder(
-              stream: ContentControl.state.onContentChange,
+              stream: ContentControl.instance.onContentChange,
               builder: (context, snapshot) {
-                if (Permissions.notGranted) {
+                if (Permissions.instance.notGranted) {
                   _animateNotMainUi();
                   return const _NoPermissionsScreen();
                 }
-                if (ContentControl.initializing) {
+                if (ContentControl.instance.initializing) {
                   _animateNotMainUi();
                   return const _SearchingSongsScreen();
                 }
-                if (ContentControl.state.allSongs.isEmpty) {
+                if (ContentControl.instance.state.allSongs.isEmpty) {
                   _animateNotMainUi();
                   return const _SongsEmptyScreen();
                 }
@@ -147,7 +147,7 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
     setState(() {
       _fetching = true;
     });
-    await ContentControl.init();
+    await ContentControl.instance.init();
     if (mounted) {
       setState(() {
         _fetching = false;
@@ -191,7 +191,7 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
     setState(() {
       _fetching = true;
     });
-    await Permissions.requestClick();
+    await Permissions.instance.requestClick();
     if (mounted) {
       setState(() {
         _fetching = false;

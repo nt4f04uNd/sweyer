@@ -29,7 +29,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   /// and assonged to each [Song.idMap].
   ///
   /// The origin will also be set for interaction with queue instertions
-  /// at functions like [ContentControl.playNext].
+  /// at functions like [QueueControl.playNext].
   @override
   List<Song> get songs {
     _idMap = {};
@@ -39,7 +39,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
     final List<Song> found = [];
     final List<int> notFoundIndices = [];
     for (int i = 0; i < songIds.length; i++) {
-      final song = ContentControl.state.allSongs.byId.get(songIds[i]);
+      final song = ContentControl.instance.state.allSongs.byId.get(songIds[i]);
       if (song != null) {
         final copiedSong = song.copyWith();
         copiedSong.origin = this;
@@ -67,7 +67,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
 
   /// Returns content URI of the first item in the album.
   String get firstSong {
-    final song = ContentControl.state.allSongs.songs.firstWhere((el) => el.albumId == id);
+    final song = ContentControl.instance.state.allSongs.songs.firstWhere((el) => el.albumId == id);
     return song.contentUri;
   }
 

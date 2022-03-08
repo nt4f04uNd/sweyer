@@ -333,7 +333,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
     updateTransitionSettings();
   }
 
-  VoidCallback? setState;
+  VoidCallback? _setState;
   void updateTransitionSettings({bool themeChanged = false}) {
     final dismissBarrier = _dismissBarrier;
     transitionSettings.grey.uiStyle = Constants.UiTheme.grey.auto;
@@ -345,10 +345,10 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
       : Constants.UiTheme.black.auto;
     transitionSettings.theme.dismissBarrier = dismissBarrier;
     if (themeChanged) {
-      setState?.call();
+      _setState?.call();
       transitionSettings.theme.dismissible = false;
       Future.delayed(dilate(const Duration(milliseconds: 300)), () {
-        setState?.call();
+        _setState?.call();
         transitionSettings.theme.dismissible = true;
       });
     }
@@ -356,10 +356,8 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
 
   @override
   Widget build(BuildContext context) {
-    return StatefulBuilder(
-      builder: (BuildContext context, setState) {
-        this.setState = () => setState(() { });
-
+    return _AppRouterBuilder(
+      builder: (context) {
         final pages = <Page<void>>[
           StackFadePage(
             key: AppRoutes.initial.uniqueKey,
@@ -412,6 +410,34 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
         );
       },
     );
+  }
+}
+
+class _AppRouterBuilder extends StatefulWidget {
+  _AppRouterBuilder({Key? key, required this.builder}) : super(key: key);
+
+  final WidgetBuilder builder;
+
+  @override
+  _AppRouterBuilderState createState() => _AppRouterBuilderState();
+}
+
+class _AppRouterBuilderState extends State<_AppRouterBuilder> {
+  @override
+  void initState() {
+    super.initState();
+    AppRouter.instance._setState = () => setState(() {});
+  }
+
+  @override
+  void dispose() {
+    AppRouter.instance._setState = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context);
   }
 }
 
@@ -478,7 +504,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
 
   /// Whether the drawer can be opened.
   bool get drawerCanBeOpened {
-    final selectionController = ContentControl.state.selectionNotifier.value;
+    final selectionController = ContentControl.instance.selectionNotifier.value;
     return playerRouteController.closed &&
       (selectionController?.notInSelection ?? true) &&
       (routes.last.hasSameLocation(HomeRoutes.tabs) || routes.last.hasSameLocation(HomeRoutes.search)) &&
@@ -491,7 +517,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   /// 
   /// For example we want that player route would be closed first.
   bool handleNecessaryPop() {
-    final selectionController = ContentControl.state.selectionNotifier.value;
+    final selectionController = ContentControl.instance.selectionNotifier.value;
     if (playerRouteController.opened) {
       if (selectionController != null) {
         selectionController.close();

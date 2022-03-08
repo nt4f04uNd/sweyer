@@ -72,7 +72,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
     });
     if (widget.player == null) {
       // Handle track switch
-      _songChangeSubscription = ContentControl.state.onSongChange.listen((song) {
+      _songChangeSubscription = PlaybackControl.instance.onSongChange.listen((song) {
         setState(() {
           _isDragging = false;
           _localValue = 0.0;

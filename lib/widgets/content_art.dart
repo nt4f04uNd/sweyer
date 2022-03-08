@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:equatable/equatable.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,9 +33,9 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
 /// Whether running on scoped storage, and should use bytes to load album
 /// arts from `MediaStore`.
-bool get _useScopedStorage => ContentControl.sdkInt >= 29;
+bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
 
-class ContentArtSource {
+class ContentArtSource with EquatableMixin {
   const ContentArtSource(Content content) : _content = content;
 
   const ContentArtSource.song(Song song)
@@ -58,6 +59,9 @@ class ContentArtSource {
     : _content = origin;
 
   final Content _content;
+
+  @override
+  List<Object?> get props => [_content];
 }
 
 /// Image that represents the content art.
@@ -419,7 +423,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
         return;
       _signal = CancellationSignal();
       try {
-        _bytes = await ContentChannel.loadAlbumArt(
+        _bytes = await ContentChannel.instance.loadAlbumArt(
           uri: uri,
           size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
@@ -525,7 +529,7 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   Future<void> _recreateArt() async {
     final ablumId = song.albumId;
     if (ablumId != null)
-      await ContentChannel.fixAlbumArt(song.albumId!);
+      await ContentChannel.instance.fixAlbumArt(song.albumId!);
     setLoading(_SourceLoading.loaded);
   }
 
