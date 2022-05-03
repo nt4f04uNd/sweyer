@@ -143,11 +143,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "playlist": "Плейлист",
-  "@playlist": {
-    "type": "text",
-    "placeholders": {}
-  },
   "arbitraryQueue": "Произвольная очередь",
   "@arbitraryQueue": {
     "type": "text",
@@ -432,11 +427,6 @@
   },
   "sort": "Сортировка",
   "@sort": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "artist": "Исполнитель",
-  "@artist": {
     "type": "text",
     "placeholders": {}
   },
