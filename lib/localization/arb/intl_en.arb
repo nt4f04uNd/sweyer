@@ -118,6 +118,17 @@
     "type": "text",
     "placeholders": {}
   },
+  "playlistQueue": "Playlist {name}",
+  "@playlistQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Playlist name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
   "playlists": "Playlists",
   "@playlists": {
     "type": "text",
