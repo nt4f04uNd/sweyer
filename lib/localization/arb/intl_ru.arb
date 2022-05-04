@@ -413,7 +413,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "noMusic": "На вашем устройстве нету музыки",
+  "noMusic": "На вашем устройстве нету музыки :(",
   "@noMusic": {
     "type": "text",
     "placeholders": {}

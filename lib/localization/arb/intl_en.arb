@@ -427,7 +427,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "noMusic": "There's no music on your device",
+  "noMusic": "There's no music on your device :(",
   "@noMusic": {
     "type": "text",
     "placeholders": {}
