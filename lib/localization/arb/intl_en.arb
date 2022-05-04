@@ -663,16 +663,16 @@
     "type": "text",
     "placeholders": {}
   },
-  "searchHistoryRemoveEntryDescriptionP1": "Are you sure you want to remove ",
-  "@searchHistoryRemoveEntryDescriptionP1": {
+  "searchHistoryRemoveEntryDescription": "Are you sure you want to remove {searchText} from your search history?",
+  "@searchHistoryRemoveEntryDescription": {
     "type": "text",
-    "placeholders": {},
-    "description": "The entry is the history entry to delete. The description is being splitted into rich text there."
-  },
-  "searchHistoryRemoveEntryDescriptionP2": " from your search history?",
-  "@searchHistoryRemoveEntryDescriptionP2": {
-    "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "searchText": {
+        "type": "String",
+        "example": "Query"
+      }
+    },
+    "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
   },
   "searchClearHistory": "Clear search history?",
   "@searchClearHistory": {
