@@ -10,7 +10,7 @@
   "@playbackControls": {
     "type": "text",
     "placeholders": {},
-    "description": " Used as notification channel description"
+    "description": "Used as notification channel description"
   },
   "play": "Play",
   "@play": {
