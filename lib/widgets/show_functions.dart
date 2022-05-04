@@ -110,7 +110,7 @@ class ShowFunctions extends NFShowFunctions {
         globalKey: globalKey,
         child: NFSnackbar(
           title: Text(
-            '😮 ' + l10n.oopsErrorOccurred,
+            l10n.oopsErrorOccurred,
             style: TextStyle(
               fontSize: 15.0,
               color: theme.colorScheme.onError,

@@ -679,7 +679,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "oopsErrorOccurred": "Oops! An error occurred",
+  "oopsErrorOccurred": "😮 Oops! An error occurred",
   "@oopsErrorOccurred": {
     "type": "text",
     "placeholders": {}

@@ -660,7 +660,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "oopsErrorOccurred": "Упс! Произошла ошибка",
+  "oopsErrorOccurred": "😮 Упс! Произошла ошибка",
   "@oopsErrorOccurred": {
     "type": "text",
     "placeholders": {}
