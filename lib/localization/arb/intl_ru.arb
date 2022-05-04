@@ -87,6 +87,17 @@
     "type": "text",
     "placeholders": {}
   },
+  "albumQueue": "Альбом {name}",
+  "@albumQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Album name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
   "albums": "Альбомы",
   "@albums": {
     "type": "text",
@@ -401,7 +412,8 @@
         "type": "String",
         "example": "\"Search text\""
       }
-    }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
   },
   "upNext": "Далее",
   "@upNext": {
