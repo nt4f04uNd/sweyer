@@ -178,11 +178,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "byQuery": "По запросу",
-  "@byQuery": {
-    "type": "text",
-    "placeholders": {}
-  },
   "selectedPlural": "Выбранные",
   "@selectedPlural": {
     "type": "text",
@@ -398,10 +393,15 @@
     "type": "text",
     "placeholders": {}
   },
-  "found": "Найдено",
-  "@found": {
+  "foundByQuery": "Найдено По запросу {query}",
+  "@foundByQuery": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "\"Search text\""
+      }
+    }
   },
   "upNext": "Далее",
   "@upNext": {

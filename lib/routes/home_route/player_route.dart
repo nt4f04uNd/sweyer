@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/physics.dart';
+import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -307,8 +308,16 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     throw UnimplementedError();
   }
 
-  List<TextSpan> _getQueueType(AppLocalizations l10n) {
-    final List<TextSpan> text = [];
+  /// The style that should be used for the queue description text in the app bar.
+  TextStyle get _queueDescriptionStyle =>
+      ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
+        fontSize: 14.0,
+        height: 1.0,
+        fontWeight: FontWeight.w700,
+      );
+
+  List<InlineSpan> _getQueueType(AppLocalizations l10n) {
+    final List<InlineSpan> text = [];
     switch (QueueControl.instance.state.type) {
       case QueueType.allSongs:
         text.add(TextSpan(text: l10n.allTracks));
@@ -324,15 +333,20 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         break;
       case QueueType.searched:
         final query = QueueControl.instance.state.searchQuery!;
-        text.add(TextSpan(
-          text: '${l10n.found} ${l10n.byQuery.toLowerCase()} ',
-        ));
-        text.add(TextSpan(
-          text: '"$query"',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: ThemeControl.instance.theme.colorScheme.onBackground,
-          ),
+        text.add(WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              text: l10n.foundByQuery('<query>${l10n.escapeRich('"$query"')}</query>'),
+              tags: {
+                'query': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
+            ),
         ));
         break;
       case QueueType.origin:
@@ -375,16 +389,12 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     return text;
   }
 
-  Text _buildTitleText(List<TextSpan> text) {
+  Text _buildTitleText(List<InlineSpan> text) {
     return Text.rich(
       TextSpan(children: text),
-      key: ValueKey(text.fold<String>('', (prev, el) => prev + el.text!)),
+      key: ValueKey(text.fold<String>('', (prev, el) => prev + el.toPlainText())),
       overflow: TextOverflow.ellipsis,
-      style: ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
-        fontSize: 14.0,
-        height: 1.0,
-        fontWeight: FontWeight.w700,
-      ),
+      style: _queueDescriptionStyle,
     );
   }
 

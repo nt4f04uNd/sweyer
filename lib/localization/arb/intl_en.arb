@@ -183,11 +183,6 @@
     "placeholders": {},
     "description": "NOTE: currently unused"
   },
-  "byQuery": "By query",
-  "@byQuery": {
-    "type": "text",
-    "placeholders": {}
-  },
   "selectedPlural": "Selected",
   "@selectedPlural": {
     "type": "text",
@@ -412,10 +407,15 @@
     "placeholders": {},
     "description": "TODO: currently unused"
   },
-  "found": "Found",
-  "@found": {
+  "foundByQuery": "Found by query {query}",
+  "@foundByQuery": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "\"Search text\""
+      }
+    }
   },
   "upNext": "Up next",
   "@upNext": {
