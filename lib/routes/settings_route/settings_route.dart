@@ -221,7 +221,7 @@ class _FooterState extends State<_Footer> {
           GestureDetector(
             onTap: _handleLicenseTap,
             child: Text(
-              MaterialLocalizations.of(context).licensesPageTitle.toLowerCase(),
+              MaterialLocalizations.of(context).licensesPageTitle,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: ThemeControl.instance.theme.colorScheme.onSurface,
