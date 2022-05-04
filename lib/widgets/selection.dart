@@ -1833,27 +1833,6 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
   }
 }
 
-/// Transforms the [text] so it can be safely embedded in xml. 
-String _escapeXml(String text) {
-  return text.replaceAllMapped(RegExp('["\'&<> ]'), (match) {
-    switch (match.group(0)) {
-      case '"':
-        return '&quot;';
-      case '\'':
-        return '&apos;';
-      case '&':
-        return '&amp;';
-      case '<':
-        return '&lt;';
-      case '>':
-        return '&gt;';
-      case ' ':
-        return '&space;';
-    }
-    throw UnimplementedError('"${match.group(0)}" is not implemented');
-  });
-}
-
 void _showActionConfirmationDialog<E extends Content>({
   required BuildContext context,
   required ContentSelectionController controller,
@@ -1892,7 +1871,7 @@ void _showActionConfirmationDialog<E extends Content>({
                 )
               else
                 StyledText(
-                  text: localizedConfirm(l10n, count, '<bold>${_escapeXml(entry.title)}</bold>'),
+                  text: localizedConfirm(l10n, count, '<bold>${l10n.escapeRich(entry.title)}</bold>'),
                   style: const TextStyle(fontSize: 15.0),
                   tags: {
                     'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),

@@ -102,4 +102,25 @@ extension AppLocalizationsExtension on AppLocalizations {
       },
     )();
   }
+
+  /// Transforms the [text] so it can be safely embedded in a rich text. 
+  String escapeRich(String text) {
+    return text.replaceAllMapped(RegExp('["\'&<> ]'), (match) {
+      switch (match.group(0)) {
+        case '"':
+          return '&quot;';
+        case '\'':
+          return '&apos;';
+        case '&':
+          return '&amp;';
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case ' ':
+          return '&space;';
+      }
+      throw UnimplementedError('"${match.group(0)}" is not implemented');
+    });
+  }
 }
