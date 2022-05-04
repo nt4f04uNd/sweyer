@@ -68,8 +68,25 @@
     "placeholders": {},
     "description": "Label for unknown artist"
   },
+  "track": "Track",
+  "@track": {
+    "type": "text",
+    "placeholders": {}
+  },
   "tracks": "Tracks",
   "@tracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tracksPlural": "{count, plural, =1{{count} track} other{{count} tracks}}",
+  "@tracksPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "album": "Album",
+  "@album": {
     "type": "text",
     "placeholders": {}
   },
@@ -78,8 +95,32 @@
     "type": "text",
     "placeholders": {}
   },
+  "albumsPlural": "{count, plural, =1{{count} album} other{{count} albums}}",
+  "@albumsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "playlist": "Playlist",
+  "@playlist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playlists": "Playlists",
   "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistsPlural": "{count, plural, =1{{count} playlist} other{{count} playlists}}",
+  "@playlistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artist": "Artist",
+  "@artist": {
     "type": "text",
     "placeholders": {}
   },
@@ -88,28 +129,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "tracksPlural": "{count,plural, =0{Tracks}=1{Track}=2{Tracks}few{Tracks}many{Tracks}other{Tracks}}",
-  "@tracksPlural": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "albumsPlural": "{count,plural, =0{Albums}=1{Album}=2{Albums}few{Albums}many{Albums}other{Albums}}",
-  "@albumsPlural": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "playlistsPlural": "{count,plural, =0{Playlists}=1{Playlist}=2{Playlists}few{Playlists}many{Playlists}other{Playlists}}",
-  "@playlistsPlural": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "artistsPlural": "{count,plural, =0{Artists}=1{Artist}=2{Artists}few{Artists}many{Artists}other{Artists}}",
+  "artistsPlural": "{count, plural, =1{{count} artist} other{{count} artists}}",
   "@artistsPlural": {
     "type": "text",
     "placeholders": {

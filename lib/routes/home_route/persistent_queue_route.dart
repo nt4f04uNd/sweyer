@@ -459,7 +459,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   if (isAlbum)
                                     album.year
                                   else
-                                    l10n.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
+                                    l10n.contentsPlural<Song>(queue.length),
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(

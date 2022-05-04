@@ -65,8 +65,25 @@
     "type": "text",
     "placeholders": {}
   },
+  "track": "Трек",
+  "@track": {
+    "type": "text",
+    "placeholders": {}
+  },
   "tracks": "Треки",
   "@tracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tracksPlural": "{count, plural, =1{{count} Трек} other{{count} Трека}}",
+  "@tracksPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "album": "Альбом",
+  "@album": {
     "type": "text",
     "placeholders": {}
   },
@@ -75,8 +92,32 @@
     "type": "text",
     "placeholders": {}
   },
+  "albumsPlural": "{count, plural, =1{{count} Альбом} other{{count} Альбома}}",
+  "@albumsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "playlist": "Плейлист",
+  "@playlist": {
+    "type": "text",
+    "placeholders": {}
+  },
   "playlists": "Плейлисты",
   "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistsPlural": "{count, plural, =1{{count} Плейлист} other{{count} Плейлиста}}",
+  "@playlistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artist": "Исполнитель",
+  "@artist": {
     "type": "text",
     "placeholders": {}
   },
@@ -85,28 +126,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "tracksPlural": "{count,plural, =0{Треков}=1{Трек}=2{Трека}few{Трека}many{Треков}other{Трека}}",
-  "@tracksPlural": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "albumsPlural": "{count,plural, =0{Альбомов}=1{Альбом}=2{Альбома}few{Альбома}many{Альбомов}other{Альбома}}",
-  "@albumsPlural": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "playlistsPlural": "{count,plural, =0{Плейлистов}=1{Плейлист}=2{Плейлиста}few{Плейлиста}many{Плейлистов}other{Плейлиста}}",
-  "@playlistsPlural": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "artistsPlural": "{count,plural, =0{Исполнителей}=1{Исполнитель}=2{Исполнителя}few{Исполнителя}many{Исполнителей}other{Исполнителя}}",
+  "artistsPlural": "{count, plural, =1{{count} Исполнитель} other{{count} Исполнителя}}",
   "@artistsPlural": {
     "type": "text",
     "placeholders": {

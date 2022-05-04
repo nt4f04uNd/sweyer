@@ -148,7 +148,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
     } else if (queue is Playlist) {
       final l10n = getl10n(context);
       children.add(Text(
-        l10n.contentsPluralWithCount<Song>(queue.length),
+        l10n.contentsPlural<Song>(queue.length),
         style: theme.textTheme.subtitle2!.merge(const TextStyle(fontSize: 14.0, height: 1.0)),
       ));
     }

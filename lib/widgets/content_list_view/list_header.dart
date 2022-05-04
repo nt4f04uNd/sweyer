@@ -136,7 +136,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, right: 10.0),
       child: Text(
-        l10n.contentsPluralWithCount<T>(count, contentType),
+        l10n.contentsPlural<T>(count, contentType),
         softWrap: false,
         overflow: TextOverflow.fade,
         style: textStyle,
