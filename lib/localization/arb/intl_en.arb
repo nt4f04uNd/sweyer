@@ -298,10 +298,11 @@
     "type": "text",
     "placeholders": {}
   },
-  "add": "Add",
-  "@add": {
+  "addTracks": "Add tracks",
+  "@addTracks": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "The title for the + button in the playlist screen"
   },
   "remove": "Remove",
   "@remove": {

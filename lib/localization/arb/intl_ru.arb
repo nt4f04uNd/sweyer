@@ -285,10 +285,11 @@
     "type": "text",
     "placeholders": {}
   },
-  "add": "Добавить",
-  "@add": {
+  "addTracks": "Добавить Трека",
+  "@addTracks": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "The title for the + button in the playlist screen"
   },
   "remove": "Убрать",
   "@remove": {

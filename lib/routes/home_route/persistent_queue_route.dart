@@ -691,7 +691,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               child: InListContentAction.song(
                                 onTap: editing || selectionController.inSelection ? null : _handleAddTracks,
                                 icon: Icons.add_rounded,
-                                text: '${l10n.add} ${l10n.tracks.toLowerCase()}',
+                                text: l10n.addTracks,
                               ),
                             ),
                         ],
