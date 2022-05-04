@@ -146,6 +146,17 @@
     "type": "text",
     "placeholders": {}
   },
+  "artistQueue": "Artist {name}",
+  "@artistQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Artist name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
   "artists": "Artists",
   "@artists": {
     "type": "text",

@@ -384,12 +384,19 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             ),
           ));
         } else if (origin is Artist) {
-          text.add(TextSpan(text: '${l10n.artist} '));
-          text.add(TextSpan(
-            text: ContentUtils.localizedArtist(origin.artist, l10n),
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.instance.theme.colorScheme.onBackground,
+          text.add(WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              text: l10n.artistQueue('<name>${l10n.escapeRich(ContentUtils.localizedArtist(origin.artist, l10n))}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
             ),
           ));
         } else {
