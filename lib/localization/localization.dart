@@ -57,7 +57,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           case SongSortFeature.artist:
             return artist;
           case SongSortFeature.album:
-            return albumsPlural(1);
+            return album;
           default:
             throw UnimplementedError();
         }
