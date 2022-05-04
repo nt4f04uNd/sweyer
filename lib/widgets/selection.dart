@@ -1165,13 +1165,9 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
       key: key,
       childKey: ValueKey(selectionCount),
       valueIncreased: controller.lengthIncreased,
-      child: Container(
-        /// Line up width with other actions, so they animate identically with [EmergeAnimation]
-        constraints: const BoxConstraints(minWidth: NFConstants.iconButtonSize),
-        child: Text(
-          selectionCount.toString(),
-          style: widget.textStyle ?? appBarTitleTextStyle,
-        ),
+      child: Text(
+        selectionCount.toString(),
+        style: widget.textStyle ?? appBarTitleTextStyle,
       ),
     );
   }
