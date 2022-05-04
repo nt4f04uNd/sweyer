@@ -401,11 +401,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "almostThere": "You're almost there",
-  "@almostThere": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pressOnceAgainToExit": "Press once again to exit",
   "@pressOnceAgainToExit": {
     "type": "text",
@@ -545,19 +540,13 @@
     "placeholders": {},
     "description": "Shown when user tapped 4 times on app logo"
   },
-  "onThePathToDevModeLastClick": "only 1 click remaining...",
-  "@onThePathToDevModeLastClick": {
-    "type": "text",
-    "placeholders": {},
-    "description": "Shown when user is about to become a developer, part 2"
-  },
-  "onThePathToDevModeClicksRemaining": "only {remainingClicks} clicks remaining...",
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{You're almost there, only 1 click remaining...} other{You're almost there, only {remainingClicks} clicks remaining...}}",
   "@onThePathToDevModeClicksRemaining": {
     "type": "text",
     "placeholders": {
       "remainingClicks": {}
     },
-    "description": "Shown when user is about to become a developer, part 2, plural"
+    "description": "Shown when user is about to become a developer, part 2"
   },
   "devTestToast": "Test toast",
   "@devTestToast": {

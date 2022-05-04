@@ -152,9 +152,7 @@ class _FooterState extends State<_Footer> {
           important: true,
           child: NFSnackbar(
             title: Text(
-              l10n.almostThere + ', ' + (remainingClicks == 1
-                      ? l10n.onThePathToDevModeLastClick
-                      : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
+              l10n.onThePathToDevModeClicksRemaining(remainingClicks),
               style: textStyle,
             ),
             color: Constants.AppColors.androidGreen,

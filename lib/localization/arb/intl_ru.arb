@@ -387,11 +387,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "almostThere": "Вы почти у цели",
-  "@almostThere": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pressOnceAgainToExit": "Нажмите еще раз для выхода",
   "@pressOnceAgainToExit": {
     "type": "text",
@@ -527,12 +522,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "onThePathToDevModeLastClick": "остался всего 1 клик...",
-  "@onThePathToDevModeLastClick": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "onThePathToDevModeClicksRemaining": "осталось всего {remainingClicks} клика...",
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Вы почти у цели, остался всего 1 клик...} other{Вы почти у цели, осталось всего {remainingClicks} клика...}}",
   "@onThePathToDevModeClicksRemaining": {
     "type": "text",
     "placeholders": {
