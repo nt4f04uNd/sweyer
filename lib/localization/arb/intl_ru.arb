@@ -96,7 +96,7 @@
         "example": "Album name"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
   },
   "albums": "Альбомы",
   "@albums": {
@@ -124,7 +124,7 @@
         "example": "Playlist name"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
   },
   "playlists": "Плейлисты",
   "@playlists": {
@@ -152,7 +152,7 @@
         "example": "Artist name"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
   },
   "artists": "Исполнители",
   "@artists": {
@@ -341,7 +341,7 @@
         "example": "Track Name"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
   "delete": "Удалить",
   "@delete": {
@@ -365,7 +365,7 @@
         "example": "Track Name"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
   "deletePlaylists": "{count, plural, =1{Удалить Плейлист} other{Удалить {count} Плейлиста}}",
   "@deletePlaylists": {
@@ -384,7 +384,7 @@
         "example": "Playlist Name"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
   "deletion": "Удаление",
   "@deletion": {
@@ -435,7 +435,7 @@
         "example": "\"Search text\""
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
   },
   "upNext": "Далее",
   "@upNext": {
@@ -653,7 +653,7 @@
         "example": "Query"
       }
     },
-    "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+    "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped: All quotes and &<>"
   },
   "searchClearHistory": "Очистить историю поиска?",
   "@searchClearHistory": {
