@@ -689,5 +689,10 @@
   "@copied": {
     "type": "text",
     "placeholders": {}
+  },
+  "gitHubRepo": "GitHub repo",
+  "@gitHubRepo": {
+    "type": "text",
+    "placeholders": {}
   }
 }

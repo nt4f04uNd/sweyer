@@ -211,7 +211,7 @@ class _FooterState extends State<_Footer> {
           GestureDetector(
             onTap: _handleGithubTap,
             child: Text(
-              'github repo',
+              getl10n(context).gitHubRepo,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: ThemeControl.instance.theme.colorScheme.onSurface,
