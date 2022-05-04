@@ -404,8 +404,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "edit": "Edit",
-  "@edit": {
+  "editPlaylist": "Edit playlist",
+  "@editPlaylist": {
     "type": "text",
     "placeholders": {}
   },

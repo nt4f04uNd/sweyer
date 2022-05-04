@@ -1581,7 +1581,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
-          tooltip: "${l10n.edit} ${l10n.playlist.toLowerCase()}",
+          tooltip: l10n.editPlaylist,
           icon: const Icon(Icons.edit_rounded, size: 21.0),
           // iconSize: 23.0,
           onPressed: () => _handleTap(controller),

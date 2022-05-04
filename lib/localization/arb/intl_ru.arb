@@ -391,8 +391,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "edit": "Изменить",
-  "@edit": {
+  "editPlaylist": "Изменить Плейлист",
+  "@editPlaylist": {
     "type": "text",
     "placeholders": {}
   },
