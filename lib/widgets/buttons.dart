@@ -232,6 +232,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       widget.text,
       maxLines: 1,
       softWrap: false,
+      overflow: TextOverflow.ellipsis,
     );
   }
 
@@ -265,11 +266,12 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             children: [
               widget.icon!,
               const SizedBox(width: 6.0),
-               Padding(
-                padding: const EdgeInsets.only(bottom: 1.0),
-                child: _buildText(),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 1.0),
+                  child: _buildText(),
+                ),
               ),
-              const SizedBox(width: 8.0),
             ],
           );
   }
