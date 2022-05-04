@@ -447,10 +447,15 @@
     "type": "text",
     "placeholders": {}
   },
-  "selected": "Selected",
+  "selected": "Selected {counter}",
   "@selected": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "counter": {
+        "type": "String",
+        "example": "1"
+      }
+    }
   },
   "actions": "Actions",
   "@actions": {

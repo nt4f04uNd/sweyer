@@ -433,10 +433,15 @@
      "type": "text",
      "placeholders": {}
   },
-  "selected": "Выбрано",
+  "selected": "Выбрано {counter}",
   "@selected": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "counter": {
+        "type": "String",
+        "example": "1"
+      }
+    }
   },
   "actions": "Действия",
   "@actions": {

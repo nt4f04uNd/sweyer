@@ -1044,6 +1044,16 @@ class _ActionsSelectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
+    final Widget counterWidget = EmergeAnimation(
+      animation: controller.animation,
+      child: Padding(
+          padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
+          child: const SelectionCounter(textStyle: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 19.0,
+          ))
+      ),
+    );
     return Row(
       children: [
         if (closeButton)
@@ -1059,32 +1069,26 @@ class _ActionsSelectionTitle extends StatelessWidget {
           ),
         if (selectedTitle && counter)
           Padding(
-            padding: EdgeInsets.only(bottom: 2.0, left: closeButton ? 12.0 : 30.0),
+            padding: EdgeInsets.only(bottom: 4.0, left: closeButton ? 12.0 : 30.0),
             child: EmergeAnimation(
               animation: controller.animation,
-              child: Text(
-                l10n.selected,
+              child: StyledText(
+                text: l10n.selected('<counter/>'),
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17.0),
+                tags: {
+                  'counter': StyledTextWidgetTag(Padding(
+                    padding: const EdgeInsets.only(top: 2, left: 7.0, right: 7.0),
+                    child: counterWidget,
+                  )),
+                },
               ),
             ),
           ),
-        if (counter)
+        if (!selectedTitle && counter)
           Padding(
-            padding: EdgeInsets.only(
-              left: counter ? 10.0 : 8.0,
-              bottom: 2.0
-            ),
-            child: EmergeAnimation(
-              animation: controller.animation,
-              child: Padding(
-                padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
-                child: const SelectionCounter(textStyle: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 19.0,
-                ))
-              ),
-            ),
-          ),
+            padding: EdgeInsets.only(left: counter ? 10.0 : 8.0, bottom: 2.0),
+            child: counterWidget,
+          )
       ],
     );
   }
