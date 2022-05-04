@@ -98,7 +98,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         child: Builder( // i need the proper context to pop the dialog
           builder: (context) => _RadioListTile<SortFeature>(
             title: Text(
-              l10n.sortFeature<T>(feature as SortFeature<T>, contentType).toLowerCase(),
+              l10n.sortFeature<T>(feature as SortFeature<T>, contentType),
               style: ThemeControl.instance.theme.textTheme.subtitle1,
             ),
             value: feature,
