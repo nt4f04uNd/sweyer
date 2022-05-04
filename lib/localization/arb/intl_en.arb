@@ -216,11 +216,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "areYouSureYouWantTo": "Are you sure you want to",
-  "@areYouSureYouWantTo": {
-    "type": "text",
-    "placeholders": {}
-  },
   "reset": "Reset",
   "@reset": {
     "type": "text",
@@ -293,10 +288,67 @@
     "type": "text",
     "placeholders": {}
   },
+  "removeTracks": "{count, plural, =1{Remove track} other{Remove {count} tracks}}",
+  "@removeTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "removeTracksConfirmation": "{count, plural, =1{Are you sure you want to remove {title}?} other{Are you sure you want to remove selected tracks?}}",
+  "@removeTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
   "delete": "Delete",
   "@delete": {
     "type": "text",
     "placeholders": {}
+  },
+  "deleteTracks": "{count, plural, =1{Delete track} other{Delete {count} tracks}}",
+  "@deleteTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteTracksConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected tracks?}}",
+  "@deleteTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
+  "deletePlaylists": "{count, plural, =1{Delete playlist} other{Delete {count} playlists}}",
+  "@deletePlaylists": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deletePlaylistsConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected playlists?}}",
+  "@deletePlaylistsConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Playlist Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
   },
   "deletion": "Deletion",
   "@deletion": {

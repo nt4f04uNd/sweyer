@@ -208,11 +208,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "areYouSureYouWantTo": "Вы точно хотите",
-  "@areYouSureYouWantTo": {
-    "type": "text",
-    "placeholders": {}
-  },
   "reset": "Сбросить",
   "@reset": {
     "type": "text",
@@ -280,10 +275,67 @@
     "type": "text",
     "placeholders": {}
   },
+  "removeTracks": "{count, plural, =1{Убрать Трек} other{Убрать {count} Трека}}",
+  "@removeTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "removeTracksConfirmation": "{count, plural, =1{Вы точно хотите Убрать {title}?} other{Вы точно хотите Убрать Выбрано Трека?}}",
+  "@removeTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
   "delete": "Удалить",
   "@delete": {
     "type": "text",
     "placeholders": {}
+  },
+  "deleteTracks": "{count, plural, =1{Удалить Трек} other{Удалить {count} Трека}}",
+  "@deleteTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteTracksConfirmation": "{count, plural, =1{Вы точно хотите Удалить {title}?} other{Вы точно хотите Удалить Выбрано Трека?}}",
+  "@deleteTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
+  },
+  "deletePlaylists": "{count, plural, =1{Удалить Плейлист} other{Удалить {count} Плейлиста}}",
+  "@deletePlaylists": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deletePlaylistsConfirmation": "{count, plural, =1{Вы точно хотите Удалить {title}?} other{Вы точно хотите Удалить Выбрано Плейлиста?}}",
+  "@deletePlaylistsConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Playlist Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>]"
   },
   "deletion": "Удаление",
   "@deletion": {
