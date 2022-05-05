@@ -5,4 +5,6 @@ jobs:
   build:
     uses: ./.github/workflows/flutter_package.yml
     with:
+      flutter_channel: stable
+      flutter_version: 2.10.5
       min_coverage: 0
