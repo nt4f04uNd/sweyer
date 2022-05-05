@@ -134,6 +134,7 @@ abstract class ThemeControl {
     Constants.Theme.app = Constants.Theme.app.copyWith(
       light: Constants.Theme.app.light.copyWith(
         primaryColor: color,
+        toggleableActiveColor: color,
         colorScheme: Constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
@@ -157,6 +158,7 @@ abstract class ThemeControl {
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,
+        toggleableActiveColor: color,
         colorScheme: Constants.Theme.app.dark.colorScheme.copyWith(
           primary: color,
         ),

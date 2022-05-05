@@ -21,7 +21,15 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
       ),
       body: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        children: const [
+        children: [
+          ValueListenableBuilder<bool>(
+            valueListenable: Prefs.confirmExitingWithBackButton,
+            builder: (context, value, child) => SwitchListTile(
+              title: Text(l10n.confirmExitingWithBackButtonSetting),
+              value: value,
+              onChanged: Prefs.confirmExitingWithBackButton.set,
+            ),
+          ),
           // _MinFileDurationSlider(
           //   initValue: minFileDuration,
           // ),

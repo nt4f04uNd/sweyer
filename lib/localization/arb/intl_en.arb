@@ -607,5 +607,10 @@
   "@openAppSettingsError": {
     "type": "text",
     "placeholders": {}
+  },
+  "confirmExitingWithBackButtonSetting": "Confirm exiting with back button",
+  "@confirmExitingWithBackButtonSetting": {
+    "type": "text",
+    "placeholders": {}
   }
 }

@@ -586,5 +586,10 @@
   "@openAppSettingsError": {
      "type": "text",
      "placeholders": {}
+  },
+  "confirmExitingWithBackButtonSetting": "Подтверждать выход кнопкой назад",
+  "@confirmExitingWithBackButtonSetting": {
+    "type": "text",
+    "placeholders": {}
   }
 }
