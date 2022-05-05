@@ -109,7 +109,7 @@ void main() {
       // Change sort feature
       await tester.tap(find.text(l10n.sortFeature<Song>(SongSortFeature.dateModified)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.sortFeature<Song>(SongSortFeature.title).toLowerCase()));
+      await tester.tap(find.text(l10n.sortFeature<Song>(SongSortFeature.title)));
       await tester.pump();
       tester.expectSongTiles(songs.reversed);
     });
@@ -128,7 +128,7 @@ void main() {
     });
     await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
-      expect(find.text('3 ${l10n.tracksPlural(3).toLowerCase()}'), findsOneWidget);
+      expect(find.text(l10n.tracksPlural(3)), findsOneWidget);
 
       // Change songs length
       ContentControl.instance.state.allSongs.songs.removeLast();
@@ -136,7 +136,7 @@ void main() {
       await tester.pump();
 
       tester.expectSongTiles(songs.toList()..removeLast());
-      expect(find.text('2 ${l10n.tracksPlural(2).toLowerCase()}'), findsOneWidget);
+      expect(find.text(l10n.tracksPlural(2)), findsOneWidget);
     });
   });
 }
