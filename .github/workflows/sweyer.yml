@@ -1,5 +1,5 @@
-name: sweyer
-on: push
+name: Sweyer
+on: [push, pull_request]
 
 jobs:
   build:
