@@ -22,11 +22,11 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
       body: ListView(
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          ValueListenableBuilder(
+          ValueListenableBuilder<bool>(
             valueListenable: Prefs.confirmOnExit,
             builder: (context, value, child) => SwitchListTile(
               title: Text(l10n.confirmBeforeExitingSetting),
-              value: Prefs.confirmOnExit.get(),
+              value: value,
               onChanged: Prefs.confirmOnExit.set,
             ),
           ),
