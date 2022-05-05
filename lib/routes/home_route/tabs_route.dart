@@ -152,7 +152,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       return true;
     }
 
-    if (!selectionRoute) {
+    if (!selectionRoute && Prefs.confirmOnExit.get()) {
       final now = DateTime.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app

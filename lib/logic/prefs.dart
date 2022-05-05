@@ -85,6 +85,9 @@ abstract class Prefs {
   /// * error snackbars are shown
   /// * song info button available in the top right menu of [PlayerRoute].
   static final devMode = PrefNotifier(const BoolPref('dev_mode', false));
+  
+  /// Whether a confirmation toast should be displayed when exiting the app. 
+  static final confirmOnExit = PrefNotifier(const BoolPref('confirm_app_exit', true));
 }
 
 class SearchHistory {
