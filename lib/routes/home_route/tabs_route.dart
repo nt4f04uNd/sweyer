@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:clock/clock.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -153,7 +154,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     }
 
     if (!selectionRoute && Prefs.confirmExitingWithBackButton.get()) {
-      final now = DateTime.now();
+      final now = clock.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
       if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
