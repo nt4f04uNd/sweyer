@@ -6,6 +6,7 @@ abstract class Config {
   static const List<Locale> supportedLocales = [
     Locale('en', 'US'),
     Locale('ru', 'RU'),
+    Locale('de', 'DE'),
   ];
   static const int SEARCH_HISTORY_LENGTH = 30;
   

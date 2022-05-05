@@ -1,0 +1,746 @@
+{
+  "playback": "Wiedergabe",
+  "@playback": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Wird als Name für den Benachrichtigungskanal in den Einstellungen benutzt"
+  },
+  "playbackControls": "Wiedergabesteuerung",
+  "@playbackControls": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Wird als Beschreibung für den Benachrichtigungskanal in den Einstellungen benutzt"
+  },
+  "play": "Wiedergeben",
+  "@play": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pause": "Pause",
+  "@pause": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "stop": "Stop",
+  "@stop": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "next": "Nächstes",
+  "@next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "previous": "Vorherige",
+  "@previous": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOff": "Wiederholen aus",
+  "@loopOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loopOn": "Wiederholen an",
+  "@loopOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "search": "Suche",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffleAll": "Alle zufällig wiedergeben",
+  "@shuffleAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playRecent": "Kürzliche wiedergeben",
+  "@playRecent": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistUnknown": "Unbekannter Künstler",
+  "@artistUnknown": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Bezeichnung für einen unbekannten Künstler"
+  },
+  "track": "Lied",
+  "@track": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tracks": "Lieder",
+  "@tracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tracksPlural": "{count, plural, =1{{count} Lied} other{{count} Lieder}}",
+  "@tracksPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "album": "Album",
+  "@album": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "albumQueue": "Album {name}",
+  "@albumQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Albumname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "albums": "Alben",
+  "@albums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "albumsPlural": "{count, plural, =1{{count} Album} other{{count} Alben}}",
+  "@albumsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "playlist": "Wiedergabeliste",
+  "@playlist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistQueue": "Wiedergabeliste {name}",
+  "@playlistQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Wiedergablelistenname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "playlists": "Wiedergabelisten",
+  "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistsPlural": "{count, plural, =1{{count} Wiedergabeliste} other{{count} Wiedergabelisten}}",
+  "@playlistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artist": "Künstler",
+  "@artist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistQueue": "Künstler {name}",
+  "@artistQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Artist name"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "artists": "Künstler",
+  "@artists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistsPlural": "{count, plural, other{{count} Künstler}}",
+  "@artistsPlural": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "albumNotFound": "Album nicht gefunden",
+  "@albumNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistNotFound": "Künstler nicht gefunden",
+  "@artistNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allTracks": "Alle Lieder",
+  "@allTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allAlbums": "Alle Alben",
+  "@allAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allPlaylists": "Alle Wiedergabelisten",
+  "@allPlaylists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allArtists": "Alle Künstler",
+  "@allArtists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "arbitraryQueue": "Zufällige Abspielliste",
+  "@arbitraryQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shuffled": "Zufällig",
+  "@shuffled": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Notiz: Momentan unbenutzt"
+  },
+  "modified": "Verändert",
+  "@modified": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Notiz: Momentan unbenutzt"
+  },
+  "selectedPlural": "Ausgewählte",
+  "@selectedPlural": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Sollte im Plural sein"
+  },
+  "newPlaylist": "Neue Wiedergabeliste",
+  "@newPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "trackAfterWhichToInsert": "Hinter diesem Lied einfügen",
+  "@trackAfterWhichToInsert": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "insertAtTheBeginning": "Am Anfang einfügen",
+  "@insertAtTheBeginning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saveQueueAsPlaylist": "Als Wiedergabeliste speichern",
+  "@saveQueueAsPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playContentList": "Wiedergeben",
+  "@playContentList": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Name der Wiedergabetaste"
+  },
+  "shuffleContentList": "Zufallswiedergabe",
+  "@shuffleContentList": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Name der zufälligen Wiedergabetaste"
+  },
+  "debug": "Debug",
+  "@debug": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "areYouSure": "Bist du sicher?",
+  "@areYouSure": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "reset": "Zurücksetzen",
+  "@reset": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "save": "Speichern",
+  "@save": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saved": "Gespeichert",
+  "@saved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "view": "Ansicht",
+  "@view": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "secondsShorthand": "s",
+  "@secondsShorthand": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "minutesShorthand": "min",
+  "@minutesShorthand": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "and": "Und",
+  "@and": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "more": "Mehr",
+  "@more": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "andNMore": "Und {count} weitere",
+  "@andNMore": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    },
+    "description": "Beispiel: 'Und 3 weitere'"
+  },
+  "done": "Fertig",
+  "@done": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "create": "Erstellen",
+  "@create": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addTracks": "Lieder hinzufügen",
+  "@addTracks": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Der Titel für die + Taste in der Wiedergabelistenanzeige"
+  },
+  "remove": "Entfernen",
+  "@remove": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeTracks": "{count, plural, =1{Lied entfernen} other{{count} Lieder entfernen}}",
+  "@removeTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "removeTracksConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} entfernen möchtest?} other{Bist du sicher, dass du die ausgewählten Lieder entfernen möchtest?}}",
+  "@removeTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Lied Name"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen für die Singular-Version dieser Übersetzung xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "delete": "Löschen",
+  "@delete": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deleteTracks": "{count, plural, =1{Lied löschen} other{{count} Lieder löschen}}",
+  "@deleteTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteTracksConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} löschen möchtest?} other{Bist du sicher, dass du die ausgewählten Lieder löschen möchtest?}}",
+  "@deleteTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Liedname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen für die Singular-Version dieser Übersetzung xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "deletePlaylists": "{count, plural, =1{Wiedergabeliste löschen} other{{count} Wiedergabelisten löschen}}",
+  "@deletePlaylists": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deletePlaylistsConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} löschen möchtest?} other{Bist du sicher, dass du die ausgewählten Wiedergabelisten löschen möchtest?}}",
+  "@deletePlaylistsConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Wiedergabelistenname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen für die Singular-Version dieser Übersetzung xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "deletion": "Löschung",
+  "@deletion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editPlaylist": "Wiedergabeliste bearbeiten",
+  "@editPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "refresh": "Aktualisieren",
+  "@refresh": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "grant": "Erlauben",
+  "@grant": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "nothingHere": "Hier ist noch nichts",
+  "@nothingHere": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "details": "Details",
+  "@details": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "songInformation": "Lied Informationen",
+  "@songInformation": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editMetadata": "Metadaten bearbeiten",
+  "@editMetadata": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "foundByQuery": "Durch Suche nach {query} gefunden",
+  "@foundByQuery": {
+    "type": "text",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "\"Suchtext\""
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "upNext": "Als Nächstes",
+  "@upNext": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pressOnceAgainToExit": "Nochmal drücken zum Verlassen",
+  "@pressOnceAgainToExit": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noMusic": "Es gibt keine Musik auf deinem Gerät :(",
+  "@noMusic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchingForTracks": "Suche nach Liedern...",
+  "@searchingForTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allowAccessToExternalStorage": "Bitte erlaube den Zugriff auf den Speicher",
+  "@allowAccessToExternalStorage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allowAccessToExternalStorageManually": "Erlaube den Zugriff auf den Speicher manuell",
+  "@allowAccessToExternalStorageManually": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selected": "{counter} ausgewählt",
+  "@selected": {
+    "type": "text",
+    "placeholders": {
+      "counter": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "actions": "Aktionen",
+  "@actions": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "goToAlbum": "Gehe zum Album",
+  "@goToAlbum": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "goToArtist": "Gehe zum Künstler",
+  "@goToArtist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playNext": "Als Nächstes wiedergeben",
+  "@playNext": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToPlaylist": "Zur Wiedergabeliste hinzufügen",
+  "@addToPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromPlaylist": "Aus Wiedergabeliste entfernen",
+  "@removeFromPlaylist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "addToFavorites": "Zu Favoriten hinzufügen",
+  "@addToFavorites": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "addToQueue": "Zur Abspielliste hinzufügen",
+  "@addToQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeFromQueue": "Aus Abspielliste entfernen",
+  "@removeFromQueue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "share": "Teilen",
+  "@share": {
+    "type": "text",
+    "placeholders": {},
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "selectAll": "Alle auswählen",
+  "@selectAll": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sort": "Sortieren",
+  "@sort": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "title": "Titel",
+  "@title": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "name": "Name",
+  "@name": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "dateModified": "Änderungsdatum",
+  "@dateModified": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "dateAdded": "Hinzufügungsdatum",
+  "@dateAdded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "year": "Jahr",
+  "@year": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "numberOfTracks": "Anzahl der Lieder",
+  "@numberOfTracks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "numberOfAlbums": "Anzahl der Alben",
+  "@numberOfAlbums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devModeGreet": "Fertig! Du bist jetzt ein Entwickler",
+  "@devModeGreet": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onThePathToDevMode": "Etwas sollte jetzt passieren...",
+  "@onThePathToDevMode": {
+    "type": "text",
+    "placeholders": {},
+    "description": "Wird angezeigt, wenn der Nutzer 4 mal auf das Logo der App klickt"
+  },
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Du bist fast da, nur noch 1 Klick verbleibend...} other{Du bist fast da, nur noch {remainingClicks} Klicks verbleibend...}}",
+  "@onThePathToDevModeClicksRemaining": {
+    "type": "text",
+    "placeholders": {
+      "remainingClicks": {}
+    },
+    "description": "Wird angezeigt, wenn der Nutzer dabei ist, ein Entwickler zu werden, Part 2"
+  },
+  "devTestToast": "Popup testen",
+  "@devTestToast": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "devAnimationsSlowMo": "Verlangsame Animationen",
+  "@devAnimationsSlowMo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "quitDevMode": "Verlasse den Entwicklermodus",
+  "@quitDevMode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "quitDevModeDescription": "Entwicklermodus verlassen?",
+  "@quitDevModeDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "settings": "Einstellungen",
+  "@settings": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "general": "Allgemein",
+  "@general": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "theme": "Design",
+  "@theme": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "settingLightMode": "Heller Modus",
+  "@settingLightMode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistory": "Suchverlauf",
+  "@searchHistory": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistoryPlaceholder": "Dein Suchverlauf wird hier angezeigt",
+  "@searchHistoryPlaceholder": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchNothingFound": "Nichts gefunden",
+  "@searchNothingFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchHistoryRemoveEntryDescription": "Willst du {searchText} wirklich aus dem Suchverlauf entfernen?",
+  "@searchHistoryRemoveEntryDescription": {
+    "type": "text",
+    "placeholders": {
+      "searchText": {
+        "type": "String",
+        "example": "Suchtext"
+      }
+    },
+    "description": "searchText ist der Suchverlaufseintrag, der entfernt werdens soll. Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "searchClearHistory": "Suchverlauf löschen?",
+  "@searchClearHistory": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "oopsErrorOccurred": "😮 Ups! Es ist ein Fehler aufgetreten",
+  "@oopsErrorOccurred": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorDetails": "Fehlerdetails",
+  "@errorDetails": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deletionError": "Fehler beim Löschen",
+  "@deletionError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistDoesNotExistError": "Die Wiedergabeliste wurde nicht gefunden, vielleicht ist sie entfernt worden",
+  "@playlistDoesNotExistError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playbackError": "Während der Wiedergabe ist ein Fehler aufgetreten",
+  "@playbackError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openAppSettingsError": "Fehler beim Öffnen der App Einstellungen",
+  "@openAppSettingsError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "confirmExitingWithBackButtonSetting": "Bestätige das Verlassen der App mit der Zurück-Taste",
+  "@confirmExitingWithBackButtonSetting": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "warning": "Warnung",
+  "@warning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "close": "Schließen",
+  "@close": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "accept": "Akzeptieren",
+  "@accept": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "cancel": "Abbrechen",
+  "@cancel": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "copied": "Kopiert",
+  "@copied": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "gitHubRepo": "GitHub Repository",
+  "@gitHubRepo": {
+    "type": "text",
+    "placeholders": {}
+  }
+}
