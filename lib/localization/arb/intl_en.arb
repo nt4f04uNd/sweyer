@@ -608,8 +608,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "confirmBeforeExitingSetting": "Confirm exiting with back button",
-  "@confirmBeforeExitingSetting": {
+  "confirmExitingWithBackButtonSetting": "Confirm exiting with back button",
+  "@confirmExitingWithBackButtonSetting": {
     "type": "text",
     "placeholders": {}
   }

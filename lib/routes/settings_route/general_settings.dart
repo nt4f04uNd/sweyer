@@ -23,11 +23,11 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           ValueListenableBuilder<bool>(
-            valueListenable: Prefs.confirmOnExit,
+            valueListenable: Prefs.confirmExitingWithBackButton,
             builder: (context, value, child) => SwitchListTile(
-              title: Text(l10n.confirmBeforeExitingSetting),
+              title: Text(l10n.confirmExitingWithBackButtonSetting),
               value: value,
-              onChanged: Prefs.confirmOnExit.set,
+              onChanged: Prefs.confirmExitingWithBackButton.set,
             ),
           ),
           // _MinFileDurationSlider(

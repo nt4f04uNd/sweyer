@@ -587,8 +587,8 @@
      "type": "text",
      "placeholders": {}
   },
-  "confirmBeforeExitingSetting": "Подтверждать выход кнопкой назад",
-  "@confirmBeforeExitingSetting": {
+  "confirmExitingWithBackButtonSetting": "Подтверждать выход кнопкой назад",
+  "@confirmExitingWithBackButtonSetting": {
     "type": "text",
     "placeholders": {}
   }
