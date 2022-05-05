@@ -7,8 +7,6 @@ import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// import 'general_settings.dart';
-// import 'licenses_route.dart';
 
 class SettingsRoute extends StatefulWidget {
   const SettingsRoute({Key? key}) : super(key: key);
@@ -17,9 +15,9 @@ class SettingsRoute extends StatefulWidget {
 }
 
 class _SettingsRouteState extends State<SettingsRoute> {
-  // void _handleClickGeneralSettings() {
-  //   _pushRoute(const GeneralSettingsRoute());
-  // }
+  void _handleClickGeneralSettings() {
+    AppRouter.instance.goto(AppRoutes.generalSettings);
+  }
 
   void _handleClickThemeSettings() {
     AppRouter.instance.goto(AppRoutes.themeSettings);
@@ -42,13 +40,13 @@ class _SettingsRouteState extends State<SettingsRoute> {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(top: 10.0),
               children: <Widget>[
-                // MenuItem(
-                //   l10n.general,
-                //   icon: Icons.menu_book_rounded,
-                //   iconSize: 25.0,
-                //   fontSize: 16.0,
-                //   onTap: _handleClickGeneralSettings,
-                // ),
+                MenuItem(
+                  l10n.general,
+                  icon: Icons.build,
+                  iconSize: 25.0,
+                  fontSize: 16.0,
+                  onTap: _handleClickGeneralSettings,
+                ),
                 MenuItem(
                   l10n.theme,
                   icon: Icons.palette_rounded,

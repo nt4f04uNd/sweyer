@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide LicensePage;
 import 'package:equatable/equatable.dart';
+import 'package:sweyer/routes/settings_route/general_settings.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -58,6 +59,7 @@ class AppRoutes<T> extends _Routes<T> {
 
   static const initial = AppRoutes<void>._('/');
   static const settings = AppRoutes<void>._('/settings');
+  static const generalSettings = AppRoutes<void>._('/settings/general');
   static const themeSettings = AppRoutes<void>._('/settings/theme');
   static const licenses = AppRoutes<void>._('/settings/licenses');
   static const dev = AppRoutes<void>._('/dev');
@@ -373,6 +375,12 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
               key: AppRoutes.settings.uniqueKey,
               child: const SettingsRoute(),
               transitionSettings: transitionSettings.dismissible,
+            ));
+          } else if (route.hasSameLocation(AppRoutes.generalSettings)) {
+            pages.add(StackFadePage(
+              key: AppRoutes.generalSettings.uniqueKey,
+              child: const GeneralSettingsRoute(),
+              transitionSettings: transitionSettings.theme,
             ));
           } else if (route.hasSameLocation(AppRoutes.themeSettings)) {
             pages.add(StackFadePage(
