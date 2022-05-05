@@ -608,5 +608,9 @@
     "type": "text",
     "placeholders": {}
   },
-  "confirmBeforeExitingSetting": "Show confirmation before exiting"
+  "confirmBeforeExitingSetting": "Confirm exiting with back button",
+  "@confirmBeforeExitingSetting": {
+    "type": "text",
+    "placeholders": {}
+  }
 }

@@ -42,7 +42,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
               children: <Widget>[
                 MenuItem(
                   l10n.general,
-                  icon: Icons.build,
+                  icon: Icons.build_rounded,
                   iconSize: 25.0,
                   fontSize: 16.0,
                   onTap: _handleClickGeneralSettings,

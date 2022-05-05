@@ -66,6 +66,7 @@ abstract class Theme {
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade400,
       unselectedWidgetColor: Colors.grey.shade400,
+      toggleableActiveColor: defaultPrimaryColor,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: const ColorScheme(
@@ -191,6 +192,7 @@ abstract class Theme {
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade800,
       unselectedWidgetColor: Colors.grey.shade800,
+      toggleableActiveColor: defaultPrimaryColor,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: const ColorScheme(

@@ -11,14 +11,6 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
   /// Needed as init value and also to check whether setting
   /// value has been increased or decreased.
   int minFileDuration = 30;
-  /// Whether to show a confirmation toast before exiting the app
-  late bool confirmOnExitEnabled;
-
-  @override
-  void initState() {
-    super.initState();
-    confirmOnExitEnabled = Prefs.confirmOnExit.get();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +22,13 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
       body: ListView(
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          SwitchListTile(
-            title: Text(l10n.confirmBeforeExitingSetting),
-            value: confirmOnExitEnabled,
-            onChanged: _handleConfirmOnExitSwitch,
+          ValueListenableBuilder(
+            valueListenable: Prefs.confirmOnExit,
+            builder: (context, value, child) => SwitchListTile(
+              title: Text(l10n.confirmBeforeExitingSetting),
+              value: Prefs.confirmOnExit.get(),
+              onChanged: Prefs.confirmOnExit.set,
+            ),
           ),
           // _MinFileDurationSlider(
           //   initValue: minFileDuration,
@@ -41,15 +36,6 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
         ],
       ),
     );
-  }
-  
-  /// Handle a change of the exit confirmation setting
-  /// and update the preference and the screen. 
-  void _handleConfirmOnExitSwitch(bool newValue) {
-    Prefs.confirmOnExit.set(newValue);
-    setState(() {
-      confirmOnExitEnabled = newValue;
-    });
   }
 }
 
