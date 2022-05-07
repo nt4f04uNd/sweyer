@@ -59,13 +59,14 @@ jobs:
         run: flutter test --no-pub --coverage --test-randomize-ordering-seed random ${{(inputs.update_goldens && '--update-goldens') || ''}}
 
       - name: 📁 Save golden test failures artifacts
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: golden-test-failures
           path: test/golden/failures
           if-no-files-found: ignore
 
-      - name: 📁 Save updated golden test artifacts
+      - name: 📁 Save golden test updated artifacts
         if: ${{inputs.update_goldens}}
         uses: actions/upload-artifact@v3
         with:
