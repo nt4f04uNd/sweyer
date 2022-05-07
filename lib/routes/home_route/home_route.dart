@@ -23,7 +23,7 @@ class _InitialRouteState extends State<InitialRoute> {
 
   void _animateNotMainUi() {
     if (_onTop && playerRouteController.value == 0.0) {
-      SystemUiStyleController.animateSystemUiOverlay(
+      SystemUiStyleController.instance.animateSystemUiOverlay(
         to: Constants.UiTheme.black.auto,
         duration: const Duration(milliseconds: 550),
       );
@@ -57,13 +57,13 @@ class _InitialRouteState extends State<InitialRoute> {
                   _animateNotMainUi();
                   return const _SongsEmptyScreen();
                 }
-                if (ThemeControl.ready && _onTop && playerRouteController.value == 0.0) {
-                  SystemUiStyleController.animateSystemUiOverlay(
+                if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
+                  SystemUiStyleController.instance.animateSystemUiOverlay(
                     to: Constants.UiTheme.grey.auto,
                   );
                 }
                 return StreamBuilder<bool>(
-                  stream: ThemeControl.themeChaning,
+                  stream: ThemeControl.instance.themeChaning,
                   builder: (context, snapshot) {
                     if (snapshot.data == true)
                       return const SizedBox.shrink();

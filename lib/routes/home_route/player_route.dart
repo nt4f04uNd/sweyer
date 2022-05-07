@@ -91,8 +91,8 @@ class _PlayerRouteState extends State<PlayerRoute>
       end: Constants.UiTheme.black.auto.systemNavigationBarColor,
     );
     // Change system UI on expanding/collapsing the player route.
-    SystemUiStyleController.setSystemUiOverlay(
-      SystemUiStyleController.lastUi.copyWith(
+    SystemUiStyleController.instance.setSystemUiOverlay(
+      SystemUiStyleController.instance.lastUi.copyWith(
         systemNavigationBarColor: systemNavigationBarColorTween.evaluate(controller),
       ),
     );
@@ -115,7 +115,7 @@ class _PlayerRouteState extends State<PlayerRoute>
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = ThemeControl.theme.colorScheme.background;
+    final backgroundColor = ThemeControl.instance.theme.colorScheme.background;
     final screenHeight = MediaQuery.of(context).size.height;
     return Slidable(
       controller: controller,
@@ -123,7 +123,7 @@ class _PlayerRouteState extends State<PlayerRoute>
       end: 0.0,
       direction: slideDirection,
       barrier: Container(
-        color: ThemeControl.isDark ? Colors.black : Colors.black26,
+        color: ThemeControl.instance.isDark ? Colors.black : Colors.black26,
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -331,7 +331,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           text: '"$query"',
           style: TextStyle(
             fontWeight: FontWeight.w800,
-            color: ThemeControl.theme.colorScheme.onBackground,
+            color: ThemeControl.instance.theme.colorScheme.onBackground,
           ),
         ));
         break;
@@ -343,7 +343,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             text: origin.nameDotYear,
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: ThemeControl.theme.colorScheme.onBackground,
+              color: ThemeControl.instance.theme.colorScheme.onBackground,
             ),
           ));
         } else if (origin is Playlist) {
@@ -352,7 +352,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             text: origin.name,
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: ThemeControl.theme.colorScheme.onBackground,
+              color: ThemeControl.instance.theme.colorScheme.onBackground,
             ),
           ));
         } else if (origin is Artist) {
@@ -361,7 +361,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             text: ContentUtils.localizedArtist(origin.artist, l10n),
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: ThemeControl.theme.colorScheme.onBackground,
+              color: ThemeControl.instance.theme.colorScheme.onBackground,
             ),
           ));
         } else {
@@ -380,7 +380,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
       TextSpan(children: text),
       key: ValueKey(text.fold<String>('', (prev, el) => prev + el.text!)),
       overflow: TextOverflow.ellipsis,
-      style: ThemeControl.theme.textTheme.subtitle2!.copyWith(
+      style: ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
         fontSize: 14.0,
         height: 1.0,
         fontWeight: FontWeight.w700,
@@ -426,7 +426,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   Widget build(BuildContext context) {
     final currentSongIndex = PlaybackControl.instance.currentSongIndex;
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final origin = QueueControl.instance.state.origin;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
@@ -625,7 +625,7 @@ class _MainTab extends StatefulWidget {
 class _MainTabState extends State<_MainTab> {
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final animation = ColorTween(
       begin: theme.colorScheme.secondary,
       end: theme.colorScheme.background,
@@ -724,7 +724,7 @@ class _PlaybackButtons extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: ThemeControl.theme.colorScheme.secondary,
+            color: ThemeControl.instance.theme.colorScheme.secondary,
             borderRadius: BorderRadius.circular(100.0),
           ),
           child: const Material(
@@ -789,7 +789,7 @@ class _InfoButton extends StatelessWidget {
                         songInfo,
                         style: const TextStyle(fontSize: 13.0),
                         selectionControls: NFTextSelectionControls(
-                          backgroundColor: ThemeControl.theme.colorScheme.background,
+                          backgroundColor: ThemeControl.instance.theme.colorScheme.background,
                         ),
                       ),
                     ),
@@ -971,7 +971,7 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
   Future<void> _handleTap() async {
     
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final songs = QueueControl.instance.state.current.songs;
     final playlist = await ShowFunctions.instance.showCreatePlaylist(this, context);
 

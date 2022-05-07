@@ -130,7 +130,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 
   Widget _buildInfo() {
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final List<Widget> children = [
       Text(
         widget.queue.title,
@@ -275,7 +275,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       return _buildTile();
 
     const checkmarkGridMargin = 10.0;
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
       children: [

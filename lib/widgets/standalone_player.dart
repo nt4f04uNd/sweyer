@@ -174,7 +174,7 @@ void _openStandalonePlayerRoute(BuildContext context) {
                       Navigator.of(context).pop();
                     }
                   },
-                  child: Container(color: ThemeControl.theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value)),
+                  child: Container(color: ThemeControl.instance.theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value)),
                 ),
                 BackdropFilter(
                   filter: ImageFilter.blur(

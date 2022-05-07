@@ -14,10 +14,10 @@ class ThemeSettingsRoute extends StatefulWidget {
 
 class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
     with SingleTickerProviderStateMixin {
-  Color prevPrimaryColor = ThemeControl.theme.colorScheme.primary;
-  Color primaryColor = ThemeControl.theme.colorScheme.primary;
-  bool get switched => ThemeControl.isLight;
-  bool get canPop => !ThemeControl.themeChaning.valueWrapper!.value;
+  Color prevPrimaryColor = ThemeControl.instance.theme.colorScheme.primary;
+  Color primaryColor = ThemeControl.instance.theme.colorScheme.primary;
+  bool get switched => ThemeControl.instance.isLight;
+  bool get canPop => !ThemeControl.instance.themeChaning.valueWrapper!.value;
   late AnimationController controller;
 
   static const List<Color> colors = [
@@ -46,7 +46,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   }
 
   void _handleThemeSwitch(bool value) {
-    ThemeControl.switchTheme();
+    ThemeControl.instance.switchTheme();
   }
 
   void _handleColorTap(Color color) {
@@ -58,7 +58,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
         ).evaluate(controller)!;
       });
       primaryColor = color;
-      ThemeControl.changePrimaryColor(color);
+      ThemeControl.instance.changePrimaryColor(color);
       controller.reset();
       controller.forward();
     }
@@ -110,7 +110,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
             builder: (context, child) => ListView(
               children: [
                 Theme(
-                  data: ThemeControl.theme.copyWith(
+                  data: ThemeControl.instance.theme.copyWith(
                     splashFactory: NFListTileInkRipple.splashFactory,
                   ),
                   child: SwitchListTile(

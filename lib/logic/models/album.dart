@@ -79,7 +79,7 @@ class Album extends PersistentQueue {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      defaultArtBlendColor: ThemeControl.instance.colorForBlend.value,
       artUri: null,
       title: album,
       artist: ContentUtils.localizedArtist(artist, staticl10n),

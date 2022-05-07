@@ -8,7 +8,7 @@ class Spinner extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircularProgressIndicator(
       valueColor: AlwaysStoppedAnimation(
-        ThemeControl.theme.colorScheme.onBackground,
+        ThemeControl.instance.theme.colorScheme.onBackground,
       ),
     );
   }

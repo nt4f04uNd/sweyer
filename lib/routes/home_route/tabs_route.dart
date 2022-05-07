@@ -9,7 +9,7 @@ import 'package:sweyer/constants.dart' as Constants;
 /// Returns app style used for app bar title.
 TextStyle get appBarTitleTextStyle => TextStyle(
   fontWeight: FontWeight.w700,
-  color: ThemeControl.theme.textTheme.headline6!.color,
+  color: ThemeControl.instance.theme.textTheme.headline6!.color,
   fontSize: 22.0,
   fontFamily: 'Roboto',
 );
@@ -168,7 +168,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final screenWidth = MediaQuery.of(context).size.width;
     final searchButton = NFIconButton(
       icon: const Icon(Icons.search_rounded),
@@ -385,7 +385,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final contentType = widget.contentType;
     final list = ContentControl.instance.getContent(contentType);
     final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);

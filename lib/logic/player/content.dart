@@ -526,7 +526,7 @@ class ContentControl extends Control {
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
     // todo: implement
     songs = _ensureSongsAreSource(songs);
-    if (DeviceInfoControl.instance.sdkInt >= 30) {
+    if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       try {
         final result = await ContentChannel.instance.setSongsFavorite(songs, value);
         if (result) {
@@ -572,7 +572,7 @@ class ContentControl extends Control {
     try {
       final result = await ContentChannel.instance.deleteSongs(songs);
       await refetchAll();
-      if (DeviceInfoControl.instance.sdkInt >= 30 && result) {
+      if (DeviceInfoControl.instance.useScopedStorageForFileModifications && result) {
         _removeFromState();
       }
     } catch (ex, stack) {

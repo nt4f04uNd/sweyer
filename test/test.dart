@@ -7,11 +7,15 @@ export 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:package_info_plus_platform_interface/package_info_platform_interface.dart';
+import 'package:package_info_plus_platform_interface/method_channel_package_info.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flare_flutter/flare_testing.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:sweyer/constants.dart' as Constants;
 
 export 'fakes/fakes.dart';
 
@@ -75,7 +79,7 @@ final ArtistCopyWith artistWith = _testArtist.copyWith;
 final l10n = AppLocalizationsEn();
 const kScreenSize = Size(kScreenWidth, kScreenHeight);
 const kScreenHeight = 800.0;
-const kScreenWidth = 600.0;
+const kScreenWidth = 450.0;
 
 /// Sets the fake data providers and initializes the app state.
 /// 
@@ -98,14 +102,26 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   // Reset any state
   DeviceInfoControl.instance.dispose();
   ContentControl.instance.dispose();
+  AppRouter.instance = AppRouter();
 
   // Set up fakes
+  SystemUiStyleController.instance = FakeSystemUiStyleController();
   Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
   Permissions.instance = FakePermissions();
   ContentChannel.instance = FakeContentChannel();
   QueueControl.instance = FakeQueueControl();
+  ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();
+  PackageInfoPlatform.instance = MethodChannelPackageInfo();
+  const MethodChannel('dev.fluttercommunity.plus/package_info').setMockMethodCallHandler((MethodCall methodCall) async {
+    return {
+      'appName': Constants.Config.APPLICATION_TITLE,
+      'packageName': 'com.nt4f04und.sweyer',
+      'version': '1.0.0',
+      'buildNumber': '0',
+    };
+  });
   const MethodChannel('com.ryanheise.audio_service.client.methods').setMockMethodCallHandler((MethodCall methodCall) async {
     return {};
   });
@@ -115,6 +131,8 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   const MethodChannel('com.ryanheise.audio_session').setMockMethodCallHandler((MethodCall methodCall) async {
     return null;
   });
+  LicenseRegistry.reset();
+  LicenseRegistry.addLicense(() => Stream.value(const FakeLicenseEntry()));
 
   configureFakes?.call();
 
@@ -124,13 +142,10 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
 
   // Default initialization process from main.dart
   await NFPrefs.initialize();
+
   await DeviceInfoControl.instance.init();
-  ThemeControl.init();
-
-  // TODO: UI animations break tests
-  // ThemeControl.initSystemUi();
-  SystemUiStyleController.setSystemUiOverlay(const SystemUiOverlayStyle());
-
+  ThemeControl.instance.init();
+  ThemeControl.instance.initSystemUi();
   await Permissions.instance.init();
   await ContentControl.instance.init();
 
@@ -142,12 +157,12 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
 }
 
 extension WidgetTesterExtension on WidgetTester {
-  /// A template for that:
-  ///   1. pumps an app
-  ///   2. runs the test [callback]
-  ///   3. stops and disposes the player
-  ///   4. optionally, runs [goldenCaptureCallback]. It would time out if was ran before player is disposed in [callback].
-  ///   5. unpumps the screen
+  /// A template for this:
+  ///  1. pumps the app
+  ///  2. runs the test from the [callback]
+  ///  3. stops and disposes the player
+  ///  4. optionally, runs [goldenCaptureCallback]. It would time out if was ran before player is disposed in [callback].
+  ///  5. unpumps the screen
   Future<void> runAppTest(AsyncCallback callback, {AsyncCallback? goldenCaptureCallback}) async {
     // App only suppots vertical orientation, so switch tests to use it.
     await binding.setSurfaceSize(kScreenSize);
@@ -178,6 +193,27 @@ extension WidgetTesterExtension on WidgetTester {
     await pumpAndSettle();
   }
 
+  /// Whether the current tester is running in [testAppGoldens] and
+  /// in light mode.
+  bool get lightThemeGolden => _testersLightTheme.contains(this);
+
+  Future<void> screenMatchesGolden(
+    WidgetTester tester,
+    String name, {
+    bool? autoHeight,
+    Finder? finder,
+    CustomPump? customPump,
+  }) {
+    name = '$name.${_getThemeMessage(tester.lightThemeGolden)}';
+    return _screenMatchesGoldenWithTolerance(
+      this,
+      name,
+      autoHeight: autoHeight,
+      finder: finder,
+      customPump: customPump,
+    );
+  }
+
   /// Expect the app to render a list of songs in [SongTile]s.
   void expectSongTiles(Iterable<Song> songs) {
     final songTiles = widgetList<SongTile>(find.byType(SongTile));
@@ -186,14 +222,52 @@ extension WidgetTesterExtension on WidgetTester {
   }
 }
 
-Future<void> screenMatchesGoldenWithTolerance(
+final _testersLightTheme = <WidgetTester>{};
+String _getThemeMessage(bool lightTheme) => lightTheme  ? 'light' : 'dark';
+const Object _defaultTagObject = Object();
+
+/// Creates a golden test in two variants - in dark and light mode.
+//
+// TODO: weird, when run individually from IDE for some reason Dart extension throws
+// "No tests match regular expression "^tabs_route idle_drawer( \(variant: .*\))?$"."
+// report it here https://github.com/Dart-Code/Dart-Code/issues/new/choose
+//
+// More weird, just `testGoldens` itself works ok
+@isTest
+void testAppGoldens(
+  String description,
+  Future<void> Function(WidgetTester) test, {
+  bool? skip,
+  Object? tags = _defaultTagObject,
+}) {
+  for (final lightTheme in [false, true]) {
+    testGoldens(
+      '$description ${_getThemeMessage(lightTheme)}',
+      (tester) async {
+        try {
+          ThemeControl.instance.setThemeLightMode(lightTheme);
+          if (lightTheme) {
+            _testersLightTheme.add(tester);
+          }
+          return await test(tester);
+        } finally {
+          _testersLightTheme.remove(tester);
+        }
+      },
+      tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
+    );
+  }
+}
+
+/// Signature used in [runGoldenAppTest].
+typedef GoldenCaptureCallback = Future<void> Function(bool lightTheme);
+
+Future<void> _screenMatchesGoldenWithTolerance(
   WidgetTester tester,
   String name, {
   bool? autoHeight,
   Finder? finder,
   CustomPump? customPump,
-  @Deprecated('This method level parameter will be removed in an upcoming release. This can be configured globally. If you have concerns, please file an issue with your use case.')
-      bool? skip,
 }) {
   goldenFileComparator = _TolerableFileComparator(path.join(
     (goldenFileComparator as LocalFileComparator).basedir.toString(),
@@ -205,7 +279,6 @@ Future<void> screenMatchesGoldenWithTolerance(
     autoHeight: autoHeight,
     finder: finder,
     customPump: customPump,
-    skip: skip,
   );
 }
 
@@ -230,4 +303,43 @@ class _TolerableFileComparator extends LocalFileComparator {
     }
     return result.passed || result.diffPercent <= _kGoldenDiffTolerance;
   }
+}
+
+class FakeLicenseEntry extends LicenseEntry {
+  const FakeLicenseEntry();
+
+  @override
+  Iterable<String> get packages => const ['test_package'];
+
+  @override
+  Iterable<LicenseParagraph> get paragraphs => const [
+    LicenseParagraph('test paragraph 1', 0),
+    LicenseParagraph('test paragraph 2', 0),
+    LicenseParagraph('test paragraph 3', 0),
+    LicenseParagraph('test paragraph 4', 0),
+    LicenseParagraph('test paragraph 5', 0),
+  ];
+}
+
+class FakeSystemUiStyleController implements SystemUiStyleController {
+  @override
+  Curve curve = Curves.linear;
+
+  @override
+  Duration duration = Duration.zero;
+
+  @override
+  SystemUiOverlayStyle get actualUi => const SystemUiOverlayStyle();
+
+  @override
+  Future<void> animateSystemUiOverlay({SystemUiOverlayStyle? from, required SystemUiOverlayStyle to, Curve? curve, Duration? duration}) async {}
+
+  @override
+  SystemUiOverlayStyle get lastUi => const SystemUiOverlayStyle();
+
+  @override
+  Stream<SystemUiOverlayStyle> get onUiChange => const Stream.empty();
+
+  @override
+  void setSystemUiOverlay(SystemUiOverlayStyle ui) {}
 }

@@ -287,8 +287,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
        _DelegateMixin,
        PopNavigatorRouterDelegateMixin {
 
-  AppRouter._();
-  static final instance = AppRouter._();
+  static AppRouter instance = AppRouter();
 
   @override
   RouteObserver<Route> get observer => routeObserver;
@@ -303,7 +302,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
   
-  final _TransitionSettings transitionSettings = _TransitionSettings(
+  late final _TransitionSettings transitionSettings = _TransitionSettings(
     grey: StackFadeRouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto),
     greyDismissible: StackFadeRouteTransitionSettings(
       opaque: false,
@@ -325,7 +324,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   );
   
   static Widget get _dismissBarrier => Container(
-    color: ThemeControl.isDark ? Colors.black54 : Colors.black26,
+    color: ThemeControl.instance.isDark ? Colors.black54 : Colors.black26,
   );
 
   bool _mainScreenShown = false;
@@ -349,7 +348,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
     if (themeChanged) {
       _setState?.call();
       transitionSettings.theme.dismissible = false;
-      Future.delayed(dilate(const Duration(milliseconds: 300)), () {
+      Future.delayed(dilate(ThemeControl.instance.themeChangeDuration), () {
         _setState?.call();
         transitionSettings.theme.dismissible = true;
       });

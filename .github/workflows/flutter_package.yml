@@ -26,6 +26,10 @@ on:
         required: false
         type: number
         default: 100
+      update_goldens:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -52,7 +56,21 @@ jobs:
           very_good --analytics false
           very_good packages get --recursive
       - name: 🧪 Run Tests
-        run: flutter test --no-pub --coverage --test-randomize-ordering-seed random
+        run: flutter test --no-pub --coverage --test-randomize-ordering-seed random ${{(inputs.update_goldens && '--update-goldens') || ''}}
+
+      - name: 📁 Save golden test failures artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: golden-test-failures
+          path: test/golden/failures
+          if-no-files-found: ignore
+
+      - name: 📁 Save updated golden test artifacts
+        if: ${{inputs.update_goldens}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: golden-test-updated
+          path: test/golden/goldens
 
       - name: 📊 Check Code Coverage
         uses: VeryGoodOpenSource/very_good_coverage@v1

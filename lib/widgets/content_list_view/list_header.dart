@@ -27,7 +27,7 @@ class ListHeader extends StatelessWidget {
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(
         fontSize: 16.0,
-        color: ThemeControl.theme.hintColor,
+        color: ThemeControl.instance.theme.hintColor,
         fontWeight: FontWeight.w700,
       ),
       child: Container(
@@ -99,7 +99,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
           builder: (context) => _RadioListTile<SortFeature>(
             title: Text(
               l10n.sortFeature<T>(feature as SortFeature<T>, contentType).toLowerCase(),
-              style: ThemeControl.theme.textTheme.subtitle1,
+              style: ThemeControl.instance.theme.textTheme.subtitle1,
             ),
             value: feature,
             groupValue: sort.feature,
@@ -148,7 +148,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final textStyle = TextStyle(
-      color: ThemeControl.theme.colorScheme.onBackground,
+      color: ThemeControl.instance.theme.colorScheme.onBackground,
       fontSize: 14.0,
       fontWeight: FontWeight.w800,
     );
@@ -248,9 +248,9 @@ class _RadioListTile<T> extends StatelessWidget {
         child: Row(
           children: [
             Radio<T>(
-              activeColor: ThemeControl.isDark
-                  ? ThemeControl.theme.colorScheme.onBackground
-                  : ThemeControl.theme.colorScheme.primary,
+              activeColor: ThemeControl.instance.isDark
+                  ? ThemeControl.instance.theme.colorScheme.onBackground
+                  : ThemeControl.instance.theme.colorScheme.primary,
               value: value,
               splashRadius: 0.0,
               groupValue: groupValue,

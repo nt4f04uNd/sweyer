@@ -132,7 +132,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                       Text(
                         ContentUtils.localizedArtist(widget.artist.artist, l10n),
                         overflow: TextOverflow.ellipsis,
-                        style: ThemeControl.theme.textTheme.headline6,
+                        style: ThemeControl.instance.theme.textTheme.headline6,
                       ),
                     ],
                   ),

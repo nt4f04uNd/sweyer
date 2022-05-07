@@ -9,6 +9,12 @@ class DeviceInfoControl extends Control {
   int get sdkInt => _sdkInt;
   late int _sdkInt;
 
+  /// Whether to use scoped storage to modify system files.
+  ///
+  /// Doesn't apply to [ContentArt], which uses scoped storage
+  /// starting from API 29.
+  bool get useScopedStorageForFileModifications => sdkInt >= 30;
+
   @override
   Future<void> init() async {
     super.init();

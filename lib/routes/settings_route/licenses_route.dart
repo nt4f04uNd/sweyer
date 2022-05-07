@@ -247,12 +247,12 @@ class _PackageListTile extends StatelessWidget {
         title: Text(
           packageName,
           overflow: TextOverflow.ellipsis,
-          style: ThemeControl.theme.textTheme.headline6,
+          style: ThemeControl.instance.theme.textTheme.headline6,
         ),
         subtitle: Text(
           MaterialLocalizations.of(context)
               .licensesPackageDetailText(numberLicenses),
-          style: ThemeControl.theme.textTheme.subtitle2,
+          style: ThemeControl.instance.theme.textTheme.subtitle2,
         ),
         selected: isSelected,
         onTap: onTap,
@@ -1197,7 +1197,7 @@ class _DetailView extends StatelessWidget {
       builder: (BuildContext context, ScrollController controller) {
         return MouseRegion(
           child: Card(
-            color: ThemeControl.theme.colorScheme.secondary,
+            color: ThemeControl.instance.theme.colorScheme.secondary,
             elevation: _kCardElevation,
             clipBehavior: Clip.antiAlias,
             margin: const EdgeInsets.fromLTRB(

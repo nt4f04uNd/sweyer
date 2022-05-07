@@ -30,7 +30,7 @@ dependencies:
   firebase_crashlytics: ^2.0.1
   firebase_analytics: ^9.0.4
   cloud_functions: ^3.2.4
-  package_info: ^2.0.0
+  package_info_plus: ^1.4.2
   url_launcher: ^6.0.3
   flare_flutter: ^3.0.2
   auto_size_text: ^3.0.0-nullsafety.0
@@ -84,7 +84,7 @@ dependencies:
 
     git:
       url: https://github.com/nt4f04uNd/nt4f04unds_widgets/
-      ref: 2.0.0
+      ref: 3.0.0
 
 dev_dependencies:
   flutter_test:

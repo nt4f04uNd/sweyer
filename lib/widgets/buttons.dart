@@ -36,7 +36,7 @@ class ShuffleButton extends StatelessWidget {
       stream: ContentControl.instance.onContentChange,
       builder: (context, snap) => AnimatedIconButton(
         icon: const Icon(Icons.shuffle_rounded),
-        color: ThemeControl.theme.colorScheme.onSurface,
+        color: ThemeControl.instance.theme.colorScheme.onSurface,
         size: 40.0,
         iconSize: textScaleFactor * NFConstants.iconSize,
         active: QueueControl.instance.state.shuffled,
@@ -104,16 +104,16 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   )
   ..value = disabled ? 0.0 : 1.0;
   late final colorAnimation = ColorTween(
-    begin: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.12),
-    end: widget.color ?? ThemeControl.theme.colorScheme.primary,
+    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
+    end: widget.color ?? ThemeControl.instance.theme.colorScheme.primary,
   ).animate(CurvedAnimation(
     parent: controller,
     curve:  Curves.easeOut,
     reverseCurve: Curves.easeIn,
   ));
   late final textColorAnimation = ColorTween(
-    begin: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.38),
-    end: widget.textColor ?? ThemeControl.theme.colorScheme.onPrimary
+    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.38),
+    end: widget.textColor ?? ThemeControl.instance.theme.colorScheme.onPrimary
   ).animate(CurvedAnimation(
     parent: controller,
     curve:  Curves.easeOut,
@@ -164,7 +164,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
           splashFactory: NFListTileInkRipple.splashFactory,
           shadowColor: MaterialStateProperty.all(Colors.transparent),
           textStyle: MaterialStateProperty.all(TextStyle(
-            fontFamily: ThemeControl.theme.textTheme.headline1!.fontFamily,
+            fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
             fontWeight: widget.fontWeight,
             fontSize: widget.fontSize,
           )),
@@ -216,7 +216,7 @@ class ShuffleQueueButton extends StatelessWidget {
       text: l10n.shuffleContentList,
       icon: const Icon(Icons.shuffle_rounded, size: 22.0),
       color: Constants.Theme.contrast.auto,
-      textColor: ThemeControl.theme.colorScheme.background,
+      textColor: ThemeControl.instance.theme.colorScheme.background,
       borderRadius: 4.0,
       fontSize: 15.0,
       fontWeight: FontWeight.w700,

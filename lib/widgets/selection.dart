@@ -551,9 +551,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       localOverlay.insert(_overlayEntry!);
 
       // Animate system UI
-      final lastUi = SystemUiStyleController.lastUi;
+      final lastUi = SystemUiStyleController.instance.lastUi;
       _lastNavColor = lastUi.systemNavigationBarColor;
-      SystemUiStyleController.animateSystemUiOverlay(
+      SystemUiStyleController.instance.animateSystemUiOverlay(
         to: lastUi.copyWith(
           systemNavigationBarColor: Constants.UiTheme.grey.auto.systemNavigationBarColor
         ),
@@ -597,8 +597,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   void _animateNavBack() {
     if (_lastNavColor == null)
       return;
-    SystemUiStyleController.animateSystemUiOverlay(
-      to: SystemUiStyleController.lastUi.copyWith(
+    SystemUiStyleController.instance.animateSystemUiOverlay(
+      to: SystemUiStyleController.instance.lastUi.copyWith(
         systemNavigationBarColor: _lastNavColor,
       ),
       duration: kSelectionDuration,
@@ -769,7 +769,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
           child: FlareActor(
             Constants.Assets.ASSET_ANIMATION_CHECKMARK,
             animation: _flareAnimation,
-            color: ThemeControl.theme.colorScheme.secondaryVariant,
+            color: ThemeControl.instance.theme.colorScheme.secondaryVariant,
             callback: (name) {
               setState(() {
                 _flareAnimation = 'stop';
@@ -856,7 +856,7 @@ class _SelectionActionsBar extends StatelessWidget {
           opacity: fadeAnimation,
           child: Container(
             height: kSongTileHeight,
-            color: ThemeControl.theme.colorScheme.secondary,
+            color: ThemeControl.instance.theme.colorScheme.secondary,
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Material(
               color: Colors.transparent,
@@ -1051,7 +1051,7 @@ class _ActionsSelectionTitle extends StatelessWidget {
             child: NFIconButton(
               size: NFConstants.iconButtonSize,
               iconSize: NFConstants.iconSize,
-              color: ThemeControl.theme.colorScheme.onSurface,
+              color: ThemeControl.instance.theme.colorScheme.onSurface,
               onPressed: () => controller.close(),
               icon: const Icon(Icons.close_rounded),
             ),
@@ -1753,7 +1753,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         .cast<SelectionEntry<Song>>()
         .toList()
         ..sort((a, b) => a.index.compareTo(b.index));
-      if (DeviceInfoControl.instance.sdkInt >= 30) {
+      if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
         // On Android R the deletion is performed with OS dialog.
         await ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
         widget.controller.close();
@@ -1970,7 +1970,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     assert(T == Song || T == Playlist);
 
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final mediaQuery = MediaQuery.of(context);
     final correctedMoreTextWidth = moreTextWidth * mediaQuery.textScaleFactor;
 

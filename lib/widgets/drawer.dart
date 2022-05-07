@@ -36,11 +36,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     // Change system UI on expanding/collapsing the drawer.
     if (_onTop) {
       if (status == AnimationStatus.dismissed) {
-        SystemUiStyleController.animateSystemUiOverlay(
+        SystemUiStyleController.instance.animateSystemUiOverlay(
           to: Constants.UiTheme.grey.auto,
         );
       } else {
-        SystemUiStyleController.animateSystemUiOverlay(
+        SystemUiStyleController.instance.animateSystemUiOverlay(
           to: Constants.UiTheme.drawerScreen.auto,
         );
       }
@@ -146,7 +146,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
     return Theme(
       data: Theme.of(context).copyWith(
         //This will change the drawer background
-        canvasColor: ThemeControl.theme.colorScheme.surface,
+        canvasColor: ThemeControl.instance.theme.colorScheme.surface,
       ),
       child: Drawer(
         elevation: elevation,
@@ -169,7 +169,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
-                          color: ThemeControl.theme.textTheme.headline6!.color,
+                          color: ThemeControl.instance.theme.textTheme.headline6!.color,
                         ),
                       ),
                     ),
@@ -228,7 +228,7 @@ class MenuItem extends StatelessWidget {
               child: Icon(
                 icon,
                 size: iconSize,
-                color: ThemeControl.theme.iconTheme.color,
+                color: ThemeControl.instance.theme.iconTheme.color,
               ),
             )
           : null,

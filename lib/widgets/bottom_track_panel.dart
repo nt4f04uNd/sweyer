@@ -190,7 +190,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
       radius: kSongTileArtSize - progressLineHeight,
       lineWidth: progressLineHeight,
       circularStrokeCap: CircularStrokeCap.round,
-      progressColor: ThemeControl.theme.colorScheme.primary,
+      progressColor: ThemeControl.instance.theme.colorScheme.primary,
       backgroundColor: Colors.transparent,
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,

@@ -167,7 +167,7 @@ class ContentArt extends StatefulWidget {
   final ContentArtSource? source;
 
   /// Background color for the album art.
-  /// By default will use [ThemeControl.colorForBlend].
+  /// By default will use [ThemeControl.instance.colorForBlend].
   final Color? color;
 
   /// Album art size.
@@ -884,7 +884,7 @@ class _ContentArtState extends State<ContentArt> {
     if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
       // We should show the art now.
       _deliverLoad();
-      final theme = ThemeControl.theme;
+      final theme = ThemeControl.instance.theme;
       child = Container(
         alignment: Alignment.center,
         color: theme.colorScheme.primary,
@@ -910,7 +910,7 @@ class _ContentArtState extends State<ContentArt> {
         cacheHeight: _cacheSize,
         color: widget.color != null
             ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
-            : ThemeControl.colorForBlend,
+            : ThemeControl.instance.colorForBlend,
         colorBlendMode: BlendMode.plus,
         frameBuilder: frameBuilder,
         fit: BoxFit.cover,
@@ -948,7 +948,7 @@ class _ContentArtState extends State<ContentArt> {
       if (widget.current) {
         child = Container(
           alignment: Alignment.center,
-          color: ThemeControl.theme.colorScheme.primary,
+          color: ThemeControl.instance.theme.colorScheme.primary,
           width: widget.size,
           height: widget.size,
         );

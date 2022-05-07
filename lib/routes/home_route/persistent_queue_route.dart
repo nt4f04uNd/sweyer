@@ -170,7 +170,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
           body: StreamBuilder(
             stream: ContentControl.instance.onContentChange,
             builder: (context, snapshot) {
-              final selectedTileColor = ThemeControl.theme.colorScheme.primary;
+              final selectedTileColor = ThemeControl.instance.theme.colorScheme.primary;
               final selectedSplashColor = Constants.Theme.glowSplashColorOnContrast.auto;
               late StateSetter setListState;
               if (!tapped || selectedSong != null && !songs.contains(selectedSong)) {
@@ -187,8 +187,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                     enableDefaultOnTap: false,
                     leading: InListContentAction.song(
                       color: selectedSong == null ? selectedTileColor : null,
-                      iconColor: selectedSong == null ? ThemeControl.theme.colorScheme.onPrimary : null,
-                      textColor: selectedSong == null ? ThemeControl.theme.colorScheme.onPrimary : null,
+                      iconColor: selectedSong == null ? ThemeControl.instance.theme.colorScheme.onPrimary : null,
+                      textColor: selectedSong == null ? ThemeControl.instance.theme.colorScheme.onPrimary : null,
                       splashColor: selectedSong == null ? selectedSplashColor : null,
                       icon: SweyerIcons.play_next,
                       text: l10n.insertAtTheBeginning,
@@ -205,7 +205,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                       return Colors.transparent;
                     },
                     itemBuilder: (context, index, child) {
-                      final theme = ThemeControl.theme;
+                      final theme = ThemeControl.instance.theme;
                       final selected = selectedSong == songs[index];
                       return Theme(
                         data: theme.copyWith(
@@ -444,7 +444,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   textStyle: TextStyle(
                                     fontWeight: FontWeight.w900,
                                     fontSize: 15.0,
-                                    color: ThemeControl.theme.colorScheme.onBackground,
+                                    color: ThemeControl.instance.theme.colorScheme.onBackground,
                                   ),
                                 ),
                               ),
@@ -463,7 +463,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(
-                                  color: ThemeControl.theme.textTheme.subtitle2!.color,
+                                  color: ThemeControl.instance.theme.textTheme.subtitle2!.color,
                                   height: 1.2,
                                   fontWeight: FontWeight.w900,
                                   fontSize: 14.0,
@@ -568,7 +568,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -709,7 +709,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               l10n.nothingHere,
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
-                                color: ThemeControl.theme.hintColor,
+                                color: ThemeControl.instance.theme.hintColor,
                               ),
                             ),
                           ),
@@ -748,8 +748,8 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
     duration: const Duration(milliseconds: 240),
   );
   late final colorAnimation = ColorTween(
-    begin: ThemeControl.theme.colorScheme.onSurface.withOpacity(0.12),
-    end: ThemeControl.theme.iconTheme.color,
+    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
+    end: ThemeControl.instance.theme.iconTheme.color,
   ).animate(CurvedAnimation(
     parent: controller,
     curve: Curves.easeOut,

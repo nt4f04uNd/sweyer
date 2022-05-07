@@ -12,7 +12,7 @@ class SweyerLogo extends StatelessWidget {
 
   final double size;
 
-  /// Background color to be used instead of [ThemeControl.colorForBlend],
+  /// Background color to be used instead of [ThemeControl.instance.colorForBlend],
   /// which is applied by default.
   final Color? color;
 
@@ -34,7 +34,7 @@ class SweyerLogo extends StatelessWidget {
                 Constants.Assets.ASSET_LOGO_MASK,
                 color: color != null
                     ? ContentArt.getColorToBlendInDefaultArt(color!)
-                    : ThemeControl.colorForBlend,
+                    : ThemeControl.instance.colorForBlend,
                 cacheHeight: cacheSize,
                 cacheWidth: cacheSize,
                 colorBlendMode: BlendMode.plus,

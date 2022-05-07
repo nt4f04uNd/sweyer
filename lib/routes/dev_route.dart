@@ -58,7 +58,7 @@ class DevRoute extends StatelessWidget {
           ),
           NFListTile(
             title: Text(l10n.quitDevMode),
-            splashColor: ThemeControl.theme.colorScheme.error,
+            splashColor: ThemeControl.instance.theme.colorScheme.error,
             onTap: () => _quitDevMode(context, l10n),
           ),
         ],

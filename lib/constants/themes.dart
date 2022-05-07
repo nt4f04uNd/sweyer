@@ -386,10 +386,10 @@ class _ThemeContainer<T> {
   final T dark;
 
   /// Checks theme and automatically picks [light] or [dark] depending on current brightness.
-  T get auto => ThemeControl.isDark ? dark : light;
+  T get auto => ThemeControl.instance.isDark ? dark : light;
 
   /// Checks theme and automatically picks opposite value from the current brightness.
-  T get autoReverse => ThemeControl.isDark ? light : dark;
+  T get autoReverse => ThemeControl.instance.isDark ? light : dark;
 
   _ThemeContainer<T> copyWith({T? light, T? dark}) {
     return _ThemeContainer(

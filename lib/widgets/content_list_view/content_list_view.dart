@@ -300,7 +300,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableDefaultOnTap: enableDefaultOnTap,
                 backgroundColor: backgroundColorBuilder == null
-                  ? ThemeControl.theme.colorScheme.background
+                  ? ThemeControl.instance.theme.colorScheme.background
                   : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,

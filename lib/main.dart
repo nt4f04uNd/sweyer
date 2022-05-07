@@ -52,8 +52,8 @@ class _WidgetsBindingObserver extends WidgetsBindingObserver {
       /// 
       /// [SystemUiOverlayStyle.statusBarBrightness] is only honored on iOS,
       /// so I can safely use that here.
-      final lastUi = SystemUiStyleController.lastUi;
-      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
+      final lastUi = SystemUiStyleController.instance.lastUi;
+      SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
         statusBarBrightness:
           lastUi.statusBarBrightness == null ||
           lastUi.statusBarBrightness == Brightness.dark
@@ -61,7 +61,7 @@ class _WidgetsBindingObserver extends WidgetsBindingObserver {
             : Brightness.dark
       ));
       /// Defensive programming if I some time later decide to add iOS support.
-      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
+      SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
         statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark
           ? Brightness.light
           : Brightness.dark
@@ -98,8 +98,8 @@ Future<void> main() async {
     WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
 
     await DeviceInfoControl.instance.init();
-    ThemeControl.init();
-    ThemeControl.initSystemUi();
+    ThemeControl.instance.init();
+    ThemeControl.instance.initSystemUi();
     await Permissions.instance.init();
     await ContentControl.instance.init();
     runApp(const App());
@@ -158,7 +158,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: ThemeControl.themeChaning,
+      stream: ThemeControl.instance.themeChaning,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return NFTheme(
         data: App.nfThemeData,
@@ -169,7 +169,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             // TODO: remove when invesigate the https://github.com/flutter/flutter/issues/12994
             useInheritedMediaQuery: true, // used in tests
             title: Constants.Config.APPLICATION_TITLE,
-            color: ThemeControl.theme.colorScheme.primary,
+            color: ThemeControl.instance.theme.colorScheme.primary,
             supportedLocales: Constants.Config.supportedLocales,
             scrollBehavior: _ScrollBehavior(),
             localizationsDelegates:
@@ -177,7 +177,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
               + const [
                 NFLocalizations.delegate,
               ],
-            theme: ThemeControl.theme,
+            theme: ThemeControl.instance.theme,
             routerDelegate: AppRouter.instance,
             routeInformationParser: AppRouteInformationParser(),
           ),
@@ -192,7 +192,7 @@ class _ScrollBehavior extends ScrollBehavior {
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return GlowingOverscrollIndicator(
       axisDirection: axisDirection,
-      color: ThemeControl.theme.colorScheme.background,
+      color: ThemeControl.instance.theme.colorScheme.background,
       child: child,
     );
   }

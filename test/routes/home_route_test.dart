@@ -23,21 +23,19 @@ void main() {
     ContentControl.instance = fake;
     fake.init();
 
+    expect(Permissions.instance.granted, true);
+    expect(ContentControl.instance.disposed.value, true);
+    expect(ContentControl.instance.initializing, false);
+    expect(ContentControl.instance.stateNullable, null);
+
+    // Fake ContentControl.init in a way to trigger the home screen rebuild
+    fake.initializing = true;
+    fake.stateNullable = ContentState();
+    fake.disposed.value = false;
+
+    expect(ContentControl.instance.initializing, true);
+
     await tester.runAppTest(() async {
-      expect(Permissions.instance.granted, true);
-      expect(ContentControl.instance.disposed.value, true);
-      expect(ContentControl.instance.initializing, false);
-      expect(ContentControl.instance.stateNullable, null);
-
-      // Fake ContentControl.init in a way to trigger the home screen rebuild
-      fake.initializing = true;
-      fake.stateNullable = ContentState();
-      fake.disposed.value = false;
-
-      expect(ContentControl.instance.initializing, true);
-
-      await tester.pump();
-
       // Expect appropriate ui
       expect(find.text(l10n.searchingForTracks), findsOneWidget);
       expect(find.byType(Spinner), findsOneWidget);

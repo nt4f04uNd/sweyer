@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sweyer/sweyer.dart';
 
 import 'package:sweyer/constants.dart' as Constants;
@@ -181,7 +181,7 @@ class _FooterState extends State<_Footer> {
                 padding: const EdgeInsets.only(left: 2.5, right: 2.5),
                 child: NFIconButton(
                   icon: const SweyerLogo(),
-                  splashColor: ThemeControl.theme.colorScheme.primary,
+                  splashColor: ThemeControl.instance.theme.colorScheme.primary,
                   size: 60.0,
                   iconSize: 42.0,
                   onPressed: _handleSecretLogoClick,
@@ -194,7 +194,7 @@ class _FooterState extends State<_Footer> {
                     appName,
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: ThemeControl.theme.textTheme.headline6!.color,
+                      color: ThemeControl.instance.theme.textTheme.headline6!.color,
                     ),
                   ),
                   Text(
@@ -214,7 +214,7 @@ class _FooterState extends State<_Footer> {
               'github repo',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.theme.colorScheme.onSurface,
+                color: ThemeControl.instance.theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -224,7 +224,7 @@ class _FooterState extends State<_Footer> {
               MaterialLocalizations.of(context).licensesPageTitle.toLowerCase(),
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.theme.colorScheme.onSurface,
+                color: ThemeControl.instance.theme.colorScheme.onSurface,
               ),
             ),
           ),

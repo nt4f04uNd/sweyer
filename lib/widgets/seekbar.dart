@@ -138,7 +138,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.color ?? ThemeControl.theme.colorScheme.primary;
+    final color = widget.color ?? ThemeControl.instance.theme.colorScheme.primary;
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final scaleFactor = textScaleFactor == 1.0 ? 1.0 : textScaleFactor * 1.1;
     return Container(
@@ -155,7 +155,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6!.color,
+                color: ThemeControl.instance.theme.textTheme.headline6!.color,
               ),
             ),
           ),
@@ -166,7 +166,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
                 data: SliderThemeData(
                   trackHeight: 2.0,
                   thumbColor: color,
-                  overlayColor: color.withOpacity(ThemeControl.isLight ? 0.12 : 0.24),
+                  overlayColor: color.withOpacity(ThemeControl.instance.isLight ? 0.12 : 0.24),
                   activeTrackColor: color,
                   inactiveTrackColor: Constants.Theme.sliderInactiveColor.auto,
                   overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),
@@ -193,7 +193,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.theme.textTheme.headline6!.color,
+                color: ThemeControl.instance.theme.textTheme.headline6!.color,
               ),
             ),
           ),

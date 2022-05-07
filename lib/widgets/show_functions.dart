@@ -21,7 +21,7 @@ class ShowFunctions extends NFShowFunctions {
     Color? textColor,
     Color? backgroundColor,
   }) async {
-    backgroundColor ??= ThemeControl.theme.colorScheme.primary;
+    backgroundColor ??= ThemeControl.instance.theme.colorScheme.primary;
 
     return Fluttertoast.showToast(
       msg: msg,
@@ -50,7 +50,7 @@ class ShowFunctions extends NFShowFunctions {
   /// Shows a dialog to create a playlist.
   Future<Playlist?> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final TextEditingController controller = TextEditingController();
     final AnimationController animationController = AnimationController(
       vsync: vsync,
@@ -125,7 +125,7 @@ class ShowFunctions extends NFShowFunctions {
   void showError({ required String errorDetails }) {
     final context = AppRouter.instance.navigatorKey.currentContext!;
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final globalKey = GlobalKey<NFSnackbarEntryState>();
     NFSnackbarController.showSnackbar(
       NFSnackbarEntry(
@@ -180,7 +180,7 @@ class ShowFunctions extends NFShowFunctions {
                             // scrollPhysics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                             style: const TextStyle(fontSize: 11.0),
                             selectionControls: NFTextSelectionControls(
-                              backgroundColor: ThemeControl.theme.colorScheme.background,
+                              backgroundColor: ThemeControl.instance.theme.colorScheme.background,
                             ),
                           ),
                         ),

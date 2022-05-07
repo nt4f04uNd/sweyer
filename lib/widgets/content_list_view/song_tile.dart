@@ -49,7 +49,7 @@ class SongNumber extends StatelessWidget {
       child = Padding(
         padding: const EdgeInsets.only(top: 2.0),
         child: CurrentIndicator(
-          color: ThemeControl.theme.colorScheme.onBackground,
+          color: ThemeControl.instance.theme.colorScheme.onBackground,
         ),
       );
     } else if (number != null && number! > 0 && number! < 999) {
@@ -67,7 +67,7 @@ class SongNumber extends StatelessWidget {
         width: 7.0,
         height: 7.0,
         decoration: BoxDecoration(
-          color: ThemeControl.theme.colorScheme.onBackground,
+          color: ThemeControl.instance.theme.colorScheme.onBackground,
           borderRadius: const BorderRadius.all(
             Radius.circular(100.0),
           ),

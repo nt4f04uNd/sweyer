@@ -115,11 +115,11 @@ class _AppScrollbarState extends State<AppScrollbar> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller ?? PrimaryScrollController.of(context)!;
-    final theme = ThemeControl.theme;
+    final theme = ThemeControl.instance.theme;
     final highlightColor = theme.highlightColor;
     return Theme(
       data: theme.copyWith(
-        highlightColor: ThemeControl.isDark
+        highlightColor: ThemeControl.instance.isDark
           ? const Color(0x40CCCCCC)
           : const Color(0x66BCBCBC),
       ),

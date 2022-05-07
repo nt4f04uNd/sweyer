@@ -53,7 +53,7 @@ class SettingItem extends StatelessWidget {
               child: Text(
                 description!,
                 style: TextStyle(
-                  color: ThemeControl.theme.textTheme.caption!.color,
+                  color: ThemeControl.instance.theme.textTheme.caption!.color,
                 ),
               ),
             ),

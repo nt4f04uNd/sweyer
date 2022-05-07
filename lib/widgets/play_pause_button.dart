@@ -121,7 +121,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
     ).animate(baseAnimation);
     final scaleAnimation = Tween(begin: 1.05, end: 0.89).animate(baseAnimation);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final color = widget.iconColor ?? ThemeControl.theme.iconTheme.color!;
+    final color = widget.iconColor ?? ThemeControl.instance.theme.iconTheme.color!;
     return NFIconButton(
       size: textScaleFactor * (widget.size ?? _kButtonSize),
       iconSize: textScaleFactor * (widget.iconSize ?? _kIconSize),
