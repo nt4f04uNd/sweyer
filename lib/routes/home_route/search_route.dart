@@ -544,7 +544,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                     widget.delegate._chipsBarDragged = false;
                   },
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(left: 12.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: children,
