@@ -18,6 +18,7 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.general),
+        leading: const NFBackButton(),
       ),
       body: ListView(
         physics: const NeverScrollableScrollPhysics(),

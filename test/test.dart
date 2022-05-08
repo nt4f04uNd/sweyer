@@ -16,6 +16,7 @@ import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/logic/logic.dart';
 
 export 'fakes/fakes.dart';
 
@@ -142,6 +143,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
 
   // Default initialization process from main.dart
   await NFPrefs.initialize();
+  await SearchHistory.instance.clear();
 
   await DeviceInfoControl.instance.init();
   ThemeControl.instance.init();
