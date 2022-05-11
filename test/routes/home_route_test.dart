@@ -1,4 +1,5 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:sweyer/constants.dart';
 
 import '../observer/observer.dart';
 import '../test.dart';
@@ -71,74 +72,42 @@ void main() {
     });
   });
 
-  testWidgets('app shows exit confirmation toast', (WidgetTester tester) async {
+  testWidgets('app shows exit confirmation toast if enabled in the preferences', (WidgetTester tester) async {
     await Prefs.confirmExitingWithBackButton.set(true);
-    final ToastObserver toastObserver = ToastObserver(tester);
-    final AppObserver appObserver = AppObserver(tester);
     await tester.runAppTest(() async {
-      expect(
-        await appObserver.haveCloseRequest(
-          () => toastObserver.expectShowsToast(
-            BackButtonInterceptor.popRoute,
-            message: l10n.pressOnceAgainToExit,
-            reason: 'Expected the app to ask for confirmation before exiting',
-          ),
-        ),
-        isFalse,
-        reason: 'Expected the app not to close after showing the toast',
-      );
-      await tester.binding.delayed(const Duration(seconds: 5));
-      expect(
-        await appObserver.haveCloseRequest(
-          () => toastObserver.expectShowsToast(
-            BackButtonInterceptor.popRoute,
-            message: l10n.pressOnceAgainToExit,
-            reason: 'Expected the app to ask for confirmation before exiting after the previous message timed out',
-          ),
-        ),
-        isFalse,
-        reason: 'Expected the app not to close after showing the toast',
-      );
-      expect(
-        await appObserver.haveCloseRequest(
-          () => toastObserver.expectShowsNoToast(
-            BackButtonInterceptor.popRoute,
+      final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
+      final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.lastToastMessage, l10n.pressOnceAgainToExit,
+          reason: 'Expected the app to ask for confirmation before exiting');
+      expect(systemObserver.closeRequests, 0,
+          reason: 'Expected the app not to close after showing the toast');
+      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT + const Duration(milliseconds: 1));
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.lastToastMessage, l10n.pressOnceAgainToExit,
+        reason: 'Expected the app to ask for confirmation before exiting after the previous message timed out');
+      expect(systemObserver.closeRequests, 0,
+        reason: 'Expected the app not to close after showing the toast');
+      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT - const Duration(milliseconds: 1));
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.lastToastMessage, null,
             reason: 'Expected the app to show no toast when pressing the back button a second time',
-          ),
-        ),
-        isTrue,
-      );
+          );
+      expect(systemObserver.closeRequests, 1,
+          reason: 'Expected the app to close if back is pressed after the confirmation toast was shown');
     });
   });
 
-  testWidgets('app respects the exit confirmation preference', (WidgetTester tester) async {
-    await Prefs.confirmExitingWithBackButton.set(true);
-    final ToastObserver toastObserver = ToastObserver(tester);
-    final AppObserver appObserver = AppObserver(tester);
+  testWidgets('app does not ask for exit confirmation if disabled in the preferences', (WidgetTester tester) async {
+    await Prefs.confirmExitingWithBackButton.set(false);
     await tester.runAppTest(() async {
-      expect(
-        await appObserver.haveCloseRequest(
-          () => toastObserver.expectShowsToast(
-            BackButtonInterceptor.popRoute,
-            message: l10n.pressOnceAgainToExit,
-            reason: 'Expected the app to ask for confirmation before exiting',
-          ),
-        ),
-        isFalse,
-        reason: 'Expected the app not to close after showing the toast',
-      );
-      await Prefs.confirmExitingWithBackButton.set(false);
-      await tester.binding.delayed(const Duration(seconds: 5));
-      expect(
-        await appObserver.haveCloseRequest(
-          () => toastObserver.expectShowsNoToast(
-            BackButtonInterceptor.popRoute,
-            reason: 'Expected the app to show no toast when pressing the back button after disabling it',
-          ),
-        ),
-        isTrue,
-        reason: 'Expected the confirmation toast to be disabled',
-      );
+      final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
+      final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.lastToastMessage, null,
+        reason: 'Expected the app to show no toast when pressing the back button after disabling it');
+      expect(systemObserver.closeRequests, 1,
+        reason: 'Expected the app to close if the confirmation toast is disabled');
     });
   });
 }
