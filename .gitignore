@@ -76,6 +76,8 @@
 
 # Ignore key props
 key.properties
+**/*.keystore
+**/*.jks
 
 # gen_l10n untranslated messages output, see l10n.yaml
 untranslated-messages.txt
