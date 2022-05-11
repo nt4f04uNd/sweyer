@@ -157,7 +157,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       final now = clock.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;
