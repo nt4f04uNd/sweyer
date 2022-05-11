@@ -1,4 +1,5 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sweyer/constants.dart';
 
 import '../observer/observer.dart';
@@ -10,13 +11,15 @@ void main() {
   });
 
   testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions', (WidgetTester tester) async {
+    late PermissionsChannelObserver permissionsObserver;
     await setUpAppTest(() {
-      FakePermissions.instance.granted = false;
+      permissionsObserver = tester.overwritePermissionObserver();
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {
-      expect(Permissions.instance.granted, false);
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
       await tester.tap(find.text(l10n.grant));
-      expect(Permissions.instance.granted, true);
+      expect(permissionsObserver.requestedPermissions, contains(Permission.storage));
     });
   });
 

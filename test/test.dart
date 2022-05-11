@@ -20,6 +20,7 @@ import 'package:sweyer/logic/logic.dart';
 
 export 'fakes/fakes.dart';
 
+import 'observer/observer.dart';
 import 'test.dart';
 
 final _testSong = Song(
@@ -87,6 +88,8 @@ const kScreenWidth = 450.0;
 /// The [configureFakes] callback can be used to modify the fake data providers
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  
   // Prepare flare.
   FlareTesting.setup();
 
@@ -109,7 +112,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   SystemUiStyleController.instance = FakeSystemUiStyleController();
   Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
-  Permissions.instance = FakePermissions();
+  PermissionsChannelObserver(binding); // Grant all permissions by default.
   ContentChannel.instance = FakeContentChannel();
   QueueControl.instance = FakeQueueControl();
   ThemeControl.instance = FakeThemeControl();

@@ -1,0 +1,87 @@
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler_platform_interface/permission_handler_platform_interface.dart';
+
+import '../test.dart';
+
+/// An observer for platform permission requests.
+class PermissionsChannelObserver {
+  /// The method channel used by the flutter permissions package
+  static const MethodChannel _channel = MethodChannel('flutter.baseflow.com/permissions/methods');
+  Set<Permission> _requestedPermissions = {};  // The permissions which were requested since the last observation.
+  Set<Permission> get requestedPermissions {
+    final permissions = _requestedPermissions;
+    clearRequestedPermissions();
+    return permissions;
+  }
+  Set<Permission> _checkedPermissions = {};  // The permissions which were checked since the last observation.
+  Set<Permission> get checkedPermissions {
+    final permissions = _checkedPermissions;
+    clearCheckedPermissions();
+    return permissions;
+  }
+  
+  /// Permissions whose values are specified, all other permissions are implicitly granted.
+  final Map<Permission, Future<PermissionStatus> Function()> _specifiedPermissions = {};
+
+  /// Create a new permissions observer, which automatically
+  /// unregisters any previously created observer.
+  PermissionsChannelObserver(TestWidgetsFlutterBinding binding) {
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(_channel, (call) async {
+      switch (call.method) {
+        case 'requestPermissions':
+          final Map<int, int> permissionStatuses = {};
+          for (final int permissionValue in List<int>.from(call.arguments)) {
+            final permission = Permission.byValue(permissionValue);
+            _requestedPermissions.add(permission);
+            final permissionStatus = await getStatus(permission);
+            permissionStatuses[permissionValue] = permissionStatus.index;
+          }
+          return permissionStatuses;
+        case 'checkPermissionStatus':
+          final Permission permission = Permission.byValue(call.arguments as int);
+          _checkedPermissions.add(permission);
+          final status = await getStatus(permission);
+          return status.index;
+      }
+      return null;  // Ignore unimplemented method calls
+    });
+  }
+  
+  /// Get the status of the given [permission].
+  Future<PermissionStatus> getStatus(Permission permission) {
+    return (_specifiedPermissions[permission] ?? () async => PermissionStatus.granted)();
+  }
+  
+  /// Forget all requested permissions.
+  void clearRequestedPermissions() {
+    _requestedPermissions = {};
+  }
+
+  /// Forget all checked permissions.
+  void clearCheckedPermissions() {
+    _checkedPermissions = {};
+  }
+
+  /// Set the status value of the [permission] to the result of the
+  /// [resolvable], which will be resolved when the permission status is
+  /// first requested.
+  void setPermissionResolvable(Permission permission, Future<PermissionStatus> Function() resolvable) {
+    _specifiedPermissions[permission] = resolvable;
+  }
+  
+  /// Set the [status] for the [permission].
+  void setPermission(Permission permission, PermissionStatus status) {
+    if (status == PermissionStatus.granted) {
+      _specifiedPermissions.remove(permission);
+    } else {
+      setPermissionResolvable(permission, () async => status);
+    }
+  }
+}
+
+extension PermissionObserverExtension on WidgetTester {
+  /// Create a new PermissionsChannelObserver, which overwrites the default one
+  /// for this test.
+  PermissionsChannelObserver overwritePermissionObserver() => PermissionsChannelObserver(binding);
+}

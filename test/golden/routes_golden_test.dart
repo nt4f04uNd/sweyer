@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import '../observer/observer.dart';
 import '../test.dart';
 
 void main() {
@@ -9,8 +11,10 @@ void main() {
 
   group('home_route', () {
     testAppGoldens('permissions_screen', (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
       await setUpAppTest(() {
-        FakePermissions.instance.granted = false;
+        permissionsObserver = tester.overwritePermissionObserver();
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
       });
       await tester.runAppTest(() async {
         await tester.tap(find.text(l10n.grant));
