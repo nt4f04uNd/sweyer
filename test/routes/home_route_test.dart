@@ -78,23 +78,16 @@ void main() {
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
       await BackButtonInterceptor.popRoute();
-      expect(toastObserver.lastToastMessage, l10n.pressOnceAgainToExit,
-          reason: 'Expected the app to ask for confirmation before exiting');
-      expect(systemObserver.closeRequests, 0,
-          reason: 'Expected the app not to close after showing the toast');
+      expect(toastObserver.lastToastMessage, l10n.pressOnceAgainToExit);
+      expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
       await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT + const Duration(milliseconds: 1));
       await BackButtonInterceptor.popRoute();
-      expect(toastObserver.lastToastMessage, l10n.pressOnceAgainToExit,
-        reason: 'Expected the app to ask for confirmation before exiting after the previous message timed out');
-      expect(systemObserver.closeRequests, 0,
-        reason: 'Expected the app not to close after showing the toast');
+      expect(toastObserver.lastToastMessage, l10n.pressOnceAgainToExit, reason: 'The previous message timed out');
+      expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
       await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT - const Duration(milliseconds: 1));
       await BackButtonInterceptor.popRoute();
-      expect(toastObserver.lastToastMessage, null,
-            reason: 'Expected the app to show no toast when pressing the back button a second time',
-          );
-      expect(systemObserver.closeRequests, 1,
-          reason: 'Expected the app to close if back is pressed after the confirmation toast was shown');
+      expect(toastObserver.lastToastMessage, null);
+      expect(systemObserver.closeRequests, 1);
     });
   });
 
@@ -104,10 +97,8 @@ void main() {
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
       await BackButtonInterceptor.popRoute();
-      expect(toastObserver.lastToastMessage, null,
-        reason: 'Expected the app to show no toast when pressing the back button after disabling it');
-      expect(systemObserver.closeRequests, 1,
-        reason: 'Expected the app to close if the confirmation toast is disabled');
+      expect(toastObserver.lastToastMessage, null);
+      expect(systemObserver.closeRequests, 1);
     });
   });
 }
