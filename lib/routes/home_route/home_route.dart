@@ -160,11 +160,12 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
     final l10n = getl10n(context);
     return CenterContentScreen(
       text: l10n.noMusic + ' :(',
-      widget: ButtonTheme(
-        minWidth: 130.0, // specific value
-        height: 40.0,
-        child: NFButton(
-          variant: NFButtonVariant.raised,
+      widget: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 40.0,
+          minWidth: 130.0,
+        ),
+        child: AppButton(
           loading: _fetching,
           text: l10n.refresh,
           onPressed: _handleRefetch,
@@ -204,11 +205,12 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
     final l10n = getl10n(context);
     return CenterContentScreen(
       text: l10n.allowAccessToExternalStorage,
-      widget: ButtonTheme(
-        minWidth: 130.0, // specific value
-        height: 40.0,
-        child: NFButton(
-          variant: NFButtonVariant.raised,
+      widget: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 40.0,
+          minWidth: 130.0,
+        ),
+        child: AppButton(
           loading: _fetching,
           text: l10n.grant,
           onPressed: _handlePermissionRequest,

@@ -153,7 +153,7 @@ class ThemeControl {
         colorScheme: Constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
-          // todo: temporarily used for text in [NFButtons], remove when it's removed
+          // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         ),
         tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(

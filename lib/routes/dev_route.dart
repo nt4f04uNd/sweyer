@@ -16,16 +16,17 @@ class DevRoute extends StatelessWidget {
   }
 
   Future<void> _quitDevMode(BuildContext context, AppLocalizations l10n) async {
-    final nfl10n = NFLocalizations.of(context);
+    final l10n = getl10n(context);
     final res = await ShowFunctions.instance.showDialog(
       context,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
       buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-      acceptButton: NFButton.accept(
-        text: nfl10n.accept,
+      acceptButton: AppButton.pop(
+        text: l10n.accept,
+        popResult: true,
         splashColor: Constants.Theme.glowSplashColor.auto,
-        textStyle: const TextStyle(color: Constants.AppColors.red),
+        textColor: Constants.AppColors.red,
       ),
     );
     if (res != null && res as bool) {
@@ -105,8 +106,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         changed: _value != 1.0,
         child: ButtonTheme(
           height: 36.0,
-          child: NFButton(
-            variant: NFButtonVariant.raised,
+          child: AppButton(
             text: l10n.reset,
             onPressed: () {
               _handleChangeEnd(1.0);

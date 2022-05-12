@@ -172,11 +172,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             color: ThemeControl.instance.theme.colorScheme.primary,
             supportedLocales: Constants.Config.supportedLocales,
             scrollBehavior: _ScrollBehavior(),
-            localizationsDelegates:
-              AppLocalizations.localizationsDelegates
-              + const [
-                NFLocalizations.delegate,
-              ],
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             theme: ThemeControl.instance.theme,
             routerDelegate: AppRouter.instance,
             routeInformationParser: AppRouteInformationParser(),

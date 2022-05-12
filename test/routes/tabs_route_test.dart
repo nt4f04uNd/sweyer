@@ -132,6 +132,7 @@ void main() {
 
       // Change songs length
       ContentControl.instance.state.allSongs.songs.removeLast();
+      ContentControl.instance.emitContentChange();
       await tester.pump();
 
       tester.expectSongTiles(songs.toList()..removeLast());

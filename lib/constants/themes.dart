@@ -79,7 +79,7 @@ abstract class Theme {
         onPrimary: Colors.white,
         secondary: AppColors.eee,
         secondaryVariant: Colors.white,
-        // todo: temporarily used for text in [NFButtons], remove when it's removed
+        // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
         onError: Colors.white,
@@ -205,7 +205,7 @@ abstract class Theme {
         onPrimary: Colors.white,
         secondary: AppColors.grey,
         secondaryVariant: Colors.black,
-        // todo: temporarily used for text in [NFButtons], remove when it's removed
+        // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         onSecondary: Colors.white,
         error: Color(0xffed3b3b),
         onError: Colors.white,

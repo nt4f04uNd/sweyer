@@ -1640,7 +1640,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
       buttonSplashColor: Constants.Theme.glowSplashColor.auto,
       acceptButton: const SizedBox(),
       // acceptButton: Builder(
-      //   builder: (context) => NFButton.accept(
+      //   builder: (context) => AppButton.pop(
       //     text: getl10n(context).add,
       //     splashColor: Constants.Theme.glowSplashColor.auto,
       //     onPressed: () {
@@ -1882,10 +1882,11 @@ void _showActionConfirmationDialog<E extends Content>({
     ),
     buttonSplashColor: Constants.Theme.glowSplashColor.auto,
     acceptButton: Builder(
-      builder: (context) => NFButton.accept(
+      builder: (context) => AppButton.pop(
         text: localizedAction(getl10n(context)),
+        popResult: true,
         splashColor: Constants.Theme.glowSplashColor.auto,
-        textStyle: const TextStyle(color: Constants.AppColors.red),
+        textColor: Constants.AppColors.red,
         onPressed: () {
           onSubmit();
           controller.close();

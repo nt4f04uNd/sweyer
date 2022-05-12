@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart'
     hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
@@ -50,26 +51,11 @@ class ShowFunctions extends NFShowFunctions {
   /// Shows a dialog to create a playlist.
   Future<Playlist?> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
     final TextEditingController controller = TextEditingController();
-    final AnimationController animationController = AnimationController(
-      vsync: vsync,
-      duration: const Duration(milliseconds: 300),
-    );
+    final enabled = ValueNotifier(false);
     controller.addListener(() {
-      if (controller.text.trim().isNotEmpty)
-        animationController.forward();
-      else
-        animationController.reverse();
+      enabled.value = controller.text.trim().isNotEmpty;
     });
-    final animation = ColorTween(
-      begin: theme.disabledColor,
-      end: theme.colorScheme.onSecondary,
-    ).animate(CurvedAnimation(
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
-      parent: animationController,
-    ));
     bool submitted = false;
     String? name;
     Future<void> submit(BuildContext context) async {
@@ -92,26 +78,18 @@ class ShowFunctions extends NFShowFunctions {
           },
           onDispose: () {
             controller.dispose();
-            animationController.dispose();
           },
         ),
       ),
       buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-      acceptButton: AnimatedBuilder(
-        animation: animation,
-        builder: (context, child) => IgnorePointer(
-          ignoring: const IgnoringStrategy(
-            dismissed: true,
-            reverse: true,
-          ).ask(animation),
-          child: NFButton(
-            text: l10n.create,
-            textStyle: TextStyle(color: animation.value),
-            splashColor: Constants.Theme.glowSplashColor.auto,
-            onPressed: () async {
-              submit(context);
-            },
-          ),
+      acceptButton: ValueListenableBuilder<bool>(
+        valueListenable: enabled,
+        builder: (context, value, child) => AppButton.flat(
+          text: l10n.create,
+          splashColor: Constants.Theme.glowSplashColor.auto,
+          onPressed: !value ? null : () async {
+            submit(context);
+          },
         ),
       ),
     );
@@ -145,11 +123,10 @@ class ShowFunctions extends NFShowFunctions {
             bottom: 4.0,
           ),
           color: theme.colorScheme.error,
-          trailing: NFButton(
-            variant: NFButtonVariant.raised,
+          trailing: AppButton(
             text: l10n.details,
             color: theme.colorScheme.onPrimary,
-            textStyle: const TextStyle(color: Colors.black),
+            textColor: Colors.black,
             onPressed: () {
               globalKey.currentState!.close();
               showAlert(
@@ -189,13 +166,80 @@ class ShowFunctions extends NFShowFunctions {
                   ),
                 ),
                 additionalActions: [
-                  NFCopyButton(text: errorDetails),
+                  CopyButton(text: errorDetails),
                 ],
               );
             },
           ),
         ),
       ),
+    );
+  }
+
+  Future<T?> showAlert<T extends Object?>(
+    BuildContext context, {
+    Widget? title,
+    Widget? content,
+    EdgeInsets titlePadding = defaultAlertTitlePadding,
+    EdgeInsets contentPadding = defaultAlertContentPadding,
+    Widget? closeButton,
+    Color? buttonSplashColor,
+    List<Widget>? additionalActions,
+    SystemUiOverlayStyle? ui,
+  }) async {
+    final l10n = getl10n(context);
+    title ??= Text(l10n.warning);
+    closeButton ??= AppButton.pop(
+      text: l10n.close,
+      popResult: false,
+      splashColor: buttonSplashColor,
+    );
+    return showDialog<T>(
+      context,
+      title: title,
+      content: content,
+      titlePadding: titlePadding,
+      contentPadding: contentPadding,
+      acceptButton: closeButton,
+      cancelButton: const SizedBox.shrink(),
+      buttonSplashColor: buttonSplashColor,
+      additionalActions: additionalActions,
+      ui: ui,
+    );
+  }
+
+  @override
+  Future<T?> showDialog<T extends Object?>(
+    BuildContext context, {
+    required Widget title,
+    Widget? content,
+    EdgeInsets titlePadding: defaultAlertTitlePadding,
+    EdgeInsets contentPadding = defaultAlertContentPadding,
+    Widget? acceptButton,
+    Widget? cancelButton,
+    Color? buttonSplashColor,
+    List<Widget>? additionalActions,
+    double borderRadius = 8.0,
+    SystemUiOverlayStyle? ui,
+  }) async {
+    final l10n = getl10n(context);
+    cancelButton ??= AppButton.pop(
+      text: l10n.cancel,
+      popResult: false,
+      splashColor: buttonSplashColor,
+    );
+    return super.showDialog<T>(
+      context,
+      title: title,
+      content: content,
+      titlePadding: titlePadding,
+      contentPadding: contentPadding,
+      acceptButton: acceptButton,
+      cancelButton: cancelButton,
+      buttonSplashColor: buttonSplashColor,
+      additionalActions: additionalActions,
+      borderRadius: borderRadius,
+      ui: ui,
     );
   }
 }

@@ -591,5 +591,30 @@
   "@confirmExitingWithBackButtonSetting": {
     "type": "text",
     "placeholders": {}
+  },
+  "warning": "Предупреждение",
+  "@warning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "close": "Закрыть",
+  "@close": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "accept": "Принять",
+  "@accept": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "cancel": "Отмена",
+  "@cancel": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "copied": "Скопировано",
+  "@copied": {
+    "type": "text",
+    "placeholders": {}
   }
 }

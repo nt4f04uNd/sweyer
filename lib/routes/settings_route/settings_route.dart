@@ -98,8 +98,8 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleGithubTap() {
-    const url = Constants.Config.GITHUB_REPO_URL;
-    launch(url);
+    final url = Uri.parse(Constants.Config.GITHUB_REPO_URL);
+    launchUrl(url);
   }
 
   void _handleLicenseTap() {

@@ -121,7 +121,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       title: Text(l10n.sort),
       titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
-      acceptButton: const SizedBox.shrink(),
+      closeButton: const SizedBox.shrink(),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: SortFeature

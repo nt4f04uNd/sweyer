@@ -798,7 +798,7 @@ class _InfoButton extends StatelessWidget {
               ),
             ),
             additionalActions: [
-              NFCopyButton(text: songInfo),
+              CopyButton(text: songInfo),
             ],
           );
         },
@@ -1007,6 +1007,7 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
               title: Text(l10n.saved, style: TextStyle(fontSize: 15.0, color: theme.colorScheme.onPrimary)),
               trailing: AppButton(
                 text: l10n.view,
+                horizontalPadding: 20.0,
                 onPressed: () {
                   key.currentState!.close();
                   HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlist));

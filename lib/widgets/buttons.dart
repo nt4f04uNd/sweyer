@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -63,6 +64,14 @@ class SettingsButton extends StatelessWidget {
   }
 }
 
+/// Button type for [AppButton].
+enum AppButtonType {
+  /// Will create [ElevatedButton].
+  elevated,
+
+  /// Will create [TextButton].
+  flat,
+}
 
 /// A button with text and icon, used to start queue playback.
 /// 
@@ -81,8 +90,52 @@ class AppButton extends StatefulWidget {
     this.borderRadius = 15.0,
     this.fontSize,
     this.fontWeight = FontWeight.w800,
+    this.loading = false,
+    this.verticalPadding = 0.0,
+    this.horizontalPadding = kHorizontalPadding,
+  }) : type = AppButtonType.elevated,
+       popResult = _emptyPopResult,
+       super(key: key);
+
+  const AppButton.flat({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+    this.icon,
+    this.color,
+    this.textColor,
+    this.splashColor,
+    this.borderRadius = 15.0,
+    this.fontSize,
+    this.fontWeight = FontWeight.w800,
+    this.loading = false,
+    this.verticalPadding = 0.0,
+    this.horizontalPadding = kHorizontalPadding,
+  }) : type = AppButtonType.flat,
+       popResult = _emptyPopResult, 
+       super(key: key);
+
+  /// Will automatically pop using its context, [onPressed] still will be called.
+  const AppButton.pop({
+    Key? key,
+    required this.text,
+    required this.popResult,
+    this.type = AppButtonType.flat,
+    this.onPressed,
+    this.icon,
+    this.color,
+    this.textColor,
+    this.splashColor,
+    this.borderRadius = 15.0,
+    this.fontSize,
+    this.fontWeight = FontWeight.w800,
+    this.loading = false,
+    this.verticalPadding = 0.0,
+    this.horizontalPadding = kHorizontalPadding,
   }) : super(key: key);
 
+  final AppButtonType type;
+  final Object? popResult;
   final String text;
   final Icon? icon;
   final VoidCallback? onPressed;
@@ -92,6 +145,14 @@ class AppButton extends StatefulWidget {
   final double borderRadius;
   final double? fontSize;
   final FontWeight fontWeight;
+  final bool loading;
+  final double verticalPadding;
+  final double horizontalPadding;
+
+  static const kHorizontalPadding = 15.0;
+  static const _emptyPopResult = Object();
+
+  bool get pop => popResult != _emptyPopResult;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -105,22 +166,50 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   ..value = disabled ? 0.0 : 1.0;
   late final colorAnimation = ColorTween(
     begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
-    end: widget.color ?? ThemeControl.instance.theme.colorScheme.primary,
+    end: widget.color ?? defaultColor,
   ).animate(CurvedAnimation(
     parent: controller,
-    curve:  Curves.easeOut,
+    curve: Curves.easeOut,
     reverseCurve: Curves.easeIn,
   ));
   late final textColorAnimation = ColorTween(
     begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.38),
-    end: widget.textColor ?? ThemeControl.instance.theme.colorScheme.onPrimary
+    end: widget.textColor ?? defaultTextColor,
   ).animate(CurvedAnimation(
     parent: controller,
-    curve:  Curves.easeOut,
+    curve: Curves.easeOut,
     reverseCurve: Curves.easeIn,
   ));
 
-  bool get disabled => widget.onPressed == null;
+  bool get disabled => !widget.pop && widget.onPressed == null;
+
+  Color get defaultColor {
+    switch (widget.type) {
+      case AppButtonType.elevated:
+        return ThemeControl.instance.theme.colorScheme.primary;
+      case AppButtonType.flat:
+        return Colors.transparent;
+    }
+  }
+
+  Color get defaultTextColor {
+    switch (widget.type) {
+      case AppButtonType.elevated:
+        return ThemeControl.instance.theme.colorScheme.onPrimary;
+      case AppButtonType.flat:
+        return ThemeControl.instance.theme.colorScheme.onSecondary;
+    }
+  }
+
+  VoidCallback? get onPressed => !widget.pop ? widget.onPressed : () {
+    Navigator.pop(context, widget.popResult);
+    widget.onPressed?.call();
+  };
+
+  EdgeInsets get padding => EdgeInsets.symmetric(
+    vertical: widget.verticalPadding,
+    horizontal: widget.horizontalPadding,
+  );
 
   @override
   void didUpdateWidget(covariant AppButton oldWidget) {
@@ -139,9 +228,10 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   Widget _buildText() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 1.0),
-      child: Text(widget.text),
+    return Text(
+      widget.text,
+      maxLines: 1,
+      softWrap: false,
     );
   }
 
@@ -149,35 +239,90 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
-      builder: (context, child) => ElevatedButton(
-        onPressed: widget.onPressed,
-        style: const ElevatedButton(child: null, onPressed: null).defaultStyleOf(context).copyWith(
-          backgroundColor: MaterialStateProperty.all(colorAnimation.value),
-          padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 20.0)),
-          shape: MaterialStateProperty.all(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-            )
-          ),
-          foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
-          overlayColor: MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
-          splashFactory: NFListTileInkRipple.splashFactory,
-          shadowColor: MaterialStateProperty.all(Colors.transparent),
-          textStyle: MaterialStateProperty.all(TextStyle(
-            fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
-            fontWeight: widget.fontWeight,
-            fontSize: widget.fontSize,
-          )),
+      builder: (context, child) {
+        switch (widget.type) {
+          case AppButtonType.elevated:
+            return _buildElevated();
+          case AppButtonType.flat:
+            return _buildFlat();
+        }
+      },
+    );
+  }
+
+  Widget _buildChild() {
+    return widget.loading
+        ? const SizedBox(
+            width: 25.0,
+            height: 25.0,
+            child: CircularProgressIndicator(
+              strokeWidth: 3.0,
+              valueColor: AlwaysStoppedAnimation(Colors.white),
+            ),
+          )
+        : widget.icon == null ? _buildText() : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              widget.icon!,
+              const SizedBox(width: 6.0),
+               Padding(
+                padding: const EdgeInsets.only(bottom: 1.0),
+                child: _buildText(),
+              ),
+              const SizedBox(width: 8.0),
+            ],
+          );
+  }
+
+  Widget _buildElevated() {
+    return ElevatedButton(
+      child: _buildChild(),
+      onPressed: onPressed,
+      style: const ElevatedButton(child: null, onPressed: null).defaultStyleOf(context).copyWith(
+        animationDuration: Duration.zero,
+        backgroundColor: MaterialStateProperty.all(colorAnimation.value),
+        padding: MaterialStateProperty.all(padding),
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          )
         ),
-        child: widget.icon == null ? Text(widget.text): Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            widget.icon!,
-            const SizedBox(width: 6.0),
-            _buildText(),
-            const SizedBox(width: 8.0),
-          ],
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
+        overlayColor: MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
+        splashFactory: NFListTileInkRipple.splashFactory,
+        shadowColor: MaterialStateProperty.all(Colors.transparent),
+        textStyle: MaterialStateProperty.all(TextStyle(
+          fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
+          fontWeight: widget.fontWeight,
+          fontSize: widget.fontSize,
+        )),
+      ),
+    );
+  }
+
+  Widget _buildFlat() {
+     return TextButton(
+      child: _buildChild(),
+      onPressed: onPressed,
+      style: const TextButton(child: SizedBox.shrink(), onPressed: null).defaultStyleOf(context).copyWith(
+        animationDuration: Duration.zero,
+        padding: MaterialStateProperty.all(padding),
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          )
         ),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
+        overlayColor: MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
+        splashFactory: NFListTileInkRipple.splashFactory,
+        shadowColor: MaterialStateProperty.all(Colors.transparent),
+        textStyle: MaterialStateProperty.all(TextStyle(
+          fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
+          fontWeight: widget.fontWeight,
+          fontSize: widget.fontSize,
+        )),
       ),
     );
   }
@@ -221,6 +366,54 @@ class ShuffleQueueButton extends StatelessWidget {
       fontSize: 15.0,
       fontWeight: FontWeight.w700,
       onPressed: onPressed,
+    );
+  }
+}
+
+/// Creates an icon copy button, which, when preseed,
+/// will copy [text] to clipboard.
+class CopyButton extends StatelessWidget {
+  const CopyButton({
+    Key? key,
+    this.text,
+    this.size = 44.0,
+  }) : super(key: key);
+
+  /// Text that will be copied when button is pressed.
+  final String? text;
+
+  /// Button size.
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final color = Theme.of(context).colorScheme.onPrimary;
+    return NFIconButton(
+      icon: const Icon(Icons.content_copy_rounded),
+      size: size,
+      onPressed: text == null
+          ? null
+          : () {
+              Clipboard.setData(
+                ClipboardData(text: text),
+              );
+              NFSnackbarController.showSnackbar(
+                NFSnackbarEntry(
+                  child: NFSnackbar(
+                    title: Text(
+                      l10n.copied,
+                      style: TextStyle(color: color),
+                    ),
+                    titlePadding: const EdgeInsets.only(left: 8.0),
+                    leading: Icon(
+                      Icons.content_copy_rounded,
+                      color: color,
+                    ),
+                  ),
+                ),
+              );
+            },
     );
   }
 }

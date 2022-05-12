@@ -666,7 +666,6 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                 backgroundColor: theme.primaryColor,
                 iconTheme: theme.primaryIconTheme,
                 textTheme: theme.primaryTextTheme,
-                brightness: theme.primaryColorBrightness,
                 leading: buildLeading(),
                 actions: selectionRoute ? const [] : buildActions(),
                 bottom: bottom,
@@ -1058,10 +1057,11 @@ class _SuggestionsHeader extends StatelessWidget {
               ui: Constants.UiTheme.modalOverGrey.auto,
               title: Text(l10n.searchClearHistory),
               buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-              acceptButton: NFButton.accept(
+              acceptButton: AppButton.pop(
                 text: l10n.delete,
+                popResult: true,
                 splashColor: Constants.Theme.glowSplashColor.auto,
-                textStyle: const TextStyle(color: Constants.AppColors.red),
+                textColor: Constants.AppColors.red,
                 onPressed: () => clearHistory(context),
               ),
             );
@@ -1133,10 +1133,11 @@ class _SuggestionTile extends StatelessWidget {
             ),
           ),
           buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-          acceptButton: NFButton.accept(
+          acceptButton: AppButton.pop(
             text: l10n.remove,
+            popResult: true,
             splashColor: Constants.Theme.glowSplashColor.auto,
-            textStyle: const TextStyle(color: Constants.AppColors.red),
+            textColor: Constants.AppColors.red,
             onPressed: () => _removeEntry(context, index)
           ),
         );

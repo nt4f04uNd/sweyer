@@ -419,7 +419,7 @@ packages:
     description:
       path: "."
       ref: "3.0.0"
-      resolved-ref: "6efae2f25a6c4c3ba1dd3852be2cc89e2ff90ac9"
+      resolved-ref: "7246e025e454a5007696012f0788daadac065bf6"
       url: "https://github.com/nt4f04uNd/nt4f04unds_widgets/"
     source: git
     version: "3.0.0"
@@ -735,7 +735,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.17"
+    version: "6.1.2"
   url_launcher_android:
     dependency: transitive
     description:

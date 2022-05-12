@@ -46,6 +46,7 @@ class _SelectionRouteState extends State<SelectionRoute> {
             animation: controller,
             builder: (context, child) => AppButton(
               text: l10n.done,
+              horizontalPadding: 20.0,
               onPressed: controller.data.isEmpty ? null : () {
                 widget.selectionArguments.onSubmit(controller.data);
                 Navigator.of(this.context).pop();
