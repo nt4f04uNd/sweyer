@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sweyer/constants.dart';
 
@@ -17,9 +20,22 @@ void main() {
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {
-      permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
+      expect(permissionsObserver.checkedPermissions, contains(Permission.storage),
+          reason: 'The app should always check the storage permission on startup');
+      expect(find.byType(Home), findsNothing,
+          reason: 'The app should not display the Home screen, if permissions are not granted yet');
+      final permissionGrantCompleter = Completer<PermissionStatus>(); 
+      permissionsObserver.setPermissionResolvable(Permission.storage, () => permissionGrantCompleter.future);
       await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.requestedPermissions, contains(Permission.storage));
+      expect(permissionsObserver.requestedPermissions, contains(Permission.storage),
+          reason: 'The app should request storage permission when clicking on the grant button');
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget,
+          reason: 'The app should display a loading indicator while waiting for the permission to be granted');
+      permissionGrantCompleter.complete(PermissionStatus.granted);
+      await tester.pumpAndSettle();
+      expect(find.byType(Home), findsOneWidget,
+          reason: 'The app should show the Home screen after permissions were granted.');
     });
   });
 
