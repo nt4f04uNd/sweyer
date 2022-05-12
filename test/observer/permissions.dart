@@ -20,6 +20,15 @@ class PermissionsChannelObserver {
     clearCheckedPermissions();
     return permissions;
   }
+  bool _wasOpenSettingsRequested = false;  /// If an attempt was made to open the permission settings since the last observation.
+  bool get wasOpenSettingsRequested {
+    final wasRequested = _wasOpenSettingsRequested;
+    clearCheckedPermissions();
+    return wasRequested;
+  }
+
+  /// Whether an attempt to open the settings should succeed.
+  bool isOpeningSettingsSuccessful = true;
   
   /// Permissions whose values are specified, all other permissions are implicitly granted.
   final Map<Permission, Future<PermissionStatus> Function()> _specifiedPermissions = {};
@@ -43,6 +52,9 @@ class PermissionsChannelObserver {
           _checkedPermissions.add(permission);
           final status = await getStatus(permission);
           return status.index;
+        case 'openAppSettings':
+          _wasOpenSettingsRequested = true;
+          return isOpeningSettingsSuccessful;
       }
       return null;  // Ignore unimplemented method calls
     });
@@ -61,6 +73,11 @@ class PermissionsChannelObserver {
   /// Forget all checked permissions.
   void clearCheckedPermissions() {
     _checkedPermissions = {};
+  }
+
+  /// Forget that opening the settings was requested.
+  void clearSettingsRequested() {
+    _wasOpenSettingsRequested = false;
   }
 
   /// Set the status value of the [permission] to the result of the
