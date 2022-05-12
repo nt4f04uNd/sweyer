@@ -41,7 +41,6 @@ abstract class Control {
   /// Must be called when the control needs to be initialized.
   @mustCallSuper
   void init() {
-    assert(_disposed.value);
     _disposed.value = false;
   }
 
