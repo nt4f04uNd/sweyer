@@ -779,7 +779,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
               WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
                 _prevIndex = index;
               });
-              return NFBackButtonListener(
+              return BackButtonListener(
                 onBackButtonPressed: () => _handlePop(delegate),
                 child:
                 StreamBuilder(
