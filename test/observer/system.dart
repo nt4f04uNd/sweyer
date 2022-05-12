@@ -6,11 +6,7 @@ import '../test.dart';
 class SystemChannelObserver {
   
   int _closeRequests = 0;  /// How many close request was recorded since the last observation.
-  int get closeRequests {
-    final numRequests = _closeRequests;
-    clearCloseRequest();
-    return numRequests;
-  } 
+  int get closeRequests => _closeRequests;
 
   /// Create a new system channel observer, which automatically
   /// unregisters any previously created observer.
@@ -22,10 +18,5 @@ class SystemChannelObserver {
       }
       return null;  // Ignore unimplemented method calls
     });
-  }
-
-  /// Reset the number of recorded close requests to zero.
-  void clearCloseRequest() {
-    _closeRequests = 0;
   }
 }
