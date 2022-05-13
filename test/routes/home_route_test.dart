@@ -1,3 +1,7 @@
+import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:sweyer/constants.dart';
+
+import '../observer/observer.dart';
 import '../test.dart';
 
 void main() {
@@ -65,6 +69,37 @@ void main() {
         return tester.tap(find.text(l10n.refresh));
       });
       expect(ContentControl.instance.state.allSongs.songs, [songWith()]);
+    });
+  });
+
+  testWidgets('app shows exit confirmation toast if enabled in the preferences', (WidgetTester tester) async {
+    await Prefs.confirmExitingWithBackButton.set(true);
+    await tester.runAppTest(() async {
+      final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
+      final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit]);
+      expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
+      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT + const Duration(milliseconds: 1));
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit],
+          reason: 'The previous message timed out');
+      expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
+      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT - const Duration(milliseconds: 1));
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit]);
+      expect(systemObserver.closeRequests, 1);
+    });
+  });
+
+  testWidgets('app does not ask for exit confirmation if disabled in the preferences', (WidgetTester tester) async {
+    await Prefs.confirmExitingWithBackButton.set(false);
+    await tester.runAppTest(() async {
+      final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
+      final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
+      await BackButtonInterceptor.popRoute();
+      expect(toastObserver.toastMessagesLog, []);
+      expect(systemObserver.closeRequests, 1);
     });
   });
 }
