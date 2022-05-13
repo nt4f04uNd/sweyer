@@ -1047,11 +1047,11 @@ class _ActionsSelectionTitle extends StatelessWidget {
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
       child: Padding(
-          padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
-          child: const SelectionCounter(textStyle: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 19.0,
-          ))
+        padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
+        child: const SelectionCounter(textStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 19.0,
+        )),
       ),
     );
     return Row(

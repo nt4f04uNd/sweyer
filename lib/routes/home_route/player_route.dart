@@ -334,19 +334,19 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
       case QueueType.searched:
         final query = QueueControl.instance.state.searchQuery!;
         text.add(WidgetSpan(
-            child: StyledText(
-              overflow: TextOverflow.ellipsis,
-              style: _queueDescriptionStyle,
-              text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
-              tags: {
-                'query': StyledTextTag(
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: ThemeControl.instance.theme.colorScheme.onBackground,
-                  ),
+          child: StyledText(
+            overflow: TextOverflow.ellipsis,
+            style: _queueDescriptionStyle,
+            text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
+            tags: {
+              'query': StyledTextTag(
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: ThemeControl.instance.theme.colorScheme.onBackground,
                 ),
-              },
-            ),
+              ),
+            },
+          ),
         ));
         break;
       case QueueType.origin:
