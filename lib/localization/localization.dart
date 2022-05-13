@@ -103,8 +103,9 @@ extension AppLocalizationsExtension on AppLocalizations {
     )();
   }
 
-  /// Transforms the [text] so it can be safely embedded in a rich text. 
-  String escapeRich(String text) {
+  /// Transforms the [text] so it can be safely embedded into [StyledText] text.
+  /// See: https://pub.dev/packages/styled_text#escaping--special-characters
+  String escapeStyled(String text) {
     return text.replaceAllMapped(RegExp('["\'&<> ]'), (match) {
       switch (match.group(0)) {
         case '"':

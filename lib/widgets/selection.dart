@@ -1871,7 +1871,7 @@ void _showActionConfirmationDialog<E extends Content>({
                 )
               else
                 StyledText(
-                  text: localizedConfirm(l10n, count, '<bold>${l10n.escapeRich(entry.title)}</bold>'),
+                  text: localizedConfirm(l10n, count, '<bold>${l10n.escapeStyled(entry.title)}</bold>'),
                   style: const TextStyle(fontSize: 15.0),
                   tags: {
                     'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),

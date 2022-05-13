@@ -337,7 +337,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              text: l10n.foundByQuery('<query>${l10n.escapeRich('"$query"')}</query>'),
+              text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
               tags: {
                 'query': StyledTextTag(
                   style: TextStyle(
@@ -356,7 +356,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              text: l10n.albumQueue('<name>${l10n.escapeRich(origin.nameDotYear)}</name>'),
+              text: l10n.albumQueue('<name>${l10n.escapeStyled(origin.nameDotYear)}</name>'),
               tags: {
                 'name': StyledTextTag(
                   style: TextStyle(
@@ -372,7 +372,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              text: l10n.playlistQueue('<name>${l10n.escapeRich(origin.name)}</name>'),
+              text: l10n.playlistQueue('<name>${l10n.escapeStyled(origin.name)}</name>'),
               tags: {
                 'name': StyledTextTag(
                   style: TextStyle(
@@ -388,7 +388,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              text: l10n.artistQueue('<name>${l10n.escapeRich(ContentUtils.localizedArtist(origin.artist, l10n))}</name>'),
+              text: l10n.artistQueue('<name>${l10n.escapeStyled(ContentUtils.localizedArtist(origin.artist, l10n))}</name>'),
               tags: {
                 'name': StyledTextTag(
                   style: TextStyle(

@@ -1122,7 +1122,7 @@ class _SuggestionTile extends StatelessWidget {
           contentPadding: defaultAlertContentPadding.copyWith(bottom: 6.0),
           content: StyledText(
             style: const TextStyle(fontSize: 15.0),
-            text: l10n.searchHistoryRemoveEntryDescription('<bold>${l10n.escapeRich('"${SearchHistory.instance.history![index]}"')}</bold>'),
+            text: l10n.searchHistoryRemoveEntryDescription('<bold>${l10n.escapeStyled('"${SearchHistory.instance.history![index]}"')}</bold>'),
             tags: {
               'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),
             },
