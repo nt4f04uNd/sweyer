@@ -8,4 +8,7 @@ abstract class Config {
     Locale('ru', 'RU'),
   ];
   static const int SEARCH_HISTORY_LENGTH = 30;
+  
+  /// The amount of time within a second back press will close the app after the first back press.
+  static const BACK_PRESS_CLOSE_TIMEOUT = Duration(seconds: 2);
 }
