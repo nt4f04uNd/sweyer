@@ -316,24 +316,29 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         fontWeight: FontWeight.w700,
       );
 
-  List<InlineSpan> _getQueueType(AppLocalizations l10n) {
-    final List<InlineSpan> text = [];
+  Text _buildTitleText(AppLocalizations l10n) {
+    final InlineSpan text;
+    final Key key;
     switch (QueueControl.instance.state.type) {
       case QueueType.allSongs:
-        text.add(TextSpan(text: l10n.allTracks));
+        text = TextSpan(text: l10n.allTracks);
+        key = ValueKey(l10n.allTracks);
         break;
       case QueueType.allAlbums:
-        text.add(TextSpan(text: l10n.allAlbums));
+        text = TextSpan(text: l10n.allAlbums);
+        key = ValueKey(l10n.allAlbums);
         break;
       case QueueType.allPlaylists:
-        text.add(TextSpan(text: l10n.allPlaylists));
+        text = TextSpan(text: l10n.allPlaylists);
+        key = ValueKey(l10n.allPlaylists);
         break;
       case QueueType.allArtists:
-        text.add(TextSpan(text: l10n.allArtists));
+        text = TextSpan(text: l10n.allArtists);
+        key = ValueKey(l10n.allArtists);
         break;
       case QueueType.searched:
         final query = QueueControl.instance.state.searchQuery!;
-        text.add(WidgetSpan(
+        text = WidgetSpan(
           child: StyledText(
             overflow: TextOverflow.ellipsis,
             style: _queueDescriptionStyle,
@@ -347,12 +352,13 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
               ),
             },
           ),
-        ));
+        );
+        key = ValueKey(l10n.foundByQuery(query));
         break;
       case QueueType.origin:
         final origin = QueueControl.instance.state.origin!;
         if (origin is Album) {
-          text.add(WidgetSpan(
+          text = WidgetSpan(
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
@@ -366,9 +372,10 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 ),
               },
             ),
-          ));
+          );
+          key = ValueKey(l10n.albumQueue(origin.nameDotYear));
         } else if (origin is Playlist) {
-          text.add(WidgetSpan(
+          text = WidgetSpan(
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
@@ -382,13 +389,15 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 ),
               },
             ),
-          ));
+          );
+          key = ValueKey(l10n.playlistQueue(origin.name));
         } else if (origin is Artist) {
-          text.add(WidgetSpan(
+          final artist = ContentUtils.localizedArtist(origin.artist, l10n);
+          text = WidgetSpan(
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              text: l10n.artistQueue('<name>${l10n.escapeStyled(ContentUtils.localizedArtist(origin.artist, l10n))}</name>'),
+              text: l10n.artistQueue('<name>${l10n.escapeStyled(artist)}</name>'),
               tags: {
                 'name': StyledTextTag(
                   style: TextStyle(
@@ -398,22 +407,20 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 ),
               },
             ),
-          ));
+          );
+          key = ValueKey(l10n.artistQueue(artist));
         } else {
-          throw UnimplementedError();
+          throw UnimplementedError('Unhandled origin: $origin');
         }
         break;
       case QueueType.arbitrary:
-        text.add(TextSpan(text: l10n.arbitraryQueue));
+        text = TextSpan(text: l10n.arbitraryQueue);
+        key = ValueKey(l10n.arbitraryQueue);
         break;
     }
-    return text;
-  }
-
-  Text _buildTitleText(List<InlineSpan> text) {
     return Text.rich(
-      TextSpan(children: text),
-      key: ValueKey(text.fold<String>('', (prev, el) => prev + el.toPlainText())),
+      text,
+      key: key,
       overflow: TextOverflow.ellipsis,
       style: _queueDescriptionStyle,
     );
@@ -578,7 +585,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                     duration: const Duration(milliseconds: 400),
                                     switchInCurve: Curves.easeOut,
                                     switchOutCurve: Curves.easeIn,
-                                    child: _buildTitleText(_getQueueType(l10n)),
+                                    child: _buildTitleText(l10n),
                                   ),
                                 ),
                                 if (origin != null || type == QueueType.searched)
