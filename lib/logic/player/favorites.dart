@@ -1,13 +1,12 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
 @visibleForTesting
 class FavoritesRepository {
   final serializersMap = ContentMap<IntSerializerType>({
     for (final contentType in Content.enumerate())
-      contentType: IntListSerializer(ContentUtils.contentTypeString(contentType))
+      contentType: IntListSerializer('favorites_${ContentUtils.contentTypeString(contentType)}.json')
   });
 }
 
@@ -25,7 +24,7 @@ class FavoritesControl extends Control {
   @override
   Future<void> init() async {
     super.init();
-    _favoritesModeNotifier = ValueNotifier(false);
+    _favoritesModeNotifier.value = false;
     for (final contentType in Content.enumerate()) {
       final favoriteSet = _favoriteSetsMap.getValue(contentType) ?? {};
       if (_useAndroidFavorites(contentType)) {
@@ -46,13 +45,12 @@ class FavoritesControl extends Control {
 
   @override
   void dispose() {
-    _favoritesModeNotifier.dispose();
     _favoriteSetsMap.clear();
     super.dispose();
   }
 
   ValueListenable<bool> get onFavoritesMode => _favoritesModeNotifier;
-  late ValueNotifier<bool> _favoritesModeNotifier;
+  final ValueNotifier<bool> _favoritesModeNotifier = ValueNotifier(false);
 
   /// Whether tabs route currently should filter and only show favorite content.
   bool get favoritesMode => _favoritesModeNotifier.value;
