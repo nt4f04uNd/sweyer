@@ -463,6 +463,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   static ValueGetter<List<Widget>> _getActions<T extends Content>(List<Widget> additionalPlayActions) {
     const commonActions = <Widget>[
+      _FavoriteSelectionAction(),
       _PlayAsQueueSelectionAction(),
       _ShuffleAsQueueSelectionAction(),
       _AddToPlaylistSelectionAction(),
@@ -1361,7 +1362,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
       : super(key: key);
 
   void _handleTap(ContentSelectionController controller) {
-    final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
+    final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
     QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: false,
@@ -1400,7 +1401,7 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
       : super(key: key);
 
   void _handleTap(ContentSelectionController controller) {
-    final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
+    final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
     QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: true,
@@ -1627,7 +1628,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
                   final playlist = playlists[index];
                   ContentControl.instance.insertSongsInPlaylist(
                     index: playlist.length + 1,
-                    songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged),
+                    songs: ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged),
                     playlist: playlist,
                   );
                   Navigator.pop(context);
@@ -1666,6 +1667,43 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           tooltip: l10n.addToPlaylist,
           icon: const Icon(Icons.playlist_add_rounded),
           onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(context, controller),
+        ),
+      ),
+    );
+  }
+}
+
+/// Action that removes a song from playlist.
+class _FavoriteSelectionAction extends StatelessWidget {
+  const _FavoriteSelectionAction({ Key? key }) : super(key: key);
+
+  void _handleTap(BuildContext context, ContentSelectionController controller) {
+    final contentTuple = ContentUtils.selectionPack(controller.data);
+    FavoritesControl.instance.setFavorite(
+      contentTuple: contentTuple,
+      value: contentTuple.any((el) => !el.isFavorite),
+    );
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    return _ActionBuilder(
+      controller: controller,
+      shown: () => true,
+      builder: (context, child) => EmergeAnimation(
+        animation: controller.animation,
+        child: NFIconButton(
+          tooltip: l10n.addToFavorites,
+          icon: Icon(
+            controller.data.any((el) => !el.data.isFavorite)
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
+            size: 24.0,
+          ),
+          onPressed: () => _handleTap(context, controller),
         ),
       ),
     );
@@ -1968,7 +2006,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     return ContentArt(
       source: ContentArtSource(item),
       size: size,
-      defaultArtIcon: item is PersistentQueue ? ContentUtils.persistentQueueIcon(item) : null,
+      defaultArtIcon: item.contentIcon,
     );
   }
 

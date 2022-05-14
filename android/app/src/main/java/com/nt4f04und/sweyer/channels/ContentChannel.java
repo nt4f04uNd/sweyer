@@ -233,10 +233,10 @@ public enum ContentChannel {
                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                   this.result = result;
                   Boolean value = call.argument("value");
-                  ArrayList<HashMap<String, Object>> songs = call.argument("songs");
+                  ArrayList<ArrayList<Object>> songsIds = call.argument("songsIds");
                   ArrayList<Uri> uris = new ArrayList<>();
-                  for (HashMap<String, Object> song : songs) {
-                     Long id = GeneralHandler.getLong(song.get("id"));
+                  for (Object songId : songsIds) {
+                     Long id = GeneralHandler.getLong(songId);
                      uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
                   }
                   PendingIntent pendingIntent = MediaStore.createFavoriteRequest(
@@ -322,16 +322,16 @@ public enum ContentChannel {
                Handler handler = new Handler(Looper.getMainLooper());
                Executors.newSingleThreadExecutor().execute(() -> {
                   try {
-                     ArrayList<Object> songIds = call.argument("ids");
-                     ArrayList<String> songIdStrings = new ArrayList<>();
-                     for (Object id : songIds) {
-                        songIdStrings.add(id.toString());
+                     ArrayList<Object> ids = call.argument("ids");
+                     ArrayList<String> idsStrings = new ArrayList<>();
+                     for (Object id : ids) {
+                        idsStrings.add(id.toString());
                      }
                      ContentResolver resolver = getContentResolver();
                      resolver.delete(
                              MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                             FetchHandler.buildWhereForCount(MediaStore.Audio.Playlists._ID, songIdStrings.size()),
-                             songIdStrings.toArray(new String[0])
+                             FetchHandler.buildWhereForCount(MediaStore.Audio.Playlists._ID, ids.size()),
+                             idsStrings.toArray(new String[0])
                      );
                      resolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null);
                      handler.post(() -> {

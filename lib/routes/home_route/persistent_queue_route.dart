@@ -246,7 +246,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         }
         ContentControl.instance.insertSongsInPlaylist(
           index: index,
-          songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(entries).merged),
+          songs: ContentUtils.flatten(ContentUtils.selectionPackAndSort(entries).merged),
           playlist: playlist,
         );
       },
@@ -382,7 +382,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   children: [
                     ContentArt(
                       size: 130.0,
-                      defaultArtIcon: ContentUtils.persistentQueueIcon(queue),
+                      defaultArtIcon: queue.contentIcon,
                       defaultArtIconScale: 2,
                       assetHighRes: true,
                       assetScale: 1.5,

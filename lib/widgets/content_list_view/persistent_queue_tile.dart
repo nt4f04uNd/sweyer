@@ -174,7 +174,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             ContentArt(
               size: widget.gridArtSize,
               defaultArtIconScale: (widget.gridArtSize / kPersistentQueueTileArtSize) / 1.5,
-              defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
+              defaultArtIcon: widget.queue.contentIcon,
               assetHighRes: true,
               currentIndicatorScale: widget.gridCurrentIndicatorScale,
               assetScale: widget.gridArtAssetScale,
@@ -200,12 +200,12 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
               child: widget.small
                 ? ContentArt.songTile(
                     source: source,
-                    defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
+                    defaultArtIcon: widget.queue.contentIcon,
                     current: current,
                   )
                 : ContentArt.persistentQueueTile(
                     source: source,
-                    defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
+                    defaultArtIcon: widget.queue.contentIcon,
                     current: current,
                   ),
             ),
@@ -215,20 +215,19 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                 child: _buildInfo(),
               ),
             ),
-            if (selectionRoute)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.trailing != null)
-                    widget.trailing!,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.queue.isFavorite)
+                  const FavoriteIndicator(),
+                if (widget.trailing != null)
+                  widget.trailing!,
+                if (selectionRoute)
                   buildAddToSelection(),
-                ],
-              )
-            else if (widget.trailing != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: widget.trailing,
-              ),
+                if (!selectionRoute)
+                  const SizedBox(width: 8.0),
+              ],
+            ),
           ],
         ),
       );
@@ -275,13 +274,15 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       return _buildTile();
 
     const checkmarkGridMargin = 10.0;
+    const favoriteIndicatorMargin = 17.0;
+    const favoriteIndicatorLargeSize = 28.0;
     final theme = ThemeControl.instance.theme;
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
       children: [
         _buildTile(),
         if (!selectionRoute)
-          if(animation.status == AnimationStatus.dismissed)
+          if (animation.status == AnimationStatus.dismissed)
             const SizedBox.shrink()
           else
             Positioned(
@@ -299,6 +300,16 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                 iconTheme: theme.iconTheme.copyWith(color: Colors.white),
               ),
               child: buildAddToSelection(),
+            ),
+          ),
+        if (widget.grid && widget.queue.isFavorite)
+          Positioned(
+            left: selectionRoute ? 14.0 : 2.0,
+            top: selectionRoute
+              ? widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin * 1.5
+              : widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin,
+            child: const FavoriteIndicator(
+              size: favoriteIndicatorLargeSize,
             ),
           ),
       ],

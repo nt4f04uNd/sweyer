@@ -30,11 +30,12 @@ class LoopButton extends StatelessWidget {
 
 class ShuffleButton extends StatelessWidget {
   const ShuffleButton({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return StreamBuilder(
-      stream: ContentControl.instance.onContentChange,
+      stream: QueueControl.instance.onQueueChanged,
       builder: (context, snap) => AnimatedIconButton(
         icon: const Icon(Icons.shuffle_rounded),
         color: ThemeControl.instance.theme.colorScheme.onSurface,
@@ -419,6 +420,53 @@ class CopyButton extends StatelessWidget {
                 ),
               );
             },
+    );
+  }
+}
+
+class FavoriteButton extends StatelessWidget {
+  const FavoriteButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: ContentControl.instance.onContentChange,
+      builder: (context, snapshot) {
+        final currentSong = PlaybackControl.instance.currentSong;
+        return HeartButton(
+          active: currentSong.isFavorite,
+          onPressed: FavoritesControl.instance.switchFavoriteCurrentSong,
+        );
+      },
+    );
+  }
+}
+
+class HeartButton extends StatelessWidget {
+  const HeartButton({
+    Key? key,
+    this.active = true,
+    this.onPressed,
+  }) : super(key: key);
+
+  final bool active;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ThemeControl.instance.theme;
+    return AnimatedIconButton(
+      active: active,
+      duration: const Duration(milliseconds: 240),
+      icon: Icon(
+        active
+          ? Icons.favorite_rounded
+          : Icons.favorite_outline_rounded,
+      ),
+      color: Colors.redAccent,
+      inactiveColor: theme.colorScheme.onSurface.withOpacity(0.6),
+      iconSize: 24.0,
+      onPressed: onPressed,
     );
   }
 }

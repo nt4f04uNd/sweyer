@@ -7,6 +7,7 @@ export 'content_art.dart';
 export 'content_section.dart';
 export 'current_indicator.dart';
 export 'drawer.dart';
+export 'favorite_indicator.dart';
 export 'logo.dart';
 export 'play_pause_button.dart';
 export 'screens.dart';

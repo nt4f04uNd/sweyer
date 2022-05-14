@@ -138,20 +138,19 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                   ),
                 ),
               ),
-            if (selectionRoute)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (widget.artist.isFavorite)
+                    const FavoriteIndicator(),
                   if (widget.trailing != null)
                     widget.trailing!,
-                  buildAddToSelection(),
+                  if (selectionRoute)
+                    buildAddToSelection(),
+                  if (!selectionRoute)
+                    const SizedBox(width: 8.0)
                 ],
               )
-            else if (widget.trailing != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: widget.trailing,
-              ),
             ],
           ),
         ),

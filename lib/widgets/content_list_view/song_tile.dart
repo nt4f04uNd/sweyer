@@ -256,16 +256,17 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         title: title,
         subtitle: subtitle,
         leading: albumArt,
-        trailing: selectionRoute
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (widget.trailing != null)
-                  widget.trailing!,
-                buildAddToSelection(),
-              ],
-            )
-          : widget.trailing,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.song.isFavorite)
+              const FavoriteIndicator(),
+            if (widget.trailing != null)
+              widget.trailing!,
+            if (selectionRoute)
+              buildAddToSelection(),
+          ],
+        ),
       ),
     );
   }

@@ -91,7 +91,7 @@ void main() {
       await tester.runAppTest(() async {
         await tester.tap(find.text(
           l10n.sortFeature<Song>(
-            ContentControl.instance.state.sorts.getValue<Song>().feature as SongSortFeature,
+            ContentControl.instance.state.sorts.getValue<Song>()!.feature as SongSortFeature,
           )
         ));
         await tester.pumpAndSettle();
