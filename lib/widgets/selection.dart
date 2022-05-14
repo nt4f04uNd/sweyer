@@ -1690,20 +1690,17 @@ class _FavoriteSelectionAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
+    final theme = ThemeControl.instance.theme;
     return _ActionBuilder(
       controller: controller,
       shown: () => true,
       builder: (context, child) => EmergeAnimation(
         animation: controller.animation,
-        child: NFIconButton(
+        child: HeartButton(
           tooltip: l10n.addToFavorites,
-          icon: Icon(
-            controller.data.any((el) => !el.data.isFavorite)
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
-            size: 24.0,
-          ),
+          active: controller.data.any((el) => !el.data.isFavorite),
           onPressed: () => _handleTap(context, controller),
+          inactiveColor: theme.colorScheme.onSurface,
         ),
       ),
     );
