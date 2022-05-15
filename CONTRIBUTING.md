@@ -14,7 +14,7 @@ In particular, it includes not using auto-formatter.
 
 After you made some changes, run the tests
 
-```
+```shell
 flutter test
 ```
 
@@ -29,35 +29,26 @@ golden tests files.
 
 ## Updating golden tests
 
-Because Flutter golden files are platform-specific, the process
-will depend on what platform you are using.
+Because Flutter golden files are platform-specific, the golden files will vary slightly depending
+on what platform you are using. To avoid creating unnecessary changes and to have the golden tests
+consistent on the continuous integration tests, they should only be regenerated on Linux.
 
-If you are using Linux, you can update golden tests files locally just by running
-
-```
+You can update golden tests files locally on Linux just by running
+```shell
 flutter test --update-goldens
 ```
 
-To update the golden tests on Windows or macOS, open the [sweyer.yml](.github/workflows/sweyer.yml)
-workflow and set `update_goldens` to `true`:
+To update the golden tests from Windows or MacOS, run the
+[`Update Goldens`](https://github.com/nt4f04uNd/sweyer/actions/workflows/update_goldens.yml)
+workflow on GitHub **in your fork**. Unless you are a contributor, you can't run it on the main
+repository. In the popup, choose on which branch the goldens should be updated and whether
+the workflow should automatically create a commit on that branch with the updated golden artifacts:
 
-```yml
-name: Sweyer
-on: [push, pull_request]
+![The workflow site on GitHub](static_assets/readme/run_update_goldens_workflow.png)
 
-jobs:
-  build:
-    uses: ./.github/workflows/flutter_package.yml
-    with:
-      flutter_channel: stable
-      flutter_version: 2.10.5
-      min_coverage: 0
-      update_goldens: true # set this from false to true
-```
+The workflow also uploads a `golden-test-updated` artifact, which will contain the generated
+golden files:
 
-Then push your code to a pull request and wait for the workflow to finish,
-then open the workflow summary and download a `golden-test-updated` artifact,
-which will contain the generated golden files.
+![The workflow result site on GitHub](static_assets/readme/update_goldens_workflow_result.png)
 
-Put those new files into `test/golden/goldens` folder, then set `update_goldens`
-back to `false` and push these changes to your PR.
+Those new files can be put into `test/golden/goldens` folder and manually pushed to your PR.
