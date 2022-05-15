@@ -53,3 +53,9 @@ golden files:
 
 If you left the auto-commit option unchecked, those new files can be put into `test/golden/goldens`
 folder and manually pushed to your PR.
+
+## Coverage [![codecov](https://codecov.io/gh/nt4f04uNd/sweyer/branch/master/graph/badge.svg)](https://codecov.io/gh/nt4f04uNd/sweyer)
+
+Coverage measures which lines of code are covered during the tests. It shows which part of the
+code is untested. When adding a new feature, a test must be added to verify the new feature and to
+avoid reducing the test coverage.
