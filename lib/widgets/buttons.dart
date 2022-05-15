@@ -228,11 +228,13 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   Widget _buildText() {
-    return Text(
-      widget.text,
-      maxLines: 1,
-      softWrap: false,
-      overflow: TextOverflow.ellipsis,
+    return FittedBox(
+      fit: BoxFit.fitWidth,
+      child: Text(
+        widget.text,
+        maxLines: 1,
+        softWrap: false,
+      ),
     );
   }
 
