@@ -6,7 +6,7 @@ on:
         type: boolean
         default: true
         required: true
-        description: Commit the new Goldens to this branch.
+        description: Commit new Goldens to this branch.
 
 jobs:
   build:
@@ -20,8 +20,6 @@ jobs:
       - name: 🏗 Build and test Sweyer
         uses: ./.github/workflows/build_and_test
         with:
-          flutter_channel: stable
-          flutter_version: 2.10.5
           testing_arguments: --update-goldens
 
       - name: 📁 Save updated Golden test artifacts

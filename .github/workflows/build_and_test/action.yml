@@ -11,7 +11,7 @@ inputs:
     description: The channel of the Flutter used to build Sweyer with. 
   flutter_version:
     required: false
-    default: ""
+    default: "2.10.5"
     description: The version of Flutter used to build Sweyer with.
   testing_arguments:
     required: false
