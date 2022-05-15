@@ -29,12 +29,13 @@ jobs:
           path: test/golden/goldens
 
       - name: 💂 Verify that ${{ github.actor }} has permission to commit
-        if: ${{ github.event.inputs.commit == 'true' }}
-        shell: bash
-        run: git log --author='^${{ github.actor }} <\S*>$' --max-count=1 --exit-code > /dev/null && { echo '⚠ You have no commits on this branch and therefore no permission to commit ⚠' ; exit 1; } || exit 0
-
+        if: github.event.inputs.commit == 'true'
+        id: permissionCheck
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: write
       - name: 💾 Commit updated Golden test artifacts
         uses: stefanzweifel/git-auto-commit-action@v4
-        if: ${{ github.event.inputs.commit == 'true' }}
+        if: github.event.inputs.commit == 'true' && steps.permissionCheck.outputs.require-result == 'true'
         with:
           commit_message: 🤖 Update Golden test artifacts 🤖
