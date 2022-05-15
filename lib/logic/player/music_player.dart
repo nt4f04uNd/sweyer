@@ -180,16 +180,22 @@ class _BrowserParentProvider {
   }
 }
 
-class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
-  _AudioHandler() {
-    _init();
+@visibleForTesting
+class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
+  AudioHandler(MusicPlayer player) {
+    _init(player);
   }
 
   bool _disposed = false;
-  bool _running = false;
-  MusicPlayer player = MusicPlayer.instance;
+  @visibleForTesting
+  bool running = false;
+  late MusicPlayer player;
+  late StreamSubscription playbackSubscriber;
+  late StreamSubscription queueSubscriber;
 
-  Future<void> _init() async {
+  Future<void> _init(MusicPlayer player) async {
+    _disposed = false;
+    this.player = player;
     WidgetsBinding.instance!.addObserver(this);
     
     DateTime? _lastEvent;
@@ -204,14 +210,14 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
       _setState();
       _lastEvent = DateTime.now();
       if (playing)
-        _running = true;
+        running = true;
     });
     player.loopingStream.listen((event) => _setState());
-    PlaybackControl.instance.onSongChange.listen((song) {
+    playbackSubscriber = PlaybackControl.instance.onSongChange.listen((song) {
       mediaItem.add(song.toMediaItem());
       _setState();
     });
-    QueueControl.instance.onQueueChanged.listen((_) {
+    queueSubscriber = QueueControl.instance.onQueueChanged.listen((_) {
       queue.add(
         QueueControl.instance.state.current.songs
           .map((el) => el.toMediaItem())
@@ -223,6 +229,9 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   void dispose() {
     _disposed = true;
+    stop();
+    playbackSubscriber.cancel();
+    queueSubscriber.cancel();
     WidgetsBinding.instance!.removeObserver(this);
   }
 
@@ -330,7 +339,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> stop() async {
-    _running = false;
+    running = false;
     // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
     // await player.stop();
     await player.pause();
@@ -525,7 +534,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   /// Broadcasts the current state to all clients.
   void _setState() {
-    if (_disposed || !_running)
+    if (_disposed || !running)
       return;
     final playing = player.playing;
     final l10n = staticl10n;
@@ -636,20 +645,22 @@ class MusicPlayer extends AudioPlayer {
     return _instance ??= MusicPlayer._();
   }
 
-  static _AudioHandler? _handler;
+  @visibleForTesting
+  static AudioHandler? handler;
 
   /// Updates service state media item.
   void updateServiceMediaItem() {
     final song = PlaybackControl.instance.currentSongNullable;
-    if (song != null && _handler!._running) {
-      _handler!.mediaItem.add(song.toMediaItem());
+    if (song != null && handler!.running) {
+      handler!.mediaItem.add(song.toMediaItem());
     }
   }
 
   Future<void> init() async {
     await restoreLastSong();
-    _handler ??= await AudioService.init(builder: () {
-        return _AudioHandler();
+    await handler?._init(this);
+    handler ??= await AudioService.init(builder: () {
+        return AudioHandler(MusicPlayer.instance);
       },
       config: AudioServiceConfig(
         androidResumeOnClick: true,
@@ -694,7 +705,7 @@ class MusicPlayer extends AudioPlayer {
   @override
   Future<void> dispose() {
     _instance = null;
-    _handler?.stop();
+    handler?.dispose();
     return super.dispose();
   }
 
