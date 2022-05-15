@@ -233,9 +233,9 @@ public enum ContentChannel {
                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                   this.result = result;
                   Boolean value = call.argument("value");
-                  ArrayList<ArrayList<Object>> songsIds = call.argument("songsIds");
+                  ArrayList<ArrayList<Object>> songIds = call.argument("songIds");
                   ArrayList<Uri> uris = new ArrayList<>();
-                  for (Object songId : songsIds) {
+                  for (Object songId : songIds) {
                      Long id = GeneralHandler.getLong(songId);
                      uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
                   }
@@ -254,7 +254,7 @@ public enum ContentChannel {
                Intent serviceIntent = new Intent(GeneralHandler.getAppContext(), DeletionService.class);
                serviceIntent.putExtra("songs", (ArrayList<HashMap<?, ?>>) call.argument("songs"));
                GeneralHandler.getAppContext().startService(serviceIntent);
-               // Save the result to report to the flutter code later in `sendResultFromIntent(`
+               // Save the result to report to the flutter code later in `sendResultFromIntent`
                this.result = result;
                break;
             }

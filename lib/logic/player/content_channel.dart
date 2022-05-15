@@ -146,7 +146,7 @@ class ContentChannel {
       final res = await _channel.invokeMethod<bool>(
         'setSongsFavorite',
         {
-          'songsIds': songs.map((song) => song.sourceId).toList(),
+          'songIds': songs.map((song) => song.sourceId).toList(),
           'value': value,
         },
       );
