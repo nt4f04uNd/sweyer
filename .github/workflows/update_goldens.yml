@@ -1,0 +1,37 @@
+name: Update Goldens
+on: 
+  workflow_dispatch:
+    inputs:
+      commit:
+        type: boolean
+        default: true
+        required: true
+        description: Commit the new Goldens to this branch.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+
+      - name: 🏗 Build and test Sweyer
+        uses: ./.github/workflows/build_and_test
+        with:
+          flutter_channel: stable
+          flutter_version: 2.10.5
+          testing_arguments: --update-goldens
+
+      - name: 📁 Save updated Golden test artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: golden-test-updated
+          path: test/golden/goldens
+
+      - name: 💾 Commit updated Golden test artifacts
+        uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ github.event.inputs.commit == 'true' }}
+        with:
+          commit_message: 🤖 Update Golden test artifacts 🤖
