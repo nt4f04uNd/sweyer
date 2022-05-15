@@ -40,7 +40,7 @@ flutter test --update-goldens
 
 To update the golden tests from Windows or MacOS, run the
 [`Update Goldens`](https://github.com/nt4f04uNd/sweyer/actions/workflows/update_goldens.yml)
-workflow on GitHub **in your fork**. Unless you are a contributor, you can't run it on the main
+workflow on GitHub **in your fork**. Unless you are a collaborator, you can't run it on the main
 repository. In the popup, choose on which branch the goldens should be updated and whether
 the workflow should automatically create a commit on that branch with the updated golden artifacts:
 
@@ -51,4 +51,5 @@ golden files:
 
 ![The workflow result site on GitHub](static_assets/readme/update_goldens_workflow_result.png)
 
-Those new files can be put into `test/golden/goldens` folder and manually pushed to your PR.
+If you left the auto-commit option unchecked, those new files can be put into `test/golden/goldens`
+folder and manually pushed to your PR.
