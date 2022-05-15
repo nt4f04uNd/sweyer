@@ -1,0 +1,48 @@
+# Modified very_good_workflows workflow, see ThirdPartyNotices.txt for license
+# https://github.com/VeryGoodOpenSource/very_good_workflows/blob/c66b5434b3428fb5c3d5101492f173b206821850/.github/workflows/flutter_package.yml
+
+name: 🏗 Build and test Sweyer
+description: Build Sweyer and then test it.
+
+inputs:
+  flutter_channel:
+    required: false
+    default: "stable"
+    description: The channel of the Flutter used to build Sweyer with. 
+  flutter_version:
+    required: false
+    default: "2.10.5"
+    description: The version of Flutter used to build Sweyer with.
+  testing_arguments:
+    required: false
+    default: ""
+    description: Optional additional arguments to the flutter test command.
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🐦 Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{inputs.flutter_version}}
+        channel: ${{inputs.flutter_channel}}
+        cache: true
+
+    - name: 📦 Install Dependencies
+      shell: bash
+      run: |
+        flutter pub global activate very_good_cli
+        very_good --analytics false
+        very_good packages get --recursive
+
+    - name: 🧪 Run Tests
+      shell: bash
+      run: flutter test --no-pub --test-randomize-ordering-seed random ${{inputs.testing_arguments}}
+
+    - name: 📁 Save golden test failures artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: golden-test-failures
+        path: test/golden/failures
+        if-no-files-found: ignore
