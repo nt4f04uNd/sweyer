@@ -272,6 +272,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
                   child: _buildText(),
                 ),
               ),
+              const SizedBox(width: 8.0),
             ],
           );
   }
