@@ -1,8 +1,22 @@
-name: sweyer
-on: push
+name: Sweyer
+on: [push, pull_request]
 
 jobs:
   build:
-    uses: ./.github/workflows/flutter_package.yml
-    with:
-      min_coverage: 0
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v3
+
+      - name: 🏗 Build and test Sweyer
+        uses: ./.github/workflows/build_and_test
+        with:
+          flutter_channel: stable
+          flutter_version: 2.10.5
+          testing_arguments: --coverage
+
+      - name: 📊 Check Code Coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v1
+        with:
+          path: coverage/lcov.info
+          min_coverage: 0
