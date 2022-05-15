@@ -20,13 +20,13 @@ void main() {
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {
-      expect(permissionsObserver.checkedPermissions, contains(Permission.storage),
+      expect(permissionsObserver.checkedPermissions, [Permission.storage],
           reason: 'Should always check the storage permission on startup');
       expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
       final permissionGrantCompleter = Completer<PermissionStatus>(); 
       permissionsObserver.setPermissionResolvable(Permission.storage, () => permissionGrantCompleter.future);
       await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.requestedPermissions, contains(Permission.storage));
+      expect(permissionsObserver.requestedPermissions, [Permission.storage]);
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget,
           reason: 'Indicate while waiting for the permission to be granted');
@@ -47,12 +47,12 @@ void main() {
       permissionsObserver.isOpeningSettingsSuccessful = false;
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
       await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.wasOpenSettingsRequested, true);
+      expect(permissionsObserver.openSettingsRequests, 1);
       expect(toastObserver.toastMessagesLog, [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError]);
 
       permissionsObserver.isOpeningSettingsSuccessful = true;
       await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.wasOpenSettingsRequested, true);
+      expect(permissionsObserver.openSettingsRequests, 2);
       expect(
           toastObserver.toastMessagesLog,
           [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError, l10n.allowAccessToExternalStorageManually]);

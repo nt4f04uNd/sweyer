@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:permission_handler_platform_interface/permission_handler_platform_interface.dart';
@@ -8,24 +10,12 @@ import '../test.dart';
 class PermissionsChannelObserver {
   /// The method channel used by the flutter permissions package
   static const MethodChannel _channel = MethodChannel('flutter.baseflow.com/permissions/methods');
-  Set<Permission> _requestedPermissions = {};  // The permissions which were requested since the last observation.
-  Set<Permission> get requestedPermissions {
-    final permissions = _requestedPermissions;
-    clearRequestedPermissions();
-    return permissions;
-  }
-  Set<Permission> _checkedPermissions = {};  // The permissions which were checked since the last observation.
-  Set<Permission> get checkedPermissions {
-    final permissions = _checkedPermissions;
-    clearCheckedPermissions();
-    return permissions;
-  }
-  bool _wasOpenSettingsRequested = false;  /// If an attempt was made to open the permission settings since the last observation.
-  bool get wasOpenSettingsRequested {
-    final wasRequested = _wasOpenSettingsRequested;
-    clearCheckedPermissions();
-    return wasRequested;
-  }
+  final List<Permission> _requestedPermissions = [];  // The permissions which were requested.
+  List<Permission> get requestedPermissions  => UnmodifiableListView(_requestedPermissions);
+  final List<Permission> _checkedPermissions = [];  // The permissions which were checked.
+  List<Permission> get checkedPermissions => UnmodifiableListView(_checkedPermissions);
+  int _openSettingsRequests = 0;  /// The amount of attempts to open the permission settings.
+  int get openSettingsRequests => _openSettingsRequests;
 
   /// Whether an attempt to open the settings should succeed.
   bool isOpeningSettingsSuccessful = true;
@@ -53,7 +43,7 @@ class PermissionsChannelObserver {
           final status = await getStatus(permission);
           return status.index;
         case 'openAppSettings':
-          _wasOpenSettingsRequested = true;
+          _openSettingsRequests++;
           return isOpeningSettingsSuccessful;
       }
       return null;  // Ignore unimplemented method calls
@@ -63,21 +53,6 @@ class PermissionsChannelObserver {
   /// Get the status of the given [permission].
   Future<PermissionStatus> getStatus(Permission permission) {
     return (_specifiedPermissions[permission] ?? () async => PermissionStatus.granted)();
-  }
-  
-  /// Forget all requested permissions.
-  void clearRequestedPermissions() {
-    _requestedPermissions = {};
-  }
-
-  /// Forget all checked permissions.
-  void clearCheckedPermissions() {
-    _checkedPermissions = {};
-  }
-
-  /// Forget that opening the settings was requested.
-  void clearSettingsRequested() {
-    _wasOpenSettingsRequested = false;
   }
 
   /// Set the status value of the [permission] to the result of the
