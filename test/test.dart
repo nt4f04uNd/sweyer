@@ -79,9 +79,10 @@ final ArtistCopyWith artistWith = _testArtist.copyWith;
 
 /// Default l10n delegate in tests.
 final l10n = AppLocalizationsEn();
-const kScreenSize = Size(kScreenWidth, kScreenHeight);
 const kScreenHeight = 800.0;
 const kScreenWidth = 450.0;
+const kScreenPixelRatio = 3.0;
+const kScreenSize = Size(kScreenWidth, kScreenHeight);
 
 /// Sets the fake data providers and initializes the app state.
 /// 
@@ -89,7 +90,8 @@ const kScreenWidth = 450.0;
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  
+  binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
+  binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
   // Prepare flare.
   FlareTesting.setup();
 
@@ -175,16 +177,7 @@ extension WidgetTesterExtension on WidgetTester {
   Future<void> runAppTest(AsyncCallback callback, {AsyncCallback? goldenCaptureCallback}) async {
     // App only suppots vertical orientation, so switch tests to use it.
     await binding.setSurfaceSize(kScreenSize);
-    await pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window).copyWith(size: kScreenSize),
-          child: const App(
-            debugShowCheckedModeBanner: false,
-          ),
-        ),
-      ),
-    );
+    await pumpWidget(const App(debugShowCheckedModeBanner: false));
     await pump();
     await callback();
     await runAsync(() async {
