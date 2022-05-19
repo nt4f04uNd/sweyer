@@ -342,9 +342,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @override
   Future<void> stop() async {
     running = false;
-    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
-    // await player.stop();
-    await player.pause();
+    await player.stop();
     await super.stop();
   }
 
