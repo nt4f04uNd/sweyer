@@ -20,6 +20,7 @@ import 'package:sweyer/logic/logic.dart';
 
 export 'fakes/fakes.dart';
 
+import 'observer/observer.dart';
 import 'test.dart';
 
 final _testSong = Song(
@@ -87,6 +88,8 @@ const kScreenWidth = 450.0;
 /// The [configureFakes] callback can be used to modify the fake data providers
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  
   // Prepare flare.
   FlareTesting.setup();
 
@@ -109,13 +112,13 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   SystemUiStyleController.instance = FakeSystemUiStyleController();
   Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
-  Permissions.instance = FakePermissions();
-  ContentChannel.instance = FakeContentChannel();
+  PermissionsChannelObserver(binding); // Grant all permissions by default.
+  ContentChannel.instance = FakeContentChannel(binding);
   QueueControl.instance = FakeQueueControl();
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();
   PackageInfoPlatform.instance = MethodChannelPackageInfo();
-  const MethodChannel('dev.fluttercommunity.plus/package_info').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'), (MethodCall methodCall) async {
     return {
       'appName': Constants.Config.APPLICATION_TITLE,
       'packageName': 'com.nt4f04und.sweyer',
@@ -123,13 +126,13 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
       'buildNumber': '0',
     };
   });
-  const MethodChannel('com.ryanheise.audio_service.client.methods').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_service.client.methods'), (MethodCall methodCall) async {
     return {};
   });
-  const MethodChannel('com.ryanheise.audio_service.handler.methods').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_service.handler.methods'), (MethodCall methodCall) async {
     return {};
   });
-  const MethodChannel('com.ryanheise.audio_session').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
     return null;
   });
   LicenseRegistry.reset();

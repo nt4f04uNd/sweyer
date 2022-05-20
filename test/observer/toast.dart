@@ -8,9 +8,11 @@ import '../test.dart';
 class ToastChannelObserver {
   /// The method channel used by the flutter toast package.
   static const MethodChannel _channel = MethodChannel('PonnamKarthik/fluttertoast');
-  final List<String> _toastMessagesLog = []; /// The messages of all recorded requested toasts.
+
+  /// The messages of all recorded requested toasts.
   List<String> get toastMessagesLog => UnmodifiableListView(_toastMessagesLog);
-  
+  final List<String> _toastMessagesLog = [];
+
   /// Create a new toast channel observer, which automatically
   /// unregisters any previously created observer.
   ToastChannelObserver(WidgetTester tester) {
@@ -19,7 +21,7 @@ class ToastChannelObserver {
         _toastMessagesLog.add(Map.castFrom(call.arguments)['msg'] as String);
         return null;
       }
-      return null;  // Ignore unimplemented method calls
+      return null; // Ignore unimplemented method calls.
     });
   }
 }

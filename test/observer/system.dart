@@ -2,11 +2,11 @@ import 'package:flutter/services.dart';
 
 import '../test.dart';
 
-/// An observer for the system channel. 
+/// An observer for the system channel.
 class SystemChannelObserver {
-  
-  int _closeRequests = 0;  /// How many close request was recorded since the last observation.
+  /// How many close request was recorded since the last observation.
   int get closeRequests => _closeRequests;
+  int _closeRequests = 0;
 
   /// Create a new system channel observer, which automatically
   /// unregisters any previously created observer.
@@ -16,7 +16,7 @@ class SystemChannelObserver {
         _closeRequests++;
         return null;
       }
-      return null;  // Ignore unimplemented method calls
+      return null; // Ignore unimplemented method calls.
     });
   }
 }

@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:back_button_interceptor/back_button_interceptor.dart';
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sweyer/constants.dart';
 
 import '../observer/observer.dart';
@@ -10,16 +14,51 @@ void main() {
   });
 
   testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions', (WidgetTester tester) async {
+    late PermissionsChannelObserver permissionsObserver;
     await setUpAppTest(() {
-      FakePermissions.instance.granted = false;
+      permissionsObserver = PermissionsChannelObserver(tester.binding);
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {
-      expect(Permissions.instance.granted, false);
+      expect(permissionsObserver.checkedPermissions, [Permission.storage],
+          reason: 'Should always check the storage permission on startup');
+      expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
+      final permissionGrantCompleter = Completer<PermissionStatus>(); 
+      permissionsObserver.setPermissionResolvable(Permission.storage, () => permissionGrantCompleter.future);
       await tester.tap(find.text(l10n.grant));
-      expect(Permissions.instance.granted, true);
+      expect(permissionsObserver.requestedPermissions, [Permission.storage]);
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget,
+          reason: 'Indicate while waiting for the permission to be granted');
+      permissionGrantCompleter.complete(PermissionStatus.granted);
+      await tester.pumpAndSettle();
+      expect(find.byType(Home), findsOneWidget);
     });
   });
 
+  testWidgets('permissions screen - shows toast and opens settings when permissions are denied', (WidgetTester tester) async {
+    late PermissionsChannelObserver permissionsObserver;
+    await setUpAppTest(() {
+      permissionsObserver = PermissionsChannelObserver(tester.binding);
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+    });
+    await tester.runAppTest(() async {
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
+      permissionsObserver.isOpeningSettingsSuccessful = false;
+      final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
+      await tester.tap(find.text(l10n.grant));
+      expect(permissionsObserver.openSettingsRequests, 1);
+      expect(toastObserver.toastMessagesLog, [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError]);
+
+      permissionsObserver.isOpeningSettingsSuccessful = true;
+      await tester.tap(find.text(l10n.grant));
+      expect(permissionsObserver.openSettingsRequests, 2);
+      expect(
+          toastObserver.toastMessagesLog,
+          [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError, l10n.allowAccessToExternalStorageManually]);
+    });
+  });
+  
   testWidgets('searching screen - shows when permissions are granted and searching for tracks', (WidgetTester tester) async {
     // Use fake
     ContentControl.instance.dispose();
