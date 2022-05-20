@@ -10,16 +10,22 @@ import '../test.dart';
 class PermissionsChannelObserver {
   /// The method channel used by the flutter permissions package
   static const MethodChannel _channel = MethodChannel('flutter.baseflow.com/permissions/methods');
-  final List<Permission> _requestedPermissions = [];  // The permissions which were requested.
-  List<Permission> get requestedPermissions  => UnmodifiableListView(_requestedPermissions);
-  final List<Permission> _checkedPermissions = [];  // The permissions which were checked.
+
+  /// The permissions which were requested.
+  List<Permission> get requestedPermissions => UnmodifiableListView(_requestedPermissions);
+  final List<Permission> _requestedPermissions = [];
+
+  /// The permissions which were checked.
   List<Permission> get checkedPermissions => UnmodifiableListView(_checkedPermissions);
-  int _openSettingsRequests = 0;  /// The amount of attempts to open the permission settings.
+  final List<Permission> _checkedPermissions = [];
+
+  /// The amount of attempts to open the permission settings.
   int get openSettingsRequests => _openSettingsRequests;
+  int _openSettingsRequests = 0;
 
   /// Whether an attempt to open the settings should succeed.
   bool isOpeningSettingsSuccessful = true;
-  
+
   /// Permissions whose values are specified, all other permissions are implicitly granted.
   final Map<Permission, Future<PermissionStatus> Function()> _specifiedPermissions = {};
 
@@ -46,10 +52,10 @@ class PermissionsChannelObserver {
           _openSettingsRequests++;
           return isOpeningSettingsSuccessful;
       }
-      return null;  // Ignore unimplemented method calls
+      return null; // Ignore unimplemented method calls.
     });
   }
-  
+
   /// Get the status of the given [permission].
   Future<PermissionStatus> getStatus(Permission permission) {
     return (_specifiedPermissions[permission] ?? () async => PermissionStatus.granted)();
@@ -61,7 +67,7 @@ class PermissionsChannelObserver {
   void setPermissionResolvable(Permission permission, Future<PermissionStatus> Function() resolvable) {
     _specifiedPermissions[permission] = resolvable;
   }
-  
+
   /// Set the [status] for the [permission].
   void setPermission(Permission permission, PermissionStatus status) {
     if (status == PermissionStatus.granted) {
