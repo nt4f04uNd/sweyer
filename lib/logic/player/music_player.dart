@@ -658,7 +658,12 @@ class MusicPlayer extends AudioPlayer {
 
   Future<void> init() async {
     await restoreLastSong();
-    handler?._init(this);  // In case the handler already exists, reinitialize it.
+
+    // Reinitialize the AudioHandler if it already exists. Otherwise it is
+    // initialized by the AudioService. The AudioService must only ever be
+    // initialized once per process, but the handler depends on the MusicPlayer,
+    // which can be disposed and recreated.
+    handler?._init(this);
     handler ??= await AudioService.init(builder: () {
         return AudioHandler(MusicPlayer.instance);
       },
