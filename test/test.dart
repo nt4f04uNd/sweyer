@@ -113,7 +113,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
   PermissionsChannelObserver(binding); // Grant all permissions by default.
-  ContentChannel.instance = FakeContentChannel();
+  ContentChannel.instance = FakeContentChannel(binding);
   QueueControl.instance = FakeQueueControl();
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();

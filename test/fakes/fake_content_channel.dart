@@ -19,9 +19,9 @@ const List<int> _kBlueSquarePng = <int>[
 ];
 
 class FakeContentChannel implements ContentChannel {
-  FakeContentChannel() {
+  FakeContentChannel(TestWidgetsFlutterBinding binding) {
     instance = this;
-    const MethodChannel('content_channel').setMockMethodCallHandler((call) {
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('content_channel'), (call) {
       /// Ignore [CancellationSignal] calls
       if (call.method == 'cancelAlbumArtLoading')
         return null;
