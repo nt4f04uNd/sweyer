@@ -193,7 +193,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   late StreamSubscription playbackSubscriber;
   late StreamSubscription queueSubscriber;
 
-  Future<void> _init(MusicPlayer player) async {
+  void _init(MusicPlayer player) {
     _disposed = false;
     this.player = player;
     WidgetsBinding.instance!.addObserver(this);
@@ -658,7 +658,7 @@ class MusicPlayer extends AudioPlayer {
 
   Future<void> init() async {
     await restoreLastSong();
-    await handler?._init(this);  // In case the handler already exists, reinitialize it.
+    handler?._init(this);  // In case the handler already exists, reinitialize it.
     handler ??= await AudioService.init(builder: () {
         return AudioHandler(MusicPlayer.instance);
       },
