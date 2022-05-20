@@ -1,13 +1,10 @@
 name: Bug report
-description: Report any issues that you have found with the Sweyer app. Please check open issues first, in case it has already been reported.
+description: Report any issues that you have found with the app.
 labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for taking the time and filling out this bug report!
-
-        Please [check open issues](https://github.com/nt4f04uNd/sweyer/issues) first, in case it has already been reported.
+      value: Thank you for taking the time and filling out this bug report!
   - type: textarea
     id: reproduction-steps
     attributes:
@@ -21,15 +18,17 @@ body:
     validations:
       required: true
   - type: textarea
-    id: result
+    id: expected
     attributes:
-      label: Outcome
-      placeholder: Tell us what went wrong
-      value: |
-        #### What did you expect?
-
-        #### What happened instead?
-        
+      label: What did you expect?
+      placeholder: Tell us what you thought should happen.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What happened instead?
+      placeholder: Tell us what went actually happened.
     validations:
       required: true
   - type: input
@@ -44,7 +43,7 @@ body:
     id: android-version
     attributes:
       label: Android version
-      description: The Andorid version of your device. You can leave this empty if you are sure that it's not important, if you are unsure please specify. 
+      description: The Andorid version of your device. 
       placeholder: e.g. Android 12 or Android Snow Cone
     validations:
       required: false

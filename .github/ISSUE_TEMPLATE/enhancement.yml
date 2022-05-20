@@ -1,10 +1,10 @@
-name: Enhancement request
-description: Do you have a suggestion or feature request?
+name: Feature request
+description: Do you have a suggestion?
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
-      value: Thank you for taking the time to propose a new feature or make a suggestion.
+      value: Thank you for taking the time to make a suggestion!
   - type: textarea
     id: suggestion
     attributes:
@@ -17,6 +17,5 @@ body:
         #### Why would you like to do it?
 
         #### How would you like to achieve it?
-        
     validations:
       required: true
