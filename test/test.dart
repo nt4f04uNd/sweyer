@@ -118,7 +118,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();
   PackageInfoPlatform.instance = MethodChannelPackageInfo();
-  const MethodChannel('dev.fluttercommunity.plus/package_info').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'), (MethodCall methodCall) async {
     return {
       'appName': Constants.Config.APPLICATION_TITLE,
       'packageName': 'com.nt4f04und.sweyer',
@@ -126,13 +126,13 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
       'buildNumber': '0',
     };
   });
-  const MethodChannel('com.ryanheise.audio_service.client.methods').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_service.client.methods'), (MethodCall methodCall) async {
     return {};
   });
-  const MethodChannel('com.ryanheise.audio_service.handler.methods').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_service.handler.methods'), (MethodCall methodCall) async {
     return {};
   });
-  const MethodChannel('com.ryanheise.audio_session').setMockMethodCallHandler((MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
     return null;
   });
   LicenseRegistry.reset();
