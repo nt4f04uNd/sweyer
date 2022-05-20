@@ -10,12 +10,6 @@ body:
     attributes:
       label: Suggestion
       description: Please feel welcome to include screenshots or sketches.
-      placeholder: Tell us what you would like to do!
-      value: |
-        #### What would you like to do?
-
-        #### Why would you like to do it?
-
-        #### How would you like to achieve it?
+      placeholder: I would like to ...
     validations:
       required: true
