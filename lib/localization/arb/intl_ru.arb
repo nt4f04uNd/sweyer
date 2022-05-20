@@ -75,7 +75,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "tracksPlural": "{count, plural, =1{{count} Трек} other{{count} Трека}}",
+  "tracksPlural": "{count, plural, =0{{count} треков} =1{{count} трек} few{{count} трека} many{{count} треков} other{{count} трека}}",
   "@tracksPlural": {
     "type": "text",
     "placeholders": {
@@ -103,7 +103,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "albumsPlural": "{count, plural, =1{{count} Альбом} other{{count} Альбома}}",
+  "albumsPlural": "{count, plural, =0{{count} альбомов} =1{{count} альбом} few{{count} альбома} many{{count} альбомов} other{{count} альбома}}",
   "@albumsPlural": {
     "type": "text",
     "placeholders": {
@@ -131,7 +131,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "playlistsPlural": "{count, plural, =1{{count} Плейлист} other{{count} Плейлиста}}",
+  "playlistsPlural": "{count, plural, =0{{count} плейлистов} =1{{count} плейлист} few{{count} плейлиста} many{{count} плейлистов} other{{count} плейлиста}}",
   "@playlistsPlural": {
     "type": "text",
     "placeholders": {
@@ -159,7 +159,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "artistsPlural": "{count, plural, =1{{count} Исполнитель} other{{count} Исполнителя}}",
+  "artistsPlural": "{count, plural, =0{{count} исполнителей} =1{{count} исполнитель} few{{count} исполнителя} many{{count} исполнителей} other{{count} исполнителя}}",
   "@artistsPlural": {
     "type": "text",
     "placeholders": {
@@ -313,7 +313,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "addTracks": "Добавить Трека",
+  "addTracks": "Добавить треки",
   "@addTracks": {
     "type": "text",
     "placeholders": {},
@@ -324,14 +324,14 @@
     "type": "text",
     "placeholders": {}
   },
-  "removeTracks": "{count, plural, =1{Убрать Трек} other{Убрать {count} Трека}}",
+  "removeTracks": "{count, plural, =1{Убрать трек} few{Убрать {count} трека} many{Убрать {count} треков} other{Убрать {count} трека}}",
   "@removeTracks": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "removeTracksConfirmation": "{count, plural, =1{Вы точно хотите Убрать {title}?} other{Вы точно хотите Убрать Выбрано Трека?}}",
+  "removeTracksConfirmation": "{count, plural, =1{Вы точно хотите убрать {title}?} other{Вы точно хотите убрать выбранные треки?}}",
   "@removeTracksConfirmation": {
     "type": "text",
     "placeholders": {
@@ -348,14 +348,14 @@
     "type": "text",
     "placeholders": {}
   },
-  "deleteTracks": "{count, plural, =1{Удалить Трек} other{Удалить {count} Трека}}",
+  "deleteTracks": "{count, plural, =1{Удалить трек} few{Удалить {count} трека} many{Удалить {count} треков} other{Удалить {count} трека}}",
   "@deleteTracks": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "deleteTracksConfirmation": "{count, plural, =1{Вы точно хотите Удалить {title}?} other{Вы точно хотите Удалить Выбрано Трека?}}",
+  "deleteTracksConfirmation": "{count, plural, =1{Вы точно хотите удалить {title}?} other{Вы точно хотите удалить выбранные треки?}}",
   "@deleteTracksConfirmation": {
     "type": "text",
     "placeholders": {
@@ -367,14 +367,14 @@
     },
     "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
-  "deletePlaylists": "{count, plural, =1{Удалить Плейлист} other{Удалить {count} Плейлиста}}",
+  "deletePlaylists": "{count, plural, =1{Удалить плейлист} few{Удалить {count} плейлиста} many{Удалить {count} плейлистов} other{Удалить {count} плейлиста}}",
   "@deletePlaylists": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "deletePlaylistsConfirmation": "{count, plural, =1{Вы точно хотите Удалить {title}?} other{Вы точно хотите Удалить Выбрано Плейлиста?}}",
+  "deletePlaylistsConfirmation": "{count, plural, =1{Вы точно хотите удалить {title}?} other{Вы точно хотите удалить выбранные плейлисты?}}",
   "@deletePlaylistsConfirmation": {
     "type": "text",
     "placeholders": {
@@ -391,7 +391,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "editPlaylist": "Изменить Плейлист",
+  "editPlaylist": "Изменить плейлист",
   "@editPlaylist": {
     "type": "text",
     "placeholders": {}
@@ -426,7 +426,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "foundByQuery": "Найдено По запросу {query}",
+  "foundByQuery": "Найдено по запросу {query}",
   "@foundByQuery": {
     "type": "text",
     "placeholders": {
@@ -582,7 +582,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Вы почти у цели, остался всего 1 клик...} other{Вы почти у цели, осталось всего {remainingClicks} клика...}}",
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Вы почти у цели, остался всего 1 клик...} few{Вы почти у цели, осталось всего {remainingClicks} клика...} many{Вы почти у цели, осталось всего {remainingClicks} кликов...} other{Вы почти у цели, осталось всего {remainingClicks} клика...}}",
   "@onThePathToDevModeClicksRemaining": {
     "type": "text",
     "placeholders": {
