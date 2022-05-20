@@ -51,7 +51,7 @@ class TrackPanel extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                    height: kSongTileHeight * math.max(0.95, textScaleFactor),
+                    height: TrackPanel.height(textScaleFactor),
                     padding: const EdgeInsets.only(
                       left: 16.0,
                       right: 16.0,
@@ -116,6 +116,10 @@ class TrackPanel extends StatelessWidget {
       },
     );
   }
+
+  /// The height of this widget given a [textScaleFactor].
+  static double height(double textScaleFactor) =>
+      kSongTileHeight * math.max(0.95, textScaleFactor);
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {

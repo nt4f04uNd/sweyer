@@ -672,6 +672,7 @@ class _MainTabState extends State<_MainTab> {
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
+    final mediaQuery = MediaQuery.of(context);
     return AnimatedBuilder(
       animation: playerRouteController,
       builder: (context, child) => Scaffold(
@@ -681,6 +682,7 @@ class _MainTabState extends State<_MainTab> {
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: Colors.transparent,
+          toolbarHeight: TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
           leading: FadeTransition(
             opacity: fadeAnimation,
             child: RepaintBoundary(
@@ -716,7 +718,7 @@ class _MainTabState extends State<_MainTab> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const _TrackShowcase(),
+            const TrackShowcase(),
             Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -846,14 +848,15 @@ class _InfoButton extends StatelessWidget {
 }
 
 /// A widget that displays all information about current song
-class _TrackShowcase extends StatefulWidget {
-  const _TrackShowcase({Key? key}) : super(key: key);
+@visibleForTesting
+class TrackShowcase extends StatefulWidget {
+  const TrackShowcase({Key? key}) : super(key: key);
 
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }
 
-class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderStateMixin {
+class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateMixin {
   late StreamSubscription<Song> _songChangeSubscription;
   late AnimationController controller;
   late AnimationController fadeController;
