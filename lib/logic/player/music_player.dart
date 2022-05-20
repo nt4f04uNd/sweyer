@@ -658,7 +658,7 @@ class MusicPlayer extends AudioPlayer {
 
   Future<void> init() async {
     await restoreLastSong();
-    await handler?._init(this);
+    await handler?._init(this);  // In case the handler already exists, reinitialize it.
     handler ??= await AudioService.init(builder: () {
         return AudioHandler(MusicPlayer.instance);
       },
