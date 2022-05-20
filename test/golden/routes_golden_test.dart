@@ -274,7 +274,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text(l10n.settings));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('licenses'));
+        await tester.tap(find.text('Licenses'));
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'settings_route.licenses_route'));
     });
@@ -285,7 +285,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text(l10n.settings));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('licenses'));
+        await tester.tap(find.text('Licenses'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('test_package'));
         await tester.pumpAndSettle();

@@ -60,7 +60,7 @@ void main() {
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
-      expect(find.text(l10n.noMusic + ' :('), findsOneWidget);
+      expect(find.text(l10n.noMusic), findsOneWidget);
 
       // Test refresh
       FakeContentChannel.instance.songs = [songWith()];

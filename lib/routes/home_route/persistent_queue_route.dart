@@ -459,7 +459,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   if (isAlbum)
                                     album.year
                                   else
-                                    l10n.contentsPluralWithCount<Song>(queue.length).toLowerCase(),
+                                    l10n.contentsPlural<Song>(queue.length),
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(
@@ -691,7 +691,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               child: InListContentAction.song(
                                 onTap: editing || selectionController.inSelection ? null : _handleAddTracks,
                                 icon: Icons.add_rounded,
-                                text: '${l10n.add} ${l10n.tracks.toLowerCase()}',
+                                text: l10n.addTracks,
                               ),
                             ),
                         ],

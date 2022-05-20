@@ -152,9 +152,7 @@ class _FooterState extends State<_Footer> {
           important: true,
           child: NFSnackbar(
             title: Text(
-              l10n.almostThere + ', ' + (remainingClicks == 1
-                      ? l10n.onThePathToDevModeLastClick
-                      : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
+              l10n.onThePathToDevModeClicksRemaining(remainingClicks),
               style: textStyle,
             ),
             color: Constants.AppColors.androidGreen,
@@ -211,7 +209,7 @@ class _FooterState extends State<_Footer> {
           GestureDetector(
             onTap: _handleGithubTap,
             child: Text(
-              'github repo',
+              getl10n(context).gitHubRepo,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: ThemeControl.instance.theme.colorScheme.onSurface,
@@ -221,7 +219,7 @@ class _FooterState extends State<_Footer> {
           GestureDetector(
             onTap: _handleLicenseTap,
             child: Text(
-              MaterialLocalizations.of(context).licensesPageTitle.toLowerCase(),
+              MaterialLocalizations.of(context).licensesPageTitle,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: ThemeControl.instance.theme.colorScheme.onSurface,

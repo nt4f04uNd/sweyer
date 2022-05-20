@@ -19,22 +19,6 @@ AppLocalizations get staticl10n {
 extension AppLocalizationsExtension on AppLocalizations {
   //* Content ******************
 
-  String get track {
-    return tracksPlural(1);
-  }
-
-  String get album {
-    return albumsPlural(1);
-  }
-
-  String get playlist {
-    return playlistsPlural(1);
-  }
-
-  String get artist {
-    return artistsPlural(1);
-  }
-
   /// Picks a string of a [Content] in plural form.
   /// For example "tracks".
   String contents<T extends Content>([Type? contentType]) {
@@ -47,12 +31,8 @@ extension AppLocalizationsExtension on AppLocalizations {
     )();
   }
 
-  /// Returns string in form "5 songs".
-  String contentsPluralWithCount<T extends Content>(int count, [Type? contentType]) {
-    return '$count ${contentsPlural<T>(count, contentType).toLowerCase()}';
-  }
-
   /// Calls a `plural` getter from Intl for a [Content].
+  /// Returns string in form "5 songs".
   String contentsPlural<T extends Content>(int count, [Type? contentType]) {
     return contentPick<T, ValueGetter<String>>(
       contentType: contentType,
@@ -77,7 +57,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           case SongSortFeature.artist:
             return artist;
           case SongSortFeature.album:
-            return albumsPlural(1);
+            return album;
           default:
             throw UnimplementedError();
         }
@@ -121,5 +101,27 @@ extension AppLocalizationsExtension on AppLocalizations {
         }
       },
     )();
+  }
+
+  /// Transforms the [text] so it can be safely embedded into [StyledText] text.
+  /// See: https://pub.dev/packages/styled_text#escaping--special-characters
+  String escapeStyled(String text) {
+    return text.replaceAllMapped(RegExp('["\'&<> ]'), (match) {
+      switch (match.group(0)) {
+        case '"':
+          return '&quot;';
+        case '\'':
+          return '&apos;';
+        case '&':
+          return '&amp;';
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case ' ':
+          return '&space;';
+      }
+      throw UnimplementedError('"${match.group(0)}" is not implemented');
+    });
   }
 }

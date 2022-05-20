@@ -10,7 +10,7 @@
   "@playbackControls": {
     "type": "text",
     "placeholders": {},
-    "description": " Used as notification channel description"
+    "description": "Used as notification channel description"
   },
   "play": "Play",
   "@play": {
@@ -68,48 +68,101 @@
     "placeholders": {},
     "description": "Label for unknown artist"
   },
+  "track": "Track",
+  "@track": {
+    "type": "text",
+    "placeholders": {}
+  },
   "tracks": "Tracks",
   "@tracks": {
     "type": "text",
     "placeholders": {}
   },
-  "albums": "Albums",
-  "@albums": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "playlists": "Playlists",
-  "@playlists": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "artists": "Artists",
-  "@artists": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "tracksPlural": "{count,plural, =0{Tracks}=1{Track}=2{Tracks}few{Tracks}many{Tracks}other{Tracks}}",
+  "tracksPlural": "{count, plural, =1{{count} track} other{{count} tracks}}",
   "@tracksPlural": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "albumsPlural": "{count,plural, =0{Albums}=1{Album}=2{Albums}few{Albums}many{Albums}other{Albums}}",
+  "album": "Album",
+  "@album": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "albumQueue": "Album {name}",
+  "@albumQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Album name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "albums": "Albums",
+  "@albums": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "albumsPlural": "{count, plural, =1{{count} album} other{{count} albums}}",
   "@albumsPlural": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "playlistsPlural": "{count,plural, =0{Playlists}=1{Playlist}=2{Playlists}few{Playlists}many{Playlists}other{Playlists}}",
+  "playlist": "Playlist",
+  "@playlist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistQueue": "Playlist {name}",
+  "@playlistQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Playlist name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "playlists": "Playlists",
+  "@playlists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "playlistsPlural": "{count, plural, =1{{count} playlist} other{{count} playlists}}",
   "@playlistsPlural": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "artistsPlural": "{count,plural, =0{Artists}=1{Artist}=2{Artists}few{Artists}many{Artists}other{Artists}}",
+  "artist": "Artist",
+  "@artist": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistQueue": "Artist {name}",
+  "@artistQueue": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Artist name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "artists": "Artists",
+  "@artists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "artistsPlural": "{count, plural, =1{{count} artist} other{{count} artists}}",
   "@artistsPlural": {
     "type": "text",
     "placeholders": {
@@ -163,11 +216,6 @@
     "placeholders": {},
     "description": "NOTE: currently unused"
   },
-  "byQuery": "By query",
-  "@byQuery": {
-    "type": "text",
-    "placeholders": {}
-  },
   "selectedPlural": "Selected",
   "@selectedPlural": {
     "type": "text",
@@ -213,11 +261,6 @@
   },
   "areYouSure": "Are you sure?",
   "@areYouSure": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areYouSureYouWantTo": "Are you sure you want to",
-  "@areYouSureYouWantTo": {
     "type": "text",
     "placeholders": {}
   },
@@ -283,28 +326,86 @@
     "type": "text",
     "placeholders": {}
   },
-  "add": "Add",
-  "@add": {
+  "addTracks": "Add tracks",
+  "@addTracks": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {},
+    "description": "The title for the + button in the playlist screen"
   },
   "remove": "Remove",
   "@remove": {
     "type": "text",
     "placeholders": {}
   },
+  "removeTracks": "{count, plural, =1{Remove track} other{Remove {count} tracks}}",
+  "@removeTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "removeTracksConfirmation": "{count, plural, =1{Are you sure you want to remove {title}?} other{Are you sure you want to remove selected tracks?}}",
+  "@removeTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+  },
   "delete": "Delete",
   "@delete": {
     "type": "text",
     "placeholders": {}
+  },
+  "deleteTracks": "{count, plural, =1{Delete track} other{Delete {count} tracks}}",
+  "@deleteTracks": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteTracksConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected tracks?}}",
+  "@deleteTracksConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+  },
+  "deletePlaylists": "{count, plural, =1{Delete playlist} other{Delete {count} playlists}}",
+  "@deletePlaylists": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deletePlaylistsConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected playlists?}}",
+  "@deletePlaylistsConfirmation": {
+    "type": "text",
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Playlist Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
   "deletion": "Deletion",
   "@deletion": {
     "type": "text",
     "placeholders": {}
   },
-  "edit": "Edit",
-  "@edit": {
+  "editPlaylist": "Edit playlist",
+  "@editPlaylist": {
     "type": "text",
     "placeholders": {}
   },
@@ -339,18 +440,19 @@
     "placeholders": {},
     "description": "TODO: currently unused"
   },
-  "found": "Found",
-  "@found": {
+  "foundByQuery": "Found by query {query}",
+  "@foundByQuery": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "\"Search text\""
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
   },
   "upNext": "Up next",
   "@upNext": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "almostThere": "You're almost there",
-  "@almostThere": {
     "type": "text",
     "placeholders": {}
   },
@@ -359,7 +461,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "noMusic": "There's no music on your device",
+  "noMusic": "There's no music on your device :(",
   "@noMusic": {
     "type": "text",
     "placeholders": {}
@@ -379,10 +481,15 @@
     "type": "text",
     "placeholders": {}
   },
-  "selected": "Selected",
+  "selected": "Selected {counter}",
   "@selected": {
     "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "counter": {
+        "type": "String",
+        "example": "1"
+      }
+    }
   },
   "actions": "Actions",
   "@actions": {
@@ -493,19 +600,13 @@
     "placeholders": {},
     "description": "Shown when user tapped 4 times on app logo"
   },
-  "onThePathToDevModeLastClick": "only 1 click remaining...",
-  "@onThePathToDevModeLastClick": {
-    "type": "text",
-    "placeholders": {},
-    "description": "Shown when user is about to become a developer, part 2"
-  },
-  "onThePathToDevModeClicksRemaining": "only {remainingClicks} clicks remaining...",
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{You're almost there, only 1 click remaining...} other{You're almost there, only {remainingClicks} clicks remaining...}}",
   "@onThePathToDevModeClicksRemaining": {
     "type": "text",
     "placeholders": {
       "remainingClicks": {}
     },
-    "description": "Shown when user is about to become a developer, part 2, plural"
+    "description": "Shown when user is about to become a developer, part 2"
   },
   "devTestToast": "Test toast",
   "@devTestToast": {
@@ -562,23 +663,23 @@
     "type": "text",
     "placeholders": {}
   },
-  "searchHistoryRemoveEntryDescriptionP1": "Are you sure you want to remove ",
-  "@searchHistoryRemoveEntryDescriptionP1": {
+  "searchHistoryRemoveEntryDescription": "Are you sure you want to remove {searchText} from your search history?",
+  "@searchHistoryRemoveEntryDescription": {
     "type": "text",
-    "placeholders": {},
-    "description": "The entry is the history entry to delete. The description is being splitted into rich text there."
-  },
-  "searchHistoryRemoveEntryDescriptionP2": " from your search history?",
-  "@searchHistoryRemoveEntryDescriptionP2": {
-    "type": "text",
-    "placeholders": {}
+    "placeholders": {
+      "searchText": {
+        "type": "String",
+        "example": "Query"
+      }
+    },
+    "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
   "searchClearHistory": "Clear search history?",
   "@searchClearHistory": {
     "type": "text",
     "placeholders": {}
   },
-  "oopsErrorOccurred": "Oops! An error occurred",
+  "oopsErrorOccurred": "😮 Oops! An error occurred",
   "@oopsErrorOccurred": {
     "type": "text",
     "placeholders": {}
@@ -635,6 +736,11 @@
   },
   "copied": "Copied",
   "@copied": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "gitHubRepo": "GitHub repo",
+  "@gitHubRepo": {
     "type": "text",
     "placeholders": {}
   }

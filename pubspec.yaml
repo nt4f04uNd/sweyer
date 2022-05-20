@@ -46,6 +46,7 @@ dependencies:
   cached_network_image: ^3.0.0
   flutter_cache_manager: ^3.1.1
   clock: ^1.1.0
+  styled_text: ^5.1.0
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 

@@ -12,6 +12,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/constants.dart' as Constants;
 import 'package:sweyer/sweyer.dart';
@@ -947,7 +948,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                   ),
                   backgroundColor: Colors.transparent,
                   label: Text(
-                    l10n.contentsPluralWithCount(count, widget.contentType),
+                    l10n.contentsPlural(count, widget.contentType),
                     style: TextStyle(
                       color: textColorAnimation.value,
                       fontWeight: FontWeight.w800,
@@ -1119,18 +1120,12 @@ class _SuggestionTile extends StatelessWidget {
           title: Text(l10n.searchHistory),
           titlePadding: defaultAlertTitlePadding.copyWith(bottom: 4.0),
           contentPadding: defaultAlertContentPadding.copyWith(bottom: 6.0),
-          content: Text.rich(
-            TextSpan(
-              style: const TextStyle(fontSize: 15.0),
-              children: [
-                TextSpan(text: l10n.searchHistoryRemoveEntryDescriptionP1),
-                TextSpan(
-                  text: '"${SearchHistory.instance.history![index]}"',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                TextSpan(text: l10n.searchHistoryRemoveEntryDescriptionP2),
-              ],
-            ),
+          content: StyledText(
+            style: const TextStyle(fontSize: 15.0),
+            text: l10n.searchHistoryRemoveEntryDescription('<bold>${l10n.escapeStyled('"${SearchHistory.instance.history![index]}"')}</bold>'),
+            tags: {
+              'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),
+            },
           ),
           buttonSplashColor: Constants.Theme.glowSplashColor.auto,
           acceptButton: AppButton.pop(

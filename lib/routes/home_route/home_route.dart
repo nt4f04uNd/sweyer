@@ -159,7 +159,7 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     return CenterContentScreen(
-      text: l10n.noMusic + ' :(',
+      text: l10n.noMusic,
       widget: ConstrainedBox(
         constraints: const BoxConstraints(
           minHeight: 40.0,

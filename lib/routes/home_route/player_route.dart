@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/physics.dart';
+import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -307,84 +308,121 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     throw UnimplementedError();
   }
 
-  List<TextSpan> _getQueueType(AppLocalizations l10n) {
-    final List<TextSpan> text = [];
+  /// The style that should be used for the queue description text in the app bar.
+  TextStyle get _queueDescriptionStyle =>
+      ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
+        fontSize: 14.0,
+        height: 1.0,
+        fontWeight: FontWeight.w700,
+      );
+
+  Text _buildTitleText(AppLocalizations l10n) {
+    final InlineSpan text;
+    final Key key;
     switch (QueueControl.instance.state.type) {
       case QueueType.allSongs:
-        text.add(TextSpan(text: l10n.allTracks));
+        text = TextSpan(text: l10n.allTracks);
+        key = ValueKey(l10n.allTracks);
         break;
       case QueueType.allAlbums:
-        text.add(TextSpan(text: l10n.allAlbums));
+        text = TextSpan(text: l10n.allAlbums);
+        key = ValueKey(l10n.allAlbums);
         break;
       case QueueType.allPlaylists:
-        text.add(TextSpan(text: l10n.allPlaylists));
+        text = TextSpan(text: l10n.allPlaylists);
+        key = ValueKey(l10n.allPlaylists);
         break;
       case QueueType.allArtists:
-        text.add(TextSpan(text: l10n.allArtists));
+        text = TextSpan(text: l10n.allArtists);
+        key = ValueKey(l10n.allArtists);
         break;
       case QueueType.searched:
         final query = QueueControl.instance.state.searchQuery!;
-        text.add(TextSpan(
-          text: '${l10n.found} ${l10n.byQuery.toLowerCase()} ',
-        ));
-        text.add(TextSpan(
-          text: '"$query"',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: ThemeControl.instance.theme.colorScheme.onBackground,
+        text = WidgetSpan(
+          child: StyledText(
+            overflow: TextOverflow.ellipsis,
+            style: _queueDescriptionStyle,
+            text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
+            tags: {
+              'query': StyledTextTag(
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: ThemeControl.instance.theme.colorScheme.onBackground,
+                ),
+              ),
+            },
           ),
-        ));
+        );
+        key = ValueKey(l10n.foundByQuery(query));
         break;
       case QueueType.origin:
         final origin = QueueControl.instance.state.origin!;
         if (origin is Album) {
-          text.add(TextSpan(text: '${l10n.album} '));
-          text.add(TextSpan(
-            text: origin.nameDotYear,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.instance.theme.colorScheme.onBackground,
+          text = WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              text: l10n.albumQueue('<name>${l10n.escapeStyled(origin.nameDotYear)}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
             ),
-          ));
+          );
+          key = ValueKey(l10n.albumQueue(origin.nameDotYear));
         } else if (origin is Playlist) {
-          text.add(TextSpan(text: '${l10n.playlist} '));
-          text.add(TextSpan(
-            text: origin.name,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.instance.theme.colorScheme.onBackground,
+          text = WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              text: l10n.playlistQueue('<name>${l10n.escapeStyled(origin.name)}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
             ),
-          ));
+          );
+          key = ValueKey(l10n.playlistQueue(origin.name));
         } else if (origin is Artist) {
-          text.add(TextSpan(text: '${l10n.artist} '));
-          text.add(TextSpan(
-            text: ContentUtils.localizedArtist(origin.artist, l10n),
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.instance.theme.colorScheme.onBackground,
+          final artist = ContentUtils.localizedArtist(origin.artist, l10n);
+          text = WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              text: l10n.artistQueue('<name>${l10n.escapeStyled(artist)}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
             ),
-          ));
+          );
+          key = ValueKey(l10n.artistQueue(artist));
         } else {
-          throw UnimplementedError();
+          throw UnimplementedError('Unhandled origin: $origin');
         }
         break;
       case QueueType.arbitrary:
-        text.add(TextSpan(text: l10n.arbitraryQueue));
+        text = TextSpan(text: l10n.arbitraryQueue);
+        key = ValueKey(l10n.arbitraryQueue);
         break;
     }
-    return text;
-  }
-
-  Text _buildTitleText(List<TextSpan> text) {
     return Text.rich(
-      TextSpan(children: text),
-      key: ValueKey(text.fold<String>('', (prev, el) => prev + el.text!)),
+      text,
+      key: key,
       overflow: TextOverflow.ellipsis,
-      style: ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
-        fontSize: 14.0,
-        height: 1.0,
-        fontWeight: FontWeight.w700,
-      ),
+      style: _queueDescriptionStyle,
     );
   }
 
@@ -547,7 +585,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                     duration: const Duration(milliseconds: 400),
                                     switchInCurve: Curves.easeOut,
                                     switchOutCurve: Curves.easeIn,
-                                    child: _buildTitleText(_getQueueType(l10n)),
+                                    child: _buildTitleText(l10n),
                                   ),
                                 ),
                                 if (origin != null || type == QueueType.searched)

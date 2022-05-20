@@ -5,6 +5,7 @@ import 'package:boxy/boxy.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -1043,6 +1044,16 @@ class _ActionsSelectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
+    final Widget counterWidget = EmergeAnimation(
+      animation: controller.animation,
+      child: Padding(
+        padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
+        child: const SelectionCounter(textStyle: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 19.0,
+        )),
+      ),
+    );
     return Row(
       children: [
         if (closeButton)
@@ -1058,32 +1069,26 @@ class _ActionsSelectionTitle extends StatelessWidget {
           ),
         if (selectedTitle && counter)
           Padding(
-            padding: EdgeInsets.only(bottom: 2.0, left: closeButton ? 12.0 : 30.0),
+            padding: EdgeInsets.only(bottom: 4.0, left: closeButton ? 12.0 : 30.0),
             child: EmergeAnimation(
               animation: controller.animation,
-              child: Text(
-                l10n.selected,
+              child: StyledText(
+                text: l10n.selected('<counter/>'),
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17.0),
+                tags: {
+                  'counter': StyledTextWidgetTag(Padding(
+                    padding: const EdgeInsets.only(top: 2, left: 7.0, right: 7.0),
+                    child: counterWidget,
+                  )),
+                },
               ),
             ),
           ),
-        if (counter)
+        if (!selectedTitle && counter)
           Padding(
-            padding: EdgeInsets.only(
-              left: counter ? 10.0 : 8.0,
-              bottom: 2.0
-            ),
-            child: EmergeAnimation(
-              animation: controller.animation,
-              child: Padding(
-                padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
-                child: const SelectionCounter(textStyle: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 19.0,
-                ))
-              ),
-            ),
-          ),
+            padding: EdgeInsets.only(left: counter ? 10.0 : 8.0, bottom: 2.0),
+            child: counterWidget,
+          )
       ],
     );
   }
@@ -1160,13 +1165,9 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
       key: key,
       childKey: ValueKey(selectionCount),
       valueIncreased: controller.lengthIncreased,
-      child: Container(
-        /// Line up width with other actions, so they animate identically with [EmergeAnimation]
-        constraints: const BoxConstraints(minWidth: NFConstants.iconButtonSize),
-        child: Text(
-          selectionCount.toString(),
-          style: widget.textStyle ?? appBarTitleTextStyle,
-        ),
+      child: Text(
+        selectionCount.toString(),
+        style: widget.textStyle ?? appBarTitleTextStyle,
       ),
     );
   }
@@ -1580,7 +1581,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
       child: EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
-          tooltip: "${l10n.edit} ${l10n.playlist.toLowerCase()}",
+          tooltip: l10n.editPlaylist,
           icon: const Icon(Icons.edit_rounded, size: 21.0),
           // iconSize: 23.0,
           onPressed: () => _handleTap(controller),
@@ -1693,6 +1694,8 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
       controller: controller,
       list: list,
       localizedAction: (l10n) => l10n.remove,
+      localizedTitle: (l10n, count) => l10n.removeTracks(count),
+      localizedConfirm: (l10n, count, title) => l10n.removeTracksConfirmation(count, title),
       onSubmit: () {
         ContentControl.instance.removeFromPlaylistAt(
           indexes: controller.data.map((el) => el.index).toList(),
@@ -1765,6 +1768,8 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
           controller: widget.controller,
           list: list,
           localizedAction: (l10n) => l10n.delete,
+          localizedTitle: (l10n, count) => l10n.deleteTracks(count),
+          localizedConfirm: (l10n, count, title) => l10n.deleteTracksConfirmation(count, title),
           onSubmit: () {
             ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
           },
@@ -1781,6 +1786,8 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         controller: widget.controller,
         list: list,
         localizedAction: (l10n) => l10n.delete,
+        localizedTitle: (l10n, count) => l10n.deletePlaylists(count),
+        localizedConfirm: (l10n, count, title) => l10n.deletePlaylistsConfirmation(count, title),
         onSubmit: () {
           ContentControl.instance.deletePlaylists(list);
         },
@@ -1832,6 +1839,8 @@ void _showActionConfirmationDialog<E extends Content>({
   required List<E> list,
   required VoidCallback onSubmit,
   required String Function(AppLocalizations) localizedAction,
+  required String Function(AppLocalizations, int count) localizedTitle,
+  required String Function(AppLocalizations, int count, String? element) localizedConfirm,
 }) {
   final count = list.length;
   E? entry;
@@ -1845,9 +1854,7 @@ void _showActionConfirmationDialog<E extends Content>({
     title: Builder(
       builder: (context) {
         final l10n = getl10n(context);
-        return Text(
-          '${localizedAction(getl10n(context))} ${count > 1 ? '$count ' : ''}${l10n.contentsPlural<E>(count).toLowerCase()}',
-        );
+        return Text(localizedTitle(l10n, count));
       },
     ),
     content: SingleChildScrollView(
@@ -1857,20 +1864,19 @@ void _showActionConfirmationDialog<E extends Content>({
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
+              if (entry == null)
+                Text(
+                  localizedConfirm(l10n, count, null),
                   style: const TextStyle(fontSize: 15.0),
-                  children: [
-                    TextSpan(text: "${l10n.areYouSureYouWantTo} ${localizedAction(l10n).toLowerCase()}"),
-                    TextSpan(
-                      text: ' ${entry != null ? entry.title : '${l10n.selectedPlural.toLowerCase()} ${l10n.contents<E>().toLowerCase()}'}?',
-                      style: entry != null
-                          ? const TextStyle(fontWeight: FontWeight.w700)
-                          : null,
-                    ),
-                  ],
+                )
+              else
+                StyledText(
+                  text: localizedConfirm(l10n, count, '<bold>${l10n.escapeStyled(entry.title)}</bold>'),
+                  style: const TextStyle(fontSize: 15.0),
+                  tags: {
+                    'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),
+                  },
                 ),
-              ),
               const SizedBox(height: 8.0),
               _DeletionArtsPreview<E>(
                 list: list.toList(),
