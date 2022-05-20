@@ -13,7 +13,7 @@ void main() {
     testAppGoldens('permissions_screen', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
       await setUpAppTest(() {
-        permissionsObserver = tester.overwritePermissionObserver();
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
       });
       await tester.runAppTest(() async {

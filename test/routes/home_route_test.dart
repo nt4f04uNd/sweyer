@@ -16,7 +16,7 @@ void main() {
   testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions', (WidgetTester tester) async {
     late PermissionsChannelObserver permissionsObserver;
     await setUpAppTest(() {
-      permissionsObserver = tester.overwritePermissionObserver();
+      permissionsObserver = PermissionsChannelObserver(tester.binding);
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {
@@ -39,7 +39,7 @@ void main() {
   testWidgets('permissions screen - shows toast and opens settings when permissions are denied', (WidgetTester tester) async {
     late PermissionsChannelObserver permissionsObserver;
     await setUpAppTest(() {
-      permissionsObserver = tester.overwritePermissionObserver();
+      permissionsObserver = PermissionsChannelObserver(tester.binding);
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {

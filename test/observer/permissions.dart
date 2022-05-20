@@ -77,9 +77,3 @@ class PermissionsChannelObserver {
     }
   }
 }
-
-extension PermissionObserverExtension on WidgetTester {
-  /// Create a new PermissionsChannelObserver, which overwrites the default one
-  /// for this test.
-  PermissionsChannelObserver overwritePermissionObserver() => PermissionsChannelObserver(binding);
-}
