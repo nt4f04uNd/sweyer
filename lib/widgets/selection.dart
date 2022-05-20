@@ -1229,7 +1229,8 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
           }
         }
         assert(() {
-          contentPick<Song, void>(
+          // See contentPick documentation for why we need this. 
+          contentPick<Content, void>(
             song: null,
             album: null,
             playlist: null,
@@ -1318,7 +1319,8 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
           }
         }
         assert(() {
-          contentPick<Song, void>(
+          // See contentPick documentation for why we need this. 
+          contentPick<Content, void>(
             song: null,
             album: null,
             playlist: null,
@@ -1674,8 +1676,15 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
 }
 
 /// Action that removes a song from playlist.
-class _FavoriteSelectionAction extends StatelessWidget {
+class _FavoriteSelectionAction extends StatefulWidget {
   const _FavoriteSelectionAction({ Key? key }) : super(key: key);
+
+  @override
+  State<_FavoriteSelectionAction> createState() => _FavoriteSelectionActionState();
+}
+
+class _FavoriteSelectionActionState extends State<_FavoriteSelectionAction> {
+  bool active = false;
 
   void _handleTap(BuildContext context, ContentSelectionController controller) {
     final contentTuple = ContentUtils.selectionPack(controller.data);
@@ -1694,15 +1703,21 @@ class _FavoriteSelectionAction extends StatelessWidget {
     return _ActionBuilder(
       controller: controller,
       shown: () => true,
-      builder: (context, child) => EmergeAnimation(
-        animation: controller.animation,
-        child: HeartButton(
-          tooltip: l10n.addToFavorites,
-          active: controller.data.any((el) => !el.data.isFavorite),
-          onPressed: () => _handleTap(context, controller),
-          inactiveColor: theme.colorScheme.onSurface,
-        ),
-      ),
+      builder: (context, child) {
+        if (controller.inSelection) {
+          active = controller.data.any((el) => !el.data.isFavorite);
+        }
+        return EmergeAnimation(
+          animation: controller.animation,
+          child: HeartButton(
+            tooltip: l10n.addToFavorites,
+            active: active,
+            onPressed: () => _handleTap(context, controller),
+            color: theme.colorScheme.onSurface,
+            inactiveColor: theme.colorScheme.onSurface,
+          ),
+        );
+      },
     );
   }
 }

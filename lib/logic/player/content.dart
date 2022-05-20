@@ -34,6 +34,26 @@ extension QuickActionSerialization on QuickAction {
 /// The point of this function is to structurize and generalize the places where multiple contents
 /// an be used. It also allows to ensure that every existing content in the app is supported in all
 /// places it should be supported, this is extra useful when new content type is added.
+///
+/// Sometimes this function cannot be used directly to handle the content-related logic.
+/// Then we put a copy-paste assertion like below, so we don't forget to update the
+/// related code around this assertion, when we add a new content type.
+///
+/// An example of this can be a [ContentTuple].
+///
+/// ```
+/// assert(() {
+///   // See contentPick documentation for why we need this. 
+///   contentPick<Content, void>(
+///     song: null,
+///     album: null,
+///     playlist: null,
+///     artist: null,
+///   );
+///   return true;
+/// }());
+/// ```
+/// 
 V contentPick<T extends Content, V>({
   Type? contentType,
   required V song,
@@ -96,7 +116,7 @@ class ContentMap<V> {
   /// Map entries.
   Iterable<MapEntry<Type, V>> get entries => _map.entries;
 
-  /// Returs a value per `T` [Content] from the map.
+  /// Returns a value per `T` [Content] from the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
   V? getValue<T extends Content>([Type? key]) {
@@ -148,7 +168,7 @@ class ContentTuple {
     List<Playlist> playlists,
     List<Artist> artists,
   ) : assert(() {
-        contentPick<Song, void>(
+        contentPick<Content, void>(
           song: null,
           album: null,
           playlist: null,
@@ -194,10 +214,10 @@ class ContentTuple {
 class ContentState {
   /// All songs in the application.
   /// This list not should be modified in any way, except for sorting.
-  Queue allSongs = Queue(<Song>[]);
-  Map<int, Album> albums = <int, Album>{};
-  List<Playlist> playlists = <Playlist>[];
-  List<Artist> artists = <Artist>[];
+  Queue allSongs = Queue([]);
+  Map<int, Album> albums = {};
+  List<Playlist> playlists = [];
+  List<Artist> artists = [];
 
   /// Contains various [Sort]s of the application.
   /// Sorts of specific [Queues] like [Album]s are stored separately. // TODO: this is currently not implemented - remove this todo when it will be
@@ -548,7 +568,7 @@ class ContentControl extends Control {
   /// See [ContentState.sorts].
   void sort<T extends Content>({ Type? contentType, Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
-    sort ??= sorts.getValue<T>(contentType) as Sort<T>;
+    sort ??= sorts.getValue<T>(contentType)! as Sort<T>;
     contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
@@ -792,7 +812,9 @@ class ContentControl extends Control {
 }
 
 
-abstract class ContentUtils {
+class ContentUtils {
+  ContentUtils._();
+
   /// Android unknown artist.
   static const unknownArtist = '<unknown>';
 
@@ -847,8 +869,8 @@ abstract class ContentUtils {
     );
   }
 
-  /// Returns a string which represents a given content type.
-  static String contentTypeString<T extends Content>([Type? contentType]) {
+  /// Returns an ID string which represents a given content type.
+  static String contentTypeId<T extends Content>([Type? contentType]) {
     return contentPick<T, String>(
       contentType: contentType,
       song: 'song',
@@ -934,7 +956,8 @@ abstract class ContentUtils {
         throw UnimplementedError();
       }
       assert(() {
-        contentPick<Song, void>(
+        // See contentPick documentation for why we need this. 
+        contentPick<Content, void>(
           song: null,
           album: null,
           playlist: null,
@@ -993,7 +1016,8 @@ abstract class ContentUtils {
       }
     }
     assert(() {
-      contentPick<Song, void>(
+      // See contentPick documentation for why we need this. 
+      contentPick<Content, void>(
         song: null,
         album: null,
         playlist: null,

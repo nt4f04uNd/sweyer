@@ -30,8 +30,8 @@ abstract class Content with EquatableMixin {
   /// An icon for this content type.
   IconData get contentIcon => ContentUtils.contentIcon(runtimeType);
 
-  /// A string representation of this type.
-  String get contentString => ContentUtils.contentTypeString(runtimeType);
+  /// An ID string for this content type.
+  String get contentTypeId => ContentUtils.contentTypeId(runtimeType);
 
   /// Whether the content was marked as favorite by user.
   bool get isFavorite => FavoritesControl.instance.isFavorite(this);

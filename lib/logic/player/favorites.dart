@@ -6,7 +6,7 @@ import 'package:sweyer/sweyer.dart';
 class FavoritesRepository {
   final serializersMap = ContentMap<IntSerializerType>({
     for (final contentType in Content.enumerate())
-      contentType: IntListSerializer('favorites_${ContentUtils.contentTypeString(contentType)}.json')
+      contentType: IntListSerializer('favorites_${ContentUtils.contentTypeId(contentType)}.json')
   });
 }
 
@@ -24,7 +24,7 @@ class FavoritesControl extends Control {
   @override
   Future<void> init() async {
     super.init();
-    _favoritesModeNotifier.value = false;
+    _showOnlyFavoritesNotifier.value = false;
     for (final contentType in Content.enumerate()) {
       final favoriteSet = _favoriteSetsMap.getValue(contentType) ?? {};
       if (_useAndroidFavorites(contentType)) {
@@ -49,14 +49,14 @@ class FavoritesControl extends Control {
     super.dispose();
   }
 
-  ValueListenable<bool> get onFavoritesMode => _favoritesModeNotifier;
-  final ValueNotifier<bool> _favoritesModeNotifier = ValueNotifier(false);
+  ValueListenable<bool> get onShowOnlyFavorites => _showOnlyFavoritesNotifier;
+  final ValueNotifier<bool> _showOnlyFavoritesNotifier = ValueNotifier(false);
 
   /// Whether tabs route currently should filter and only show favorite content.
-  bool get favoritesMode => _favoritesModeNotifier.value;
+  bool get showOnlyFavorites => _showOnlyFavoritesNotifier.value;
 
-  void switchFavoritesMode() {
-    _favoritesModeNotifier.value = !_favoritesModeNotifier.value;
+  void toggleShowOnlyFavorites() {
+    _showOnlyFavoritesNotifier.value = !_showOnlyFavoritesNotifier.value;
   }
 
   /// Whether the given [content] is favorite.
@@ -118,7 +118,7 @@ class FavoritesControl extends Control {
   }
 
   /// Switches current song favorite status.
-  Future<void> switchFavoriteCurrentSong() {
+  Future<void> toggleFavoriteCurrentSong() {
     final currentSong = PlaybackControl.instance.currentSong;
     return FavoritesControl.instance.setFavorite(
       contentTuple: ContentTuple(

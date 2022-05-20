@@ -212,7 +212,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
               ),
               getAll: () => ContentControl.instance.getContent(
                 contentType: selectionController.primaryContentType!,
-                filterFavorite: FavoritesControl.instance.favoritesMode,
+                filterFavorite: FavoritesControl.instance.showOnlyFavorites,
               ),
             ),
             searchButton
@@ -228,7 +228,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
               ),
               getAll: () => ContentControl.instance.getContent(
                 contentType: selectionController.primaryContentType!,
-                filterFavorite: FavoritesControl.instance.favoritesMode,
+                filterFavorite: FavoritesControl.instance.showOnlyFavorites,
               ),
             ),
         ],
@@ -366,10 +366,10 @@ class _FavoritesModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: FavoritesControl.instance.onFavoritesMode,
+      valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
       builder: (context, favoritesMode, child) => HeartButton(
         active: favoritesMode,
-        onPressed: FavoritesControl.instance.switchFavoritesMode,
+        onPressed: FavoritesControl.instance.toggleShowOnlyFavorites,
       ),
     );
   }
@@ -414,11 +414,11 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
     final theme = ThemeControl.instance.theme;
     final contentType = widget.contentType;
     return ValueListenableBuilder<bool>(
-      valueListenable: FavoritesControl.instance.onFavoritesMode,
-      builder: (context, favoriteMode, child) {
+      valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
+      builder: (context, showOnlyFavorites, child) {
         final list = ContentControl.instance.getContent(
           contentType: contentType,
-          filterFavorite: favoriteMode,
+          filterFavorite: showOnlyFavorites,
         );
         final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
         final selectionController = widget.selectionController;
@@ -433,7 +433,7 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
             return selectionController.notInSelection &&
                   notification.depth == 0;
           },
-          child: favoriteMode && list.isEmpty
+          child: showOnlyFavorites && list.isEmpty
             ? Center(child: Text(l10n.nothingHere))
             : ContentListView(
                 contentType: contentType,

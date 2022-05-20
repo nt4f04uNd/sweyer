@@ -144,10 +144,10 @@ class _SearchStateDelegate {
     chipContextMap.setValue(context, key: contentType);
   }
 
-  final favoritesModeNotifier = ValueNotifier(false);
-  bool get favoritesMode => favoritesModeNotifier.value;
-  void switchFavoritesMode() {
-    favoritesModeNotifier.value = !favoritesModeNotifier.value;
+  final showOnlyFavoritesNotifier = ValueNotifier(false);
+  bool get showOnlyFavorites => showOnlyFavoritesNotifier.value;
+  void toggleShowOnlyFavorites() {
+    showOnlyFavoritesNotifier.value = !showOnlyFavoritesNotifier.value;
   }
 
   void onSubmit() {
@@ -753,8 +753,8 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) => _handleNotification(delegate, notification),
         child: ValueListenableBuilder<bool>(
-          valueListenable: delegate.favoritesModeNotifier,
-          builder: (context, favoritesMode, child) => ValueListenableBuilder<Type?>(
+          valueListenable: delegate.showOnlyFavoritesNotifier,
+          builder: (context, showOnlyFavorites, child) => ValueListenableBuilder<Type?>(
             valueListenable: delegate.onContentTypeChange,
             builder: (context, contentType, child) {
               if (delegate.trimmedQuery.isEmpty) {
@@ -801,7 +801,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                           for (int i = 0; i < list.length; i++)
                             list[i]: i,
                         };
-                        final filteredList = favoritesMode ? ContentUtils.filterFavorite(list).toList() : list;
+                        final filteredList = showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
                         if (filteredList.isEmpty) {
                           child = const _NothingFound();
                         } else {
@@ -827,7 +827,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                             for (int i = 0; i < list.length; i++)
                               list[i]: i,
                           };
-                          final filteredList = favoritesMode ? ContentUtils.filterFavorite(list).toList() : list;
+                          final filteredList = showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
                           if (filteredList.isEmpty) {
                             emptyCount += 1;
                             children.add(ContentSection.custom(
@@ -927,7 +927,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 
   bool get active {
     if (favoritesChip)
-      return delegate.favoritesModeNotifier.value;
+      return delegate.showOnlyFavoritesNotifier.value;
     return delegate.contentType == widget.contentType;
   }
 
@@ -936,7 +936,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     super.initState();
     controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     if (favoritesChip) {
-      delegate.favoritesModeNotifier.addListener(_favoriteListener);
+      delegate.showOnlyFavoritesNotifier.addListener(_favoriteListener);
     } else {
       delegate.registerChipContext(context, widget.contentType!);
     }
@@ -948,7 +948,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   @override
   void dispose() {
     if (favoritesChip) {
-      delegate.favoritesModeNotifier.removeListener(_favoriteListener);
+      delegate.showOnlyFavoritesNotifier.removeListener(_favoriteListener);
     }
     controller.dispose();
     super.dispose();
@@ -962,7 +962,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 
   void _handleTap() {
     if (favoritesChip) {
-      delegate.switchFavoritesMode();
+      delegate.toggleShowOnlyFavorites();
       return;
     }
     if (active) {
