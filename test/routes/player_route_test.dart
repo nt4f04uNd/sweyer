@@ -163,14 +163,19 @@ void main() {
       );
 
       expect(MusicPlayer.instance.playing, false);
+      expect(MusicPlayer.handler!.running, false);
 
       await tester.tap(button);
       expect(MusicPlayer.instance.playing, true);
+      expect(MusicPlayer.handler!.running, true);
 
       await tester.tap(button);
       expect(MusicPlayer.instance.playing, false);
+      expect(MusicPlayer.handler!.running, true,
+          reason: 'Handler should only stop when stopped, not when paused');
 
       await tester.pumpAndSettle();
     });
+    expect(MusicPlayer.handler!.running, false);
   });
 }
