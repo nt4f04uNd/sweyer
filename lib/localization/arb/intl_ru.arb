@@ -254,6 +254,7 @@
   "playbackError": "Произошла ошибка при воспроизведении",
   "openAppSettingsError": "Произошла ошибка при открытии настроек приложения",
   "confirmExitingWithBackButtonSetting": "Подтверждать выход кнопкой назад",
+  "useMediaStoreForFavoriteSongsSetting": "Использовать систему Android для любимых треков",
   "warning": "Предупреждение",
   "close": "Закрыть",
   "accept": "Принять",

@@ -112,7 +112,7 @@ void main() {
   });
 
   testWidgets('app shows exit confirmation toast if enabled in the preferences', (WidgetTester tester) async {
-    await Prefs.confirmExitingWithBackButton.set(true);
+    await Settings.confirmExitingWithBackButton.set(true);
     await tester.runAppTest(() async {
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
@@ -132,7 +132,7 @@ void main() {
   });
 
   testWidgets('app does not ask for exit confirmation if disabled in the preferences', (WidgetTester tester) async {
-    await Prefs.confirmExitingWithBackButton.set(false);
+    await Settings.confirmExitingWithBackButton.set(false);
     await tester.runAppTest(() async {
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);

@@ -307,6 +307,7 @@
   "playbackError": "Während der Wiedergabe ist ein Fehler aufgetreten",
   "openAppSettingsError": "Fehler beim Öffnen der App Einstellungen",
   "confirmExitingWithBackButtonSetting": "Bestätige das Verlassen der App mit der Zurück-Taste",
+  "useMediaStoreForFavoriteSongsSetting": "Verwende das Android-System für Lieblingstitel",
   "warning": "Warnung",
   "close": "Schließen",
   "accept": "Akzeptieren",

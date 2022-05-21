@@ -307,6 +307,7 @@
   "playbackError": "An error occurred during the playback",
   "openAppSettingsError": "Error opening the app settings",
   "confirmExitingWithBackButtonSetting": "Confirm exiting with back button",
+  "useMediaStoreForFavoriteSongsSetting": "Use Android system for favorite tracks",
   "warning": "Warning",
   "close": "Close",
   "accept": "Accept",

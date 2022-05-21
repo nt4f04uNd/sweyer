@@ -1229,8 +1229,8 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
           }
         }
         assert(() {
-          // See contentPick documentation for why we need this. 
-          contentPick<Content, void>(
+          // See contentPick documentation for why we need this.
+          contentPick<Song, void>(
             song: null,
             album: null,
             playlist: null,
@@ -1319,8 +1319,8 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
           }
         }
         assert(() {
-          // See contentPick documentation for why we need this. 
-          contentPick<Content, void>(
+          // See contentPick documentation for why we need this.
+          contentPick<Song, void>(
             song: null,
             album: null,
             playlist: null,

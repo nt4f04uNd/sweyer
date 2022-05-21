@@ -43,8 +43,8 @@ extension QuickActionSerialization on QuickAction {
 ///
 /// ```
 /// assert(() {
-///   // See contentPick documentation for why we need this. 
-///   contentPick<Content, void>(
+///   // See contentPick documentation for why we need this.
+///   contentPick<Song, void>(
 ///     song: null,
 ///     album: null,
 ///     playlist: null,
@@ -168,7 +168,8 @@ class ContentTuple {
     List<Playlist> playlists,
     List<Artist> artists,
   ) : assert(() {
-        contentPick<Content, void>(
+        // See contentPick documentation for why we need this.
+        contentPick<Song, void>(
           song: null,
           album: null,
           playlist: null,
@@ -956,8 +957,8 @@ class ContentUtils {
         throw UnimplementedError();
       }
       assert(() {
-        // See contentPick documentation for why we need this. 
-        contentPick<Content, void>(
+        // See contentPick documentation for why we need this.
+        contentPick<Song, void>(
           song: null,
           album: null,
           playlist: null,
@@ -1016,8 +1017,8 @@ class ContentUtils {
       }
     }
     assert(() {
-      // See contentPick documentation for why we need this. 
-      contentPick<Content, void>(
+      // See contentPick documentation for why we need this.
+      contentPick<Song, void>(
         song: null,
         album: null,
         playlist: null,
