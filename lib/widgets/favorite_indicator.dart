@@ -18,7 +18,7 @@ class FavoriteIndicator extends StatelessWidget {
       child: Icon(
         Icons.favorite_rounded,
         color: Colors.redAccent,
-        size: size,
+        size: size ?? 18.0,
       ),
     );
   }
