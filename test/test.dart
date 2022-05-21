@@ -135,6 +135,9 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
     return null;
   });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.nt4f04und.android_content_provider/ContentResolver'), (MethodCall methodCall) async {
+    return null;
+  });
   LicenseRegistry.reset();
   LicenseRegistry.addLicense(() => Stream.value(const FakeLicenseEntry()));
 
