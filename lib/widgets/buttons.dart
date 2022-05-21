@@ -429,7 +429,6 @@ class FavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
     return StreamBuilder(
       stream: PlaybackControl.instance.onSongChange,
       builder: (context, snapshot) => StreamBuilder(
@@ -438,7 +437,6 @@ class FavoriteButton extends StatelessWidget {
           final currentSong = PlaybackControl.instance.currentSong;
           return HeartButton(
             active: currentSong.isFavorite,
-            inactiveColor: theme.colorScheme.onSurface,
             onPressed: FavoritesControl.instance.toggleFavoriteCurrentSong,
           );
         },
@@ -476,7 +474,7 @@ class HeartButton extends StatelessWidget {
       ),
       tooltip: tooltip,
       color: color ?? Colors.redAccent,
-      inactiveColor: inactiveColor ?? theme.colorScheme.onSurface.withOpacity(0.6),
+      inactiveColor: inactiveColor ?? theme.colorScheme.onSurface,
       iconSize: 24.0,
       onPressed: onPressed,
     );

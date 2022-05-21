@@ -489,23 +489,6 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     );
   }
 
-  List<Widget> buildActions() {
-    return <Widget>[
-      if (widget.delegate.query.isEmpty)
-        const SizedBox.shrink()
-      else
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: NFIconButton(
-            icon: const Icon(Icons.clear_rounded),
-            onPressed: () {
-              widget.delegate.query = '';
-            },
-          ),
-        ),
-    ];
-  }
-
   PreferredSizeWidget buildBottom() {
     const bottomPadding = 12.0;
     final contentTypeEntries = stateDelegate.results.map.entries
@@ -609,82 +592,94 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
         ),
       ),
     );
-    return RouteAwareWidget(
-      onPushNext: _handlePushNext,
-      child: Builder(
-        builder: (context) => Semantics(
-          explicitChildNodes: true,
-          scopesRoute: true,
-          namesRoute: true,
-          label: routeName,
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            extendBodyBehindAppBar: true,
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
-              child: SelectionAppBar(
-                selectionController: stateDelegate.selectionController,
-                onMenuPressed: null,
-                showMenuButton: false,
-                titleSelection: selectionRoute ? title : Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
-                  child: SelectionCounter(controller: stateDelegate.selectionController),
-                ),
-                actionsSelection: selectionRoute
-                  ? [
-                      SelectAllSelectionAction<Content>(
-                        controller: selectionController,
-                        entryFactory: (content, index) => SelectionEntry.fromContent(
-                          content: content,
-                          index: index,
-                          context: context,
-                        ),
-                        getAll: () => stateDelegate.results.map.getValue(stateDelegate.contentType)!,
-                      ),
-                      ]
-                  : [
-                    DeleteSongsAppBarAction<Content>(
-                      controller: stateDelegate.selectionController,
-                    ),
-                    ValueListenableBuilder<Type?>(
-                      valueListenable: stateDelegate.onContentTypeChange,
-                      builder: (context, contentType, child) => AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        transitionBuilder: (child, animation) => EmergeAnimation(
-                          animation: animation,
-                          child: child,
-                        ),
-                        child: stateDelegate.contentType == null
-                          ? const SizedBox.shrink()
-                          : SelectAllSelectionAction<Content>(
-                              controller: selectionController,
-                              entryFactory: (content, index) => SelectionEntry.fromContent(
-                                content: content,
-                                index: index,
-                                context: context,
-                              ),
-                              getAll: () => stateDelegate.results.map.getValue(contentType)!,
-                            ),
-                      ),
-                    ),
-                  ],
-                elevationSelection: 0.0,
-                elevation: theme.appBarTheme.elevation!,
-                toolbarHeight: kToolbarHeight,
-                backgroundColor: theme.primaryColor,
-                iconTheme: theme.primaryIconTheme,
-                textTheme: theme.primaryTextTheme,
-                leading: buildLeading(),
-                actions: selectionRoute ? const [] : buildActions(),
-                bottom: bottom,
-                title: !selectionRoute ? title : const SizedBox.shrink(),
+    final selectAllAction = ValueListenableBuilder<Type?>(
+      valueListenable: stateDelegate.onContentTypeChange,
+      builder: (context, contentType, child) => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) => EmergeAnimation(
+          animation: animation,
+          child: child,
+        ),
+        child: stateDelegate.contentType == null
+          ? const SizedBox.shrink()
+          : SelectAllSelectionAction<Content>(
+              controller: selectionController,
+              entryFactory: (content, index) => SelectionEntry.fromContent(
+                content: content,
+                index: index,
+                context: context,
               ),
+              getAll: () {
+                final list = stateDelegate.results.map.getValue(contentType)!;
+                return stateDelegate.showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
+              },
             ),
-            body: SafeArea(
-              child: _DelegateProvider(
-                delegate: stateDelegate,
+      ),
+    );
+    return _DelegateProvider(
+      delegate: stateDelegate,
+      child: RouteAwareWidget(
+        onPushNext: _handlePushNext,
+        child: Builder(
+          builder: (context) => Semantics(
+            explicitChildNodes: true,
+            scopesRoute: true,
+            namesRoute: true,
+            label: routeName,
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              extendBodyBehindAppBar: true,
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
+                child: SelectionAppBar(
+                  selectionController: stateDelegate.selectionController,
+                  onMenuPressed: null,
+                  showMenuButton: false,
+                  titleSelection: selectionRoute ? title : Padding(
+                    padding: const EdgeInsets.only(top: 15.0),
+                    child: SelectionCounter(controller: stateDelegate.selectionController),
+                  ),
+                  actionsSelection: selectionRoute
+                    ? [
+                        if (widget.delegate.query.isNotEmpty)
+                          selectAllAction,
+                        if (widget.delegate.query.isNotEmpty)
+                          const _ClearButton(),
+                      ]
+                    : [
+                        ValueListenableBuilder<Type?>(
+                          valueListenable: stateDelegate.onContentTypeChange,
+                          builder: (context, contentType, child) => stateDelegate.contentType == null
+                            ? const SizedBox.square(dimension: NFConstants.iconButtonSize)
+                            : const SizedBox.shrink(),
+                        ),
+                        DeleteSongsAppBarAction<Content>(
+                          controller: stateDelegate.selectionController,
+                          keepSpacingWhenHidden: true,
+                        ),
+                        selectAllAction,
+                      ],
+                  elevationSelection: 0.0,
+                  elevation: theme.appBarTheme.elevation!,
+                  toolbarHeight: kToolbarHeight,
+                  backgroundColor: theme.primaryColor,
+                  iconTheme: theme.primaryIconTheme,
+                  textTheme: theme.primaryTextTheme,
+                  leading: buildLeading(),
+                  actions: selectionRoute
+                    ? const []
+                    : [
+                        const SizedBox.square(dimension: NFConstants.iconButtonSize),
+                        if (widget.delegate.query.isNotEmpty)
+                          const _ClearButton(),
+                      ],
+                  bottom: bottom,
+                  title: !selectionRoute ? title : const SizedBox.shrink(),
+                ),
+              ),
+              body: SafeArea(
                 child: GestureDetector(
                   onTap: () => focusNode.unfocus(),
                   onVerticalDragDown: (_) => focusNode.unfocus(),
@@ -891,6 +886,24 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
   }
 }
 
+
+class _ClearButton extends StatelessWidget {
+  const _ClearButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final delegate = _SearchStateDelegate._of(context)!;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: NFIconButton(
+        icon: const Icon(Icons.clear_rounded),
+        onPressed: () {
+          delegate.searchDelegate.query = '';
+        },
+      ),
+    );
+  }
+}
 
 class _ContentChip extends StatefulWidget {
   const _ContentChip({

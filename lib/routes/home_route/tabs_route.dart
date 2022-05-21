@@ -192,13 +192,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         drawerController.open();
       },
       actions: selectionRoute ? const [] : [
-        Visibility(
-          visible: false,
-          maintainState: true,
-          maintainAnimation: true,
-          maintainSize: true,
-          child: DeleteSongsAppBarAction<Content>(controller: selectionController),
-        ),
+        const _ShowOnlyFavoritesButton(),
         searchButton,
       ],
       actionsSelection: selectionRoute
@@ -215,10 +209,14 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                 filterFavorite: FavoritesControl.instance.showOnlyFavorites,
               ),
             ),
-            searchButton
+            const _ShowOnlyFavoritesButton(),
+            searchButton,
           ]
         : [
-            DeleteSongsAppBarAction<Content>(controller: selectionController),
+            DeleteSongsAppBarAction<Content>(
+              controller: selectionController,
+              keepSpacingWhenHidden: true,
+            ),
             SelectAllSelectionAction(
               controller: selectionController,
               entryFactory: (Content content, index) => SelectionEntry.fromContent(
@@ -310,32 +308,28 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                                 onPanEnd: (_) {
                                   tabBarDragged = false;
                                 },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    NFTabBar(         
-                                      isScrollable: true,
-                                      controller: tabController,
-                                      indicatorWeight: 5.0,
-                                      indicator: BoxDecoration(
-                                        color: theme.colorScheme.primary,
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(3.0),
-                                          topRight: Radius.circular(3.0),
-                                        ),
+                                child: Center(
+                                  child: NFTabBar(         
+                                    isScrollable: true,
+                                    controller: tabController,
+                                    indicatorWeight: 5.0,
+                                    indicator: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(3.0),
+                                        topRight: Radius.circular(3.0),
                                       ),
-                                      labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                      labelColor: theme.textTheme.headline6!.color,
-                                      indicatorSize: TabBarIndicatorSize.label,
-                                      unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
-                                      labelStyle: theme.textTheme.headline6!.copyWith(
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                      tabs: _buildTabs(),
                                     ),
-                                    const _FavoritesModeButton(),
-                                  ],
+                                    labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                    labelColor: theme.textTheme.headline6!.color,
+                                    indicatorSize: TabBarIndicatorSize.label,
+                                    unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
+                                    labelStyle: theme.textTheme.headline6!.copyWith(
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                    tabs: _buildTabs(),
+                                  ),
                                 ),
                               ),
                             ),
@@ -360,15 +354,15 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   }
 }
 
-class _FavoritesModeButton extends StatelessWidget {
-  const _FavoritesModeButton({Key? key}) : super(key: key);
+class _ShowOnlyFavoritesButton extends StatelessWidget {
+  const _ShowOnlyFavoritesButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
-      builder: (context, favoritesMode, child) => HeartButton(
-        active: favoritesMode,
+      builder: (context, onShowOnlyFavorites, child) => HeartButton(
+        active: onShowOnlyFavorites,
         onPressed: FavoritesControl.instance.toggleShowOnlyFavorites,
       ),
     );

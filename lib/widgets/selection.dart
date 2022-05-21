@@ -952,6 +952,7 @@ class _ActionBuilder extends StatefulWidget {
     required this.controller,
     required this.builder,
     required this.shown,
+    this.keepSpacingWhenHidden = false,
     this.child,
   }) : super(key: key);
 
@@ -963,6 +964,8 @@ class _ActionBuilder extends StatefulWidget {
 
   /// Condition to check whether the action should be shown or not.
   final ValueGetter<bool> shown;
+
+  final bool keepSpacingWhenHidden;
 
   @override
   _ActionBuilderState createState() => _ActionBuilderState();
@@ -1017,7 +1020,9 @@ class _ActionBuilderState extends State<_ActionBuilder> with SelectionHandlerMix
         child: child,
       ),
       child: !shown
-        ? const SizedBox.shrink()
+        ? widget.keepSpacingWhenHidden
+          ? const SizedBox.square(dimension: NFConstants.iconButtonSize)
+          : const SizedBox.shrink()
         : widget.builder(context, widget.child),
     );
   }
@@ -1779,9 +1784,11 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
 class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   const DeleteSongsAppBarAction({
     Key? key,
-    required this.controller
+    required this.controller,
+    this.keepSpacingWhenHidden = true,
   }) : super(key: key);
 
+  final bool keepSpacingWhenHidden;
   final ContentSelectionController<SelectionEntry<T>> controller;
 
   @override
@@ -1849,6 +1856,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
   Widget build(BuildContext context) {
     return _ActionBuilder(
       controller: widget.controller,
+      keepSpacingWhenHidden: widget.keepSpacingWhenHidden,
       shown: () {
         if (type == Song || type == Playlist) {
           typeToDelete = type;
