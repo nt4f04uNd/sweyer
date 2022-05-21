@@ -1,25 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/sweyer.dart';
 
-// TODO: https://lottiefiles.com/82795-favorite-icon
-// TODO: https://lottiefiles.com/89039-add-to-favorite
 class FavoriteIndicator extends StatelessWidget {
   const FavoriteIndicator({
     Key? key,
+    required this.shown,
     this.size,
   }) : super(key: key);
 
+  final bool shown;
   final double? size;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Icon(
-        Icons.favorite_rounded,
-        color: Colors.redAccent,
-        size: size ?? 18.0,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 240),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => ScaleTransition(
+        scale: animation,
+        child: child,
       ),
+      child: !shown
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Icon(
+              Icons.favorite_rounded,
+              color: Colors.redAccent,
+              size: size ?? 18.0,
+            ),
+          ),
     );
   }
 }

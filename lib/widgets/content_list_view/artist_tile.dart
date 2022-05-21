@@ -141,8 +141,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (widget.artist.isFavorite)
-                    const FavoriteIndicator(),
+                FavoriteIndicator(shown: widget.artist.isFavorite),
                   if (widget.trailing != null)
                     widget.trailing!,
                   if (selectionRoute)

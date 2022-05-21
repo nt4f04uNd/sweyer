@@ -259,8 +259,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.song.isFavorite)
-              const FavoriteIndicator(),
+            FavoriteIndicator(shown: widget.song.isFavorite),
             if (widget.trailing != null)
               widget.trailing!,
             if (selectionRoute)

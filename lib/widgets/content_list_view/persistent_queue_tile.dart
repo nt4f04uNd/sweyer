@@ -218,8 +218,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.queue.isFavorite)
-                  const FavoriteIndicator(),
+                FavoriteIndicator(shown: widget.queue.isFavorite),
                 if (widget.trailing != null)
                   widget.trailing!,
                 if (selectionRoute)
@@ -302,13 +301,14 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
               child: buildAddToSelection(),
             ),
           ),
-        if (widget.grid && widget.queue.isFavorite)
+        if (widget.grid)
           Positioned(
             left: selectionRoute ? 14.0 : 2.0,
             top: selectionRoute
               ? widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin * 1.5
               : widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin,
-            child: const FavoriteIndicator(
+            child: FavoriteIndicator(
+              shown: widget.queue.isFavorite,
               size: favoriteIndicatorLargeSize,
             ),
           ),
