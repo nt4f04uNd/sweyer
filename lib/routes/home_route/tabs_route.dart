@@ -215,7 +215,6 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         : [
             DeleteSongsAppBarAction<Content>(
               controller: selectionController,
-              keepSpacingWhenHidden: true,
             ),
             SelectAllSelectionAction(
               controller: selectionController,

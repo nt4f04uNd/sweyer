@@ -163,16 +163,16 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       trailing: _onlyCount
         ? null
         : Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (trailing != null)
-              trailing!,
-            Flexible(
-              child: _buildCount(l10n, textStyle),
-            ),
-          ],
-        ),
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (trailing != null)
+                trailing!,
+              Flexible(
+                child: _buildCount(l10n, textStyle),
+              ),
+            ],
+          ),
       leading: _onlyCount ? _buildCount(l10n, textStyle) : Theme(
         data: Theme.of(context).copyWith(
           splashFactory: NFListTileInkRipple.splashFactory,

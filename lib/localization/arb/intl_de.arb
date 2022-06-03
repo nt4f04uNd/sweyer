@@ -248,9 +248,6 @@
   "addToPlaylist": "Zur Wiedergabeliste hinzufügen",
   "removeFromPlaylist": "Aus Wiedergabeliste entfernen",
   "addToFavorites": "Zu Favoriten hinzufügen",
-  "@addToFavorites": {
-    "description": "TODO: Momentan unbenutzt"
-  },
   "addToQueue": "Zur Abspielliste hinzufügen",
   "removeFromQueue": "Aus Abspielliste entfernen",
   "share": "Teilen",

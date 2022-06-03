@@ -649,15 +649,8 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                           const _ClearButton(),
                       ]
                     : [
-                        ValueListenableBuilder<Type?>(
-                          valueListenable: stateDelegate.onContentTypeChange,
-                          builder: (context, contentType, child) => stateDelegate.contentType == null
-                            ? const SizedBox.square(dimension: NFConstants.iconButtonSize)
-                            : const SizedBox.shrink(),
-                        ),
                         DeleteSongsAppBarAction<Content>(
                           controller: stateDelegate.selectionController,
-                          keepSpacingWhenHidden: true,
                         ),
                         selectAllAction,
                       ],
@@ -671,7 +664,6 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                   actions: selectionRoute
                     ? const []
                     : [
-                        const SizedBox.square(dimension: NFConstants.iconButtonSize),
                         if (widget.delegate.query.isNotEmpty)
                           const _ClearButton(),
                       ],

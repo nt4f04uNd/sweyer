@@ -223,8 +223,6 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                   widget.trailing!,
                 if (selectionRoute)
                   buildAddToSelection(),
-                if (!selectionRoute)
-                  const SizedBox(width: 8.0),
               ],
             ),
           ],

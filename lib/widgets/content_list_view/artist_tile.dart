@@ -146,8 +146,6 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                     widget.trailing!,
                   if (selectionRoute)
                     buildAddToSelection(),
-                  if (!selectionRoute)
-                    const SizedBox(width: 8.0)
                 ],
               )
             ],

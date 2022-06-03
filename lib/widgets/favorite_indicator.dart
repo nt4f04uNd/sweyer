@@ -23,7 +23,7 @@ class FavoriteIndicator extends StatelessWidget {
       child: !shown
         ? const SizedBox.shrink()
         : Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(right: 8.0),
             child: Icon(
               Icons.favorite_rounded,
               color: Colors.redAccent,

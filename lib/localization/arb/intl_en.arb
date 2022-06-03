@@ -248,9 +248,6 @@
   "addToPlaylist": "Add to playlist",
   "removeFromPlaylist": "Remove from playlist",
   "addToFavorites": "Add to favorites",
-  "@addToFavorites": {
-    "description": "TODO: currently unused"
-  },
   "addToQueue": "Add to queue",
   "removeFromQueue": "Remove from queue",
   "share": "Share",

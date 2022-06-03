@@ -4,6 +4,7 @@ import 'dart:ui';
 export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';
 export 'package:flutter_test/flutter_test.dart';
+import 'package:android_content_provider/android_content_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -135,7 +136,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
     return null;
   });
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.nt4f04und.android_content_provider/ContentResolver'), (MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel, (MethodCall methodCall) async {
     return null;
   });
   LicenseRegistry.reset();
