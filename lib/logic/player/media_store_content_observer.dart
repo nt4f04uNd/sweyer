@@ -32,7 +32,7 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
     AndroidContentResolver.instance.registerContentObserver(
       uri: _uri,
       observer: this,
-      // Can be uncommented for debug purposes - will notify about the changes the appitself
+      // Can be uncommented for debug purposes - will notify about the changes the app itself
       // made to the MediaStore.
       //
       // notifyForDescendants: true,
@@ -66,12 +66,14 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
       if (match != null) {
         final capturedNumber = match.group(1);
         if (capturedNumber != null) {
-          final int id = int.parse(capturedNumber);
-          _changeSubject.add(MediaStoreContentChangeEvent(
-            id: id,
-            flags: flags ?? 0,
-            contentType: contentType ?? T,
-          ));
+          final id = int.tryParse(capturedNumber);
+          if (id != null) {
+            _changeSubject.add(MediaStoreContentChangeEvent(
+              id: id,
+              flags: flags ?? 0,
+              contentType: contentType ?? T,
+            ));
+          }
         }
       }
     }

@@ -95,6 +95,7 @@ class FavoritesControl with Control {
     if (event.flags & AndroidContentResolver.NOTIFY_UPDATE != 0) {
       _mediaStoreUpdateTimer?.cancel();
       _mediaStoreUpdateTimer = Timer(_mediaStoreUpdateDebounceInterval, () async {
+        _endMediaStoreUpdate();
         await ContentControl.instance.refetch<Song>();
         final favoriteSet = _favoriteSetsMap.getValue<Song>()!;
         for (final song in ContentControl.instance.state.allSongs.songs) {
@@ -104,7 +105,6 @@ class FavoritesControl with Control {
             favoriteSet.remove(song.id);
           }
         }
-        _endMediaStoreUpdate();
       });
     }
   }
