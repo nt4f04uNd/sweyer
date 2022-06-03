@@ -59,7 +59,7 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
   }
 
   @override
-  void onChange(bool selfChange, String? uri, int? flags) {
+  void onChange(bool selfChange, String? uri, int flags) {
     if (uri != null && uri.startsWith(_uri)) {
       final regexp = RegExp('$_uri/([0-9]+)');
       final match = regexp.firstMatch(uri);
@@ -70,7 +70,7 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
           if (id != null) {
             _changeSubject.add(MediaStoreContentChangeEvent(
               id: id,
-              flags: flags ?? 0,
+              flags: flags,
               contentType: contentType ?? T,
             ));
           }
