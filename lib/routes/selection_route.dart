@@ -16,28 +16,33 @@ class SelectionRoute extends StatefulWidget {
 class _SelectionRouteState extends State<SelectionRoute> {
   late final HomeRouter nestedHomeRouter = HomeRouter.selection(widget.selectionArguments);
   late final ContentSelectionController controller;
+  late bool settingsOpened;
 
   @override
   void initState() { 
     super.initState();
-    var settingsOpened = false;
+    settingsOpened = false;
     controller = ContentSelectionController.createAlwaysInSelection(
       context: context,
       actionsBuilder: (context) {
         final l10n = getl10n(context);
         final settingsPageBuilder = widget.selectionArguments.settingsPageBuilder;
         return [
-          if (settingsPageBuilder != null)
+          if (settingsPageBuilder != null && !settingsOpened)
             NFIconButton(
               icon: const Icon(Icons.settings_rounded),
               onPressed: () async {
                 if (!settingsOpened) {
-                  settingsOpened = true;
+                  setState(() {
+                    settingsOpened = true;
+                  });
                   await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
                     child: Builder(builder: (context) => settingsPageBuilder(context)),
                     transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
                   ));
-                  settingsOpened = false;
+                  setState(() {
+                    settingsOpened = false;
+                  });
                 }
               },
             ),
