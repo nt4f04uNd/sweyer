@@ -579,7 +579,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
           action: 'play_next',
         ),
         MediaControl(
-          androidIcon: 'drawable/round_close_${color}_24',
+          androidIcon: 'drawable/round_stop_${color}_24',
           label: l10n.stop,
           action: 'stop',
         ),
