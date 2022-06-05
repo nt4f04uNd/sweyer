@@ -656,11 +656,14 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         throw UnimplementedError();
       }
     }
-    return Navigator(
-      key: navigatorKey,
-      observers: [observer],
-      onPopPage: _handlePopPage,
-      pages: pages,
+    return RouterDelegateProvider<HomeRouter>(
+      delegate: this,
+      child: Navigator(
+        key: navigatorKey,
+        observers: [observer],
+        onPopPage: _handlePopPage,
+        pages: pages,
+      ),
     );
   }
 }
