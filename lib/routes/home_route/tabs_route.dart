@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:clock/clock.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -132,8 +131,6 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     ];
   }
 
-  
-  DateTime? _lastBackPressTime;
   Future<bool> _handlePop() async {
     final navigatorKey = AppRouter.instance.navigatorKey;
     final homeNavigatorKey = homeRouter!.navigatorKey;
@@ -152,18 +149,6 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       homeNavigatorKey.currentState!.pop();
       return true;
     }
-
-    if (!selectionRoute && Settings.confirmExitingWithBackButton.get()) {
-      final now = clock.now();
-      // Show toast when user presses back button on main route, that
-      // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
-        _lastBackPressTime = now;
-        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
-        return true;
-      }
-    }
-
     return false;
   }
 

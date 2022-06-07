@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -91,6 +92,7 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home> {
   static GlobalKey<OverlayState> overlayKey = GlobalKey();
   final router = HomeRouter.main();
+  DateTime? _lastBackPressTime;
 
   @override
   Widget build(BuildContext context) {
@@ -98,26 +100,43 @@ class HomeState extends State<Home> {
       resizeToAvoidBottomInset: false,
       body: RouterDelegateProvider<HomeRouter>(
         delegate: router,
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(bottom: kSongTileHeight),
-              child: Router<HomeRoutes>(
-                routerDelegate: router,
-                routeInformationParser: HomeRouteInformationParser(),
-                routeInformationProvider: HomeRouteInformationProvider(),
-                backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                  Router.of(context).backButtonDispatcher!,
+        child: NFBackButtonListener(
+          onBackButtonPressed: _onBackPressed,
+          child: Stack(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: kSongTileHeight),
+                child: Router<HomeRoutes>(
+                  routerDelegate: router,
+                  routeInformationParser: HomeRouteInformationParser(),
+                  routeInformationProvider: HomeRouteInformationProvider(),
+                  backButtonDispatcher: HomeRouteBackButtonDispatcher(
+                    Router.of(context).backButtonDispatcher!,
+                  ),
                 ),
               ),
-            ),
-            const PlayerRoute(),
-            Overlay(key: overlayKey),
-            const DrawerWidget(),
-          ],
+              const PlayerRoute(),
+              Overlay(key: overlayKey),
+              const DrawerWidget(),
+            ],
+          ),
         ),
       ),
     );
+  }
+  
+  Future<bool> _onBackPressed() async {
+    if (Settings.confirmExitingWithBackButton.get()) {
+      final now = clock.now();
+      // Show toast when user presses back button on main route, that
+      // asks from user to press again to confirm that he wants to quit the app
+      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
+        _lastBackPressTime = now;
+        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
+        return true;
+      }
+    }
+    return false;
   }
 }
 
