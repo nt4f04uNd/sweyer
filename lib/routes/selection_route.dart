@@ -27,25 +27,32 @@ class _SelectionRouteState extends State<SelectionRoute> {
         final l10n = getl10n(context);
         final settingsPageBuilder = widget.selectionArguments.settingsPageBuilder;
         return [
-          if (settingsPageBuilder != null && !settingsOpened)
-            NFIconButton(
-              icon: const Icon(Icons.settings_rounded),
-              onPressed: () async {
-                if (!settingsOpened) {
-                  setState(() {
-                    settingsOpened = true;
-                  });
-                  await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
-                    child: Builder(builder: (context) => settingsPageBuilder(context)),
-                    transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
-                  ));
-                  if (mounted) {
-                    setState(() {
-                      settingsOpened = false;
-                    });
-                  }
-                }
-              },
+          if (settingsPageBuilder != null)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 240),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: settingsOpened
+                ? const SizedBox.shrink()
+                : NFIconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  onPressed: () async {
+                    if (!settingsOpened) {
+                      setState(() {
+                        settingsOpened = true;
+                      });
+                      await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
+                        child: Builder(builder: (context) => settingsPageBuilder(context)),
+                        transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
+                      ));
+                      if (mounted) {
+                        setState(() {
+                          settingsOpened = false;
+                        });
+                      }
+                    }
+                  },
+                ),
             ),
           const SizedBox(width: 6.0),
           AnimatedBuilder(
