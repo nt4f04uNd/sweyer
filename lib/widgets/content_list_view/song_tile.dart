@@ -242,29 +242,55 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         color: value,
         child: child,
       ),
-      child: NFListTile(
-        dense: true,
-        isThreeLine: false,
-        contentPadding: EdgeInsets.only(
-          left: widget.horizontalPadding,
-          right: rightPadding,
-        ),
-        onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
-          ? _handleTap
-          : widget.onTap,
-        onLongPress: handleLongPress,
-        title: title,
-        subtitle: subtitle,
-        leading: albumArt,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FavoriteIndicator(shown: widget.song.isFavorite),
-            if (widget.trailing != null)
-              widget.trailing!,
-            if (selectionRoute)
-              buildAddToSelection(),
-          ],
+      child: Material(
+        color: widget.backgroundColor,
+        child: InkWell(
+          onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
+            ? _handleTap
+            : widget.onTap,
+          onLongPress: handleLongPress,
+          splashFactory: NFListTileInkRipple.splashFactory,
+          child: Padding(
+            padding:  EdgeInsets.only(
+              left: widget.horizontalPadding,
+              right: rightPadding,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: albumArt,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        title,
+                        const SizedBox(height: 4.0),
+                        subtitle,
+                        const SizedBox(height: 3.0),
+                      ],
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FavoriteIndicator(shown: widget.song.isFavorite),
+                    if (widget.trailing != null)
+                      widget.trailing!,
+                    if (selectionRoute)
+                      buildAddToSelection(),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -576,20 +576,17 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
-    final title = Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: TextField(
-        selectionControls: NFTextSelectionControls(),
-        controller: widget.delegate._queryTextController,
-        focusNode: focusNode,
-        style: theme.textTheme.headline6,
-        textInputAction: TextInputAction.search,
-        onSubmitted: (String _) => stateDelegate.onSubmit(),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: searchFieldLabel,
-          hintStyle: theme.inputDecorationTheme.hintStyle,
-        ),
+    final title = TextField(
+      selectionControls: NFTextSelectionControls(),
+      controller: widget.delegate._queryTextController,
+      focusNode: focusNode,
+      style: theme.textTheme.headline6,
+      textInputAction: TextInputAction.search,
+      onSubmitted: (String _) => stateDelegate.onSubmit(),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hintText: searchFieldLabel,
+        hintStyle: theme.inputDecorationTheme.hintStyle,
       ),
     );
     final selectAllAction = ValueListenableBuilder<Type?>(
