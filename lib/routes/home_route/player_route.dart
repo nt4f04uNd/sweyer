@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/physics.dart';
@@ -682,7 +683,10 @@ class _MainTabState extends State<_MainTab> {
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: Colors.transparent,
-          toolbarHeight: TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
+          toolbarHeight: math.max(
+              TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
+              theme.appBarTheme.toolbarHeight ?? kToolbarHeight
+          ),
           leading: FadeTransition(
             opacity: fadeAnimation,
             child: RepaintBoundary(
