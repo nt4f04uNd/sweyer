@@ -118,10 +118,11 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   Widget build(BuildContext context) {
     final backgroundColor = ThemeControl.instance.theme.colorScheme.background;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
     return Slidable(
       controller: controller,
-      start: 1.0 - kSongTileHeight / screenHeight,
+      start: 1.0 - TrackPanel.height(mediaQuery.textScaleFactor) / screenHeight,
       end: 0.0,
       direction: slideDirection,
       barrier: Container(
