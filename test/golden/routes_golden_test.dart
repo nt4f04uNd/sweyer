@@ -164,7 +164,7 @@ void main() {
             matching: find.byIcon(Icons.settings_rounded),
         ));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_settings'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_route_settings'));
     });
   });
 
