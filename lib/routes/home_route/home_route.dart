@@ -93,6 +93,16 @@ class HomeState extends State<Home> {
   static GlobalKey<OverlayState> overlayKey = GlobalKey();
   final router = HomeRouter.main();
   DateTime? _lastBackPressTime;
+  late ChildBackButtonDispatcher _backButtonDispatcher;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Defer back button dispatching to the child router
+    _backButtonDispatcher = Router.of(context)
+        .backButtonDispatcher!
+        .createChildBackButtonDispatcher();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,9 +120,7 @@ class HomeState extends State<Home> {
                   routerDelegate: router,
                   routeInformationParser: HomeRouteInformationParser(),
                   routeInformationProvider: HomeRouteInformationProvider(),
-                  backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                    Router.of(context).backButtonDispatcher!,
-                  ),
+                  backButtonDispatcher: _backButtonDispatcher,
                 ),
               ),
               const PlayerRoute(),

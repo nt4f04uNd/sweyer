@@ -134,7 +134,11 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   Future<bool> _handlePop() async {
     final navigatorKey = AppRouter.instance.navigatorKey;
     final homeNavigatorKey = homeRouter!.navigatorKey;
-
+    final selectionController = ContentControl.instance.selectionNotifier.value;
+    if (selectionController != null && !selectionController.alwaysInSelection) {
+      selectionController.close();
+      return true;
+    }
     // When in selection route, the home router should be popped first,
     // opposed to the normal situation, where the main app navigator comes first
     if (selectionRoute && homeNavigatorKey.currentState!.canPop()) {
