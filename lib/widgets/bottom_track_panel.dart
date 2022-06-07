@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -132,7 +133,7 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
 class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgress> {
   static const min = 0.001;
 
-  double initRotation = math.Random(DateTime.now().second).nextDouble();
+  double initRotation = math.Random(clock.now().second).nextDouble();
 
   /// Actual track position value
   Duration _value = Duration.zero;
