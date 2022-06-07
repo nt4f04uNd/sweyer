@@ -1,3 +1,4 @@
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 
 import '../test.dart';
@@ -214,5 +215,35 @@ void main() {
       await tester.pumpAndSettle();
     });
     expect(MusicPlayer.handler!.running, false);
+  });
+
+  testWidgets('handles back presses correctly', (WidgetTester tester) async {
+    await tester.runAppTest(() async {
+      await openQueueScreen(tester);
+      await tester.tap(find.byIcon(Icons.queue_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.newPlaylist), findsOneWidget);
+
+      // Simulate resizing the screen due to software keyboard.
+      await tester.binding.setSurfaceSize(const Size(kScreenWidth, kScreenHeight / 2));
+      await tester.pumpAndSettle();
+      
+      // First back press closes software keyboard.
+      await tester.binding.setSurfaceSize(kScreenSize);
+      await tester.pumpAndSettle();
+
+      // Close the "New playlist" dialog
+      await BackButtonInterceptor.popRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text(l10n.upNext), findsOneWidget);
+      expect(playerRouteController.value, 1.0);
+
+      // Close the player route
+      await BackButtonInterceptor.popRoute();
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.upNext), findsNothing);
+      expect(playerRouteController.value, 0);
+    });
   });
 }
