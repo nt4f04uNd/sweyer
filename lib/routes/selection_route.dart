@@ -16,12 +16,11 @@ class SelectionRoute extends StatefulWidget {
 class _SelectionRouteState extends State<SelectionRoute> {
   late final HomeRouter nestedHomeRouter = HomeRouter.selection(widget.selectionArguments);
   late final ContentSelectionController controller;
-  late bool settingsOpened;
+  bool settingsOpened = false;
 
   @override
   void initState() { 
     super.initState();
-    settingsOpened = false;
     controller = ContentSelectionController.createAlwaysInSelection(
       context: context,
       actionsBuilder: (context) {
