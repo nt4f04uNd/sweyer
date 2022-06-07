@@ -685,8 +685,8 @@ class _MainTabState extends State<_MainTab> {
           elevation: 0.0,
           backgroundColor: Colors.transparent,
           toolbarHeight: math.max(
-              TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
-              theme.appBarTheme.toolbarHeight ?? kToolbarHeight
+            TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
+            theme.appBarTheme.toolbarHeight ?? kToolbarHeight
           ),
           leading: FadeTransition(
             opacity: fadeAnimation,
