@@ -4,6 +4,7 @@ import 'dart:ui';
 export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';
 export 'package:flutter_test/flutter_test.dart';
+import 'package:android_content_provider/android_content_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -16,7 +17,6 @@ import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/logic/logic.dart';
 
 export 'fakes/fakes.dart';
 
@@ -38,7 +38,7 @@ final _testSong = Song(
   duration: 0,
   size: 0,
   data: 'data_data_data_data_data_data_data_data',
-  isFavorite: false,
+  isFavoriteInMediaStore: false,
   generationAdded: 0,
   generationModified: 0,
   origin: _testAlbum,
@@ -112,6 +112,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   SystemUiStyleController.instance = FakeSystemUiStyleController();
   Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
+  FavoritesControl.instance = FakeFavoritesControl();
   PermissionsChannelObserver(binding); // Grant all permissions by default.
   ContentChannel.instance = FakeContentChannel(binding);
   QueueControl.instance = FakeQueueControl();
@@ -133,6 +134,9 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
     return {};
   });
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
+    return null;
+  });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel, (MethodCall methodCall) async {
     return null;
   });
   LicenseRegistry.reset();

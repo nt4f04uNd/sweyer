@@ -26,6 +26,15 @@ abstract class Content with EquatableMixin {
 
   /// Enumerates all the types of content (derived from this class).
   static List<Type> enumerate() => [Song, Album, Playlist, Artist];
+
+  /// An icon for this content type.
+  IconData get contentIcon => ContentUtils.contentIcon(runtimeType);
+
+  /// An ID string for this content type.
+  String get contentTypeId => ContentUtils.contentTypeId(runtimeType);
+
+  /// Whether the content was marked as favorite by user.
+  bool get isFavorite => FavoritesControl.instance.isFavorite(this);
 }
 
 /// Content that can contain other songs inside it.

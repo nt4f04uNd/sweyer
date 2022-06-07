@@ -463,6 +463,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   static ValueGetter<List<Widget>> _getActions<T extends Content>(List<Widget> additionalPlayActions) {
     const commonActions = <Widget>[
+      _FavoriteSelectionAction(),
       _PlayAsQueueSelectionAction(),
       _ShuffleAsQueueSelectionAction(),
       _AddToPlaylistSelectionAction(),
@@ -1228,6 +1229,7 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
           }
         }
         assert(() {
+          // See contentPick documentation for why we need this.
           contentPick<Song, void>(
             song: null,
             album: null,
@@ -1317,6 +1319,7 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
           }
         }
         assert(() {
+          // See contentPick documentation for why we need this.
           contentPick<Song, void>(
             song: null,
             album: null,
@@ -1361,7 +1364,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
       : super(key: key);
 
   void _handleTap(ContentSelectionController controller) {
-    final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
+    final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
     QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: false,
@@ -1400,7 +1403,7 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
       : super(key: key);
 
   void _handleTap(ContentSelectionController controller) {
-    final songs = ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged);
+    final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
     QueueControl.instance.setQueue(
       type: QueueType.arbitrary,
       shuffled: true,
@@ -1627,7 +1630,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
                   final playlist = playlists[index];
                   ContentControl.instance.insertSongsInPlaylist(
                     index: playlist.length + 1,
-                    songs: ContentUtils.flatten(ContentUtils.selectionSortAndPack(controller.data).merged),
+                    songs: ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged),
                     playlist: playlist,
                   );
                   Navigator.pop(context);
@@ -1668,6 +1671,53 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           onPressed: !controller.hasAtLeastOneSong ? null : () => _handleTap(context, controller),
         ),
       ),
+    );
+  }
+}
+
+/// Action that removes a song from playlist.
+class _FavoriteSelectionAction extends StatefulWidget {
+  const _FavoriteSelectionAction({ Key? key }) : super(key: key);
+
+  @override
+  State<_FavoriteSelectionAction> createState() => _FavoriteSelectionActionState();
+}
+
+class _FavoriteSelectionActionState extends State<_FavoriteSelectionAction> {
+  bool active = false;
+
+  void _handleTap(BuildContext context, ContentSelectionController controller) {
+    final contentTuple = ContentUtils.selectionPack(controller.data);
+    FavoritesControl.instance.setFavorite(
+      contentTuple: contentTuple,
+      value: contentTuple.any((el) => !el.isFavorite),
+    );
+    controller.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    final controller = ContentSelectionController._of(context);
+    final theme = ThemeControl.instance.theme;
+    return _ActionBuilder(
+      controller: controller,
+      shown: () => true,
+      builder: (context, child) {
+        if (controller.inSelection) {
+          active = controller.data.any((el) => !el.data.isFavorite);
+        }
+        return EmergeAnimation(
+          animation: controller.animation,
+          child: HeartButton(
+            tooltip: l10n.addToFavorites,
+            active: active,
+            onPressed: () => _handleTap(context, controller),
+            color: theme.colorScheme.onSurface,
+            inactiveColor: theme.colorScheme.onSurface,
+          ),
+        );
+      },
     );
   }
 }
@@ -1729,7 +1779,7 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
 class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   const DeleteSongsAppBarAction({
     Key? key,
-    required this.controller
+    required this.controller,
   }) : super(key: key);
 
   final ContentSelectionController<SelectionEntry<T>> controller;
@@ -1968,7 +2018,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     return ContentArt(
       source: ContentArtSource(item),
       size: size,
-      defaultArtIcon: item is PersistentQueue ? ContentUtils.persistentQueueIcon(item) : null,
+      defaultArtIcon: item.contentIcon,
     );
   }
 

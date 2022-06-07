@@ -692,16 +692,19 @@ class _MainTabState extends State<_MainTab> {
             ),
           ),
           actions: <Widget>[
-            ValueListenableBuilder<bool>(
-              valueListenable: Prefs.devMode,
-              builder: (context, value, child) => value
-                ? child!
-                : const SizedBox.shrink(),
-              child: FadeTransition(
-                opacity: fadeAnimation,
-                child: const RepaintBoundary(
-                  child: _InfoButton(),
-                ),
+            FadeTransition(
+              opacity: fadeAnimation,
+              child: Row(
+                children: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: Prefs.devMode,
+                    builder: (context, value, child) => value
+                      ? const _InfoButton()
+                      : const SizedBox.shrink()
+                  ),
+                  const FavoriteButton(),
+                  const SizedBox(width: 5.0),
+                ],
               ),
             ),
           ],
@@ -798,49 +801,46 @@ class _InfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return Padding(
-      padding: const EdgeInsets.only(right: 5.0),
-      child: NFIconButton(
-        icon: const Icon(Icons.info_outline_rounded),
-        size: 40.0,
-        onPressed: () {
-          String songInfo = PlaybackControl.instance.currentSong
-            .toMap()
-            .toString()
-            .replaceAll(r', ', ',\n');
-          // Remove curly braces
-          songInfo = songInfo.substring(1, songInfo.length - 1);
-          ShowFunctions.instance.showAlert(
-            context,
-            title: Text(
-              l10n.songInformation,
-              textAlign: TextAlign.center,
-            ),
-            contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
-            content: PrimaryScrollController(
-              controller: ScrollController(),
-              child: Builder(
-                builder: (context) {
-                  return AppScrollbar(
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        songInfo,
-                        style: const TextStyle(fontSize: 13.0),
-                        selectionControls: NFTextSelectionControls(
-                          backgroundColor: ThemeControl.instance.theme.colorScheme.background,
-                        ),
+    return NFIconButton(
+      icon: const Icon(Icons.info_outline_rounded),
+      size: 40.0,
+      onPressed: () {
+        String songInfo = PlaybackControl.instance.currentSong
+          .toMap()
+          .toString()
+          .replaceAll(r', ', ',\n');
+        // Remove curly braces
+        songInfo = songInfo.substring(1, songInfo.length - 1);
+        ShowFunctions.instance.showAlert(
+          context,
+          title: Text(
+            l10n.songInformation,
+            textAlign: TextAlign.center,
+          ),
+          contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
+          content: PrimaryScrollController(
+            controller: ScrollController(),
+            child: Builder(
+              builder: (context) {
+                return AppScrollbar(
+                  child: SingleChildScrollView(
+                    child: SelectableText(
+                      songInfo,
+                      style: const TextStyle(fontSize: 13.0),
+                      selectionControls: NFTextSelectionControls(
+                        backgroundColor: ThemeControl.instance.theme.colorScheme.background,
                       ),
                     ),
-                  );
-                }
-              ),
+                  ),
+                );
+              }
             ),
-            additionalActions: [
-              CopyButton(text: songInfo),
-            ],
-          );
-        },
-      ),
+          ),
+          additionalActions: [
+            CopyButton(text: songInfo),
+          ],
+        );
+      },
     );
   }
 }

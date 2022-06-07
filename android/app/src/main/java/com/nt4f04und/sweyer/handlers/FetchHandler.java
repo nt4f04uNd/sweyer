@@ -138,7 +138,7 @@ public class FetchHandler {
             map.put("size", cursor.getInt(11));
             map.put("data", cursor.getString(12));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-               map.put("isFavorite", cursor.getInt(13) == 1);
+               map.put("isFavoriteInMediaStore", cursor.getInt(13) == 1);
                map.put("generationAdded", cursor.getInt(14));
                map.put("generationModified", cursor.getInt(15));
                map.put("genre", cursor.getString(16));

@@ -248,9 +248,6 @@
   "addToPlaylist": "Zur Wiedergabeliste hinzufügen",
   "removeFromPlaylist": "Aus Wiedergabeliste entfernen",
   "addToFavorites": "Zu Favoriten hinzufügen",
-  "@addToFavorites": {
-    "description": "TODO: Momentan unbenutzt"
-  },
   "addToQueue": "Zur Abspielliste hinzufügen",
   "removeFromQueue": "Aus Abspielliste entfernen",
   "share": "Teilen",
@@ -307,6 +304,7 @@
   "playbackError": "Während der Wiedergabe ist ein Fehler aufgetreten",
   "openAppSettingsError": "Fehler beim Öffnen der App Einstellungen",
   "confirmExitingWithBackButtonSetting": "Bestätige das Verlassen der App mit der Zurück-Taste",
+  "useMediaStoreForFavoriteSongsSetting": "Verwende das Android-System für Lieblingstitel",
   "warning": "Warnung",
   "close": "Schließen",
   "accept": "Akzeptieren",

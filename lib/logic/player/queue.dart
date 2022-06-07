@@ -376,6 +376,10 @@ class QueueControl extends Control {
   Stream<void> get onQueueChanged => _onQueueChangeSubject.stream;
   late PublishSubject<void> _onQueueChangeSubject;
 
+  void emitQueueChange() {
+    _onQueueChangeSubject.add(null);
+  }
+
   /// Must be called before the song is instreted to the current queue,
   /// calls [ContentUtils.deduplicateSong].
   void _deduplicateSong(Song song) {
@@ -854,7 +858,7 @@ class QueueControl extends Control {
     }
 
     if (emitChangeEvent) {
-      _onQueueChangeSubject.add(null);
+      emitQueueChange();
     }
   }
 
@@ -887,7 +891,7 @@ class QueueControl extends Control {
     }
   
     if (emitChangeEvent) {
-      _onQueueChangeSubject.add(null);
+      emitQueueChange();
     }
   }
 

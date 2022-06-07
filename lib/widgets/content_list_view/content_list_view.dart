@@ -14,7 +14,10 @@ import 'package:sweyer/sweyer.dart';
 /// other similar callbacks.
 ///
 /// The argument [index] is index of the item.
-typedef _ItemTest = bool Function(int index);
+typedef ContentItemTest = bool Function(int index);
+
+/// Signature used for [ContentListView.selectionIndexMapper].
+typedef IndexMapper = int Function(int index);
 
 /// Signature used for [ContentListView.backgroundColorBuilder].
 ///
@@ -42,6 +45,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.leading,
     this.currentTest,
     this.selectedTest,
+    this.selectionIndexMapper,
     this.longPressSelectionGestureEnabledTest,
     this.handleTapInSelectionTest,
     this.onItemTap,
@@ -80,16 +84,19 @@ class ContentListView<T extends Content> extends StatelessWidget {
   final Widget? leading;
 
   /// Returned value is passed to [ContentTile.current].
-  final _ItemTest? currentTest;
+  final ContentItemTest? currentTest;
 
   /// Returned value is passed to [ContentTile.selected].
-  final _ItemTest? selectedTest;
+  final ContentItemTest? selectedTest;
+
+  /// Returned value is passed to [ContentTile.selectionIndex].
+  final IndexMapper? selectionIndexMapper;
 
   /// Returned value is passed to [ContentTile.longPressSelectionGestureEnabled].
-  final _ItemTest? longPressSelectionGestureEnabledTest;
+  final ContentItemTest? longPressSelectionGestureEnabledTest;
 
   /// Returned value is passed to [ContentTile.handleTapInSelection].
-  final _ItemTest? handleTapInSelectionTest;
+  final ContentItemTest? handleTapInSelectionTest;
 
   /// Callback to be called on item tap.
   final ValueSetter<int>? onItemTap;
@@ -183,10 +190,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
     IndexedWidgetBuilder? itemTrailingBuilder,
     ContentSelectionController? selectionController,
     Widget? leading,
-    _ItemTest? currentTest,
-    _ItemTest? selectedTest,
-    _ItemTest? longPressSelectionGestureEnabledTest,
-    _ItemTest? handleTapInSelectionTest,
+    ContentItemTest? currentTest,
+    ContentItemTest? selectedTest,
+    IndexMapper? selectionIndexMapper,
+    ContentItemTest? longPressSelectionGestureEnabledTest,
+    ContentItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     ValueSetter<int>? onItemTap,
@@ -205,7 +213,9 @@ class ContentListView<T extends Content> extends StatelessWidget {
               final child = ContentTile<T>(
                 contentType: contentType,
                 content: item,
-                selectionIndex: index,
+                selectionIndex: selectionIndexMapper != null
+                  ? selectionIndexMapper(index)
+                  : index,
                 selected: selectedTest != null
                   ? selectedTest(index)
                   : selectionController?.data.contains(SelectionEntry<T>.fromContent(
@@ -254,10 +264,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
     IndexedWidgetBuilder? itemTrailingBuilder,
     ContentSelectionController? selectionController,
     Widget? leading,
-    _ItemTest? currentTest,
-    _ItemTest? selectedTest,
-    _ItemTest? longPressSelectionGestureEnabledTest,
-    _ItemTest? handleTapInSelectionTest,
+    ContentItemTest? currentTest,
+    ContentItemTest? selectedTest,
+    IndexMapper? selectionIndexMapper,
+    ContentItemTest? longPressSelectionGestureEnabledTest,
+    ContentItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     ValueSetter<int>? onItemTap,
@@ -282,7 +293,9 @@ class ContentListView<T extends Content> extends StatelessWidget {
               child: ContentTile<T>(
                 contentType: contentType,
                 content: item,
-                selectionIndex: index,
+                selectionIndex: selectionIndexMapper != null
+                  ? selectionIndexMapper(index)
+                  : index,
                 selected: selectedTest != null
                   ? selectedTest(index)
                   : selectionController?.data.contains(SelectionEntry<T>.fromContent(

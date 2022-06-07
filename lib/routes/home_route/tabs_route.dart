@@ -153,7 +153,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       return true;
     }
 
-    if (!selectionRoute && Prefs.confirmExitingWithBackButton.get()) {
+    if (!selectionRoute && Settings.confirmExitingWithBackButton.get()) {
       final now = clock.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
@@ -192,13 +192,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         drawerController.open();
       },
       actions: selectionRoute ? const [] : [
-        Visibility(
-          visible: false,
-          maintainState: true,
-          maintainAnimation: true,
-          maintainSize: true,
-          child: DeleteSongsAppBarAction<Content>(controller: selectionController),
-        ),
+        const _ShowOnlyFavoritesButton(),
         searchButton,
       ],
       actionsSelection: selectionRoute
@@ -210,12 +204,18 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                 index: index,
                 context: context,
               ),
-              getAll: () => ContentControl.instance.getContent(selectionController.primaryContentType!),
+              getAll: () => ContentControl.instance.getContent(
+                contentType: selectionController.primaryContentType!,
+                filterFavorite: FavoritesControl.instance.showOnlyFavorites,
+              ),
             ),
-            searchButton
+            const _ShowOnlyFavoritesButton(),
+            searchButton,
           ]
         : [
-            DeleteSongsAppBarAction<Content>(controller: selectionController),
+            DeleteSongsAppBarAction<Content>(
+              controller: selectionController,
+            ),
             SelectAllSelectionAction(
               controller: selectionController,
               entryFactory: (Content content, index) => SelectionEntry.fromContent(
@@ -223,7 +223,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                 index: index,
                 context: context,
               ),
-              getAll: () => ContentControl.instance.getContent(selectionController.primaryContentType!),
+              getAll: () => ContentControl.instance.getContent(
+                contentType: selectionController.primaryContentType!,
+                filterFavorite: FavoritesControl.instance.showOnlyFavorites,
+              ),
             ),
         ],
       title: Padding(
@@ -350,6 +353,20 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   }
 }
 
+class _ShowOnlyFavoritesButton extends StatelessWidget {
+  const _ShowOnlyFavoritesButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
+      builder: (context, onShowOnlyFavorites, child) => HeartButton(
+        active: onShowOnlyFavorites,
+        onPressed: FavoritesControl.instance.toggleShowOnlyFavorites,
+      ),
+    );
+  }
+}
 
 class _ContentTab extends StatefulWidget {
   _ContentTab({
@@ -369,11 +386,11 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
   @override
   bool get wantKeepAlive => true;
 
-  final key = GlobalKey<RefreshIndicatorState>();
+  final refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   bool get showLabel {
     final contentType = widget.contentType;
-    final SortFeature feature = ContentControl.instance.state.sorts.getValue(contentType).feature;
+    final SortFeature feature = ContentControl.instance.state.sorts.getValue(contentType)!.feature;
     return contentPick<Content, bool>(
       contentType: contentType,
       song: feature == SongSortFeature.title,
@@ -386,145 +403,156 @@ class _ContentTabState extends State<_ContentTab> with AutomaticKeepAliveClientM
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = getl10n(context);
     final theme = ThemeControl.instance.theme;
     final contentType = widget.contentType;
-    final list = ContentControl.instance.getContent(contentType);
-    final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
-    final selectionController = widget.selectionController;
-    final selectionRoute = selectionRouteOf(context);
-    return RefreshIndicator(
-      key: key,
-      strokeWidth: 2.5,
-      color: theme.colorScheme.onPrimary,
-      backgroundColor: theme.colorScheme.primary,
-      onRefresh: ContentControl.instance.refetchAll,
-      notificationPredicate: (notification) {
-        return selectionController.notInSelection &&
-               notification.depth == 0;
-      },
-      child: ContentListView(
-        contentType: contentType,
-        list: list,
-        showScrollbarLabel: showLabel,
-        selectionController: selectionController,
-        onItemTap: contentPick<Content, ValueSetter<int>>(
+    return ValueListenableBuilder<bool>(
+      valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
+      builder: (context, showOnlyFavorites, child) {
+        final list = ContentControl.instance.getContent(
           contentType: contentType,
-          song: (index) => QueueControl.instance.resetQueue(),
-          album: (index) {},
-          playlist: (index) {},
-          artist: (index) {},
-        ),
-        leading: Column(
-          children: [
-            if (selectionRoute)
-              ContentListHeader.onlyCount(contentType: contentType, count: list.length)
-            else
-              ContentListHeader(
+          filterFavorite: showOnlyFavorites,
+        );
+        final showDisabledActions = list.isNotEmpty && list.first is Playlist && (list as List<Playlist>).every((el) => el.songIds.isEmpty);
+        final selectionController = widget.selectionController;
+        final selectionRoute = selectionRouteOf(context);
+        return RefreshIndicator(
+          key: refreshIndicatorKey,
+          strokeWidth: 2.5,
+          color: theme.colorScheme.onPrimary,
+          backgroundColor: theme.colorScheme.primary,
+          onRefresh: ContentControl.instance.refetchAll,
+          notificationPredicate: (notification) {
+            return selectionController.notInSelection &&
+                  notification.depth == 0;
+          },
+          child: showOnlyFavorites && list.isEmpty
+            ? Center(child: Text(l10n.nothingHere))
+            : ContentListView(
                 contentType: contentType,
-                count: list.length,
+                list: list,
+                showScrollbarLabel: showLabel,
                 selectionController: selectionController,
-                trailing: Padding(
-                  padding: const EdgeInsets.only(bottom: 1.0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 240),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    layoutBuilder:(Widget? currentChild, List<Widget> previousChildren) {
-                      return Stack(
-                        alignment: Alignment.centerRight,
-                        children: <Widget>[
-                          ...previousChildren,
-                          if (currentChild != null) currentChild,
-                        ],
-                      );
-                    },
-                    child: list.isEmpty || selectionRoute
-                      ? const SizedBox(
-                          width: ContentListHeaderAction.size * 2,
-                          height: ContentListHeaderAction.size,
-                        )
-                      : Row(
-                          children: [
-                            AnimatedContentListHeaderAction(
-                              icon: const Icon(Icons.shuffle_rounded),
-                              onPressed: showDisabledActions ? null : () {
-                                contentPick<Content, VoidCallback>(
-                                  contentType: contentType,
-                                  song: () {
-                                    QueueControl.instance.setQueue(
-                                      type: QueueType.allSongs,
-                                      modified: false,
-                                      shuffled: true,
-                                      shuffleFrom: list as List<Song>,
-                                    );
-                                  },
-                                  album: () {
-                                    final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
-                                    QueueControl.instance.setQueue(
-                                      type: QueueType.allAlbums,
-                                      shuffled: true,
-                                      songs: shuffleResult.shuffledSongs,
-                                      shuffleFrom: shuffleResult.songs,
-                                    );
-                                  },
-                                  playlist: () {
-                                    final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Playlist>);
-                                    QueueControl.instance.setQueue(
-                                      type: QueueType.allPlaylists,
-                                      shuffled: true,
-                                      songs: shuffleResult.shuffledSongs,
-                                      shuffleFrom: shuffleResult.songs,
-                                    );
-                                  },
-                                  artist: () {
-                                    final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Artist>);
-                                    QueueControl.instance.setQueue(
-                                      type: QueueType.allArtists,
-                                      shuffled: true,
-                                      songs: shuffleResult.shuffledSongs,
-                                      shuffleFrom: shuffleResult.songs,
-                                    );
-                                  },
-                                )();
-                                MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                                MusicPlayer.instance.play();
-                                playerRouteController.open();
-                              },
-                            ),
-                            AnimatedContentListHeaderAction(
-                              icon: const Icon(Icons.play_arrow_rounded),
-                              onPressed: showDisabledActions ? null : () {
-                                contentPick<Content, VoidCallback>(
-                                  contentType: contentType,
-                                  song: () => QueueControl.instance.resetQueue(),
-                                  album: () => QueueControl.instance.setQueue(
-                                    type: QueueType.allAlbums,
-                                    songs: ContentUtils.joinSongOrigins(list as List<Album>),
-                                  ),
-                                  playlist: () => QueueControl.instance.setQueue(
-                                    type: QueueType.allPlaylists,
-                                    songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
-                                  ),
-                                  artist: () => QueueControl.instance.setQueue(
-                                    type: QueueType.allArtists,
-                                    songs: ContentUtils.joinSongOrigins(list as List<Artist>),
-                                  ),
-                                )();
-                                MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                                MusicPlayer.instance.play();
-                                playerRouteController.open();
-                              },
-                            ),
-                          ],
-                        ),
-                  ),
+                onItemTap: contentPick<Content, ValueSetter<int>>(
+                  contentType: contentType,
+                  song: (index) => QueueControl.instance.resetQueue(),
+                  album: (index) {},
+                  playlist: (index) {},
+                  artist: (index) {},
                 ),
-              ),
-            if (contentType == Playlist && !selectionRoute)
-              CreatePlaylistInListAction(enabled: selectionController.notInSelection),
-          ],
-        ),
-      )
+                leading: Column(
+                  children: [
+                    if (selectionRoute)
+                      ContentListHeader.onlyCount(contentType: contentType, count: list.length)
+                    else
+                      ContentListHeader(
+                        contentType: contentType,
+                        count: list.length,
+                        selectionController: selectionController,
+                        trailing: Padding(
+                          padding: const EdgeInsets.only(bottom: 1.0),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 240),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            layoutBuilder:(Widget? currentChild, List<Widget> previousChildren) {
+                              return Stack(
+                                alignment: Alignment.centerRight,
+                                children: <Widget>[
+                                  ...previousChildren,
+                                  if (currentChild != null) currentChild,
+                                ],
+                              );
+                            },
+                            child: list.isEmpty || selectionRoute
+                              ? const SizedBox(
+                                  width: ContentListHeaderAction.size * 2,
+                                  height: ContentListHeaderAction.size,
+                                )
+                              : Row(
+                                  children: [
+                                    AnimatedContentListHeaderAction(
+                                      icon: const Icon(Icons.shuffle_rounded),
+                                      onPressed: showDisabledActions ? null : () {
+                                        contentPick<Content, VoidCallback>(
+                                          contentType: contentType,
+                                          song: () {
+                                            QueueControl.instance.setQueue(
+                                              type: QueueType.allSongs,
+                                              modified: false,
+                                              shuffled: true,
+                                              shuffleFrom: list as List<Song>,
+                                            );
+                                          },
+                                          album: () {
+                                            final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
+                                            QueueControl.instance.setQueue(
+                                              type: QueueType.allAlbums,
+                                              shuffled: true,
+                                              songs: shuffleResult.shuffledSongs,
+                                              shuffleFrom: shuffleResult.songs,
+                                            );
+                                          },
+                                          playlist: () {
+                                            final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Playlist>);
+                                            QueueControl.instance.setQueue(
+                                              type: QueueType.allPlaylists,
+                                              shuffled: true,
+                                              songs: shuffleResult.shuffledSongs,
+                                              shuffleFrom: shuffleResult.songs,
+                                            );
+                                          },
+                                          artist: () {
+                                            final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Artist>);
+                                            QueueControl.instance.setQueue(
+                                              type: QueueType.allArtists,
+                                              shuffled: true,
+                                              songs: shuffleResult.shuffledSongs,
+                                              shuffleFrom: shuffleResult.songs,
+                                            );
+                                          },
+                                        )();
+                                        MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                                        MusicPlayer.instance.play();
+                                        playerRouteController.open();
+                                      },
+                                    ),
+                                    AnimatedContentListHeaderAction(
+                                      icon: const Icon(Icons.play_arrow_rounded),
+                                      onPressed: showDisabledActions ? null : () {
+                                        contentPick<Content, VoidCallback>(
+                                          contentType: contentType,
+                                          song: () => QueueControl.instance.resetQueue(),
+                                          album: () => QueueControl.instance.setQueue(
+                                            type: QueueType.allAlbums,
+                                            songs: ContentUtils.joinSongOrigins(list as List<Album>),
+                                          ),
+                                          playlist: () => QueueControl.instance.setQueue(
+                                            type: QueueType.allPlaylists,
+                                            songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
+                                          ),
+                                          artist: () => QueueControl.instance.setQueue(
+                                            type: QueueType.allArtists,
+                                            songs: ContentUtils.joinSongOrigins(list as List<Artist>),
+                                          ),
+                                        )();
+                                        MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                                        MusicPlayer.instance.play();
+                                        playerRouteController.open();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                          ),
+                        ),
+                      ),
+                    if (contentType == Playlist && !selectionRoute)
+                      CreatePlaylistInListAction(enabled: selectionController.notInSelection),
+                  ],
+                ),
+              )
+        );
+      },
     );
   }
 }

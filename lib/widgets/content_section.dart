@@ -17,6 +17,8 @@ class ContentSection<T extends Content> extends StatelessWidget {
     this.maxPreviewCount = 5,
     this.selectionController,
     this.contentTileTapHandler,
+    this.selectedTest,
+    this.selectionIndexMapper,
   }) : child = null,
        super(key: key);
 
@@ -28,6 +30,8 @@ class ContentSection<T extends Content> extends StatelessWidget {
     this.onHeaderTap,
   }) : selectionController = null,
        contentTileTapHandler = null,
+       selectedTest = null,
+       selectionIndexMapper = null,
        maxPreviewCount = 0,
        super(key: key);
 
@@ -52,6 +56,12 @@ class ContentSection<T extends Content> extends StatelessWidget {
   /// additional callbacks.
   final VoidCallback? contentTileTapHandler;
 
+  /// Returned value is passed to [ContentTile.selected].
+  final ContentItemTest? selectedTest;
+
+  /// Returned value is passed to [ContentTile.selectionIndex].
+  final IndexMapper? selectionIndexMapper;
+
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
@@ -63,12 +73,17 @@ class ContentSection<T extends Content> extends StatelessWidget {
         return ContentTile<T>(
           contentType: contentType,
           content: item,
-          selectionIndex: index,
-          selected: selectionController?.data.contains(SelectionEntry<T>.fromContent(
-            content: item,
-            index: index,
-            context: context,
-          )) ?? false,
+          selectionIndex: selectionIndexMapper != null
+            ? selectionIndexMapper!(index)
+            : index,
+          selected: selectedTest != null
+            ? selectedTest!(index)
+            : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                content: item,
+                index: index,
+                context: context,
+              ))
+            ?? false,
           selectionController: selectionController,
           onTap: () => contentTileTapHandler?.call(),
           horizontalPadding: 12.0,

@@ -248,9 +248,6 @@
   "addToPlaylist": "Add to playlist",
   "removeFromPlaylist": "Remove from playlist",
   "addToFavorites": "Add to favorites",
-  "@addToFavorites": {
-    "description": "TODO: currently unused"
-  },
   "addToQueue": "Add to queue",
   "removeFromQueue": "Remove from queue",
   "share": "Share",
@@ -307,6 +304,7 @@
   "playbackError": "An error occurred during the playback",
   "openAppSettingsError": "Error opening the app settings",
   "confirmExitingWithBackButtonSetting": "Confirm exiting with back button",
+  "useMediaStoreForFavoriteSongsSetting": "Use Android system for favorite tracks",
   "warning": "Warning",
   "close": "Close",
   "accept": "Accept",

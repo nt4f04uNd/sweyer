@@ -24,13 +24,22 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
         physics: const NeverScrollableScrollPhysics(),
         children: [
           ValueListenableBuilder<bool>(
-            valueListenable: Prefs.confirmExitingWithBackButton,
+            valueListenable: Settings.confirmExitingWithBackButton,
             builder: (context, value, child) => SwitchListTile(
               title: Text(l10n.confirmExitingWithBackButtonSetting),
               value: value,
-              onChanged: Prefs.confirmExitingWithBackButton.set,
+              onChanged: Settings.confirmExitingWithBackButton.set,
             ),
           ),
+          if (DeviceInfoControl.instance.useScopedStorageForFileModifications)
+            ValueListenableBuilder<bool>(
+              valueListenable: Settings.useMediaStoreForFavoriteSongs,
+              builder: (context, value, child) => SwitchListTile(
+                title: Text(l10n.useMediaStoreForFavoriteSongsSetting),
+                value: value,
+                onChanged: Settings.useMediaStoreForFavoriteSongs.set,
+              ),
+            ),
           // _MinFileDurationSlider(
           //   initValue: minFileDuration,
           // ),

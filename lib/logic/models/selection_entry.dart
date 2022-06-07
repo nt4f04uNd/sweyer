@@ -68,7 +68,7 @@ class SelectionEntry<T extends Content> {
   ///
   /// See also:
   ///  * [SelectableState.selectionRoute] and [SongTile] state for example of custom indexing
-  ///  * [ContentUtils.selectionSortAndPack], which is the default way of sorting
+  ///  * [ContentUtils.selectionPackAndSort], which is the default way of sorting
   ///    the content for further usage
   final int index;
 
