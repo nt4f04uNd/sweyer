@@ -39,9 +39,11 @@ class _SelectionRouteState extends State<SelectionRoute> {
                     child: Builder(builder: (context) => settingsPageBuilder(context)),
                     transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
                   ));
-                  setState(() {
-                    settingsOpened = false;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      settingsOpened = false;
+                    });
+                  }
                 }
               },
             ),
