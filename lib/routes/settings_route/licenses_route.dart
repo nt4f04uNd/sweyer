@@ -894,7 +894,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow>
       transitionSettings: AppRouter.instance.transitionSettings.dismissible,
       child: Builder(
         builder: (BuildContext context) {
-          return BackButtonListener(
+          return NFBackButtonListener(
             onBackButtonPressed: () async {
               // No need for setState() as rebuild happens on navigation pop.
               focus = _Focus.master;
