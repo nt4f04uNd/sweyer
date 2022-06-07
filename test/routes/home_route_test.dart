@@ -89,8 +89,11 @@ void main() {
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
       expect(find.byType(Home), findsOneWidget);
-      expect(tester.getRect(find.byType(TrackShowcase)).top,
-          tester.getRect(find.byType(App)).height, reason: 'Player route must be offscreen');
+      expect(
+        tester.getRect(find.byType(TrackShowcase)).top,
+        tester.getRect(find.byType(App)).height,
+        reason: 'Player route must be offscreen',
+      );
     });
   });
 
