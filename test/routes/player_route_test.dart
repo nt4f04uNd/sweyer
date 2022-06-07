@@ -79,9 +79,12 @@ void main() {
         await tester.tap(find.byIcon(Icons.chevron_right_rounded));
         await tester.pumpAndSettle();
         expect(find.byType(SearchRoute), findsOneWidget);
-        final queryInput = find.byType(TextField).evaluate().first.widget as TextField;
-        expect(queryInput.controller!.text, query);
-        expect(queryInput.focusNode!.hasFocus, false);
+        final queryTextField = tester.widget<TextField>(find.descendant(
+          of: find.byType(SearchRoute),
+          matching: find.byType(TextField),
+        ));
+        expect(queryTextField.controller!.text, query);
+        expect(queryTextField.focusNode!.hasFocus, false);
       });
     });
   });
