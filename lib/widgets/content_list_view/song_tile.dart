@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
-const double kSongTileHeight = 64.0;
+const double kSongTileHeight = kSongTileArtSize + _tileVerticalPadding * 2;
+const double _tileVerticalPadding = 8.0;
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
@@ -252,6 +253,8 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
           splashFactory: NFListTileInkRipple.splashFactory,
           child: Padding(
             padding:  EdgeInsets.only(
+              top: _tileVerticalPadding,
+              bottom: _tileVerticalPadding,
               left: widget.horizontalPadding,
               right: rightPadding,
             ),
