@@ -9,6 +9,7 @@ export 'serialization.dart';
 
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
@@ -202,7 +203,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     
     DateTime? _lastEvent;
     player.positionStream.listen((event) {
-      final now = DateTime.now();
+      final now = clock.now();
       if (_lastEvent == null || now.difference(_lastEvent!) > const Duration(milliseconds: 1000)) {
         _lastEvent = now;
         _setState();
@@ -210,7 +211,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     });
     player.playingStream.listen((playing) {
       _setState();
-      _lastEvent = DateTime.now();
+      _lastEvent = clock.now();
       if (playing)
         running = true;
     });

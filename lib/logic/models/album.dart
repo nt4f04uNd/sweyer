@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
@@ -39,7 +40,7 @@ class Album extends PersistentQueue {
   /// Gets album normalized year.
   int get year {
     return lastYear == null || lastYear! < 1000
-      ? DateTime.now().year
+      ? clock.now().year
       : lastYear!;
   }
 
