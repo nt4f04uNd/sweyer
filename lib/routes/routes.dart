@@ -472,11 +472,11 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   static HomeRouter get instance => _instance!;
 
   static HomeRouter of(BuildContext context) {
-    return _RouterDelegateProvider.maybeOf<HomeRouter>(context)!;
+    return RouterDelegateProvider.maybeOf<HomeRouter>(context)!;
   }
 
   static HomeRouter? maybeOf(BuildContext context) {
-    return _RouterDelegateProvider.maybeOf<HomeRouter>(context);
+    return RouterDelegateProvider.maybeOf<HomeRouter>(context);
   }
 
   @override
@@ -656,7 +656,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         throw UnimplementedError();
       }
     }
-    return _RouterDelegateProvider<HomeRouter>(
+    return RouterDelegateProvider<HomeRouter>(
       delegate: this,
       child: Navigator(
         key: navigatorKey,
@@ -686,8 +686,8 @@ class HomeRouteBackButtonDispatcher extends ChildBackButtonDispatcher {
   }
 }
 
-class _RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
-  _RouterDelegateProvider({
+class RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
+  RouterDelegateProvider({
     Key? key,
     required this.delegate,
     required Widget child,
@@ -696,8 +696,8 @@ class _RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget 
   final T delegate;
 
   static T? maybeOf<T extends RouterDelegate>(BuildContext context) {
-    return (context.getElementForInheritedWidgetOfExactType<_RouterDelegateProvider<T>>()?.widget 
-              as _RouterDelegateProvider<T>?)?.delegate;
+    return (context.getElementForInheritedWidgetOfExactType<RouterDelegateProvider<T>>()?.widget 
+              as RouterDelegateProvider<T>?)?.delegate;
   }
 
   @override

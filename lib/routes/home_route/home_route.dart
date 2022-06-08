@@ -96,23 +96,26 @@ class HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(bottom: kSongTileHeight),
-            child: Router<HomeRoutes>(
-              routerDelegate: router,
-              routeInformationParser: HomeRouteInformationParser(),
-              routeInformationProvider: HomeRouteInformationProvider(),
-              backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                Router.of(context).backButtonDispatcher!,
+      body: RouterDelegateProvider<HomeRouter>(
+        delegate: router,
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(bottom: kSongTileHeight),
+              child: Router<HomeRoutes>(
+                routerDelegate: router,
+                routeInformationParser: HomeRouteInformationParser(),
+                routeInformationProvider: HomeRouteInformationProvider(),
+                backButtonDispatcher: HomeRouteBackButtonDispatcher(
+                  Router.of(context).backButtonDispatcher!,
+                ),
               ),
             ),
-          ),
-          const PlayerRoute(),
-          Overlay(key: overlayKey),
-          const DrawerWidget(),
-        ],
+            const PlayerRoute(),
+            Overlay(key: overlayKey),
+            const DrawerWidget(),
+          ],
+        ),
       ),
     );
   }

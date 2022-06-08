@@ -12,6 +12,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(playerRouteController.value, 1.0);
   }
+  
+  /// Navigate to the queue screen in the player route.
+  Future<void> openQueueScreen(WidgetTester tester) async {
+    await expandPlayerRoute(tester);
+    await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('can expand/collapse by tapping the button', (WidgetTester tester) async {
     await tester.runAppTest(() async {
@@ -39,15 +46,45 @@ void main() {
     });
   });
 
-  testWidgets('can open queue screen by swiping to left', (WidgetTester tester) async {
-    await tester.runAppTest(() async {
-      // Expand the route
-      await expandPlayerRoute(tester);
+  group('queue screen', () {
+    testWidgets('can open by swiping to left', (WidgetTester tester) async {
+      await tester.runAppTest(() async {
+        // Expand the route
+        await expandPlayerRoute(tester);
 
-      expect(find.text(l10n.upNext), findsNothing);
-      await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
-      await tester.pumpAndSettle();
-      expect(find.text(l10n.upNext), findsOneWidget);
+        expect(find.text(l10n.upNext), findsNothing);
+        await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
+        await tester.pumpAndSettle();
+        expect(find.text(l10n.upNext), findsOneWidget);
+        expect(find.text(l10n.allTracks), findsOneWidget);
+      });
+    });
+
+    testWidgets('displays search query correctly', (WidgetTester tester) async {
+      const query = 'Query';
+      await tester.runAppTest(() async {
+        QueueControl.instance.setSearchedQueue(query, [songWith()]);
+        await openQueueScreen(tester);
+        expect(find.text(l10n.upNext), findsOneWidget);
+        expect(find.text(l10n.foundByQuery('"$query"'), findRichText: true), findsOneWidget);
+      });
+    });
+
+    testWidgets('Allows to open the search query from the title', (WidgetTester tester) async {
+      const query = 'Query';
+      await tester.runAppTest(() async {
+        QueueControl.instance.setSearchedQueue(query, [songWith()]);
+        await openQueueScreen(tester);
+        await tester.tap(find.byIcon(Icons.chevron_right_rounded));
+        await tester.pumpAndSettle();
+        expect(find.byType(SearchRoute), findsOneWidget);
+        final queryTextField = tester.widget<TextField>(find.descendant(
+          of: find.byType(SearchRoute),
+          matching: find.byType(TextField),
+        ));
+        expect(queryTextField.controller!.text, query);
+        expect(queryTextField.focusNode!.hasFocus, false);
+      });
     });
   });
 
