@@ -152,6 +152,20 @@ void main() {
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_route'));
     });
+
+    testAppGoldens('selection_route_settings', (WidgetTester tester) async {
+      await tester.runAppTest(() async {
+        HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlistWith()));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.add_rounded).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.descendant(
+            of: find.byType(SelectionRoute),
+            matching: find.byIcon(Icons.settings_rounded),
+        ));
+        await tester.pumpAndSettle();
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_route_settings'));
+    });
   });
 
   group('artist_route', () {
