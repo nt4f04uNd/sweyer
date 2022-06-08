@@ -49,7 +49,6 @@ void main() {
   group('queue screen', () {
     testWidgets('can open by swiping to left', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        QueueControl.instance.resetQueue();
         // Expand the route
         await expandPlayerRoute(tester);
 
@@ -114,7 +113,6 @@ void main() {
 
   testWidgets('shuffle button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
-      QueueControl.instance.resetQueue();
       // Expand the route
       await expandPlayerRoute(tester);
 
