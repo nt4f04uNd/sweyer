@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -116,7 +117,7 @@ class _BarState extends State<_Bar> {
   @override
   void initState() {
     super.initState();
-    index = math.Random().nextInt(widget.values.length);
+    index = math.Random(clock.now().second).nextInt(widget.values.length);
     if (MusicPlayer.instance.playing) {
       start();
     }
