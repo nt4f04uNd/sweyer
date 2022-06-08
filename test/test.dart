@@ -5,6 +5,7 @@ export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';
 export 'package:flutter_test/flutter_test.dart';
 import 'package:android_content_provider/android_content_provider.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -175,24 +176,26 @@ extension WidgetTesterExtension on WidgetTester {
   ///  4. optionally, runs [goldenCaptureCallback]. It would time out if was ran before player is disposed in [callback].
   ///  5. unpumps the screen
   Future<void> runAppTest(AsyncCallback callback, {AsyncCallback? goldenCaptureCallback}) async {
-    // App only suppots vertical orientation, so switch tests to use it.
-    await binding.setSurfaceSize(kScreenSize);
-    await pumpWidget(const App(debugShowCheckedModeBanner: false));
-    await pump();
-    await callback();
-    await runAsync(() async {
-      // Don't leak player state between tests.
-      // Delay needed for proper diposal in some tests.
-      await Future.delayed(const Duration(milliseconds: 1));
-      await MusicPlayer.instance.stop();
-      await MusicPlayer.instance.dispose();
+    await withClock(binding.clock, () async {
+      // App only supports vertical orientation, so switch tests to use it.
+      await binding.setSurfaceSize(kScreenSize);
+      await pumpWidget(const App(debugShowCheckedModeBanner: false));
+      await pump();
+      await callback();
+      await runAsync(() async {
+        // Don't leak player state between tests.
+        // Delay needed for proper disposal in some tests.
+        await Future.delayed(const Duration(milliseconds: 1));
+        await MusicPlayer.instance.stop();
+        await MusicPlayer.instance.dispose();
+      });
+      await goldenCaptureCallback?.call();
+      // Unpump, in case we have any real animations running,
+      // so the pumpAndSettle on the next line doesn't hang on.
+      await pumpWidget(const SizedBox());
+      // Wait for ui animations.
+      await pumpAndSettle();
     });
-    await goldenCaptureCallback?.call();
-    // Unpump, in case we have any real animations running,
-    // so the pumpAndSettle on the next line doesn't hang on.
-    await pumpWidget(const SizedBox());
-    // Wait for ui animations.
-    await pumpAndSettle();
   }
 
   /// Whether the current tester is running in [testAppGoldens] and
