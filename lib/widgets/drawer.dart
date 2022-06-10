@@ -58,39 +58,30 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     /// I don't bother myself applying drawer screen ui theme after
     /// the next route pops, like I do for [ShowFunctions.showBottomSheet] for example
     /// because I close the drawer after route push, so there's no way it will be open at this moment.
-    return NFBackButtonListener(
-      onBackButtonPressed: () async {
-        if (controller.opened) {
-          controller.close();
-          return true;
-        }
-        return false;
-      },
-      child: RouteAwareWidget(
-        onPushNext: () => _onTop = false,
-        onPopNext: () => _onTop = true,
-        child: Slidable(
-          direction: SlideDirection.right,
-          start: -304.0 / screenWidth,
-          end: 0.0,
-          shouldGiveUpGesture: (event) {
-            return controller.value == 0.0 &&
-                // when on another drag on the right to next tab
-                (event.delta.dx < 0.0 ||
-                  // when player route is opened, for example
-                  !HomeRouter.instance.drawerCanBeOpened);
-          },
-          onBarrierTap: controller.close,
-          barrier: Container(color: Colors.black26),
-          controller: controller,
-          barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
-          hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
-          child: SizedBox.expand(
-            child: Container(
-              width: 304.0,
-              alignment: Alignment.centerLeft,
-              child: _DrawerWidgetContent(controller: controller),
-            ),
+    return RouteAwareWidget(
+      onPushNext: () => _onTop = false,
+      onPopNext: () => _onTop = true,
+      child: Slidable(
+        direction: SlideDirection.right,
+        start: -304.0 / screenWidth,
+        end: 0.0,
+        shouldGiveUpGesture: (event) {
+          return controller.value == 0.0 &&
+              // when on another drag on the right to next tab
+              (event.delta.dx < 0.0 ||
+                // when player route is opened, for example
+                !HomeRouter.instance.drawerCanBeOpened);
+        },
+        onBarrierTap: controller.close,
+        barrier: Container(color: Colors.black26),
+        controller: controller,
+        barrierIgnoringStrategy: const IgnoringStrategy(dismissed: true),
+        hitTestBehaviorStrategy: const HitTestBehaviorStrategy.opaque(dismissed: HitTestBehavior.translucent),
+        child: SizedBox.expand(
+          child: Container(
+            width: 304.0,
+            alignment: Alignment.centerLeft,
+            child: _DrawerWidgetContent(controller: controller),
           ),
         ),
       ),

@@ -120,56 +120,42 @@ class _PlayerRouteState extends State<PlayerRoute>
     final backgroundColor = ThemeControl.instance.theme.colorScheme.background;
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
-    return NFBackButtonListener(
-      onBackButtonPressed: () async {
-        final selectionController = ContentControl.instance.selectionNotifier.value;
-        if (selectionController != null && !selectionController.alwaysInSelection) {
-          selectionController.close();
-          return true;
-        }
-        if (controller.opened) {
-          controller.close();
-          return true;
-        }
-        return false;
-      },
-      child: Slidable(
-        controller: controller,
-        start: 1.0 - TrackPanel.height(mediaQuery.textScaleFactor) / screenHeight,
-        end: 0.0,
-        direction: slideDirection,
-        barrier: Container(
-          color: ThemeControl.instance.isDark ? Colors.black : Colors.black26,
-        ),
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          backgroundColor: backgroundColor,
-          body: Stack(
-            children: <Widget>[
-              SharedAxisTabView(
-                children: _tabs,
-                controller: tabController,
-                tabBuilder: (context, animation, secondaryAnimation, child) {
-                  if (child is _QueueTab) {
-                    if (animation != _queueTabAnimation) {
-                      if (_queueTabAnimation != null) {
-                        _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
-                      }
-                      _queueTabAnimation = animation;
-                      animation.addStatusListener(
-                        _handleQueueTabAnimationStatus,
-                      );
+    return Slidable(
+      controller: controller,
+      start: 1.0 - TrackPanel.height(mediaQuery.textScaleFactor) / screenHeight,
+      end: 0.0,
+      direction: slideDirection,
+      barrier: Container(
+        color: ThemeControl.instance.isDark ? Colors.black : Colors.black26,
+      ),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: backgroundColor,
+        body: Stack(
+          children: <Widget>[
+            SharedAxisTabView(
+              children: _tabs,
+              controller: tabController,
+              tabBuilder: (context, animation, secondaryAnimation, child) {
+                if (child is _QueueTab) {
+                  if (animation != _queueTabAnimation) {
+                    if (_queueTabAnimation != null) {
+                      _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
                     }
+                    _queueTabAnimation = animation;
+                    animation.addStatusListener(
+                      _handleQueueTabAnimationStatus,
+                    );
                   }
-                  return IgnorePointer(
-                    ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
-                    child: child,
-                  );
-                },
-              ),
-              TrackPanel(onTap: controller.open),
-            ],
-          ),
+                }
+                return IgnorePointer(
+                  ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
+                  child: child,
+                );
+              },
+            ),
+            TrackPanel(onTap: controller.open),
+          ],
         ),
       ),
     );

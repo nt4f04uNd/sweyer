@@ -131,12 +131,34 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     ];
   }
 
+  /// Callback that must be called before any pop.
+  /// 
+  /// For example we want that player route would be closed first.
+  bool _handleNecessaryPop() {
+    final selectionController = ContentControl.instance.selectionNotifier.value;
+    if (playerRouteController.opened) {
+      if (selectionController != null) {
+        selectionController.close();
+        return true;
+      }
+      playerRouteController.close();
+      return true;
+    } else if (drawerController.opened) {
+      drawerController.close();
+      return true;
+    // Don't try to close the alwaysInSelection controller, since it is not possible
+    } else if (selectionController != null &&
+              !selectionController.alwaysInSelection) {
+      selectionController.close();
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> _handlePop() async {
     final navigatorKey = AppRouter.instance.navigatorKey;
     final homeNavigatorKey = homeRouter!.navigatorKey;
-    final selectionController = ContentControl.instance.selectionNotifier.value;
-    if (selectionController != null && !selectionController.alwaysInSelection) {
-      selectionController.close();
+    if (_handleNecessaryPop()) {
       return true;
     }
     // When in selection route, the home router should be popped first,
@@ -235,7 +257,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
           ),
     );
 
-    return NFBackButtonListener(
+    return BackButtonListener(
       onBackButtonPressed: _handlePop,
       child: Material(
         color: theme.colorScheme.background,

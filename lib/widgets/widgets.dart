@@ -1,7 +1,6 @@
 export 'content_list_view/content_list_view.dart';
 export 'app_bar_border.dart';
 export 'artist.dart';
-export 'back_listener.dart';
 export 'bottom_track_panel.dart';
 export 'buttons.dart';
 export 'content_art.dart';
