@@ -16,8 +16,17 @@ class SelectionRoute extends StatefulWidget {
 class _SelectionRouteState extends State<SelectionRoute> {
   late final HomeRouter nestedHomeRouter = HomeRouter.selection(widget.selectionArguments);
   late final ContentSelectionController controller;
+  late ChildBackButtonDispatcher _backButtonDispatcher;
   bool settingsOpened = false;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Defer back button dispatching to the child router
+    _backButtonDispatcher = Router.of(context)
+        .backButtonDispatcher!.createChildBackButtonDispatcher();
+  }
+  
   @override
   void initState() { 
     super.initState();
@@ -90,9 +99,7 @@ class _SelectionRouteState extends State<SelectionRoute> {
       routerDelegate: nestedHomeRouter,
       routeInformationParser: HomeRouteInformationParser(),
       routeInformationProvider: HomeRouteInformationProvider(),
-      backButtonDispatcher: ChildBackButtonDispatcher(
-        Router.of(context).backButtonDispatcher!,
-      ),
+      backButtonDispatcher: _backButtonDispatcher,
     );
   }
 }

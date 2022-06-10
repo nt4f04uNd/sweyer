@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:clock/clock.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as Constants;
@@ -132,12 +131,36 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     ];
   }
 
-  
-  DateTime? _lastBackPressTime;
+  /// Callback that must be called before any pop.
+  /// 
+  /// For example we want that player route would be closed first.
+  bool _handleNecessaryPop() {
+    final selectionController = ContentControl.instance.selectionNotifier.value;
+    if (playerRouteController.opened) {
+      if (selectionController != null) {
+        selectionController.close();
+        return true;
+      }
+      playerRouteController.close();
+      return true;
+    } else if (drawerController.opened) {
+      drawerController.close();
+      return true;
+    // Don't try to close the alwaysInSelection controller, since it is not possible
+    } else if (selectionController != null &&
+              !selectionController.alwaysInSelection) {
+      selectionController.close();
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> _handlePop() async {
     final navigatorKey = AppRouter.instance.navigatorKey;
     final homeNavigatorKey = homeRouter!.navigatorKey;
-
+    if (_handleNecessaryPop()) {
+      return true;
+    }
     // When in selection route, the home router should be popped first,
     // opposed to the normal situation, where the main app navigator comes first
     if (selectionRoute && homeNavigatorKey.currentState!.canPop()) {
@@ -152,18 +175,6 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       homeNavigatorKey.currentState!.pop();
       return true;
     }
-
-    if (!selectionRoute && Settings.confirmExitingWithBackButton.get()) {
-      final now = clock.now();
-      // Show toast when user presses back button on main route, that
-      // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
-        _lastBackPressTime = now;
-        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
-        return true;
-      }
-    }
-
     return false;
   }
 

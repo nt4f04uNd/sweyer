@@ -65,7 +65,7 @@ class ShowFunctions extends NFShowFunctions {
         Navigator.of(context).maybePop(name);
       }
     }
-    await ShowFunctions.instance.showDialog(
+    await showDialog(
       context,
       ui: Constants.UiTheme.modalOverGrey.auto,
       title: Text(l10n.newPlaylist),

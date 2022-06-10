@@ -520,30 +520,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
       !(_currentSearchDelegate?.chipsBarDragged ?? false);
   }
 
-  /// Callback that must be called before any pop.
-  /// 
-  /// For example we want that player route would be closed first.
-  bool handleNecessaryPop() {
-    final selectionController = ContentControl.instance.selectionNotifier.value;
-    if (playerRouteController.opened) {
-      if (selectionController != null) {
-        selectionController.close();
-        return true;
-      }
-      playerRouteController.close();
-      return true;
-    } else if (drawerController.opened) {
-      drawerController.close();
-      return true;
-    // Don't try to close the alwaysInSelection controller, since it is not possible
-    } else if (selectionController != null &&
-              !selectionController.alwaysInSelection) {
-      selectionController.close();
-      return true;
-    }
-    return false;
-  }
-
   /// The [allowStackSimilar] parameter in this override is ignored and set automatically.
   @override
   void goto(HomeRoutes route) {
@@ -672,18 +648,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
 class HomeRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   @override
   RouteInformation value = RouteInformation(location: HomeRoutes.tabs.location);
-}
-
-class HomeRouteBackButtonDispatcher extends ChildBackButtonDispatcher {
-  HomeRouteBackButtonDispatcher(BackButtonDispatcher parent) : super(parent);
-
-  @override
-  Future<bool> invokeCallback(Future<bool> defaultValue) async {
-    final handled = HomeRouter.instance.handleNecessaryPop();
-    if (handled)
-      return true;
-    return super.invokeCallback(defaultValue);
-  }
 }
 
 class RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
