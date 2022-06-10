@@ -228,16 +228,7 @@ class ShowFunctions extends NFShowFunctions {
       popResult: false,
       splashColor: buttonSplashColor,
     );
-    Future<bool> onBackButtonPressed() async {
-      Navigator.of(context, rootNavigator: true).pop();
-      return true;
-    }
-    
-    final backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher!.createChildBackButtonDispatcher()
-      ..addCallback(onBackButtonPressed)
-      ..takePriority();
-    final result = await super.showDialog<T>(
+    return super.showDialog<T>(
       context,
       title: title,
       content: content,
@@ -250,7 +241,5 @@ class ShowFunctions extends NFShowFunctions {
       borderRadius: borderRadius,
       ui: ui,
     );
-    backButtonDispatcher.removeCallback(onBackButtonPressed);
-    return result;
   }
 }
