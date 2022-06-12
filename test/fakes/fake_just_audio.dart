@@ -73,7 +73,7 @@ final icyMetadataMessage = IcyMetadataMessage(
   ),
 );
 
-extension SaveCompleter<T> on Completer<T> {
+extension on Completer {
   void completeIfPending() {
     if (!isCompleted) {
       complete();
