@@ -13,18 +13,14 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockJustAudio
-    with MockPlatformInterfaceMixin
-    implements JustAudioPlatform {
+class MockJustAudio with MockPlatformInterfaceMixin implements JustAudioPlatform {
   MockAudioPlayer? mostRecentPlayer;
   final _players = <String, MockAudioPlayer>{};
 
   @override
   Future<AudioPlayerPlatform> init(InitRequest request) async {
     if (_players.containsKey(request.id)) {
-      throw PlatformException(
-          code: "error",
-          message: "Platform player ${request.id} already exists");
+      throw PlatformException(code: "error", message: "Platform player ${request.id} already exists");
     }
     final player = MockAudioPlayer(request);
     _players[request.id] = player;
@@ -33,8 +29,7 @@ class MockJustAudio
   }
 
   @override
-  Future<DisposePlayerResponse> disposePlayer(
-      DisposePlayerRequest request) async {
+  Future<DisposePlayerResponse> disposePlayer(DisposePlayerRequest request) async {
     _players[request.id]!.dispose(DisposeRequest());
     _players.remove(request.id);
     return DisposePlayerResponse();
@@ -111,15 +106,13 @@ class MockAudioPlayer implements AudioPlayerPlatform {
         audioLoadConfiguration = request.audioLoadConfiguration;
 
   @override
-  Stream<PlayerDataMessage> get playerDataMessageStream =>
-      StreamController<PlayerDataMessage>().stream;
+  Stream<PlayerDataMessage> get playerDataMessageStream => StreamController<PlayerDataMessage>().stream;
 
   @override
   String get id => _id;
 
   @override
-  Stream<PlaybackEventMessage> get playbackEventMessageStream =>
-      eventController.stream;
+  Stream<PlaybackEventMessage> get playbackEventMessageStream => eventController.stream;
 
   @override
   Future<LoadResponse> load(LoadRequest request) async {
@@ -136,8 +129,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
       }
       _duration = audioSourceDuration;
     } else if (audioSource is ClippingAudioSourceMessage) {
-      _duration = (audioSource.end ?? audioSourceDuration) -
-          (audioSource.start ?? Duration.zero);
+      _duration = (audioSource.end ?? audioSourceDuration) - (audioSource.start ?? Duration.zero);
     } else {
       // TODO: pull the sequence out of the audio source and return the duration
       // of the first item in the sequence.
@@ -181,8 +173,9 @@ class MockAudioPlayer implements AudioPlayerPlatform {
 
   @override
   Future<PauseResponse> pause(PauseRequest request) async {
-    if (!_playing)
+    if (!_playing) {
       return PauseResponse();
+    }
     _playing = false;
     _playTimer?.cancel();
     _playCompleter?.completeIfPending();
@@ -200,15 +193,13 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   }
 
   @override
-  Future<SetAndroidAudioAttributesResponse> setAndroidAudioAttributes(
-      SetAndroidAudioAttributesRequest request) async {
+  Future<SetAndroidAudioAttributesResponse> setAndroidAudioAttributes(SetAndroidAudioAttributesRequest request) async {
     return SetAndroidAudioAttributesResponse();
   }
 
   @override
-  Future<SetAutomaticallyWaitsToMinimizeStallingResponse>
-      setAutomaticallyWaitsToMinimizeStalling(
-          SetAutomaticallyWaitsToMinimizeStallingRequest request) async {
+  Future<SetAutomaticallyWaitsToMinimizeStallingResponse> setAutomaticallyWaitsToMinimizeStalling(
+      SetAutomaticallyWaitsToMinimizeStallingRequest request) async {
     return SetAutomaticallyWaitsToMinimizeStallingResponse();
   }
 
@@ -218,14 +209,12 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   }
 
   @override
-  Future<SetShuffleModeResponse> setShuffleMode(
-      SetShuffleModeRequest request) async {
+  Future<SetShuffleModeResponse> setShuffleMode(SetShuffleModeRequest request) async {
     return SetShuffleModeResponse();
   }
 
   @override
-  Future<SetShuffleOrderResponse> setShuffleOrder(
-      SetShuffleOrderRequest request) async {
+  Future<SetShuffleOrderResponse> setShuffleOrder(SetShuffleOrderRequest request) async {
     return SetShuffleOrderResponse();
   }
 
@@ -242,8 +231,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   }
 
   @override
-  Future<SetSkipSilenceResponse> setSkipSilence(
-      SetSkipSilenceRequest request) async {
+  Future<SetSkipSilenceResponse> setSkipSilence(SetSkipSilenceRequest request) async {
     return SetSkipSilenceResponse();
   }
 
@@ -260,22 +248,19 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   }
 
   @override
-  Future<ConcatenatingInsertAllResponse> concatenatingInsertAll(
-      ConcatenatingInsertAllRequest request) async {
+  Future<ConcatenatingInsertAllResponse> concatenatingInsertAll(ConcatenatingInsertAllRequest request) async {
     // TODO
     return ConcatenatingInsertAllResponse();
   }
 
   @override
-  Future<ConcatenatingMoveResponse> concatenatingMove(
-      ConcatenatingMoveRequest request) async {
+  Future<ConcatenatingMoveResponse> concatenatingMove(ConcatenatingMoveRequest request) async {
     // TODO
     return ConcatenatingMoveResponse();
   }
 
   @override
-  Future<ConcatenatingRemoveRangeResponse> concatenatingRemoveRange(
-      ConcatenatingRemoveRangeRequest request) async {
+  Future<ConcatenatingRemoveRangeResponse> concatenatingRemoveRange(ConcatenatingRemoveRangeRequest request) async {
     // TODO
     return ConcatenatingRemoveRangeResponse();
   }
@@ -313,8 +298,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
 
   Duration get _position {
     if (_playing && _processingState == ProcessingStateMessage.ready) {
-      final result =
-          _updatePosition + (DateTime.now().difference(_updateTime)) * _speed;
+      final result = _updatePosition + (DateTime.now().difference(_updateTime)) * _speed;
       return result <= _duration! ? result : _duration!;
     } else {
       return _updatePosition;
@@ -331,27 +315,23 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   @override
   Future<SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse>
       setCanUseNetworkResourcesForLiveStreamingWhilePaused(
-          SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest
-              request) async {
+          SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest request) async {
     return SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse();
   }
 
   @override
-  Future<SetPreferredPeakBitRateResponse> setPreferredPeakBitRate(
-      SetPreferredPeakBitRateRequest request) async {
+  Future<SetPreferredPeakBitRateResponse> setPreferredPeakBitRate(SetPreferredPeakBitRateRequest request) async {
     return SetPreferredPeakBitRateResponse();
   }
 
   @override
-  Future<AudioEffectSetEnabledResponse> audioEffectSetEnabled(
-      AudioEffectSetEnabledRequest request) async {
+  Future<AudioEffectSetEnabledResponse> audioEffectSetEnabled(AudioEffectSetEnabledRequest request) async {
     return AudioEffectSetEnabledResponse();
   }
 
   @override
-  Future<AndroidLoudnessEnhancerSetTargetGainResponse>
-      androidLoudnessEnhancerSetTargetGain(
-          AndroidLoudnessEnhancerSetTargetGainRequest request) async {
+  Future<AndroidLoudnessEnhancerSetTargetGainResponse> androidLoudnessEnhancerSetTargetGain(
+      AndroidLoudnessEnhancerSetTargetGainRequest request) async {
     return AndroidLoudnessEnhancerSetTargetGainResponse();
   }
 
