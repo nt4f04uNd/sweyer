@@ -73,6 +73,14 @@ final icyMetadataMessage = IcyMetadataMessage(
   ),
 );
 
+extension on Completer {
+  void completeIfPending() {
+    if (!isCompleted) {
+      complete();
+    }
+  }
+}
+
 class MockAudioPlayer implements AudioPlayerPlatform {
   final String _id;
   final eventController = StreamController<PlaybackEventMessage>();
@@ -156,7 +164,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
       _setPosition(_position);
       _processingState = ProcessingStateMessage.completed;
       _broadcastPlaybackEvent();
-      _playCompleter?.complete();
+      _playCompleter?.completeIfPending();
     });
   }
 
@@ -166,7 +174,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
       return PauseResponse();
     _playing = false;
     _playTimer?.cancel();
-    _playCompleter?.complete();
+    _playCompleter?.completeIfPending();
     _setPosition(_position);
     _broadcastPlaybackEvent();
     return PauseResponse();

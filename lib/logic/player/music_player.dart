@@ -535,7 +535,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
 
   /// Broadcasts the current state to all clients.
   void _setState() {
-    if (_disposed || !running)
+    if (_disposed)
       return;
     final playing = player.playing;
     final l10n = staticl10n;
