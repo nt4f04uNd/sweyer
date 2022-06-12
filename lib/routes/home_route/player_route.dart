@@ -213,8 +213,12 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         /* update current track indicator */
       });
       if (!opened) {
-        // Scroll when track changes
-        await scrollToSong();
+        WidgetsBinding.instance.addPostFrameCallback((timestamp) async {
+          if (mounted) {
+            // Scroll when track changes
+            await scrollToSong();
+          }
+        });
       }
     });
   }
