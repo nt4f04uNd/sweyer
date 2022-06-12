@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sweyer/sweyer.dart';
 
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -56,7 +56,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
               ],
             ),
           ),
-          _Footer(),
+          const _Footer(),
         ],
       ),
     );
@@ -64,7 +64,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 }
 
 class _Footer extends StatefulWidget {
-  _Footer({Key? key}) : super(key: key);
+  const _Footer({Key? key}) : super(key: key);
 
   @override
   _FooterState createState() => _FooterState();
@@ -78,7 +78,7 @@ class _FooterState extends State<_Footer> {
   String appVersion = '';
 
   String get appName {
-    return Constants.Config.APPLICATION_TITLE + '@$appVersion';
+    return '${constants.Config.applicationTitle}@$appVersion';
   }
 
   @override
@@ -97,7 +97,7 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleGithubTap() {
-    final url = Uri.parse(Constants.Config.GITHUB_REPO_URL);
+    final url = Uri.parse(constants.Config.githubRepoUrl);
     launchUrl(url);
   }
 
@@ -132,7 +132,7 @@ class _FooterState extends State<_Footer> {
               size: NFConstants.iconSize * textScaleFactor,
             ),
             title: Text(l10n.devModeGreet, style: textStyle),
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
           ),
         ),
       );
@@ -142,7 +142,7 @@ class _FooterState extends State<_Footer> {
           important: true,
           child: NFSnackbar(
             title: Text(l10n.onThePathToDevMode, style: textStyle),
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
           ),
         ),
       );
@@ -155,7 +155,7 @@ class _FooterState extends State<_Footer> {
               l10n.onThePathToDevModeClicksRemaining(remainingClicks),
               style: textStyle,
             ),
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
           ),
         ),
       );

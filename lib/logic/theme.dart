@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/services.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 class ThemeControl {
   static ThemeControl instance = ThemeControl();
@@ -32,7 +32,7 @@ class ThemeControl {
   /// True if [brightness] is dark
   bool get isDark => _brightness == Brightness.dark;
 
-  ThemeData get theme => isLight ? Constants.Theme.app.light : Constants.Theme.app.dark;
+  ThemeData get theme => isLight ? constants.Theme.app.light : constants.Theme.app.dark;
 
   final Duration themeChangeDuration = const Duration(milliseconds: 300);
   static const Duration primaryColorChangeDuration = Duration(milliseconds: 240);
@@ -53,7 +53,7 @@ class ThemeControl {
     if (isLight) {
       return primary;
     } else {
-      if (primary == Constants.AppColors.deepPurpleAccent) {
+      if (primary == constants.AppColors.deepPurpleAccent) {
         return theme.colorScheme.onBackground;
       }
       return primary;
@@ -83,8 +83,8 @@ class ThemeControl {
     ));
     await Future.delayed(const Duration(milliseconds: 500));
     if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor !=
-        Constants.UiTheme.black.auto.systemNavigationBarColor) {
-      final ui = Constants.UiTheme.grey.auto;
+        constants.UiTheme.black.auto.systemNavigationBarColor) {
+      final ui = constants.UiTheme.grey.auto;
       await SystemUiStyleController.instance.animateSystemUiOverlay(
         to: ui,
         curve: Curves.easeOut,
@@ -105,9 +105,9 @@ class ThemeControl {
     _rebuildOperation?.cancel();
     setThemeLightMode(_brightness == Brightness.dark);
     App.nfThemeData = App.nfThemeData.copyWith(
-      systemUiStyle: Constants.UiTheme.black.auto,
-      modalSystemUiStyle: Constants.UiTheme.modal.auto,
-      bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+      systemUiStyle: constants.UiTheme.black.auto,
+      modalSystemUiStyle: constants.UiTheme.modal.auto,
+      bottomSheetSystemUiStyle: constants.UiTheme.bottomSheet.auto,
     );
 
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
@@ -122,7 +122,7 @@ class ThemeControl {
     });
 
     await SystemUiStyleController.instance.animateSystemUiOverlay(
-      to: Constants.UiTheme.black.auto,
+      to: constants.UiTheme.black.auto,
       curve: Curves.easeIn,
       duration: const Duration(milliseconds: 160),
     );
@@ -147,16 +147,16 @@ class ThemeControl {
   void _applyPrimaryColor(Color color) {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
     _colorForBlend = ContentArt.getColorToBlendInDefaultArt(color);
-    Constants.Theme.app = Constants.Theme.app.copyWith(
-      light: Constants.Theme.app.light.copyWith(
+    constants.Theme.app = constants.Theme.app.copyWith(
+      light: constants.Theme.app.light.copyWith(
         primaryColor: color,
         toggleableActiveColor: color,
-        colorScheme: Constants.Theme.app.light.colorScheme.copyWith(
+        colorScheme: constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
           // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         ),
-        tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
+        tooltipTheme: constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
             color: color,
             borderRadius: const BorderRadius.all(
@@ -164,21 +164,21 @@ class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme: Constants.Theme.app.light.textSelectionTheme.copyWith(
+        textSelectionTheme: constants.Theme.app.light.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
         ),
       ),
-      dark: Constants.Theme.app.dark.copyWith(
+      dark: constants.Theme.app.dark.copyWith(
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,
         toggleableActiveColor: color,
-        colorScheme: Constants.Theme.app.dark.colorScheme.copyWith(
+        colorScheme: constants.Theme.app.dark.colorScheme.copyWith(
           primary: color,
         ),
-        tooltipTheme: Constants.Theme.app.light.tooltipTheme.copyWith(
+        tooltipTheme: constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
             color: color,
             borderRadius: const BorderRadius.all(
@@ -186,7 +186,7 @@ class ThemeControl {
             ),
           ),
         ),
-        textSelectionTheme: Constants.Theme.app.dark.textSelectionTheme.copyWith(
+        textSelectionTheme: constants.Theme.app.dark.textSelectionTheme.copyWith(
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,

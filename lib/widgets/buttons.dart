@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Button to switch loop mode
 class LoopButton extends StatelessWidget {
@@ -295,7 +295,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
+                MaterialStateProperty.all(widget.splashColor ?? constants.Theme.glowSplashColorOnContrast.auto),
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
@@ -320,7 +320,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
+                MaterialStateProperty.all(widget.splashColor ?? constants.Theme.glowSplashColorOnContrast.auto),
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
@@ -365,7 +365,7 @@ class ShuffleQueueButton extends StatelessWidget {
     return AppButton(
       text: l10n.shuffleContentList,
       icon: const Icon(Icons.shuffle_rounded, size: 22.0),
-      color: Constants.Theme.contrast.auto,
+      color: constants.Theme.contrast.auto,
       textColor: ThemeControl.instance.theme.colorScheme.background,
       borderRadius: 4.0,
       fontSize: 15.0,

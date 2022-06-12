@@ -11,7 +11,7 @@ const double progressLineHeight = 3.0;
 
 /// Renders current playing track
 class TrackPanel extends StatelessWidget {
-  TrackPanel({
+  const TrackPanel({
     Key? key,
     this.onTap,
   }) : super(key: key);

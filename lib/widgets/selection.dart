@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 // See selection actions logic overview here
 // https://docs.google.com/spreadsheets/d/1LYJ5Abb1zWhYMAUs0zRjx-aiMwJn-3XLS2NjoqV5le8
@@ -569,8 +569,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
           child: _ContentSelectionControllerProvider(
             controller: this,
             child: Builder(
-              builder: (_context) => Builder(
-                builder: (_context) => actionsBuilder!(_context),
+              builder: (context) => Builder(
+                builder: (context) => actionsBuilder!(context),
               ),
             ),
           ),
@@ -584,7 +584,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       final lastUi = SystemUiStyleController.instance.lastUi;
       _lastNavColor = lastUi.systemNavigationBarColor;
       SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: lastUi.copyWith(systemNavigationBarColor: Constants.UiTheme.grey.auto.systemNavigationBarColor),
+        to: lastUi.copyWith(systemNavigationBarColor: constants.UiTheme.grey.auto.systemNavigationBarColor),
         duration: kSelectionDuration,
         curve: _SelectionActionsBar.forwardCurve,
       );
@@ -673,7 +673,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 }
 
 class _ContentSelectionControllerProvider extends InheritedWidget {
-  _ContentSelectionControllerProvider({
+  const _ContentSelectionControllerProvider({
     required Widget child,
     required this.controller,
   }) : super(child: child);
@@ -686,7 +686,7 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
 
 /// Creats a selection controller and automatically rebuilds, when it updates.
 class ContentSelectionControllerCreator<T extends Content> extends StatefulWidget {
-  ContentSelectionControllerCreator({
+  const ContentSelectionControllerCreator({
     Key? key,
     required this.builder,
     this.child,
@@ -795,11 +795,11 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
           width: widget.size,
           height: widget.size,
           decoration: const BoxDecoration(
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
             borderRadius: BorderRadius.all(Radius.circular(200.0)),
           ),
           child: FlareActor(
-            Constants.Assets.ASSET_ANIMATION_CHECKMARK,
+            constants.Assets.assetAnimationCheckmark,
             animation: _flareAnimation,
             color: ThemeControl.instance.theme.colorScheme.secondaryContainer,
             callback: (name) {
@@ -974,7 +974,7 @@ class EmergeAnimation extends AnimatedWidget {
 /// Calls the build again, when selection is updated, excluding the
 /// selection closing.
 class _ActionBuilder extends StatefulWidget {
-  _ActionBuilder({
+  const _ActionBuilder({
     Key? key,
     required this.controller,
     required this.builder,
@@ -1639,7 +1639,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
   void _handleTap(BuildContext context, ContentSelectionController controller) {
     ShowFunctions.instance.showDialog(
       context,
-      ui: Constants.UiTheme.modalOverGrey.auto,
+      ui: constants.UiTheme.modalOverGrey.auto,
       title: Builder(
         builder: (context) {
           final l10n = getl10n(context);
@@ -1676,7 +1676,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           );
         },
       ),
-      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: constants.Theme.glowSplashColor.auto,
       acceptButton: const SizedBox(),
       // acceptButton: Builder(
       //   builder: (context) => AppButton.pop(
@@ -1932,7 +1932,7 @@ void _showActionConfirmationDialog<E extends Content>({
 
   ShowFunctions.instance.showDialog(
     context,
-    ui: Constants.UiTheme.modalOverGrey.auto,
+    ui: constants.UiTheme.modalOverGrey.auto,
     title: Builder(
       builder: (context) {
         final l10n = getl10n(context);
@@ -1968,13 +1968,13 @@ void _showActionConfirmationDialog<E extends Content>({
         },
       ),
     ),
-    buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+    buttonSplashColor: constants.Theme.glowSplashColor.auto,
     acceptButton: Builder(
       builder: (context) => AppButton.pop(
         text: localizedAction(getl10n(context)),
         popResult: true,
-        splashColor: Constants.Theme.glowSplashColor.auto,
-        textColor: Constants.AppColors.red,
+        splashColor: constants.Theme.glowSplashColor.auto,
+        textColor: constants.AppColors.red,
         onPressed: () {
           onSubmit();
           controller.close();

@@ -6,7 +6,7 @@ import 'package:flutter/physics.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 
 final SpringDescription playerRouteSpringDescription = SpringDescription.withDampingRatio(
@@ -89,8 +89,8 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
 
   void _handleControllerChange() {
     final systemNavigationBarColorTween = ColorTween(
-      begin: Constants.UiTheme.grey.auto.systemNavigationBarColor,
-      end: Constants.UiTheme.black.auto.systemNavigationBarColor,
+      begin: constants.UiTheme.grey.auto.systemNavigationBarColor,
+      end: constants.UiTheme.black.auto.systemNavigationBarColor,
     );
     // Change system UI on expanding/collapsing the player route.
     SystemUiStyleController.instance.setSystemUiOverlay(
@@ -163,7 +163,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
 }
 
 class _QueueTab extends StatefulWidget {
-  _QueueTab({
+  const _QueueTab({
     Key? key,
     required this.selectionController,
   }) : super(key: key);
@@ -284,14 +284,15 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         return;
       case QueueType.origin:
         final origin = QueueControl.instance.state.origin!;
-        if (origin is Album)
+        if (origin is Album) {
           HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(origin));
-        else if (origin is Playlist)
+        } else if (origin is Playlist) {
           HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(origin));
-        else if (origin is Artist)
+        } else if (origin is Artist) {
           HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(origin));
-        else
+        } else {
           throw UnimplementedError;
+        }
         return;
       case QueueType.allSongs:
       case QueueType.allAlbums:
@@ -303,9 +304,9 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   }
 
   double _getBorderRadius(SongOrigin origin) {
-    if (origin is PersistentQueue)
+    if (origin is PersistentQueue) {
       return 8.0;
-    else if (origin is Artist) {
+    } else if (origin is Artist) {
       return kArtistTileArtSize;
     }
     throw UnimplementedError();

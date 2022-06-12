@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:styled_text/styled_text.dart';
 
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/sweyer.dart';
 
 class _Notifier extends ChangeNotifier {
@@ -361,7 +361,7 @@ class SearchPageRoute extends RouteTransition<SearchPage> {
 }
 
 class SearchRoute extends StatefulWidget {
-  SearchRoute({
+  const SearchRoute({
     Key? key,
     required this.delegate,
   }) : super(key: key);
@@ -684,7 +684,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                 child: GestureDetector(
                   onTap: () => focusNode.unfocus(),
                   onVerticalDragDown: (_) => focusNode.unfocus(),
-                  child: _DelegateBuilder(),
+                  child: const _DelegateBuilder(),
                 ),
               ),
             ),
@@ -713,7 +713,7 @@ class _DelegateProvider extends InheritedWidget {
 }
 
 class _DelegateBuilder extends StatefulWidget {
-  _DelegateBuilder({Key? key}) : super(key: key);
+  const _DelegateBuilder({Key? key}) : super(key: key);
 
   @override
   _DelegateBuilderState createState() => _DelegateBuilderState();
@@ -1001,7 +1001,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     final colorScheme = ThemeControl.instance.theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
-      end: Constants.Theme.contrast.auto,
+      end: constants.Theme.contrast.auto,
     );
     final baseAnimation = CurvedAnimation(
       parent: controller,
@@ -1011,11 +1011,11 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     final colorAnimation = colorTween.animate(baseAnimation);
     final textColorAnimation = ColorTween(
       begin: colorScheme.onBackground,
-      end: favoritesChip ? Colors.redAccent : Constants.Theme.contrast.autoReverse,
+      end: favoritesChip ? Colors.redAccent : constants.Theme.contrast.autoReverse,
     ).animate(baseAnimation);
     final splashColorAnimation = ColorTween(
-      begin: Constants.Theme.glowSplashColor.auto,
-      end: Constants.Theme.glowSplashColorOnContrast.auto,
+      begin: constants.Theme.glowSplashColor.auto,
+      end: constants.Theme.glowSplashColorOnContrast.auto,
     ).animate(baseAnimation);
     return SizedBox(
       height: _ContentChip.height,
@@ -1028,7 +1028,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
               ? null
               : StadiumBorder(
                   side: BorderSide(
-                    color: Constants.Theme.contrast.auto.withOpacity(0.05),
+                    color: constants.Theme.contrast.auto.withOpacity(0.05),
                     width: 1.0,
                   ),
                 ),
@@ -1051,7 +1051,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                       child: RawChip(
                         shape: StadiumBorder(
                           side: BorderSide(
-                            color: Constants.Theme.contrast.auto.withOpacity(0.05),
+                            color: constants.Theme.contrast.auto.withOpacity(0.05),
                             width: 1.0,
                           ),
                         ),
@@ -1193,14 +1193,14 @@ class _SuggestionsHeader extends StatelessWidget {
           onPressed: () {
             ShowFunctions.instance.showDialog(
               context,
-              ui: Constants.UiTheme.modalOverGrey.auto,
+              ui: constants.UiTheme.modalOverGrey.auto,
               title: Text(l10n.searchClearHistory),
-              buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+              buttonSplashColor: constants.Theme.glowSplashColor.auto,
               acceptButton: AppButton.pop(
                 text: l10n.delete,
                 popResult: true,
-                splashColor: Constants.Theme.glowSplashColor.auto,
-                textColor: Constants.AppColors.red,
+                splashColor: constants.Theme.glowSplashColor.auto,
+                textColor: constants.AppColors.red,
                 onPressed: () => clearHistory(context),
               ),
             );
@@ -1254,7 +1254,7 @@ class _SuggestionTile extends StatelessWidget {
       onLongPress: () {
         ShowFunctions.instance.showDialog(
           context,
-          ui: Constants.UiTheme.modalOverGrey.auto,
+          ui: constants.UiTheme.modalOverGrey.auto,
           title: Text(l10n.searchHistory),
           titlePadding: defaultAlertTitlePadding.copyWith(bottom: 4.0),
           contentPadding: defaultAlertContentPadding.copyWith(bottom: 6.0),
@@ -1267,12 +1267,12 @@ class _SuggestionTile extends StatelessWidget {
               'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),
             },
           ),
-          buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+          buttonSplashColor: constants.Theme.glowSplashColor.auto,
           acceptButton: AppButton.pop(
             text: l10n.remove,
             popResult: true,
-            splashColor: Constants.Theme.glowSplashColor.auto,
-            textColor: Constants.AppColors.red,
+            splashColor: constants.Theme.glowSplashColor.auto,
+            textColor: constants.AppColors.red,
             onPressed: () => _removeEntry(context, index),
           ),
         );

@@ -10,7 +10,7 @@ import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/general_settings.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 import 'settings_route/licenses_route.dart';
 
@@ -140,7 +140,7 @@ class SelectionArguments {
 }
 
 class PersistentQueueArguments<T extends PersistentQueue> extends Equatable {
-  PersistentQueueArguments({
+  const PersistentQueueArguments({
     required this.queue,
     this.editing = false,
   }) : assert(
@@ -306,12 +306,12 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
 
   late final _TransitionSettings transitionSettings = _TransitionSettings(
-    grey: StackFadeRouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto),
+    grey: StackFadeRouteTransitionSettings(uiStyle: constants.UiTheme.grey.auto),
     greyDismissible: StackFadeRouteTransitionSettings(
       opaque: false,
       dismissible: true,
       dismissBarrier: _dismissBarrier,
-      uiStyle: Constants.UiTheme.grey.auto,
+      uiStyle: constants.UiTheme.grey.auto,
     ),
     dismissible: StackFadeRouteTransitionSettings(
       opaque: false,
@@ -341,11 +341,11 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   VoidCallback? _setState;
   void updateTransitionSettings({bool themeChanged = false}) {
     final dismissBarrier = _dismissBarrier;
-    transitionSettings.grey.uiStyle = Constants.UiTheme.grey.auto;
-    transitionSettings.greyDismissible.uiStyle = Constants.UiTheme.grey.auto;
+    transitionSettings.grey.uiStyle = constants.UiTheme.grey.auto;
+    transitionSettings.greyDismissible.uiStyle = constants.UiTheme.grey.auto;
     transitionSettings.greyDismissible.dismissBarrier = dismissBarrier;
     transitionSettings.dismissible.dismissBarrier = dismissBarrier;
-    transitionSettings.initial.uiStyle = _mainScreenShown ? Constants.UiTheme.grey.auto : Constants.UiTheme.black.auto;
+    transitionSettings.initial.uiStyle = _mainScreenShown ? constants.UiTheme.grey.auto : constants.UiTheme.black.auto;
     transitionSettings.theme.dismissBarrier = dismissBarrier;
     if (themeChanged) {
       _setState?.call();
@@ -423,7 +423,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
 }
 
 class _AppRouterBuilder extends StatefulWidget {
-  _AppRouterBuilder({Key? key, required this.builder}) : super(key: key);
+  const _AppRouterBuilder({Key? key, required this.builder}) : super(key: key);
 
   final WidgetBuilder builder;
 
@@ -601,17 +601,18 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         ));
       } else if (route.hasSameLocation(HomeRoutes.artistContent)) {
         final arguments = route.arguments! as ArtistContentArguments;
-        final ArtistContentRoute _route;
-        if (arguments is ArtistContentArguments<Song>)
-          _route = ArtistContentRoute<Song>(arguments: arguments);
-        else if (arguments is ArtistContentArguments<Album>)
-          _route = ArtistContentRoute<Album>(arguments: arguments);
-        else
+        final ArtistContentRoute actualRoute;
+        if (arguments is ArtistContentArguments<Song>) {
+          actualRoute = ArtistContentRoute<Song>(arguments: arguments);
+        } else if (arguments is ArtistContentArguments<Album>) {
+          actualRoute = ArtistContentRoute<Album>(arguments: arguments);
+        } else {
           throw ArgumentError();
+        }
         pages.add(_buildPage(
           ValueKey('${HomeRoutes.artistContent.location}/${arguments.artist.id}_$i'),
           transitionSettings.greyDismissible,
-          _route,
+          actualRoute,
         ));
       } else if (route.hasSameLocation(HomeRoutes.search)) {
         final arguments = route.arguments! as SearchArguments;
@@ -642,7 +643,7 @@ class HomeRouteInformationProvider extends RouteInformationProvider with ChangeN
 }
 
 class RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
-  RouterDelegateProvider({
+  const RouterDelegateProvider({
     Key? key,
     required this.delegate,
     required Widget child,

@@ -594,34 +594,34 @@ class ContentControl extends Control {
     contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
-        final _sort = sort! as SongSort;
-        sorts.setValue<Song>(_sort);
-        repository.songSort.set(_sort);
-        final comparator = _sort.comparator;
+        final castedSort = sort! as SongSort;
+        sorts.setValue<Song>(castedSort);
+        repository.songSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.allSongs.songs.sort(comparator);
       },
       album: () {
-        final _sort = sort! as AlbumSort;
-        sorts.setValue<Album>(_sort);
-        repository.albumSort.set(_sort);
-        final comparator = _sort.comparator;
+        final castedSort = sort! as AlbumSort;
+        sorts.setValue<Album>(castedSort);
+        repository.albumSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()
           ..sort((a, b) {
             return comparator(a.value, b.value);
           }));
       },
       playlist: () {
-        final _sort = sort! as PlaylistSort;
-        sorts.setValue<Playlist>(_sort);
-        repository.playlistSort.set(_sort);
-        final comparator = _sort.comparator;
+        final castedSort = sort! as PlaylistSort;
+        sorts.setValue<Playlist>(castedSort);
+        repository.playlistSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.playlists.sort(comparator);
       },
       artist: () {
-        final _sort = sort! as ArtistSort;
-        sorts.setValue<Artist>(_sort);
-        repository.artistSort.set(_sort);
-        final comparator = _sort.comparator;
+        final castedSort = sort! as ArtistSort;
+        sorts.setValue<Artist>(castedSort);
+        repository.artistSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.artists.sort(comparator);
       },
     )();

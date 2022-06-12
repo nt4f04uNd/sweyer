@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 class Seekbar extends StatefulWidget {
   const Seekbar({
@@ -170,7 +170,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
                   thumbColor: color,
                   overlayColor: color.withOpacity(ThemeControl.instance.isLight ? 0.12 : 0.24),
                   activeTrackColor: color,
-                  inactiveTrackColor: Constants.Theme.sliderInactiveColor.auto,
+                  inactiveTrackColor: constants.Theme.sliderInactiveColor.auto,
                   overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),
                   thumbShape: RoundSliderThumbShape(
                     pressedElevation: 3.0,

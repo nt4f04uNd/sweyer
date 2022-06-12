@@ -5,7 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 class _ReorderOperation {
   final int oldIndex;
@@ -14,7 +14,7 @@ class _ReorderOperation {
 }
 
 class PersistentQueueRoute extends StatefulWidget {
-  PersistentQueueRoute({
+  const PersistentQueueRoute({
     Key? key,
     required this.arguments,
   }) : super(key: key);
@@ -173,7 +173,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             stream: ContentControl.instance.onContentChange,
             builder: (context, snapshot) {
               final selectedTileColor = ThemeControl.instance.theme.colorScheme.primary;
-              final selectedSplashColor = Constants.Theme.glowSplashColorOnContrast.auto;
+              final selectedSplashColor = constants.Theme.glowSplashColorOnContrast.auto;
               late StateSetter setListState;
               if (!tapped || selectedSong != null && !songs.contains(selectedSong)) {
                 // Set last song on start and when the songs update and selected song was deleted

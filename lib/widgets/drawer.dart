@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
@@ -37,11 +37,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     if (_onTop) {
       if (status == AnimationStatus.dismissed) {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: Constants.UiTheme.grey.auto,
+          to: constants.UiTheme.grey.auto,
         );
       } else {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: Constants.UiTheme.drawerScreen.auto,
+          to: constants.UiTheme.drawerScreen.auto,
         );
       }
     }
@@ -90,7 +90,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 }
 
 class _DrawerWidgetContent extends StatefulWidget {
-  _DrawerWidgetContent({Key? key, required this.controller}) : super(key: key);
+  const _DrawerWidgetContent({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
   final SlidableController? controller;
 
   @override
@@ -165,7 +169,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10.0),
                       child: Text(
-                        Constants.Config.APPLICATION_TITLE,
+                        constants.Config.applicationTitle,
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
@@ -236,7 +240,7 @@ class DrawerMenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: Constants.Theme.drawerMenuItemColor.auto,
+          color: constants.Theme.drawerMenuItemColor.auto,
         ),
       ),
       onTap: onTap,

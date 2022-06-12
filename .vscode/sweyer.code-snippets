@@ -9,7 +9,7 @@
       "prefix": "_iconst",
       "description": "Import constants module shortcut",
       "body": [
-         "import 'package:sweyer/constants.dart' as Constants;"
+         "import 'package:sweyer/constants.dart' as constants;"
       ],
    },
    "Import application": {

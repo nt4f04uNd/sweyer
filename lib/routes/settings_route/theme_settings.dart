@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 const double _colorItemSize = 36.0;
 const double _colorItemActiveBorderWidth = 2.5;
@@ -20,13 +20,13 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
   late AnimationController controller;
 
   static const List<Color> colors = [
-    Constants.AppColors.deepPurpleAccent,
-    Constants.AppColors.yellow,
-    Constants.AppColors.blue,
-    Constants.AppColors.red,
-    Constants.AppColors.orange,
-    Constants.AppColors.pink,
-    Constants.AppColors.androidGreen,
+    constants.AppColors.deepPurpleAccent,
+    constants.AppColors.yellow,
+    constants.AppColors.blue,
+    constants.AppColors.red,
+    constants.AppColors.orange,
+    constants.AppColors.pink,
+    constants.AppColors.androidGreen,
   ];
 
   @override
@@ -121,7 +121,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
                 ),
                 child!,
                 Image.asset(
-                  Constants.Assets.ASSET_LOGO_MASK,
+                  constants.Assets.assetLogoMask,
                   color: ContentArt.getColorToBlendInDefaultArt(animation.value!),
                   colorBlendMode: BlendMode.plus,
                   fit: BoxFit.cover,

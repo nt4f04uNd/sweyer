@@ -190,17 +190,17 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     this.player = player;
     WidgetsBinding.instance.addObserver(this);
 
-    DateTime? _lastEvent;
+    DateTime? lastEvent;
     player.positionStream.listen((event) {
       final now = clock.now();
-      if (_lastEvent == null || now.difference(_lastEvent!) > const Duration(milliseconds: 1000)) {
-        _lastEvent = now;
+      if (lastEvent == null || now.difference(lastEvent!) > const Duration(milliseconds: 1000)) {
+        lastEvent = now;
         _setState();
       }
     });
     player.playingStream.listen((playing) {
       _setState();
-      _lastEvent = clock.now();
+      lastEvent = clock.now();
       if (playing) {
         running = true;
       }

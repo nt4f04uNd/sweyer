@@ -2,7 +2,7 @@ import 'package:boxy/boxy.dart';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Needed for scrollbar computations.
 const double kPersistentQueueTileHeight = kPersistentQueueTileArtSize + _tileVerticalPadding * 2;
@@ -243,7 +243,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: onTap,
-                      splashColor: Constants.Theme.glowSplashColor.auto,
+                      splashColor: constants.Theme.glowSplashColor.auto,
                       onLongPress: handleLongPress,
                       splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
                     ),

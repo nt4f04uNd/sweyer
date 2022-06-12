@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 export 'artist_content_route.dart';
 export 'artist_route.dart';
@@ -25,7 +25,7 @@ class _InitialRouteState extends State<InitialRoute> {
   void _animateNotMainUi() {
     if (_onTop && playerRouteController.value == 0.0) {
       SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: Constants.UiTheme.black.auto,
+        to: constants.UiTheme.black.auto,
         duration: const Duration(milliseconds: 550),
       );
     }
@@ -60,7 +60,7 @@ class _InitialRouteState extends State<InitialRoute> {
                 }
                 if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
                   SystemUiStyleController.instance.animateSystemUiOverlay(
-                    to: Constants.UiTheme.grey.auto,
+                    to: constants.UiTheme.grey.auto,
                   );
                 }
                 return StreamBuilder<bool>(
@@ -137,7 +137,7 @@ class HomeState extends State<Home> {
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
       if (_lastBackPressTime == null ||
-          now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
+          now.difference(_lastBackPressTime!) > constants.Config.backPressCloseTimeout) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;

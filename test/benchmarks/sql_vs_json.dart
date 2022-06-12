@@ -67,8 +67,8 @@ class SongsDatabase {
   static final SongsDatabase instance = SongsDatabase._();
 
   // Names
-  static const _DATABASE = 'TEST.db';
-  static const TABLE = 'TEST';
+  static const _databaseName = 'TEST.db';
+  static const _tableName = 'TEST';
 
   Completer<Database>? _completer;
   Future<Database> get _database async {
@@ -77,9 +77,9 @@ class SongsDatabase {
     }
     _completer = Completer();
     await openDatabase(
-      join(await getDatabasesPath(), _DATABASE),
+      join(await getDatabasesPath(), _databaseName),
       onCreate: (database, version) {
-        database.execute('CREATE TABLE $TABLE(id INTEGER PRIMARY KEY, origin_type TEXT, origin_id INTEGER)');
+        database.execute('CREATE TABLE $_tableName(id INTEGER PRIMARY KEY, origin_type TEXT, origin_id INTEGER)');
       },
       onDowngrade: (database, oldVersion, newVersion) {},
       onUpgrade: (database, oldVersion, newVersion) {},
@@ -93,10 +93,10 @@ class SongsDatabase {
 
   /// Table of all songs.
   ///
-  /// Named with [TABLE].
+  /// Named with [_tableName].
   /// Introduced in version `1`.
   Future<Table<SqlSong>> get table async => Table(
-        name: TABLE,
+        name: _tableName,
         database: await _database,
         factory: (data) => SqlSong.fromMap(data),
       );

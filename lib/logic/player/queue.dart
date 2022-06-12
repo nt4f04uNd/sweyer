@@ -758,8 +758,8 @@ class QueueControl extends Control {
     final queues = state;
 
     @pragma('vm:prefer-inline')
-    List<Song> copySongs(List<Song> _songs) {
-      return copied ? _songs : List.from(_songs);
+    List<Song> copySongs(List<Song> songs) {
+      return copied ? songs : List.from(songs);
     }
 
     assert(

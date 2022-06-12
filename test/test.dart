@@ -16,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 export 'fakes/fakes.dart';
 
@@ -124,7 +124,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'),
       (MethodCall methodCall) async {
     return {
-      'appName': Constants.Config.APPLICATION_TITLE,
+      'appName': constants.Config.applicationTitle,
       'packageName': 'com.nt4f04und.sweyer',
       'version': '1.0.0',
       'buildNumber': '0',

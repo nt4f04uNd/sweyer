@@ -9,7 +9,7 @@ import 'package:sweyer/sweyer.dart';
 // Currently it's not used anywhere.
 
 class _StandalonePlayer extends StatefulWidget {
-  _StandalonePlayer({Key? key}) : super(key: key);
+  const _StandalonePlayer({Key? key}) : super(key: key);
 
   @override
   _StandalonePlayerState createState() => _StandalonePlayerState();
@@ -141,7 +141,7 @@ void _openStandalonePlayerRoute(BuildContext context) {
   Navigator.of(context).push(
     RouteTransitionBuilder(
       transitionSettings: RouteTransitionSettings(opaque: false, transitionDuration: const Duration(milliseconds: 500)),
-      builder: (context) => _StandalonePlayer(),
+      builder: (context) => const _StandalonePlayer(),
       animationBuilder: (context, animation, secondaryAnimation, child) {
         final fadeAnimation = CurvedAnimation(
           parent: animation,

@@ -3,7 +3,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart' hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
@@ -60,14 +60,15 @@ class ShowFunctions extends NFShowFunctions {
     Future<void> submit(BuildContext context) async {
       if (!submitted) {
         submitted = true;
+        final navigator = Navigator.of(context);
         name = await ContentControl.instance.createPlaylist(controller.text);
-        Navigator.of(context).maybePop(name);
+        navigator.maybePop(name);
       }
     }
 
     await showDialog(
       context,
-      ui: Constants.UiTheme.modalOverGrey.auto,
+      ui: constants.UiTheme.modalOverGrey.auto,
       title: Text(l10n.newPlaylist),
       content: Builder(
         builder: (context) => AppTextField(
@@ -81,12 +82,12 @@ class ShowFunctions extends NFShowFunctions {
           },
         ),
       ),
-      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: constants.Theme.glowSplashColor.auto,
       acceptButton: ValueListenableBuilder<bool>(
         valueListenable: enabled,
         builder: (context, value, child) => AppButton.flat(
           text: l10n.create,
-          splashColor: Constants.Theme.glowSplashColor.auto,
+          splashColor: constants.Theme.glowSplashColor.auto,
           onPressed: !value
               ? null
               : () async {

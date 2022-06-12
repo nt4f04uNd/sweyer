@@ -8,7 +8,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/sweyer.dart';
 
 const double kSongTileArtSize = 48.0;
@@ -900,7 +900,9 @@ class _ContentArtState extends State<ContentArt> {
   Widget _buildDefault([bool forPlaylist = false, int? cacheSize]) {
     final size = _getSize(forPlaylist);
     cacheSize ??= _getCacheSize(forPlaylist, size);
-    final int? _cacheSize = (cacheSize == null ? cacheSize : cacheSize * widget.assetScale)?.round();
+    if (cacheSize != null) {
+      cacheSize = (cacheSize * widget.assetScale).round();
+    }
     Widget child;
     if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
       // We should show the art now.
@@ -922,11 +924,11 @@ class _ContentArtState extends State<ContentArt> {
       }
     } else {
       child = Image.asset(
-        widget.assetHighRes ? Constants.Assets.ASSET_LOGO_MASK : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
+        widget.assetHighRes ? constants.Assets.assetLogoMask : constants.Assets.assetLogoThumbInapp,
         width: size,
         height: size,
-        cacheWidth: _cacheSize,
-        cacheHeight: _cacheSize,
+        cacheWidth: cacheSize,
+        cacheHeight: cacheSize,
         color: widget.color != null
             ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
             : ThemeControl.instance.colorForBlend,

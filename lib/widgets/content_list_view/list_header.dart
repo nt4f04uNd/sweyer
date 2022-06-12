@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 class ListHeader extends StatelessWidget {
   const ListHeader({
@@ -119,7 +119,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
 
     ShowFunctions.instance.showAlert(
       context,
-      ui: Constants.UiTheme.modalOverGrey.auto,
+      ui: constants.UiTheme.modalOverGrey.auto,
       title: Text(l10n.sort),
       titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),

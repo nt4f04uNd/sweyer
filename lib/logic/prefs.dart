@@ -1,5 +1,5 @@
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Class to save and get [SharedPreferences].
 ///
@@ -127,7 +127,7 @@ class SearchHistory {
       // Remove if this input is in array
       history!.removeWhere((el) => el == entry);
       history!.insert(0, entry);
-      if (history!.length > Constants.Config.SEARCH_HISTORY_LENGTH) {
+      if (history!.length > constants.Config.searchHistoryLength) {
         history!.removeLast();
       }
       await Prefs.searchHistory.set(history!);
@@ -147,7 +147,7 @@ abstract class Settings {
 
   /// Stores primary color int value.
   static final primaryColorInt = PrefNotifier(
-    IntPref('setting_primary_color', Constants.Theme.defaultPrimaryColor.value),
+    IntPref('setting_primary_color', constants.Theme.defaultPrimaryColor.value),
   );
 
   /// Whether a confirmation toast should be displayed when exiting

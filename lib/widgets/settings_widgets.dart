@@ -69,7 +69,7 @@ class SettingItem extends StatelessWidget {
 ///
 /// The [child] is untouchable in the animation.
 class ChangedSwitcher extends StatefulWidget {
-  ChangedSwitcher({
+  const ChangedSwitcher({
     Key? key,
     this.child,
     this.changed = false,

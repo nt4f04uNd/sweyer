@@ -48,6 +48,7 @@ dependencies:
   clock: ^1.1.0
   styled_text: ^5.1.0
   android_content_provider: ^0.2.2
+  collection: ^1.16.0
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 
@@ -93,6 +94,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_lints: ^2.0.1
   golden_toolkit: ^0.13.0
 
 flutter:

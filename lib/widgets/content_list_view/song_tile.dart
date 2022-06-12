@@ -87,7 +87,7 @@ class SongNumber extends StatelessWidget {
 
 /// A [SongTile] that can be selected.
 class SongTile extends SelectableWidget<SelectionEntry> {
-  SongTile({
+  const SongTile({
     Key? key,
     required this.song,
     this.trailing,
@@ -100,7 +100,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.backgroundColor = Colors.transparent,
   }) : super(key: key);
 
-  SongTile.selectable({
+  const SongTile.selectable({
     Key? key,
     required this.song,
     required int selectionIndex,

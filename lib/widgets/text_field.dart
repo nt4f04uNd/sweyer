@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class AppTextField extends StatefulWidget {
-  AppTextField({
+  const AppTextField({
     Key? key,
     this.onSubmit,
     this.autofocus = false,

@@ -131,12 +131,12 @@ void main() {
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit]);
       expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
-      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT + const Duration(milliseconds: 1));
+      await tester.binding.delayed(Config.backPressCloseTimeout + const Duration(milliseconds: 1));
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit],
           reason: 'The previous message timed out');
       expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
-      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT - const Duration(milliseconds: 1));
+      await tester.binding.delayed(Config.backPressCloseTimeout - const Duration(milliseconds: 1));
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit]);
       expect(systemObserver.closeRequests, 1);

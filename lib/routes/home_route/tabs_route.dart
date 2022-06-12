@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Returns app style used for app bar title.
 TextStyle get appBarTitleTextStyle => TextStyle(
@@ -45,7 +45,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 
   /// Used in [HomeRouter.drawerCanBeOpened].
   bool tabBarDragged = false;
-  static late bool _mainTabsCreated = false;
+  static bool _mainTabsCreated = false;
 
   Type indexToContentType(int index) {
     return Content.enumerate()[index];
@@ -247,7 +247,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         child: selectionRoute
             ? const SizedBox.shrink()
             : Text(
-                Constants.Config.APPLICATION_TITLE,
+                constants.Config.applicationTitle,
                 style: appBarTitleTextStyle,
               ),
       ),
@@ -382,7 +382,7 @@ class _ShowOnlyFavoritesButton extends StatelessWidget {
 }
 
 class _ContentTab extends StatefulWidget {
-  _ContentTab({
+  const _ContentTab({
     Key? key,
     required this.contentType,
     required this.selectionController,

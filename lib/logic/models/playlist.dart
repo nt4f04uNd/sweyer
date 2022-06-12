@@ -35,7 +35,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
     _idMap = {};
     // Key - song id
     // Value - duplication index
-    final _duplicationIndexMap = <int, int>{};
+    final duplicationIndexMap = <int, int>{};
     final List<Song> found = [];
     final List<int> notFoundIndices = [];
     for (int i = 0; i < songIds.length; i++) {
@@ -45,14 +45,14 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
         copiedSong.origin = this;
         copiedSong.idMap = idMap;
         final id = copiedSong.id;
-        final duplicationIndex = _duplicationIndexMap[id] ??= 0;
+        final duplicationIndex = duplicationIndexMap[id] ??= 0;
         copiedSong.duplicationIndex = duplicationIndex;
         ContentUtils.deduplicateSong(
           song: copiedSong,
           list: found,
           idMap: idMap,
         );
-        _duplicationIndexMap[id] = _duplicationIndexMap[id]! + 1;
+        duplicationIndexMap[id] = duplicationIndexMap[id]! + 1;
         found.add(copiedSong);
       } else {
         notFoundIndices.add(songIds[i]);

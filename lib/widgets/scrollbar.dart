@@ -79,7 +79,6 @@ class AppScrollbar extends StatefulWidget {
                 )(),
               );
             },
-      child: child,
       controller: controller,
       isAlwaysShown: isAlwaysShown,
       showTrackOnHover: showTrackOnHover,
@@ -88,6 +87,7 @@ class AppScrollbar extends StatefulWidget {
       radius: radius,
       notificationPredicate: notificationPredicate,
       interactive: interactive,
+      child: child,
     );
   }
 
@@ -125,10 +125,6 @@ class _AppScrollbarState extends State<AppScrollbar> {
           children: [
             _Scrollbar(
               controller: controller,
-              child: Theme(
-                data: theme.copyWith(highlightColor: highlightColor),
-                child: widget.child,
-              ),
               isAlwaysShown: widget.isAlwaysShown,
               showTrackOnHover: widget.showTrackOnHover,
               hoverThickness: widget.hoverThickness,
@@ -142,6 +138,10 @@ class _AppScrollbarState extends State<AppScrollbar> {
               onThumbPressEnd: () => setState(() {
                 _dragIsActive = false;
               }),
+              child: Theme(
+                data: theme.copyWith(highlightColor: highlightColor),
+                child: widget.child,
+              ),
             ),
             if (widget.labelBuilder != null)
               AnimatedSwitcher(
@@ -440,8 +440,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
         return _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor;
+      }
 
       return Color.lerp(
         _scrollbarTheme.thumbColor?.resolve(states) ?? idleColor,
@@ -477,8 +478,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered) && _showTrackOnHover)
+      if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
         return widget.hoverThickness ?? _scrollbarTheme.thickness?.resolve(states) ?? _kScrollbarThicknessWithTrack;
+      }
       // The default scrollbar thickness is smaller on mobile.
       return widget.thickness ??
           _scrollbarTheme.thickness?.resolve(states) ??

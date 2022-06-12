@@ -8,10 +8,10 @@ import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 class ArtistRoute extends StatefulWidget {
-  ArtistRoute({Key? key, required this.artist}) : super(key: key);
+  const ArtistRoute({Key? key, required this.artist}) : super(key: key);
 
   final Artist artist;
 
@@ -198,7 +198,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               style: TextStyle(
                                 height: 1.0,
                                 fontWeight: FontWeight.w800,
-                                color: Constants.Theme.contrast.auto,
+                                color: constants.Theme.contrast.auto,
                                 fontSize: 36.0,
                               ),
                             ),
@@ -381,7 +381,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           ).animate(backButtonAnimation);
 
                           final splashColorAnimation = ColorTween(
-                            begin: Constants.Theme.glowSplashColorOnContrast.auto,
+                            begin: constants.Theme.glowSplashColorOnContrast.auto,
                             end: theme.splashColor,
                           ).animate(backButtonAnimation);
 
