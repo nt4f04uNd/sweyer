@@ -34,9 +34,7 @@ class Artist extends SongOrigin {
 
   /// Returns albums for this artst.
   List<Album> get albums {
-    return ContentControl.instance.state.albums.values
-      .where((el) => el.artistId == id)
-      .toList();
+    return ContentControl.instance.state.albums.values.where((el) => el.artistId == id).toList();
   }
 
   /// Whether this artist represents an unknown artist.
@@ -89,11 +87,11 @@ class Artist extends SongOrigin {
 
   @override
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'artist': artist,
-    'numberOfAlbums': numberOfAlbums,
-    'numberOfTracks': numberOfTracks,
-  };
+        'id': id,
+        'artist': artist,
+        'numberOfAlbums': numberOfAlbums,
+        'numberOfTracks': numberOfTracks,
+      };
 }
 
 /// The `copyWith` function type for [Artist].

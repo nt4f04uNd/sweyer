@@ -38,25 +38,20 @@ bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
 class ContentArtSource with EquatableMixin {
   const ContentArtSource(Content content) : _content = content;
 
-  const ContentArtSource.song(Song song)
-    : _content = song;
+  const ContentArtSource.song(Song song) : _content = song;
 
-  const ContentArtSource.album(Album album)
-    : _content = album;
-  
-  const ContentArtSource.playlist(Playlist playlist)
-    : _content = playlist;
+  const ContentArtSource.album(Album album) : _content = album;
+
+  const ContentArtSource.playlist(Playlist playlist) : _content = playlist;
 
   /// Checks the kind of [PersistentQueue], and respectively either picks [ContentArtSource.album], or [ContentArtSource.playlist].
   const ContentArtSource.persistentQueue(PersistentQueue persistentQueue)
-    : assert(persistentQueue is Album || persistentQueue is Playlist),
-      _content = persistentQueue;
+      : assert(persistentQueue is Album || persistentQueue is Playlist),
+        _content = persistentQueue;
 
-  const ContentArtSource.artist(Artist artist)
-    : _content = artist;
+  const ContentArtSource.artist(Artist artist) : _content = artist;
 
-  const ContentArtSource.origin(SongOrigin origin)
-    : _content = origin;
+  const ContentArtSource.origin(SongOrigin origin) : _content = origin;
 
   final Content _content;
 
@@ -68,7 +63,7 @@ class ContentArtSource with EquatableMixin {
 /// It can be an album art, placeholder, or some other image.
 ///
 /// How arts are displayed:
-/// * [ContentArtSource.song] - just the song art 
+/// * [ContentArtSource.song] - just the song art
 /// * [ContentArtSource.album] - the art of the first song in album
 /// * [ContentArtSource.playlist] - grid of 4 arts, when playlist length is:
 ///    * 1 - 4 identical arts
@@ -105,10 +100,10 @@ class ContentArt extends StatefulWidget {
     this.current = false,
     this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
-  }) : size = kSongTileArtSize,
-       assetHighRes = false,
-       currentIndicatorScale = null,
-       super(key: key);
+  })  : size = kSongTileArtSize,
+        assetHighRes = false,
+        currentIndicatorScale = null,
+        super(key: key);
 
   /// Creates an art for the [PersistentQueueTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
@@ -123,10 +118,10 @@ class ContentArt extends StatefulWidget {
     this.current = false,
     this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
-  }) : size = kPersistentQueueTileArtSize,
-       assetHighRes = false,
-       currentIndicatorScale = 1.17,
-       super(key: key);
+  })  : size = kPersistentQueueTileArtSize,
+        assetHighRes = false,
+        currentIndicatorScale = 1.17,
+        super(key: key);
 
   /// Creates an art for the [ArtistTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
@@ -141,10 +136,10 @@ class ContentArt extends StatefulWidget {
     this.current = false,
     this.onLoad,
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
-  }) : size = kPersistentQueueTileArtSize,
-       assetHighRes = false,
-       currentIndicatorScale = 1.1,
-       super(key: key);
+  })  : size = kPersistentQueueTileArtSize,
+        assetHighRes = false,
+        currentIndicatorScale = 1.1,
+        super(key: key);
 
   /// Creates an art for the [PlayerRoute].
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.PersistentQueueTile].
@@ -159,10 +154,10 @@ class ContentArt extends StatefulWidget {
     this.borderRadius = kArtBorderRadius,
     this.onLoad,
     this.loadAnimationDuration = const Duration(milliseconds: 500),
-  }) : assetHighRes = true,
-       current = false,
-       currentIndicatorScale = null,
-       super(key: key);
+  })  : assetHighRes = true,
+        current = false,
+        currentIndicatorScale = null,
+        super(key: key);
 
   final ContentArtSource? source;
 
@@ -302,8 +297,9 @@ class _NoSourceLoader extends _ArtSourceLoader {
 
   @override
   void load() {
-    if (loading != _SourceLoading.notLoading)
+    if (loading != _SourceLoading.notLoading) {
       return;
+    }
     if (state.loadAnimationDuration == Duration.zero) {
       setLoading(_SourceLoading.notLoading);
     } else {
@@ -314,7 +310,7 @@ class _NoSourceLoader extends _ArtSourceLoader {
   }
 
   @override
-  void cancel() { }
+  void cancel() {}
 
   @override
   Widget? getImage(int? cacheSize) {
@@ -331,7 +327,7 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
     required this.song,
     required this.size,
     required _ContentArtState state,
-  }) :  super(state: state) {
+  }) : super(state: state) {
     if (song == null) {
       loader = _NoSourceLoader(state);
     } else if (_useScopedStorage) {
@@ -341,7 +337,7 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
         onLoadingChange: (value) => setLoading(value),
         state: state,
       );
-    } else { 
+    } else {
       loader = _SongFileArtSourceLoader(
         song: song!,
         size: size,
@@ -378,7 +374,7 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
 }
 
 /// Loads local song art with `MediaStore` API, used above Android Q.
-/// 
+///
 /// Lower Android Q album arts ared displayed directly from the file path
 /// of album art from [Song.albumArt].
 ///
@@ -387,7 +383,7 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
 ///
 /// The [_useScopedStorage] indicates that we are on scoped storage and should use this
 /// new method.
-/// 
+///
 /// See also:
 ///  * [_SongFileArtSourceLoader], which loads arts from files
 ///  * [_SongArtSourceLoader], which automatically chooses between this loader and [_SongFileArtSourceLoader],
@@ -414,13 +410,15 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
 
   @override
   void load() {
-    if (loading != _SourceLoading.notLoading)
+    if (loading != _SourceLoading.notLoading) {
       return;
+    }
     setLoading(_SourceLoading.loading);
     final uri = song.contentUri;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      if (!state.mounted)
+      if (!state.mounted) {
         return;
+      }
       _signal = CancellationSignal();
       try {
         _bytes = await ContentChannel.instance.loadAlbumArt(
@@ -450,8 +448,9 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
 
   @override
   Widget? getImage(int? cacheSize) {
-    if (showDefault)
+    if (showDefault) {
       return null;
+    }
     return Image.memory(
       _bytes!,
       width: size,
@@ -495,8 +494,9 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
 
   @override
   void load() {
-    if (loading != _SourceLoading.notLoading)
+    if (loading != _SourceLoading.notLoading) {
       return;
+    }
     setLoading(_SourceLoading.loading);
     if (state.loadAnimationDuration == Duration.zero) {
       _loadFile();
@@ -508,35 +508,40 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   }
 
   @override
-  void cancel() { }
+  void cancel() {}
 
   void _loadFile() {
-    if (!state.mounted)
+    if (!state.mounted) {
       return;
+    }
     final art = song.albumArt;
     bool broken = false;
     if (art != null) {
       _file = File(art);
       final exists = _file.existsSync();
       broken = !exists;
-      if (broken)
+      if (broken) {
         _recreateArt();
+      }
     }
-    if (!broken)
+    if (!broken) {
       setLoading(_SourceLoading.loaded);
+    }
   }
 
   Future<void> _recreateArt() async {
     final ablumId = song.albumId;
-    if (ablumId != null)
+    if (ablumId != null) {
       await ContentChannel.instance.fixAlbumArt(song.albumId!);
+    }
     setLoading(_SourceLoading.loaded);
   }
 
   @override
   Widget? getImage(int? cacheSize) {
-    if (showDefault)
+    if (showDefault) {
       return null;
+    }
     return Image.file(
       _file,
       width: size,
@@ -548,7 +553,6 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
     );
   }
 }
-
 
 /// Makes a call to the backend which searches an for artist art
 /// on Genius.
@@ -574,16 +578,18 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
 
   @override
   void load() {
-    if (loading != _SourceLoading.notLoading)
+    if (loading != _SourceLoading.notLoading) {
       return;
+    }
     if (artist.isUnknown) {
       setLoading(_SourceLoading.notLoading);
       return;
     }
     setLoading(_SourceLoading.loading);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      if (!state.mounted)
+      if (!state.mounted) {
         return;
+      }
       try {
         final info = await artist.fetchInfo();
         _url = info.imageUrl;
@@ -600,12 +606,13 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
   }
 
   @override
-  void cancel() { }
+  void cancel() {}
 
   @override
   Widget? getImage(int? cacheSize) {
-    if (showDefault)
+    if (showDefault) {
       return null;
+    }
     return Image(
       image: ResizeImage.resizeIfNeeded(cacheSize, cacheSize, CachedNetworkImageProvider(_url!)),
       width: size,
@@ -656,19 +663,17 @@ class _ContentArtState extends State<ContentArt> {
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
 
   /// Min duration for [loadAnimationDuration].
-  static Duration get _minDuration => _useScopedStorage
-    ? const Duration(milliseconds: 100)
-    : Duration.zero;
+  static Duration get _minDuration => _useScopedStorage ? const Duration(milliseconds: 100) : Duration.zero;
 
-  Duration get loadAnimationDuration => widget.loadAnimationDuration < _minDuration
-    ? _minDuration
-    : widget.loadAnimationDuration;
+  Duration get loadAnimationDuration =>
+      widget.loadAnimationDuration < _minDuration ? _minDuration : widget.loadAnimationDuration;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
-    if (widget.onLoad != null)
+    if (widget.onLoad != null) {
       globalKey = GlobalKey();
+    }
     _init();
   }
 
@@ -678,17 +683,21 @@ class _ContentArtState extends State<ContentArt> {
     if (content == null) {
       _loaders = [_NoSourceLoader(this)];
     } else if (content is Song) {
-      _loaders = [_SongArtSourceLoader(
-        state: this,
-        song: content,
-        size: widget.size,
-      )];
+      _loaders = [
+        _SongArtSourceLoader(
+          state: this,
+          song: content,
+          size: widget.size,
+        ),
+      ];
     } else if (content is Album) {
-      _loaders = [_SongArtSourceLoader(
-        state: this,
-        song: content.firstSong,
-        size: widget.size,
-      )];
+      _loaders = [
+        _SongArtSourceLoader(
+          state: this,
+          song: content.firstSong,
+          size: widget.size,
+        ),
+      ];
     } else if (content is Playlist) {
       final songs = content.songs;
       final size = _getSize(true);
@@ -709,37 +718,48 @@ class _ContentArtState extends State<ContentArt> {
           );
           _loaders = List.generate(4, (index) => loader);
           break;
-        case 2: 
-          _loaders = List.generate(2, (index) => _SongArtSourceLoader(
-            state: this,
-            song: songs[index],
-            size: size,
-          ));
+        case 2:
+          _loaders = List.generate(
+            2,
+            (index) => _SongArtSourceLoader(
+              state: this,
+              song: songs[index],
+              size: size,
+            ),
+          );
           _loaders.addAll(_loaders.reversed.toList());
           break;
         case 3:
-          _loaders = List.generate(3, (index) => _SongArtSourceLoader(
-            state: this,
-            song: songs[index],
-            size: size,
-          ));
+          _loaders = List.generate(
+            3,
+            (index) => _SongArtSourceLoader(
+              state: this,
+              song: songs[index],
+              size: size,
+            ),
+          );
           _loaders.add(_loaders[0]);
           break;
         case 4:
         default:
-          _loaders = List.generate(4, (index) => _SongArtSourceLoader(
-            state: this,
-            song: songs[index],
-            size: size,
-          ));
+          _loaders = List.generate(
+            4,
+            (index) => _SongArtSourceLoader(
+              state: this,
+              song: songs[index],
+              size: size,
+            ),
+          );
           break;
       }
     } else if (content is Artist) {
-      _loaders = [_ArtistGeniusArtSourceLoader(
-        state: this,
-        artist: content,
-        size: widget.size,
-      )];
+      _loaders = [
+        _ArtistGeniusArtSourceLoader(
+          state: this,
+          artist: content,
+          size: widget.size,
+        ),
+      ];
     } else {
       throw UnimplementedError();
     }
@@ -751,15 +771,17 @@ class _ContentArtState extends State<ContentArt> {
   bool _delivered = false;
   void _onSourceLoad(_SourceLoading loading) {
     if (mounted) {
-      if (loading == _SourceLoading.notLoading)
+      if (loading == _SourceLoading.notLoading) {
         _deliverLoad();
-      setState(() { });
+      }
+      setState(() {});
     }
   }
 
   Widget frameBuilder(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
-    if (frame == 0 && loaded)
+    if (frame == 0 && loaded) {
       _deliverLoad();
+    }
     return child;
   }
 
@@ -790,31 +812,33 @@ class _ContentArtState extends State<ContentArt> {
         /// And the third is for the called above `setState`, because calling it
         /// will cause image to be rebuilt to trigger [AnimatiedSwitcher] animation.
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-          if (!mounted)
-            return;
-          final object = globalKey!.currentContext!.findRenderObject()!;
-          final RenderRepaintBoundary boundary;
-          if (object is RenderStack) {
-            boundary = (object.lastChild! as RenderAnimatedOpacity).child! as RenderRepaintBoundary;
-          } else if (object is RenderPositionedBox) {
-            boundary = object.child! as RenderRepaintBoundary;
-          } else {
-            throw StateError('');
-          }
-          final image = await boundary.toImage();
-          widget.onLoad!(image);
-        });
-        });
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+              if (!mounted) {
+                return;
+              }
+              final object = globalKey!.currentContext!.findRenderObject()!;
+              final RenderRepaintBoundary boundary;
+              if (object is RenderStack) {
+                boundary = (object.lastChild! as RenderAnimatedOpacity).child! as RenderRepaintBoundary;
+              } else if (object is RenderPositionedBox) {
+                boundary = object.child! as RenderRepaintBoundary;
+              } else {
+                throw StateError('');
+              }
+              final image = await boundary.toImage();
+              widget.onLoad!(image);
+            });
+          });
         });
       }
     }
   }
 
   void _update() {
-    for (final loader in _loaders)
+    for (final loader in _loaders) {
       loader.cancel();
+    }
     _init();
   }
 
@@ -825,8 +849,9 @@ class _ContentArtState extends State<ContentArt> {
     final newPixelRatio = MediaQuery.of(context).devicePixelRatio;
     // Reload arts when on scoped storage, as they are using the pixel ratio size at the stage
     // of loading.
-    if (_useScopedStorage && _devicePixelRatio != null && _devicePixelRatio != newPixelRatio)
+    if (_useScopedStorage && _devicePixelRatio != null && _devicePixelRatio != newPixelRatio) {
       _update();
+    }
     _devicePixelRatio = newPixelRatio;
     super.didChangeDependencies();
   }
@@ -834,26 +859,26 @@ class _ContentArtState extends State<ContentArt> {
   @override
   void didUpdateWidget(covariant ContentArt oldWidget) {
     final oldContent = oldWidget.source?._content;
-    final content =  widget.source?._content;
+    final content = widget.source?._content;
     if (oldContent != content ||
         oldContent is Album && content is Album && oldContent.firstSong != content.firstSong ||
-        oldContent is Playlist && content is Playlist && !listEquals(oldContent.songIds, content.songIds))
+        oldContent is Playlist && content is Playlist && !listEquals(oldContent.songIds, content.songIds)) {
       _update();
+    }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
-  void dispose() { 
-    for (final loader in _loaders)
+  void dispose() {
+    for (final loader in _loaders) {
       loader.cancel();
+    }
     super.dispose();
   }
 
   /// Returns a size for image.
   double? _getSize([bool forPlaylist = false]) {
-    return forPlaylist && widget.size != null
-      ? widget.size! / 2
-      : widget.size;
+    return forPlaylist && widget.size != null ? widget.size! / 2 : widget.size;
   }
 
   /// Returns a cache size for image.
@@ -875,11 +900,7 @@ class _ContentArtState extends State<ContentArt> {
   Widget _buildDefault([bool forPlaylist = false, int? cacheSize]) {
     final size = _getSize(forPlaylist);
     cacheSize ??= _getCacheSize(forPlaylist, size);
-    final int? _cacheSize = (
-      cacheSize == null
-      ? cacheSize
-      : cacheSize * widget.assetScale
-    )?.round();
+    final int? _cacheSize = (cacheSize == null ? cacheSize : cacheSize * widget.assetScale)?.round();
     Widget child;
     if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
       // We should show the art now.
@@ -901,9 +922,7 @@ class _ContentArtState extends State<ContentArt> {
       }
     } else {
       child = Image.asset(
-        widget.assetHighRes
-            ? Constants.Assets.ASSET_LOGO_MASK
-            : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
+        widget.assetHighRes ? Constants.Assets.ASSET_LOGO_MASK : Constants.Assets.ASSET_LOGO_THUMB_INAPP,
         width: size,
         height: size,
         cacheWidth: _cacheSize,
@@ -1033,8 +1052,7 @@ class _ContentArtState extends State<ContentArt> {
                 child: _delivered ? child : Opacity(opacity: 0, child: child),
               ),
             ),
-          if (currentIndicator != null)
-            Center(child: currentIndicator),
+          if (currentIndicator != null) Center(child: currentIndicator),
         ],
       ),
     );
@@ -1049,8 +1067,8 @@ class AlbumArtRotating extends StatefulWidget {
     required this.source,
     required this.initRotating,
     this.initRotation = 0.0,
-  }) : assert(initRotation >= 0 && initRotation <= 1.0),
-       super(key: key);
+  })  : assert(initRotation >= 0 && initRotation <= 1.0),
+        super(key: key);
 
   final ContentArtSource source;
 

@@ -23,7 +23,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   static const fadeDuration = Duration(milliseconds: 300);
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     controller = AnimationController(vsync: this, duration: fadeDuration);
     MusicPlayer.instance.pause();
@@ -39,7 +39,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     timer?.cancel();
     controller.dispose();
     player.dispose();
@@ -91,8 +91,8 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
                       onTap: _handleTap,
                       child: AnimatedBuilder(
                         animation: controller,
-                          child: RepaintBoundary(
-                            child: Container(
+                        child: RepaintBoundary(
+                          child: Container(
                             alignment: Alignment.center,
                             color: Colors.black38,
                             child: IgnorePointer(
@@ -126,7 +126,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
                 color: Colors.white,
                 duration: const Duration(seconds: 215),
                 player: player,
-              )
+              ),
             ),
           ],
         ),
@@ -143,23 +143,20 @@ void _openStandalonePlayerRoute(BuildContext context) {
       transitionSettings: RouteTransitionSettings(opaque: false, transitionDuration: const Duration(milliseconds: 500)),
       builder: (context) => _StandalonePlayer(),
       animationBuilder: (context, animation, secondaryAnimation, child) {
-          final fadeAnimation = CurvedAnimation(
+        final fadeAnimation = CurvedAnimation(
           parent: animation,
-          curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic), 
-          reverseCurve: const Interval(0.0, 0.8, curve: Curves.easeInCubic), 
+          curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
+          reverseCurve: const Interval(0.0, 0.8, curve: Curves.easeInCubic),
         );
-        final routeScaleAnimation = Tween(
-          begin: 0.87,
-          end: 1.0
-        ).animate(CurvedAnimation(
+        final routeScaleAnimation = Tween(begin: 0.87, end: 1.0).animate(CurvedAnimation(
           parent: animation,
-          curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic), 
-          reverseCurve: const Interval(0.3, 1.0, curve: Curves.easeInCubic), 
+          curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+          reverseCurve: const Interval(0.3, 1.0, curve: Curves.easeInCubic),
         ));
         final routeFadeAnimation = CurvedAnimation(
           parent: animation,
-          curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic), 
-          reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeInCubic), 
+          curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic),
+          reverseCurve: const Interval(0.4, 1.0, curve: Curves.easeInCubic),
         );
         final value = fadeAnimation.value * 20.0;
         return AnimatedBuilder(
@@ -174,7 +171,9 @@ void _openStandalonePlayerRoute(BuildContext context) {
                       Navigator.of(context).pop();
                     }
                   },
-                  child: Container(color: ThemeControl.instance.theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value)),
+                  child: Container(
+                    color: ThemeControl.instance.theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value),
+                  ),
                 ),
                 BackdropFilter(
                   filter: ImageFilter.blur(
@@ -185,7 +184,8 @@ void _openStandalonePlayerRoute(BuildContext context) {
                     scale: routeScaleAnimation,
                     child: FadeTransition(
                       opacity: routeFadeAnimation,
-                      child: RepaintBoundary(// TODO: test RepaintBoundaries in this file
+                      child: RepaintBoundary(
+                        // TODO: test RepaintBoundaries in this file
                         child: child,
                       ),
                     ),
@@ -193,9 +193,9 @@ void _openStandalonePlayerRoute(BuildContext context) {
                 ),
               ],
             );
-          }
+          },
         );
-      }
+      },
     ),
   );
 }

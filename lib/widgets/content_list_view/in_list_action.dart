@@ -14,8 +14,8 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  }) : horizontalPadding = kSongTileHorizontalPadding,
-       super(key: key);
+  })  : horizontalPadding = kSongTileHorizontalPadding,
+        super(key: key);
 
   /// Creats action with paddings for persistent queue list.
   const InListContentAction.persistentQueue({
@@ -27,8 +27,8 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  }) : horizontalPadding = kPersistentQueueTileHorizontalPadding,
-       super(key: key);
+  })  : horizontalPadding = kPersistentQueueTileHorizontalPadding,
+        super(key: key);
 
   final IconData icon;
   final String text;
@@ -62,13 +62,13 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
   bool get enabled => widget.onTap != null;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     if (enabled) {
       controller.forward();
-    } 
+    }
   }
-  
+
   @override
   void didUpdateWidget(covariant InListContentAction oldWidget) {
     previousColor = oldWidget.color;
@@ -126,7 +126,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                 ),
                 Expanded(
                   child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
+                    padding: const EdgeInsets.only(left: 16.0),
                     child: Text(
                       widget.text,
                       overflow: TextOverflow.ellipsis,
@@ -145,7 +145,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
 
 class CreatePlaylistInListAction extends StatefulWidget {
   const CreatePlaylistInListAction({
-    Key? key ,
+    Key? key,
     this.enabled = true,
   }) : super(key: key);
 

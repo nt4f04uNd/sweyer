@@ -69,8 +69,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           return controller.value == 0.0 &&
               // when on another drag on the right to next tab
               (event.delta.dx < 0.0 ||
-                // when player route is opened, for example
-                !HomeRouter.instance.drawerCanBeOpened);
+                  // when player route is opened, for example
+                  !HomeRouter.instance.drawerCanBeOpened);
         },
         onBarrierTap: controller.close,
         barrier: Container(color: Colors.black26),

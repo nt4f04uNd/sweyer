@@ -16,7 +16,7 @@ class Seekbar extends StatefulWidget {
   }) : super(key: key);
 
   /// Color of the actove slider part.
-  /// 
+  ///
   /// If non specified [ColorScheme.primary] color will be used.
   final Color? color;
 
@@ -119,8 +119,10 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
 
   void _handleChanged(double newValue) {
     setState(() {
-      if (animationController.status != AnimationStatus.completed && animationController.status != AnimationStatus.forward)
+      if (animationController.status != AnimationStatus.completed &&
+          animationController.status != AnimationStatus.forward) {
         animationController.forward();
+      }
       _localValue = newValue;
     });
   }

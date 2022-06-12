@@ -26,10 +26,10 @@ class ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(
-        fontSize: 16.0,
-        color: ThemeControl.instance.theme.hintColor,
-        fontWeight: FontWeight.w700,
-      ),
+            fontSize: 16.0,
+            color: ThemeControl.instance.theme.hintColor,
+            fontWeight: FontWeight.w700,
+          ),
       child: Container(
         color: color,
         padding: margin,
@@ -55,18 +55,19 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     this.selectionController,
     this.leading,
     this.trailing,
-  }) : _onlyCount = false, super(key: key);
+  })  : _onlyCount = false,
+        super(key: key);
 
   /// Creates a header that shows only count.
   const ContentListHeader.onlyCount({
     Key? key,
     this.contentType,
     required this.count,
-  }) : _onlyCount = true,
-       selectionController = null,
-       leading = null,
-       trailing = null,
-       super(key: key);
+  })  : _onlyCount = true,
+        selectionController = null,
+        leading = null,
+        trailing = null,
+        super(key: key);
 
   final Type? contentType;
 
@@ -95,7 +96,8 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         data: Theme.of(context).copyWith(
           splashFactory: NFListTileInkRipple.splashFactory,
         ),
-        child: Builder( // i need the proper context to pop the dialog
+        child: Builder(
+          // i need the proper context to pop the dialog
           builder: (context) => _RadioListTile<SortFeature>(
             title: Text(
               l10n.sortFeature<T>(feature as SortFeature<T>, contentType),
@@ -124,10 +126,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       closeButton: const SizedBox.shrink(),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: SortFeature
-          .getValuesForContent<T>(contentType)
-          .map((el) => buildItem(el))
-          .toList(),
+        children: SortFeature.getValuesForContent<T>(contentType).map((el) => buildItem(el)).toList(),
       ),
     );
   }
@@ -161,61 +160,60 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         right: 7.0,
       ),
       trailing: _onlyCount
-        ? null
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (trailing != null)
-                trailing!,
-              Flexible(
-                child: _buildCount(l10n, textStyle),
-              ),
-            ],
-          ),
-      leading: _onlyCount ? _buildCount(l10n, textStyle) : Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NFListTileInkRipple.splashFactory,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ContentListHeaderAction(
-              icon: Icon(sort.orderAscending 
-                ? Icons.north_rounded
-                : Icons.south_rounded),
-              onPressed: () {
-                ContentControl.instance.sort(
-                  contentType: contentType,
-                  sort: sort.copyWith(orderAscending: !sort.orderAscending),
-                );
-              },
-            ),
-            Flexible(
-              child: InkResponse(
-                onTap: () => _handleTap(context),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4.0,
-                    vertical: 2.0,
-                  ),
-                  child: Text(
-                    l10n.sortFeature<T>(sort.feature, contentType),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                    style: textStyle,
-                  ),
+          ? null
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (trailing != null) trailing!,
+                Flexible(
+                  child: _buildCount(l10n, textStyle),
                 ),
+              ],
+            ),
+      leading: _onlyCount
+          ? _buildCount(l10n, textStyle)
+          : Theme(
+              data: Theme.of(context).copyWith(
+                splashFactory: NFListTileInkRipple.splashFactory,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ContentListHeaderAction(
+                    icon: Icon(sort.orderAscending ? Icons.north_rounded : Icons.south_rounded),
+                    onPressed: () {
+                      ContentControl.instance.sort(
+                        contentType: contentType,
+                        sort: sort.copyWith(orderAscending: !sort.orderAscending),
+                      );
+                    },
+                  ),
+                  Flexible(
+                    child: InkResponse(
+                      onTap: () => _handleTap(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0,
+                          vertical: 2.0,
+                        ),
+                        child: Text(
+                          l10n.sortFeature<T>(sort.feature, contentType),
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                          style: textStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (leading != null) leading!
+                ],
               ),
             ),
-            if (leading != null)
-              leading!
-          ],
-        ),
-      ),
     );
-    if (selectionController == null)
+    if (selectionController == null) {
       return child;
+    }
     return IgnoreInSelection(
       controller: selectionController!,
       child: child,

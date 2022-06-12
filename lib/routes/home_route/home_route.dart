@@ -64,13 +64,13 @@ class _InitialRouteState extends State<InitialRoute> {
                   );
                 }
                 return StreamBuilder<bool>(
-                  stream: ThemeControl.instance.themeChaning,
-                  builder: (context, snapshot) {
-                    if (snapshot.data == true)
-                      return const SizedBox.shrink();
-                    return const Home();
-                  }
-                );
+                    stream: ThemeControl.instance.themeChaning,
+                    builder: (context, snapshot) {
+                      if (snapshot.data == true) {
+                        return const SizedBox.shrink();
+                      }
+                      return const Home();
+                    });
               },
             );
           }
@@ -99,9 +99,7 @@ class HomeState extends State<Home> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Defer back button dispatching to the child router
-    _backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher!
-        .createChildBackButtonDispatcher();
+    _backButtonDispatcher = Router.of(context).backButtonDispatcher!.createChildBackButtonDispatcher();
   }
 
   @override
@@ -132,13 +130,14 @@ class HomeState extends State<Home> {
       ),
     );
   }
-  
+
   Future<bool> _onBackPressed() async {
     if (Settings.confirmExitingWithBackButton.get()) {
       final now = clock.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
+      if (_lastBackPressTime == null ||
+          now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;
@@ -217,8 +216,9 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
   bool _fetching = false;
 
   Future<void> _handlePermissionRequest() async {
-    if (_fetching)
+    if (_fetching) {
       return;
+    }
     setState(() {
       _fetching = true;
     });

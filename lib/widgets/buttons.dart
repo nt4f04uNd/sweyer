@@ -75,7 +75,7 @@ enum AppButtonType {
 }
 
 /// A button with text and icon, used to start queue playback.
-/// 
+///
 /// Also used in:
 ///  * [PlayQueueButton]
 ///  * [ShuffleQueueButton]
@@ -94,9 +94,9 @@ class AppButton extends StatefulWidget {
     this.loading = false,
     this.verticalPadding = 0.0,
     this.horizontalPadding = kHorizontalPadding,
-  }) : type = AppButtonType.elevated,
-       popResult = _emptyPopResult,
-       super(key: key);
+  })  : type = AppButtonType.elevated,
+        popResult = _emptyPopResult,
+        super(key: key);
 
   const AppButton.flat({
     Key? key,
@@ -112,9 +112,9 @@ class AppButton extends StatefulWidget {
     this.loading = false,
     this.verticalPadding = 0.0,
     this.horizontalPadding = kHorizontalPadding,
-  }) : type = AppButtonType.flat,
-       popResult = _emptyPopResult, 
-       super(key: key);
+  })  : type = AppButtonType.flat,
+        popResult = _emptyPopResult,
+        super(key: key);
 
   /// Will automatically pop using its context, [onPressed] still will be called.
   const AppButton.pop({
@@ -160,11 +160,8 @@ class AppButton extends StatefulWidget {
 }
 
 class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMixin {
-  late final controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 240)
-  )
-  ..value = disabled ? 0.0 : 1.0;
+  late final controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 240))
+    ..value = disabled ? 0.0 : 1.0;
   late final colorAnimation = ColorTween(
     begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
     end: widget.color ?? defaultColor,
@@ -202,15 +199,17 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
     }
   }
 
-  VoidCallback? get onPressed => !widget.pop ? widget.onPressed : () {
-    Navigator.pop(context, widget.popResult);
-    widget.onPressed?.call();
-  };
+  VoidCallback? get onPressed => !widget.pop
+      ? widget.onPressed
+      : () {
+          Navigator.pop(context, widget.popResult);
+          widget.onPressed?.call();
+        };
 
   EdgeInsets get padding => EdgeInsets.symmetric(
-    vertical: widget.verticalPadding,
-    horizontal: widget.horizontalPadding,
-  );
+        vertical: widget.verticalPadding,
+        horizontal: widget.horizontalPadding,
+      );
 
   @override
   void didUpdateWidget(covariant AppButton oldWidget) {
@@ -223,7 +222,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     controller.dispose();
     super.dispose();
   }
@@ -264,20 +263,22 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
               valueColor: AlwaysStoppedAnimation(Colors.white),
             ),
           )
-        : widget.icon == null ? _buildText() : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              widget.icon!,
-              const SizedBox(width: 6.0),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 1.0),
-                  child: _buildText(),
-                ),
-              ),
-              const SizedBox(width: 8.0),
-            ],
-          );
+        : widget.icon == null
+            ? _buildText()
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  widget.icon!,
+                  const SizedBox(width: 6.0),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 1.0),
+                      child: _buildText(),
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                ],
+              );
   }
 
   Widget _buildElevated() {
@@ -285,51 +286,49 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       child: _buildChild(),
       onPressed: onPressed,
       style: const ElevatedButton(child: null, onPressed: null).defaultStyleOf(context).copyWith(
-        animationDuration: Duration.zero,
-        backgroundColor: MaterialStateProperty.all(colorAnimation.value),
-        padding: MaterialStateProperty.all(padding),
-        shape: MaterialStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-          )
-        ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
-        overlayColor: MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
-        splashFactory: NFListTileInkRipple.splashFactory,
-        shadowColor: MaterialStateProperty.all(Colors.transparent),
-        textStyle: MaterialStateProperty.all(TextStyle(
-          fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
-          fontWeight: widget.fontWeight,
-          fontSize: widget.fontSize,
-        )),
-      ),
+            animationDuration: Duration.zero,
+            backgroundColor: MaterialStateProperty.all(colorAnimation.value),
+            padding: MaterialStateProperty.all(padding),
+            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+            )),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
+            overlayColor:
+                MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
+            splashFactory: NFListTileInkRipple.splashFactory,
+            shadowColor: MaterialStateProperty.all(Colors.transparent),
+            textStyle: MaterialStateProperty.all(TextStyle(
+              fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
+              fontWeight: widget.fontWeight,
+              fontSize: widget.fontSize,
+            )),
+          ),
     );
   }
 
   Widget _buildFlat() {
-     return TextButton(
+    return TextButton(
       child: _buildChild(),
       onPressed: onPressed,
       style: const TextButton(child: SizedBox.shrink(), onPressed: null).defaultStyleOf(context).copyWith(
-        animationDuration: Duration.zero,
-        padding: MaterialStateProperty.all(padding),
-        shape: MaterialStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-          )
-        ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
-        overlayColor: MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
-        splashFactory: NFListTileInkRipple.splashFactory,
-        shadowColor: MaterialStateProperty.all(Colors.transparent),
-        textStyle: MaterialStateProperty.all(TextStyle(
-          fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
-          fontWeight: widget.fontWeight,
-          fontSize: widget.fontSize,
-        )),
-      ),
+            animationDuration: Duration.zero,
+            padding: MaterialStateProperty.all(padding),
+            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+            )),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
+            overlayColor:
+                MaterialStateProperty.all(widget.splashColor ?? Constants.Theme.glowSplashColorOnContrast.auto),
+            splashFactory: NFListTileInkRipple.splashFactory,
+            shadowColor: MaterialStateProperty.all(Colors.transparent),
+            textStyle: MaterialStateProperty.all(TextStyle(
+              fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
+              fontWeight: widget.fontWeight,
+              fontSize: widget.fontSize,
+            )),
+          ),
     );
   }
 }
@@ -468,9 +467,7 @@ class HeartButton extends StatelessWidget {
       active: active,
       duration: const Duration(milliseconds: 240),
       icon: Icon(
-        active
-          ? Icons.favorite_rounded
-          : Icons.favorite_outline_rounded,
+        active ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
       ),
       tooltip: tooltip,
       color: color ?? Colors.redAccent,

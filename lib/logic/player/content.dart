@@ -53,7 +53,7 @@ extension QuickActionSerialization on QuickAction {
 ///   return true;
 /// }());
 /// ```
-/// 
+///
 V contentPick<T extends Content, V>({
   Type? contentType,
   required V song,
@@ -72,8 +72,9 @@ V contentPick<T extends Content, V>({
     case Artist:
       return artist;
     case Content:
-      if (fallback != null)
+      if (fallback != null) {
         return fallback;
+      }
       throw UnimplementedError();
     default:
       throw UnimplementedError();
@@ -93,8 +94,9 @@ V persistentQueuePick<T extends PersistentQueue, V>({
     case Playlist:
       return playlist;
     case Content:
-      if (fallback != null)
+      if (fallback != null) {
         return fallback;
+      }
       throw UnimplementedError();
     default:
       throw UnimplementedError();
@@ -117,7 +119,7 @@ class ContentMap<V> {
   Iterable<MapEntry<Type, V>> get entries => _map.entries;
 
   /// Returns a value per `T` [Content] from the map.
-  /// 
+  ///
   /// If [key] was explicitly provided, will use it instead.
   V? getValue<T extends Content>([Type? key]) {
     assert(
@@ -168,32 +170,31 @@ class ContentTuple {
     List<Playlist> playlists,
     List<Artist> artists,
   ) : assert(() {
-        // See contentPick documentation for why we need this.
-        contentPick<Song, void>(
-          song: null,
-          album: null,
-          playlist: null,
-          artist: null,
-        );
-        return true;
-      }()) {
-        _map.setValue<Song>(songs);
-        _map.setValue<Album>(albums);
-        _map.setValue<Playlist>(playlists);
-        _map.setValue<Artist>(artists);
-      }
+          // See contentPick documentation for why we need this.
+          contentPick<Song, void>(
+            song: null,
+            album: null,
+            playlist: null,
+            artist: null,
+          );
+          return true;
+        }()) {
+    _map.setValue<Song>(songs);
+    _map.setValue<Album>(albums);
+    _map.setValue<Playlist>(playlists);
+    _map.setValue<Artist>(artists);
+  }
 
   List<Song> get songs => _map.getValue<Song>()! as List<Song>;
-  List<Album> get albums => _map.getValue<Album>()! as List<Album> ;
+  List<Album> get albums => _map.getValue<Album>()! as List<Album>;
   List<Playlist> get playlists => _map.getValue<Playlist>()! as List<Playlist>;
   List<Artist> get artists => _map.getValue<Artist>()! as List<Artist>;
 
   List<T> get<T extends Content>([Type? contentType]) => _map.getValue<T>(contentType)! as List<T>;
 
   List<Content> get merged => [
-    for (final content in _map.values)
-      ...content,
-  ];
+        for (final content in _map.values) ...content,
+      ];
 
   bool get empty => _map.values.every((element) => element.isEmpty);
   bool get notEmpty => _map.values.any((element) => element.isNotEmpty);
@@ -273,8 +274,9 @@ class ContentControl extends Control {
 
   /// Emit event to [onContentChange].
   void emitContentChange() {
-    if (!disposed.value)
+    if (!disposed.value) {
       _contentSubject.add(null);
+    }
   }
 
   // /// Recently pressed quick action.
@@ -380,7 +382,7 @@ class ContentControl extends Control {
   //     ShortcutItem(type: QuickAction.playRecent.value, localizedTitle: staticl10n.playRecent, icon: 'round_play_arrow_white_36')
   //   ]);
   // }
-  
+
   /// Returns content of specified type.
   List<T> getContent<T extends Content>({
     Type? contentType,
@@ -406,19 +408,20 @@ class ContentControl extends Control {
 
   /// Returns content of specified type with ID.
   T? getContentById<T extends Content>(int id, [Type? contentType]) {
-    if ((contentType ?? T) == Album)
+    if ((contentType ?? T) == Album) {
       return state.albums[id] as T?;
+    }
     return getContent<T>(contentType: contentType).firstWhereOrNull((el) => el.id == id);
   }
 
   /// Refetches all the content.
   Future<void> refetchAll() async {
     await Future.wait([
-      for (final contentType in Content.enumerate())
-        refetch(contentType: contentType),
+      for (final contentType in Content.enumerate()) refetch(contentType: contentType),
     ]);
-    if (!disposed.value)
+    if (!disposed.value) {
       await MusicPlayer.instance.restoreLastSong();
+    }
   }
 
   /// Refetches content by the `T` content type.
@@ -430,8 +433,9 @@ class ContentControl extends Control {
     bool updateQueues = true,
     bool emitChangeEvent = true,
   }) async {
-    if (disposed.value)
+    if (disposed.value) {
       return;
+    }
     await contentPick<T, AsyncCallback>(
       contentType: contentType,
       song: () async {
@@ -485,7 +489,7 @@ class ContentControl extends Control {
   }
 
   /// Searches for content by given [query] and the `T` content type.
-  List<T> search<T extends Content>(String query, { Type? contentType }) {
+  List<T> search<T extends Content>(String query, {Type? contentType}) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
     final words = query.split(' ');
@@ -499,25 +503,31 @@ class ContentControl extends Control {
     /// Splits string by spaces, or dashes, or bar, or paranthesis
     final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
     final l10n = staticl10n;
+
     /// Checks whether a [string] is abbreviation for the [query].
     /// For example: "big baby tape - bbt"
     bool isAbbreviation(String string) {
-      return string.toLowerCase()
-            .split(abbreviationRegexp)
-            .map((word) => word.isNotEmpty ? word[0] : '')
-            .join()
-            .contains(query);
+      return string
+          .toLowerCase()
+          .split(abbreviationRegexp)
+          .map((word) => word.isNotEmpty ? word[0] : '')
+          .join()
+          .contains(query);
     }
+
     final contentInterable = contentPick<T, ValueGetter<Iterable<T>>>(
       contentType: contentType,
       song: () {
         return state.allSongs.songs.where((song) {
           // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            song.title.toLowerCase().contains(word) ||
-            ContentUtils.localizedArtist(song.artist, l10n).toLowerCase().contains(word) ||
-            (song.album?.toLowerCase().contains(word) ?? false)
-          ).toList();
+          final wordsTest = words
+              .map<bool>(
+                (word) =>
+                    song.title.toLowerCase().contains(word) ||
+                    ContentUtils.localizedArtist(song.artist, l10n).toLowerCase().contains(word) ||
+                    (song.album?.toLowerCase().contains(word) ?? false),
+              )
+              .toList();
           final fullQuery = wordsTest.every((e) => e);
           // Abbreviation search
           final abbreviation = isAbbreviation(song.title);
@@ -527,10 +537,13 @@ class ContentControl extends Control {
       album: () {
         return state.albums.values.where((album) {
           // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            ContentUtils.localizedArtist(album.artist, l10n).toLowerCase().contains(word) ||
-            album.album.toLowerCase().contains(word),
-          ).toList();
+          final wordsTest = words
+              .map<bool>(
+                (word) =>
+                    ContentUtils.localizedArtist(album.artist, l10n).toLowerCase().contains(word) ||
+                    album.album.toLowerCase().contains(word),
+              )
+              .toList();
           final fullQuery = wordsTest.every((e) => e);
           // Abbreviation search
           final abbreviation = isAbbreviation(album.album);
@@ -540,9 +553,11 @@ class ContentControl extends Control {
       playlist: () {
         return state.playlists.where((playlist) {
           // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            playlist.name.toLowerCase().contains(word),
-          ).toList();
+          final wordsTest = words
+              .map<bool>(
+                (word) => playlist.name.toLowerCase().contains(word),
+              )
+              .toList();
           final fullQuery = wordsTest.every((e) => e);
           // Abbreviation search
           final abbreviation = isAbbreviation(playlist.name);
@@ -552,9 +567,11 @@ class ContentControl extends Control {
       artist: () {
         return state.artists.where((artist) {
           // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            artist.artist.toLowerCase().contains(word),
-          ).toList();
+          final wordsTest = words
+              .map<bool>(
+                (word) => artist.artist.toLowerCase().contains(word),
+              )
+              .toList();
           final fullQuery = wordsTest.every((e) => e);
           // Abbreviation search
           final abbreviation = isAbbreviation(artist.artist);
@@ -567,7 +584,11 @@ class ContentControl extends Control {
 
   /// Sorts songs, albums, etc.
   /// See [ContentState.sorts].
-  void sort<T extends Content>({ Type? contentType, Sort<T>? sort, bool emitChangeEvent = true }) {
+  void sort<T extends Content>({
+    Type? contentType,
+    Sort<T>? sort,
+    bool emitChangeEvent = true,
+  }) {
     final sorts = state.sorts;
     sort ??= sorts.getValue<T>(contentType)! as Sort<T>;
     contentPick<T, VoidCallback>(
@@ -656,8 +677,9 @@ class ContentControl extends Control {
     songs = _ensureSongsAreSource(songs);
 
     void _removeFromState() {
-      for (final song in songs)
+      for (final song in songs) {
         state.allSongs.byId.remove(song.id);
+      }
       if (songs.isEmpty) {
         dispose();
       } else {
@@ -729,7 +751,7 @@ class ContentControl extends Control {
       // * `)?`: close optional capturing group\
       // * `$`: match string end
       final regexp = RegExp(name.toString() + r'( \(([^)]+)\))?$');
-      int? max; 
+      int? max;
       for (final el in state.playlists) {
         final match = regexp.firstMatch(el.name);
         if (match != null) {
@@ -744,7 +766,7 @@ class ContentControl extends Control {
         name = '$name (${max + 1})';
       }
     }
-  
+
     return name;
   }
 
@@ -765,30 +787,44 @@ class ContentControl extends Control {
       await ContentChannel.instance.renamePlaylist(playlist, name);
       await refetchSongsAndPlaylists();
       return name;
-    } on ContentChannelException catch(ex) {
-      if (ex == ContentChannelException.playlistNotExists)
+    } on ContentChannelException catch (ex) {
+      if (ex == ContentChannelException.playlistNotExists) {
         return null;
+      }
       rethrow;
     }
   }
 
   /// Inserts songs in the playlist at the given [index].
-  Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
+  Future<void> insertSongsInPlaylist({
+    required int index,
+    required List<Song> songs,
+    required Playlist playlist,
+  }) async {
     await ContentChannel.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Moves song in playlist, returned value indicates whether the operation was successful.
-  Future<void> moveSongInPlaylist({ required Playlist playlist, required int from, required int to, bool emitChangeEvent = true }) async {
+  Future<void> moveSongInPlaylist({
+    required Playlist playlist,
+    required int from,
+    required int to,
+    bool emitChangeEvent = true,
+  }) async {
     if (from != to) {
       await ContentChannel.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
-      if (emitChangeEvent)
+      if (emitChangeEvent) {
         await refetchSongsAndPlaylists();
+      }
     }
   }
 
   /// Removes songs from playlist at given [indexes].
-  Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
+  Future<void> removeFromPlaylistAt({
+    required List<int> indexes,
+    required Playlist playlist,
+  }) async {
     await ContentChannel.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
@@ -812,7 +848,6 @@ class ContentControl extends Control {
   }
 }
 
-
 class ContentUtils {
   ContentUtils._();
 
@@ -829,8 +864,9 @@ class ContentUtils {
 
   /// Joins list with the [dot].
   static String joinDot(List list) {
-    if (list.isEmpty)
+    if (list.isEmpty) {
       return '';
+    }
     var result = list.first;
     for (int i = 1; i < list.length; i++) {
       final string = list[i].toString();
@@ -843,7 +879,7 @@ class ContentUtils {
 
   /// Appends dot and year to [string].
   static String appendYearWithDot(String string, int year) {
-    return '$string $dot $year'; 
+    return '$string $dot $year';
   }
 
   /// Checks whether a [Song] is currently playing.
@@ -856,7 +892,7 @@ class ContentUtils {
   static bool originIsCurrent(SongOrigin origin) {
     final queues = QueueControl.instance.state;
     return queues.type == QueueType.origin && origin == queues.origin ||
-           queues.type != QueueType.origin && origin == PlaybackControl.instance.currentSongOrigin;
+        queues.type != QueueType.origin && origin == PlaybackControl.instance.currentSongOrigin;
   }
 
   /// Returns a default icon for a [Content].
@@ -864,7 +900,7 @@ class ContentUtils {
     return contentPick<T, IconData>(
       contentType: contentType,
       song: Song.icon,
-      album: Album.icon, 
+      album: Album.icon,
       playlist: Playlist.icon,
       artist: Artist.icon,
     );
@@ -875,7 +911,7 @@ class ContentUtils {
     return contentPick<T, String>(
       contentType: contentType,
       song: 'song',
-      album: 'album', 
+      album: 'album',
       playlist: 'playlist',
       artist: 'artist',
     );
@@ -1045,8 +1081,8 @@ class ContentUtils {
   /// If [idMap] is null, [ContentState.idMap] will be used.
   static int getSourceId(int id, {required SongOrigin? origin, IdMap? idMap}) {
     return id < 0
-      ? (idMap ?? QueueControl.instance.state.idMap)[IdMapKey(id: id, originEntry: origin?.toSongOriginEntry())]!
-      : id;
+        ? (idMap ?? QueueControl.instance.state.idMap)[IdMapKey(id: id, originEntry: origin?.toSongOriginEntry())]!
+        : id;
   }
 
   /// Checks the [song] for being a duplicate within the [origin], and if
@@ -1060,7 +1096,7 @@ class ContentUtils {
   /// The function asserts that.
   ///
   /// Marks the queue as dirty, so the next [setQueue] will save it.
-  /// 
+  ///
   /// The returned value indicates whether the duplicate song was found and
   /// [source] was changed.
   static bool deduplicateSong({
@@ -1072,7 +1108,7 @@ class ContentUtils {
       final sourceSong = ContentControl.instance.state.allSongs.byId.get(song.sourceId);
       if (identical(sourceSong, song)) {
         throw ArgumentError(
-          "Tried to handle duplicate on the source song in `allSongs`. This may lead " 
+          "Tried to handle duplicate on the source song in `allSongs`. This may lead "
           "to that the source song ID is lost, copy the song first",
         );
       }
@@ -1082,7 +1118,7 @@ class ContentUtils {
       final sameSong = list.firstWhereOrNull((el) => identical(el, song));
       if (identical(sameSong, song)) {
         throw ArgumentError(
-          "The provided `song` is contained in the given `list`. This is incorrect " 
+          "The provided `song` is contained in the given `list`. This is incorrect "
           "usage of this function, it should be called before the song is inserted to "
           "the `list`",
         );

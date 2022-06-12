@@ -18,9 +18,9 @@ class ArtistContentRoute<T extends Content> extends StatefulWidget {
 class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRoute<T>> {
   late StreamSubscription<void> _contentChangeSubscription;
   late List<T> list;
-  
+
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     list = widget.arguments.list;
     _contentChangeSubscription = ContentControl.instance.onContentChange.listen((event) {
@@ -37,7 +37,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     _contentChangeSubscription.cancel();
     super.dispose();
   }
@@ -92,70 +92,70 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
             list: list,
             selectionController: selectionController,
             leading: selectionRoute
-              ? ContentListHeader<T>.onlyCount(count: list.length)
-              : ContentListHeader<T>(
-                  count: list.length,
-                  selectionController: selectionController,
-                  trailing: Padding(
-                    padding: const EdgeInsets.only(bottom: 1.0),
-                    child: Row(
-                      children: [
-                        ContentListHeaderAction(
-                          icon: const Icon(Icons.shuffle_rounded),
-                          onPressed: () {
-                            contentPick<T, VoidCallback>(
-                              song: () {
-                                QueueControl.instance.setOriginQueue(
-                                  origin: artist,
-                                  shuffled: true,
-                                  songs: list as List<Song>,
-                                );
-                              },
-                              album: () {
-                                final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
-                                QueueControl.instance.setOriginQueue(
-                                  origin: artist,
-                                  shuffled: true,
-                                  songs: shuffleResult.songs,
-                                  shuffledSongs: shuffleResult.shuffledSongs,
-                                );
-                              },
-                              playlist: () => throw UnimplementedError(),
-                              artist: () => throw UnimplementedError(),
-                            )();
-                            MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                            MusicPlayer.instance.play();
-                            playerRouteController.open();
-                          },
-                        ),
-                        ContentListHeaderAction(
-                          icon: const Icon(Icons.play_arrow_rounded),
-                          onPressed: () {
-                            contentPick<T, VoidCallback>(
-                              song: () {
-                                QueueControl.instance.setOriginQueue(
-                                  origin: artist,
-                                  songs: list as List<Song>,
-                                );
-                              },
-                              album: () {
-                                QueueControl.instance.setOriginQueue(
-                                  origin: artist,
-                                  songs: ContentUtils.joinSongOrigins(list as List<Album>),
-                                );
-                              },
-                              playlist: () => throw UnimplementedError(),
-                              artist: () => throw UnimplementedError(),
-                            )();
-                            MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                            MusicPlayer.instance.play();
-                            playerRouteController.open();
-                          },
-                        ),
-                      ],
+                ? ContentListHeader<T>.onlyCount(count: list.length)
+                : ContentListHeader<T>(
+                    count: list.length,
+                    selectionController: selectionController,
+                    trailing: Padding(
+                      padding: const EdgeInsets.only(bottom: 1.0),
+                      child: Row(
+                        children: [
+                          ContentListHeaderAction(
+                            icon: const Icon(Icons.shuffle_rounded),
+                            onPressed: () {
+                              contentPick<T, VoidCallback>(
+                                song: () {
+                                  QueueControl.instance.setOriginQueue(
+                                    origin: artist,
+                                    shuffled: true,
+                                    songs: list as List<Song>,
+                                  );
+                                },
+                                album: () {
+                                  final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
+                                  QueueControl.instance.setOriginQueue(
+                                    origin: artist,
+                                    shuffled: true,
+                                    songs: shuffleResult.songs,
+                                    shuffledSongs: shuffleResult.shuffledSongs,
+                                  );
+                                },
+                                playlist: () => throw UnimplementedError(),
+                                artist: () => throw UnimplementedError(),
+                              )();
+                              MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                              MusicPlayer.instance.play();
+                              playerRouteController.open();
+                            },
+                          ),
+                          ContentListHeaderAction(
+                            icon: const Icon(Icons.play_arrow_rounded),
+                            onPressed: () {
+                              contentPick<T, VoidCallback>(
+                                song: () {
+                                  QueueControl.instance.setOriginQueue(
+                                    origin: artist,
+                                    songs: list as List<Song>,
+                                  );
+                                },
+                                album: () {
+                                  QueueControl.instance.setOriginQueue(
+                                    origin: artist,
+                                    songs: ContentUtils.joinSongOrigins(list as List<Album>),
+                                  );
+                                },
+                                playlist: () => throw UnimplementedError(),
+                                artist: () => throw UnimplementedError(),
+                              )();
+                              MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                              MusicPlayer.instance.play();
+                              playerRouteController.open();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
           ),
         ),
       ),

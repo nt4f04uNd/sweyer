@@ -38,33 +38,29 @@ Future<void> reportFlutterError(FlutterErrorDetails details) async {
   await FirebaseCrashlytics.instance.recordFlutterError(details);
 }
 
-
 class _WidgetsBindingObserver extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       /// This ensures that proper UI will be applied when activity is resumed.
-      /// 
+      ///
       /// See:
       /// * https://github.com/flutter/flutter/issues/21265
       /// * https://github.com/ryanheise/audio_service/issues/662
-      /// 
+      ///
       /// [SystemUiOverlayStyle.statusBarBrightness] is only honored on iOS,
       /// so I can safely use that here.
       final lastUi = SystemUiStyleController.instance.lastUi;
       SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
-        statusBarBrightness:
-          lastUi.statusBarBrightness == null ||
-          lastUi.statusBarBrightness == Brightness.dark
+        statusBarBrightness: lastUi.statusBarBrightness == null || lastUi.statusBarBrightness == Brightness.dark
             ? Brightness.light
-            : Brightness.dark
+            : Brightness.dark,
       ));
+
       /// Defensive programming if I some time later decide to add iOS support.
       SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
-        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark
-          ? Brightness.light
-          : Brightness.dark
+        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark ? Brightness.light : Brightness.dark,
       ));
     }
   }
@@ -125,6 +121,7 @@ class App extends StatefulWidget {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
+
     (AppRouter.instance.navigatorKey.currentContext as Element?)!.visitChildren(rebuild);
   }
 
@@ -161,7 +158,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       stream: ThemeControl.instance.themeChaning,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return NFTheme(
-        data: App.nfThemeData,
+          data: App.nfThemeData,
           child: MaterialApp.router(
             // showPerformanceOverlay: true,
             // checkerboardRasterCacheImages: true,

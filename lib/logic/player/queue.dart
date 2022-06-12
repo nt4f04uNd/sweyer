@@ -45,6 +45,7 @@ class Queue implements _QueueOperations<Song> {
   /// Queue songs.
   List<Song> get songs => _songs;
   List<Song> _songs;
+
   /// Sets songs.
   void setSongs(List<Song> value) {
     _songs = value;
@@ -236,8 +237,7 @@ enum PoolQueueType {
 /// Represents the state in [QueueControl].
 @visibleForTesting
 class QueuesState {
-  QueuesState(Map<PoolQueueType, Queue> pool)
-      : _pool = pool;
+  QueuesState(Map<PoolQueueType, Queue> pool) : _pool = pool;
 
   final Map<PoolQueueType, Queue> _pool;
 
@@ -246,8 +246,9 @@ class QueuesState {
   QueueType _type = QueueType.allSongs;
 
   PoolQueueType get _internalType {
-    if (shuffled)
+    if (shuffled) {
       return PoolQueueType.shuffled;
+    }
     return PoolQueueType.queue;
   }
 
@@ -259,6 +260,7 @@ class QueuesState {
     }
     return _pool[_internalType]!;
   }
+
   Queue get _queue => _pool[PoolQueueType.queue]!;
   Queue get _shuffledQueue => _pool[PoolQueueType.shuffled]!;
 
@@ -290,7 +292,7 @@ class QueuesState {
   /// The key is string, because [jsonEncode] and [jsonDecode] can only
   /// work with `Map<String, dynamic>`. Convertion to int doesn't seem to be a
   /// benefit, so keeping this as string.
-  /// 
+  ///
   /// See [ContentUtils.deduplicateSong] for discussion about the
   /// logic behind this.
   IdMap idMap = {};
@@ -400,9 +402,7 @@ class QueueControl extends Control {
       emitChangeEvent: false,
       modified: true,
       shuffled: false,
-      songs: state._shuffled
-          ? List.from(state._shuffledQueue.songs)
-          : null,
+      songs: state._shuffled ? List.from(state._shuffledQueue.songs) : null,
     );
   }
 
@@ -506,7 +506,7 @@ class QueueControl extends Control {
   ///
   /// If currently some song origin is already playing, will first save the current queue to
   /// [Song.origin] in its items.
-  /// 
+  ///
   /// In difference with [playNext], always traverses the playlist into [QueueType.arbitrary].
   void playOriginNext(SongOrigin origin) {
     final songs = origin.songs;
@@ -628,7 +628,7 @@ class QueueControl extends Control {
   /// * fall back to the first song in [QueueType.all]
   /// * fall back to [QueueType.all]
   /// * stop the playback
-  /// 
+  ///
   /// TODO: add return value ?
   void removeAllFromQueueAt(List<int> indexes) {
     final queues = state;
@@ -653,7 +653,7 @@ class QueueControl extends Control {
 
   /// A shorthand for setting [QueueType.searched].
   void setSearchedQueue(String query, List<Song> songs) {
-     setQueue(
+    setQueue(
       type: QueueType.searched,
       searchQuery: query,
       modified: false,
@@ -719,7 +719,7 @@ class QueueControl extends Control {
   ///   will be used as new queue, without being shuffled.
   /// * [shuffleFrom] is a list of songs to fall back when [shuffle]
   ///   thereafter will be set to `false`.
-  ///   
+  ///
   ///   By default it will also be shuffled and set to shuffled queue,
   ///   unless [songs] are specified, which will override this value.
   ///
@@ -767,15 +767,11 @@ class QueueControl extends Control {
       "It's invalid to set empty songs queue",
     );
     assert(
-      type != QueueType.origin ||
-      queues._origin != null ||
-      origin != null,
+      type != QueueType.origin || queues._origin != null || origin != null,
       "When you set `origin` queue and currently none set, you must provide the `origin` paramenter",
     );
     assert(
-      type != QueueType.searched ||
-      queues._searchQuery != null ||
-      searchQuery != null,
+      type != QueueType.searched || queues._searchQuery != null || searchQuery != null,
       "When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter",
     );
 
@@ -821,9 +817,7 @@ class QueueControl extends Control {
 
     if (shuffled) {
       queues._shuffledQueue.setSongs(
-        songs != null
-          ? copySongs(songs)
-          : Queue.shuffleSongs(shuffleFrom ?? queues.current.songs),
+        songs != null ? copySongs(songs) : Queue.shuffleSongs(shuffleFrom ?? queues.current.songs),
       );
       if (shuffleFrom != null) {
         queues._queue.setSongs(copySongs(shuffleFrom));
@@ -844,11 +838,7 @@ class QueueControl extends Control {
       repository.saveCurrentQueue();
     }
 
-    if (state.idMap.isNotEmpty &&
-        !modified &&
-        !shuffled &&
-        type != QueueType.origin &&
-        type != QueueType.arbitrary) {
+    if (state.idMap.isNotEmpty && !modified && !shuffled && type != QueueType.origin && type != QueueType.arbitrary) {
       state.idMap.clear();
       state.idMapDirty = false;
       repository.saveIdMap();
@@ -863,7 +853,7 @@ class QueueControl extends Control {
   }
 
   /// Checks queue pool and removes obsolete songs - that are no longer on all songs data.
-  void removeObsolete({ bool emitChangeEvent = true }) {
+  void removeObsolete({bool emitChangeEvent = true}) {
     final allSongs = ContentControl.instance.state.allSongs;
     assert(allSongs.isNotEmpty);
     state._queue.compareAndRemoveObsolete(allSongs);
@@ -889,7 +879,7 @@ class QueueControl extends Control {
         player.setSong(state.current.songs[0]);
       }
     }
-  
+
     if (emitChangeEvent) {
       emitQueueChange();
     }
@@ -904,7 +894,7 @@ class QueueControl extends Control {
     final shuffled = repository.queueShuffled.get();
     final modified = repository.queueModified.get();
     final songOrigin = repository.songOrigin.get();
-    final type =  repository.queueType.get();
+    final type = repository.queueType.get();
 
     state.idMap = await repository.idMap.read();
 
@@ -922,7 +912,7 @@ class QueueControl extends Control {
           queueSongs.add(song);
         }
       }
-    } catch(ex, stack) {
+    } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
@@ -946,7 +936,7 @@ class QueueControl extends Control {
           }
         }
       }
-    } catch(ex, stack) {
+    } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
         ex,
         stack,

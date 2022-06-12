@@ -37,8 +37,8 @@ class SongNumber extends StatelessWidget {
     Key? key,
     String? number,
     this.current = false,
-  }) : number = int.tryParse(number ?? ''),
-       super(key: key);
+  })  : number = int.tryParse(number ?? ''),
+        super(key: key);
 
   final int? number;
   final bool current;
@@ -116,16 +116,16 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
-              selectionController is SelectionController<SelectionEntry<Song>>),
-       super.selectable(
-         key: key,
-         selectionIndex: selectionIndex,
-         selected: selected,
-         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-         handleTapInSelection: handleTapInSelection,
-         selectionController: selectionController,
-       );
+  })  : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+            selectionController is SelectionController<SelectionEntry<Song>>),
+        super.selectable(
+          key: key,
+          selectionIndex: selectionIndex,
+          selected: selected,
+          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+          handleTapInSelection: handleTapInSelection,
+          selectionController: selectionController,
+        );
 
   final Song song;
 
@@ -134,7 +134,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
 
   /// Whether this song is current, if yes, enables animated
   /// [CurrentIndicator] over the ablum art/instead song number.
-  /// 
+  ///
   /// If not specified, by default uses [ContentUtils.songIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
@@ -170,15 +170,14 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
 
   @override
   SelectionEntry<Song> toSelectionEntry() => SelectionEntry<Song>.fromContent(
-    content: widget.song,
-    index: widget.selectionIndex!,
-    context: context,
-  );
+        content: widget.song,
+        index: widget.selectionIndex!,
+        context: context,
+      );
 
   @override
-  bool? get widgetSelected => selectionRoute
-    ? widget.selectionController!.data.contains(toSelectionEntry())
-    : super.widgetSelected;
+  bool? get widgetSelected =>
+      selectionRoute ? widget.selectionController!.data.contains(toSelectionEntry()) : super.widgetSelected;
 
   bool get showAlbumArt => widget.variant == SongTileVariant.albumArt;
 
@@ -247,12 +246,12 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         color: widget.backgroundColor,
         child: InkWell(
           onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
-            ? _handleTap
-            : widget.onTap,
+              ? _handleTap
+              : widget.onTap,
           onLongPress: handleLongPress,
           splashFactory: NFListTileInkRipple.splashFactory,
           child: Padding(
-            padding:  EdgeInsets.only(
+            padding: EdgeInsets.only(
               top: _tileVerticalPadding,
               bottom: _tileVerticalPadding,
               left: widget.horizontalPadding,
@@ -285,10 +284,8 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     FavoriteIndicator(shown: widget.song.isFavorite),
-                    if (widget.trailing != null)
-                      widget.trailing!,
-                    if (selectionRoute)
-                      buildAddToSelection(),
+                    if (widget.trailing != null) widget.trailing!,
+                    if (selectionRoute) buildAddToSelection(),
                   ],
                 ),
               ],
@@ -313,8 +310,9 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         current: current,
       );
     }
-    if (!selectable)
+    if (!selectable) {
       return _buildTile(albumArt);
+    }
     return Stack(
       children: [
         AnimatedBuilder(

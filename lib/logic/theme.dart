@@ -82,7 +82,8 @@ class ThemeControl {
       statusBarIconBrightness: Brightness.light,
     ));
     await Future.delayed(const Duration(milliseconds: 500));
-    if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor != Constants.UiTheme.black.auto.systemNavigationBarColor) {
+    if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor !=
+        Constants.UiTheme.black.auto.systemNavigationBarColor) {
       final ui = Constants.UiTheme.grey.auto;
       await SystemUiStyleController.instance.animateSystemUiOverlay(
         to: ui,
@@ -113,13 +114,13 @@ class ThemeControl {
 
     themeChaning.add(true);
     _rebuildOperation = CancelableOperation<void>.fromFuture(
-      Future.delayed(dilate(themeChangeDuration))
+      Future.delayed(dilate(themeChangeDuration)),
     ).then((value) async {
       App.rebuildAllChildren();
     }).then((value) {
       themeChaning.add(false);
     });
-  
+
     await SystemUiStyleController.instance.animateSystemUiOverlay(
       to: Constants.UiTheme.black.auto,
       curve: Curves.easeIn,
@@ -135,7 +136,7 @@ class ThemeControl {
     themeChaning.add(true);
     MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation<void>.fromFuture(
-      Future.delayed(dilate(primaryColorChangeDuration))
+      Future.delayed(dilate(primaryColorChangeDuration)),
     ).then((value) async {
       App.rebuildAllChildren();
     }).then((value) {

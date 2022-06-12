@@ -46,10 +46,11 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
   ///
   /// If [selectionRoute] is currently `true`, will instead listen to the
   /// existing controller the selection route provides.
-  /// 
+  ///
   /// If [listen] is `true`, the [handleSelection] is attached to the controller.
   /// If [listenStatus] is `true`, the [handleSelectionStatus] is attached to the controller.
-  void initSelectionController(ValueGetter<ContentSelectionController> factory, {
+  void initSelectionController(
+    ValueGetter<ContentSelectionController> factory, {
     bool listen = true,
     bool listenStatus = false,
   }) {
@@ -59,10 +60,12 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
     } else {
       selectionController = factory();
     }
-    if (listen)
+    if (listen) {
       selectionController.addListener(handleSelection);
-    if (listenStatus)
+    }
+    if (listenStatus) {
       selectionController.addStatusListener(handleSelectionStatus);
+    }
   }
 
   /// Disposes the created selection controller, or, when [selectionRoute] is `true`,
@@ -81,7 +84,7 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
 
   /// Listens to [SelectionController.addListener].
   /// By default just calls [setState].
-  /// 
+  ///
   /// Can be automatically bound with [initSelectionController].
   @protected
   void handleSelection() {
@@ -95,7 +98,7 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
 
   /// Listens to [SelectionController.addStatusListener].
   /// By default just calls [setState].
-  /// 
+  ///
   /// Can be automatically bound with [initSelectionController].
   @protected
   void handleSelectionStatus(AnimationStatus status) {
@@ -116,12 +119,12 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   /// Creates a widget, not selectable.
   const SelectableWidget({
     Key? key,
-  }) : selectionIndex = null,
-       selected = null,
-       longPressSelectionGestureEnabled = null,
-       handleTapInSelection = null,
-       selectionController = null,
-       super(key: key);
+  })  : selectionIndex = null,
+        selected = null,
+        longPressSelectionGestureEnabled = null,
+        handleTapInSelection = null,
+        selectionController = null,
+        super(key: key);
 
   /// Creates a selectable widget.
   const SelectableWidget.selectable({
@@ -155,7 +158,7 @@ abstract class SelectableWidget<T> extends StatefulWidget {
   final bool? handleTapInSelection;
 
   /// A controller that drive the selection.
-  /// 
+  ///
   /// If `null`, widget will be considered as not selectable
   final SelectionController<T>? selectionController;
 
@@ -168,20 +171,20 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
   late AnimationController _controller;
 
   /// Returns animation that can be used for animating the selection.
-  /// 
+  ///
   /// The [SelectableWidget] may likely be used in large lists, hence initializing
   /// an animation in build method would be quite expensive.
-  /// 
+  ///
   /// To avoid this, animation is instantiated in [initState].
-  /// 
+  ///
   /// See also:
   /// * [buildAnimation] that builds the animation
   Animation<double> get animation => _animation;
   late Animation<double> _animation;
 
   /// Whether the widget is currently being selected.
-  bool get selected => selectable && (_controller.status == AnimationStatus.forward ||
-                                      _controller.status == AnimationStatus.completed);
+  bool get selected =>
+      selectable && (_controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.completed);
 
   /// Used to update the [selected] value when the widget updates.
   ///
@@ -208,15 +211,16 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
   bool get selectionRoute => selectable && selectionRouteOf(context);
 
   /// Converts this widget to the entry [selectionController] is holding.
-  /// 
+  ///
   /// See also a discussion in [SelectionEntry].
   E toSelectionEntry();
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
-    if (!selectable)
+    if (!selectable) {
       return;
+    }
     _controller = AnimationController(vsync: this, duration: kSelectionDuration);
     _animation = buildAnimation(_controller);
     if (widgetSelected ?? widget.selected!) {
@@ -250,15 +254,16 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
 
   @override
   void dispose() {
-    if (selectable)
+    if (selectable) {
       _controller.dispose();
+    }
     super.dispose();
   }
 
   /// Builds an [animation].
-  /// 
+  ///
   /// The `animation` is the bare, without any applied curves.
-  /// 
+  ///
   /// Override this method to build your own custom animation.
   Animation<double> buildAnimation(Animation<double> animation) {
     return Tween(
@@ -273,22 +278,29 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
 
   /// Returns a method that either joins the selection, or closes it, dependent
   /// on current state of [selected].
-  /// 
+  ///
   /// Will return null if not [selectable], because it is common to pass it to [ListTile.onLongPress],
   /// and passing null will disable the long press gesture.
-  VoidCallback? get handleLongPress => !selectable || selectionRouteOf(context) || !widget.longPressSelectionGestureEnabled! ? null : () {
-    if (!selectable)
-      return;
-    toggleSelection();
-  };
+  VoidCallback? get handleLongPress =>
+      !selectable || selectionRouteOf(context) || !widget.longPressSelectionGestureEnabled!
+          ? null
+          : () {
+              if (!selectable) {
+                return;
+              }
+              toggleSelection();
+            };
 
   /// Checks whether widget is selectable and the selection controller
   /// is currently in selection.
-  /// 
+  ///
   /// If yes, on taps will be handled by calling [toggleSelection],
   /// otherwise calls the [onTap] callback.
   void handleTap(VoidCallback onTap) {
-    if (selectable && !selectionRouteOf(context) && widget.selectionController!.inSelection && widget.handleTapInSelection!) {
+    if (selectable &&
+        !selectionRouteOf(context) &&
+        widget.selectionController!.inSelection &&
+        widget.handleTapInSelection!) {
       toggleSelection();
     } else {
       onTap();
@@ -328,18 +340,17 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     this.ignoreWhen,
     Set<T>? data,
   }) : super(
-         animationController: animationController,
-         data: data,
-       );
+          animationController: animationController,
+          data: data,
+        );
 
   ContentSelectionController._alwaysInSelection({
     required this.context,
     required this.actionsBuilder,
     this.overlay,
     Set<T>? data,
-  }) : ignoreWhen = null,
-       super.alwaysInSelection(data: data);
-
+  })  : ignoreWhen = null,
+        super.alwaysInSelection(data: data);
 
   /// Needed to listen listen to a [DismissibleRoute], and as soon as it's
   /// dismissed, the selection will be closed.
@@ -385,7 +396,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ///
   /// Generally, it's recommended to pass navigator state to [vsync], so controller can
   /// safely make deferred disposal.
-  /// 
+  ///
   /// By default controller automatically creates a selection actions bar overlay.
   /// The [actionsBar] can be set to `false` to disable this behavior.
   ///
@@ -397,7 +408,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ///
   /// If [closeButton] is `true`, will show a selection close button in the actions bar.
   ///
-  /// For other parameters, see the class properties. 
+  /// For other parameters, see the class properties.
   @factory
   static ContentSelectionController<SelectionEntry<T>> create<T extends Content>({
     required TickerProvider vsync,
@@ -415,16 +426,20 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         vsync: vsync,
         duration: kSelectionDuration,
       ),
-      actionsBuilder: !actionsBar ? null : (context) {
-        return _SelectionActionsBar(
-          left: [_ActionsSelectionTitle(
-            selectedTitle: false,
-            counter: counter,
-            closeButton: closeButton,
-          )],
-          right: _getActions<T>(additionalPlayActionsBuilder?.call(context) ?? const [])(),
-        );
-      },
+      actionsBuilder: !actionsBar
+          ? null
+          : (context) {
+              return _SelectionActionsBar(
+                left: [
+                  _ActionsSelectionTitle(
+                    selectedTitle: false,
+                    counter: counter,
+                    closeButton: closeButton,
+                  )
+                ],
+                right: _getActions<T>(additionalPlayActionsBuilder?.call(context) ?? const [])(),
+              );
+            },
     );
   }
 
@@ -452,9 +467,11 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       overlay: overlay,
       actionsBuilder: (context) {
         return _SelectionActionsBar(
-          left: const [_ActionsSelectionTitle(
-            counter: true,
-          )],
+          left: const [
+            _ActionsSelectionTitle(
+              counter: true,
+            )
+          ],
           right: actionsBuilder?.call(context) ?? const [],
         );
       },
@@ -469,43 +486,53 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       _AddToPlaylistSelectionAction(),
     ];
     return contentPick<T, ValueGetter<List<Widget>>>(
-      song: () => commonActions + [
-        const _GoToArtistSelectionAction(),
-        const _GoToAlbumSelectionAction(),
-        ...additionalPlayActions,
-        const _PlayNextSelectionAction<Song>(),
-        const _AddToQueueSelectionAction<Song>(),
-      ],
-      album: () => commonActions + [
-        ...additionalPlayActions,
-        const _PlayNextSelectionAction<Album>(),
-        const _AddToQueueSelectionAction<Album>(),
-      ],
-      playlist: () => commonActions + [
-        const _EditPlaylistSelectionAction(),
-        ...additionalPlayActions,
-        const _PlayNextSelectionAction<Playlist>(),
-        const _AddToQueueSelectionAction<Playlist>(),
-      ],
-      artist: () => commonActions + [
-        ...additionalPlayActions,
-        const _PlayNextSelectionAction<Artist>(),
-        const _AddToQueueSelectionAction<Artist>(),
-      ],
-      fallback: () => commonActions + [
-        const _GoToArtistSelectionAction(),
-        const _GoToAlbumSelectionAction(),
-        const _EditPlaylistSelectionAction(),
-        ...additionalPlayActions,
-        const _PlayNextSelectionAction(),
-        const _AddToQueueSelectionAction(),
-      ],
+      song: () =>
+          commonActions +
+          [
+            const _GoToArtistSelectionAction(),
+            const _GoToAlbumSelectionAction(),
+            ...additionalPlayActions,
+            const _PlayNextSelectionAction<Song>(),
+            const _AddToQueueSelectionAction<Song>(),
+          ],
+      album: () =>
+          commonActions +
+          [
+            ...additionalPlayActions,
+            const _PlayNextSelectionAction<Album>(),
+            const _AddToQueueSelectionAction<Album>(),
+          ],
+      playlist: () =>
+          commonActions +
+          [
+            const _EditPlaylistSelectionAction(),
+            ...additionalPlayActions,
+            const _PlayNextSelectionAction<Playlist>(),
+            const _AddToQueueSelectionAction<Playlist>(),
+          ],
+      artist: () =>
+          commonActions +
+          [
+            ...additionalPlayActions,
+            const _PlayNextSelectionAction<Artist>(),
+            const _AddToQueueSelectionAction<Artist>(),
+          ],
+      fallback: () =>
+          commonActions +
+          [
+            const _GoToArtistSelectionAction(),
+            const _GoToAlbumSelectionAction(),
+            const _EditPlaylistSelectionAction(),
+            ...additionalPlayActions,
+            const _PlayNextSelectionAction(),
+            const _AddToQueueSelectionAction(),
+          ],
     );
   }
 
   static ContentSelectionController _of(BuildContext context) {
-    final widget = context.getElementForInheritedWidgetOfExactType<_ContentSelectionControllerProvider>()!
-      .widget as _ContentSelectionControllerProvider;
+    final widget = context.getElementForInheritedWidgetOfExactType<_ContentSelectionControllerProvider>()!.widget
+        as _ContentSelectionControllerProvider;
     return widget.controller;
   }
 
@@ -530,8 +557,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       _notifier.value!.close();
       assert(false, 'There can only be one active controller');
     }
-    for (final observer in NFWidgets.routeObservers!)
+    for (final observer in NFWidgets.routeObservers!) {
       observer.subscribe(this, ModalRoute.of(context)!);
+    }
     _dismissibleRouteController = DismissibleRoute.controllerOf(context);
     _dismissibleRouteController?.addDragEventListener(_handleDismissibleRouteDrag);
 
@@ -542,8 +570,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
             controller: this,
             child: Builder(
               builder: (_context) => Builder(
-              builder: (_context) => actionsBuilder!(_context),
-            ),
+                builder: (_context) => actionsBuilder!(_context),
+              ),
             ),
           ),
         ),
@@ -556,9 +584,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       final lastUi = SystemUiStyleController.instance.lastUi;
       _lastNavColor = lastUi.systemNavigationBarColor;
       SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: lastUi.copyWith(
-          systemNavigationBarColor: Constants.UiTheme.grey.auto.systemNavigationBarColor
-        ),
+        to: lastUi.copyWith(systemNavigationBarColor: Constants.UiTheme.grey.auto.systemNavigationBarColor),
         duration: kSelectionDuration,
         curve: _SelectionActionsBar.forwardCurve,
       );
@@ -597,8 +623,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   void _animateNavBack() {
-    if (_lastNavColor == null)
+    if (_lastNavColor == null) {
       return;
+    }
     SystemUiStyleController.instance.animateSystemUiOverlay(
       to: SystemUiStyleController.instance.lastUi.copyWith(
         systemNavigationBarColor: _lastNavColor,
@@ -621,9 +648,10 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   void dispose() {
     _dismissibleRouteController?.removeDragEventListener(_handleDismissibleRouteDrag);
     _dismissibleRouteController = null;
-    for (final observer in NFWidgets.routeObservers!)
+    for (final observer in NFWidgets.routeObservers!) {
       observer.unsubscribe(this);
-  
+    }
+
     if (ContentControl.instance.disposed.value) {
       _removeOverlay();
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -634,20 +662,21 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
         _notifier.value = null;
         _primaryContentTypeNotifier.dispose();
-        if (inSelection)
+        if (inSelection) {
           await close();
+        }
         _removeOverlay();
         super.dispose();
       });
     }
   }
-} 
+}
 
 class _ContentSelectionControllerProvider extends InheritedWidget {
   _ContentSelectionControllerProvider({
     required Widget child,
     required this.controller,
-    }) : super(child: child);
+  }) : super(child: child);
 
   final ContentSelectionController controller;
 
@@ -672,17 +701,16 @@ class ContentSelectionControllerCreator<T extends Content> extends StatefulWidge
 
 class _SelectionControllerCreatorState<T extends Content> extends State<ContentSelectionControllerCreator<T>>
     with SelectionHandlerMixin {
-
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     initSelectionController(() => ContentSelectionController.create<T>(
-      vsync: AppRouter.instance.navigatorKey.currentState!,
-      context: context,
-      closeButton: true,
-      counter: true,
-      ignoreWhen: () => playerRouteController.opened,
-    ));
+          vsync: AppRouter.instance.navigatorKey.currentState!,
+          context: context,
+          closeButton: true,
+          counter: true,
+          ignoreWhen: () => playerRouteController.opened,
+        ));
   }
 
   @override
@@ -757,10 +785,12 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
       ignoring: widget.ignorePointer,
       child: AnimatedBuilder(
         animation: widget.animation,
-        builder: (context, child) => !widget.scaleAnimation ? child! : ScaleTransition(
-          scale: widget.animation,
-          child: child,
-        ),
+        builder: (context, child) => !widget.scaleAnimation
+            ? child!
+            : ScaleTransition(
+                scale: widget.animation,
+                child: child,
+              ),
         child: Container(
           width: widget.size,
           height: widget.size,
@@ -804,10 +834,7 @@ class IgnoreInSelection extends StatelessWidget {
       ),
       animation: controller.animation,
       child: child,
-      builder: (context, value, child) => IgnorePointer(
-        ignoring: value,
-        child: child
-      ),
+      builder: (context, value, child) => IgnorePointer(ignoring: value, child: child),
     );
   }
 }
@@ -943,7 +970,7 @@ class EmergeAnimation extends AnimatedWidget {
 }
 
 /// Checks whether the action is supported and hides it, if it's not.
-/// 
+///
 /// Calls the build again, when selection is updated, excluding the
 /// selection closing.
 class _ActionBuilder extends StatefulWidget {
@@ -995,7 +1022,9 @@ class _ActionBuilderState extends State<_ActionBuilder> with SelectionHandlerMix
 
   @override
   void handleSelection() {
-    if (widget.controller.closeSelectionWhenEmpty && widget.controller.data.length == 1 && widget.controller.lengthIncreased) {
+    if (widget.controller.closeSelectionWhenEmpty &&
+        widget.controller.data.length == 1 &&
+        widget.controller.lengthIncreased) {
       // Prevents animation we enter the selection by updating the key
       key = UniqueKey();
     }
@@ -1016,9 +1045,7 @@ class _ActionBuilderState extends State<_ActionBuilder> with SelectionHandlerMix
         animation: animation,
         child: child,
       ),
-      child: !shown
-        ? const SizedBox.shrink()
-        : widget.builder(context, widget.child),
+      child: !shown ? const SizedBox.shrink() : widget.builder(context, widget.child),
     );
   }
 }
@@ -1048,8 +1075,14 @@ class _ActionsSelectionTitle extends StatelessWidget {
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
       child: Padding(
-        padding: EdgeInsets.only(left: selectedTitle ? 0.0 : closeButton ? 5.0 : 10.0),
-        child: const SelectionCounter(textStyle: TextStyle(
+        padding: EdgeInsets.only(
+            left: selectedTitle
+                ? 0.0
+                : closeButton
+                    ? 5.0
+                    : 10.0),
+        child: const SelectionCounter(
+            textStyle: TextStyle(
           fontWeight: FontWeight.w700,
           fontSize: 19.0,
         )),
@@ -1104,7 +1137,7 @@ class SelectionCounter extends StatefulWidget {
   }) : super(key: key);
 
   /// Text style of the counter.
-  /// 
+  ///
   /// By default [appBarTitleTextStyle] is used.
   final TextStyle? textStyle;
 
@@ -1123,7 +1156,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
   int get minCount => controller.closeSelectionWhenEmpty ? 1 : 0;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     controller = widget.controller ?? ContentSelectionController._of(context);
     controller.addListener(handleSelection);
@@ -1141,7 +1174,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     controller.removeListener(handleSelection);
     super.dispose();
   }
@@ -1183,19 +1216,19 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
   const _PlayNextSelectionAction({Key? key}) : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
-    if (entries.isEmpty)
+    if (entries.isEmpty) {
       return;
+    }
     entries.sort((a, b) => a.index.compareTo(b.index));
     QueueControl.instance.playNext(
-      entries
-        .map((el) => el.data)
-        .toList(),
+      entries.map((el) => el.data).toList(),
     );
   }
 
   void _handleOrigins(List<SelectionEntry<SongOrigin>> entries) {
-    if (entries.isEmpty)
+    if (entries.isEmpty) {
       return;
+    }
     // Reverse order is proper here
     entries.sort((a, b) => b.index.compareTo(a.index));
     for (final entry in entries) {
@@ -1270,23 +1303,22 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
 
 /// Action that adds a [Song] or a [SongOrigin] to the end of the queue.
 class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
-  const _AddToQueueSelectionAction({Key? key})
-      : super(key: key);
+  const _AddToQueueSelectionAction({Key? key}) : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
-    if (entries.isEmpty)
+    if (entries.isEmpty) {
       return;
+    }
     entries.sort((a, b) => a.index.compareTo(b.index));
     QueueControl.instance.addToQueue(
-      entries
-        .map((el) => el.data)
-        .toList(),
+      entries.map((el) => el.data).toList(),
     );
   }
 
   void _handleOrigins(List<SelectionEntry<SongOrigin>> entries) {
-    if (entries.isEmpty)
+    if (entries.isEmpty) {
       return;
+    }
     entries.sort((a, b) => a.index.compareTo(b.index));
     for (final entry in entries) {
       QueueControl.instance.addOriginToQueue(entry.data);
@@ -1360,8 +1392,7 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
 
 /// Action that plays selected content as queue.
 class _PlayAsQueueSelectionAction extends StatelessWidget {
-  const _PlayAsQueueSelectionAction({Key? key})
-      : super(key: key);
+  const _PlayAsQueueSelectionAction({Key? key}) : super(key: key);
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
@@ -1383,7 +1414,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
     return _ActionBuilder(
       shown: () => true,
       controller: controller,
-       builder: (context, child) => EmergeAnimation(
+      builder: (context, child) => EmergeAnimation(
         animation: controller.animation,
         child: AnimatedIconButton(
           tooltip: l10n.playContentList,
@@ -1399,8 +1430,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
 
 /// Action that shuffles and plays selected content as queue.
 class _ShuffleAsQueueSelectionAction extends StatelessWidget {
-  const _ShuffleAsQueueSelectionAction({Key? key})
-      : super(key: key);
+  const _ShuffleAsQueueSelectionAction({Key? key}) : super(key: key);
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
@@ -1422,7 +1452,7 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
     return _ActionBuilder(
       shown: () => true,
       controller: controller,
-       builder: (context, child) => EmergeAnimation(
+      builder: (context, child) => EmergeAnimation(
         animation: controller.animation,
         child: AnimatedIconButton(
           tooltip: l10n.shuffleContentList,
@@ -1488,15 +1518,17 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
     assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
-           controller is ContentSelectionController<SelectionEntry<Song>>);
+        controller is ContentSelectionController<SelectionEntry<Song>>);
     final data = controller.data;
 
     return _ActionBuilder(
       controller: controller,
       shown: () {
         return data.length == 1 &&
-          data.first.data is Song && (data.first.data as Song).albumId != null &&
-          (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.album) || playerRouteController.opened); // disable action in album route
+            data.first.data is Song &&
+            (data.first.data as Song).albumId != null &&
+            // disable action in album route
+            (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.album) || playerRouteController.opened);
       },
       builder: (context, child) => child!,
       child: EmergeAnimation(
@@ -1533,15 +1565,17 @@ class _GoToArtistSelectionAction extends StatelessWidget {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
     assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
-           controller is ContentSelectionController<SelectionEntry<Song>> ||
-           controller is ContentSelectionController<SelectionEntry<Album>>);
+        controller is ContentSelectionController<SelectionEntry<Song>> ||
+        controller is ContentSelectionController<SelectionEntry<Album>>);
     final data = controller.data;
 
     return _ActionBuilder(
       controller: controller,
       shown: () {
-        return data.length == 1 && (data.first.data is Song || data.first.data is Album) &&
-          (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.artist) || playerRouteController.opened); // disable action in album route
+        return data.length == 1 &&
+            (data.first.data is Song || data.first.data is Album) &&
+            // disable action in artist route
+            (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.artist) || playerRouteController.opened);
       },
       builder: (context, child) => child!,
       child: EmergeAnimation(
@@ -1563,7 +1597,8 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
 
   void _handleTap(ContentSelectionController controller) {
     final playlist = controller.data.first.data as Playlist;
-    HomeRouter.instance.goto(HomeRoutes.playlist.withArguments(PersistentQueueArguments(queue: playlist, editing: true)));
+    HomeRouter.instance
+        .goto(HomeRoutes.playlist.withArguments(PersistentQueueArguments(queue: playlist, editing: true)));
     controller.close();
   }
 
@@ -1572,13 +1607,13 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
     assert(controller.runtimeType == typeOf<ContentSelectionController<SelectionEntry<Content>>>() ||
-           controller is ContentSelectionController<SelectionEntry<Playlist>>);
+        controller is ContentSelectionController<SelectionEntry<Playlist>>);
     final data = controller.data;
 
     return _ActionBuilder(
       controller: controller,
       shown: () {
-        return data.length == 1 && data.first.data is Playlist; // disable action in album route
+        return data.length == 1 && data.first.data is Playlist;
       },
       builder: (context, child) => child!,
       child: EmergeAnimation(
@@ -1677,7 +1712,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
 
 /// Action that removes a song from playlist.
 class _FavoriteSelectionAction extends StatefulWidget {
-  const _FavoriteSelectionAction({ Key? key }) : super(key: key);
+  const _FavoriteSelectionAction({Key? key}) : super(key: key);
 
   @override
   State<_FavoriteSelectionAction> createState() => _FavoriteSelectionActionState();
@@ -1734,10 +1769,10 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
   final Playlist playlist;
 
   void _handleTap(BuildContext context) {
-    final entries = controller.data
-      .cast<SelectionEntry<Song>>()
-      .toList()
-      ..sort((a, b) => a.index.compareTo(b.index));
+    final entries = controller.data.cast<SelectionEntry<Song>>().toList()
+      ..sort(
+        (a, b) => a.index.compareTo(b.index),
+      );
     final list = entries.map((el) => el.data).toList();
     _showActionConfirmationDialog<Song>(
       context: context,
@@ -1773,7 +1808,7 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
 
 /// Displays an action to delete songs.
 /// Only meant to be displayed in app bar.
-/// 
+///
 /// Can receive either [controller] with [Song]s selection, or with gerenric [Content] type.
 /// With the lattter, will automatically check if selection contains only songs and hide the button, if not.
 class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
@@ -1788,12 +1823,13 @@ class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   _DeleteSongsAppBarActionState<T> createState() => _DeleteSongsAppBarActionState();
 }
 
-class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>> with SelectionHandlerMixin {
+class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongsAppBarAction<T>>
+    with SelectionHandlerMixin {
   late Type type;
   late Type typeToDelete;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     type = typeOf<T>();
     assert(type == Song || type == Playlist || type == Content, 'Only Song, Playlist and Content types are supported');
@@ -1802,9 +1838,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
   Future<void> _handleDelete() async {
     assert(typeToDelete == Song || typeToDelete == Playlist);
     if (typeToDelete == Song) {
-      final entries = widget.controller.data
-        .cast<SelectionEntry<Song>>()
-        .toList()
+      final entries = widget.controller.data.cast<SelectionEntry<Song>>().toList()
         ..sort((a, b) => a.index.compareTo(b.index));
       if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
         // On Android R the deletion is performed with OS dialog.
@@ -1826,9 +1860,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         );
       }
     } else if (typeToDelete == Playlist) {
-      final entries = widget.controller.data
-        .cast<SelectionEntry<Playlist>>()
-        .toList()
+      final entries = widget.controller.data.cast<SelectionEntry<Playlist>>().toList()
         ..sort((a, b) => a.index.compareTo(b.index));
       final list = entries.map((el) => el.data).toList();
       _showActionConfirmationDialog<Playlist>(
@@ -1954,7 +1986,7 @@ void _showActionConfirmationDialog<E extends Content>({
 
 /// Shows the preview arts from [list] and, if there are more that are not fit,
 /// adds a text at the end "and N more".
-/// 
+///
 /// Supports only songs and playlists.
 class _DeletionArtsPreview<T extends Content> extends StatefulWidget {
   const _DeletionArtsPreview({Key? key, required this.list}) : super(key: key);
@@ -1965,7 +1997,8 @@ class _DeletionArtsPreview<T extends Content> extends StatefulWidget {
   State<_DeletionArtsPreview<T>> createState() => _DeletionArtsPreviewState<T>();
 }
 
-class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPreview<T>> with SingleTickerProviderStateMixin {
+class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPreview<T>>
+    with SingleTickerProviderStateMixin {
   /// Maximum amount of arts per row
   static const maxArts = 5;
   static const itemSize = kPersistentQueueTileArtSize;
@@ -1976,7 +2009,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
   late AnimationController controller;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     controller = AnimationController(
       vsync: this,
@@ -1986,7 +2019,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     controller.dispose();
     BackButtonInterceptor.remove(backButtonInterceptor);
     super.dispose();
@@ -2043,49 +2076,50 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
       children: [
         AnimatedBuilder(
           animation: controller,
-          builder: (context, child) => LayoutBuilder(
-            builder: (context, constraints) {
-              final double intermediatePreviewsPerRow = math.min(constraints.maxWidth / (itemSize + spacing), maxArts.toDouble());
-              final int previewsPerRow = intermediatePreviewsPerRow.toInt();
-              // The amount of previews to show in "more" grid, so they fill
-              // the entire available space
-              final int gridPreviewsPerRow = intermediatePreviewsPerRow.ceil();
-              final double gridItemSize = (constraints.maxWidth - spacing * (gridPreviewsPerRow - 1)) / gridPreviewsPerRow;
-              final exceeded = widget.list.length > previewsPerRow;
-              final List<T> previews = exceeded
+          builder: (context, child) => LayoutBuilder(builder: (context, constraints) {
+            final double intermediatePreviewsPerRow =
+                math.min(constraints.maxWidth / (itemSize + spacing), maxArts.toDouble());
+            final int previewsPerRow = intermediatePreviewsPerRow.toInt();
+            // The amount of previews to show in "more" grid, so they fill
+            // the entire available space
+            final int gridPreviewsPerRow = intermediatePreviewsPerRow.ceil();
+            final double gridItemSize =
+                (constraints.maxWidth - spacing * (gridPreviewsPerRow - 1)) / gridPreviewsPerRow;
+            final exceeded = widget.list.length > previewsPerRow;
+            final List<T> previews = exceeded
                 ? widget.list.sublist(0, (constraints.maxWidth - correctedMoreTextWidth) ~/ (itemSize + spacing))
                 : widget.list;
-              final length = previews.length + (exceeded ? 1 : 0);
-              final rows = (widget.list.length / gridPreviewsPerRow).ceil();
+            final length = previews.length + (exceeded ? 1 : 0);
+            final rows = (widget.list.length / gridPreviewsPerRow).ceil();
 
-              final animation = Tween(
-                begin: itemSize,
-                end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
-              ).animate(CurvedAnimation(
-                curve: Curves.easeOut,
-                reverseCurve: Curves.easeInCubic,
-                parent: controller,
-              ));
+            final animation = Tween(
+              begin: itemSize,
+              end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
+            ).animate(CurvedAnimation(
+              curve: Curves.easeOut,
+              reverseCurve: Curves.easeInCubic,
+              parent: controller,
+            ));
 
-              return GestureDetector(
-                onTap: exceeded ? _handleMoreTap : null,
-                child: SizedBox(
-                  height: animation.value,
-                  width: constraints.maxWidth,
-                  child: ScrollConfiguration(
-                    behavior: const GlowlessScrollBehavior(),
-                    child: AnimatedSwitcher(
-                      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                        return Stack(
-                          alignment: Alignment.topCenter,
-                          children: <Widget>[
-                            ...previousChildren,
-                            if (currentChild != null) currentChild,
-                          ],
-                        );
-                      },
-                      duration: animationDuration,
-                      child: !showMore
+            return GestureDetector(
+              onTap: exceeded ? _handleMoreTap : null,
+              child: SizedBox(
+                height: animation.value,
+                width: constraints.maxWidth,
+                child: ScrollConfiguration(
+                  behavior: const GlowlessScrollBehavior(),
+                  child: AnimatedSwitcher(
+                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                      return Stack(
+                        alignment: Alignment.topCenter,
+                        children: <Widget>[
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    duration: animationDuration,
+                    child: !showMore
                         ? SizedBox(
                             height: itemSize,
                             width: constraints.maxWidth,
@@ -2137,12 +2171,11 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                               itemCount: widget.list.length,
                             ),
                           ),
-                    ),
                   ),
                 ),
-              );
-            }
-          ),
+              ),
+            );
+          }),
         ),
       ],
     );
@@ -2166,7 +2199,7 @@ class _BoxyArtsPreviewDelegate extends BoxyDelegate {
   Size layout() {
     return children.first.layout(constraints);
   }
-  
+
   @override
   double minIntrinsicWidth(double height) {
     return minWidth;
@@ -2231,8 +2264,9 @@ class SelectAllSelectionAction<T extends Content> extends StatelessWidget {
         // ignore: invalid_use_of_protected_member
         controller.notifyListeners();
       } else {
-        for (int i = 0; i < all.length; i++)
+        for (int i = 0; i < all.length; i++) {
           controller.data.add(entryFactory(all[i], i));
+        }
         // ignore: invalid_use_of_protected_member
         controller.notifyListeners();
       }

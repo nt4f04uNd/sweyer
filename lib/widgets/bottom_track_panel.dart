@@ -119,8 +119,7 @@ class TrackPanel extends StatelessWidget {
   }
 
   /// The height of this widget given a [textScaleFactor].
-  static double height(double textScaleFactor) =>
-      kSongTileHeight * math.max(0.95, textScaleFactor);
+  static double height(double textScaleFactor) => kSongTileHeight * math.max(0.95, textScaleFactor);
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {

@@ -44,7 +44,7 @@ class AppScrollbar extends StatefulWidget {
   /// Creates a scrollbar, draggable by default.
   /// Automatically passes [labelBuilder] dependent on content type `T` and
   /// uses passed content [list] in it.
-  /// 
+  ///
   /// It is also possible to disable the label with [showLabel].
   @factory
   static AppScrollbar forContent<T extends Content>({
@@ -65,23 +65,20 @@ class AppScrollbar extends StatefulWidget {
     return AppScrollbar(
       key: key,
       labelBuilder: !showLabel
-        ? null
-        : (context) {
-          final l10n = getl10n(context);
-          final item = list[
-            (controller.position.pixels / kSongTileHeight - 1)
-            .clamp(0.0, list.length - 1).round()
-          ];
-          return NFScrollLabel(
-            text: contentPick<T, ValueGetter<String>>(
-              contentType: contentType,
-              song: () => (item as Song).title[0].toUpperCase(),
-              album: () => (item as Album).album[0].toUpperCase(),
-              playlist: () => (item as Playlist).name[0].toUpperCase(),
-              artist: () => ContentUtils.localizedArtist((item as Artist).artist, l10n)[0].toUpperCase(),
-            )(),
-          );
-        },
+          ? null
+          : (context) {
+              final l10n = getl10n(context);
+              final item = list[(controller.position.pixels / kSongTileHeight - 1).clamp(0.0, list.length - 1).round()];
+              return NFScrollLabel(
+                text: contentPick<T, ValueGetter<String>>(
+                  contentType: contentType,
+                  song: () => (item as Song).title[0].toUpperCase(),
+                  album: () => (item as Album).album[0].toUpperCase(),
+                  playlist: () => (item as Playlist).name[0].toUpperCase(),
+                  artist: () => ContentUtils.localizedArtist((item as Artist).artist, l10n)[0].toUpperCase(),
+                )(),
+              );
+            },
       child: child,
       controller: controller,
       isAlwaysShown: isAlwaysShown,
@@ -119,9 +116,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
     final highlightColor = theme.highlightColor;
     return Theme(
       data: theme.copyWith(
-        highlightColor: ThemeControl.instance.isDark
-          ? const Color(0x40CCCCCC)
-          : const Color(0x66BCBCBC),
+        highlightColor: ThemeControl.instance.isDark ? const Color(0x40CCCCCC) : const Color(0x66BCBCBC),
       ),
       child: MediaQuery.removePadding(
         context: context,
@@ -141,8 +136,12 @@ class _AppScrollbarState extends State<AppScrollbar> {
               radius: widget.radius,
               notificationPredicate: widget.notificationPredicate,
               interactive: widget.interactive,
-              onThumbPressStart: () => setState(() { _dragIsActive = true; }),
-              onThumbPressEnd: () => setState(() { _dragIsActive = false; }),
+              onThumbPressStart: () => setState(() {
+                _dragIsActive = true;
+              }),
+              onThumbPressEnd: () => setState(() {
+                _dragIsActive = false;
+              }),
             ),
             if (widget.labelBuilder != null)
               AnimatedSwitcher(
@@ -150,13 +149,13 @@ class _AppScrollbarState extends State<AppScrollbar> {
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
                 child: !_dragIsActive
-                  ? const SizedBox.shrink()
-                  : Center(
-                      child: AnimatedBuilder(
-                        animation: controller,
-                        builder: (context, child) => widget.labelBuilder!(context),
+                    ? const SizedBox.shrink()
+                    : Center(
+                        child: AnimatedBuilder(
+                          animation: controller,
+                          builder: (context, child) => widget.labelBuilder!(context),
+                        ),
                       ),
-                    ),
               ),
           ],
         ),
@@ -369,24 +368,23 @@ class _MaterialScrollbar extends RawScrollbar {
     this.onThumbPressStart,
     this.onThumbPressEnd,
   }) : super(
-         key: key,
-         child: child,
-         controller: controller,
-         isAlwaysShown: isAlwaysShown,
-         thickness: thickness,
-         radius: radius,
-         fadeDuration: _kScrollbarFadeDuration,
-         timeToFade: _kScrollbarTimeToFade,
-         pressDuration: Duration.zero,
-         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-         interactive: interactive,
-       );
+          key: key,
+          child: child,
+          controller: controller,
+          isAlwaysShown: isAlwaysShown,
+          thickness: thickness,
+          radius: radius,
+          fadeDuration: _kScrollbarFadeDuration,
+          timeToFade: _kScrollbarTimeToFade,
+          pressDuration: Duration.zero,
+          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+          interactive: interactive,
+        );
 
   final bool? showTrackOnHover;
   final double? hoverThickness;
   final VoidCallback? onThumbPressStart;
   final VoidCallback? onThumbPressEnd;
-
 
   @override
   _MaterialScrollbarState createState() => _MaterialScrollbarState();
@@ -410,9 +408,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
 
   Set<MaterialState> get _states => <MaterialState>{
-    if (_dragIsActive) MaterialState.dragged,
-    if (_hoverIsActive) MaterialState.hovered,
-  };
+        if (_dragIsActive) MaterialState.dragged,
+        if (_hoverIsActive) MaterialState.hovered,
+      };
 
   MaterialStateProperty<Color> get _thumbColor {
     final Color onSurface = _colorScheme.onSurface;
@@ -424,22 +422,21 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case Brightness.light:
         dragColor = onSurface.withOpacity(0.6);
         hoverColor = onSurface.withOpacity(0.5);
-        idleColor = _useAndroidScrollbar
-          ? Theme.of(context).highlightColor.withOpacity(1.0)
-          : onSurface.withOpacity(0.1);
+        idleColor =
+            _useAndroidScrollbar ? Theme.of(context).highlightColor.withOpacity(1.0) : onSurface.withOpacity(0.1);
         break;
       case Brightness.dark:
         dragColor = onSurface.withOpacity(0.75);
         hoverColor = onSurface.withOpacity(0.65);
-        idleColor = _useAndroidScrollbar
-          ? Theme.of(context).highlightColor.withOpacity(1.0)
-          : onSurface.withOpacity(0.3);
+        idleColor =
+            _useAndroidScrollbar ? Theme.of(context).highlightColor.withOpacity(1.0) : onSurface.withOpacity(0.3);
         break;
     }
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.dragged))
+      if (states.contains(MaterialState.dragged)) {
         return _scrollbarTheme.thumbColor?.resolve(states) ?? dragColor;
+      }
 
       // If the track is visible, the thumb color hover animation is ignored and
       // changes immediately.
@@ -459,10 +456,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
-        return _scrollbarTheme.trackColor?.resolve(states)
-          ?? (brightness == Brightness.light
-            ? onSurface.withOpacity(0.03)
-            : onSurface.withOpacity(0.05));
+        return _scrollbarTheme.trackColor?.resolve(states) ??
+            (brightness == Brightness.light ? onSurface.withOpacity(0.03) : onSurface.withOpacity(0.05));
       }
       return const Color(0x00000000);
     });
@@ -473,10 +468,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover) {
-        return _scrollbarTheme.trackBorderColor?.resolve(states)
-          ?? (brightness == Brightness.light
-            ? onSurface.withOpacity(0.1)
-            : onSurface.withOpacity(0.25));
+        return _scrollbarTheme.trackBorderColor?.resolve(states) ??
+            (brightness == Brightness.light ? onSurface.withOpacity(0.1) : onSurface.withOpacity(0.25));
       }
       return const Color(0x00000000);
     });
@@ -485,13 +478,11 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   MaterialStateProperty<double> get _thickness {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered) && _showTrackOnHover)
-        return widget.hoverThickness
-          ?? _scrollbarTheme.thickness?.resolve(states)
-          ?? _kScrollbarThicknessWithTrack;
+        return widget.hoverThickness ?? _scrollbarTheme.thickness?.resolve(states) ?? _kScrollbarThicknessWithTrack;
       // The default scrollbar thickness is smaller on mobile.
-      return widget.thickness
-        ?? _scrollbarTheme.thickness?.resolve(states)
-        ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
+      return widget.thickness ??
+          _scrollbarTheme.thickness?.resolve(states) ??
+          (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
     });
   }
 
@@ -545,14 +536,18 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   void handleThumbPressStart(Offset localPosition) {
     super.handleThumbPressStart(localPosition);
-    setState(() { _dragIsActive = true; });
+    setState(() {
+      _dragIsActive = true;
+    });
     widget.onThumbPressStart?.call();
   }
 
   @override
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     super.handleThumbPressEnd(localPosition, velocity);
-    setState(() { _dragIsActive = false; });
+    setState(() {
+      _dragIsActive = false;
+    });
     widget.onThumbPressEnd?.call();
   }
 
@@ -562,11 +557,15 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position, event.kind)) {
       // Pointer is hovering over the scrollbar
-      setState(() { _hoverIsActive = true; });
+      setState(() {
+        _hoverIsActive = true;
+      });
       _hoverAnimationController.forward();
     } else if (_hoverIsActive) {
       // Pointer was, but is no longer over painted scrollbar.
-      setState(() { _hoverIsActive = false; });
+      setState(() {
+        _hoverIsActive = false;
+      });
       _hoverAnimationController.reverse();
     }
   }
@@ -574,7 +573,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   void handleHoverExit(PointerExitEvent event) {
     super.handleHoverExit(event);
-    setState(() { _hoverIsActive = false; });
+    setState(() {
+      _hoverIsActive = false;
+    });
     _hoverAnimationController.reverse();
   }
 

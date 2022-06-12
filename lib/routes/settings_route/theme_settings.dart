@@ -12,8 +12,7 @@ class ThemeSettingsRoute extends StatefulWidget {
   _ThemeSettingsRouteState createState() => _ThemeSettingsRouteState();
 }
 
-class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
-    with SingleTickerProviderStateMixin {
+class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTickerProviderStateMixin {
   Color prevPrimaryColor = ThemeControl.instance.theme.colorScheme.primary;
   Color primaryColor = ThemeControl.instance.theme.colorScheme.primary;
   bool get switched => ThemeControl.instance.isLight;

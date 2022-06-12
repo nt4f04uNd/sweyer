@@ -27,9 +27,10 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.gridCurrentIndicatorScale = _gridCurrentIndicatorScale,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : assert(!grid || !small),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-       super(key: key);
+  })  : assert(!grid || !small),
+        horizontalPadding =
+            horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
+        super(key: key);
 
   const PersistentQueueTile.selectable({
     Key? key,
@@ -50,18 +51,19 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.gridCurrentIndicatorScale = _gridCurrentIndicatorScale,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
-              selectionController is SelectionController<SelectionEntry<T>>),
-       assert(!grid || !small),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-       super.selectable(
-         key: key,
-         selectionIndex: selectionIndex,
-         selected: selected,
-         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-         handleTapInSelection: handleTapInSelection,
-         selectionController: selectionController,
-       );
+  })  : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+            selectionController is SelectionController<SelectionEntry<T>>),
+        assert(!grid || !small),
+        horizontalPadding =
+            horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
+        super.selectable(
+          key: key,
+          selectionIndex: selectionIndex,
+          selected: selected,
+          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+          handleTapInSelection: handleTapInSelection,
+          selectionController: selectionController,
+        );
 
   final T queue;
 
@@ -70,7 +72,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
 
   /// Whether this queue is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
-  /// 
+  ///
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
@@ -88,7 +90,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
 
   /// The size of the art when [grid] is `true`.
   final double gridArtSize;
-  
+
   /// Value passed to [ContentArt.assetScale] when [grid] is `true`.
   final double gridArtAssetScale;
 
@@ -106,15 +108,14 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   _PersistentQueueTileState<T> createState() => _PersistentQueueTileState();
 }
 
-class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableState<SelectionEntry<T>, PersistentQueueTile<T>>
-  with ContentTileComponentsMixin {
-
+class _PersistentQueueTileState<T extends PersistentQueue>
+    extends SelectableState<SelectionEntry<T>, PersistentQueueTile<T>> with ContentTileComponentsMixin {
   @override
   SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>.fromContent(
-    content: widget.queue,
-    index: widget.selectionIndex!,
-    context: context,
-  );
+        content: widget.queue,
+        index: widget.selectionIndex!,
+        context: context,
+      );
 
   void _handleTap() {
     super.handleTap(() {
@@ -124,8 +125,9 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 
   bool get current {
-    if (widget.current != null)
+    if (widget.current != null) {
       return widget.current!;
+    }
     return ContentUtils.originIsCurrent(widget.queue);
   }
 
@@ -198,16 +200,16 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: widget.small
-                ? ContentArt.songTile(
-                    source: source,
-                    defaultArtIcon: widget.queue.contentIcon,
-                    current: current,
-                  )
-                : ContentArt.persistentQueueTile(
-                    source: source,
-                    defaultArtIcon: widget.queue.contentIcon,
-                    current: current,
-                  ),
+                  ? ContentArt.songTile(
+                      source: source,
+                      defaultArtIcon: widget.queue.contentIcon,
+                      current: current,
+                    )
+                  : ContentArt.persistentQueueTile(
+                      source: source,
+                      defaultArtIcon: widget.queue.contentIcon,
+                      current: current,
+                    ),
             ),
             Expanded(
               child: Padding(
@@ -219,10 +221,8 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
               mainAxisSize: MainAxisSize.min,
               children: [
                 FavoriteIndicator(shown: widget.queue.isFavorite),
-                if (widget.trailing != null)
-                  widget.trailing!,
-                if (selectionRoute)
-                  buildAddToSelection(),
+                if (widget.trailing != null) widget.trailing!,
+                if (selectionRoute) buildAddToSelection(),
               ],
             ),
           ],
@@ -230,9 +230,8 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       );
     }
 
-    final onTap = widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
-      ? _handleTap
-      : widget.onTap;
+    final onTap =
+        widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection ? _handleTap : widget.onTap;
 
     if (widget.grid) {
       return Stack(
@@ -241,14 +240,14 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             alignment: Alignment.topCenter,
             child: CustomBoxy(
               delegate: _BoxyDelegate(() => Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onTap,
-                  splashColor: Constants.Theme.glowSplashColor.auto,
-                  onLongPress: handleLongPress,
-                  splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
-                ),
-              )),
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onTap,
+                      splashColor: Constants.Theme.glowSplashColor.auto,
+                      onLongPress: handleLongPress,
+                      splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
+                    ),
+                  )),
               children: [
                 LayoutId(id: #tile, child: child),
               ],
@@ -267,8 +266,9 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
 
   @override
   Widget build(BuildContext context) {
-    if (!selectable)
+    if (!selectable) {
       return _buildTile();
+    }
 
     const checkmarkGridMargin = 10.0;
     const favoriteIndicatorMargin = 17.0;
@@ -293,7 +293,8 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             // 8 padding is already in `buildAddToSelection`, so add 10 more to reach `checkmarkMargin`
             right: 2.0,
             child: Theme(
-              data: theme.copyWith(// TODO: probably add some dimming so it's better seen no matter the picture?
+              data: theme.copyWith(
+                // TODO: probably add some dimming so it's better seen no matter the picture?
                 iconTheme: theme.iconTheme.copyWith(color: Colors.white),
               ),
               child: buildAddToSelection(),
@@ -303,8 +304,8 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
           Positioned(
             left: selectionRoute ? 14.0 : 2.0,
             top: selectionRoute
-              ? widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin * 1.5
-              : widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin,
+                ? widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin * 1.5
+                : widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin,
             child: FavoriteIndicator(
               shown: widget.queue.isFavorite,
               size: favoriteIndicatorLargeSize,
@@ -315,9 +316,8 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 }
 
-
 class _BoxyDelegate extends BoxyDelegate {
-  _BoxyDelegate(this.builder); 
+  _BoxyDelegate(this.builder);
   final ValueGetter<Widget> builder;
 
   @override
@@ -337,7 +337,6 @@ class _BoxyDelegate extends BoxyDelegate {
     );
   }
 }
-
 
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
   const _InkRippleFactory({required this.artSize});

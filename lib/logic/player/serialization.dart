@@ -105,12 +105,10 @@ class SerializedQueueItem {
     );
   }
   Map<String, dynamic> toMap() => {
-    'id': id,
-    if (duplicationIndex != null)
-      'duplicationIndex': duplicationIndex,
-    if (originEntry != null)
-      'origin': originEntry!.toMap(),
-  };
+        'id': id,
+        if (duplicationIndex != null) 'duplicationIndex': duplicationIndex,
+        if (originEntry != null) 'origin': originEntry!.toMap(),
+      };
 }
 
 /// The type for [QueueSerializer].
@@ -163,13 +161,13 @@ class QueueSerializer extends QueueSerializerType {
   @override
   Future<void> save(List<Song> data) async {
     final file = await getFile();
-    final json = jsonEncode(data.map((song) =>
-      SerializedQueueItem(
-        id: song.id,
-        duplicationIndex: song.duplicationIndex,
-        originEntry: song.origin?.toSongOriginEntry()
-      ).toMap()
-    ).toList());
+    final json = jsonEncode(data
+        .map((song) => SerializedQueueItem(
+              id: song.id,
+              duplicationIndex: song.duplicationIndex,
+              originEntry: song.origin?.toSongOriginEntry(),
+            ).toMap())
+        .toList());
     await file.writeAsString(json);
     // debugPrint('$fileName: json saved');
   }
@@ -235,8 +233,8 @@ class IdMapSerializer extends IdMapSerializerType {
   @override
   Future<void> save(IdMap data) async {
     final file = await getFile();
-    await file.writeAsString(jsonEncode(data.map((key, value) =>
-      MapEntry(jsonEncode(key.toMap()), value),
+    await file.writeAsString(jsonEncode(data.map(
+      (key, value) => MapEntry(jsonEncode(key.toMap()), value),
     )));
     // debugPrint('$fileName: json saved');
   }

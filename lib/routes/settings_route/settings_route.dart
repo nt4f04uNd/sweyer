@@ -7,7 +7,6 @@ import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class SettingsRoute extends StatefulWidget {
   const SettingsRoute({Key? key}) : super(key: key);
   @override
@@ -107,8 +106,9 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleSecretLogoClick() {
-    if (Prefs.devMode.get())
+    if (Prefs.devMode.get()) {
       return;
+    }
     final int remainingClicks = clicksForDevMode - 1 - _clickCount;
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final theme = Theme.of(context);
@@ -197,10 +197,7 @@ class _FooterState extends State<_Footer> {
                   ),
                   Text(
                     'Copyright (c) 2019, nt4f04uNd',
-                    style: Theme.of(context)
-                        .textTheme
-                        .caption!
-                        .copyWith(height: 1.0),
+                    style: Theme.of(context).textTheme.caption!.copyWith(height: 1.0),
                   ),
                 ],
               ),

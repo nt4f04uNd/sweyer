@@ -99,10 +99,13 @@ class _HomeRoutesFactory {
 
   HomeRoutes<ArtistContentArguments<T>> artistContent<T extends Content>(Artist artist, List<T> list) {
     assert(T == Song || T == Album);
-    return HomeRoutes._(HomeRoutes.artistContent.location, ArtistContentArguments<T>(
-      artist: artist,
-      list: list,
-    ));
+    return HomeRoutes._(
+      HomeRoutes.artistContent.location,
+      ArtistContentArguments<T>(
+        artist: artist,
+        list: list,
+      ),
+    );
   }
 
   HomeRoutes persistentQueue<T extends PersistentQueue>(T persistentQueue) {
@@ -141,9 +144,9 @@ class PersistentQueueArguments<T extends PersistentQueue> extends Equatable {
     required this.queue,
     this.editing = false,
   }) : assert(
-        !editing || queue is Playlist,
-        "The `editing` is only valid with playlists"
-      );
+          !editing || queue is Playlist,
+          "The `editing` is only valid with playlists",
+        );
 
   /// The queue to be opened.
   final T queue;
@@ -189,7 +192,6 @@ class SearchArguments {
   final String query;
   final bool openKeyboard;
 }
-
 
 class AppRouteInformationParser extends RouteInformationParser<AppRoutes> {
   @override
@@ -269,24 +271,25 @@ class _TransitionSettings {
     required this.initial,
     required this.theme,
   });
-  
+
   /// Used on [HomeRouter] routes that cannot be dismissed.
   final StackFadeRouteTransitionSettings grey;
+
   /// Used on [HomeRouter] routes that can be dismissed.
   final StackFadeRouteTransitionSettings greyDismissible;
+
   /// Used by default on routes that can be dismissed.
   final StackFadeRouteTransitionSettings dismissible;
+
   /// Used on [InitialRoute] to switch its UI style.
   final StackFadeRouteTransitionSettings initial;
+
   /// Used on theme settings route to disable dimissing while theme is chaning.
   final StackFadeRouteTransitionSettings theme;
 }
 
 class AppRouter extends RouterDelegate<AppRoutes<Object?>>
-  with ChangeNotifier,
-       _DelegateMixin,
-       PopNavigatorRouterDelegateMixin {
-
+    with ChangeNotifier, _DelegateMixin, PopNavigatorRouterDelegateMixin {
   static AppRouter instance = AppRouter();
 
   @override
@@ -297,11 +300,11 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   final List<AppRoutes<Object?>> __routes = [AppRoutes.initial];
 
   @override
-  Future<void> setNewRoutePath(AppRoutes configuration) async { }
-         
+  Future<void> setNewRoutePath(AppRoutes configuration) async {}
+
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-  
+
   late final _TransitionSettings transitionSettings = _TransitionSettings(
     grey: StackFadeRouteTransitionSettings(uiStyle: Constants.UiTheme.grey.auto),
     greyDismissible: StackFadeRouteTransitionSettings(
@@ -322,12 +325,13 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
       dismissBarrier: _dismissBarrier,
     ),
   );
-  
+
   static Widget get _dismissBarrier => Container(
-    color: ThemeControl.instance.isDark ? Colors.black54 : Colors.black26,
-  );
+        color: ThemeControl.instance.isDark ? Colors.black54 : Colors.black26,
+      );
 
   bool _mainScreenShown = false;
+
   /// Controls the ui style that will be applied to home screen.
   set mainScreenShown(bool value) {
     _mainScreenShown = value;
@@ -341,9 +345,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
     transitionSettings.greyDismissible.uiStyle = Constants.UiTheme.grey.auto;
     transitionSettings.greyDismissible.dismissBarrier = dismissBarrier;
     transitionSettings.dismissible.dismissBarrier = dismissBarrier;
-    transitionSettings.initial.uiStyle = _mainScreenShown
-      ? Constants.UiTheme.grey.auto
-      : Constants.UiTheme.black.auto;
+    transitionSettings.initial.uiStyle = _mainScreenShown ? Constants.UiTheme.grey.auto : Constants.UiTheme.black.auto;
     transitionSettings.theme.dismissBarrier = dismissBarrier;
     if (themeChanged) {
       _setState?.call();
@@ -449,10 +451,7 @@ class _AppRouterBuilderState extends State<_AppRouterBuilder> {
 }
 
 class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
-  with ChangeNotifier,
-       _DelegateMixin,
-       PopNavigatorRouterDelegateMixin {
-
+    with ChangeNotifier, _DelegateMixin, PopNavigatorRouterDelegateMixin {
   HomeRouter.main() : selectionArguments = null {
     AppRouter.instance.mainScreenShown = true;
     _instance = this;
@@ -501,31 +500,30 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
 
   @override
-  Future<void> setNewRoutePath(HomeRoutes configuration) async { }
+  Future<void> setNewRoutePath(HomeRoutes configuration) async {}
 
   final tabsRouteKey = GlobalKey<TabsRouteState>();
 
-  ContentSearchDelegate? get _currentSearchDelegate => _routes.last.hasSameLocation(HomeRoutes.search) 
-    ? (_routes.last as HomeRoutes<SearchArguments>).arguments!._delegate
-    : null;
+  ContentSearchDelegate? get _currentSearchDelegate => _routes.last.hasSameLocation(HomeRoutes.search)
+      ? (_routes.last as HomeRoutes<SearchArguments>).arguments!._delegate
+      : null;
 
   /// Whether the drawer can be opened.
   bool get drawerCanBeOpened {
     final selectionController = ContentControl.instance.selectionNotifier.value;
     return playerRouteController.closed &&
-      (selectionController?.notInSelection ?? true) &&
-      (routes.last.hasSameLocation(HomeRoutes.tabs) || routes.last.hasSameLocation(HomeRoutes.search)) &&
-      ((tabsRouteKey.currentState?.tabController.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
-      !(tabsRouteKey.currentState?.tabBarDragged ?? false) &&
-      !(_currentSearchDelegate?.chipsBarDragged ?? false);
+        (selectionController?.notInSelection ?? true) &&
+        (routes.last.hasSameLocation(HomeRoutes.tabs) || routes.last.hasSameLocation(HomeRoutes.search)) &&
+        ((tabsRouteKey.currentState?.tabController.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
+        !(tabsRouteKey.currentState?.tabBarDragged ?? false) &&
+        !(_currentSearchDelegate?.chipsBarDragged ?? false);
   }
 
   /// The [allowStackSimilar] parameter in this override is ignored and set automatically.
   @override
   void goto(HomeRoutes route) {
     playerRouteController.close();
-    if (route.hasSameLocation(HomeRoutes.search) &&
-       _routes.last.hasSameLocation(HomeRoutes.search)) {
+    if (route.hasSameLocation(HomeRoutes.search) && _routes.last.hasSameLocation(HomeRoutes.search)) {
       final lastRoute = _routes.last as HomeRoutes<SearchArguments>;
       final newArguments = (route as HomeRoutes<SearchArguments>).arguments!;
       lastRoute.arguments!._delegate.query = newArguments.query;
@@ -580,7 +578,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           transitionSettings.grey,
           TabsRoute(key: tabsRouteKey),
         ));
-
       } else if (route.hasSameLocation(HomeRoutes.album)) {
         final arguments = route.arguments! as PersistentQueueArguments<Album>;
         pages.add(_buildPage(
@@ -588,7 +585,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
         ));
-
       } else if (route.hasSameLocation(HomeRoutes.playlist)) {
         final arguments = route.arguments! as PersistentQueueArguments<Playlist>;
         pages.add(_buildPage(
@@ -596,7 +592,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
         ));
-
       } else if (route.hasSameLocation(HomeRoutes.artist)) {
         final arguments = route.arguments! as Artist;
         pages.add(_buildPage(
@@ -604,7 +599,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           transitionSettings.greyDismissible,
           ArtistRoute(artist: arguments),
         ));
-
       } else if (route.hasSameLocation(HomeRoutes.artistContent)) {
         final arguments = route.arguments! as ArtistContentArguments;
         final ArtistContentRoute _route;
@@ -619,7 +613,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           transitionSettings.greyDismissible,
           _route,
         ));
-
       } else if (route.hasSameLocation(HomeRoutes.search)) {
         final arguments = route.arguments! as SearchArguments;
         pages.add(SearchPage(
@@ -627,7 +620,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           child: _buildChild(SearchRoute(delegate: arguments._delegate)),
           transitionSettings: transitionSettings.grey,
         ));
-
       } else {
         throw UnimplementedError();
       }
@@ -644,7 +636,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   }
 }
 
-
 class HomeRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   @override
   RouteInformation value = RouteInformation(location: HomeRoutes.tabs.location);
@@ -660,8 +651,9 @@ class RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
   final T delegate;
 
   static T? maybeOf<T extends RouterDelegate>(BuildContext context) {
-    return (context.getElementForInheritedWidgetOfExactType<RouterDelegateProvider<T>>()?.widget 
-              as RouterDelegateProvider<T>?)?.delegate;
+    return (context.getElementForInheritedWidgetOfExactType<RouterDelegateProvider<T>>()?.widget
+            as RouterDelegateProvider<T>?)
+        ?.delegate;
   }
 
   @override

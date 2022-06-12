@@ -3,7 +3,7 @@ import 'package:sweyer/sweyer.dart';
 
 /// Provides an information about the device.
 class DeviceInfoControl extends Control {
-  static DeviceInfoControl instance = DeviceInfoControl(); 
+  static DeviceInfoControl instance = DeviceInfoControl();
 
   /// Android SDK integer.
   int get sdkInt => _sdkInt;

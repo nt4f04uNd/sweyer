@@ -12,6 +12,7 @@ class ArtistWidget extends StatelessWidget {
   }) : super(key: key);
 
   final String artist;
+
   /// If not null, this text will be shown after appended dot.
   final String? trailingText;
   final TextOverflow overflow;

@@ -84,7 +84,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
     super.dispose();
   }
 
- /// Animates to state where it shows "play" button.
+  /// Animates to state where it shows "play" button.
   void _play() {
     if (_animation != 'pause_play' && _animation != 'play') {
       controller.forward();

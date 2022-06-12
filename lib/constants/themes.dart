@@ -19,7 +19,7 @@ abstract class Theme {
     dark: Color(0xff191b1a),
   );
 
-  static const  _ThemeContainer<Color> drawerMenuItemColor = _ThemeContainer(
+  static const _ThemeContainer<Color> drawerMenuItemColor = _ThemeContainer(
     light: Color(0xff3d3e42),
     dark: Colors.white,
   );
@@ -83,9 +83,9 @@ abstract class Theme {
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
         onError: Colors.white,
-        /// For window headers (e.g. alert dialogs)
+        // For window headers (e.g. alert dialogs)
         surface: Colors.white,
-        /// For dimmed text (e.g. in appbar)
+        // For dimmed text (e.g. in appbar)
         onSurface: _lightIconColor,
       ),
 
@@ -207,9 +207,9 @@ abstract class Theme {
         onSecondary: Colors.white,
         error: Color(0xffed3b3b),
         onError: Colors.white,
-        /// For window headers (e.g. alert dialogs)
+        // For window headers (e.g. alert dialogs)
         surface: AppColors.grey,
-        /// For dimmed text (e.g. in appbar)
+        // For dimmed text (e.g. in appbar)
         onSurface: AppColors.whiteDarkened,
       ),
       //****************** Specific app elements *****************
@@ -329,8 +329,7 @@ abstract class UiTheme {
   );
 
   /// Theme for the drawer screen.
-  static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen =
-      _ThemeContainer(
+  static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen = _ThemeContainer(
     light: black.light.copyWith(
       statusBarColor: Colors.white,
       systemNavigationBarColor: Colors.white,

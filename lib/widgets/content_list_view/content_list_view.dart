@@ -65,7 +65,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
 
   /// Content list.
   final List<T> list;
-  
+
   /// Builder that allows to wrap the prebuilt item tile tile.
   /// For example can be used to add [Dismissible].
   final _ItemBuilder? itemBuilder;
@@ -178,7 +178,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// not to slivers.
   ///
   /// Padding is also removed, since it's possible to just wrap it with [SliverPadding].
-  /// 
+  ///
   /// See also:
   ///  * [reorderableSliver] which creates a reorderable sliver
   @factory
@@ -203,8 +203,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) {
     return MultiSliver(
       children: [
-        if (leading != null)
-          leading,
+        if (leading != null) leading,
         SliverFixedExtentList(
           itemExtent: ContentTile.getHeight<T>(contentType),
           delegate: SliverChildBuilderDelegate(
@@ -213,17 +212,15 @@ class ContentListView<T extends Content> extends StatelessWidget {
               final child = ContentTile<T>(
                 contentType: contentType,
                 content: item,
-                selectionIndex: selectionIndexMapper != null
-                  ? selectionIndexMapper(index)
-                  : index,
+                selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
                 selected: selectedTest != null
-                  ? selectedTest(index)
-                  : selectionController?.data.contains(SelectionEntry<T>.fromContent(
-                      content: item,
-                      index: index,
-                      context: context,
-                    ))
-                  ?? false,
+                    ? selectedTest(index)
+                    : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                          content: item,
+                          index: index,
+                          context: context,
+                        )) ??
+                        false,
                 longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
                 handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
                 selectionController: selectionController,
@@ -250,7 +247,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// not to slivers.
   ///
   /// Padding is also removed, since it's possible to just wrap it with [SliverPadding].
-  /// 
+  ///
   /// See also:
   ///  * [sliver] which creates a not reorderable sliver
   @factory
@@ -277,8 +274,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) {
     return MultiSliver(
       children: [
-        if (leading != null)
-          leading,
+        if (leading != null) leading,
         SliverReorderableList(
           // TODO: itemExtent is broken https://github.com/flutter/flutter/issues/84901
           // itemExtent: ContentTile.getHeight<T>(contentType),
@@ -293,28 +289,25 @@ class ContentListView<T extends Content> extends StatelessWidget {
               child: ContentTile<T>(
                 contentType: contentType,
                 content: item,
-                selectionIndex: selectionIndexMapper != null
-                  ? selectionIndexMapper(index)
-                  : index,
+                selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
                 selected: selectedTest != null
-                  ? selectedTest(index)
-                  : selectionController?.data.contains(SelectionEntry<T>.fromContent(
-                      content: item,
-                      index: index,
-                      context: context,
-                    ))
-                  ?? false,
-                longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index)
-                  ?? !reorderingEnabled,
-                handleTapInSelection: handleTapInSelectionTest?.call(index)
-                  ?? !reorderingEnabled,
+                    ? selectedTest(index)
+                    : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                          content: item,
+                          index: index,
+                          context: context,
+                        )) ??
+                        false,
+                longPressSelectionGestureEnabled:
+                    longPressSelectionGestureEnabledTest?.call(index) ?? !reorderingEnabled,
+                handleTapInSelection: handleTapInSelectionTest?.call(index) ?? !reorderingEnabled,
                 selectionController: selectionController,
                 current: currentTest?.call(index),
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableDefaultOnTap: enableDefaultOnTap,
                 backgroundColor: backgroundColorBuilder == null
-                  ? ThemeControl.instance.theme.colorScheme.background
-                  : backgroundColorBuilder(index),
+                    ? ThemeControl.instance.theme.colorScheme.background
+                    : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
                 trailing: AnimatedSwitcher(
@@ -333,15 +326,15 @@ class ContentListView<T extends Content> extends StatelessWidget {
                     );
                   },
                   child: !reorderingEnabled
-                    ? itemTrailingBuilder?.call(context, index) ?? const SizedBox.shrink()
-                    : ReorderableDragStartListener(
-                        enabled: reorderingEnabled,
-                        index: index,
-                        child: const Icon(
-                          Icons.drag_handle,
-                          size: 30.0,
+                      ? itemTrailingBuilder?.call(context, index) ?? const SizedBox.shrink()
+                      : ReorderableDragStartListener(
+                          enabled: reorderingEnabled,
+                          index: index,
+                          child: const Icon(
+                            Icons.drag_handle,
+                            size: 30.0,
+                          ),
                         ),
-                      ),
                 ),
               ),
             );

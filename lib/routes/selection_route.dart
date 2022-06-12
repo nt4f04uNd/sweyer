@@ -23,12 +23,11 @@ class _SelectionRouteState extends State<SelectionRoute> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Defer back button dispatching to the child router
-    _backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher!.createChildBackButtonDispatcher();
+    _backButtonDispatcher = Router.of(context).backButtonDispatcher!.createChildBackButtonDispatcher();
   }
-  
+
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     controller = ContentSelectionController.createAlwaysInSelection(
       context: context,
@@ -42,26 +41,26 @@ class _SelectionRouteState extends State<SelectionRoute> {
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               child: settingsOpened
-                ? const SizedBox.shrink()
-                : NFIconButton(
-                  icon: const Icon(Icons.settings_rounded),
-                  onPressed: () async {
-                    if (!settingsOpened) {
-                      setState(() {
-                        settingsOpened = true;
-                      });
-                      await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
-                        child: Builder(builder: (context) => settingsPageBuilder(context)),
-                        transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
-                      ));
-                      if (mounted) {
-                        setState(() {
-                          settingsOpened = false;
-                        });
-                      }
-                    }
-                  },
-                ),
+                  ? const SizedBox.shrink()
+                  : NFIconButton(
+                      icon: const Icon(Icons.settings_rounded),
+                      onPressed: () async {
+                        if (!settingsOpened) {
+                          setState(() {
+                            settingsOpened = true;
+                          });
+                          await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
+                            child: Builder(builder: (context) => settingsPageBuilder(context)),
+                            transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
+                          ));
+                          if (mounted) {
+                            setState(() {
+                              settingsOpened = false;
+                            });
+                          }
+                        }
+                      },
+                    ),
             ),
           const SizedBox(width: 6.0),
           AnimatedBuilder(
@@ -69,10 +68,12 @@ class _SelectionRouteState extends State<SelectionRoute> {
             builder: (context, child) => AppButton(
               text: l10n.done,
               horizontalPadding: 20.0,
-              onPressed: controller.data.isEmpty ? null : () {
-                widget.selectionArguments.onSubmit(controller.data);
-                Navigator.of(this.context).pop();
-              },
+              onPressed: controller.data.isEmpty
+                  ? null
+                  : () {
+                      widget.selectionArguments.onSubmit(controller.data);
+                      Navigator.of(this.context).pop();
+                    },
             ),
           ),
         ];
@@ -88,14 +89,14 @@ class _SelectionRouteState extends State<SelectionRoute> {
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-     return Router<HomeRoutes>(
+    return Router<HomeRoutes>(
       routerDelegate: nestedHomeRouter,
       routeInformationParser: HomeRouteInformationParser(),
       routeInformationProvider: HomeRouteInformationProvider(),

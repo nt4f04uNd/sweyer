@@ -22,8 +22,7 @@ class PlayerRoute extends StatefulWidget {
   _PlayerRouteState createState() => _PlayerRouteState();
 }
 
-class _PlayerRouteState extends State<PlayerRoute>
-    with SingleTickerProviderStateMixin, SelectionHandlerMixin {
+class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStateMixin, SelectionHandlerMixin {
   final _queueTabKey = GlobalKey<_QueueTabState>();
   late List<Widget> _tabs;
   late SlidableController controller;
@@ -35,7 +34,8 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   void initState() {
     super.initState();
-    initSelectionController(() => ContentSelectionController.create<Song>(
+    initSelectionController(
+      () => ContentSelectionController.create<Song>(
         vsync: this,
         context: context,
         closeButton: true,
@@ -45,7 +45,7 @@ class _PlayerRouteState extends State<PlayerRoute>
       ),
       listenStatus: true,
     );
-  
+
     _tabs = [
       const _MainTab(),
       _QueueTab(
@@ -175,7 +175,6 @@ class _QueueTab extends StatefulWidget {
 }
 
 class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
-
   static const double appBarHeight = 81.0;
 
   /// This is set in parent via global key
@@ -258,8 +257,9 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   ///
   /// If optional [index] is provided - jumps to it.
   void jumpToSong([int? index]) {
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     index ??= PlaybackControl.instance.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
@@ -305,14 +305,14 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   double _getBorderRadius(SongOrigin origin) {
     if (origin is PersistentQueue)
       return 8.0;
-    else if (origin is Artist)
+    else if (origin is Artist) {
       return kArtistTileArtSize;
+    }
     throw UnimplementedError();
   }
 
   /// The style that should be used for the queue description text in the app bar.
-  TextStyle get _queueDescriptionStyle =>
-      ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
+  TextStyle get _queueDescriptionStyle => ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
         fontSize: 14.0,
         height: 1.0,
         fontWeight: FontWeight.w700,
@@ -430,9 +430,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
 
   AnimatedCrossFade _crossFade(bool showFirst, Widget firstChild, Widget secondChild) {
     return AnimatedCrossFade(
-      crossFadeState: showFirst
-        ? CrossFadeState.showFirst
-        : CrossFadeState.showSecond,
+      crossFadeState: showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       duration: const Duration(milliseconds: 400),
       layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
         // TODO: remove `layoutBuilder` build when https://github.com/flutter/flutter/issues/82614 is resolved
@@ -556,7 +554,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                       Icons.edit_rounded,
                                       size: 18.0,
                                     ),
-                                  )
+                                  ),
                                 ),
                                 _crossFade(
                                   !QueueControl.instance.state.shuffled,
@@ -633,9 +631,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                     top: 4.0,
                     bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
                   ),
-                  songTileVariant: QueueControl.instance.state.origin is Album
-                    ? SongTileVariant.number
-                    : SongTileVariant.albumArt,
+                  songTileVariant:
+                      QueueControl.instance.state.origin is Album ? SongTileVariant.number : SongTileVariant.albumArt,
                   songTileClickBehavior: SongTileClickBehavior.playPause,
                   currentTest: (index) => index == currentSongIndex,
                   alwaysShowScrollbar: true,
@@ -686,7 +683,7 @@ class _MainTabState extends State<_MainTab> {
           backgroundColor: Colors.transparent,
           toolbarHeight: math.max(
             TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
-            theme.appBarTheme.toolbarHeight ?? kToolbarHeight
+            theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
           ),
           leading: FadeTransition(
             opacity: fadeAnimation,
@@ -705,9 +702,7 @@ class _MainTabState extends State<_MainTab> {
                 children: [
                   ValueListenableBuilder<bool>(
                     valueListenable: Prefs.devMode,
-                    builder: (context, value, child) => value
-                      ? const _InfoButton()
-                      : const SizedBox.shrink()
+                    builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
                   ),
                   const FavoriteButton(),
                   const SizedBox(width: 5.0),
@@ -812,10 +807,7 @@ class _InfoButton extends StatelessWidget {
       icon: const Icon(Icons.info_outline_rounded),
       size: 40.0,
       onPressed: () {
-        String songInfo = PlaybackControl.instance.currentSong
-          .toMap()
-          .toString()
-          .replaceAll(r', ', ',\n');
+        String songInfo = PlaybackControl.instance.currentSong.toMap().toString().replaceAll(r', ', ',\n');
         // Remove curly braces
         songInfo = songInfo.substring(1, songInfo.length - 1);
         ShowFunctions.instance.showAlert(
@@ -840,7 +832,7 @@ class _InfoButton extends StatelessWidget {
                     ),
                   ),
                 );
-              }
+              },
             ),
           ),
           additionalActions: [
@@ -875,7 +867,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
   @override
   void initState() {
     super.initState();
-    controller = AnimationController( 
+    controller = AnimationController(
       vsync: this,
       duration: defaultDuration,
     );
@@ -896,8 +888,9 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
   }
 
   void _handleStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
+    if (status == AnimationStatus.completed) {
       controller.reverse();
+    }
   }
 
   @override
@@ -922,7 +915,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
       end: 1.0,
     ).animate(CurvedAnimation(
       curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
-      reverseCurve:const Interval(0.5, 1.0, curve: Curves.easeInCubic),
+      reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeInCubic),
       parent: fadeController,
     ));
     return FadeTransition(
@@ -984,7 +977,8 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
                   source: ContentArtSource.song(currentSong),
                 );
                 if (art == null ||
-                    controller.status == AnimationStatus.reverse || controller.status == AnimationStatus.dismissed ||
+                    controller.status == AnimationStatus.reverse ||
+                    controller.status == AnimationStatus.dismissed ||
                     useFade) {
                   art = newArt;
                 }
@@ -1015,7 +1009,6 @@ class _SaveQueueAsPlaylistAction extends StatefulWidget {
 
 class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> with TickerProviderStateMixin {
   Future<void> _handleTap() async {
-    
     final l10n = getl10n(context);
     final theme = ThemeControl.instance.theme;
     final songs = QueueControl.instance.state.current.songs;
