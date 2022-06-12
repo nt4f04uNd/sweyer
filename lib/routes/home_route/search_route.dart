@@ -684,7 +684,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                 child: GestureDetector(
                   onTap: () => focusNode.unfocus(),
                   onVerticalDragDown: (_) => focusNode.unfocus(),
-                  child: const _DelegateBuilder(),
+                  child: _DelegateBuilder(),
                 ),
               ),
             ),
@@ -713,7 +713,7 @@ class _DelegateProvider extends InheritedWidget {
 }
 
 class _DelegateBuilder extends StatefulWidget {
-  const _DelegateBuilder({Key? key}) : super(key: key);
+  _DelegateBuilder({Key? key}) : super(key: key);
 
   @override
   _DelegateBuilderState createState() => _DelegateBuilderState();

@@ -15,6 +15,7 @@ linter:
     depend_on_referenced_packages: false
     library_private_types_in_public_api: false
     sort_child_properties_last: false
+    prefer_const_constructors_in_immutables: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
