@@ -45,7 +45,7 @@ void main() {
         MediaControl(androidIcon: 'drawable/round_skip_next_black_36',
             label: l10n.next,
             action: 'play_next'),
-        MediaControl(androidIcon: 'drawable/round_close_black_24',
+        MediaControl(androidIcon: 'drawable/round_stop_black_24',
             label: l10n.stop,
             action: 'stop'),
       ].map((control) => control.toString()));
@@ -73,7 +73,7 @@ void main() {
         MediaControl(androidIcon: 'drawable/round_skip_next_black_36',
             label: l10n.next,
             action: 'play_next'),
-        MediaControl(androidIcon: 'drawable/round_close_black_24',
+        MediaControl(androidIcon: 'drawable/round_stop_black_24',
             label: l10n.stop,
             action: 'stop'),
       ].map((control) => control.toString()));
@@ -100,7 +100,7 @@ void main() {
         MediaControl(androidIcon: 'drawable/round_skip_next_black_36',
             label: l10n.next,
             action: 'play_next'),
-        MediaControl(androidIcon: 'drawable/round_close_black_24',
+        MediaControl(androidIcon: 'drawable/round_stop_black_24',
             label: l10n.stop,
             action: 'stop'),
       ].map((control) => control.toString()));
