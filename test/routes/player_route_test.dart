@@ -1,3 +1,4 @@
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 
 import '../test.dart';
@@ -11,6 +12,13 @@ void main() {
     await tester.tap(find.byType(TrackPanel));
     await tester.pumpAndSettle();
     expect(playerRouteController.value, 1.0);
+  }
+  
+  /// Navigate to the queue screen in the player route.
+  Future<void> openQueueScreen(WidgetTester tester) async {
+    await expandPlayerRoute(tester);
+    await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
+    await tester.pumpAndSettle();
   }
 
   testWidgets('can expand/collapse by tapping the button', (WidgetTester tester) async {
@@ -39,15 +47,45 @@ void main() {
     });
   });
 
-  testWidgets('can open queue screen by swiping to left', (WidgetTester tester) async {
-    await tester.runAppTest(() async {
-      // Expand the route
-      await expandPlayerRoute(tester);
+  group('queue screen', () {
+    testWidgets('can open by swiping to left', (WidgetTester tester) async {
+      await tester.runAppTest(() async {
+        // Expand the route
+        await expandPlayerRoute(tester);
 
-      expect(find.text(l10n.upNext), findsNothing);
-      await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
-      await tester.pumpAndSettle();
-      expect(find.text(l10n.upNext), findsOneWidget);
+        expect(find.text(l10n.upNext), findsNothing);
+        await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
+        await tester.pumpAndSettle();
+        expect(find.text(l10n.upNext), findsOneWidget);
+        expect(find.text(l10n.allTracks), findsOneWidget);
+      });
+    });
+
+    testWidgets('displays search query correctly', (WidgetTester tester) async {
+      const query = 'Query';
+      await tester.runAppTest(() async {
+        QueueControl.instance.setSearchedQueue(query, [songWith()]);
+        await openQueueScreen(tester);
+        expect(find.text(l10n.upNext), findsOneWidget);
+        expect(find.text(l10n.foundByQuery('"$query"'), findRichText: true), findsOneWidget);
+      });
+    });
+
+    testWidgets('Allows to open the search query from the title', (WidgetTester tester) async {
+      const query = 'Query';
+      await tester.runAppTest(() async {
+        QueueControl.instance.setSearchedQueue(query, [songWith()]);
+        await openQueueScreen(tester);
+        await tester.tap(find.byIcon(Icons.chevron_right_rounded));
+        await tester.pumpAndSettle();
+        expect(find.byType(SearchRoute), findsOneWidget);
+        final queryTextField = tester.widget<TextField>(find.descendant(
+          of: find.byType(SearchRoute),
+          matching: find.byType(TextField),
+        ));
+        expect(queryTextField.controller!.text, query);
+        expect(queryTextField.focusNode!.hasFocus, false);
+      });
     });
   });
 
@@ -177,5 +215,35 @@ void main() {
       await tester.pumpAndSettle();
     });
     expect(MusicPlayer.handler!.running, false);
+  });
+
+  testWidgets('handles back presses correctly', (WidgetTester tester) async {
+    await tester.runAppTest(() async {
+      await openQueueScreen(tester);
+      await tester.tap(find.byIcon(Icons.queue_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.newPlaylist), findsOneWidget);
+
+      // Simulate resizing the screen due to software keyboard.
+      await tester.binding.setSurfaceSize(const Size(kScreenWidth, kScreenHeight / 2));
+      await tester.pumpAndSettle();
+      
+      // First back press closes software keyboard.
+      await tester.binding.setSurfaceSize(kScreenSize);
+      await tester.pumpAndSettle();
+
+      // Close the "New playlist" dialog
+      await BackButtonInterceptor.popRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text(l10n.upNext), findsOneWidget);
+      expect(playerRouteController.value, 1.0);
+
+      // Close the player route
+      await BackButtonInterceptor.popRoute();
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.upNext), findsNothing);
+      expect(playerRouteController.value, 0);
+    });
   });
 }

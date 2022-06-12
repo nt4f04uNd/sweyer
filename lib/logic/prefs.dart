@@ -85,10 +85,6 @@ abstract class Prefs {
   /// * error snackbars are shown
   /// * song info button available in the top right menu of [PlayerRoute].
   static final devMode = PrefNotifier(const BoolPref('dev_mode', false));
-  
-  /// Whether a confirmation toast should be displayed when exiting
-  /// the app with back button.
-  static final confirmExitingWithBackButton = PrefNotifier(const BoolPref('confirm_exiting_with_back_button', true));
 }
 
 class SearchHistory {
@@ -147,4 +143,11 @@ abstract class Settings {
 
   /// Stores primary color int value.
   static final primaryColorInt = PrefNotifier(IntPref('setting_primary_color', Constants.Theme.defaultPrimaryColor.value));
+
+  /// Whether a confirmation toast should be displayed when exiting
+  /// the app with back button.
+  static final confirmExitingWithBackButton = PrefNotifier(const BoolPref('confirm_exiting_with_back_button', true));
+
+  /// Whether to use `MediaStore` to save favorite songs on Android 11 and above.
+  static final useMediaStoreForFavoriteSongs = PrefNotifier(const BoolPref('use_media_store_for_favorite_songs', true));
 }

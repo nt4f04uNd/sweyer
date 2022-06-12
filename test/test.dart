@@ -4,6 +4,8 @@ import 'dart:ui';
 export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';
 export 'package:flutter_test/flutter_test.dart';
+import 'package:android_content_provider/android_content_provider.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -16,7 +18,6 @@ import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as Constants;
-import 'package:sweyer/logic/logic.dart';
 
 export 'fakes/fakes.dart';
 
@@ -38,7 +39,7 @@ final _testSong = Song(
   duration: 0,
   size: 0,
   data: 'data_data_data_data_data_data_data_data',
-  isFavorite: false,
+  isFavoriteInMediaStore: false,
   generationAdded: 0,
   generationModified: 0,
   origin: _testAlbum,
@@ -79,9 +80,10 @@ final ArtistCopyWith artistWith = _testArtist.copyWith;
 
 /// Default l10n delegate in tests.
 final l10n = AppLocalizationsEn();
-const kScreenSize = Size(kScreenWidth, kScreenHeight);
 const kScreenHeight = 800.0;
 const kScreenWidth = 450.0;
+const kScreenPixelRatio = 3.0;
+const kScreenSize = Size(kScreenWidth, kScreenHeight);
 
 /// Sets the fake data providers and initializes the app state.
 /// 
@@ -89,7 +91,8 @@ const kScreenWidth = 450.0;
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  
+  binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
+  binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
   // Prepare flare.
   FlareTesting.setup();
 
@@ -112,6 +115,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   SystemUiStyleController.instance = FakeSystemUiStyleController();
   Backend.instance = FakeBackend();
   DeviceInfoControl.instance = FakeDeviceInfoControl();
+  FavoritesControl.instance = FakeFavoritesControl();
   PermissionsChannelObserver(binding); // Grant all permissions by default.
   ContentChannel.instance = FakeContentChannel(binding);
   QueueControl.instance = FakeQueueControl();
@@ -133,6 +137,9 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
     return {};
   });
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
+    return null;
+  });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel, (MethodCall methodCall) async {
     return null;
   });
   LicenseRegistry.reset();
@@ -169,33 +176,26 @@ extension WidgetTesterExtension on WidgetTester {
   ///  4. optionally, runs [goldenCaptureCallback]. It would time out if was ran before player is disposed in [callback].
   ///  5. unpumps the screen
   Future<void> runAppTest(AsyncCallback callback, {AsyncCallback? goldenCaptureCallback}) async {
-    // App only suppots vertical orientation, so switch tests to use it.
-    await binding.setSurfaceSize(kScreenSize);
-    await pumpWidget(
-      Center(
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(window).copyWith(size: kScreenSize),
-          child: const App(
-            debugShowCheckedModeBanner: false,
-          ),
-        ),
-      ),
-    );
-    await pump();
-    await callback();
-    await runAsync(() async {
-      // Don't leak player state between tests.
-      // Delay needed for proper diposal in some tests.
-      await Future.delayed(const Duration(milliseconds: 1));
-      await MusicPlayer.instance.stop();
-      await MusicPlayer.instance.dispose();
+    await withClock(binding.clock, () async {
+      // App only supports vertical orientation, so switch tests to use it.
+      await binding.setSurfaceSize(kScreenSize);
+      await pumpWidget(const App(debugShowCheckedModeBanner: false));
+      await pump();
+      await callback();
+      await runAsync(() async {
+        // Don't leak player state between tests.
+        // Delay needed for proper disposal in some tests.
+        await Future.delayed(const Duration(milliseconds: 1));
+        await MusicPlayer.instance.stop();
+        await MusicPlayer.instance.dispose();
+      });
+      await goldenCaptureCallback?.call();
+      // Unpump, in case we have any real animations running,
+      // so the pumpAndSettle on the next line doesn't hang on.
+      await pumpWidget(const SizedBox());
+      // Wait for ui animations.
+      await pumpAndSettle();
     });
-    await goldenCaptureCallback?.call();
-    // Unpump, in case we have any real animations running,
-    // so the pumpAndSettle on the next line doesn't hang on.
-    await pumpWidget(const SizedBox());
-    // Wait for ui animations.
-    await pumpAndSettle();
   }
 
   /// Whether the current tester is running in [testAppGoldens] and

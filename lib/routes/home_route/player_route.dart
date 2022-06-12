@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/physics.dart';
@@ -117,10 +118,11 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   Widget build(BuildContext context) {
     final backgroundColor = ThemeControl.instance.theme.colorScheme.background;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
     return Slidable(
       controller: controller,
-      start: 1.0 - kSongTileHeight / screenHeight,
+      start: 1.0 - TrackPanel.height(mediaQuery.textScaleFactor) / screenHeight,
       end: 0.0,
       direction: slideDirection,
       barrier: Container(
@@ -672,6 +674,7 @@ class _MainTabState extends State<_MainTab> {
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
+    final mediaQuery = MediaQuery.of(context);
     return AnimatedBuilder(
       animation: playerRouteController,
       builder: (context, child) => Scaffold(
@@ -681,6 +684,10 @@ class _MainTabState extends State<_MainTab> {
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: Colors.transparent,
+          toolbarHeight: math.max(
+            TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
+            theme.appBarTheme.toolbarHeight ?? kToolbarHeight
+          ),
           leading: FadeTransition(
             opacity: fadeAnimation,
             child: RepaintBoundary(
@@ -692,16 +699,19 @@ class _MainTabState extends State<_MainTab> {
             ),
           ),
           actions: <Widget>[
-            ValueListenableBuilder<bool>(
-              valueListenable: Prefs.devMode,
-              builder: (context, value, child) => value
-                ? child!
-                : const SizedBox.shrink(),
-              child: FadeTransition(
-                opacity: fadeAnimation,
-                child: const RepaintBoundary(
-                  child: _InfoButton(),
-                ),
+            FadeTransition(
+              opacity: fadeAnimation,
+              child: Row(
+                children: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: Prefs.devMode,
+                    builder: (context, value, child) => value
+                      ? const _InfoButton()
+                      : const SizedBox.shrink()
+                  ),
+                  const FavoriteButton(),
+                  const SizedBox(width: 5.0),
+                ],
               ),
             ),
           ],
@@ -713,7 +723,7 @@ class _MainTabState extends State<_MainTab> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const _TrackShowcase(),
+            const TrackShowcase(),
             Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -798,62 +808,60 @@ class _InfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return Padding(
-      padding: const EdgeInsets.only(right: 5.0),
-      child: NFIconButton(
-        icon: const Icon(Icons.info_outline_rounded),
-        size: 40.0,
-        onPressed: () {
-          String songInfo = PlaybackControl.instance.currentSong
-            .toMap()
-            .toString()
-            .replaceAll(r', ', ',\n');
-          // Remove curly braces
-          songInfo = songInfo.substring(1, songInfo.length - 1);
-          ShowFunctions.instance.showAlert(
-            context,
-            title: Text(
-              l10n.songInformation,
-              textAlign: TextAlign.center,
-            ),
-            contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
-            content: PrimaryScrollController(
-              controller: ScrollController(),
-              child: Builder(
-                builder: (context) {
-                  return AppScrollbar(
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        songInfo,
-                        style: const TextStyle(fontSize: 13.0),
-                        selectionControls: NFTextSelectionControls(
-                          backgroundColor: ThemeControl.instance.theme.colorScheme.background,
-                        ),
+    return NFIconButton(
+      icon: const Icon(Icons.info_outline_rounded),
+      size: 40.0,
+      onPressed: () {
+        String songInfo = PlaybackControl.instance.currentSong
+          .toMap()
+          .toString()
+          .replaceAll(r', ', ',\n');
+        // Remove curly braces
+        songInfo = songInfo.substring(1, songInfo.length - 1);
+        ShowFunctions.instance.showAlert(
+          context,
+          title: Text(
+            l10n.songInformation,
+            textAlign: TextAlign.center,
+          ),
+          contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
+          content: PrimaryScrollController(
+            controller: ScrollController(),
+            child: Builder(
+              builder: (context) {
+                return AppScrollbar(
+                  child: SingleChildScrollView(
+                    child: SelectableText(
+                      songInfo,
+                      style: const TextStyle(fontSize: 13.0),
+                      selectionControls: NFTextSelectionControls(
+                        backgroundColor: ThemeControl.instance.theme.colorScheme.background,
                       ),
                     ),
-                  );
-                }
-              ),
+                  ),
+                );
+              }
             ),
-            additionalActions: [
-              CopyButton(text: songInfo),
-            ],
-          );
-        },
-      ),
+          ),
+          additionalActions: [
+            CopyButton(text: songInfo),
+          ],
+        );
+      },
     );
   }
 }
 
 /// A widget that displays all information about current song
-class _TrackShowcase extends StatefulWidget {
-  const _TrackShowcase({Key? key}) : super(key: key);
+@visibleForTesting
+class TrackShowcase extends StatefulWidget {
+  const TrackShowcase({Key? key}) : super(key: key);
 
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }
 
-class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderStateMixin {
+class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateMixin {
   late StreamSubscription<Song> _songChangeSubscription;
   late AnimationController controller;
   late AnimationController fadeController;

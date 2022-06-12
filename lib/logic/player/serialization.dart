@@ -42,6 +42,9 @@ abstract class JsonSerializer<R, S> {
   Future<void> save(S data);
 }
 
+/// The type for [IntListSerializer].
+typedef IntSerializerType = JsonSerializer<List<int>, List<int>>;
+
 /// Serializes a list of integers.
 class IntListSerializer extends JsonSerializer<List<int>, List<int>> {
   const IntListSerializer(this.fileName);

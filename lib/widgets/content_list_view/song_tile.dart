@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
-const double kSongTileHeight = 64.0;
+const double kSongTileHeight = kSongTileArtSize + _tileVerticalPadding * 2;
+const double _tileVerticalPadding = 8.0;
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
@@ -242,30 +243,58 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
         color: value,
         child: child,
       ),
-      child: NFListTile(
-        dense: true,
-        isThreeLine: false,
-        contentPadding: EdgeInsets.only(
-          left: widget.horizontalPadding,
-          right: rightPadding,
-        ),
-        onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
-          ? _handleTap
-          : widget.onTap,
-        onLongPress: handleLongPress,
-        title: title,
-        subtitle: subtitle,
-        leading: albumArt,
-        trailing: selectionRoute
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
+      child: Material(
+        color: widget.backgroundColor,
+        child: InkWell(
+          onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
+            ? _handleTap
+            : widget.onTap,
+          onLongPress: handleLongPress,
+          splashFactory: NFListTileInkRipple.splashFactory,
+          child: Padding(
+            padding:  EdgeInsets.only(
+              top: _tileVerticalPadding,
+              bottom: _tileVerticalPadding,
+              left: widget.horizontalPadding,
+              right: rightPadding,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (widget.trailing != null)
-                  widget.trailing!,
-                buildAddToSelection(),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: albumArt,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        title,
+                        const SizedBox(height: 4.0),
+                        subtitle,
+                        const SizedBox(height: 3.0),
+                      ],
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FavoriteIndicator(shown: widget.song.isFavorite),
+                    if (widget.trailing != null)
+                      widget.trailing!,
+                    if (selectionRoute)
+                      buildAddToSelection(),
+                  ],
+                ),
               ],
-            )
-          : widget.trailing,
+            ),
+          ),
+        ),
       ),
     );
   }

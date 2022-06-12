@@ -34,6 +34,26 @@ extension QuickActionSerialization on QuickAction {
 /// The point of this function is to structurize and generalize the places where multiple contents
 /// an be used. It also allows to ensure that every existing content in the app is supported in all
 /// places it should be supported, this is extra useful when new content type is added.
+///
+/// Sometimes this function cannot be used directly to handle the content-related logic.
+/// Then we put a copy-paste assertion like below, so we don't forget to update the
+/// related code around this assertion, when we add a new content type.
+///
+/// An example of this can be a [ContentTuple].
+///
+/// ```
+/// assert(() {
+///   // See contentPick documentation for why we need this.
+///   contentPick<Song, void>(
+///     song: null,
+///     album: null,
+///     playlist: null,
+///     artist: null,
+///   );
+///   return true;
+/// }());
+/// ```
+/// 
 V contentPick<T extends Content, V>({
   Type? contentType,
   required V song,
@@ -96,19 +116,19 @@ class ContentMap<V> {
   /// Map entries.
   Iterable<MapEntry<Type, V>> get entries => _map.entries;
 
-  /// Returs a [Sort] per `T` [Content] from the map.
+  /// Returns a value per `T` [Content] from the map.
   /// 
   /// If [key] was explicitly provided, will use it instead.
-  V getValue<T extends Content>([Type? key]) {
+  V? getValue<T extends Content>([Type? key]) {
     assert(
       Content.enumerate().contains(key ?? T),
       "Specified type must be a subtype of Content",
     );
-    return _map[key ?? T]!;
+    return _map[key ?? T];
   }
 
-  /// Puts a [Sort] typed with `T` into the map.
-  /// 
+  /// Puts a [value] typed with `T` into the map.
+  ///
   /// If [key] was explicitly provided, will use it instead.
   void setValue<T extends Content>(V value, {Type? key}) {
     assert(
@@ -116,6 +136,77 @@ class ContentMap<V> {
       "Specified type must be a subtype of Content",
     );
     _map[key ?? T] = value;
+  }
+
+  /// Look up the value of [key], or add a new entry if it isn't there.
+  ///
+  /// If [key] was explicitly provided, will use it instead.
+  V putIfAbsent<T extends Content>(V Function() ifAbsent, {Type? key}) {
+    assert(
+      Content.enumerate().contains(key ?? T),
+      "Specified type must be a subtype of Content",
+    );
+    return _map.putIfAbsent(key ?? T, ifAbsent);
+  }
+
+  /// Removes all entries from the map.
+  void clear() {
+    _map.clear();
+  }
+}
+
+/// A container for list of all content types.
+///
+/// This is like a [ContentMap] that contains lists and
+/// always guarantees to have a value in it for given content type.
+class ContentTuple {
+  final _map = ContentMap<List<Content>>();
+
+  ContentTuple(
+    List<Song> songs,
+    List<Album> albums,
+    List<Playlist> playlists,
+    List<Artist> artists,
+  ) : assert(() {
+        // See contentPick documentation for why we need this.
+        contentPick<Song, void>(
+          song: null,
+          album: null,
+          playlist: null,
+          artist: null,
+        );
+        return true;
+      }()) {
+        _map.setValue<Song>(songs);
+        _map.setValue<Album>(albums);
+        _map.setValue<Playlist>(playlists);
+        _map.setValue<Artist>(artists);
+      }
+
+  List<Song> get songs => _map.getValue<Song>()! as List<Song>;
+  List<Album> get albums => _map.getValue<Album>()! as List<Album> ;
+  List<Playlist> get playlists => _map.getValue<Playlist>()! as List<Playlist>;
+  List<Artist> get artists => _map.getValue<Artist>()! as List<Artist>;
+
+  List<T> get<T extends Content>([Type? contentType]) => _map.getValue<T>(contentType)! as List<T>;
+
+  List<Content> get merged => [
+    for (final content in _map.values)
+      ...content,
+  ];
+
+  bool get empty => _map.values.every((element) => element.isEmpty);
+  bool get notEmpty => _map.values.any((element) => element.isNotEmpty);
+
+  bool any(bool Function(Content element) test) {
+    for (final contentList in _map.values) {
+      for (final content in contentList) {
+        if (test(content)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 
@@ -222,6 +313,7 @@ class ContentControl extends Control {
         await QueueControl.instance.init();
         PlaybackControl.instance.init();
         await MusicPlayer.instance.init();
+        await FavoritesControl.instance.init();
       }
       _initializeCompleter = null;
     }
@@ -247,6 +339,7 @@ class ContentControl extends Control {
       QueueControl.instance.dispose();
       PlaybackControl.instance.dispose();
       MusicPlayer.instance.dispose();
+      FavoritesControl.instance.dispose();
     }
     super.dispose();
   }
@@ -289,7 +382,19 @@ class ContentControl extends Control {
   // }
   
   /// Returns content of specified type.
-  List<T> getContent<T extends Content>([Type? contentType]) {
+  List<T> getContent<T extends Content>({
+    Type? contentType,
+    bool filterFavorite = false,
+  }) {
+    if (filterFavorite) {
+      return contentPick<T, ValueGetter<List<T>>>(
+        contentType: contentType,
+        song: () => ContentUtils.filterFavorite(state.allSongs.songs).toList() as List<T>,
+        album: () => ContentUtils.filterFavorite(state.albums.values).toList() as List<T>,
+        playlist: () => ContentUtils.filterFavorite(state.playlists).toList() as List<T>,
+        artist: () => ContentUtils.filterFavorite(state.artists).toList() as List<T>,
+      )();
+    }
     return contentPick<T, ValueGetter<List<T>>>(
       contentType: contentType,
       song: () => state.allSongs.songs as List<T>,
@@ -303,7 +408,7 @@ class ContentControl extends Control {
   T? getContentById<T extends Content>(int id, [Type? contentType]) {
     if ((contentType ?? T) == Album)
       return state.albums[id] as T?;
-    return getContent<T>(contentType).firstWhereOrNull((el) => el.id == id);
+    return getContent<T>(contentType: contentType).firstWhereOrNull((el) => el.id == id);
   }
 
   /// Refetches all the content.
@@ -464,7 +569,7 @@ class ContentControl extends Control {
   /// See [ContentState.sorts].
   void sort<T extends Content>({ Type? contentType, Sort<T>? sort, bool emitChangeEvent = true }) {
     final sorts = state.sorts;
-    sort ??= sorts.getValue<T>(contentType) as Sort<T>;
+    sort ??= sorts.getValue<T>(contentType)! as Sort<T>;
     contentPick<T, VoidCallback>(
       contentType: contentType,
       song: () {
@@ -524,8 +629,6 @@ class ContentControl extends Control {
   ///
   /// The songs must have a source ID (non-negative).
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
-    // todo: implement
-    songs = _ensureSongsAreSource(songs);
     if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       try {
         final result = await ContentChannel.instance.setSongsFavorite(songs, value);
@@ -543,8 +646,6 @@ class ContentControl extends Control {
         );
         debugPrint('setSongsFavorite error: $ex');
       }
-    } else {
-     
     }
   }
 
@@ -713,6 +814,8 @@ class ContentControl extends Control {
 
 
 class ContentUtils {
+  ContentUtils._();
+
   /// Android unknown artist.
   static const unknownArtist = '<unknown>';
 
@@ -756,17 +859,30 @@ class ContentUtils {
            queues.type != QueueType.origin && origin == PlaybackControl.instance.currentSongOrigin;
   }
 
-  /// Returns a default icon for a [PersistentQueue].
-  static IconData persistentQueueIcon(PersistentQueue queue) {
-    return persistentQueuePick<PersistentQueue, IconData>(
-      contentType: queue.runtimeType,
-      album: Album.icon,
+  /// Returns a default icon for a [Content].
+  static IconData contentIcon<T extends Content>([Type? contentType]) {
+    return contentPick<T, IconData>(
+      contentType: contentType,
+      song: Song.icon,
+      album: Album.icon, 
       playlist: Playlist.icon,
+      artist: Artist.icon,
+    );
+  }
+
+  /// Returns an ID string which represents a given content type.
+  static String contentTypeId<T extends Content>([Type? contentType]) {
+    return contentPick<T, String>(
+      contentType: contentType,
+      song: 'song',
+      album: 'album', 
+      playlist: 'playlist',
+      artist: 'artist',
     );
   }
 
   /// Computes the duration of mulitple [songs] and returs it as formatted string.
-  static String bulkDuration(List<Song> songs) {
+  static String bulkDuration(Iterable<Song> songs) {
     final duration = Duration(milliseconds: songs.fold(0, (prev, el) => prev + el.duration));
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
@@ -796,7 +912,7 @@ class ContentUtils {
   }
 
   /// Joins and returns a list of all songs of specified [origins] list.
-  static List<Song> joinSongOrigins(List<SongOrigin> origins) {
+  static List<Song> joinSongOrigins(Iterable<SongOrigin> origins) {
     final List<Song> songs = [];
     for (final origin in origins) {
       for (final song in origin.songs) {
@@ -809,7 +925,7 @@ class ContentUtils {
 
   /// Joins specified [origins] list and returns a list of all songs and a
   /// shuffled variant of it.
-  static ShuffleResult shuffleSongOrigins(List<SongOrigin> origins) {
+  static ShuffleResult shuffleSongOrigins(Iterable<SongOrigin> origins) {
     final List<Song> songs = joinSongOrigins(origins);
     final List<Song> shuffledSongs = [];
     for (final origin in List<SongOrigin>.from(origins)..shuffle()) {
@@ -826,7 +942,7 @@ class ContentUtils {
 
   /// Accepts a collection of content, exctracts songs from each entry
   /// and returns a one flattened array of songs.
-  static List<Song> flatten(List<Content> collection) {
+  static List<Song> flatten(Iterable<Content> collection) {
     final List<Song> songs = [];
     for (final content in collection) {
       if (content is Song) {
@@ -841,6 +957,7 @@ class ContentUtils {
         throw UnimplementedError();
       }
       assert(() {
+        // See contentPick documentation for why we need this.
         contentPick<Song, void>(
           song: null,
           album: null,
@@ -853,11 +970,35 @@ class ContentUtils {
     return songs;
   }
 
+  /// Filter content collection by favorite.
+  static Iterable<T> filterFavorite<T extends Content>(Iterable<T> content) {
+    return content.where((el) => el.isFavorite);
+  }
+
+  /// Receives a selection data set, extracts all types of contents,
+  /// and returns the result.
+  static ContentTuple selectionPack(Set<SelectionEntry<Content>> data) {
+    return _selectionPack(
+      data: data,
+      sort: false,
+    );
+  }
+
   /// Receives a selection data set, extracts all types of contents,
   /// sorts them by index in ascending order and returns the result.
   ///
   /// See also discussion in [SelectionEntry].
-  static SortAndPackResult selectionSortAndPack(Set<SelectionEntry<Content>> data) {
+  static ContentTuple selectionPackAndSort(Set<SelectionEntry<Content>> data) {
+    return _selectionPack(
+      data: data,
+      sort: true,
+    );
+  }
+
+  static ContentTuple _selectionPack({
+    required Set<SelectionEntry<Content>> data,
+    required bool sort,
+  }) {
     final List<SelectionEntry<Song>> songs = [];
     final List<SelectionEntry<Album>> albums = [];
     final List<SelectionEntry<Playlist>> playlists = [];
@@ -876,6 +1017,7 @@ class ContentUtils {
       }
     }
     assert(() {
+      // See contentPick documentation for why we need this.
       contentPick<Song, void>(
         song: null,
         album: null,
@@ -884,11 +1026,13 @@ class ContentUtils {
       );
       return true;
     }());
-    songs.sort((a, b) => a.index.compareTo(b.index));
-    albums.sort((a, b) => a.index.compareTo(b.index));
-    playlists.sort((a, b) => a.index.compareTo(b.index));
-    artists.sort((a, b) => a.index.compareTo(b.index));
-    return SortAndPackResult(
+    if (sort) {
+      songs.sort((a, b) => a.index.compareTo(b.index));
+      albums.sort((a, b) => a.index.compareTo(b.index));
+      playlists.sort((a, b) => a.index.compareTo(b.index));
+      artists.sort((a, b) => a.index.compareTo(b.index));
+    }
+    return ContentTuple(
       songs.map((el) => el.data).toList(),
       albums.map((el) => el.data).toList(),
       playlists.map((el) => el.data).toList(),
@@ -965,22 +1109,4 @@ class ShuffleResult {
   const ShuffleResult(this.songs, this.shuffledSongs);
   final List<Song> songs;
   final List<Song> shuffledSongs;
-}
-
-
-/// Result of [ContentUtils.selectionSortAndPack].
-class SortAndPackResult {
-  final List<Song> songs;
-  final List<Album> albums;
-  final List<Playlist> playlists;
-  final List<Artist> artists;
-
-  SortAndPackResult(this.songs, this.albums, this.playlists, this.artists);
-
-  List<Content> get merged => [
-    ...songs,
-    ...albums,
-    ...playlists,
-    ...artists,
-  ];
 }

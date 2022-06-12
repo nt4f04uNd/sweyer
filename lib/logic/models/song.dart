@@ -33,11 +33,13 @@ class Song extends Content {
   final int size;
   final String? data;
 
-  /// Indicates that user marked this song as favorite.
+  /// Whether the content was marked as favorite in MediaStore.
   ///
-  /// In native only available starting from Android R, below this favorite logic
-  /// is implemented in app itself.
-  final bool? isFavorite;
+  /// Only available starting from Android R (30), below this is always `null`.
+  ///
+  /// See also:
+  ///  * [isFavorite] getter
+  final bool? isFavoriteInMediaStore;
 
   /// Generation number at which metadata for this media item was first inserted.
   /// 
@@ -111,7 +113,7 @@ class Song extends Content {
     required this.duration,
     required this.size,
     required this.data,
-    required this.isFavorite,
+    required this.isFavoriteInMediaStore,
     required this.generationAdded,
     required this.generationModified,
     this.duplicationIndex,
@@ -155,7 +157,7 @@ class Song extends Content {
       duration: map['duration'] as int,
       size: map['size'] as int,
       data: map['data'] as String?,
-      isFavorite: map['isFavorite'] as bool?,
+      isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool?,
       generationAdded: map['generationAdded'] as int?,
       generationModified: map['generationModified'] as int?,
     );
@@ -177,7 +179,7 @@ class Song extends Content {
       'duration': duration,
       'size': size,
       'data': data,
-      'isFavorite': isFavorite,
+      'isFavoriteInMediaStore': isFavoriteInMediaStore,
       'generationAdded': generationAdded,
       'generationModified': generationModified,
     };
@@ -200,7 +202,7 @@ abstract class SongCopyWith {
     int duration,
     int size,
     String? data,
-    bool? isFavorite,
+    bool? isFavoriteInMediaStore,
     int? generationAdded,
     int? generationModified,
     int? duplicationIndex,
@@ -234,7 +236,7 @@ class _SongCopyWith extends SongCopyWith {
     Object duration = _undefined,
     Object size = _undefined,
     Object? data = _undefined,
-    Object? isFavorite = _undefined,
+    Object? isFavoriteInMediaStore = _undefined,
     Object? generationAdded = _undefined,
     Object? generationModified = _undefined,
     Object? duplicationIndex = _undefined,
@@ -255,7 +257,7 @@ class _SongCopyWith extends SongCopyWith {
       duration: duration == _undefined ? value.duration : duration as int,
       size: size == _undefined ? value.size : size as int,
       data: data == _undefined ? value.data : data as String?,
-      isFavorite: isFavorite == _undefined ? value.isFavorite : isFavorite as bool?,
+      isFavoriteInMediaStore: isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool?,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
       generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
       duplicationIndex: duplicationIndex == _undefined ? value.duplicationIndex : duplicationIndex as int?,

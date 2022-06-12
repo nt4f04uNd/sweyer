@@ -1,12 +1,15 @@
 export 'backend.dart';
 export 'content_channel.dart';
 export 'content.dart';
+export 'favorites.dart';
+export 'media_store_content_observer.dart';
 export 'playback.dart';
 export 'queue.dart';
 export 'serialization.dart';
 
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
@@ -200,7 +203,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     
     DateTime? _lastEvent;
     player.positionStream.listen((event) {
-      final now = DateTime.now();
+      final now = clock.now();
       if (_lastEvent == null || now.difference(_lastEvent!) > const Duration(milliseconds: 1000)) {
         _lastEvent = now;
         _setState();
@@ -208,7 +211,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     });
     player.playingStream.listen((playing) {
       _setState();
-      _lastEvent = DateTime.now();
+      _lastEvent = clock.now();
       if (playing)
         running = true;
     });
@@ -340,9 +343,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @override
   Future<void> stop() async {
     running = false;
-    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
-    // await player.stop();
-    await player.pause();
+    await player.stop();
     await super.stop();
   }
 
@@ -579,7 +580,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
           action: 'play_next',
         ),
         MediaControl(
-          androidIcon: 'drawable/round_close_${color}_24',
+          androidIcon: 'drawable/round_stop_${color}_24',
           label: l10n.stop,
           action: 'stop',
         ),

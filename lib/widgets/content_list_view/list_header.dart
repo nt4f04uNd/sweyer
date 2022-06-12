@@ -85,7 +85,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// Additional widget to place before [count].
   final Widget? trailing;
 
-  Sort<T> getSort() => ContentControl.instance.state.sorts.getValue<T>(contentType) as Sort<T>;
+  Sort<T> getSort() => ContentControl.instance.state.sorts.getValue<T>(contentType)! as Sort<T>;
 
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
@@ -163,16 +163,16 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
       trailing: _onlyCount
         ? null
         : Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (trailing != null)
-              trailing!,
-            Flexible(
-              child: _buildCount(l10n, textStyle),
-            ),
-          ],
-        ),
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (trailing != null)
+                trailing!,
+              Flexible(
+                child: _buildCount(l10n, textStyle),
+              ),
+            ],
+          ),
       leading: _onlyCount ? _buildCount(l10n, textStyle) : Theme(
         data: Theme.of(context).copyWith(
           splashFactory: NFListTileInkRipple.splashFactory,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -51,7 +52,7 @@ class TrackPanel extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                    height: kSongTileHeight * math.max(0.95, textScaleFactor),
+                    height: TrackPanel.height(textScaleFactor),
                     padding: const EdgeInsets.only(
                       left: 16.0,
                       right: 16.0,
@@ -116,6 +117,10 @@ class TrackPanel extends StatelessWidget {
       },
     );
   }
+
+  /// The height of this widget given a [textScaleFactor].
+  static double height(double textScaleFactor) =>
+      kSongTileHeight * math.max(0.95, textScaleFactor);
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {
@@ -128,7 +133,7 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
 class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgress> {
   static const min = 0.001;
 
-  double initRotation = math.Random(DateTime.now().second).nextDouble();
+  double initRotation = math.Random(clock.now().second).nextDouble();
 
   /// Actual track position value
   Duration _value = Duration.zero;

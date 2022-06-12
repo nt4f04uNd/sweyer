@@ -472,11 +472,11 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   static HomeRouter get instance => _instance!;
 
   static HomeRouter of(BuildContext context) {
-    return _RouterDelegateProvider.maybeOf<HomeRouter>(context)!;
+    return RouterDelegateProvider.maybeOf<HomeRouter>(context)!;
   }
 
   static HomeRouter? maybeOf(BuildContext context) {
-    return _RouterDelegateProvider.maybeOf<HomeRouter>(context);
+    return RouterDelegateProvider.maybeOf<HomeRouter>(context);
   }
 
   @override
@@ -518,30 +518,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
       ((tabsRouteKey.currentState?.tabController.animation?.value ?? -1) == 0.0 || routes.length > 1) &&
       !(tabsRouteKey.currentState?.tabBarDragged ?? false) &&
       !(_currentSearchDelegate?.chipsBarDragged ?? false);
-  }
-
-  /// Callback that must be called before any pop.
-  /// 
-  /// For example we want that player route would be closed first.
-  bool handleNecessaryPop() {
-    final selectionController = ContentControl.instance.selectionNotifier.value;
-    if (playerRouteController.opened) {
-      if (selectionController != null) {
-        selectionController.close();
-        return true;
-      }
-      playerRouteController.close();
-      return true;
-    } else if (drawerController.opened) {
-      drawerController.close();
-      return true;
-    // Don't try to close the alwaysInSelection controller, since it is not possible
-    } else if (selectionController != null &&
-              !selectionController.alwaysInSelection) {
-      selectionController.close();
-      return true;
-    }
-    return false;
   }
 
   /// The [allowStackSimilar] parameter in this override is ignored and set automatically.
@@ -656,7 +632,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         throw UnimplementedError();
       }
     }
-    return _RouterDelegateProvider<HomeRouter>(
+    return RouterDelegateProvider<HomeRouter>(
       delegate: this,
       child: Navigator(
         key: navigatorKey,
@@ -674,20 +650,8 @@ class HomeRouteInformationProvider extends RouteInformationProvider with ChangeN
   RouteInformation value = RouteInformation(location: HomeRoutes.tabs.location);
 }
 
-class HomeRouteBackButtonDispatcher extends ChildBackButtonDispatcher {
-  HomeRouteBackButtonDispatcher(BackButtonDispatcher parent) : super(parent);
-
-  @override
-  Future<bool> invokeCallback(Future<bool> defaultValue) async {
-    final handled = HomeRouter.instance.handleNecessaryPop();
-    if (handled)
-      return true;
-    return super.invokeCallback(defaultValue);
-  }
-}
-
-class _RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
-  _RouterDelegateProvider({
+class RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
+  RouterDelegateProvider({
     Key? key,
     required this.delegate,
     required Widget child,
@@ -696,8 +660,8 @@ class _RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget 
   final T delegate;
 
   static T? maybeOf<T extends RouterDelegate>(BuildContext context) {
-    return (context.getElementForInheritedWidgetOfExactType<_RouterDelegateProvider<T>>()?.widget 
-              as _RouterDelegateProvider<T>?)?.delegate;
+    return (context.getElementForInheritedWidgetOfExactType<RouterDelegateProvider<T>>()?.widget 
+              as RouterDelegateProvider<T>?)?.delegate;
   }
 
   @override

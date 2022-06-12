@@ -21,13 +21,24 @@ class ArtistWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final localizedArtist = ContentUtils.localizedArtist(artist, l10n);
-    return Text(
-      trailingText == null ? localizedArtist : ContentUtils.joinDot([
-        localizedArtist,
-        trailingText,
-      ]),
-      overflow: overflow,
-      style: Theme.of(context).textTheme.subtitle2!.merge(textStyle),
+    final style = Theme.of(context).textTheme.subtitle2!.merge(textStyle);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Flexible(
+          child: Text(
+            localizedArtist,
+            overflow: overflow,
+            style: style,
+          ),
+        ),
+        if (trailingText != null)
+          Text(
+            ' ${ContentUtils.dot} $trailingText',
+            style: style,
+          ),
+      ],
     );
   }
 }
