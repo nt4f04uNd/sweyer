@@ -213,7 +213,7 @@ class ShowFunctions extends NFShowFunctions {
     BuildContext context, {
     required Widget title,
     Widget? content,
-    EdgeInsets titlePadding: defaultAlertTitlePadding,
+    EdgeInsets titlePadding = defaultAlertTitlePadding,
     EdgeInsets contentPadding = defaultAlertContentPadding,
     Widget? acceptButton,
     Widget? cancelButton,

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';
@@ -90,7 +89,7 @@ const kScreenSize = Size(kScreenWidth, kScreenHeight);
 /// The [configureFakes] callback can be used to modify the fake data providers
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
-  final binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
   binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
   binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
   // Prepare flare.

@@ -39,6 +39,15 @@ class MockJustAudio
     _players.remove(request.id);
     return DisposePlayerResponse();
   }
+
+  @override
+  Future<DisposeAllPlayersResponse> disposeAllPlayers(DisposeAllPlayersRequest request) async {
+    _players.forEach((key, value) {
+      value.dispose(DisposeRequest());
+    });
+    _players.clear();
+    return DisposeAllPlayersResponse();
+  }
 }
 
 const audioSourceDuration = Duration(minutes: 2);
@@ -137,7 +146,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
     _audioSource = audioSource;
     _index = request.initialIndex ?? 0;
     // Simulate loading time.
-    await Future<dynamic>.delayed(Duration(milliseconds: 100));
+    await Future<dynamic>.delayed(const Duration(milliseconds: 100));
     _setPosition(request.initialPosition ?? Duration.zero);
     _processingState = ProcessingStateMessage.ready;
     _broadcastPlaybackEvent();
@@ -149,7 +158,9 @@ class MockAudioPlayer implements AudioPlayerPlatform {
 
   @override
   Future<PlayResponse> play(PlayRequest request) async {
-    if (_playing) return PlayResponse();
+    if (_playing) {
+      return PlayResponse();
+    }
     _playing = true;
     if (_duration != null) {
       _startTimer();
@@ -273,7 +284,7 @@ class MockAudioPlayer implements AudioPlayerPlatform {
     String? url;
     if (_audioSource is UriAudioSourceMessage) {
       // Not sure why this cast is necessary...
-      url = (_audioSource as UriAudioSourceMessage).uri.toString();
+      url = (_audioSource! as UriAudioSourceMessage).uri.toString();
     }
     eventController.add(PlaybackEventMessage(
       processingState: _processingState,

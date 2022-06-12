@@ -332,7 +332,7 @@ class ContentControl extends Control {
       _initializeCompleter = null;
       // TODO: this might still deliver some pedning events to listeneres, see https://github.com/dart-lang/sdk/issues/45653
       _contentSubject.close();
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         selectionNotifier.dispose();
       });
       _state = null;

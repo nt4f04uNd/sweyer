@@ -95,7 +95,7 @@ Future<void> main() async {
   FlutterError.onError = reportFlutterError;
 
   runZonedGuarded<Future<void>>(() async {
-    WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
+    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
     await DeviceInfoControl.instance.init();
     ThemeControl.instance.init();

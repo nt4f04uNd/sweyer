@@ -100,7 +100,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     albums = widget.artist.albums;
     if (songs.isEmpty && albums.isEmpty) {
       if (postFrame) {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           if (mounted) {
             _quitBecauseNotFound();
           }

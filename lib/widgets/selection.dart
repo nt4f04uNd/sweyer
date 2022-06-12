@@ -71,7 +71,7 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
     if (selectionRoute) {
       selectionController.removeListener(handleSelection);
       selectionController.removeStatusListener(handleSelectionStatus);
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         selectionController.primaryContentType = _savedPrimaryContentType;
       });
     } else {
@@ -584,7 +584,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
   @override
   void didPop() {
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // This might be called during the build which will cause a crash
       close();
     });
@@ -626,12 +626,12 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   
     if (ContentControl.instance.disposed.value) {
       _removeOverlay();
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
         _primaryContentTypeNotifier.dispose();
       });
       super.dispose();
     } else {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
         _notifier.value = null;
         _primaryContentTypeNotifier.dispose();
         if (inSelection)
@@ -771,7 +771,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
           child: FlareActor(
             Constants.Assets.ASSET_ANIMATION_CHECKMARK,
             animation: _flareAnimation,
-            color: ThemeControl.instance.theme.colorScheme.secondaryVariant,
+            color: ThemeControl.instance.theme.colorScheme.secondaryContainer,
             callback: (name) {
               setState(() {
                 _flareAnimation = 'stop';

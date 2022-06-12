@@ -178,7 +178,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               ),
               const Divider(),
               const SizedBox(height: 7.0),
-              MenuItem(
+              DrawerMenuItem(
                 l10n.settings,
                 icon: Icons.settings_rounded,
                 onTap: _handleClickSettings,
@@ -186,7 +186,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               ValueListenableBuilder<bool>(
                 valueListenable: Prefs.devMode,
                 builder: (context, value, child) => value ? child! : const SizedBox.shrink(),
-                child: MenuItem(
+                child: DrawerMenuItem(
                   l10n.debug,
                   icon: Icons.adb_rounded,
                   onTap: _handleClickDebug,
@@ -200,8 +200,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   }
 }
 
-class MenuItem extends StatelessWidget {
-  const MenuItem(
+class DrawerMenuItem extends StatelessWidget {
+  const DrawerMenuItem(
     this.title, {
     Key? key,
     this.icon,
@@ -236,7 +236,7 @@ class MenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: Constants.Theme.menuItemColor.auto,
+          color: Constants.Theme.drawerMenuItemColor.auto,
         ),
       ),
       onTap: onTap,

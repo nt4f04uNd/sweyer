@@ -191,7 +191,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       jumpToSong(PlaybackControl.instance.currentSongIndex);
     });
 
@@ -201,7 +201,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
       if (ContentControl.instance.state.allSongs.isNotEmpty) {
         setState(() {/* update ui list as data list may have changed */});
         if (!opened) {
-          WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
             // Jump when tracklist changes (e.g. shuffle happened)
             jumpToSong();
             // Post framing it because we need to be sure that list gets updated before we jump.
@@ -476,7 +476,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     );
     final appBar = Material(
       elevation: 2.0,
-      color: theme.appBarTheme.color,
+      color: theme.appBarTheme.backgroundColor,
       child: Container(
         height: appBarHeight,
         margin: EdgeInsets.only(top: topScreenPadding),

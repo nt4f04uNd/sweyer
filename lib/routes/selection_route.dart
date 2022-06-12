@@ -79,7 +79,7 @@ class _SelectionRouteState extends State<SelectionRoute> {
       },
     );
     widget.selectionArguments.selectionController = controller;
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
         controller.overlay = nestedHomeRouter.navigatorKey.currentState!.overlay;
         controller.activate();

@@ -55,8 +55,6 @@ class PaletteSwatches extends StatelessWidget {
 
 
 const Color _kBackgroundColor = Color(0xffa0a0a0);
-const Color _kSelectionRectangleBackground = Color(0x15000000);
-const Color _kSelectionRectangleBorder = Color(0x80000000);
 const Color _kPlaceholderColor = Color(0x80404040);
 
 /// A small square of color with an optional label.

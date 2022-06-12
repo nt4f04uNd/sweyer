@@ -307,7 +307,7 @@ class _NoSourceLoader extends _ArtSourceLoader {
     if (state.loadAnimationDuration == Duration.zero) {
       setLoading(_SourceLoading.notLoading);
     } else {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         setLoading(_SourceLoading.notLoading);
       });
     }
@@ -418,7 +418,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
       return;
     setLoading(_SourceLoading.loading);
     final uri = song.contentUri;
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       if (!state.mounted)
         return;
       _signal = CancellationSignal();
@@ -501,7 +501,7 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
     if (state.loadAnimationDuration == Duration.zero) {
       _loadFile();
     } else {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _loadFile();
       });
     }
@@ -581,7 +581,7 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
       return;
     }
     setLoading(_SourceLoading.loading);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       if (!state.mounted)
         return;
       try {
@@ -776,7 +776,7 @@ class _ContentArtState extends State<ContentArt> {
     assert(loaded);
     if (!_delivered) {
       _delivered = true;
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (mounted) {
           setState(() {
             /* rebuild to change animated switcher child */
@@ -789,9 +789,9 @@ class _ContentArtState extends State<ContentArt> {
         ///
         /// And the third is for the called above `setState`, because calling it
         /// will cause image to be rebuilt to trigger [AnimatiedSwitcher] animation.
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
           if (!mounted)
             return;
           final object = globalKey!.currentContext!.findRenderObject()!;

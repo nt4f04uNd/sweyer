@@ -118,7 +118,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
 
     if (queue == null || queue is Album && queueSongs!.isEmpty) {
       if (init) {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           if (mounted) {
             _quitBecauseNotFound();
           }

@@ -199,7 +199,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   void _init(MusicPlayer player) {
     _disposed = false;
     this.player = player;
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     
     DateTime? _lastEvent;
     player.positionStream.listen((event) {
@@ -235,7 +235,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     stop();
     playbackSubscriber.cancel();
     queueSubscriber.cancel();
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -539,7 +539,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
       return;
     final playing = player.playing;
     final l10n = staticl10n;
-    final color = WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
+    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark
       ? 'white'
       : 'black';
     playbackState.add(playbackState.value!.copyWith(

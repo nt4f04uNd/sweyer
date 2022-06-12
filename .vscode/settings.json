@@ -19,7 +19,4 @@
       "statusBarItem.remoteForeground": "#e7e7e7"
    },
    "peacock.color": "#7c4dff",
-   "[dart]": {
-      "editor.defaultFormatter": "Dart-Code.flutter",
-   },
 }

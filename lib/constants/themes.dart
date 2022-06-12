@@ -19,7 +19,7 @@ abstract class Theme {
     dark: Color(0xff191b1a),
   );
 
-  static const  _ThemeContainer<Color> menuItemColor = _ThemeContainer(
+  static const  _ThemeContainer<Color> drawerMenuItemColor = _ThemeContainer(
     light: Color(0xff3d3e42),
     dark: Colors.white,
   );
@@ -75,10 +75,10 @@ abstract class Theme {
         onBackground: AppColors.greyText,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
-        primaryVariant: Color(0xff936bff),
+        primaryContainer: Color(0xff936bff),
         onPrimary: Colors.white,
         secondary: AppColors.eee,
-        secondaryVariant: Colors.white,
+        secondaryContainer: Colors.white,
         // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
@@ -160,12 +160,10 @@ abstract class Theme {
         caption: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
-        brightness: Brightness.light,
         elevation: 2.0,
         titleSpacing: 0.0,
         toolbarHeight: NFConstants.toolbarHeight,
         color: AppColors.eee,
-        backwardsCompatibility: false,
         titleTextStyle: TextStyle(
           color: AppColors.greyText,
           fontWeight: FontWeight.w600,
@@ -201,10 +199,10 @@ abstract class Theme {
         onBackground: Colors.white,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
-        primaryVariant: Color(0xff936bff),
+        primaryContainer: Color(0xff936bff),
         onPrimary: Colors.white,
         secondary: AppColors.grey,
-        secondaryVariant: Colors.black,
+        secondaryContainer: Colors.black,
         // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         onSecondary: Colors.white,
         error: Color(0xffed3b3b),
@@ -270,12 +268,10 @@ abstract class Theme {
         caption: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
-        brightness: Brightness.dark,
         color: AppColors.grey,
         elevation: 0.0,
         titleSpacing: 0.0,
         toolbarHeight: NFConstants.toolbarHeight,
-        backwardsCompatibility: false,
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,

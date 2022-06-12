@@ -379,7 +379,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     stateDelegate = _SearchStateDelegate(selectionController, widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
         _route = ModalRoute.of(context)!;
         _animation = _route.animation!;
@@ -470,7 +470,6 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     final ThemeData theme = ThemeControl.instance.theme;
     return theme.copyWith(
       primaryColor: theme.backgroundColor,
-      primaryColorBrightness: theme.appBarTheme.brightness,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
       textTheme: const TextTheme(
         headline6: TextStyle(
@@ -753,7 +752,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                 final showSingleCategoryContentList = single || contentType != null;
                 final contentListContentType = single ? contentTypeEntries.single.key : contentType;
                 final index = contentType == null ? -1 : Content.enumerate().indexOf(contentType);
-                WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                   _prevIndex = index;
                 });
                 return BackButtonListener(

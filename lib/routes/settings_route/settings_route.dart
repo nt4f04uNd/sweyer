@@ -40,14 +40,14 @@ class _SettingsRouteState extends State<SettingsRoute> {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(top: 10.0),
               children: <Widget>[
-                MenuItem(
+                DrawerMenuItem(
                   l10n.general,
                   icon: Icons.build_rounded,
                   iconSize: 25.0,
                   fontSize: 16.0,
                   onTap: _handleClickGeneralSettings,
                 ),
-                MenuItem(
+                DrawerMenuItem(
                   l10n.theme,
                   icon: Icons.palette_rounded,
                   iconSize: 25.0,
