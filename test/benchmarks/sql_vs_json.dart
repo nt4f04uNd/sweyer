@@ -8,7 +8,7 @@ import '../test.dart';
 /// Comparison of JSON serialization vs `sqflite`
 ///
 /// Results - JSON absolutely kills SQL (tested with `sqflite 2.0.0+3`):
-/// 
+///
 /// ```
 /// 00:00 +0: sql
 /// 0. 437
@@ -61,22 +61,25 @@ void main() {
 }
 
 class SongsDatabase {
-  SongsDatabase._() { _database; }
+  SongsDatabase._() {
+    _database;
+  }
   static final SongsDatabase instance = SongsDatabase._();
 
   // Names
-  static const _DATABASE = 'TEST.db';
-  static const TABLE = 'TEST';
+  static const _databaseName = 'TEST.db';
+  static const _tableName = 'TEST';
 
   Completer<Database>? _completer;
   Future<Database> get _database async {
-    if (_completer != null)
+    if (_completer != null) {
       return _completer!.future;
+    }
     _completer = Completer();
     await openDatabase(
-      join(await getDatabasesPath(), _DATABASE),
+      join(await getDatabasesPath(), _databaseName),
       onCreate: (database, version) {
-        database.execute('CREATE TABLE $TABLE(id INTEGER PRIMARY KEY, origin_type TEXT, origin_id INTEGER)');
+        database.execute('CREATE TABLE $_tableName(id INTEGER PRIMARY KEY, origin_type TEXT, origin_id INTEGER)');
       },
       onDowngrade: (database, oldVersion, newVersion) {},
       onUpgrade: (database, oldVersion, newVersion) {},
@@ -87,16 +90,16 @@ class SongsDatabase {
     );
     return _completer!.future;
   }
-  
+
   /// Table of all songs.
   ///
-  /// Named with [TABLE].
+  /// Named with [_tableName].
   /// Introduced in version `1`.
   Future<Table<SqlSong>> get table async => Table(
-    name: TABLE, 
-    database: await _database,
-    factory: (data) => SqlSong.fromMap(data),
-  );
+        name: _tableName,
+        database: await _database,
+        factory: (data) => SqlSong.fromMap(data),
+      );
 }
 
 class Table<T extends SqlSong> {
@@ -116,12 +119,10 @@ class Table<T extends SqlSong> {
   final T Function(Map<String, Object?> data) factory;
 
   Future<List<T>> queryAll() async {
-    return (await _database.query(name))
-        .map(factory)
-        .toList();
+    return (await _database.query(name)).map(factory).toList();
   }
 
-  Future<void> insert(T item, { ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace }) async {
+  Future<void> insert(T item, {ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace}) async {
     await _database.insert(
       name,
       item.toMap(),
@@ -137,7 +138,7 @@ class Table<T extends SqlSong> {
     await batch.commit();
   }
 
-  Future<void> update(T item, { ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace }) async {
+  Future<void> update(T item, {ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace}) async {
     await _database.update(
       name,
       item.toMap(),
@@ -158,7 +159,7 @@ class SqlSong {
   SqlSong({
     required this.id,
     required this.origin,
-  })  : assert(() {
+  }) : assert(() {
           if (origin is Album) {
             return true;
           }
@@ -177,11 +178,9 @@ class SqlSong {
 
   Map<String, dynamic> toMap() {
     return {
-      'id':id,
-      if (origin != null)
-        'origin_type': 'album',
-      if (origin != null)
-        'origin_id': origin!.id,
+      'id': id,
+      if (origin != null) 'origin_type': 'album',
+      if (origin != null) 'origin_id': origin!.id,
     };
   }
 

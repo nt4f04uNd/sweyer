@@ -36,8 +36,9 @@ class Backend {
   /// Calls to the backend to find the info about artist.
   Future<GetArtistInfoResponse> getArtistInfo(String name) async {
     final file = await _cacheManager.getSingleFile(name);
-    if (!file.existsSync())
+    if (!file.existsSync()) {
       return GetArtistInfoResponse(imageUrl: null);
+    }
     return GetArtistInfoResponse.fromMap(jsonDecode(await file.readAsString()));
   }
 }
@@ -88,5 +89,4 @@ class _ArtistInfoServiceResponse extends FileServiceResponse {
 
   @override
   DateTime get validTill => _receivedTime.add(const Duration(days: 3));
-
 }

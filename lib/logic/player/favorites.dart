@@ -22,9 +22,9 @@ class FavoritesControl with Control {
   final _favoriteSetsMap = ContentMap<Set<int>>();
 
   bool _useMediaStoreFavorites(Type contentType) =>
-    contentType == Song &&
-    DeviceInfoControl.instance.useScopedStorageForFileModifications &&
-    Settings.useMediaStoreForFavoriteSongs.value;
+      contentType == Song &&
+      DeviceInfoControl.instance.useScopedStorageForFileModifications &&
+      Settings.useMediaStoreForFavoriteSongs.value;
 
   MediaStoreContentObserver<Song>? _mediaStoreContentObserver;
 
@@ -79,6 +79,7 @@ class FavoritesControl with Control {
       ..onChangeStream.listen(_handleMediaStoreSongsChange)
       ..register();
   }
+
   void _disposeMediaStoreObserver() {
     _endMediaStoreUpdate();
     _mediaStoreContentObserver?.dispose();
@@ -91,6 +92,7 @@ class FavoritesControl with Control {
     _mediaStoreUpdateTimer?.cancel();
     _mediaStoreUpdateTimer = null;
   }
+
   void _handleMediaStoreSongsChange(MediaStoreContentChangeEvent event) {
     if (event.flags & AndroidContentResolver.NOTIFY_UPDATE != 0) {
       _mediaStoreUpdateTimer?.cancel();
@@ -122,15 +124,16 @@ class FavoritesControl with Control {
   /// Whether the given [content] is favorite.
   bool isFavorite<T extends Content>(T content) {
     final favoriteSet = _favoriteSetsMap.getValue<T>(content.runtimeType);
-    if (content is Song)
+    if (content is Song) {
       return favoriteSet!.contains(content.sourceId);
+    }
     return favoriteSet!.contains(content.id);
   }
 
   /// Sets whether a given tuple of content is favorite.
   Future<void> setFavorite({
     required ContentTuple contentTuple,
-    required bool value
+    required bool value,
   }) async {
     for (final contentType in Content.enumerate()) {
       final contentList = contentTuple.get(contentType);

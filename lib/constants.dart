@@ -1,3 +1,3 @@
-/// This library should be imported `as Constants`
+/// This library should be imported `as constants`
 
 export 'constants/constants.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 const double _colorItemSize = 36.0;
 const double _colorItemActiveBorderWidth = 2.5;
@@ -12,8 +12,7 @@ class ThemeSettingsRoute extends StatefulWidget {
   _ThemeSettingsRouteState createState() => _ThemeSettingsRouteState();
 }
 
-class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
-    with SingleTickerProviderStateMixin {
+class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTickerProviderStateMixin {
   Color prevPrimaryColor = ThemeControl.instance.theme.colorScheme.primary;
   Color primaryColor = ThemeControl.instance.theme.colorScheme.primary;
   bool get switched => ThemeControl.instance.isLight;
@@ -21,13 +20,13 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   late AnimationController controller;
 
   static const List<Color> colors = [
-    Constants.AppColors.deepPurpleAccent,
-    Constants.AppColors.yellow,
-    Constants.AppColors.blue,
-    Constants.AppColors.red,
-    Constants.AppColors.orange,
-    Constants.AppColors.pink,
-    Constants.AppColors.androidGreen,
+    constants.AppColors.deepPurpleAccent,
+    constants.AppColors.yellow,
+    constants.AppColors.blue,
+    constants.AppColors.red,
+    constants.AppColors.orange,
+    constants.AppColors.pink,
+    constants.AppColors.androidGreen,
   ];
 
   @override
@@ -122,7 +121,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
                 ),
                 child!,
                 Image.asset(
-                  Constants.Assets.ASSET_LOGO_MASK,
+                  constants.Assets.assetLogoMask,
                   color: ContentArt.getColorToBlendInDefaultArt(animation.value!),
                   colorBlendMode: BlendMode.plus,
                   fit: BoxFit.cover,

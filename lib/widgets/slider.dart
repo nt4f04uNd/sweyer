@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/sweyer.dart';
 
 /// Creates slider with labels of min and max values
@@ -89,7 +89,7 @@ class LabelledSlider extends StatelessWidget {
                 valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
                 overlayColor: Colors.transparent,
                 activeTrackColor: activeColor ?? ThemeControl.instance.theme.colorScheme.primary,
-                inactiveTrackColor: inactiveColor ?? Constants.Theme.sliderInactiveColor.auto,
+                inactiveTrackColor: inactiveColor ?? constants.Theme.sliderInactiveColor.auto,
               ),
               child: Slider(
                 value: value,

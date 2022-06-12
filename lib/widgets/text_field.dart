@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class AppTextField extends StatefulWidget {
-  AppTextField({
+  const AppTextField({
     Key? key,
     this.onSubmit,
     this.autofocus = false,
@@ -29,7 +29,7 @@ class AppTextField extends StatefulWidget {
 
 class _AppTextFieldState extends State<AppTextField> {
   @override
-  void dispose() { 
+  void dispose() {
     widget.onDispose?.call();
     super.dispose();
   }
@@ -42,8 +42,7 @@ class _AppTextFieldState extends State<AppTextField> {
       selectionControls: NFTextSelectionControls(),
       controller: widget.controller,
       autofocus: widget.autofocus,
-      style: theme.textTheme.headline6?.merge(widget.textStyle)
-        ?? widget.textStyle,
+      style: theme.textTheme.headline6?.merge(widget.textStyle) ?? widget.textStyle,
       maxLines: 1,
       onSubmitted: widget.onSubmit,
       decoration: InputDecoration(

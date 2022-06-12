@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -38,33 +38,29 @@ Future<void> reportFlutterError(FlutterErrorDetails details) async {
   await FirebaseCrashlytics.instance.recordFlutterError(details);
 }
 
-
 class _WidgetsBindingObserver extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       /// This ensures that proper UI will be applied when activity is resumed.
-      /// 
+      ///
       /// See:
       /// * https://github.com/flutter/flutter/issues/21265
       /// * https://github.com/ryanheise/audio_service/issues/662
-      /// 
+      ///
       /// [SystemUiOverlayStyle.statusBarBrightness] is only honored on iOS,
       /// so I can safely use that here.
       final lastUi = SystemUiStyleController.instance.lastUi;
       SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
-        statusBarBrightness:
-          lastUi.statusBarBrightness == null ||
-          lastUi.statusBarBrightness == Brightness.dark
+        statusBarBrightness: lastUi.statusBarBrightness == null || lastUi.statusBarBrightness == Brightness.dark
             ? Brightness.light
-            : Brightness.dark
+            : Brightness.dark,
       ));
+
       /// Defensive programming if I some time later decide to add iOS support.
       SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
-        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark
-          ? Brightness.light
-          : Brightness.dark
+        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark ? Brightness.light : Brightness.dark,
       ));
     }
   }
@@ -95,7 +91,7 @@ Future<void> main() async {
   FlutterError.onError = reportFlutterError;
 
   runZonedGuarded<Future<void>>(() async {
-    WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
+    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
     await DeviceInfoControl.instance.init();
     ThemeControl.instance.init();
@@ -115,9 +111,9 @@ class App extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   static NFThemeData nfThemeData = NFThemeData(
-    systemUiStyle: Constants.UiTheme.black.auto,
-    modalSystemUiStyle: Constants.UiTheme.modal.auto,
-    bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+    systemUiStyle: constants.UiTheme.black.auto,
+    modalSystemUiStyle: constants.UiTheme.modal.auto,
+    bottomSheetSystemUiStyle: constants.UiTheme.bottomSheet.auto,
   );
 
   static void rebuildAllChildren() {
@@ -125,6 +121,7 @@ class App extends StatefulWidget {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
+
     (AppRouter.instance.navigatorKey.currentContext as Element?)!.visitChildren(rebuild);
   }
 
@@ -161,14 +158,14 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       stream: ThemeControl.instance.themeChaning,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return NFTheme(
-        data: App.nfThemeData,
+          data: App.nfThemeData,
           child: MaterialApp.router(
             // showPerformanceOverlay: true,
             // checkerboardRasterCacheImages: true,
             debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-            title: Constants.Config.APPLICATION_TITLE,
+            title: constants.Config.applicationTitle,
             color: ThemeControl.instance.theme.colorScheme.primary,
-            supportedLocales: Constants.Config.supportedLocales,
+            supportedLocales: constants.Config.supportedLocales,
             scrollBehavior: _ScrollBehavior(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             theme: ThemeControl.instance.theme,

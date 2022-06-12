@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -35,17 +34,17 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.enableDefaultOnTap = true,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
-              selectionController is SelectionController<SelectionEntry<Artist>>),
-       horizontalPadding = horizontalPadding ?? _horizontalPadding,
-       super.selectable(
-         key: key,
-         selectionIndex: selectionIndex,
-         selected: selected,
-         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-         handleTapInSelection: handleTapInSelection,
-         selectionController: selectionController,
-       );
+  })  : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+            selectionController is SelectionController<SelectionEntry<Artist>>),
+        horizontalPadding = horizontalPadding ?? _horizontalPadding,
+        super.selectable(
+          key: key,
+          selectionIndex: selectionIndex,
+          selected: selected,
+          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+          handleTapInSelection: handleTapInSelection,
+          selectionController: selectionController,
+        );
 
   final Artist artist;
 
@@ -54,7 +53,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
 
   /// Whether this queue is currently playing, if yes, enables animated
   /// [CurrentIndicator] over the ablum art.
-  /// 
+  ///
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
@@ -76,10 +75,10 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
 class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTile> with ContentTileComponentsMixin {
   @override
   SelectionEntry<Artist> toSelectionEntry() => SelectionEntry<Artist>.fromContent(
-    content: widget.artist,
-    index: widget.selectionIndex!,
-    context: context,
-  );
+        content: widget.artist,
+        index: widget.selectionIndex!,
+        context: context,
+      );
 
   void _handleTap() {
     super.handleTap(() {
@@ -89,8 +88,9 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
   }
 
   bool get current {
-    if (widget.current != null)
+    if (widget.current != null) {
       return widget.current!;
+    }
     return ContentUtils.originIsCurrent(widget.artist);
   }
 
@@ -101,8 +101,8 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
       color: widget.backgroundColor,
       child: InkWell(
         onTap: widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
-          ? _handleTap
-          : widget.onTap,
+            ? _handleTap
+            : widget.onTap,
         onLongPress: handleLongPress,
         splashFactory: NFListTileInkRipple.splashFactory,
         child: Padding(
@@ -142,10 +142,8 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   FavoriteIndicator(shown: widget.artist.isFavorite),
-                  if (widget.trailing != null)
-                    widget.trailing!,
-                  if (selectionRoute)
-                    buildAddToSelection(),
+                  if (widget.trailing != null) widget.trailing!,
+                  if (selectionRoute) buildAddToSelection(),
                 ],
               )
             ],
@@ -157,8 +155,9 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
 
   @override
   Widget build(BuildContext context) {
-    if (!selectable)
+    if (!selectable) {
       return _buildTile();
+    }
     return Stack(
       children: [
         _buildTile(),
@@ -172,4 +171,3 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
     );
   }
 }
-

@@ -9,24 +9,24 @@ abstract class Theme {
 
   //************************************** WIDGET SPECIFIC COLORS ******************************************
 
-  static final _ThemeContainer<Color> sliderInactiveColor = _ThemeContainer(
+  static final ThemeContainer<Color> sliderInactiveColor = ThemeContainer(
     light: Colors.black.withOpacity(0.2),
     dark: Colors.white.withOpacity(0.2),
   );
 
-  static const _ThemeContainer<Color> appBarBorderColor = _ThemeContainer(
+  static const ThemeContainer<Color> appBarBorderColor = ThemeContainer(
     light: AppColors.eee,
     dark: Color(0xff191b1a),
   );
 
-  static const  _ThemeContainer<Color> menuItemColor = _ThemeContainer(
+  static const ThemeContainer<Color> drawerMenuItemColor = ThemeContainer(
     light: Color(0xff3d3e42),
     dark: Colors.white,
   );
 
   /// Color that contrasts with the [ColorScheme.background].
   /// Black and white.
-  static const _ThemeContainer<Color> contrast = _ThemeContainer(
+  static const ThemeContainer<Color> contrast = ThemeContainer(
     light: Colors.black,
     dark: Colors.white,
   );
@@ -43,20 +43,20 @@ abstract class Theme {
   /// it's drawn over).
   ///
   /// For example, it can be used for better look of splashes over the primary color in dark mode.
-  static final _ThemeContainer<Color> glowSplashColor = _ThemeContainer(
+  static final ThemeContainer<Color> glowSplashColor = ThemeContainer(
     light: _lightThemeSplashColor,
     dark: Colors.white.withOpacity(0.1),
   );
 
   /// A [glowSplashColor] to draw over contrasting colors, like primary or [contrast].
-  static final _ThemeContainer<Color> glowSplashColorOnContrast = _ThemeContainer(
+  static final ThemeContainer<Color> glowSplashColorOnContrast = ThemeContainer(
     light: Colors.white.withOpacity(0.13),
     dark: Colors.black.withOpacity(0.13),
   );
 
   static const Color _lightIconColor = Color(0xff616266);
 
-  static _ThemeContainer<ThemeData> app = _ThemeContainer(
+  static ThemeContainer<ThemeData> app = ThemeContainer(
     light: ThemeData(
       //******** General ********
       fontFamily: 'Manrope',
@@ -75,17 +75,17 @@ abstract class Theme {
         onBackground: AppColors.greyText,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
-        primaryVariant: Color(0xff936bff),
+        primaryContainer: Color(0xff936bff),
         onPrimary: Colors.white,
         secondary: AppColors.eee,
-        secondaryVariant: Colors.white,
+        secondaryContainer: Colors.white,
         // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
         onError: Colors.white,
-        /// For window headers (e.g. alert dialogs)
+        // For window headers (e.g. alert dialogs)
         surface: Colors.white,
-        /// For dimmed text (e.g. in appbar)
+        // For dimmed text (e.g. in appbar)
         onSurface: _lightIconColor,
       ),
 
@@ -160,12 +160,10 @@ abstract class Theme {
         caption: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
-        brightness: Brightness.light,
         elevation: 2.0,
         titleSpacing: 0.0,
         toolbarHeight: NFConstants.toolbarHeight,
         color: AppColors.eee,
-        backwardsCompatibility: false,
         titleTextStyle: TextStyle(
           color: AppColors.greyText,
           fontWeight: FontWeight.w600,
@@ -201,17 +199,17 @@ abstract class Theme {
         onBackground: Colors.white,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
-        primaryVariant: Color(0xff936bff),
+        primaryContainer: Color(0xff936bff),
         onPrimary: Colors.white,
         secondary: AppColors.grey,
-        secondaryVariant: Colors.black,
+        secondaryContainer: Colors.black,
         // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
         onSecondary: Colors.white,
         error: Color(0xffed3b3b),
         onError: Colors.white,
-        /// For window headers (e.g. alert dialogs)
+        // For window headers (e.g. alert dialogs)
         surface: AppColors.grey,
-        /// For dimmed text (e.g. in appbar)
+        // For dimmed text (e.g. in appbar)
         onSurface: AppColors.whiteDarkened,
       ),
       //****************** Specific app elements *****************
@@ -270,12 +268,10 @@ abstract class Theme {
         caption: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
-        brightness: Brightness.dark,
         color: AppColors.grey,
         elevation: 0.0,
         titleSpacing: 0.0,
         toolbarHeight: NFConstants.toolbarHeight,
-        backwardsCompatibility: false,
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
@@ -303,7 +299,7 @@ abstract class UiTheme {
   /// For light this means [white].
   ///
   /// The opposite is [grey].
-  static final _ThemeContainer<SystemUiOverlayStyle> black = _ThemeContainer(
+  static final ThemeContainer<SystemUiOverlayStyle> black = ThemeContainer(
     /// [withOpacity] needed for smooth transtion to [drawerScreen].
     light: SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white,
@@ -327,14 +323,13 @@ abstract class UiTheme {
   /// For light this means [eee].
   ///
   /// The opposite is [black].
-  static final _ThemeContainer<SystemUiOverlayStyle> grey = _ThemeContainer(
+  static final ThemeContainer<SystemUiOverlayStyle> grey = ThemeContainer(
     light: black.light.copyWith(systemNavigationBarColor: AppColors.eee),
     dark: black.dark.copyWith(systemNavigationBarColor: AppColors.grey),
   );
 
   /// Theme for the drawer screen.
-  static final _ThemeContainer<SystemUiOverlayStyle> drawerScreen =
-      _ThemeContainer(
+  static final ThemeContainer<SystemUiOverlayStyle> drawerScreen = ThemeContainer(
     light: black.light.copyWith(
       statusBarColor: Colors.white,
       systemNavigationBarColor: Colors.white,
@@ -346,7 +341,7 @@ abstract class UiTheme {
   );
 
   /// Theme for the bottom sheet dialog.
-  static final _ThemeContainer<SystemUiOverlayStyle> bottomSheet = _ThemeContainer(
+  static final ThemeContainer<SystemUiOverlayStyle> bottomSheet = ThemeContainer(
     light: black.light.copyWith(
       systemNavigationBarColor: Colors.white,
       statusBarBrightness: Brightness.light,
@@ -358,7 +353,7 @@ abstract class UiTheme {
   );
 
   /// Theme for the modal dialog.
-  static final _ThemeContainer<SystemUiOverlayStyle> modal = _ThemeContainer(
+  static final ThemeContainer<SystemUiOverlayStyle> modal = ThemeContainer(
     light: black.light.copyWith(
       systemNavigationBarColor: const Color(0xff757575),
       systemNavigationBarIconBrightness: Brightness.light,
@@ -369,7 +364,7 @@ abstract class UiTheme {
   );
 
   /// Theme for the modal dialog that is displayed over [grey].
-  static final _ThemeContainer<SystemUiOverlayStyle> modalOverGrey = _ThemeContainer(
+  static final ThemeContainer<SystemUiOverlayStyle> modalOverGrey = ThemeContainer(
     light: modal.light.copyWith(
       systemNavigationBarColor: const Color(0xff6d6d6d),
     ),
@@ -380,8 +375,8 @@ abstract class UiTheme {
 }
 
 /// Class to wrap some values, so they will have [light] and [dark] variants.
-class _ThemeContainer<T> {
-  const _ThemeContainer({required this.light, required this.dark});
+class ThemeContainer<T> {
+  const ThemeContainer({required this.light, required this.dark});
   final T light;
   final T dark;
 
@@ -391,8 +386,8 @@ class _ThemeContainer<T> {
   /// Checks theme and automatically picks opposite value from the current brightness.
   T get autoReverse => ThemeControl.instance.isDark ? light : dark;
 
-  _ThemeContainer<T> copyWith({T? light, T? dark}) {
-    return _ThemeContainer(
+  ThemeContainer<T> copyWith({T? light, T? dark}) {
+    return ThemeContainer(
       light: light ?? this.light,
       dark: dark ?? this.dark,
     );

@@ -8,8 +8,10 @@ import 'package:sweyer/sweyer.dart';
 /// Shows an indicator that marks out the current playing song tile.
 /// Consists of three equalizer bars.
 class CurrentIndicator extends StatelessWidget {
-  const CurrentIndicator({Key? key, this.color = Colors.white})
-      : super(key: key);
+  const CurrentIndicator({
+    Key? key,
+    this.color = Colors.white,
+  }) : super(key: key);
 
   /// Color of the bars.
   final Color color;
@@ -185,9 +187,7 @@ class _BarState extends State<_Bar> {
         ),
       ),
       width: 5.0,
-      duration: animating
-          ? currentValue.duration
-          : const Duration(milliseconds: 500),
+      duration: animating ? currentValue.duration : const Duration(milliseconds: 500),
     );
   }
 }

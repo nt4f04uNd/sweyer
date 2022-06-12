@@ -21,7 +21,7 @@ class DebugOverlay {
       return true;
     }());
   }
-  
+
   OverlayEntry? _entry;
 
   void dispose() {

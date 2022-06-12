@@ -21,14 +21,12 @@ class Album extends PersistentQueue {
   /// Returns songs that belong to this album.
   @override
   List<Song> get songs {
-    return ContentControl.instance.state.allSongs.songs
-      .fold<List<Song>>([], (prev, el) {
-        if (el.albumId == id) {
-          prev.add(el.copyWith(origin: this));
-        }
-        return prev;
-      })
-      .toList();
+    return ContentControl.instance.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
+      if (el.albumId == id) {
+        prev.add(el.copyWith(origin: this));
+      }
+      return prev;
+    }).toList();
   }
 
   @override
@@ -39,21 +37,19 @@ class Album extends PersistentQueue {
 
   /// Gets album normalized year.
   int get year {
-    return lastYear == null || lastYear! < 1000
-      ? clock.now().year
-      : lastYear!;
+    return lastYear == null || lastYear! < 1000 ? clock.now().year : lastYear!;
   }
 
   Song get firstSong {
     return ContentControl.instance.state.allSongs.songs.firstWhere((el) => el.albumId == id);
   }
 
-  /// Returns string in format `album name • year`. 
+  /// Returns string in format `album name • year`.
   String get nameDotYear {
     return ContentUtils.appendYearWithDot(album, year);
   }
 
-  /// Returns string in format `Album • year`. 
+  /// Returns string in format `Album • year`.
   String albumDotName(AppLocalizations l10n) {
     return ContentUtils.appendYearWithDot(l10n.album, year);
   }
@@ -114,15 +110,15 @@ class Album extends PersistentQueue {
 
   @override
   Map<String, dynamic> toMap() => <String, dynamic>{
-      'id': id,
-      'album': album,
-      'albumArt': albumArt,
-      'artist': artist,
-      'artistId': artistId,
-      'firstYear': firstYear,
-      'lastYear': lastYear,
-      'numberOfSongs': numberOfSongs,
-    };
+        'id': id,
+        'album': album,
+        'albumArt': albumArt,
+        'artist': artist,
+        'artistId': artistId,
+        'firstYear': firstYear,
+        'lastYear': lastYear,
+        'numberOfSongs': numberOfSongs,
+      };
 }
 
 /// The `copyWith` function type for [Album].

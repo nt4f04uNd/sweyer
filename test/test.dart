@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';
@@ -17,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 export 'fakes/fakes.dart';
 
@@ -69,8 +68,8 @@ final _testPlaylist = Playlist(
 const _testArtist = Artist(
   id: 0,
   artist: 'artist',
-  numberOfAlbums: 1, 
-  numberOfTracks: 1, 
+  numberOfAlbums: 1,
+  numberOfTracks: 1,
 );
 
 final SongCopyWith songWith = _testSong.copyWith;
@@ -86,11 +85,11 @@ const kScreenPixelRatio = 3.0;
 const kScreenSize = Size(kScreenWidth, kScreenHeight);
 
 /// Sets the fake data providers and initializes the app state.
-/// 
+///
 /// The [configureFakes] callback can be used to modify the fake data providers
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
-  final binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
   binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
   binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
   // Prepare flare.
@@ -122,24 +121,29 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();
   PackageInfoPlatform.instance = MethodChannelPackageInfo();
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'), (MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'),
+      (MethodCall methodCall) async {
     return {
-      'appName': Constants.Config.APPLICATION_TITLE,
+      'appName': constants.Config.applicationTitle,
       'packageName': 'com.nt4f04und.sweyer',
       'version': '1.0.0',
       'buildNumber': '0',
     };
   });
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_service.client.methods'), (MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('com.ryanheise.audio_service.client.methods'), (MethodCall methodCall) async {
     return {};
   });
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_service.handler.methods'), (MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('com.ryanheise.audio_service.handler.methods'), (MethodCall methodCall) async {
     return {};
   });
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'), (MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.ryanheise.audio_session'),
+      (MethodCall methodCall) async {
     return null;
   });
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel, (MethodCall methodCall) async {
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel,
+      (MethodCall methodCall) async {
     return null;
   });
   LicenseRegistry.reset();
@@ -228,7 +232,7 @@ extension WidgetTesterExtension on WidgetTester {
 }
 
 final _testersLightTheme = <WidgetTester>{};
-String _getThemeMessage(bool lightTheme) => lightTheme  ? 'light' : 'dark';
+String _getThemeMessage(bool lightTheme) => lightTheme ? 'light' : 'dark';
 const Object _defaultTagObject = Object();
 
 /// Creates a golden test in two variants - in dark and light mode.
@@ -318,12 +322,12 @@ class FakeLicenseEntry extends LicenseEntry {
 
   @override
   Iterable<LicenseParagraph> get paragraphs => const [
-    LicenseParagraph('test paragraph 1', 0),
-    LicenseParagraph('test paragraph 2', 0),
-    LicenseParagraph('test paragraph 3', 0),
-    LicenseParagraph('test paragraph 4', 0),
-    LicenseParagraph('test paragraph 5', 0),
-  ];
+        LicenseParagraph('test paragraph 1', 0),
+        LicenseParagraph('test paragraph 2', 0),
+        LicenseParagraph('test paragraph 3', 0),
+        LicenseParagraph('test paragraph 4', 0),
+        LicenseParagraph('test paragraph 5', 0),
+      ];
 }
 
 class FakeSystemUiStyleController implements SystemUiStyleController {
@@ -337,7 +341,12 @@ class FakeSystemUiStyleController implements SystemUiStyleController {
   SystemUiOverlayStyle get actualUi => const SystemUiOverlayStyle();
 
   @override
-  Future<void> animateSystemUiOverlay({SystemUiOverlayStyle? from, required SystemUiOverlayStyle to, Curve? curve, Duration? duration}) async {}
+  Future<void> animateSystemUiOverlay({
+    SystemUiOverlayStyle? from,
+    required SystemUiOverlayStyle to,
+    Curve? curve,
+    Duration? duration,
+  }) async {}
 
   @override
   SystemUiOverlayStyle get lastUi => const SystemUiOverlayStyle();

@@ -24,12 +24,8 @@ class SelectionEntry<T extends Content> {
         final song = content as Song;
         return SelectionEntry<Song>(
           data: content,
-          index: selectionRouteOf(context)
-            ? ContentControl.instance.state.allSongs.getIndex(song)
-            : index,
-          origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin
-            ? song.origin
-            : null,
+          index: selectionRouteOf(context) ? ContentControl.instance.state.allSongs.getIndex(song) : index,
+          origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin ? song.origin : null,
         ) as SelectionEntry<T>;
       },
       album: () => SelectionEntry<Album>(
@@ -88,9 +84,6 @@ class SelectionEntry<T extends Content> {
     // if (other.runtimeType != runtimeType)
     //   return false;
 
-    return other is SelectionEntry 
-        && other.data == data
-        && other.index == index
-        && other.origin == origin;
+    return other is SelectionEntry && other.data == data && other.index == index && other.origin == origin;
   }
 }

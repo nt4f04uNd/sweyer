@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
@@ -37,11 +37,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     if (_onTop) {
       if (status == AnimationStatus.dismissed) {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: Constants.UiTheme.grey.auto,
+          to: constants.UiTheme.grey.auto,
         );
       } else {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: Constants.UiTheme.drawerScreen.auto,
+          to: constants.UiTheme.drawerScreen.auto,
         );
       }
     }
@@ -69,8 +69,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           return controller.value == 0.0 &&
               // when on another drag on the right to next tab
               (event.delta.dx < 0.0 ||
-                // when player route is opened, for example
-                !HomeRouter.instance.drawerCanBeOpened);
+                  // when player route is opened, for example
+                  !HomeRouter.instance.drawerCanBeOpened);
         },
         onBarrierTap: controller.close,
         barrier: Container(color: Colors.black26),
@@ -90,7 +90,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 }
 
 class _DrawerWidgetContent extends StatefulWidget {
-  _DrawerWidgetContent({Key? key, required this.controller}) : super(key: key);
+  const _DrawerWidgetContent({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
   final SlidableController? controller;
 
   @override
@@ -165,7 +169,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10.0),
                       child: Text(
-                        Constants.Config.APPLICATION_TITLE,
+                        constants.Config.applicationTitle,
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
@@ -178,7 +182,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               ),
               const Divider(),
               const SizedBox(height: 7.0),
-              MenuItem(
+              DrawerMenuItem(
                 l10n.settings,
                 icon: Icons.settings_rounded,
                 onTap: _handleClickSettings,
@@ -186,7 +190,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               ValueListenableBuilder<bool>(
                 valueListenable: Prefs.devMode,
                 builder: (context, value, child) => value ? child! : const SizedBox.shrink(),
-                child: MenuItem(
+                child: DrawerMenuItem(
                   l10n.debug,
                   icon: Icons.adb_rounded,
                   onTap: _handleClickDebug,
@@ -200,8 +204,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   }
 }
 
-class MenuItem extends StatelessWidget {
-  const MenuItem(
+class DrawerMenuItem extends StatelessWidget {
+  const DrawerMenuItem(
     this.title, {
     Key? key,
     this.icon,
@@ -236,7 +240,7 @@ class MenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: Constants.Theme.menuItemColor.auto,
+          color: constants.Theme.drawerMenuItemColor.auto,
         ),
       ),
       onTap: onTap,

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 export 'artist_content_route.dart';
 export 'artist_route.dart';
@@ -25,7 +25,7 @@ class _InitialRouteState extends State<InitialRoute> {
   void _animateNotMainUi() {
     if (_onTop && playerRouteController.value == 0.0) {
       SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: Constants.UiTheme.black.auto,
+        to: constants.UiTheme.black.auto,
         duration: const Duration(milliseconds: 550),
       );
     }
@@ -60,17 +60,17 @@ class _InitialRouteState extends State<InitialRoute> {
                 }
                 if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
                   SystemUiStyleController.instance.animateSystemUiOverlay(
-                    to: Constants.UiTheme.grey.auto,
+                    to: constants.UiTheme.grey.auto,
                   );
                 }
                 return StreamBuilder<bool>(
-                  stream: ThemeControl.instance.themeChaning,
-                  builder: (context, snapshot) {
-                    if (snapshot.data == true)
-                      return const SizedBox.shrink();
-                    return const Home();
-                  }
-                );
+                    stream: ThemeControl.instance.themeChaning,
+                    builder: (context, snapshot) {
+                      if (snapshot.data == true) {
+                        return const SizedBox.shrink();
+                      }
+                      return const Home();
+                    });
               },
             );
           }
@@ -99,9 +99,7 @@ class HomeState extends State<Home> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Defer back button dispatching to the child router
-    _backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher!
-        .createChildBackButtonDispatcher();
+    _backButtonDispatcher = Router.of(context).backButtonDispatcher!.createChildBackButtonDispatcher();
   }
 
   @override
@@ -132,13 +130,14 @@ class HomeState extends State<Home> {
       ),
     );
   }
-  
+
   Future<bool> _onBackPressed() async {
     if (Settings.confirmExitingWithBackButton.get()) {
       final now = clock.now();
       // Show toast when user presses back button on main route, that
       // asks from user to press again to confirm that he wants to quit the app
-      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > Constants.Config.BACK_PRESS_CLOSE_TIMEOUT) {
+      if (_lastBackPressTime == null ||
+          now.difference(_lastBackPressTime!) > constants.Config.backPressCloseTimeout) {
         _lastBackPressTime = now;
         ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;
@@ -217,8 +216,9 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
   bool _fetching = false;
 
   Future<void> _handlePermissionRequest() async {
-    if (_fetching)
+    if (_fetching) {
       return;
+    }
     setState(() {
       _fetching = true;
     });

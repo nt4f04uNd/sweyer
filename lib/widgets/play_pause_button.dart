@@ -5,7 +5,7 @@ import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:flare_flutter/flare_actor.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 const double _kIconSize = 22.0;
 const double _kButtonSize = 66.0;
@@ -84,7 +84,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
     super.dispose();
   }
 
- /// Animates to state where it shows "play" button.
+  /// Animates to state where it shows "play" button.
   void _play() {
     if (_animation != 'pause_play' && _animation != 'play') {
       controller.forward();
@@ -134,7 +134,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
           key: ValueKey(color),
           child: RepaintBoundary(
             child: FlareActor(
-              Constants.Assets.ASSET_ANIMATION_PLAY_PAUSE,
+              constants.Assets.assetAnimationPlayPause,
               animation: _animation,
               callback: (value) {
                 if (value == 'pause_play' && _animation != 'play_pause') {

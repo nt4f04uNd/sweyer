@@ -13,7 +13,8 @@ void main() {
     await setUpAppTest();
   });
 
-  testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions', (WidgetTester tester) async {
+  testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions',
+      (WidgetTester tester) async {
     late PermissionsChannelObserver permissionsObserver;
     await setUpAppTest(() {
       permissionsObserver = PermissionsChannelObserver(tester.binding);
@@ -23,7 +24,7 @@ void main() {
       expect(permissionsObserver.checkedPermissions, [Permission.storage],
           reason: 'Should always check the storage permission on startup');
       expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
-      final permissionGrantCompleter = Completer<PermissionStatus>(); 
+      final permissionGrantCompleter = Completer<PermissionStatus>();
       permissionsObserver.setPermissionResolvable(Permission.storage, () => permissionGrantCompleter.future);
       await tester.tap(find.text(l10n.grant));
       expect(permissionsObserver.requestedPermissions, [Permission.storage]);
@@ -36,7 +37,8 @@ void main() {
     });
   });
 
-  testWidgets('permissions screen - shows toast and opens settings when permissions are denied', (WidgetTester tester) async {
+  testWidgets('permissions screen - shows toast and opens settings when permissions are denied',
+      (WidgetTester tester) async {
     late PermissionsChannelObserver permissionsObserver;
     await setUpAppTest(() {
       permissionsObserver = PermissionsChannelObserver(tester.binding);
@@ -53,13 +55,16 @@ void main() {
       permissionsObserver.isOpeningSettingsSuccessful = true;
       await tester.tap(find.text(l10n.grant));
       expect(permissionsObserver.openSettingsRequests, 2);
-      expect(
-          toastObserver.toastMessagesLog,
-          [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError, l10n.allowAccessToExternalStorageManually]);
+      expect(toastObserver.toastMessagesLog, [
+        l10n.allowAccessToExternalStorageManually,
+        l10n.openAppSettingsError,
+        l10n.allowAccessToExternalStorageManually
+      ]);
     });
   });
-  
-  testWidgets('searching screen - shows when permissions are granted and searching for tracks', (WidgetTester tester) async {
+
+  testWidgets('searching screen - shows when permissions are granted and searching for tracks',
+      (WidgetTester tester) async {
     // Use fake
     ContentControl.instance.dispose();
     final fake = FakeContentControl();
@@ -85,7 +90,8 @@ void main() {
     });
   });
 
-  testWidgets('home screen - shows when permissions are granted and not searching for tracks', (WidgetTester tester) async {
+  testWidgets('home screen - shows when permissions are granted and not searching for tracks',
+      (WidgetTester tester) async {
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
       expect(find.byType(Home), findsOneWidget);
@@ -97,7 +103,8 @@ void main() {
     });
   });
 
-  testWidgets('no songs screen - shows when the library is empty and pressing the button performs refetching', (WidgetTester tester) async {
+  testWidgets('no songs screen - shows when the library is empty and pressing the button performs refetching',
+      (WidgetTester tester) async {
     // TODO: because of `MusicPlayer.instance.stop` at the end of `runAppTest`, this test will print an error in console, but not actually fail, because the exception is catched. Ideally I should somehow hide that
     await setUpAppTest(() {
       FakeContentChannel.instance.songs = [];
@@ -124,12 +131,12 @@ void main() {
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit]);
       expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
-      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT + const Duration(milliseconds: 1));
+      await tester.binding.delayed(Config.backPressCloseTimeout + const Duration(milliseconds: 1));
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit],
           reason: 'The previous message timed out');
       expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
-      await tester.binding.delayed(Config.BACK_PRESS_CLOSE_TIMEOUT - const Duration(milliseconds: 1));
+      await tester.binding.delayed(Config.backPressCloseTimeout - const Duration(milliseconds: 1));
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit]);
       expect(systemObserver.closeRequests, 1);

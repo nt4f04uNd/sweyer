@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+
 class Genre extends Content {
   @override
   final int id;
@@ -31,10 +32,10 @@ class Genre extends Content {
 
   @override
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'songIds': songIds,
-  };
+        'id': id,
+        'name': name,
+        'songIds': songIds,
+      };
 
   @override
   MediaItem toMediaItem() {

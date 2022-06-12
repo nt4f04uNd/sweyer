@@ -18,14 +18,14 @@ class MediaStoreContentChangeEvent {
 /// An Android MediaStore content observer.
 class MediaStoreContentObserver<T extends Content> extends ContentObserver {
   MediaStoreContentObserver([this.contentType])
-    : assert(
-        Content.enumerate().contains(T),
-        "Specified type must be a subtype of Content",
-      );
+      : assert(
+          Content.enumerate().contains(T),
+          "Specified type must be a subtype of Content",
+        );
 
   final Type? contentType;
 
-  Stream<MediaStoreContentChangeEvent> get onChangeStream =>_changeSubject;
+  Stream<MediaStoreContentChangeEvent> get onChangeStream => _changeSubject;
   final _changeSubject = PublishSubject<MediaStoreContentChangeEvent>();
 
   void register() {
@@ -40,16 +40,16 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
   }
 
   String get _uri => contentPick<T, String>(
-    contentType: contentType,
-    /// MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-    song: 'content://media/external/audio/media',
-    /// MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
-    album: 'content://media/external/audio/albums',
-    /// MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI
-    playlist: 'content://media/external/audio/playlists',
-    /// MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
-    artist: 'content://media/external/audio/artists',
-  );
+        contentType: contentType,
+        // MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        song: 'content://media/external/audio/media',
+        // MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+        album: 'content://media/external/audio/albums',
+        // MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI
+        playlist: 'content://media/external/audio/playlists',
+        // MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
+        artist: 'content://media/external/audio/artists',
+      );
 
   @override
   void dispose() {

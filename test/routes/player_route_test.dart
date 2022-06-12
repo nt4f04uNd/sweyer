@@ -13,7 +13,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(playerRouteController.value, 1.0);
   }
-  
+
   /// Navigate to the queue screen in the player route.
   Future<void> openQueueScreen(WidgetTester tester) async {
     await expandPlayerRoute(tester);
@@ -101,12 +101,11 @@ void main() {
 
       final currentSong = PlaybackControl.instance.currentSong;
       expect(find.text(currentSong.title), findsNWidgets(3));
+
       /// Use `textContaining`, because [SongTile] adds duration at the end of the artist
       expect(find.textContaining(currentSong.artist), findsNWidgets(3));
-      expect(find.byWidgetPredicate(
-        (widget) =>
-          widget is ContentArt &&
-          widget.source == ContentArtSource.song(currentSong)),
+      expect(
+        find.byWidgetPredicate((widget) => widget is ContentArt && widget.source == ContentArtSource.song(currentSong)),
         findsNWidgets(4), // PlayerRoute shows two arts and animates between them
       );
     });
@@ -209,8 +208,7 @@ void main() {
 
       await tester.tap(button);
       expect(MusicPlayer.instance.playing, false);
-      expect(MusicPlayer.handler!.running, true,
-          reason: 'Handler should only stop when stopped, not when paused');
+      expect(MusicPlayer.handler!.running, true, reason: 'Handler should only stop when stopped, not when paused');
 
       await tester.pumpAndSettle();
     });
@@ -227,7 +225,7 @@ void main() {
       // Simulate resizing the screen due to software keyboard.
       await tester.binding.setSurfaceSize(const Size(kScreenWidth, kScreenHeight / 2));
       await tester.pumpAndSettle();
-      
+
       // First back press closes software keyboard.
       await tester.binding.setSurfaceSize(kScreenSize);
       await tester.pumpAndSettle();

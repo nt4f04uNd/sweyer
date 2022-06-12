@@ -21,15 +21,15 @@ class FavoriteIndicator extends StatelessWidget {
         child: child,
       ),
       child: !shown
-        ? const SizedBox.shrink()
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Icon(
-              Icons.favorite_rounded,
-              color: Colors.redAccent,
-              size: size ?? 18.0,
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Icon(
+                Icons.favorite_rounded,
+                color: Colors.redAccent,
+                size: size ?? 18.0,
+              ),
             ),
-          ),
     );
   }
 }

@@ -34,9 +34,14 @@ void main() {
 
       await tester.runAppTest(() async {
         expect(find.byType(Spinner), findsOneWidget);
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'home_route.searching_screen', customPump: (WidgetTester tester) async {
-        await tester.pump(const Duration(milliseconds: 400));
-      }));
+      },
+          goldenCaptureCallback: () => tester.screenMatchesGolden(
+                tester,
+                'home_route.searching_screen',
+                customPump: (WidgetTester tester) async {
+                  await tester.pump(const Duration(milliseconds: 400));
+                },
+              ));
     });
 
     testAppGoldens('no_songs_screen', (WidgetTester tester) async {
@@ -62,7 +67,7 @@ void main() {
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.songs_tab'));
     });
-  
+
     testAppGoldens('albums_tab', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.byIcon(Album.icon));
@@ -92,12 +97,12 @@ void main() {
         await tester.tap(find.text(
           l10n.sortFeature<Song>(
             ContentControl.instance.state.sorts.getValue<Song>()!.feature as SongSortFeature,
-          )
+          ),
         ));
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.sort_feature_dialog'));
     });
-    
+
     testAppGoldens('selection_songs_tab', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.pumpAndSettle();
@@ -123,7 +128,9 @@ void main() {
         await tester.tap(find.byType(SelectAllSelectionAction).last);
         await tester.tap(find.byType(DeleteSongsAppBarAction).last);
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.selection_deletion_dialog_songs_tab'));
+      },
+          goldenCaptureCallback: () =>
+              tester.screenMatchesGolden(tester, 'tabs_route.selection_deletion_dialog_songs_tab'));
     });
   });
 
@@ -160,8 +167,8 @@ void main() {
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.pumpAndSettle();
         await tester.tap(find.descendant(
-            of: find.byType(SelectionRoute),
-            matching: find.byIcon(Icons.settings_rounded),
+          of: find.byType(SelectionRoute),
+          matching: find.byIcon(Icons.settings_rounded),
         ));
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_route_settings'));
@@ -182,7 +189,11 @@ void main() {
       await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.artistContent<Song>(artistWith(), [songWith()]));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'artist_content_route.artist_content_route_songs'));
+      },
+          goldenCaptureCallback: () => tester.screenMatchesGolden(
+                tester,
+                'artist_content_route.artist_content_route_songs',
+              ));
     });
   });
 

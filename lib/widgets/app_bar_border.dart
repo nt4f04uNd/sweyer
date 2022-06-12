@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Themed border divider that can be shown and hidden with animation.
-/// 
+///
 /// Used in list views when they are scrolled and displayed below the [AppBar],
 /// instead of elevation.
 class AppBarBorder extends StatelessWidget {
@@ -18,9 +18,7 @@ class AppBarBorder extends StatelessWidget {
     return AnimatedContainer(
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 400),
-      color: shown
-          ? Constants.Theme.appBarBorderColor.auto
-          : theme.colorScheme.secondary.withOpacity(0.0),
+      color: shown ? constants.Theme.appBarBorderColor.auto : theme.colorScheme.secondary.withOpacity(0.0),
       height: height,
     );
   }

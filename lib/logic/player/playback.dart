@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
@@ -70,9 +69,11 @@ class PlaybackControl extends Control {
   ///
   /// Also, uses [Song.origin] to set [currentSongOrigin].
   void changeSong(Song song) {
-    if (song.id != currentSongNullable?.id)
+    if (song.id != currentSongNullable?.id) {
       repository.songId.set(song.id);
-    if (!identical(song, currentSongNullable))
+    }
+    if (!identical(song, currentSongNullable)) {
       _songSubject.add(song);
+    }
   }
 }

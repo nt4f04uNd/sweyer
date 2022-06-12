@@ -21,7 +21,7 @@ abstract class Content with EquatableMixin {
   /// Converts the content to media item.
   MediaItem toMediaItem();
 
-  /// Converts the content to map.  
+  /// Converts the content to map.
   Map<String, dynamic> toMap();
 
   /// Enumerates all the types of content (derived from this class).
@@ -38,10 +38,10 @@ abstract class Content with EquatableMixin {
 }
 
 /// Content that can contain other songs inside it.
-/// 
+///
 /// This class represents not duplicating, a.k.a. `true source` song origins.
 /// For origins to allow duplication, see a protocol in [DuplicatingSongOriginMixin].
-/// 
+///
 /// The [songs] getter must set the [Song.origin]s.
 ///
 /// Examples:
@@ -61,8 +61,9 @@ abstract class SongOrigin extends Content {
 
   /// Creates origin from map.
   static SongOrigin? originFromEntry(SongOriginEntry? entry) {
-    if (entry == null)
+    if (entry == null) {
       return null;
+    }
     switch (entry.type) {
       case SongOriginType.album:
         return ContentControl.instance.getContentById<Album>(entry.id);
@@ -77,7 +78,7 @@ abstract class SongOrigin extends Content {
 }
 
 /// Song origin that allows duplication within the [songs].
-/// 
+///
 /// Classes that are mixed in with this should in [songs] getter:
 /// * set the [Song.origin]
 /// * set a [Song.duplicationIndex]
@@ -99,8 +100,9 @@ mixin DuplicatingSongOriginMixin on SongOrigin {
     final value = idMap;
 
     for (final song in songs) {
-      if (song.origin != this || song.idMap != idMap)
+      if (song.origin != this || song.idMap != idMap) {
         return false;
+      }
     }
     return true;
   }
@@ -116,8 +118,10 @@ class SongOriginType {
   static const artist = SongOriginType._('artist');
 
   static List<SongOriginType> get values => const [
-    album, playlist, artist,
-  ];
+        album,
+        playlist,
+        artist,
+      ];
 }
 
 /// Model used to serialize song origin.
@@ -134,8 +138,9 @@ class SongOriginEntry {
   /// Will return null if map is not valid.
   static SongOriginEntry? fromMap(Map map) {
     final rawType = map['origin_type'];
-    if (rawType == null)
+    if (rawType == null) {
       return null;
+    }
     final id = map['origin_id'];
     assert(id != null);
     return SongOriginEntry(
@@ -145,9 +150,9 @@ class SongOriginEntry {
   }
 
   Map<String, dynamic> toMap() => {
-    'origin_type': type._value,
-    'origin_id': id,
-  };
+        'origin_type': type._value,
+        'origin_id': id,
+      };
 
   @override
   int get hashCode => hashValues(type, id);
@@ -157,9 +162,7 @@ class SongOriginEntry {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SongOriginEntry &&
-           other.type == type &&
-           other.id == id;
+    return other is SongOriginEntry && other.type == type && other.id == id;
   }
 }
 
@@ -184,8 +187,9 @@ class IdMapKey {
   /// Will return null if map is not valid.
   static IdMapKey? fromMap(Map map) {
     final id = map['id'];
-    if (id == null)
+    if (id == null) {
       return null;
+    }
     SongOriginEntry? originEntry;
     if (map.length > 1) {
       final rawOriginEntry = map['origin'];
@@ -200,10 +204,9 @@ class IdMapKey {
   }
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    if (originEntry != null)
-      'origin': originEntry!.toMap(),
-  };
+        'id': id,
+        if (originEntry != null) 'origin': originEntry!.toMap(),
+      };
 
   @override
   int get hashCode => hashValues(id, originEntry);
@@ -213,8 +216,6 @@ class IdMapKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IdMapKey &&
-           other.id == id &&
-           other.originEntry == originEntry;
+    return other is IdMapKey && other.id == id && other.originEntry == originEntry;
   }
 }

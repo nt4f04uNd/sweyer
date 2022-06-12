@@ -51,110 +51,108 @@ class ContentTile<T extends Content> extends StatelessWidget {
   }
 
   bool get selectable => selectionController != null;
-  
+
   ValueGetter<Widget> forPersistentQueue<Q extends PersistentQueue>() {
     return () => !selectable
-      ? PersistentQueueTile<Q>(
-          queue: content as Q,
-          onTap: onTap,
-          enableDefaultOnTap: enableDefaultOnTap,
-          trailing: trailing,
-          current: current,
-          horizontalPadding: horizontalPadding,
-          backgroundColor: backgroundColor,
-        )
-      : PersistentQueueTile<Q>.selectable(
-          queue: content as Q,
-          selectionIndex: selectionIndex!,
-          selectionController: selectionController!,
-          selected: selected,
-          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-          handleTapInSelection: handleTapInSelection,
-          trailing: trailing,
-          current: current,
-          onTap: onTap,
-          enableDefaultOnTap: enableDefaultOnTap,
-          horizontalPadding: horizontalPadding,
-          backgroundColor: backgroundColor,
-        );
+        ? PersistentQueueTile<Q>(
+            queue: content as Q,
+            onTap: onTap,
+            enableDefaultOnTap: enableDefaultOnTap,
+            trailing: trailing,
+            current: current,
+            horizontalPadding: horizontalPadding,
+            backgroundColor: backgroundColor,
+          )
+        : PersistentQueueTile<Q>.selectable(
+            queue: content as Q,
+            selectionIndex: selectionIndex!,
+            selectionController: selectionController!,
+            selected: selected,
+            longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+            handleTapInSelection: handleTapInSelection,
+            trailing: trailing,
+            current: current,
+            onTap: onTap,
+            enableDefaultOnTap: enableDefaultOnTap,
+            horizontalPadding: horizontalPadding,
+            backgroundColor: backgroundColor,
+          );
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(
-      !selectable || selectable && selectionIndex != null,
-      'If tile is selectable, an `index` must be provided'
-    );
+    assert(!selectable || selectable && selectionIndex != null, 'If tile is selectable, an `index` must be provided');
 
     return contentPick<T, ValueGetter<Widget>>(
       contentType: contentType,
       song: () => !selectable
-        ? SongTile(
-            song: content as Song,
-            trailing: trailing,
-            current: current,
-            onTap: onTap,
-            enableDefaultOnTap: enableDefaultOnTap,
-            horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
-            backgroundColor: backgroundColor,
-            variant: songTileVariant,
-            clickBehavior: songTileClickBehavior,
-          )
-        : SongTile.selectable(
-            song: content as Song,
-            selectionIndex: selectionIndex!,
-            selectionController: selectionController,
-            selected: selected,
-            longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-            handleTapInSelection: handleTapInSelection,
-            trailing: trailing,
-            current: current,
-            onTap: onTap,
-            enableDefaultOnTap: enableDefaultOnTap,
-            horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
-            backgroundColor: backgroundColor,
-            variant: songTileVariant,
-            clickBehavior: songTileClickBehavior,
-          ),
+          ? SongTile(
+              song: content as Song,
+              trailing: trailing,
+              current: current,
+              onTap: onTap,
+              enableDefaultOnTap: enableDefaultOnTap,
+              horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
+              backgroundColor: backgroundColor,
+              variant: songTileVariant,
+              clickBehavior: songTileClickBehavior,
+            )
+          : SongTile.selectable(
+              song: content as Song,
+              selectionIndex: selectionIndex!,
+              selectionController: selectionController,
+              selected: selected,
+              longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+              handleTapInSelection: handleTapInSelection,
+              trailing: trailing,
+              current: current,
+              onTap: onTap,
+              enableDefaultOnTap: enableDefaultOnTap,
+              horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
+              backgroundColor: backgroundColor,
+              variant: songTileVariant,
+              clickBehavior: songTileClickBehavior,
+            ),
       album: forPersistentQueue<Album>(),
       playlist: forPersistentQueue<Playlist>(),
       artist: () => !selectable
-        ? ArtistTile(
-            artist: content as Artist,
-            trailing: trailing,
-            current: current,
-            onTap: onTap,
-            enableDefaultOnTap: enableDefaultOnTap,
-            horizontalPadding: horizontalPadding,
-            backgroundColor: backgroundColor,
-          )
-        : ArtistTile.selectable(
-            artist: content as Artist,
-            selectionIndex: selectionIndex!,
-            selectionController: selectionController,
-            selected: selected,
-            longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-            handleTapInSelection: handleTapInSelection,
-            trailing: trailing,
-            current: current,
-            onTap: onTap,
-            enableDefaultOnTap: enableDefaultOnTap,
-            horizontalPadding: horizontalPadding,
-            backgroundColor: backgroundColor,
-          ),
+          ? ArtistTile(
+              artist: content as Artist,
+              trailing: trailing,
+              current: current,
+              onTap: onTap,
+              enableDefaultOnTap: enableDefaultOnTap,
+              horizontalPadding: horizontalPadding,
+              backgroundColor: backgroundColor,
+            )
+          : ArtistTile.selectable(
+              artist: content as Artist,
+              selectionIndex: selectionIndex!,
+              selectionController: selectionController,
+              selected: selected,
+              longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+              handleTapInSelection: handleTapInSelection,
+              trailing: trailing,
+              current: current,
+              onTap: onTap,
+              enableDefaultOnTap: enableDefaultOnTap,
+              horizontalPadding: horizontalPadding,
+              backgroundColor: backgroundColor,
+            ),
     )();
   }
 }
 
 /// Common parts of the UI in content tile implementations.
-/// 
+///
 /// TODO: comments
 mixin ContentTileComponentsMixin<E extends SelectionEntry, W extends SelectableWidget> on SelectableState<E, W> {
   final checmarkLargeSize = 28.0;
 
   Widget buildSelectionCheckmark({bool forceLarge = false, bool forSelectionRoute = false}) {
-    if (animation.status == AnimationStatus.dismissed)
+    if (animation.status == AnimationStatus.dismissed) {
       return const SizedBox.shrink();
+    }
     return SelectionCheckmark(
       ignorePointer: !forSelectionRoute,
       scaleAnimation: !forSelectionRoute,
@@ -170,6 +168,7 @@ mixin ContentTileComponentsMixin<E extends SelectionEntry, W extends SelectableW
         child: child,
       );
     }
+
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, right: 8.0),
       child: GestureDetector(

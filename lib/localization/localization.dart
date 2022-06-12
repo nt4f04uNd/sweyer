@@ -9,7 +9,7 @@ AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context)!;
 /// Gets [AppLocalizations] without context.
 AppLocalizations get staticl10n {
   try {
-    return lookupAppLocalizations(WidgetsBinding.instance!.window.locale);
+    return lookupAppLocalizations(WidgetsBinding.instance.window.locale);
   } catch (ex) {
     // Load default locale.
     return lookupAppLocalizations(const Locale('en', 'US'));

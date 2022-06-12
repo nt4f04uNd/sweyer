@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
-class DevRoute extends StatelessWidget {
+class DevRoute extends StatefulWidget {
   const DevRoute({Key? key}) : super(key: key);
 
+  @override
+  State<DevRoute> createState() => _DevRouteState();
+}
+
+class _DevRouteState extends State<DevRoute> {
   void _testToast() {
     ShowFunctions.instance.showToast(
       msg: 'Test',
@@ -15,23 +20,25 @@ class DevRoute extends StatelessWidget {
     );
   }
 
-  Future<void> _quitDevMode(BuildContext context, AppLocalizations l10n) async {
+  Future<void> _quitDevMode() async {
     final l10n = getl10n(context);
     final res = await ShowFunctions.instance.showDialog(
       context,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
-      buttonSplashColor: Constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: constants.Theme.glowSplashColor.auto,
       acceptButton: AppButton.pop(
         text: l10n.accept,
         popResult: true,
-        splashColor: Constants.Theme.glowSplashColor.auto,
-        textColor: Constants.AppColors.red,
+        splashColor: constants.Theme.glowSplashColor.auto,
+        textColor: constants.AppColors.red,
       ),
     );
     if (res != null && res as bool) {
       Prefs.devMode.set(false);
-      Navigator.of(context).pop();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -60,7 +67,7 @@ class DevRoute extends StatelessWidget {
           NFListTile(
             title: Text(l10n.quitDevMode),
             splashColor: ThemeControl.instance.theme.colorScheme.error,
-            onTap: () => _quitDevMode(context, l10n),
+            onTap: _quitDevMode,
           ),
         ],
       ),
@@ -115,14 +122,14 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        inactiveColor: Constants.Theme.sliderInactiveColor.auto,
+        inactiveColor: constants.Theme.sliderInactiveColor.auto,
         min: 0.001,
         max: 10,
         divisions: 100,
         value: _value,
         onChanged: _handleChange,
         onChangeEnd: _handleChangeEnd,
-        label: 'x' + _value.toStringAsFixed(3),
+        label: 'x${_value.toStringAsFixed(3)}',
         minLabel: 'x0',
         maxLabel: 'x10',
         themeData: SliderThemeData(

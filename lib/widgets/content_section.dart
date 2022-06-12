@@ -19,8 +19,8 @@ class ContentSection<T extends Content> extends StatelessWidget {
     this.contentTileTapHandler,
     this.selectedTest,
     this.selectionIndexMapper,
-  }) : child = null,
-       super(key: key);
+  })  : child = null,
+        super(key: key);
 
   const ContentSection.custom({
     Key? key,
@@ -28,12 +28,12 @@ class ContentSection<T extends Content> extends StatelessWidget {
     required this.list,
     required this.child,
     this.onHeaderTap,
-  }) : selectionController = null,
-       contentTileTapHandler = null,
-       selectedTest = null,
-       selectionIndexMapper = null,
-       maxPreviewCount = 0,
-       super(key: key);
+  })  : selectionController = null,
+        contentTileTapHandler = null,
+        selectedTest = null,
+        selectionIndexMapper = null,
+        maxPreviewCount = 0,
+        super(key: key);
 
   final Type? contentType;
   final List<T> list;
@@ -65,7 +65,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    
+
     Widget Function(int)? builder;
     if (child == null) {
       builder = (index) {
@@ -73,24 +73,22 @@ class ContentSection<T extends Content> extends StatelessWidget {
         return ContentTile<T>(
           contentType: contentType,
           content: item,
-          selectionIndex: selectionIndexMapper != null
-            ? selectionIndexMapper!(index)
-            : index,
+          selectionIndex: selectionIndexMapper != null ? selectionIndexMapper!(index) : index,
           selected: selectedTest != null
-            ? selectedTest!(index)
-            : selectionController?.data.contains(SelectionEntry<T>.fromContent(
-                content: item,
-                index: index,
-                context: context,
-              ))
-            ?? false,
+              ? selectedTest!(index)
+              : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                    content: item,
+                    index: index,
+                    context: context,
+                  )) ??
+                  false,
           selectionController: selectionController,
           onTap: () => contentTileTapHandler?.call(),
           horizontalPadding: 12.0,
         );
       };
     }
-  
+
     final count = list.length;
 
     return Column(
@@ -113,12 +111,10 @@ class ContentSection<T extends Content> extends StatelessWidget {
                   duration: const Duration(milliseconds: 240),
                   switchInCurve: Curves.easeOut,
                   switchOutCurve: Curves.easeIn,
-                  child: onHeaderTap == null
-                    ? const SizedBox.shrink()
-                    : const Icon(Icons.chevron_right_rounded),
+                  child: onHeaderTap == null ? const SizedBox.shrink() : const Icon(Icons.chevron_right_rounded),
                 ),
               ],
-            ), 
+            ),
           ),
         ),
         if (child != null)
@@ -126,8 +122,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
         else
           Column(
             children: [
-              for (int index = 0; index < math.min(maxPreviewCount, count); index++)
-                builder!(index),
+              for (int index = 0; index < math.min(maxPreviewCount, count); index++) builder!(index),
             ],
           )
       ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/sweyer.dart';
 
 /// Creates a Sweyer logo.
@@ -31,7 +31,7 @@ class SweyerLogo extends StatelessWidget {
             Transform.scale(
               scale: 1.65,
               child: Image.asset(
-                Constants.Assets.ASSET_LOGO_MASK,
+                constants.Assets.assetLogoMask,
                 color: color != null
                     ? ContentArt.getColorToBlendInDefaultArt(color!)
                     : ThemeControl.instance.colorForBlend,
