@@ -1,14 +1,18 @@
 ## Code style
 
-The repo has a set of lints in [analysis_options](https://github.com/nt4f04uNd/sweyer/blob/master/analysis_options.yaml)
+The repo has a set of lints in [analysis_options](https://github.com/nt4f04uNd/sweyer/blob/master/analysis_options.yaml),
+which are based of [flutter_lints](https://pub.dev/packages/flutter_lints) (with some tunes), and
 that enfore the style that I'm following, so just following
 them and the code that you see around you should be fine.
 
-The coding style is very similar (but not exactly the same)
-to the style [Flutter framework itself uses](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo),
-and the set of lints was created by copying and redacting Flutter's
-[analysis_options](https://github.com/flutter/flutter/blob/master/analysis_options.yaml).
-In particular, it includes not using auto-formatter.
+The project is also using auto dart formatter with line break
+limit set to 120 characters (instead of default 80).
+
+VSCode workspace is already configured to use 120 line break automatically.
+
+To run it manually, use this command
+
+```flutter format -l 120 .```
 
 ## Tests and golden tests
 
