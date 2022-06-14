@@ -36,7 +36,7 @@ dependencies:
   auto_size_text: ^3.0.0-nullsafety.0
   marquee: ^2.1.0
   equatable: ^2.0.0
-  device_info: ^2.0.0
+  device_info_plus: ^3.2.4
   enum_to_string: ^2.0.1
   sqflite: ^2.0.0+3
   boxy: ^2.0.0
