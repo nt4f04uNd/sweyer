@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:flare_flutter/flare_actor.dart';
+import 'package:rive/rive.dart';
 import 'package:sweyer/constants.dart' as constants;
 
 const double _kIconSize = 22.0;
@@ -32,13 +32,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
   late AnimationController controller;
   StreamSubscription<bool>? _playingSubscription;
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
-
-  late String _animation;
-  set animation(String value) {
-    setState(() {
-      _animation = value;
-    });
-  }
+  SMIBool? _isPlayingAnimationInput;
 
   @override
   void initState() {
@@ -52,10 +46,10 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
 
   void _update() {
     if (player.playing) {
-      _animation = 'pause';
+      _isPlayingAnimationInput?.value = true;
     } else {
       controller.value = 1.0;
-      _animation = 'play';
+      _isPlayingAnimationInput?.value = false;
     }
     _playingSubscription?.cancel();
     _playingSubscription = player.playingStream.listen((playing) {
@@ -86,17 +80,17 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
 
   /// Animates to state where it shows "play" button.
   void _play() {
-    if (_animation != 'pause_play' && _animation != 'play') {
+    if (_isPlayingAnimationInput?.value == true) {
       controller.forward();
-      animation = 'pause_play';
+      _isPlayingAnimationInput?.value = false;
     }
   }
 
   /// Animates to state where it shows "pause" button.
   void _pause() {
-    if (_animation != 'play_pause' && _animation != 'pause') {
+    if (_isPlayingAnimationInput?.value == false) {
       controller.reverse();
-      animation = 'play_pause';
+      _isPlayingAnimationInput?.value = true;
     }
   }
 
@@ -133,17 +127,14 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
           // Needed because for some reason the color is not updated on theme change.
           key: ValueKey(color),
           child: RepaintBoundary(
-            child: FlareActor(
+            child: RiveAnimation.asset(
               constants.Assets.assetAnimationPlayPause,
-              animation: _animation,
-              callback: (value) {
-                if (value == 'pause_play' && _animation != 'play_pause') {
-                  animation = 'play';
-                } else if (value == 'play_pause' && _animation != 'pause_play') {
-                  animation = 'pause';
-                }
+              onInit: (artBoard) {
+                artBoard.setForegroundColor(color);
+                final controller = StateMachineController.fromArtboard(artBoard, 'State Machine');
+                artBoard.addController(controller!);
+                _isPlayingAnimationInput = controller.findInput<bool>('playing') as SMIBool;
               },
-              color: color,
             ),
           ),
         ),

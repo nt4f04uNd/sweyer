@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:boxy/boxy.dart';
-import 'package:flare_flutter/flare_actor.dart';
+import 'package:rive/rive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:styled_text/styled_text.dart';
@@ -744,7 +744,7 @@ class SelectionCheckmark extends StatefulWidget {
 }
 
 class _SelectionCheckmarkState extends State<SelectionCheckmark> {
-  String _flareAnimation = 'stop';
+  SMITrigger? _checkBoxAnimation;
 
   @override
   void initState() {
@@ -771,7 +771,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
 
   void _update() {
     if (widget.animation.status == AnimationStatus.forward) {
-      _flareAnimation = 'play';
+      _checkBoxAnimation?.fire();
     }
   }
 
@@ -798,14 +798,14 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
             color: constants.AppColors.androidGreen,
             borderRadius: BorderRadius.all(Radius.circular(200.0)),
           ),
-          child: FlareActor(
+          child: RiveAnimation.asset(
             constants.Assets.assetAnimationCheckmark,
-            animation: _flareAnimation,
-            color: ThemeControl.instance.theme.colorScheme.secondaryContainer,
-            callback: (name) {
-              setState(() {
-                _flareAnimation = 'stop';
-              });
+            onInit: (artBoard) {
+              artBoard.setForegroundColor(ThemeControl.instance.theme.colorScheme.secondaryContainer);
+              final controller = StateMachineController.fromArtboard(artBoard, 'State Machine');
+              artBoard.addController(controller!);
+              _checkBoxAnimation = controller.findInput<bool>('play') as SMITrigger;
+              _checkBoxAnimation?.fire();
             },
           ),
         ),

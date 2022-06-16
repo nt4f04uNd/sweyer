@@ -13,7 +13,6 @@ import 'package:package_info_plus_platform_interface/method_channel_package_info
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as constants;
@@ -92,8 +91,6 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
   binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
   binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
-  // Prepare flare.
-  FlareTesting.setup();
 
   // Fake prefs values.
   //

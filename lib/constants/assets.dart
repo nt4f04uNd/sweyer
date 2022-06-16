@@ -9,6 +9,6 @@ abstract class Assets {
   /// Thumb for in app usage.
   static const assetLogoThumbInApp = 'assets/images/logo_mask_thumb_in_app.png';
 
-  static const assetAnimationPlayPause = 'assets/animations/play_pause.flr';
-  static const assetAnimationCheckmark = 'assets/animations/checkmark.flr';
+  static const assetAnimationPlayPause = 'assets/animations/play_pause.riv';
+  static const assetAnimationCheckmark = 'assets/animations/checkmark.riv';
 }
