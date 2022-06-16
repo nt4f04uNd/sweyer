@@ -22,10 +22,10 @@ dependencies:
   rxdart: ^0.26.0
   sliver_tools: ^0.2.1
   animations: ^2.0.2
-  permission_handler: ^8.3.0
+  permission_handler: ^9.0.0
   shared_preferences: ^2.0.5
   path_provider: ^2.0.1
-  percent_indicator: ^3.0.1
+  percent_indicator: ^4.2.2
   firebase_core: ^1.0.3
   firebase_crashlytics: ^2.0.1
   firebase_analytics: ^9.0.4
@@ -36,11 +36,11 @@ dependencies:
   auto_size_text: ^3.0.0-nullsafety.0
   marquee: ^2.1.0
   equatable: ^2.0.0
-  device_info_plus: ^3.2.4
+  device_info_plus: ^4.0.0
   enum_to_string: ^2.0.1
   sqflite: ^2.0.0+3
   boxy: ^2.0.0
-  back_button_interceptor: ^5.0.0
+  back_button_interceptor: ^6.0.0
   flutter_sticky_header: ^0.6.0
   palette_generator: ^0.3.0
   cached_network_image: ^3.0.0
