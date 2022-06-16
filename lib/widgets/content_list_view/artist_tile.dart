@@ -52,7 +52,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   final Widget? trailing;
 
   /// Whether this queue is currently playing, if yes, enables animated
-  /// [CurrentIndicator] over the ablum art.
+  /// [CurrentIndicator] over the album art.
   ///
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;

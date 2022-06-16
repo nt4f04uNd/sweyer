@@ -43,7 +43,7 @@ abstract class _Routes<T> extends Equatable {
     return location == other.location;
   }
 
-  /// The oppsoite of [hasSameLocation].
+  /// The opposite of [hasSameLocation].
   bool hasDifferentLocation(_Routes other) {
     return location != other.location;
   }
@@ -151,7 +151,7 @@ class PersistentQueueArguments<T extends PersistentQueue> extends Equatable {
   /// The queue to be opened.
   final T queue;
 
-  // Whether to open the playlist route in edtining mode.
+  // Whether to open the playlist route in editing mode.
   final bool editing;
 
   @override
@@ -253,7 +253,7 @@ mixin _DelegateMixin<T extends _Routes> on RouterDelegate<T>, ChangeNotifier {
     final bool success = route.didPop(result);
     if (success) {
       if (_routes.length <= 1) {
-        assert(false, "Can't pop inital route");
+        assert(false, "Can't pop initial route");
       } else {
         _routes.removeLast();
       }
@@ -284,7 +284,7 @@ class _TransitionSettings {
   /// Used on [InitialRoute] to switch its UI style.
   final StackFadeRouteTransitionSettings initial;
 
-  /// Used on theme settings route to disable dimissing while theme is chaning.
+  /// Used on theme settings route to disable dismissing while theme is changing.
   final StackFadeRouteTransitionSettings theme;
 }
 

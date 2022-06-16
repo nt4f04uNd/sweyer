@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Inteface for other sort feature enums.
+/// Interface for other sort feature enums.
 abstract class SortFeature<T extends Content> extends Enum<String> {
   const SortFeature._(String value) : super(value);
 

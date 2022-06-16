@@ -2,7 +2,7 @@
 
 The repo has a set of lints in [analysis_options](https://github.com/nt4f04uNd/sweyer/blob/master/analysis_options.yaml),
 which are based of [flutter_lints](https://pub.dev/packages/flutter_lints) (with some tunes), and
-that enfore the style that I'm following, so just following
+that enforce the style that I'm following, so just following
 them and the code that you see around you should be fine.
 
 The project is also using auto dart formatter with line break
@@ -58,7 +58,7 @@ golden files:
 If you left the auto-commit option unchecked, those new files can be put into `test/golden/goldens`
 folder and manually pushed to your PR.
 
-## Coverage [![codecov](https://codecov.io/gh/nt4f04uNd/sweyer/branch/master/graph/badge.svg)](https://codecov.io/gh/nt4f04uNd/sweyer)
+## Coverage [![Codecov](https://codecov.io/gh/nt4f04uNd/sweyer/branch/master/graph/badge.svg)](https://codecov.io/gh/nt4f04uNd/sweyer)
 
 Coverage measures which lines of code are covered during the tests. It shows which part of the
 code is untested. When adding a new feature, a test must be added to verify the new feature and to

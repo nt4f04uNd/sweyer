@@ -171,7 +171,7 @@ class ContentArt extends StatefulWidget {
   /// Icon to show as default image instead of the app logo.
   ///
   /// Will be ignored if [source] is created from [Song], since the song default art
-  /// are inteded to use an app logo.
+  /// are intended to use an app logo.
   final IconData? defaultArtIcon;
 
   /// Scale that will be applied to the [defaultArtIcon].
@@ -180,7 +180,7 @@ class ContentArt extends StatefulWidget {
   /// Scale that will be applied to the asset image contents.
   final double assetScale;
 
-  /// Whether the default album art is should be rendered with hight resolution.
+  /// Whether the default album art is should be rendered with high resolution.
   /// Defaults to `false`.
   ///
   /// This changes image contents, so size of it might be different and you probably
@@ -202,7 +202,7 @@ class ContentArt extends StatefulWidget {
   /// Called when art is loaded.
   final Function(ui.Image)? onLoad;
 
-  /// Above Android Q and above album art loads from bytes, and performns an animation on load.
+  /// Above Android Q and above album art loads from bytes, and performs an animation on load.
   /// This defines the duration of this animation.
   final Duration loadAnimationDuration;
 
@@ -375,7 +375,7 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
 
 /// Loads local song art with `MediaStore` API, used above Android Q.
 ///
-/// Lower Android Q album arts ared displayed directly from the file path
+/// Lower Android Q album arts are displayed directly from the file path
 /// of album art from [Song.albumArt].
 ///
 /// Above Q though, this path was deprecated due to  scoped storage, and now
@@ -465,7 +465,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
 
 /// Loads local song art from the file, used below Android Q.
 ///
-/// Also, sometimes below Android Q, album arts files sometimes become unaccessible,
+/// Also, sometimes below Android Q, album arts files sometimes become inaccessible,
 /// even though they should not. This loader will try to restore them with [Song.albumId]
 /// and [ContentChannel.fixAlbumArt].
 ///
@@ -530,8 +530,8 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   }
 
   Future<void> _recreateArt() async {
-    final ablumId = song.albumId;
-    if (ablumId != null) {
+    final albumId = song.albumId;
+    if (albumId != null) {
       await ContentChannel.instance.fixAlbumArt(song.albumId!);
     }
     setLoading(_SourceLoading.loaded);
@@ -632,7 +632,7 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
 }
 
 // TODO: end the abstraction of Art and ContentArt
-// I started it, but it's consumed a lot of time and I left it unended
+// I started it, but it's consumed a lot of time and I left it unfinished.
 //
 // What needs to be done is that there should be a clean widget Art,
 // all specifics regarding source and how widget is exactly rendered should be either:
@@ -806,11 +806,11 @@ class _ContentArtState extends State<ContentArt> {
         }
       });
       if (widget.onLoad != null) {
-        /// Schedule two build phazes, don't know exactly why, but one throws with
+        /// Schedule two build phases, don't know exactly why, but one throws with
         /// `debugNeedsPaint` assertion fail.
         ///
         /// And the third is for the called above `setState`, because calling it
-        /// will cause image to be rebuilt to trigger [AnimatiedSwitcher] animation.
+        /// will cause image to be rebuilt to trigger [AnimatedSwitcher] animation.
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -924,7 +924,7 @@ class _ContentArtState extends State<ContentArt> {
       }
     } else {
       child = Image.asset(
-        widget.assetHighRes ? constants.Assets.assetLogoMask : constants.Assets.assetLogoThumbInapp,
+        widget.assetHighRes ? constants.Assets.assetLogoMask : constants.Assets.assetLogoThumbInApp,
         width: size,
         height: size,
         cacheWidth: cacheSize,

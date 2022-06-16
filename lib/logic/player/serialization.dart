@@ -198,7 +198,7 @@ class IdMapSerializer extends IdMapSerializerType {
         final decodedKey = jsonDecode(entry.key);
         // Initially the id map was saved as just `Map<String, int>` where:
         // key was negative song id,
-        // value was the source positve id
+        // value was the source positive id
         //
         // This ensures there will be no errors in case someone migrates from
         // the old version.

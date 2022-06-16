@@ -34,7 +34,7 @@ class ContentChannelException extends Enum with EquatableMixin {
   /// Generic error.
   static const unexpected = ContentChannelException._('UNEXPECTED_ERROR');
 
-  /// On Android 30 requets like `MediaStore.createDeletionRequest` require
+  /// On Android 30 requests like `MediaStore.createDeletionRequest` require
   /// calling `startIntentSenderForResult`, which might throw this exception.
   static const intentSender = ContentChannelException._('INTENT_SENDER_ERROR');
 
@@ -58,7 +58,7 @@ class ContentChannelException extends Enum with EquatableMixin {
 
 /// Communication bridge with the platform for all content-related methods.
 ///
-/// Methods can thow various [ContentChannelException]s.
+/// Methods can throw various [ContentChannelException]s.
 class ContentChannel {
   static const MethodChannel _channel = MethodChannel('content_channel');
 
@@ -94,9 +94,9 @@ class ContentChannel {
 
   /// Tries to tell system to recreate album art by [albumId].
   ///
-  /// Sometimes `MediaStore` tells that there's an albumart for some song, but the actual file
+  /// Sometimes `MediaStore` tells that there's an album art for some song, but the actual file
   /// by some path doesn't exist. Supposedly, what happens is that Android detects reads on this
-  /// entry from something like `InputStream` in Java and regenerates albumthumbs if they do not exist
+  /// entry from something like `InputStream` in Java and regenerates album thumbs if they do not exist
   /// (because this is just a caches that system tends to clear out if it thinks it should),
   /// but (yet again, supposedly) this is not the case when Flutter accesses this file. System cannot
   /// detect it and does not recreate the thumb, so we do this instead.

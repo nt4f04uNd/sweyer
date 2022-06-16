@@ -243,7 +243,7 @@ class ContentRepository {
 //   }
 // }
 
-/// Contols content state and allows to perform related actions, for example:
+/// Controls content state and allows to perform related actions, for example:
 ///
 /// * fetch songs
 /// * search
@@ -288,7 +288,7 @@ class ContentControl extends Control {
   bool get initializing => _initializeCompleter != null;
   Completer<void>? _initializeCompleter;
 
-  /// The main data app initialization function, inits all queues.
+  /// The main data app initialization function, initializes all queues.
   /// Also handles no-permissions situations.
   @override
   Future<void> init() async {
@@ -299,7 +299,7 @@ class ContentControl extends Control {
       selectionNotifier = ValueNotifier(null);
     }
     if (Permissions.instance.granted) {
-      // TODO: prevent initalizing if already initizlied
+      // TODO: prevent initializing if already initialized
       _initializeCompleter = Completer();
       emitContentChange(); // update UI to show "Searching songs" screen
       _restoreSorts();
@@ -332,7 +332,7 @@ class ContentControl extends Control {
       // _quickActions.clearShortcutItems();
       _initializeCompleter?.complete();
       _initializeCompleter = null;
-      // TODO: this might still deliver some pedning events to listeneres, see https://github.com/dart-lang/sdk/issues/45653
+      // TODO: This might still deliver some pending events to listeners, see https://github.com/dart-lang/sdk/issues/45653
       _contentSubject.close();
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         selectionNotifier.dispose();
@@ -500,7 +500,7 @@ class ContentControl extends Control {
     //
     // final year = int.tryParse(words[0]);
 
-    /// Splits string by spaces, or dashes, or bar, or paranthesis
+    /// Splits string by spaces, or dashes, or bar, or parenthesis
     final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
     final l10n = staticl10n;
 
@@ -515,7 +515,7 @@ class ContentControl extends Control {
           .contains(query);
     }
 
-    final contentInterable = contentPick<T, ValueGetter<Iterable<T>>>(
+    final contentIterable = contentPick<T, ValueGetter<Iterable<T>>>(
       contentType: contentType,
       song: () {
         return state.allSongs.songs.where((song) {
@@ -579,7 +579,7 @@ class ContentControl extends Control {
         }).cast<T>();
       },
     )();
-    return contentInterable.toList();
+    return contentIterable.toList();
   }
 
   /// Sorts songs, albums, etc.
@@ -917,7 +917,7 @@ class ContentUtils {
     );
   }
 
-  /// Computes the duration of mulitple [songs] and returs it as formatted string.
+  /// Computes the duration of multiple [songs] and returns it as formatted string.
   static String bulkDuration(Iterable<Song> songs) {
     final duration = Duration(milliseconds: songs.fold(0, (prev, el) => prev + el.duration));
     final hours = duration.inHours;
@@ -976,7 +976,7 @@ class ContentUtils {
     );
   }
 
-  /// Accepts a collection of content, exctracts songs from each entry
+  /// Accepts a collection of content, extracts songs from each entry
   /// and returns a one flattened array of songs.
   static List<Song> flatten(Iterable<Content> collection) {
     final List<Song> songs = [];
@@ -1092,7 +1092,7 @@ class ContentUtils {
   /// The [list] is the list of songs contained in this origin.
   ///
   /// This must be called before the song is inserted to the queue, otherwise
-  /// the song might be conidiered as a duplicate of itself, which will be incorrect.
+  /// the song might be considered as a duplicate of itself, which will be incorrect.
   /// The function asserts that.
   ///
   /// Marks the queue as dirty, so the next [setQueue] will save it.

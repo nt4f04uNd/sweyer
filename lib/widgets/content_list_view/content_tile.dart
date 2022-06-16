@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Generalizes all content tiles into one widget and exposes
-/// common propertlies of all tiles.
+/// common properties of all tiles.
 class ContentTile<T extends Content> extends StatelessWidget {
   const ContentTile({
     Key? key,
@@ -147,7 +147,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
 ///
 /// TODO: comments
 mixin ContentTileComponentsMixin<E extends SelectionEntry, W extends SelectableWidget> on SelectableState<E, W> {
-  final checmarkLargeSize = 28.0;
+  final checkmarkLargeSize = 28.0;
 
   Widget buildSelectionCheckmark({bool forceLarge = false, bool forSelectionRoute = false}) {
     if (animation.status == AnimationStatus.dismissed) {
@@ -156,7 +156,7 @@ mixin ContentTileComponentsMixin<E extends SelectionEntry, W extends SelectableW
     return SelectionCheckmark(
       ignorePointer: !forSelectionRoute,
       scaleAnimation: !forSelectionRoute,
-      size: forceLarge || forSelectionRoute ? checmarkLargeSize : 21.0,
+      size: forceLarge || forSelectionRoute ? checkmarkLargeSize : 21.0,
       animation: animation,
     );
   }

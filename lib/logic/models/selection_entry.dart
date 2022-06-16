@@ -55,7 +55,7 @@ class SelectionEntry<T extends Content> {
   /// Usually the selection controller is created per one screen with one list.
   /// In this case the index can be taken just as index of item in the list.
   /// Aside from that, for this case when the controller is in selection any
-  /// sorting or reordering operatins must not happen, otherwise might mixup and
+  /// sorting or reordering operations must not happen, otherwise might mix up and
   /// the correct order might be lost.
   ///
   /// But in some cases it's not enough to imply index from the list and we

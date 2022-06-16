@@ -2,7 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Represends a song.
+/// Represents a song.
 ///
 /// Songs are always playable, trashed or pending songs on Android Q are excluded.
 class Song extends Content {
@@ -20,7 +20,7 @@ class Song extends Content {
   final int? albumId;
   final String artist;
   final int artistId;
-  // TODO: vodoo shenanigans on android versions with this (and other places where i can)
+  // TODO: Voodoo shenanigans on android versions with this (and other places where i can)
   final String? genre;
   final int? genreId;
   @override

@@ -155,7 +155,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: ThemeControl.instance.themeChaning,
+      stream: ThemeControl.instance.themeChanging,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return NFTheme(
           data: App.nfThemeData,

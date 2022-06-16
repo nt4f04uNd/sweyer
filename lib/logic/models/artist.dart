@@ -18,7 +18,7 @@ class Artist extends SongOrigin {
   @override
   String get title => artist;
 
-  /// Returns songs for this artst.
+  /// Returns songs for this artist.
   @override
   List<Song> get songs {
     return ContentControl.instance.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
@@ -32,7 +32,7 @@ class Artist extends SongOrigin {
   @override
   int get length => numberOfTracks;
 
-  /// Returns albums for this artst.
+  /// Returns albums for this artist.
   List<Album> get albums {
     return ContentControl.instance.state.albums.values.where((el) => el.artistId == id).toList();
   }

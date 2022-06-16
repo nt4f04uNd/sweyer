@@ -15,7 +15,7 @@ enum QueueType {
   /// Queue of all playlists.
   allPlaylists,
 
-  /// Queue of all artistt.
+  /// Queue of all artists.
   allArtists,
 
   /// Queue of searched tracks.
@@ -24,7 +24,7 @@ enum QueueType {
   /// Queue that has same [SongOrigin].
   origin,
 
-  /// Some arbitrary queue. Сannot have modified state.
+  /// Some arbitrary queue. Cannot have modified state.
   ///
   /// Made up when:
   /// * user adds a song to [persistent] queue, that’s not included in it
@@ -165,7 +165,7 @@ abstract class _QueueOperations<T> {
   /// Removes song.
   bool remove(T arg);
 
-  /// Retruns song.
+  /// Returns song.
   Song? get(T arg);
 
   /// Returns song index.
@@ -178,7 +178,7 @@ abstract class _QueueOperations<T> {
   Song? getPrev(T arg);
 }
 
-/// Implements opertions on [queue] by IDs of the [Song]s.
+/// Implements operations on [queue] by IDs of the [Song]s.
 class _QueueOperationsById implements _QueueOperations<int> {
   const _QueueOperationsById(this.queue);
   final Queue queue;
@@ -290,7 +290,7 @@ class QueuesState {
   /// This is a map to store ids of duplicated songs in queue.
   ///
   /// The key is string, because [jsonEncode] and [jsonDecode] can only
-  /// work with `Map<String, dynamic>`. Convertion to int doesn't seem to be a
+  /// work with `Map<String, dynamic>`. Conversion to int doesn't seem to be a
   /// benefit, so keeping this as string.
   ///
   /// See [ContentUtils.deduplicateSong] for discussion about the
@@ -382,7 +382,7 @@ class QueueControl extends Control {
     _onQueueChangeSubject.add(null);
   }
 
-  /// Must be called before the song is instreted to the current queue,
+  /// Must be called before the song is inserted to the current queue,
   /// calls [ContentUtils.deduplicateSong].
   void _deduplicateSong(Song song) {
     final result = ContentUtils.deduplicateSong(
@@ -395,7 +395,7 @@ class QueueControl extends Control {
     }
   }
 
-  /// Marks queues modified and traverses it to be unshuffled, preseving the shuffled
+  /// Marks queues modified and traverses it to be unshuffled, preserving the shuffled
   /// queue contents.
   void _unshuffle() {
     setQueue(
@@ -644,7 +644,7 @@ class QueueControl extends Control {
       }
       if (containsCurrent) {
         /// TODO: add to [Queue] something like relative indexing, that allows negative indexes
-        /// and imporove this
+        /// and improve this
         MusicPlayer.instance.setSong(state.current.songs[0]);
       }
       setQueue(modified: true);
@@ -694,7 +694,7 @@ class QueueControl extends Control {
   /// Resets queue to all songs, pauses the player and sets the first song as
   /// current.
   ///
-  /// This fucntion should be called if queue is found to be broken
+  /// This function should be called if queue is found to be broken
   /// and there's no straight way to figure out where to fallback.
   void resetQueueAsFallback() {
     setQueue(
@@ -727,14 +727,14 @@ class QueueControl extends Control {
   ///   from current queue.
   /// * [origin] is the song origin being set, only applied when [type] is [QueueType.origin].
   ///   When [QueueType.origin] is set and currently it's not origin, this parameter is required.
-  ///   Otherwise it can be omitted and for updating other paramters only.
+  ///   Otherwise it can be omitted and for updating other parameters only.
   ///
   ///   With playlist origin the [Playlist.idMap] will be used to update the
   ///   [ContentState.idMap].
   /// * [searchQuery] is the search query the playlist was searched by,
   ///   only applied when [type] is [QueueType.searched].
   ///   Similarly as for [origin], when [QueueType.searched] is set and currently it's not searched,
-  ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
+  ///   this parameter is required. Otherwise it can be omitted for updating other parameters only.
   /// * [emitChangeEvent] is whether to emit a song list change event
   /// * [setIdMapFromPlaylist] allows to configure whether to set the [Playlist.idMap]
   ///   when set [origin] is playlist. Needed to not override the map at the app start.
@@ -768,11 +768,11 @@ class QueueControl extends Control {
     );
     assert(
       type != QueueType.origin || queues._origin != null || origin != null,
-      "When you set `origin` queue and currently none set, you must provide the `origin` paramenter",
+      "When you set `origin` queue and currently none set, you must provide the `origin` parameter",
     );
     assert(
       type != QueueType.searched || queues._searchQuery != null || searchQuery != null,
-      "When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter",
+      "When you set `searched` queue and currently none set, you must provide the `searchQuery` parameter",
     );
 
     type ??= queues._type;

@@ -36,7 +36,7 @@
   was saved only for the current app session, when it was added, and was not restored.
 - Optimized scrollbar and listviews
 - Became media browser service, support for Android Auto
-- Fixed that album arts were not recached (below Android 10)
+- Fixed that album arts were not re-cached (below Android 10)
 - Refactored a lot of code and fixed a lot of other bugs
 - Changed player backend (non-UX)
 
@@ -45,7 +45,7 @@
 - localization (ru, en)
 - revamped design, changed logo, some fancy animations
 - ability to change primary color in theme settings
-- bottom bar is now swipable
+- bottom bar is now swipeable
 - sidebar can be swiped out from any place on the screen
 - albums
 - queue system

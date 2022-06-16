@@ -41,7 +41,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
   final Widget? child;
 
   /// If specified, header will become tappable and near content name there will
-  /// be chevron icon, idicating that it's tappable.
+  /// be chevron icon, indicating that it's tappable.
   final VoidCallback? onHeaderTap;
 
   /// Max amount of items shown in section.

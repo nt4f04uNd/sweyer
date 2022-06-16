@@ -54,8 +54,8 @@ class SongNumber extends StatelessWidget {
         ),
       );
     } else if (number != null && number! > 0 && number! < 999) {
-      // Since this class won't be used for playlsits, but only for albums,
-      // I limit the number to be from 0 to 999, in other cases consider it invalid/unsassigned and show a dot
+      // Since this class won't be used for playlists, but only for albums,
+      // I limit the number to be from 0 to 999, in other cases consider it invalid/unassigned and show a dot
       child = Text(
         number.toString(),
         style: const TextStyle(
@@ -133,7 +133,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   final Widget? trailing;
 
   /// Whether this song is current, if yes, enables animated
-  /// [CurrentIndicator] over the ablum art/instead song number.
+  /// [CurrentIndicator] over the album art/instead song number.
   ///
   /// If not specified, by default uses [ContentUtils.songIsCurrent].
   final bool? current;

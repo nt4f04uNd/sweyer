@@ -16,7 +16,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
   Color prevPrimaryColor = ThemeControl.instance.theme.colorScheme.primary;
   Color primaryColor = ThemeControl.instance.theme.colorScheme.primary;
   bool get switched => ThemeControl.instance.isLight;
-  bool get canPop => !ThemeControl.instance.themeChaning.valueWrapper!.value;
+  bool get canPop => !ThemeControl.instance.themeChanging.valueWrapper!.value;
   late AnimationController controller;
 
   static const List<Color> colors = [
