@@ -545,10 +545,11 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
     LocalKey key,
     StackFadeRouteTransitionSettings transitionSettings,
     Widget child,
+    double textScaleFactor,
   ) {
     if (selectionRoute) {
       child = Padding(
-        padding: const EdgeInsets.only(bottom: kSongTileHeight),
+        padding: EdgeInsets.only(bottom: kSongTileHeight(textScaleFactor)),
         child: child,
       );
     }
@@ -559,10 +560,10 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
     );
   }
 
-  Widget _buildChild(Widget child) {
+  Widget _buildChild(Widget child, double textScaleFactor) {
     if (selectionRoute) {
       child = Padding(
-        padding: const EdgeInsets.only(bottom: kSongTileHeight),
+        padding: EdgeInsets.only(bottom: kSongTileHeight(textScaleFactor)),
         child: child,
       );
     }
@@ -573,6 +574,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   Widget build(BuildContext context) {
     final transitionSettings = AppRouter.instance.transitionSettings;
     final pages = <Page<void>>[];
+    double textScaleFactor = MediaQuery.of(context).textScaleFactor;
 
     for (int i = 0; i < _routes.length; i++) {
       LocalKey _buildContentKey(_Routes route, Content content) {
@@ -585,6 +587,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           HomeRoutes.tabs.uniqueKey,
           transitionSettings.grey,
           TabsRoute(key: tabsRouteKey),
+          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.album)) {
         final arguments = route.arguments! as PersistentQueueArguments<Album>;
@@ -592,6 +595,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           _buildContentKey(HomeRoutes.album, arguments.queue),
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
+          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.playlist)) {
         final arguments = route.arguments! as PersistentQueueArguments<Playlist>;
@@ -599,6 +603,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           _buildContentKey(route, arguments.queue),
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
+          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.artist)) {
         final arguments = route.arguments! as Artist;
@@ -606,6 +611,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           _buildContentKey(route, arguments),
           transitionSettings.greyDismissible,
           ArtistRoute(artist: arguments),
+          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.artistContent)) {
         final arguments = route.arguments! as ArtistContentArguments;
@@ -621,12 +627,13 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           ValueKey('${HomeRoutes.artistContent.location}/${arguments.artist.id}_$i'),
           transitionSettings.greyDismissible,
           actualRoute,
+          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.search)) {
         final arguments = route.arguments! as SearchArguments;
         pages.add(SearchPage(
           key: ValueKey('${HomeRoutes.search.location}/$i'),
-          child: _buildChild(SearchRoute(delegate: arguments._delegate)),
+          child: _buildChild(SearchRoute(delegate: arguments._delegate), textScaleFactor),
           transitionSettings: transitionSettings.grey,
         ));
       } else {

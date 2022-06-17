@@ -931,7 +931,7 @@ class _SelectionActionsBar extends StatelessWidget {
           child: PlayerInterfaceColorWidget(
             color: () => theme.colorScheme.secondary,
             child: Container(
-              height: kSongTileHeight,
+              height: kSongTileHeight(MediaQuery.of(context).textScaleFactor),
               padding: const EdgeInsets.only(bottom: 6.0),
               child: Material(
                 color: Colors.transparent,
@@ -1710,7 +1710,8 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           final playlists = ContentControl.instance.state.playlists;
           final screenSize = MediaQuery.of(context).size;
           return SizedBox(
-            height: kSongTileHeight + playlists.length * kPersistentQueueTileHeight,
+            height:
+                kSongTileHeight(MediaQuery.of(context).textScaleFactor) + playlists.length * kPersistentQueueTileHeight,
             width: screenSize.width,
             child: ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),

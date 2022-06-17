@@ -249,7 +249,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   /// If optional [index] is provided - scrolls to it.
   Future<void> scrollToSong([int? index]) async {
     index ??= PlaybackControl.instance.currentSongIndex;
-    final extent = index * kSongTileHeight;
+    final extent = index * kSongTileHeight(MediaQuery.of(context).textScaleFactor);
     final pixels = scrollController.position.pixels;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
@@ -280,7 +280,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     index ??= PlaybackControl.instance.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
-    scrollController.jumpTo((index * kSongTileHeight).clamp(min, max));
+    scrollController.jumpTo((index * kSongTileHeight(MediaQuery.of(context).textScaleFactor)).clamp(min, max));
   }
 
   /// Jump to song when changing tab to main.
@@ -484,7 +484,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     final origin = QueueControl.instance.state.origin;
-    final topScreenPadding = MediaQuery.of(context).padding.top;
+    final mediaQuery = MediaQuery.of(context);
+    final topScreenPadding = mediaQuery.padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
@@ -652,7 +653,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                   selectionController: widget.selectionController,
                   padding: EdgeInsets.only(
                     top: 4.0,
-                    bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
+                    bottom: value == null ? 0.0 : kSongTileHeight(mediaQuery.textScaleFactor) + 4.0,
                   ),
                   songTileVariant:
                       QueueControl.instance.state.origin is Album ? SongTileVariant.number : SongTileVariant.albumArt,

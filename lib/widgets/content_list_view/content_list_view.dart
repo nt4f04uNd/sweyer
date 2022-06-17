@@ -150,6 +150,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
           SliverPadding(
             padding: padding,
             sliver: sliver(
+              context: context,
               contentType: contentType,
               list: list,
               itemBuilder: itemBuilder,
@@ -183,6 +184,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   ///  * [reorderableSliver] which creates a reorderable sliver
   @factory
   static MultiSliver sliver<T extends Content>({
+    required BuildContext context,
     Key? key,
     required ContentType<T> contentType,
     required List<T> list,
@@ -205,7 +207,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
       children: [
         if (leading != null) leading,
         SliverFixedExtentList(
-          itemExtent: ContentTile.getHeight(contentType),
+          itemExtent: ContentTile.getHeight(contentType, MediaQuery.of(context).textScaleFactor),
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final item = list[index];

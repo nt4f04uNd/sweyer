@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
-const double kSongTileHeight = kSongTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
+double kSongTileHeight(double textScaleFactor) =>
+    (kSongTileArtSize + _tileVerticalPadding * 2) * math.max(0.95, textScaleFactor);
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
