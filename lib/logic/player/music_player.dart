@@ -517,11 +517,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     queue.add(QueueControl.instance.state.current.songs.map((el) => el.toMediaItem()).toList());
   }
 
-  @override
-  void didChangePlatformBrightness() {
-    _setState();
-  }
-
   /// Broadcasts the current state to all clients.
   void _setState() {
     if (_disposed) {
@@ -529,46 +524,45 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     }
     final playing = player.playing;
     final l10n = staticl10n;
-    final color = WidgetsBinding.instance.window.platformBrightness == Brightness.dark ? 'white' : 'black';
     playbackState.add(playbackState.value!.copyWith(
       controls: [
         // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
         if (player.looping)
           MediaControl(
-            androidIcon: 'drawable/round_loop_on_${color}_24',
+            androidIcon: 'drawable/round_loop_one',
             label: l10n.loopOn,
             action: 'loop_on',
           )
         else
           MediaControl(
-            androidIcon: 'drawable/round_loop_${color}_24',
+            androidIcon: 'drawable/round_loop',
             label: l10n.loopOff,
             action: 'loop_off',
           ),
         MediaControl(
-          androidIcon: 'drawable/round_skip_previous_${color}_36',
+          androidIcon: 'drawable/round_skip_previous',
           label: l10n.previous,
           action: 'play_prev',
         ),
         if (playing)
           MediaControl(
-            androidIcon: 'drawable/round_pause_${color}_36',
+            androidIcon: 'drawable/round_pause',
             label: l10n.pause,
             action: 'pause',
           )
         else
           MediaControl(
-            androidIcon: 'drawable/round_play_arrow_${color}_36',
+            androidIcon: 'drawable/round_play_arrow',
             label: l10n.play,
             action: 'play',
           ),
         MediaControl(
-          androidIcon: 'drawable/round_skip_next_${color}_36',
+          androidIcon: 'drawable/round_skip_next',
           label: l10n.next,
           action: 'play_next',
         ),
         MediaControl(
-          androidIcon: 'drawable/round_stop_${color}_24',
+          androidIcon: 'drawable/round_stop',
           label: l10n.stop,
           action: 'stop',
         ),
@@ -655,7 +649,7 @@ class MusicPlayer extends AudioPlayer {
         androidNotificationChannelName: staticl10n.playback,
         androidNotificationChannelDescription: staticl10n.playbackControls,
         // notificationColor,
-        androidNotificationIcon: 'drawable/round_music_note_white_48',
+        androidNotificationIcon: 'drawable/round_music_note',
         androidShowNotificationBadge: false,
         androidNotificationClickStartsActivity: true,
         androidNotificationOngoing: false,
