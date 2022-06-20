@@ -920,13 +920,13 @@ class _SelectionActionsBar extends StatelessWidget {
   }
 }
 
-/// Animation that emerges the item, by default from left to right.
+/// Animation that emerges the item, by default from right to left.
 class EmergeAnimation extends AnimatedWidget {
   const EmergeAnimation({
     Key? key,
     required Animation<double> animation,
     required this.child,
-    this.begin = const Offset(-1.0, 0.0),
+    this.begin = const Offset(1.0, 0.0),
     this.end = Offset.zero,
   }) : super(key: key, listenable: animation);
 
