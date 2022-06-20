@@ -11,7 +11,7 @@ import 'package:sweyer/sweyer.dart';
 class ContentSection<T extends Content> extends StatelessWidget {
   const ContentSection({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     this.onHeaderTap,
     this.maxPreviewCount = 5,
@@ -24,7 +24,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
 
   const ContentSection.custom({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     required this.child,
     this.onHeaderTap,
@@ -35,7 +35,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
         maxPreviewCount = 0,
         super(key: key);
 
-  final Type? contentType;
+  final ContentType contentType;
   final List<T> list;
 
   final Widget? child;
@@ -101,7 +101,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.contents<T>(contentType),
+                  l10n.contents(contentType),
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.w800,

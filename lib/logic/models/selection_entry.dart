@@ -18,32 +18,23 @@ class SelectionEntry<T extends Content> {
     required int index,
     required BuildContext context,
   }) {
-    return contentPick<T, ValueGetter<SelectionEntry<T>>>(
-      contentType: content.runtimeType,
-      song: () {
+    switch (content.type) {
+      case ContentType.song:
         final song = content as Song;
         return SelectionEntry<Song>(
           data: content,
           index: selectionRouteOf(context) ? ContentControl.instance.state.allSongs.getIndex(song) : index,
           origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin ? song.origin : null,
         ) as SelectionEntry<T>;
-      },
-      album: () => SelectionEntry<Album>(
-        index: index,
-        data: content as Album,
-        origin: null,
-      ) as SelectionEntry<T>,
-      playlist: () => SelectionEntry<Playlist>(
-        index: index,
-        data: content as Playlist,
-        origin: null,
-      ) as SelectionEntry<T>,
-      artist: () => SelectionEntry<Artist>(
-        index: index,
-        data: content as Artist,
-        origin: null,
-      ) as SelectionEntry<T>,
-    )();
+      case ContentType.album:
+      case ContentType.playlist:
+      case ContentType.artist:
+        return SelectionEntry<T>(
+          index: index,
+          data: content,
+          origin: null,
+        );
+    }
   }
 
   /// The content data.

@@ -3,6 +3,9 @@ import 'package:sweyer/sweyer.dart';
 
 class Genre extends Content {
   @override
+  ContentType get type => ContentType.song; // FIXME: Add a real content type for genres.
+
+  @override
   final int id;
   final String name;
   final List<int> songIds;

@@ -150,7 +150,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
     } else if (queue is Playlist) {
       final l10n = getl10n(context);
       children.add(Text(
-        l10n.contentsPlural<Song>(queue.length),
+        l10n.contentsPlural(ContentType.song, queue.length),
         style: theme.textTheme.subtitle2!.merge(const TextStyle(fontSize: 14.0, height: 1.0)),
       ));
     }
@@ -176,7 +176,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
             ContentArt(
               size: widget.gridArtSize,
               defaultArtIconScale: (widget.gridArtSize / kPersistentQueueTileArtSize) / 1.5,
-              defaultArtIcon: widget.queue.contentIcon,
+              defaultArtIcon: widget.queue.icon,
               assetHighRes: true,
               currentIndicatorScale: widget.gridCurrentIndicatorScale,
               assetScale: widget.gridArtAssetScale,
@@ -202,12 +202,12 @@ class _PersistentQueueTileState<T extends PersistentQueue>
               child: widget.small
                   ? ContentArt.songTile(
                       source: source,
-                      defaultArtIcon: widget.queue.contentIcon,
+                      defaultArtIcon: widget.queue.icon,
                       current: current,
                     )
                   : ContentArt.persistentQueueTile(
                       source: source,
-                      defaultArtIcon: widget.queue.contentIcon,
+                      defaultArtIcon: widget.queue.icon,
                       current: current,
                     ),
             ),

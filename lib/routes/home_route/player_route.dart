@@ -38,6 +38,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
       () => ContentSelectionController.create<Song>(
         vsync: this,
         context: context,
+        contentType: ContentType.song,
         closeButton: true,
         additionalPlayActionsBuilder: (context) => const [
           RemoveFromQueueSelectionAction(),
@@ -288,12 +289,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         return;
       case QueueType.origin:
         final origin = QueueControl.instance.state.origin!;
-        if (origin is Album) {
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(origin));
-        } else if (origin is Playlist) {
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(origin));
-        } else if (origin is Artist) {
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(origin));
+        if (origin is Album || origin is Playlist || origin is Artist) {
+          HomeRouter.instance.goto(HomeRoutes.factory.content(origin));
         } else {
           throw UnimplementedError;
         }
@@ -629,6 +626,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
               valueListenable: ContentControl.instance.selectionNotifier,
               builder: (context, value, child) {
                 return ContentListView<Song>(
+                  contentType: ContentType.song,
                   list: list,
                   controller: scrollController,
                   selectionController: widget.selectionController,
@@ -1054,7 +1052,7 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
                 horizontalPadding: 20.0,
                 onPressed: () {
                   key.currentState!.close();
-                  HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlist));
+                  HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
                 },
               ),
             ),

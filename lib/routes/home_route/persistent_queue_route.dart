@@ -70,6 +70,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     initSelectionController(() => ContentSelectionController.create<Song>(
           vsync: AppRouter.instance.navigatorKey.currentState!,
           context: context,
+          contentType: ContentType.song,
           closeButton: true,
           ignoreWhen: () => playerRouteController.opened,
         ));
@@ -184,6 +185,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                 builder: (context, snapshot) => StatefulBuilder(builder: (context, setState) {
                   setListState = setState;
                   return ContentListView<Song>(
+                    contentType: ContentType.song,
                     list: songs,
                     enableDefaultOnTap: false,
                     leading: InListContentAction.song(
@@ -388,7 +390,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   children: [
                     ContentArt(
                       size: 130.0,
-                      defaultArtIcon: queue.contentIcon,
+                      defaultArtIcon: queue.icon,
                       defaultArtIconScale: 2,
                       assetHighRes: true,
                       assetScale: 1.5,
@@ -463,7 +465,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                               child: Text(
                                 ContentUtils.joinDot([
                                   if (isAlbum) l10n.album else l10n.playlist,
-                                  if (isAlbum) album.year else l10n.contentsPlural<Song>(queue.length),
+                                  if (isAlbum) album.year else l10n.contentsPlural(ContentType.song, queue.length),
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(
@@ -679,6 +681,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                       sliver: MultiSliver(
                         children: [
                           ContentListView.reorderableSliver<Song>(
+                            contentType: ContentType.song,
                             list: songs,
                             selectionController: selectionController,
                             reorderingEnabled: editing,

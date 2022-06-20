@@ -83,7 +83,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
   void _handleTap() {
     super.handleTap(() {
       widget.onTap?.call();
-      HomeRouter.of(context).goto(HomeRoutes.factory.content<Artist>(widget.artist));
+      HomeRouter.of(context).goto(HomeRoutes.factory.content(widget.artist));
     });
   }
 
@@ -118,7 +118,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                 padding: const EdgeInsets.only(right: 8.0),
                 child: ContentArt.artistTile(
                   source: source,
-                  defaultArtIcon: Artist.icon,
+                  defaultArtIcon: ContentType.artist.icon,
                   current: current,
                 ),
               ),

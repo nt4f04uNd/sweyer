@@ -50,14 +50,14 @@ class ContentSearchDelegate {
 
 /// Search results container.
 class _Results {
-  ContentMap<List<Content>> map = ContentMap({
-    for (final contentType in Content.enumerate()) contentType: [],
+  ContentMap<List<Content>> map = ContentMap.from({
+    for (final contentType in ContentType.values) contentType: [],
   });
 
-  List<Song> get songs => map.getValue<Song>()!.cast<Song>();
-  List<Album> get albums => map.getValue<Album>()!.cast<Album>();
-  List<Playlist> get playlists => map.getValue<Playlist>()!.cast<Playlist>();
-  List<Artist> get artists => map.getValue<Artist>()!.cast<Artist>();
+  List<Song> get songs => map.get(ContentType.song).cast<Song>();
+  List<Album> get albums => map.get(ContentType.album).cast<Album>();
+  List<Playlist> get playlists => map.get(ContentType.playlist).cast<Playlist>();
+  List<Artist> get artists => map.get(ContentType.artist).cast<Artist>();
 
   bool get empty => map.values.every((element) => element.isEmpty);
   bool get notEmpty => map.values.any((element) => element.isNotEmpty);
@@ -69,8 +69,8 @@ class _Results {
   }
 
   void search(String query) {
-    for (final contentType in Content.enumerate()) {
-      map.setValue(
+    for (final contentType in ContentType.values) {
+      map.set(
         ContentControl.instance.search(query, contentType: contentType),
         key: contentType,
       );
@@ -117,19 +117,19 @@ class _SearchStateDelegate {
     searchDelegate.setState();
   }
 
-  ValueListenable<Type?> get onContentTypeChange => selectionController.onContentTypeChange;
+  ValueListenable<ContentType?> get onContentTypeChange => selectionController.onContentTypeChange;
 
   /// Content type to filter results by.
   ///
   /// When null results are displayed as list of sections, see [ContentSection].
-  Type? get contentType => selectionController.primaryContentType;
-  set contentType(Type? value) {
+  ContentType? get contentType => selectionController.primaryContentType;
+  set contentType(ContentType? value) {
     selectionController.primaryContentType = value;
     bodyScrolledNotifier.value = false;
     if (value != null) {
       // Scroll to chip
       ensureVisible(
-        chipContextMap.getValue(value)!,
+        chipContextMap.get(value)!,
         duration: kTabScrollDuration,
         alignment: 0.5,
         alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
@@ -137,11 +137,11 @@ class _SearchStateDelegate {
     }
   }
 
-  ContentMap<BuildContext> chipContextMap = ContentMap();
+  ContentMap<BuildContext?> chipContextMap = ContentMap.withSame(null);
 
   /// Saves chips context to be able to scroll it when [contentType] changes.
-  void registerChipContext(BuildContext context, Type contentType) {
-    chipContextMap.setValue(context, key: contentType);
+  void registerChipContext(BuildContext context, ContentType contentType) {
+    chipContextMap.set(context, key: contentType);
   }
 
   final showOnlyFavoritesNotifier = ValueNotifier(false);
@@ -176,17 +176,18 @@ class _SearchStateDelegate {
   }
 
   /// Handles tap to different content tiles.
-  void handleContentTap<T extends Content>([Type? contentType]) {
-    return contentPick<T, VoidCallback>(
-      contentType: contentType,
-      song: () {
+  void handleContentTap(ContentType contentType) {
+    switch (contentType) {
+      case ContentType.song:
         onSubmit();
         QueueControl.instance.setSearchedQueue(query, results.songs);
-      },
-      album: onSubmit,
-      playlist: onSubmit,
-      artist: onSubmit,
-    )();
+        break;
+      case ContentType.album:
+      case ContentType.playlist:
+      case ContentType.artist:
+        onSubmit();
+        break;
+    }
   }
 
   /// Scrolls the [Scrollable]s that enclose the given context so as to make the
@@ -514,7 +515,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
       preferredSize: Size.fromHeight(
         showChips ? AppBarBorder.height + _ContentChip.height + bottomPadding : AppBarBorder.height,
       ),
-      child: ValueListenableBuilder<Type?>(
+      child: ValueListenableBuilder<ContentType?>(
         valueListenable: stateDelegate.onContentTypeChange,
         builder: (context, contentTypeValue, child) {
           if (!showChips) {
@@ -602,7 +603,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
         hintStyle: theme.inputDecorationTheme.hintStyle,
       ),
     );
-    final selectAllAction = ValueListenableBuilder<Type?>(
+    final selectAllAction = ValueListenableBuilder<ContentType?>(
       valueListenable: stateDelegate.onContentTypeChange,
       builder: (context, contentType, child) => AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
@@ -612,7 +613,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
           animation: animation,
           child: child,
         ),
-        child: stateDelegate.contentType == null
+        child: contentType == null
             ? const SizedBox.shrink()
             : SelectAllSelectionAction<Content>(
                 controller: selectionController,
@@ -622,7 +623,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                   context: context,
                 ),
                 getAll: () {
-                  final list = stateDelegate.results.map.getValue(contentType)!;
+                  final list = stateDelegate.results.map.get(contentType);
                   return stateDelegate.showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
                 },
               ),
@@ -749,7 +750,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
         onNotification: (notification) => _handleNotification(delegate, notification),
         child: ValueListenableBuilder<bool>(
           valueListenable: delegate.showOnlyFavoritesNotifier,
-          builder: (context, showOnlyFavorites, child) => ValueListenableBuilder<Type?>(
+          builder: (context, showOnlyFavorites, child) => ValueListenableBuilder<ContentType?>(
             valueListenable: delegate.onContentTypeChange,
             builder: (context, contentType, child) {
               if (delegate.trimmedQuery.isEmpty) {
@@ -765,7 +766,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                 final single = contentTypeEntries.length == 1;
                 final showSingleCategoryContentList = single || contentType != null;
                 final contentListContentType = single ? contentTypeEntries.single.key : contentType;
-                final index = contentType == null ? -1 : Content.enumerate().indexOf(contentType);
+                final index = contentType == null ? -1 : ContentType.values.indexOf(contentType);
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                   _prevIndex = index;
                 });
@@ -794,7 +795,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                         final Widget child;
 
                         if (showSingleCategoryContentList) {
-                          final list = single ? contentTypeEntries.single.value : results.map.getValue(contentType)!;
+                          final list = single ? contentTypeEntries.single.value : results.map.get(contentType!);
                           final listIndexMap = {
                             for (int i = 0; i < list.length; i++) list[i]: i,
                           };
@@ -803,7 +804,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                             child = const _NothingFound();
                           } else {
                             child = ContentListView<Content>(
-                              contentType: contentListContentType,
+                              contentType: contentListContentType!,
                               controller: delegate.singleListScrollController,
                               selectionController: delegate.selectionController,
                               onItemTap: (index) => delegate.handleContentTap(contentListContentType),
@@ -819,7 +820,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                           final List<Widget> children = [];
                           int emptyCount = 0;
                           for (final entry in contentTypeEntries) {
-                            final list = results.map.getValue(entry.key)!;
+                            final list = results.map.get(entry.key);
                             final listIndexMap = {
                               for (int i = 0; i < list.length; i++) list[i]: i,
                             };
@@ -921,7 +922,7 @@ class _ContentChip extends StatefulWidget {
         super(key: key);
 
   final _SearchStateDelegate delegate;
-  final Type? contentType;
+  final ContentType? contentType;
   final bool favoritesChip;
 
   static const double height = 34.0;
@@ -997,7 +998,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       controller.reverse();
     }
     final l10n = getl10n(context);
-    final count = favoritesChip ? null : delegate.results.map.getValue(widget.contentType)!.length;
+    final count = favoritesChip ? null : delegate.results.map.get(widget.contentType!).length;
     final colorScheme = ThemeControl.instance.theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
@@ -1057,7 +1058,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                         ),
                         backgroundColor: Colors.transparent,
                         label: Text(
-                          l10n.contentsPlural(count!, widget.contentType),
+                          l10n.contentsPlural(widget.contentType!, count!),
                           style: TextStyle(
                             color: textColorAnimation.value,
                             fontWeight: FontWeight.w800,

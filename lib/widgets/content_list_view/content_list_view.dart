@@ -36,7 +36,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     this.itemBuilder,
     this.itemTrailingBuilder,
@@ -61,7 +61,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) : super(key: key);
 
   /// An explicit content type.
-  final Type? contentType;
+  final ContentType contentType;
 
   /// Content list.
   final List<T> list;
@@ -184,7 +184,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @factory
   static MultiSliver sliver<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType contentType,
     required List<T> list,
     _ItemBuilder? itemBuilder,
     IndexedWidgetBuilder? itemTrailingBuilder,
@@ -205,7 +205,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
       children: [
         if (leading != null) leading,
         SliverFixedExtentList(
-          itemExtent: ContentTile.getHeight<T>(contentType),
+          itemExtent: ContentTile.getHeight(contentType),
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final item = list[index];
@@ -253,7 +253,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @factory
   static MultiSliver reorderableSliver<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType contentType,
     required List<T> list,
     required ReorderCallback onReorder,
     bool reorderingEnabled = true,

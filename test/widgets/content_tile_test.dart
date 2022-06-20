@@ -16,7 +16,7 @@ void main() {
   testWidgets('AlbumTile - tapping opens album route', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Open albums tab
-      await tester.tap(find.byIcon(Album.icon));
+      await tester.tap(find.byIcon(ContentType.album.icon));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(typeOf<PersistentQueueTile<Album>>()));
@@ -29,7 +29,7 @@ void main() {
   testWidgets('PlaylistTile - tapping opens playlist route', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Open playlists tab
-      await tester.tap(find.byIcon(Playlist.icon));
+      await tester.tap(find.byIcon(ContentType.playlist.icon));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(typeOf<PersistentQueueTile<Playlist>>()));
@@ -42,7 +42,7 @@ void main() {
   testWidgets('ArtistTile - tapping opens artist route', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Open artists tab
-      await tester.tap(find.byIcon(Artist.icon));
+      await tester.tap(find.byIcon(ContentType.artist.icon));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(typeOf<ArtistTile>()));

@@ -136,8 +136,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     final theme = ThemeControl.instance.theme;
     final artSize = mediaQuery.size.width;
     final summary = ContentUtils.joinDot([
-      l10n.contentsPlural<Song>(songs.length),
-      if (albums.isNotEmpty) l10n.contentsPlural<Album>(albums.length),
+      l10n.contentsPlural(ContentType.song, songs.length),
+      if (albums.isNotEmpty) l10n.contentsPlural(ContentType.album, albums.length),
       ContentUtils.bulkDuration(songs),
     ]);
     return Column(
@@ -154,7 +154,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                       assetHighRes: true,
                       size: artSize,
                       borderRadius: 0.0,
-                      defaultArtIcon: Artist.icon,
+                      defaultArtIcon: ContentType.artist.icon,
                       defaultArtIconScale: 4.5,
                       // onLoad: (image) async {
                       // palette = await compute<ui.Image, PaletteGenerator>(_isolate, image);
@@ -306,6 +306,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         if (songs.isNotEmpty)
                           SliverToBoxAdapter(
                             child: ContentSection<Song>(
+                              contentType: ContentType.song,
                               list: songs,
                               selectionController: selectionController,
                               maxPreviewCount: 5,
@@ -328,6 +329,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           MultiSliver(
                             children: [
                               ContentSection<Album>.custom(
+                                contentType: ContentType.album,
                                 list: albums,
                                 onHeaderTap: selectionController.inSelection && !selectionRoute
                                     ? null

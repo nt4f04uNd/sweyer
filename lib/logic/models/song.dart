@@ -1,11 +1,13 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Represents a song.
 ///
 /// Songs are always playable, trashed or pending songs on Android Q are excluded.
 class Song extends Content {
+  @override
+  ContentType get type => ContentType.song;
+
   /// This is the main song ID used for comparisons.
   ///
   /// Initially, this is equal to the source song [sourceId], but if song is
@@ -75,9 +77,6 @@ class Song extends Content {
   ///
   /// Not copied with [copyWith].
   IdMap? idMap;
-
-  /// An icon for this content type.
-  static const icon = Icons.music_note_rounded;
 
   @override
   List<Object?> get props => [id];

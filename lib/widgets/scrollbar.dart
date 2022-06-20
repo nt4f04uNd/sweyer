@@ -49,7 +49,7 @@ class AppScrollbar extends StatefulWidget {
   @factory
   static AppScrollbar forContent<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType contentType,
     required List<T> list,
     required Widget child,
     required ScrollController controller,
@@ -69,15 +69,18 @@ class AppScrollbar extends StatefulWidget {
           : (context) {
               final l10n = getl10n(context);
               final item = list[(controller.position.pixels / kSongTileHeight - 1).clamp(0.0, list.length - 1).round()];
-              return NFScrollLabel(
-                text: contentPick<T, ValueGetter<String>>(
-                  contentType: contentType,
-                  song: () => (item as Song).title[0].toUpperCase(),
-                  album: () => (item as Album).album[0].toUpperCase(),
-                  playlist: () => (item as Playlist).name[0].toUpperCase(),
-                  artist: () => ContentUtils.localizedArtist((item as Artist).artist, l10n)[0].toUpperCase(),
-                )(),
-              );
+              return NFScrollLabel(text: () {
+                switch (contentType) {
+                  case ContentType.song:
+                    return (item as Song).title[0].toUpperCase();
+                  case ContentType.album:
+                    return (item as Album).album[0].toUpperCase();
+                  case ContentType.playlist:
+                    return (item as Playlist).name[0].toUpperCase();
+                  case ContentType.artist:
+                    return ContentUtils.localizedArtist((item as Artist).artist, l10n)[0].toUpperCase();
+                }
+              }());
             },
       controller: controller,
       isAlwaysShown: isAlwaysShown,

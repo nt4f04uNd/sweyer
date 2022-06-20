@@ -40,7 +40,7 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
   /// Whether the [SelectionRoute] is currently opened in this context.
   bool get selectionRoute => homeRouter?.selectionArguments != null;
 
-  Type? _savedPrimaryContentType;
+  ContentType? _savedPrimaryContentType;
 
   /// Creates a selection controller.
   ///
@@ -372,8 +372,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   final ValueGetter<bool>? ignoreWhen;
 
   /// Notifies about changes of [primaryContentType].
-  ValueListenable<Type?> get onContentTypeChange => _primaryContentTypeNotifier;
-  final ValueNotifier<Type?> _primaryContentTypeNotifier = ValueNotifier(null);
+  ValueListenable<ContentType?> get onContentTypeChange => _primaryContentTypeNotifier;
+  final ValueNotifier<ContentType?> _primaryContentTypeNotifier = ValueNotifier(null);
 
   /// Current primary content type for when `T` is [Content], and not
   /// specific subclass of it, like [Song]. It is an error to set this
@@ -386,9 +386,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ///
   /// For example in tabs route the that denotes the currently selected tab,
   /// or in search route that denotes currently filtered content type.
-  Type? get primaryContentType => _primaryContentTypeNotifier.value;
-  set primaryContentType(Type? value) {
-    assert(T != Content, 'T must be a subclass of Content');
+  ContentType? get primaryContentType => _primaryContentTypeNotifier.value;
+  set primaryContentType(ContentType? value) {
     _primaryContentTypeNotifier.value = value;
   }
 
@@ -413,6 +412,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   static ContentSelectionController<SelectionEntry<T>> create<T extends Content>({
     required TickerProvider vsync,
     required BuildContext context,
+    ContentType? contentType,
     bool actionsBar = true,
     List<Widget> Function(BuildContext)? additionalPlayActionsBuilder,
     bool counter = false,
@@ -437,7 +437,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
                     closeButton: closeButton,
                   )
                 ],
-                right: _getActions<T>(additionalPlayActionsBuilder?.call(context) ?? const [])(),
+                right: _getActions(contentType, additionalPlayActionsBuilder?.call(context) ?? const [])(),
               );
             },
     );
@@ -478,56 +478,61 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     );
   }
 
-  static ValueGetter<List<Widget>> _getActions<T extends Content>(List<Widget> additionalPlayActions) {
+  static ValueGetter<List<Widget>> _getActions(ContentType? contentType, List<Widget> additionalPlayActions) {
     const commonActions = <Widget>[
       _FavoriteSelectionAction(),
       _PlayAsQueueSelectionAction(),
       _ShuffleAsQueueSelectionAction(),
       _AddToPlaylistSelectionAction(),
     ];
-    return contentPick<T, ValueGetter<List<Widget>>>(
-      song: () =>
-          commonActions +
-          [
-            const _GoToArtistSelectionAction(),
-            const _GoToAlbumSelectionAction(),
-            ...additionalPlayActions,
-            const _PlayNextSelectionAction<Song>(),
-            const _AddToQueueSelectionAction<Song>(),
-          ],
-      album: () =>
-          commonActions +
-          [
-            ...additionalPlayActions,
-            const _PlayNextSelectionAction<Album>(),
-            const _AddToQueueSelectionAction<Album>(),
-          ],
-      playlist: () =>
-          commonActions +
-          [
-            const _EditPlaylistSelectionAction(),
-            ...additionalPlayActions,
-            const _PlayNextSelectionAction<Playlist>(),
-            const _AddToQueueSelectionAction<Playlist>(),
-          ],
-      artist: () =>
-          commonActions +
-          [
-            ...additionalPlayActions,
-            const _PlayNextSelectionAction<Artist>(),
-            const _AddToQueueSelectionAction<Artist>(),
-          ],
-      fallback: () =>
-          commonActions +
-          [
-            const _GoToArtistSelectionAction(),
-            const _GoToAlbumSelectionAction(),
-            const _EditPlaylistSelectionAction(),
-            ...additionalPlayActions,
-            const _PlayNextSelectionAction(),
-            const _AddToQueueSelectionAction(),
-          ],
-    );
+    switch (contentType) {
+      case ContentType.song:
+        return () =>
+            commonActions +
+            [
+              const _GoToArtistSelectionAction(),
+              const _GoToAlbumSelectionAction(),
+              ...additionalPlayActions,
+              const _PlayNextSelectionAction(contentType: ContentType.song),
+              const _AddToQueueSelectionAction(contentType: ContentType.song),
+            ];
+      case ContentType.album:
+        return () =>
+            commonActions +
+            [
+              ...additionalPlayActions,
+              const _PlayNextSelectionAction(contentType: ContentType.album),
+              const _AddToQueueSelectionAction(contentType: ContentType.album),
+            ];
+      case ContentType.playlist:
+        return () =>
+            commonActions +
+            [
+              const _EditPlaylistSelectionAction(),
+              ...additionalPlayActions,
+              const _PlayNextSelectionAction(contentType: ContentType.playlist),
+              const _AddToQueueSelectionAction(contentType: ContentType.playlist),
+            ];
+      case ContentType.artist:
+        return () =>
+            commonActions +
+            [
+              ...additionalPlayActions,
+              const _PlayNextSelectionAction(contentType: ContentType.artist),
+              const _AddToQueueSelectionAction(contentType: ContentType.artist),
+            ];
+      case null:
+        return () =>
+            commonActions +
+            [
+              const _GoToArtistSelectionAction(),
+              const _GoToAlbumSelectionAction(),
+              const _EditPlaylistSelectionAction(),
+              ...additionalPlayActions,
+              const _PlayNextSelectionAction(),
+              const _AddToQueueSelectionAction(),
+            ];
+    }
   }
 
   static ContentSelectionController _of(BuildContext context) {
@@ -689,10 +694,12 @@ class ContentSelectionControllerCreator<T extends Content> extends StatefulWidge
   const ContentSelectionControllerCreator({
     Key? key,
     required this.builder,
+    required this.contentType,
     this.child,
   }) : super(key: key);
 
   final Widget Function(BuildContext context, ContentSelectionController selectionController, Widget? child) builder;
+  final ContentType contentType;
   final Widget? child;
 
   @override
@@ -707,6 +714,7 @@ class _SelectionControllerCreatorState<T extends Content> extends State<ContentS
     initSelectionController(() => ContentSelectionController.create<T>(
           vsync: AppRouter.instance.navigatorKey.currentState!,
           context: context,
+          contentType: widget.contentType,
           closeButton: true,
           counter: true,
           ignoreWhen: () => playerRouteController.opened,
@@ -1212,8 +1220,10 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 //*********** Queue actions ***********
 
 /// Action that queues a [Song] or a [SongOrigin] to be played next.
-class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
-  const _PlayNextSelectionAction({Key? key}) : super(key: key);
+class _PlayNextSelectionAction extends StatelessWidget {
+  final ContentType? contentType;
+
+  const _PlayNextSelectionAction({this.contentType, Key? key}) : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty) {
@@ -1237,46 +1247,47 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
   }
 
   void _handleTap(ContentSelectionController controller) {
-    contentPick<T, VoidCallback>(
-      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
-      album: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>),
-      playlist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>),
-      artist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Artist>>),
-      fallback: () {
+    switch (contentType) {
+      case ContentType.song:
+        _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>);
+        break;
+      case ContentType.album:
+        _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>);
+        break;
+      case ContentType.playlist:
+        _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>);
+        break;
+      case ContentType.artist:
+        _handleOrigins(controller.data.toList() as List<SelectionEntry<Artist>>);
+        break;
+      case null:
         final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
         final List<SelectionEntry<Album>> albums = [];
         final List<SelectionEntry<Playlist>> playlists = [];
         final List<SelectionEntry<Artist>> artists = [];
         for (final entry in entries) {
-          if (entry is SelectionEntry<Song>) {
-            songs.add(entry);
-          } else if (entry is SelectionEntry<Album>) {
-            albums.add(entry);
-          } else if (entry is SelectionEntry<Playlist>) {
-            playlists.add(entry);
-          } else if (entry is SelectionEntry<Artist>) {
-            artists.add(entry);
-          } else {
-            throw UnimplementedError();
+          switch (entry.data.type) {
+            case ContentType.song:
+              songs.add(entry as SelectionEntry<Song>);
+              break;
+            case ContentType.album:
+              albums.add(entry as SelectionEntry<Album>);
+              break;
+            case ContentType.playlist:
+              playlists.add(entry as SelectionEntry<Playlist>);
+              break;
+            case ContentType.artist:
+              artists.add(entry as SelectionEntry<Artist>);
+              break;
           }
         }
-        assert(() {
-          // See contentPick documentation for why we need this.
-          contentPick<Song, void>(
-            song: null,
-            album: null,
-            playlist: null,
-            artist: null,
-          );
-          return true;
-        }());
         _handleSongs(songs);
         _handleOrigins(albums);
         _handleOrigins(playlists);
         _handleOrigins(artists);
-      },
-    )();
+        break;
+    }
     controller.close();
   }
 
@@ -1302,8 +1313,10 @@ class _PlayNextSelectionAction<T extends Content> extends StatelessWidget {
 }
 
 /// Action that adds a [Song] or a [SongOrigin] to the end of the queue.
-class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
-  const _AddToQueueSelectionAction({Key? key}) : super(key: key);
+class _AddToQueueSelectionAction extends StatelessWidget {
+  final ContentType? contentType;
+
+  const _AddToQueueSelectionAction({this.contentType, Key? key}) : super(key: key);
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty) {
@@ -1326,46 +1339,47 @@ class _AddToQueueSelectionAction<T extends Content> extends StatelessWidget {
   }
 
   void _handleTap(ContentSelectionController controller) {
-    contentPick<T, VoidCallback>(
-      song: () => _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>),
-      album: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>),
-      playlist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>),
-      artist: () => _handleOrigins(controller.data.toList() as List<SelectionEntry<Artist>>),
-      fallback: () {
+    switch (contentType) {
+      case ContentType.song:
+        _handleSongs(controller.data.toList() as List<SelectionEntry<Song>>);
+        break;
+      case ContentType.album:
+        _handleOrigins(controller.data.toList() as List<SelectionEntry<Album>>);
+        break;
+      case ContentType.playlist:
+        _handleOrigins(controller.data.toList() as List<SelectionEntry<Playlist>>);
+        break;
+      case ContentType.artist:
+        _handleOrigins(controller.data.toList() as List<SelectionEntry<Artist>>);
+        break;
+      case null:
         final List<SelectionEntry<Content>> entries = controller.data.toList();
         final List<SelectionEntry<Song>> songs = [];
         final List<SelectionEntry<Album>> albums = [];
         final List<SelectionEntry<Playlist>> playlists = [];
         final List<SelectionEntry<Artist>> artists = [];
         for (final entry in entries) {
-          if (entry is SelectionEntry<Song>) {
-            songs.add(entry);
-          } else if (entry is SelectionEntry<Album>) {
-            albums.add(entry);
-          } else if (entry is SelectionEntry<Playlist>) {
-            playlists.add(entry);
-          } else if (entry is SelectionEntry<Artist>) {
-            artists.add(entry);
-          } else {
-            throw UnimplementedError();
+          switch (entry.data.type) {
+            case ContentType.song:
+              songs.add(entry as SelectionEntry<Song>);
+              break;
+            case ContentType.album:
+              albums.add(entry as SelectionEntry<Album>);
+              break;
+            case ContentType.playlist:
+              playlists.add(entry as SelectionEntry<Playlist>);
+              break;
+            case ContentType.artist:
+              artists.add(entry as SelectionEntry<Artist>);
+              break;
           }
         }
-        assert(() {
-          // See contentPick documentation for why we need this.
-          contentPick<Song, void>(
-            song: null,
-            album: null,
-            playlist: null,
-            artist: null,
-          );
-          return true;
-        }());
         _handleSongs(songs);
         _handleOrigins(albums);
         _handleOrigins(playlists);
         _handleOrigins(artists);
-      },
-    )();
+        break;
+    }
     controller.close();
   }
 
@@ -1508,7 +1522,7 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
     final song = controller.data.first.data as Song;
     final album = song.getAlbum();
     if (album != null) {
-      HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(album));
+      HomeRouter.instance.goto(HomeRoutes.factory.content(album));
     }
     controller.close();
   }
@@ -1535,7 +1549,7 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
         animation: controller.animation,
         child: NFIconButton(
           tooltip: l10n.goToAlbum,
-          icon: const Icon(Album.icon),
+          icon: Icon(ContentType.album.icon),
           iconSize: 23.0,
           onPressed: () => _handleTap(controller),
         ),
@@ -1551,9 +1565,9 @@ class _GoToArtistSelectionAction extends StatelessWidget {
   void _handleTap(ContentSelectionController controller) {
     final content = controller.data.first.data;
     if (content is Song) {
-      HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(content.getArtist()));
+      HomeRouter.instance.goto(HomeRoutes.factory.content(content.getArtist()));
     } else if (content is Album) {
-      HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(content.getArtist()));
+      HomeRouter.instance.goto(HomeRoutes.factory.content(content.getArtist()));
     } else {
       throw UnimplementedError();
     }
@@ -1582,7 +1596,7 @@ class _GoToArtistSelectionAction extends StatelessWidget {
         animation: controller.animation,
         child: NFIconButton(
           tooltip: l10n.goToArtist,
-          icon: const Icon(Artist.icon),
+          icon: Icon(ContentType.artist.icon),
           iconSize: 23.0,
           onPressed: () => _handleTap(controller),
         ),
@@ -1658,6 +1672,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
             child: ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),
               child: ContentListView<Playlist>(
+                contentType: ContentType.playlist,
                 list: playlists,
                 leading: const CreatePlaylistInListAction(),
                 enableDefaultOnTap: false,
@@ -2051,7 +2066,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     return ContentArt(
       source: ContentArtSource(item),
       size: size,
-      defaultArtIcon: item.contentIcon,
+      defaultArtIcon: item.icon,
     );
   }
 
