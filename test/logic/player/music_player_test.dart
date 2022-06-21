@@ -34,11 +34,11 @@ void main() {
       expect(
         playbackState.controls.map((control) => control.toString()),
         [
-          MediaControl(androidIcon: 'drawable/round_loop_black_24', label: l10n.loopOff, action: 'loop_off'),
-          MediaControl(androidIcon: 'drawable/round_skip_previous_black_36', label: l10n.previous, action: 'play_prev'),
-          MediaControl(androidIcon: 'drawable/round_pause_black_36', label: l10n.pause, action: 'pause'),
-          MediaControl(androidIcon: 'drawable/round_skip_next_black_36', label: l10n.next, action: 'play_next'),
-          MediaControl(androidIcon: 'drawable/round_stop_black_24', label: l10n.stop, action: 'stop'),
+          MediaControl(androidIcon: 'drawable/round_loop', label: l10n.loopOff, action: 'loop_off'),
+          MediaControl(androidIcon: 'drawable/round_skip_previous', label: l10n.previous, action: 'play_prev'),
+          MediaControl(androidIcon: 'drawable/round_pause', label: l10n.pause, action: 'pause'),
+          MediaControl(androidIcon: 'drawable/round_skip_next', label: l10n.next, action: 'play_next'),
+          MediaControl(androidIcon: 'drawable/round_stop', label: l10n.stop, action: 'stop'),
         ].map((control) => control.toString()),
       );
     });
@@ -55,11 +55,11 @@ void main() {
       expect(
         playbackState.controls.map((control) => control.toString()),
         [
-          MediaControl(androidIcon: 'drawable/round_loop_black_24', label: l10n.loopOff, action: 'loop_off'),
-          MediaControl(androidIcon: 'drawable/round_skip_previous_black_36', label: l10n.previous, action: 'play_prev'),
-          MediaControl(androidIcon: 'drawable/round_play_arrow_black_36', label: l10n.play, action: 'play'),
-          MediaControl(androidIcon: 'drawable/round_skip_next_black_36', label: l10n.next, action: 'play_next'),
-          MediaControl(androidIcon: 'drawable/round_stop_black_24', label: l10n.stop, action: 'stop'),
+          MediaControl(androidIcon: 'drawable/round_loop', label: l10n.loopOff, action: 'loop_off'),
+          MediaControl(androidIcon: 'drawable/round_skip_previous', label: l10n.previous, action: 'play_prev'),
+          MediaControl(androidIcon: 'drawable/round_play_arrow', label: l10n.play, action: 'play'),
+          MediaControl(androidIcon: 'drawable/round_skip_next', label: l10n.next, action: 'play_next'),
+          MediaControl(androidIcon: 'drawable/round_stop', label: l10n.stop, action: 'stop'),
         ].map((control) => control.toString()),
       );
     });
@@ -75,11 +75,11 @@ void main() {
       expect(
         playbackState.controls.map((control) => control.toString()),
         [
-          MediaControl(androidIcon: 'drawable/round_loop_black_24', label: l10n.loopOff, action: 'loop_off'),
-          MediaControl(androidIcon: 'drawable/round_skip_previous_black_36', label: l10n.previous, action: 'play_prev'),
-          MediaControl(androidIcon: 'drawable/round_play_arrow_black_36', label: l10n.play, action: 'play'),
-          MediaControl(androidIcon: 'drawable/round_skip_next_black_36', label: l10n.next, action: 'play_next'),
-          MediaControl(androidIcon: 'drawable/round_stop_black_24', label: l10n.stop, action: 'stop'),
+          MediaControl(androidIcon: 'drawable/round_loop', label: l10n.loopOff, action: 'loop_off'),
+          MediaControl(androidIcon: 'drawable/round_skip_previous', label: l10n.previous, action: 'play_prev'),
+          MediaControl(androidIcon: 'drawable/round_play_arrow', label: l10n.play, action: 'play'),
+          MediaControl(androidIcon: 'drawable/round_skip_next', label: l10n.next, action: 'play_next'),
+          MediaControl(androidIcon: 'drawable/round_stop', label: l10n.stop, action: 'stop'),
         ].map((control) => control.toString()),
       );
     });
