@@ -37,11 +37,15 @@ extension _RequireMap<K, V> on Map<K, V> {
   }
 }
 
-/// A [Map] container for the [Content] as key, and `V` as value entry.
+/// A [Map] container for the [ContentType] as key, and [V] as value entry.
 class ContentMap<V> {
+  /// The value for [ContentType.song].
   V songValue;
+  /// The value for [ContentType.album].
   V albumValue;
+  /// The value for [ContentType.playlist].
   V playlistValue;
+  /// The value for [ContentType.artist].
   V artistValue;
 
   ContentMap({
@@ -51,7 +55,7 @@ class ContentMap<V> {
     required this.artistValue,
   });
 
-  /// Create a content map from a regular map, which must contain a value for each content type.
+  /// Create a content map from a regular map, which must contain a value for each [ContentType].
   factory ContentMap.from(Map<ContentType, V> map) {
     assert(map.length == ContentType.values.length);
     return ContentMap(
@@ -76,9 +80,7 @@ class ContentMap<V> {
   /// Map entries.
   Iterable<MapEntry<ContentType, V>> get entries => [for (final type in ContentType.values) MapEntry(type, get(type))];
 
-  /// Returns a value per `T` [Content] from the map.
-  ///
-  /// If [key] was explicitly provided, will use it instead.
+  /// Returns the value for the [type] from the map.
   V get(ContentType type) {
     switch (type) {
       case ContentType.song:
@@ -92,9 +94,7 @@ class ContentMap<V> {
     }
   }
 
-  /// Puts a [value] typed with `T` into the map.
-  ///
-  /// If [key] was explicitly provided, will use it instead.
+  /// Puts a [value] for the [key] into the map.
   void set(V value, {required ContentType key}) {
     switch (key) {
       case ContentType.song:
@@ -126,6 +126,7 @@ class ContentTuple {
   const ContentTuple(
       {this.songs = const [], this.albums = const [], this.playlists = const [], this.artists = const []});
 
+  /// Get the list corresponding to the [type].
   List<T> get<T extends Content>(ContentType type) {
     switch (type) {
       case ContentType.song:
@@ -139,11 +140,15 @@ class ContentTuple {
     }
   }
 
+  /// Get a merged list of all lists for all content types.
   List<Content> get merged => [for (final contentType in ContentType.values) ...get(contentType)];
 
+  /// Whether there is any content in this tuple.
   bool get notEmpty => ContentType.values.any((contentType) => get(contentType).isNotEmpty);
+  /// Whether there is no content in this tuple.
   bool get empty => !notEmpty;
 
+  /// Test whether the [test] function evaluates to `true` for any of the content in this tuple.
   bool any(bool Function(Content element) test) {
     for (final contentType in ContentType.values) {
       for (final content in get(contentType)) {
@@ -328,7 +333,7 @@ class ContentControl extends Control {
   //   ]);
   // }
 
-  /// Returns content of specified type.
+  /// Returns content of specified [contentType].
   List<T> getContent<T extends Content>(
     ContentType contentType, {
     bool filterFavorite = false,
@@ -372,10 +377,10 @@ class ContentControl extends Control {
     }
   }
 
-  /// Refetches content by the `T` content type.
+  /// Refetches content by the [contentType].
   ///
-  /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling [QueueControl.removeObsolete].
-  /// (only works with [Song]s).
+  /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling
+  /// [QueueControl.removeObsolete] (only works with [Song]s).
   Future<void> refetch(
     ContentType contentType, {
     bool updateQueues = true,
@@ -435,7 +440,7 @@ class ContentControl extends Control {
     }
   }
 
-  /// Searches for content by given [query] and the `T` content type.
+  /// Searches for content by given [query] and the [contentType].
   List<T> search<T extends Content>(String query, {required ContentType contentType}) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
