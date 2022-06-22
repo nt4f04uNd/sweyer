@@ -105,7 +105,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
           onTap: widget.onTap,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
-            height: kSongTileHeight(MediaQuery.of(context).textScaleFactor),
+            height: kSongTileHeight(context),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

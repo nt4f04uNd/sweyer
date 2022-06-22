@@ -591,7 +591,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             final mediaQuery = MediaQuery.of(context);
             final showAddSongsAction = isPlaylist && !selectionRoute;
 
-            final songTileHeight = kSongTileHeight(mediaQuery.textScaleFactor);
+            final songTileHeight = kSongTileHeight(context);
 
             /// The height to add at the end of the scroll view to make the top info part of the route
             /// always be fully scrollable, even if there's not enough items for that.

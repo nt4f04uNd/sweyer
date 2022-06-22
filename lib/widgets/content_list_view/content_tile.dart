@@ -40,10 +40,10 @@ class ContentTile<T extends Content> extends StatelessWidget {
   final bool handleTapInSelection;
   final ContentSelectionController? selectionController;
 
-  static double getHeight(ContentType contentType, double textScaleFactor) {
+  static double getHeight(ContentType contentType, BuildContext context) {
     switch (contentType) {
       case ContentType.song:
-        return kSongTileHeight(textScaleFactor);
+        return kSongTileHeight(context);
       case ContentType.album:
         return kPersistentQueueTileHeight;
       case ContentType.playlist:

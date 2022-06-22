@@ -542,14 +542,14 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   }
 
   Page<void> _buildPage(
+    BuildContext context,
     LocalKey key,
     StackFadeRouteTransitionSettings transitionSettings,
     Widget child,
-    double textScaleFactor,
   ) {
     if (selectionRoute) {
       child = Padding(
-        padding: EdgeInsets.only(bottom: kSongTileHeight(textScaleFactor)),
+        padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
         child: child,
       );
     }
@@ -560,10 +560,10 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
     );
   }
 
-  Widget _buildChild(Widget child, double textScaleFactor) {
+  Widget _buildChild(BuildContext context, Widget child) {
     if (selectionRoute) {
       child = Padding(
-        padding: EdgeInsets.only(bottom: kSongTileHeight(textScaleFactor)),
+        padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
         child: child,
       );
     }
@@ -574,7 +574,6 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
   Widget build(BuildContext context) {
     final transitionSettings = AppRouter.instance.transitionSettings;
     final pages = <Page<void>>[];
-    double textScaleFactor = MediaQuery.of(context).textScaleFactor;
 
     for (int i = 0; i < _routes.length; i++) {
       LocalKey _buildContentKey(_Routes route, Content content) {
@@ -584,34 +583,34 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
       final route = _routes[i];
       if (route.hasSameLocation(HomeRoutes.tabs)) {
         pages.add(_buildPage(
+          context,
           HomeRoutes.tabs.uniqueKey,
           transitionSettings.grey,
           TabsRoute(key: tabsRouteKey),
-          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.album)) {
         final arguments = route.arguments! as PersistentQueueArguments<Album>;
         pages.add(_buildPage(
+          context,
           _buildContentKey(HomeRoutes.album, arguments.queue),
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
-          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.playlist)) {
         final arguments = route.arguments! as PersistentQueueArguments<Playlist>;
         pages.add(_buildPage(
+          context,
           _buildContentKey(route, arguments.queue),
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
-          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.artist)) {
         final arguments = route.arguments! as Artist;
         pages.add(_buildPage(
+          context,
           _buildContentKey(route, arguments),
           transitionSettings.greyDismissible,
           ArtistRoute(artist: arguments),
-          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.artistContent)) {
         final arguments = route.arguments! as ArtistContentArguments;
@@ -624,16 +623,16 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
           throw ArgumentError();
         }
         pages.add(_buildPage(
+          context,
           ValueKey('${HomeRoutes.artistContent.location}/${arguments.artist.id}_$i'),
           transitionSettings.greyDismissible,
           actualRoute,
-          textScaleFactor,
         ));
       } else if (route.hasSameLocation(HomeRoutes.search)) {
         final arguments = route.arguments! as SearchArguments;
         pages.add(SearchPage(
           key: ValueKey('${HomeRoutes.search.location}/$i'),
-          child: _buildChild(SearchRoute(delegate: arguments._delegate), textScaleFactor),
+          child: _buildChild(context, SearchRoute(delegate: arguments._delegate)),
           transitionSettings: transitionSettings.grey,
         ));
       } else {

@@ -121,7 +121,7 @@ class HomeState extends State<Home> {
           child: Stack(
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(bottom: kSongTileHeight(MediaQuery.of(context).textScaleFactor)),
+                padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
                 child: Router<HomeRoutes>(
                   routerDelegate: router,
                   routeInformationParser: HomeRouteInformationParser(),

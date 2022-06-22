@@ -150,7 +150,6 @@ class ContentListView<T extends Content> extends StatelessWidget {
           SliverPadding(
             padding: padding,
             sliver: sliver(
-              context: context,
               contentType: contentType,
               list: list,
               itemBuilder: itemBuilder,
@@ -184,7 +183,6 @@ class ContentListView<T extends Content> extends StatelessWidget {
   ///  * [reorderableSliver] which creates a reorderable sliver
   @factory
   static MultiSliver sliver<T extends Content>({
-    required BuildContext context,
     Key? key,
     required ContentType<T> contentType,
     required List<T> list,
@@ -206,39 +204,41 @@ class ContentListView<T extends Content> extends StatelessWidget {
     return MultiSliver(
       children: [
         if (leading != null) leading,
-        SliverFixedExtentList(
-          itemExtent: ContentTile.getHeight(contentType, MediaQuery.of(context).textScaleFactor),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final item = list[index];
-              final child = ContentTile(
-                contentType: contentType,
-                content: item,
-                selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
-                selected: selectedTest != null
-                    ? selectedTest(index)
-                    : selectionController?.data.contains(SelectionEntry<T>.fromContent(
-                          content: item,
-                          index: index,
-                          context: context,
-                        )) ??
-                        false,
-                longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
-                handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
-                selectionController: selectionController,
-                trailing: itemTrailingBuilder?.call(context, index),
-                current: currentTest?.call(index),
-                onTap: onItemTap == null ? null : () => onItemTap(index),
-                backgroundColor: backgroundColorBuilder == null ? Colors.transparent : backgroundColorBuilder(index),
-                enableDefaultOnTap: enableDefaultOnTap,
-                songTileVariant: songTileVariant,
-                songTileClickBehavior: songTileClickBehavior,
-              );
-              return itemBuilder?.call(context, index, child) ?? child;
-            },
-            childCount: list.length,
-          ),
-        ),
+        Builder(builder: (context) {
+          return SliverFixedExtentList(
+            itemExtent: ContentTile.getHeight(contentType, context),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final item = list[index];
+                final child = ContentTile(
+                  contentType: contentType,
+                  content: item,
+                  selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
+                  selected: selectedTest != null
+                      ? selectedTest(index)
+                      : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                            content: item,
+                            index: index,
+                            context: context,
+                          )) ??
+                          false,
+                  longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
+                  handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
+                  selectionController: selectionController,
+                  trailing: itemTrailingBuilder?.call(context, index),
+                  current: currentTest?.call(index),
+                  onTap: onItemTap == null ? null : () => onItemTap(index),
+                  backgroundColor: backgroundColorBuilder == null ? Colors.transparent : backgroundColorBuilder(index),
+                  enableDefaultOnTap: enableDefaultOnTap,
+                  songTileVariant: songTileVariant,
+                  songTileClickBehavior: songTileClickBehavior,
+                );
+                return itemBuilder?.call(context, index, child) ?? child;
+              },
+              childCount: list.length,
+            ),
+          );
+        }),
       ],
     );
   }
