@@ -64,7 +64,7 @@ class _InitialRouteState extends State<InitialRoute> {
                   );
                 }
                 return StreamBuilder<bool>(
-                    stream: ThemeControl.instance.themeChaning,
+                    stream: ThemeControl.instance.themeChanging,
                     builder: (context, snapshot) {
                       if (snapshot.data == true) {
                         return const SizedBox.shrink();

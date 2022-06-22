@@ -25,7 +25,7 @@ class SharedAxisTabController extends ChangeNotifier {
   /// nor by user drag.
   bool canChange = true;
 
-  /// Changes the tab and notifies liteners.
+  /// Changes the tab and notifies listeners.
   /// Updates can be disabled with [canChange] `false`.
   void changeTab(int value) {
     if (!canChange) {
@@ -68,7 +68,7 @@ class SharedAxisTabView extends StatefulWidget {
   final SharedAxisTabController controller;
 
   /// Allows to add hook into tab build process.
-  /// Specifying this doens't affect the animation this view provides by defaults.
+  /// Specifying this doesn't affect the animation this view provides by defaults.
   final RouteTransitionsBuilder tabBuilder;
 
   @override

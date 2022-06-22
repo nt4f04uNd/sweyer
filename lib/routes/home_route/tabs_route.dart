@@ -596,7 +596,7 @@ class TabCollapse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: some wierd stuff happening if value is 1.6090780263766646e-7, this suggests some issue in the rendering that would needed to be investigated, reproduced and filed to flutter as issue
+    // TODO: some weird stuff happening if value is 1.6090780263766646e-7, this suggests some issue in the rendering that would needed to be investigated, reproduced and filed to flutter as issue
     return NFTab(
       child: AnimatedBuilder(
         animation: tabController.animation!,

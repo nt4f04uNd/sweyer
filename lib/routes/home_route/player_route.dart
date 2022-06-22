@@ -181,7 +181,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   bool opened = false;
   final ScrollController scrollController = ScrollController();
 
-  /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
+  /// A bool var to disable show/hide in track list controller listener when manual [scrollToSong] is performing
   late StreamSubscription<Song> _songChangeSubscription;
   late StreamSubscription<void> _queueChangeSubscription;
 
@@ -201,7 +201,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         setState(() {/* update ui list as data list may have changed */});
         if (!opened) {
           WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            // Jump when tracklist changes (e.g. shuffle happened)
+            // Jump when track list changes (e.g. shuffle happened)
             jumpToSong();
             // Post framing it because we need to be sure that list gets updated before we jump.
           });
@@ -866,7 +866,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
 
   static const defaultDuration = Duration(milliseconds: 160);
 
-  /// When `true`, should use fade animation instaed of scale.
+  /// When `true`, should use fade animation instead of scale.
   bool get useFade => playerRouteController.value == 0.0;
 
   @override

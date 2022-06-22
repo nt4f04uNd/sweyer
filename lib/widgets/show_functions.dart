@@ -7,7 +7,7 @@ import 'package:sweyer/constants.dart' as constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
-  /// Empty constructor will allow enheritance.
+  /// Empty constructor will allow inheritance.
   ShowFunctions();
   ShowFunctions._();
   static final instance = ShowFunctions._();

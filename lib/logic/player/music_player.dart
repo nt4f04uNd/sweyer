@@ -779,7 +779,7 @@ class MusicPlayer extends AudioPlayer {
     }
   }
 
-  /// Plays the song after current, or if speceified, then after [song].
+  /// Plays the song after current, or if specified, then after [song].
   Future<void> playNext({Song? song}) async {
     song = QueueControl.instance.state.current.getNext(
       song ?? PlaybackControl.instance.currentSong,
@@ -797,7 +797,7 @@ class MusicPlayer extends AudioPlayer {
     }
   }
 
-  /// Plays the song before current, or if speceified, then before [song].
+  /// Plays the song before current, or if specified, then before [song].
   Future<void> playPrev({Song? song}) async {
     song = QueueControl.instance.state.current.getPrev(
       song ?? PlaybackControl.instance.currentSong,

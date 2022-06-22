@@ -46,7 +46,7 @@ class ListHeader extends StatelessWidget {
 
 /// Displays content controls to sort content and content [count] at the trailing.
 class ContentListHeader<T extends Content> extends StatelessWidget {
-  /// Creats a default header with sort controls, count and slots widgets
+  /// Create a default header with sort controls, count and slots widgets
   /// for other widgets.
   const ContentListHeader({
     Key? key,

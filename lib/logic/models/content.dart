@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 
 /// Represents some content in the app (songs, album, etc).
 ///
-/// Each type of content have an approprate [Sort]s implemented.
+/// Each type of content have an appropriate [Sort]s implemented.
 abstract class Content with EquatableMixin {
   const Content();
 
@@ -83,7 +83,7 @@ abstract class SongOrigin extends Content {
 /// * set the [Song.origin]
 /// * set a [Song.duplicationIndex]
 /// * create, fill and set a [Song.idMap]
-/// * call [debugAssertSongsAreValid] at the ennd of the getter, to check
+/// * call [debugAssertSongsAreValid] at the end of the getter, to check
 ///   that everything is set correctly.
 ///
 /// Examples:
@@ -92,7 +92,7 @@ mixin DuplicatingSongOriginMixin on SongOrigin {
   /// Must be created and filled automatically each time the [songs] is called.
   IdMap? get idMap;
 
-  /// Ensures that [idMap] is initialized and receieved [Song.idMap]
+  /// Ensures that [idMap] is initialized and received [Song.idMap]
   /// and the [Song.origin].
   bool debugAssertSongsAreValid(List<Song> songs) {
     // Check that new valid idMap is created.

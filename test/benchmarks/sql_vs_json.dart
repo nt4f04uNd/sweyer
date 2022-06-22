@@ -115,7 +115,7 @@ class Table<T extends SqlSong> {
   /// Database instance.
   final Database _database;
 
-  /// Recieves map of data and should create an item from it.
+  /// Receives map of data and should create an item from it.
   final T Function(Map<String, Object?> data) factory;
 
   Future<List<T>> queryAll() async {

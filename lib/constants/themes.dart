@@ -79,7 +79,7 @@ abstract class Theme {
         onPrimary: Colors.white,
         secondary: AppColors.eee,
         secondaryContainer: Colors.white,
-        // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
+        // todo: temporarily used for text in [AppButton], remove when ThemeExtensions are in place
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
         onError: Colors.white,
@@ -203,7 +203,7 @@ abstract class Theme {
         onPrimary: Colors.white,
         secondary: AppColors.grey,
         secondaryContainer: Colors.black,
-        // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
+        // todo: temporarily used for text in [AppButton], remove when ThemeExtensions are in place
         onSecondary: Colors.white,
         error: Color(0xffed3b3b),
         onError: Colors.white,
@@ -300,7 +300,7 @@ abstract class UiTheme {
   ///
   /// The opposite is [grey].
   static final ThemeContainer<SystemUiOverlayStyle> black = ThemeContainer(
-    /// [withOpacity] needed for smooth transtion to [drawerScreen].
+    /// [withOpacity] needed for smooth transition to [drawerScreen].
     light: SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white,
       systemNavigationBarDividerColor: Colors.transparent,

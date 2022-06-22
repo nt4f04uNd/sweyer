@@ -366,7 +366,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// Before entering selection, controller will check this getter, and if it
   /// returns `true`, selection will be cancelled out.
   ///
-  /// This is needed, beucase in lists I allow multiple gestures at once, and if user holds one finger
+  /// This is needed, because in lists I allow multiple gestures at once, and if user holds one finger
   /// and then taps tile with another finger, this will cause the selection menu to
   /// be displayed over player route, which is not wanted.
   final ValueGetter<bool>? ignoreWhen;
@@ -392,7 +392,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     _primaryContentTypeNotifier.value = value;
   }
 
-  /// Constucts a controller for particular `T` [Content] type.
+  /// Constructs a controller for particular `T` [Content] type.
   ///
   /// Generally, it's recommended to pass navigator state to [vsync], so controller can
   /// safely make deferred disposal.
@@ -404,7 +404,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// which should always be visible. The [additionalPlayActionsBuilder] parameter
   /// allows to add additional actions just before the "play next" and "add to queue" actions.
   ///
-  /// If [counter] is `true`, will show a couter in the actions bar title.
+  /// If [counter] is `true`, will show a counter in the actions bar title.
   ///
   /// If [closeButton] is `true`, will show a selection close button in the actions bar.
   ///
@@ -443,7 +443,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     );
   }
 
-  /// Creats content [SelectionController.alwaysInSelection], with immutable, always in selection state
+  /// Creates content [SelectionController.alwaysInSelection], with immutable, always in selection state
   /// for particular `T` [Content] type.
   ///
   /// Call [activate] on then to create the selection bar overlay.
@@ -684,7 +684,7 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
 }
 
-/// Creats a selection controller and automatically rebuilds, when it updates.
+/// Creates a selection controller and automatically rebuilds, when it updates.
 class ContentSelectionControllerCreator<T extends Content> extends StatefulWidget {
   const ContentSelectionControllerCreator({
     Key? key,
@@ -1809,8 +1809,8 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
 /// Displays an action to delete songs.
 /// Only meant to be displayed in app bar.
 ///
-/// Can receive either [controller] with [Song]s selection, or with gerenric [Content] type.
-/// With the lattter, will automatically check if selection contains only songs and hide the button, if not.
+/// Can receive either [controller] with [Song]s selection, or with generic [Content] type.
+/// With the latter, will automatically check if selection contains only songs and hide the button, if not.
 class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   const DeleteSongsAppBarAction({
     Key? key,

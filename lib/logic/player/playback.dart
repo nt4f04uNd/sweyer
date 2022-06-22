@@ -56,7 +56,7 @@ class PlaybackControl extends Control {
     return index;
   }
 
-  /// Currently playing peristent queue when song is added via [QueueControl.playOriginNext]
+  /// Currently playing persistent queue when song is added via [QueueControl.playOriginNext]
   /// or [QueueControl.addOriginToQueue].
   ///
   /// Used for showing [CurrentIndicator] for [SongOrigin]s.

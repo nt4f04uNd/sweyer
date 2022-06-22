@@ -14,7 +14,7 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-  /// Indicates that current route with drawer is ontop and it can take the control
+  /// Indicates that current route with drawer is on top and it can take the control
   /// over the ui animations.
   bool _onTop = true;
   late SlidableController controller;

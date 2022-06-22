@@ -15,7 +15,7 @@ class Seekbar extends StatefulWidget {
     this.duration,
   }) : super(key: key);
 
-  /// Color of the actove slider part.
+  /// Color of the active slider part.
   ///
   /// If non specified [ColorScheme.primary] color will be used.
   final Color? color;
@@ -76,7 +76,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
         setState(() {
           _isDragging = false;
           _localValue = 0.0;
-          // Not setting to 0, because even though I'm intializing player in proper order, i.e.
+          // Not setting to 0, because even though I'm initializing player in proper order, i.e.
           // set song and then seek to needed position, it still fires in reverse, not sure why.
           _value = _positionToValue(MusicPlayer.instance.position);
           _duration = Duration(milliseconds: song.duration);

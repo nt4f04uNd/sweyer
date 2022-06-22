@@ -82,7 +82,7 @@ class _SearchStateDelegate {
   _SearchStateDelegate(this.selectionController, this.searchDelegate)
       : scrollController = ScrollController(),
         singleListScrollController = ScrollController() {
-    /// Initalize [prevQuery] and [trimmedQuery] values.
+    /// Initialize [prevQuery] and [trimmedQuery] values.
     onQueryChange();
   }
 
@@ -189,7 +189,7 @@ class _SearchStateDelegate {
     )();
   }
 
-  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// Scrolls the [Scrollable]s that enclose the given context so as to make the
   /// given context visible.
   ///
   /// Copied from [Scrollable.ensureVisible].

@@ -418,7 +418,7 @@ public enum ContentChannel {
                         ArrayList<Object> indexes = call.argument("indexes");
                         ArrayList<String> stringIndexes = new ArrayList<>();
                         for (Object index : indexes) {
-                           // Android seems to require indexes to be offsetted by 1.
+                           // Android seems to require indexes to be offset by 1.
                            //
                            // It might be because when songs are inserted into the playlist,
                            // the indexing is quite similar an there it makes sense, because we need

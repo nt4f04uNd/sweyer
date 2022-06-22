@@ -375,7 +375,7 @@ class ShuffleQueueButton extends StatelessWidget {
   }
 }
 
-/// Creates an icon copy button, which, when preseed,
+/// Creates an icon copy button, which, when pressed,
 /// will copy [text] to clipboard.
 class CopyButton extends StatelessWidget {
   const CopyButton({

@@ -18,7 +18,7 @@ class GetArtistInfoResponse {
 
 /// A namespace for connection methods with the backend.
 ///
-/// Backend source code is avilable here https://github.com/nt4f04uNd/sweyer-backend.
+/// Backend source code is available at https://github.com/nt4f04uNd/sweyer-backend.
 class Backend {
   static Backend instance = Backend();
 

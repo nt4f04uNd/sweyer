@@ -178,7 +178,7 @@ extension WidgetTesterExtension on WidgetTester {
   ///  2. runs the test from the [callback]
   ///  3. stops and disposes the player
   ///  4. optionally, runs [goldenCaptureCallback]. It would time out if was ran before player is disposed in [callback].
-  ///  5. unpumps the screen
+  ///  5. un-pumps the screen
   Future<void> runAppTest(AsyncCallback callback, {AsyncCallback? goldenCaptureCallback}) async {
     await withClock(binding.clock, () async {
       // App only supports vertical orientation, so switch tests to use it.
@@ -194,7 +194,7 @@ extension WidgetTesterExtension on WidgetTester {
         await MusicPlayer.instance.dispose();
       });
       await goldenCaptureCallback?.call();
-      // Unpump, in case we have any real animations running,
+      // Un-pump, in case we have any real animations running,
       // so the pumpAndSettle on the next line doesn't hang on.
       await pumpWidget(const SizedBox());
       // Wait for ui animations.

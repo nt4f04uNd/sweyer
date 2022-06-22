@@ -71,7 +71,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   final Widget? trailing;
 
   /// Whether this queue is currently playing, if yes, enables animated
-  /// [CurrentIndicator] over the ablum art.
+  /// [CurrentIndicator] over the album art.
   ///
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
@@ -283,8 +283,8 @@ class _PersistentQueueTileState<T extends PersistentQueue>
             const SizedBox.shrink()
           else
             Positioned(
-              left: artSize + (widget.grid ? -checmarkLargeSize - checkmarkGridMargin : 2.0),
-              top: artSize + (widget.grid ? -checmarkLargeSize - checkmarkGridMargin : -7.0),
+              left: artSize + (widget.grid ? -checkmarkLargeSize - checkmarkGridMargin : 2.0),
+              top: artSize + (widget.grid ? -checkmarkLargeSize - checkmarkGridMargin : -7.0),
               child: buildSelectionCheckmark(forceLarge: widget.grid),
             )
         else if (widget.grid)

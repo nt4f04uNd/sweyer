@@ -4,7 +4,7 @@ import 'package:sweyer/constants.dart' as constants;
 
 /// Action to be displayed directly in the content list.
 class InListContentAction extends StatefulWidget {
-  /// Creats action with paddings for song list.
+  /// Create action with paddings for song list.
   const InListContentAction.song({
     Key? key,
     required this.icon,
@@ -17,7 +17,7 @@ class InListContentAction extends StatefulWidget {
   })  : horizontalPadding = kSongTileHorizontalPadding,
         super(key: key);
 
-  /// Creats action with paddings for persistent queue list.
+  /// Create action with paddings for persistent queue list.
   const InListContentAction.persistentQueue({
     Key? key,
     required this.icon,

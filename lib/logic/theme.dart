@@ -40,7 +40,7 @@ class ThemeControl {
 
   /// If `true` - that means theme animation is now being performed and
   /// some interface can hidden for optimization sake.
-  final BehaviorSubject<bool> themeChaning = BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> themeChanging = BehaviorSubject.seeded(false);
 
   /// Returns primary or onBackground color, depending on:
   /// * the current primary
@@ -60,7 +60,7 @@ class ThemeControl {
     }
   }
 
-  /// Inits theme, fetches brightness from [Prefs].
+  /// Initializes theme, fetches brightness from [Prefs].
   ///
   /// NOTE that this does NOT call [emitThemeChange].
   void init() {
@@ -112,13 +112,13 @@ class ThemeControl {
 
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
 
-    themeChaning.add(true);
+    themeChanging.add(true);
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(themeChangeDuration)),
     ).then((value) async {
       App.rebuildAllChildren();
     }).then((value) {
-      themeChaning.add(false);
+      themeChanging.add(false);
     });
 
     await SystemUiStyleController.instance.animateSystemUiOverlay(
@@ -133,14 +133,14 @@ class ThemeControl {
     _rebuildOperation?.cancel();
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
-    themeChaning.add(true);
+    themeChanging.add(true);
     MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(primaryColorChangeDuration)),
     ).then((value) async {
       App.rebuildAllChildren();
     }).then((value) {
-      themeChaning.add(false);
+      themeChanging.add(false);
     });
   }
 
@@ -154,7 +154,7 @@ class ThemeControl {
         colorScheme: constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
-          // todo: temporarily used for text in [AppButton], remove when ThemeExtenions are in place
+          // todo: temporarily used for text in [AppButton], remove when ThemeExtensions are in place
         ),
         tooltipTheme: constants.Theme.app.light.tooltipTheme.copyWith(
           decoration: BoxDecoration(
