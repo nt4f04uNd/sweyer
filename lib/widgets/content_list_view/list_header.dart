@@ -69,7 +69,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         trailing = null,
         super(key: key);
 
-  final ContentType contentType;
+  final ContentType<T> contentType;
 
   final bool _onlyCount;
 

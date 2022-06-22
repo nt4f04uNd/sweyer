@@ -305,7 +305,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         ),
                         if (songs.isNotEmpty)
                           SliverToBoxAdapter(
-                            child: ContentSection<Song>(
+                            child: ContentSection(
                               contentType: ContentType.song,
                               list: songs,
                               selectionController: selectionController,
@@ -328,7 +328,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         if (albums.isNotEmpty)
                           MultiSliver(
                             children: [
-                              ContentSection<Album>.custom(
+                              ContentSection.custom(
                                 contentType: ContentType.album,
                                 list: albums,
                                 onHeaderTap: selectionController.inSelection && !selectionRoute

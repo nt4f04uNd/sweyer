@@ -412,7 +412,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   static ContentSelectionController<SelectionEntry<T>> create<T extends Content>({
     required TickerProvider vsync,
     required BuildContext context,
-    ContentType? contentType,
+    ContentType<T>? contentType,
     bool actionsBar = true,
     List<Widget> Function(BuildContext)? additionalPlayActionsBuilder,
     bool counter = false,
@@ -699,7 +699,7 @@ class ContentSelectionControllerCreator<T extends Content> extends StatefulWidge
   }) : super(key: key);
 
   final Widget Function(BuildContext context, ContentSelectionController selectionController, Widget? child) builder;
-  final ContentType contentType;
+  final ContentType<T> contentType;
   final Widget? child;
 
   @override
@@ -711,7 +711,7 @@ class _SelectionControllerCreatorState<T extends Content> extends State<ContentS
   @override
   void initState() {
     super.initState();
-    initSelectionController(() => ContentSelectionController.create<T>(
+    initSelectionController(() => ContentSelectionController.create(
           vsync: AppRouter.instance.navigatorKey.currentState!,
           context: context,
           contentType: widget.contentType,
@@ -1671,7 +1671,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
             width: screenSize.width,
             child: ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),
-              child: ContentListView<Playlist>(
+              child: ContentListView(
                 contentType: ContentType.playlist,
                 list: playlists,
                 leading: const CreatePlaylistInListAction(),

@@ -129,19 +129,19 @@ class _BrowserParentProvider {
         switch (_parent.value) {
           case 'albums':
             return ContentControl.instance
-                .getContentById<Album>(id, ContentType.album)!
+                .getContentById(id, ContentType.album)!
                 .songs
                 .map((song) => song.toMediaItem())
                 .toList();
           case 'playlists':
             return ContentControl.instance
-                .getContentById<Playlist>(id, ContentType.playlist)!
+                .getContentById(id, ContentType.playlist)!
                 .songs
                 .map((song) => song.toMediaItem())
                 .toList();
           case 'artists':
             return ContentControl.instance
-                .getContentById<Artist>(id, ContentType.artist)!
+                .getContentById(id, ContentType.artist)!
                 .songs
                 .map((song) => song.toMediaItem())
                 .toList();
@@ -159,19 +159,19 @@ class _BrowserParentProvider {
     } else {
       switch (parent.value) {
         case 'albums':
-          final album = ContentControl.instance.getContentById<Album>(parent.id!, ContentType.album);
+          final album = ContentControl.instance.getContentById(parent.id!, ContentType.album);
           if (album != null) {
             QueueControl.instance.setOriginQueue(origin: album, songs: album.songs);
           }
           break;
         case 'playlists':
-          final playlist = ContentControl.instance.getContentById<Playlist>(parent.id!, ContentType.playlist);
+          final playlist = ContentControl.instance.getContentById(parent.id!, ContentType.playlist);
           if (playlist != null) {
             QueueControl.instance.setOriginQueue(origin: playlist, songs: playlist.songs);
           }
           break;
         case 'artists':
-          final artist = ContentControl.instance.getContentById<Artist>(parent.id!, ContentType.artist);
+          final artist = ContentControl.instance.getContentById(parent.id!, ContentType.artist);
           if (artist != null) {
             QueueControl.instance.setOriginQueue(origin: artist, songs: artist.songs);
           }

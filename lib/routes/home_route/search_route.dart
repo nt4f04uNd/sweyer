@@ -803,7 +803,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
                           if (filteredList.isEmpty) {
                             child = const _NothingFound();
                           } else {
-                            child = ContentListView<Content>(
+                            child = ContentListView(
                               contentType: contentListContentType!,
                               controller: delegate.singleListScrollController,
                               selectionController: delegate.selectionController,

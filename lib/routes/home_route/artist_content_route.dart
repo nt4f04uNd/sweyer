@@ -54,7 +54,7 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
     final l10n = getl10n(context);
     final artist = widget.arguments.artist;
     final selectionRoute = selectionRouteOf(context);
-    return ContentSelectionControllerCreator<T>(
+    return ContentSelectionControllerCreator(
       contentType: widget.contentType,
       builder: (context, selectionController, child) => Scaffold(
         appBar: AppBar(
@@ -101,8 +101,8 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
             list: list,
             selectionController: selectionController,
             leading: selectionRoute
-                ? ContentListHeader<T>.onlyCount(contentType: widget.contentType, count: list.length)
-                : ContentListHeader<T>(
+                ? ContentListHeader.onlyCount(contentType: widget.contentType, count: list.length)
+                : ContentListHeader(
                     contentType: widget.contentType,
                     count: list.length,
                     selectionController: selectionController,

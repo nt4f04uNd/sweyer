@@ -5,18 +5,18 @@ import 'package:equatable/equatable.dart';
 
 
 /// A type of a content.
-enum ContentType {
+enum ContentType<T extends Content> {
   /// A song.
-  song(Icons.music_note_rounded),
+  song<Song>(Icons.music_note_rounded),
   
   /// A collection of songs by their creator.
-  album(Icons.album_rounded),
+  album<Album>(Icons.album_rounded),
   
   /// A collection of songs by the user.
-  playlist(Icons.queue_music_rounded),
+  playlist<Playlist>(Icons.queue_music_rounded),
   
   /// A creator of songs.
-  artist(Icons.person_rounded);
+  artist<Artist>(Icons.person_rounded);
   
   const ContentType(this.icon);
   
@@ -85,11 +85,11 @@ abstract class SongOrigin extends Content {
     }
     switch (entry.type) {
       case SongOriginType.album:
-        return ContentControl.instance.getContentById<Album>(entry.id, ContentType.album);
+        return ContentControl.instance.getContentById(entry.id, ContentType.album);
       case SongOriginType.playlist:
-        return ContentControl.instance.getContentById<Playlist>(entry.id, ContentType.playlist);
+        return ContentControl.instance.getContentById(entry.id, ContentType.playlist);
       case SongOriginType.artist:
-        return ContentControl.instance.getContentById<Artist>(entry.id, ContentType.artist);
+        return ContentControl.instance.getContentById(entry.id, ContentType.artist);
       default:
         throw UnimplementedError();
     }

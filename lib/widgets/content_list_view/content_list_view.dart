@@ -61,7 +61,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) : super(key: key);
 
   /// An explicit content type.
-  final ContentType contentType;
+  final ContentType<T> contentType;
 
   /// Content list.
   final List<T> list;
@@ -149,7 +149,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
         slivers: [
           SliverPadding(
             padding: padding,
-            sliver: sliver<T>(
+            sliver: sliver(
               contentType: contentType,
               list: list,
               itemBuilder: itemBuilder,
@@ -184,7 +184,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @factory
   static MultiSliver sliver<T extends Content>({
     Key? key,
-    required ContentType contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     _ItemBuilder? itemBuilder,
     IndexedWidgetBuilder? itemTrailingBuilder,
@@ -253,7 +253,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @factory
   static MultiSliver reorderableSliver<T extends Content>({
     Key? key,
-    required ContentType contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     required ReorderCallback onReorder,
     bool reorderingEnabled = true,

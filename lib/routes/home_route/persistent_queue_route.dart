@@ -67,7 +67,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     );
     scrollController.addListener(_handleScroll);
 
-    initSelectionController(() => ContentSelectionController.create<Song>(
+    initSelectionController(() => ContentSelectionController.create(
           vsync: AppRouter.instance.navigatorKey.currentState!,
           context: context,
           contentType: ContentType.song,
@@ -184,7 +184,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                 stream: PlaybackControl.instance.onSongChange,
                 builder: (context, snapshot) => StatefulBuilder(builder: (context, setState) {
                   setListState = setState;
-                  return ContentListView<Song>(
+                  return ContentListView(
                     contentType: ContentType.song,
                     list: songs,
                     enableDefaultOnTap: false,
@@ -680,7 +680,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                       ),
                       sliver: MultiSliver(
                         children: [
-                          ContentListView.reorderableSliver<Song>(
+                          ContentListView.reorderableSliver(
                             contentType: ContentType.song,
                             list: songs,
                             selectionController: selectionController,

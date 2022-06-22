@@ -35,7 +35,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
         maxPreviewCount = 0,
         super(key: key);
 
-  final ContentType contentType;
+  final ContentType<T> contentType;
   final List<T> list;
 
   final Widget? child;

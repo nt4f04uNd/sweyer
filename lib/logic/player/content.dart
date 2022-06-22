@@ -360,7 +360,7 @@ class ContentControl extends Control {
   }
 
   /// Returns content of specified type with ID.
-  T? getContentById<T extends Content>(int id, ContentType contentType) {
+  T? getContentById<T extends Content>(int id, ContentType<T> contentType) {
     if (contentType == ContentType.album) {
       return state.albums[id] as T?;
     }

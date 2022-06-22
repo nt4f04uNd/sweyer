@@ -35,7 +35,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
   void initState() {
     super.initState();
     initSelectionController(
-      () => ContentSelectionController.create<Song>(
+      () => ContentSelectionController.create(
         vsync: this,
         context: context,
         contentType: ContentType.song,
@@ -625,7 +625,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: ValueListenableBuilder<SelectionController?>(
               valueListenable: ContentControl.instance.selectionNotifier,
               builder: (context, value, child) {
-                return ContentListView<Song>(
+                return ContentListView(
                   contentType: ContentType.song,
                   list: list,
                   controller: scrollController,
