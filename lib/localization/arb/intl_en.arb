@@ -314,5 +314,7 @@
   "defaultValue": "Default",
   "playerInterfaceColorStyle": "Player color theme",
   "playerInterfaceColorStyleArtColor": "Based on track art",
-  "playerInterfaceColorStyleThemeBackgroundColor": "Theme background color"
+  "playerInterfaceColorStyleThemeBackgroundColor": "Theme background color",
+  "resolveConflict": "Resolve conflict",
+  "conflictExplanation": "The system has different favorites than Sweyer, please select which ones should remain marked as favorites. Only the conflicting tracks are shown."
 }

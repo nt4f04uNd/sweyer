@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:android_content_provider/android_content_provider.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 @visibleForTesting
@@ -48,13 +50,16 @@ class FavoritesControl with Control {
     super.dispose();
   }
 
-  Future<void> _initContentType(ContentType contentType) async {
+  Future<void> _initContentType(ContentType contentType, {bool displayDialogOnConflict = false}) async {
     final Set<int> favoriteSet = {};
     if (_useMediaStoreFavorites(contentType)) {
       for (final song in ContentControl.instance.state.allSongs.songs) {
         if (song.isFavoriteInMediaStore!) {
           favoriteSet.add(song.sourceId);
         }
+      }
+      if (displayDialogOnConflict && !await _resolveConflictsOnSwitchingToMediaStore(favoriteSet)) {
+        return;
       }
     } else {
       final serializer = repository.serializersMap.get(contentType);
@@ -65,14 +70,111 @@ class FavoritesControl with Control {
     _favoriteSetsMap.set(favoriteSet, key: contentType);
   }
 
+  /// Let the user resolve any conflicts between the current favorite state and the MediaStore state.
+  /// The [favoritesInMediaStore] are the source ids of the songs that are currently marked as favorites in the
+  /// MediaStore. The list will be updated if the user decides to mark more favorites or un-mark some favorites.
+  /// Returns `true` if the conflicts were resolved successfully, `false` if the user decided to cancel.
+  Future<bool> _resolveConflictsOnSwitchingToMediaStore(Set<int> favoritesInMediaStore) async {
+    final previousFavorites = _favoriteSetsMap.get(ContentType.song);
+    final newFavoritesFromMediaStore = favoritesInMediaStore
+        .difference(previousFavorites)
+        .map((id) =>
+            ContentControl.instance.getContent(ContentType.song).firstWhereOrNull((song) => song.sourceId == id))
+        .whereType<Song>() // Filter unknown songs
+        .toSet();
+    final newFavoritesFromLocalStore = previousFavorites
+        .difference(favoritesInMediaStore)
+        .map((id) =>
+            ContentControl.instance.getContent(ContentType.song).firstWhereOrNull((song) => song.sourceId == id))
+        .whereType<Song>() // Filter unknown songs
+        .toSet();
+    if (newFavoritesFromMediaStore.isNotEmpty || newFavoritesFromLocalStore.isNotEmpty) {
+      final context = AppRouter.instance.navigatorKey.currentContext;
+      if (context != null) {
+        final chosenFavorites =
+            await _showFavoriteConflictDialog(context, newFavoritesFromLocalStore, newFavoritesFromMediaStore);
+        if (chosenFavorites == null) {
+          await Settings.useMediaStoreForFavoriteSongs.set(false);
+          return false;
+        }
+        final songsToUnfavor = newFavoritesFromMediaStore.difference(chosenFavorites);
+        final songsToFavor = chosenFavorites.difference(newFavoritesFromMediaStore);
+        if (songsToUnfavor.isNotEmpty) {
+          await ContentControl.instance.setSongsFavorite(songsToUnfavor, false);
+          favoritesInMediaStore.removeAll(songsToUnfavor.map((song) => song.sourceId));
+        }
+        if (songsToFavor.isNotEmpty) {
+          await ContentControl.instance.setSongsFavorite(songsToFavor, true);
+          favoritesInMediaStore.addAll(songsToFavor.map((song) => song.sourceId));
+        }
+      }
+    }
+    return true;
+  }
+
+  /// Show a dialog to allow the user to choose which of the given songs should be marked as favorites.
+  /// The [favorites] will be marked as favorites in the beginning, the [unfavored] will not.
+  /// Returns the set of songs that the user has chosen as favorites.
+  Future<Set<Song>?> _showFavoriteConflictDialog(
+      BuildContext context, Iterable<Song> favorites, Iterable<Song> unfavored) async {
+    final l10n = getl10n(context);
+    final theme = Theme.of(context);
+    Set<Song> chosenFavorites = favorites.toSet();
+    final didChoose = await ShowFunctions.instance.showDialog<bool>(
+          context,
+          ui: theme.systemUiThemeExtension.modalOverGrey,
+          title: Text(l10n.resolveConflict),
+          titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
+          contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
+          acceptButton: AppButton.pop(
+            text: l10n.accept,
+            popResult: true,
+          ),
+          content: StatefulBuilder(builder: (context, setState) {
+            void toggleSong(Song song) => setState(() {
+                  chosenFavorites.contains(song) ? chosenFavorites.remove(song) : chosenFavorites.add(song);
+                });
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(l10n.conflictExplanation),
+                ),
+                for (final song in favorites.followedBy(unfavored))
+                  SongTile(
+                    song: song,
+                    enableDefaultOnTap: false,
+                    onTap: () => toggleSong(song),
+                    showFavoriteIndicator: false,
+                    trailing: HeartButton(active: chosenFavorites.contains(song), onPressed: () => toggleSong(song)),
+                  ),
+              ],
+            );
+          }),
+        ) ??
+        false;
+    return didChoose ? chosenFavorites : null;
+  }
+
   Future<void> _useMediaStoreForFavoriteSongsListener() async {
-    if (Settings.useMediaStoreForFavoriteSongs.value) {
+    final useMediaStore = Settings.useMediaStoreForFavoriteSongs.value;
+    if (useMediaStore) {
       _registerMediaStoreObserver();
     } else {
       _disposeMediaStoreObserver();
+      await _saveRepository(ContentType.song);
     }
-    await _initContentType(ContentType.song);
+    await _initContentType(ContentType.song, displayDialogOnConflict: useMediaStore);
     ContentControl.instance.emitContentChange();
+  }
+
+  /// Save the [newFavorites] of the [contentType] to the local database.
+  /// If [newFavorites] is omitted, save the current state of the favorite map to the database.
+  Future<void> _saveRepository(ContentType contentType, {List<int>? newFavorites}) async {
+    newFavorites ??= _favoriteSetsMap.get(contentType).toList(growable: false);
+    final serializer = repository.serializersMap.get(contentType);
+    await serializer.save(newFavorites);
   }
 
   void _registerMediaStoreObserver() {
@@ -161,8 +263,7 @@ class FavoritesControl with Control {
           final songs = (contentList as List<Song>).toSet();
           await ContentControl.instance.setSongsFavorite(songs, value);
         } else {
-          final serializer = repository.serializersMap.get(contentType);
-          await serializer.save(newFavoriteSet.toList());
+          _saveRepository(contentType, newFavorites: newFavoriteSet.toList());
         }
         _favoriteSetsMap.set(newFavoriteSet, key: contentType);
         ContentControl.instance.emitContentChange();
