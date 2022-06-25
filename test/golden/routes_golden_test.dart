@@ -321,12 +321,13 @@ void main() {
           await Settings.useMediaStoreForFavoriteSongs.set(false);
           await tester.pumpAndSettle(); // Wait for the listener in FavoriteControl to execute
           await FakeFavoritesControl.instance.setFavorite(
-            contentTuple:
-                ContentTuple([localFavoriteAndMediaStoreSong, localFavoriteButNotInMediaStoreSong], [], [], []),
+            contentTuple: ContentTuple(songs: [localFavoriteAndMediaStoreSong, localFavoriteButNotInMediaStoreSong]),
             value: true,
           );
-          await FakeFavoritesControl.instance
-              .setFavorite(contentTuple: ContentTuple([mediaStoreFavoriteButNotLocalSong], [], [], []), value: false);
+          await FakeFavoritesControl.instance.setFavorite(
+            contentTuple: ContentTuple(songs: [mediaStoreFavoriteButNotLocalSong]),
+            value: false,
+          );
           await tester.tap(find.byType(AnimatedMenuCloseButton));
           await tester.pumpAndSettle();
           await tester.tap(find.text(l10n.settings));
