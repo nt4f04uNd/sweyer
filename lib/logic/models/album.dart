@@ -25,7 +25,8 @@ class Album extends PersistentQueue {
         prev.add(el.copyWith(origin: this));
       }
       return prev;
-    }).toList();
+    })
+      ..sort(_compareTracks);
   }
 
   @override
@@ -118,6 +119,13 @@ class Album extends PersistentQueue {
         'lastYear': lastYear,
         'numberOfSongs': numberOfSongs,
       };
+
+  /// Compare [song1] with [song2]. This can be used to sort the tracks of the album.
+  int _compareTracks(Song song1, Song song2) => song1.trackPosition == song2.trackPosition
+      ? song1.title.compareTo(song2.title)
+      : song2.trackPosition == null
+          ? -1
+          : song1.trackPosition?.compareTo(song2.trackPosition!) ?? 1;
 }
 
 /// The `copyWith` function type for [Album].
