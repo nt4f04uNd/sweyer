@@ -137,6 +137,18 @@ void main() {
 
   group('persistent_queue_route', () {
     testAppGoldens('album_route', (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await setUpAppTest(() {
+          FakeContentChannel.instance.songs = [
+            songWith(id: 0, track: null, title: 'Null Song 1'),
+            songWith(id: 5, track: null, title: 'Null Song 2'),
+            songWith(id: 3, track: '1', title: 'First Song'),
+            songWith(id: 2, track: '2', title: 'Second Song'),
+            songWith(id: 4, track: '3', title: 'Third Song'),
+            songWith(id: 1, track: '4', title: 'Fourth Song'),
+          ];
+        });
+      });
       await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(albumWith()));
         await tester.pumpAndSettle();
