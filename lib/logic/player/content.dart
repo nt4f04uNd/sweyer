@@ -22,21 +22,6 @@ extension QuickActionSerialization on QuickAction {
   String get value => EnumToString.convertToString(this);
 }
 
-extension _RequireMap<K, V> on Map<K, V> {
-  /// Get a value for the [key] from the map, or throw an [ArgumentError] if the key is not in the map.
-  /// This works with nullable [V] value types.
-  V requireValue(K key) {
-    final value = this[key];
-    if (value != null) {
-      return value;
-    }
-    if (value is V && containsKey(key)) {
-      return value;
-    }
-    throw ArgumentError('No entry for key $key');
-  }
-}
-
 /// A [Map] container for the [ContentType] as key, and [V] as value entry.
 class ContentMap<V> {
   /// The value for [ContentType.song].
@@ -55,24 +40,16 @@ class ContentMap<V> {
     required this.artistValue,
   });
 
-  /// Create a content map from a regular map, which must contain a value for each [ContentType].
-  factory ContentMap.from(Map<ContentType, V> map) {
-    assert(map.length == ContentType.values.length);
+  /// Create a content map and initialize it with the values returned by the [factory],
+  /// which will be called once with each [ContentType].
+  factory ContentMap.fromFactory(V Function(ContentType contentType) factory) {
     return ContentMap(
-      songValue: map.requireValue(ContentType.song),
-      albumValue: map.requireValue(ContentType.album),
-      playlistValue: map.requireValue(ContentType.playlist),
-      artistValue: map.requireValue(ContentType.artist),
+      songValue: factory(ContentType.song),
+      albumValue: factory(ContentType.album),
+      playlistValue: factory(ContentType.playlist),
+      artistValue: factory(ContentType.artist),
     );
   }
-
-  /// Create a content map where the value for each content is initialized to the [value].
-  factory ContentMap.withSame(V value) => ContentMap(
-        songValue: value,
-        albumValue: value,
-        playlistValue: value,
-        artistValue: value,
-      );
 
   /// Map values.
   Iterable<V> get values => [for (final type in ContentType.values) get(type)];

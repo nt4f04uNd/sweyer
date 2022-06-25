@@ -7,9 +7,8 @@ import 'package:sweyer/sweyer.dart';
 
 @visibleForTesting
 class FavoritesRepository {
-  final serializersMap = ContentMap<IntSerializerType>.from({
-    for (final contentType in ContentType.values) contentType: IntListSerializer('favorites_${contentType.name}.json')
-  });
+  final serializersMap = ContentMap<IntSerializerType>.fromFactory(
+      (contentType) => IntListSerializer('favorites_${contentType.name}.json'));
 }
 
 class FavoritesControl with Control {
@@ -18,12 +17,7 @@ class FavoritesControl with Control {
   @visibleForTesting
   final repository = FavoritesRepository();
 
-  final _favoriteSetsMap = ContentMap<Set<int>>(
-    songValue: {},
-    albumValue: {},
-    playlistValue: {},
-    artistValue: {},
-  );
+  final _favoriteSetsMap = ContentMap.fromFactory((_) => <int>{});
 
   bool _useMediaStoreFavorites(ContentType contentType) =>
       contentType == ContentType.song &&

@@ -4,9 +4,7 @@ import '../test.dart';
 
 class _FavoritesRepository extends FavoritesRepository {
   @override
-  final serializersMap = ContentMap<IntSerializerType>.from({
-    for (final contentType in ContentType.values) contentType: FakeJsonSerializer([]),
-  });
+  final serializersMap = ContentMap<IntSerializerType>.fromFactory((contentType) => FakeJsonSerializer([]));
 }
 
 class FakeFavoritesControl extends FavoritesControl {
