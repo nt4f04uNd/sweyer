@@ -20,7 +20,7 @@ class Album extends PersistentQueue {
   /// Returns songs that belong to this album.
   @override
   List<Song> get songs {
-    return ContentControl.instance.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
+    return ContentControl.instance.getContent<Song>(contentType: Song).fold<List<Song>>([], (prev, el) {
       if (el.albumId == id) {
         prev.add(el.copyWith(origin: this));
       }
