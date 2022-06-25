@@ -40,10 +40,6 @@ class Album extends PersistentQueue {
     return lastYear == null || lastYear! < 1000 ? clock.now().year : lastYear!;
   }
 
-  Song get firstSong {
-    return ContentControl.instance.state.allSongs.songs.firstWhere((el) => el.albumId == id);
-  }
-
   /// Returns string in format `album name • year`.
   String get nameDotYear {
     return ContentUtils.appendYearWithDot(album, year);
