@@ -52,10 +52,10 @@ class ContentMap<V> {
   }
 
   /// Map values.
-  Iterable<V> get values => [for (final type in ContentType.values) get(type)];
+  Iterable<V> get values => ContentType.values.map((type) => get(type));
 
   /// Map entries.
-  Iterable<MapEntry<ContentType, V>> get entries => [for (final type in ContentType.values) MapEntry(type, get(type))];
+  Iterable<MapEntry<ContentType, V>> get entries => ContentType.values.map((type) => MapEntry(type, get(type)));
 
   /// Returns the value for the [type] from the map.
   V get(ContentType type) {
