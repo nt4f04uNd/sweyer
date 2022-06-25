@@ -134,22 +134,24 @@ class FavoritesControl with Control {
             void toggleSong(Song song) => setState(() {
                   chosenFavorites.contains(song) ? chosenFavorites.remove(song) : chosenFavorites.add(song);
                 });
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(l10n.conflictExplanation),
-                ),
-                for (final song in favorites.followedBy(unfavored))
-                  SongTile(
-                    song: song,
-                    enableDefaultOnTap: false,
-                    onTap: () => toggleSong(song),
-                    showFavoriteIndicator: false,
-                    trailing: HeartButton(active: chosenFavorites.contains(song), onPressed: () => toggleSong(song)),
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(l10n.conflictExplanation),
                   ),
-              ],
+                  for (final song in favorites.followedBy(unfavored))
+                    SongTile(
+                      song: song,
+                      enableDefaultOnTap: false,
+                      onTap: () => toggleSong(song),
+                      showFavoriteIndicator: false,
+                      trailing: HeartButton(active: chosenFavorites.contains(song), onPressed: () => toggleSong(song)),
+                    ),
+                ],
+              ),
             );
           }),
         ) ??
