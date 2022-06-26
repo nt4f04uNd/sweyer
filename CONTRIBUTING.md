@@ -9,6 +9,8 @@ The project is also using auto dart formatter with line break
 limit set to 120 characters (instead of default 80).
 
 VSCode workspace is already configured to use 120 line break automatically.
+Android Studios normal formatter unfortunately doesn't follow our formatting settings,
+so please only use the `Reformat Code with 'dart format'` action for formatting.
 
 To run it manually, use this command
 
