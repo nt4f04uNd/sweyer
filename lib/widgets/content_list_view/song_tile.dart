@@ -5,8 +5,30 @@ import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
 const double _tileVerticalPadding = 8.0;
+
+/// Calculate the height of one line of text rendered with the [style] and [textScaleFactor].
+double _lineHeight(TextStyle style, double textScaleFactor) {
+  final TextPainter textPainter = TextPainter(
+    text: TextSpan(text: "", style: style),
+    maxLines: 1,
+    textDirection: TextDirection.ltr,
+    textScaleFactor: textScaleFactor,
+  )..layout(minWidth: 0, maxWidth: double.infinity);
+  return textPainter.size.height;
+}
+
+/// The height of the title and subtitle part of the [SongTile] widget for the given [context].
+double kSongTileTextHeight(context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return _lineHeight(_SongTileState.titleTheme(theme), textScaleFactor) +
+      _lineHeight(ArtistWidget.defaultTextStyle(theme), textScaleFactor) +
+      _SongTileState.subtitleTopPadding +
+      _SongTileState.subtitleBottomPadding;
+}
+
 double kSongTileHeight(BuildContext context) =>
-    (kSongTileArtSize + _tileVerticalPadding * 2) * math.max(0.95, MediaQuery.of(context).textScaleFactor);
+    math.max(kSongTileArtSize, kSongTileTextHeight(context)) + _tileVerticalPadding * 2;
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
@@ -165,6 +187,12 @@ class SongTile extends SelectableWidget<SelectionEntry> {
 
 class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> with ContentTileComponentsMixin {
   Color? previousBackgroundColor;
+  /// The padding that is added to the top of the subtitle widget.
+  static const subtitleTopPadding = 4.0;
+  /// The padding that is added to the bottom of the subtitle widget.
+  static const subtitleBottomPadding = 3.0;
+  /// The [TextStyle] used for the title text from the [theme].
+  static TextStyle titleTheme(ThemeData theme) => theme.textTheme.headline6!;
 
   @override
   void didUpdateWidget(SongTile oldWidget) {
@@ -219,7 +247,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
     Widget title = Text(
       widget.song.title,
       overflow: TextOverflow.ellipsis,
-      style: theme.textTheme.headline6,
+      style: titleTheme(theme),
     );
     Widget subtitle = ArtistWidget(
       artist: widget.song.artist,
@@ -277,9 +305,9 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         title,
-                        const SizedBox(height: 4.0),
+                        const SizedBox(height: subtitleTopPadding),
                         subtitle,
-                        const SizedBox(height: 3.0),
+                        const SizedBox(height: subtitleBottomPadding),
                       ],
                     ),
                   ),
