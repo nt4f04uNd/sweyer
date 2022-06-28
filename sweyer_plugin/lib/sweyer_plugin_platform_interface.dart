@@ -32,15 +32,15 @@ abstract class SweyerPluginPlatform extends PlatformInterface {
 
   Future<void> fixAlbumArt(int albumId);
 
-  Future<List<Map>> retrieveSongs();
+  Future<Iterable<Map<String, dynamic>>> retrieveSongs();
 
-  Future<List<Map>> retrieveAlbums();
+  Future<Iterable<Map<String, dynamic>>> retrieveAlbums();
 
-  Future<List<Map>> retrievePlaylists();
+  Future<Iterable<Map<String, dynamic>>> retrievePlaylists();
 
-  Future<List<Map>> retrieveArtists();
+  Future<Iterable<Map<String, dynamic>>> retrieveArtists();
 
-  Future<List<Map>> retrieveGenres();
+  Future<Iterable<Map<String, dynamic>>> retrieveGenres();
 
   Future<bool> setSongsFavorite(List<int> songsIds, bool value);
 

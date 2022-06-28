@@ -85,19 +85,24 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
       );
 
   @override
-  Future<List<Map>> retrieveSongs() async => (await methodChannel.invokeListMethod<Map>('retrieveSongs'))!;
+  Future<Iterable<Map<String, dynamic>>> retrieveSongs() async =>
+      (await methodChannel.invokeListMethod<Map>('retrieveSongs'))!.map(Map.castFrom);
 
   @override
-  Future<List<Map>> retrieveAlbums() async => (await methodChannel.invokeListMethod<Map>('retrieveAlbums'))!;
+  Future<Iterable<Map<String, dynamic>>> retrieveAlbums() async =>
+      (await methodChannel.invokeListMethod<Map>('retrieveAlbums'))!.map(Map.castFrom);
 
   @override
-  Future<List<Map>> retrievePlaylists() async => (await methodChannel.invokeListMethod<Map>('retrievePlaylists'))!;
+  Future<Iterable<Map<String, dynamic>>> retrievePlaylists() async =>
+      (await methodChannel.invokeListMethod<Map>('retrievePlaylists'))!.map(Map.castFrom);
 
   @override
-  Future<List<Map>> retrieveArtists() async => (await methodChannel.invokeListMethod<Map>('retrieveArtists'))!;
+  Future<Iterable<Map<String, dynamic>>> retrieveArtists() async =>
+      (await methodChannel.invokeListMethod<Map>('retrieveArtists'))!.map(Map.castFrom);
 
   @override
-  Future<List<Map>> retrieveGenres() async => (await methodChannel.invokeListMethod<Map>('retrieveGenres'))!;
+  Future<Iterable<Map<String, dynamic>>> retrieveGenres() async =>
+      (await methodChannel.invokeListMethod<Map>('retrieveGenres'))!.map(Map.castFrom);
 
   @override
   Future<bool> setSongsFavorite(List<int> songsIds, bool value) async {

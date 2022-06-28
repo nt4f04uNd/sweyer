@@ -107,7 +107,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin, MediaSto
     );
   }
 
-  factory Playlist.fromMap(Map map) {
+  factory Playlist.fromMap(Map<String, dynamic> map) {
     return Playlist(
       id: map['id'] as int,
       data: map['data'] as String,

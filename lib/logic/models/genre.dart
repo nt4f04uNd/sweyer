@@ -26,7 +26,7 @@ class Genre extends Content with MediaStoreGenre {
   @override
   GenreCopyWith get copyWith => _GenreCopyWith(this);
 
-  factory Genre.fromMap(Map map) {
+  factory Genre.fromMap(Map<String, dynamic> map) {
     return Genre(
       id: map['id'] as int,
       name: map['name'] as String,

@@ -79,11 +79,13 @@ abstract class SweyerPlugin {
   static Future<void> fixAlbumArt(int albumId) async => await SweyerPluginPlatform.instance.fixAlbumArt(albumId);
 
   static Future<Iterable<T>> retrieveSongs<T extends MediaStoreSong>(
-    T Function(Map data) factory,
+    T Function(Map<String, dynamic> data) factory,
   ) async =>
       (await SweyerPluginPlatform.instance.retrieveSongs()).map(factory);
 
-  static Future<Map<int, T>> retrieveAlbums<T extends MediaStoreAlbum>(T Function(Map data) factory) async {
+  static Future<Map<int, T>> retrieveAlbums<T extends MediaStoreAlbum>(
+    T Function(Map<String, dynamic> data) factory,
+  ) async {
     final maps = await SweyerPluginPlatform.instance.retrieveAlbums();
     final Map<int, T> albums = {};
     for (final map in maps) {
@@ -92,13 +94,19 @@ abstract class SweyerPlugin {
     return albums;
   }
 
-  static Future<Iterable<T>> retrievePlaylists<T extends MediaStorePlaylist>(T Function(Map data) factory) async =>
+  static Future<Iterable<T>> retrievePlaylists<T extends MediaStorePlaylist>(
+    T Function(Map<String, dynamic> data) factory,
+  ) async =>
       (await SweyerPluginPlatform.instance.retrievePlaylists()).map(factory);
 
-  static Future<Iterable<T>> retrieveArtists<T extends MediaStoreArtist>(T Function(Map data) factory) async =>
+  static Future<Iterable<T>> retrieveArtists<T extends MediaStoreArtist>(
+    T Function(Map<String, dynamic> data) factory,
+  ) async =>
       (await SweyerPluginPlatform.instance.retrieveArtists()).map(factory);
 
-  static Future<Iterable<T>> retrieveGenres<T extends MediaStoreGenre>(T Function(Map data) factory) async =>
+  static Future<Iterable<T>> retrieveGenres<T extends MediaStoreGenre>(
+    T Function(Map<String, dynamic> data) factory,
+  ) async =>
       (await SweyerPluginPlatform.instance.retrieveGenres()).map(factory);
 
   /// Sets songs' favorite flag to [value].

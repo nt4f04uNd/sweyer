@@ -145,7 +145,7 @@ class Song extends Content with MediaStoreSong {
     );
   }
 
-  factory Song.fromMap(Map map) {
+  factory Song.fromMap(Map<String, dynamic> map) {
     return Song(
       id: map['id'] as int,
       album: map['album'] as String?,

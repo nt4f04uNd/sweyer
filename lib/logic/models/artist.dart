@@ -76,7 +76,7 @@ class Artist extends SongOrigin with MediaStoreArtist {
     );
   }
 
-  factory Artist.fromMap(Map map) {
+  factory Artist.fromMap(Map<String, dynamic> map) {
     return Artist(
       id: map['id'] as int,
       artist: map['artist'] as String,

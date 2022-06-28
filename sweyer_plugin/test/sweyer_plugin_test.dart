@@ -74,31 +74,31 @@ class MockSweyerPluginPlatform extends SweyerPluginPlatform {
   }
 
   @override
-  Future<List<Map>> retrieveAlbums() {
+  Future<Iterable<Map<String, dynamic>>> retrieveAlbums() {
     // TODO: implement retrieveAlbums
     throw UnimplementedError();
   }
 
   @override
-  Future<List<Map>> retrieveArtists() {
+  Future<Iterable<Map<String, dynamic>>> retrieveArtists() {
     // TODO: implement retrieveArtists
     throw UnimplementedError();
   }
 
   @override
-  Future<List<Map>> retrieveGenres() {
+  Future<Iterable<Map<String, dynamic>>> retrieveGenres() {
     // TODO: implement retrieveGenres
     throw UnimplementedError();
   }
 
   @override
-  Future<List<Map>> retrievePlaylists() {
+  Future<Iterable<Map<String, dynamic>>> retrievePlaylists() {
     // TODO: implement retrievePlaylists
     throw UnimplementedError();
   }
 
   @override
-  Future<List<Map>> retrieveSongs() {
+  Future<Iterable<Map<String, dynamic>>> retrieveSongs() {
     // TODO: implement retrieveSongs
     throw UnimplementedError();
   }

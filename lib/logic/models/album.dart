@@ -94,7 +94,7 @@ class Album extends PersistentQueue with MediaStoreAlbum {
     );
   }
 
-  factory Album.fromMap(Map map) {
+  factory Album.fromMap(Map<String, dynamic> map) {
     return Album(
       id: map['id'] as int,
       album: map['album'] as String,

@@ -192,7 +192,7 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val handler = Handler(Looper.getMainLooper())
                     Executors.newSingleThreadExecutor().execute {
                         try {
-                            val res: ArrayList<HashMap<*, *>> = FetchHandler.retrieveSongs(getContentResolver())
+                            val res = FetchHandler.retrieveSongs(getContentResolver())
                             handler.post { result.success(res) }
                         } catch (e: Exception) {
                             handler.post {
@@ -209,7 +209,7 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val handler = Handler(Looper.getMainLooper())
                     Executors.newSingleThreadExecutor().execute {
                         try {
-                            val res: ArrayList<HashMap<*, *>> = FetchHandler.retrieveAlbums(getContentResolver())
+                            val res = FetchHandler.retrieveAlbums(getContentResolver())
                             handler.post { result.success(res) }
                         } catch (e: Exception) {
                             handler.post {
@@ -226,7 +226,7 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val handler = Handler(Looper.getMainLooper())
                     Executors.newSingleThreadExecutor().execute {
                         try {
-                            val res: ArrayList<HashMap<*, *>> = FetchHandler.retrievePlaylists(getContentResolver())
+                            val res = FetchHandler.retrievePlaylists(getContentResolver())
                             handler.post { result.success(res) }
                         } catch (e: Exception) {
                             handler.post {
@@ -243,7 +243,7 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val handler = Handler(Looper.getMainLooper())
                     Executors.newSingleThreadExecutor().execute {
                         try {
-                            val res: ArrayList<HashMap<*, *>> = FetchHandler.retrieveArtists(getContentResolver())
+                            val res = FetchHandler.retrieveArtists(getContentResolver())
                             handler.post { result.success(res) }
                         } catch (e: Exception) {
                             handler.post {
@@ -260,7 +260,7 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val handler = Handler(Looper.getMainLooper())
                     Executors.newSingleThreadExecutor().execute {
                         try {
-                            val res: ArrayList<HashMap<*, *>> = FetchHandler.retrieveGenres(getContentResolver())
+                            val res = FetchHandler.retrieveGenres(getContentResolver())
                             handler.post { result.success(res) }
                         } catch (e: Exception) {
                             handler.post {
