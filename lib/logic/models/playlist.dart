@@ -1,14 +1,15 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
+class Playlist extends PersistentQueue with DuplicatingSongOriginMixin, MediaStorePlaylist {
   @override
   ContentType get type => ContentType.playlist;
-
   final String data;
   final int dateAdded;
   final int dateModified;
   final String name;
+  @override
   final List<int> songIds;
 
   @override

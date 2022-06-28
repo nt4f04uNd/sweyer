@@ -90,6 +90,9 @@ dependencies:
       url: https://github.com/nt4f04uNd/nt4f04unds_widgets/
       ref: 3.0.0
 
+  sweyer_plugin:
+    path: sweyer_plugin
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
 const double kSongTileArtSize = 48.0;
 const double kPersistentQueueTileArtSize = 64.0;
@@ -421,13 +422,13 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
       }
       _signal = CancellationSignal();
       try {
-        _bytes = await ContentChannel.instance.loadAlbumArt(
+        _bytes = await SweyerPlugin.loadAlbumArt(
           uri: uri,
           size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
         );
-      } on ContentChannelException catch (ex, stack) {
-        if (ex != ContentChannelException.io) {
+      } on SweyerPluginException catch (ex, stack) {
+        if (ex != SweyerPluginException.io) {
           FirebaseCrashlytics.instance.recordError(
             ex,
             stack,
@@ -532,7 +533,7 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   Future<void> _recreateArt() async {
     final albumId = song.albumId;
     if (albumId != null) {
-      await ContentChannel.instance.fixAlbumArt(song.albumId!);
+      await SweyerPlugin.fixAlbumArt(song.albumId!);
     }
     setLoading(_SourceLoading.loaded);
   }

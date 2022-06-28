@@ -1,4 +1,4 @@
-package com.nt4f04und.sweyer.services;
+package com.nt4f04und.sweyer.sweyer_plugin.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -13,12 +13,9 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
-import com.nt4f04und.sweyer.Constants;
-import com.nt4f04und.sweyer.channels.ContentChannel;
-import com.nt4f04und.sweyer.handlers.FetchHandler;
-import com.nt4f04und.sweyer.handlers.GeneralHandler;
+import com.nt4f04und.sweyer.sweyer_plugin.Constants;
+import com.nt4f04und.sweyer.sweyer_plugin.SweyerPlugin;
+import com.nt4f04und.sweyer.sweyer_plugin.handlers.FetchHandler;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +30,7 @@ public class DeletionService extends Service {
       Handler handler = new Handler(Looper.getMainLooper());
       executor.submit(() -> {
          ArrayList<HashMap<String, Object>> songs = (ArrayList<HashMap<String, Object>>) intent.getSerializableExtra("songs");
-         ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
+         ContentResolver resolver = getContentResolver();
 
          // I'm setting `android:requestLegacyExternalStorage="true"`, because there's no consistent way
          // to delete a bulk of music files in scoped storage in Android Q, or at least I didn't find it
@@ -43,16 +40,17 @@ public class DeletionService extends Service {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
             for (HashMap<String, Object> song : songs) {
-               Long id = GeneralHandler.getLong(song.get("id"));
+               Long id = getLong(song.get("id"));
                uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
-                    GeneralHandler.getAppContext().getContentResolver(),
+                    getContentResolver(),
                     uris
             );
             handler.post(() -> {
                // On R it's required to request an OS permission for file deletions
-               ContentChannel.instance.startIntentSenderForResult(pendingIntent, Constants.intents.PERMANENT_DELETION_REQUEST);
+               
+               SweyerPlugin.Companion.getInstance().startIntentSenderForResult(pendingIntent, Constants.intents.PERMANENT_DELETION_REQUEST);
             });
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();
@@ -77,16 +75,26 @@ public class DeletionService extends Service {
             // Delete file from `MediaStore`
             resolver.delete(uri, where, selectionArgs);
             resolver.notifyChange(uri, null);
-            ContentChannel.instance.sendResultFromIntent(true);
+            SweyerPlugin.Companion.getInstance().sendResultFromIntent(true);
          }
          stopSelf();
       });
       return super.onStartCommand(intent, flags, startId);
    }
 
-   @Nullable
    @Override
    public IBinder onBind(Intent intent) {
       return null;
+   }
+
+
+   private static Long getLong(Object rawValue) {
+      if (rawValue instanceof Long) {
+         return (Long) rawValue;
+      } else if (rawValue instanceof Integer) {
+         return Long.valueOf((Integer) rawValue);
+      } else {
+         throw new IllegalArgumentException();
+      }
    }
 }

@@ -46,7 +46,7 @@ void main() {
 
     testAppGoldens('no_songs_screen', (WidgetTester tester) async {
       await setUpAppTest(() {
-        FakeContentChannel.instance.songs = [];
+        FakeSweyerPluginPlatform.instance.songs = [];
       });
       await tester.runAppTest(() async {
         await tester.pumpAndSettle();
@@ -119,7 +119,7 @@ void main() {
           final fake = FakeDeviceInfoControl();
           DeviceInfoControl.instance = fake;
           fake.sdkInt = 29;
-          FakeContentChannel.instance.songs = songs.toList();
+          FakeSweyerPluginPlatform.instance.songs = songs.toList();
         });
       });
       await tester.runAppTest(() async {

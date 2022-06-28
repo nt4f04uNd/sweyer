@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as constants;
+import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 
 export 'fakes/fakes.dart';
 
@@ -113,7 +114,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   DeviceInfoControl.instance = FakeDeviceInfoControl();
   FavoritesControl.instance = FakeFavoritesControl();
   PermissionsChannelObserver(binding); // Grant all permissions by default.
-  ContentChannel.instance = FakeContentChannel(binding);
+  SweyerPluginPlatform.instance = FakeSweyerPluginPlatform(binding);
   QueueControl.instance = FakeQueueControl();
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();

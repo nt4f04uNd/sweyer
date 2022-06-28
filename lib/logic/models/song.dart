@@ -1,10 +1,11 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
 /// Represents a song.
 ///
 /// Songs are always playable, trashed or pending songs on Android Q are excluded.
-class Song extends Content {
+class Song extends Content with MediaStoreSong {
   @override
   ContentType get type => ContentType.song;
 
@@ -82,6 +83,7 @@ class Song extends Content {
   List<Object?> get props => [id];
 
   /// Returns source song ID.
+  @override
   int get sourceId => ContentUtils.getSourceId(
         id,
         origin: origin,

@@ -1,7 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Genre extends Content {
+class Genre extends Content with MediaStoreGenre {
   @override
   ContentType get type => ContentType.song; // FIXME: Add a real content type for genres.
 
