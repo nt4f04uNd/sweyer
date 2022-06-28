@@ -41,7 +41,7 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
   Future<void> createPlaylist(String name) async {}
 
   @override
-  Future<bool> deleteSongs(List<Map> songs) async {
+  Future<bool> deleteSongs(List<Map<String, dynamic>> songs) async {
     return true;
   }
 

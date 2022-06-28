@@ -7,21 +7,31 @@ import 'package:uuid/uuid.dart';
 
 import 'sweyer_plugin_platform_interface.dart';
 
+/// A song from the native media store.
 abstract class MediaStoreSong {
+  /// The id of this song in the native media store.
   int get sourceId;
 
-  Map<String, dynamic> toMap();
+  /// Absolute filesystem path to the media item on disk.
+  String? get filesystemPath;
 }
 
+/// An album from the native media store.
 abstract class MediaStoreAlbum {}
 
+/// An artist from the native media store.
 abstract class MediaStoreArtist {}
 
+/// A playlist from the native media store.
 abstract class MediaStorePlaylist {
+  /// The id of this playlist in the native media store.
   int get id;
+
+  /// A list of ids of songs that this playlist contains.
   List<int> get songIds;
 }
 
+/// A genre from the native media store.
 abstract class MediaStoreGenre {}
 
 abstract class SweyerPluginException with EquatableMixin {
@@ -125,8 +135,8 @@ abstract class SweyerPlugin {
   ///
   /// Throws:
   ///  * [SweyerMethodChannelException.intentSender]
-  static Future<bool> deleteSongs(Set<MediaStoreSong> songs) =>
-      SweyerPluginPlatform.instance.deleteSongs(songs.map((song) => song.toMap()).toList());
+  static Future<bool> deleteSongs(Set<MediaStoreSong> songs) => SweyerPluginPlatform.instance.deleteSongs(
+      songs.map((song) => {'id': song.sourceId, 'filesystemPath': song.filesystemPath}).toList(growable: false));
 
   static Future<void> createPlaylist(String name) => SweyerPluginPlatform.instance.createPlaylist(name);
 

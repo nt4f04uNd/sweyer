@@ -135,7 +135,7 @@ public class FetchHandler {
             map.put("dateModified", cursor.getInt(9));
             map.put("duration", cursor.getInt(10));
             map.put("size", cursor.getInt(11));
-            map.put("data", cursor.getString(12));
+            map.put("filesystemPath", cursor.getString(12));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                map.put("isFavoriteInMediaStore", cursor.getInt(13) == 1);
                map.put("generationAdded", cursor.getInt(14));
@@ -225,7 +225,7 @@ public class FetchHandler {
                }
                HashMap<String, Object> map = new HashMap<>();
                map.put("id", cursor.getInt(0));
-               map.put("data", cursor.getString(1));
+               map.put("filesystemPath", cursor.getString(1));
                map.put("dateAdded", cursor.getInt(2));
                map.put("dateModified", cursor.getInt(3));
                map.put("name", cursor.getString(4));

@@ -37,7 +37,7 @@ final _testSong = Song(
   dateModified: 0,
   duration: 0,
   size: 0,
-  data: 'data_data_data_data_data_data_data_data',
+  filesystemPath: '/path/to/song',
   isFavoriteInMediaStore: false,
   generationAdded: 0,
   generationModified: 0,
@@ -58,7 +58,7 @@ const _testAlbum = Album(
 
 final _testPlaylist = Playlist(
   id: 0,
-  data: 'data_data_data_data_data_data_data_data',
+  filesystemPath: '/path/to/playlist',
   dateAdded: 0,
   dateModified: 0,
   name: 'name',

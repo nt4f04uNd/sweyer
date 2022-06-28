@@ -44,7 +44,7 @@ abstract class SweyerPluginPlatform extends PlatformInterface {
 
   Future<bool> setSongsFavorite(List<int> songsIds, bool value);
 
-  Future<bool> deleteSongs(List<Map> songs);
+  Future<bool> deleteSongs(List<Map<String, dynamic>> songs);
 
   Future<void> createPlaylist(String name);
 

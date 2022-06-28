@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -14,22 +15,25 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.nt4f04und.sweyer.sweyer_plugin.Constants;
+import com.nt4f04und.sweyer.sweyer_plugin.DeletionItem;
 import com.nt4f04und.sweyer.sweyer_plugin.SweyerPlugin;
 import com.nt4f04und.sweyer.sweyer_plugin.handlers.FetchHandler;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DeletionService extends Service {
+    /** The name of the argument where an array of DeletionItems is expected to be passed. */
+    private final static String SONGS_ARGUMENT = "songs";
+    
    @Override
    public int onStartCommand(Intent intent, int flags, int startId) {
       ExecutorService executor = Executors.newSingleThreadExecutor();
       Handler handler = new Handler(Looper.getMainLooper());
       executor.submit(() -> {
-         ArrayList<HashMap<String, Object>> songs = (ArrayList<HashMap<String, Object>>) intent.getSerializableExtra("songs");
+         DeletionItem[] songs = (DeletionItem[]) intent.getSerializableExtra(SONGS_ARGUMENT);
          ContentResolver resolver = getContentResolver();
 
          // I'm setting `android:requestLegacyExternalStorage="true"`, because there's no consistent way
@@ -39,9 +43,9 @@ public class DeletionService extends Service {
          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
-            for (HashMap<String, Object> song : songs) {
-               Long id = getLong(song.get("id"));
-               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
+            for (DeletionItem song : songs) {
+               uris.add(ContentUris.withAppendedId(
+                       MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.getId()));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
                     getContentResolver(),
@@ -55,22 +59,26 @@ public class DeletionService extends Service {
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();
             // Delete files and populate `songListSuccessful` with successful uris
-            for (HashMap<String, Object> song : songs) {
-               String data = (String) song.get("data");
-               File file = new File(data);
-
+            for (DeletionItem song : songs) {
+               String path = song.getPath();
+               if (path == null) {
+                  Log.e(Constants.LogTag, "File without path not deleted");
+                  continue;
+               }
+               File file = new File(path);
                if (file.exists()) {
                   // Delete the actual file
                   if (file.delete()) {
-                     songListSuccessful.add(data);
+                     songListSuccessful.add(path);
                   } else {
-                     Log.e(Constants.LogTag, "file not deleted: " + data);
+                     Log.e(Constants.LogTag, "File not deleted: " + path);
                   }
                }
             }
 
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            String where = FetchHandler.buildWhereForCount(MediaStore.Audio.Media.DATA, songs.size());
+            String where = FetchHandler.buildWhereForCount(
+                    MediaStore.Audio.Media.DATA, songs.length);
             String[] selectionArgs = songListSuccessful.toArray(new String[0]);
             // Delete file from `MediaStore`
             resolver.delete(uri, where, selectionArgs);
@@ -87,14 +95,15 @@ public class DeletionService extends Service {
       return null;
    }
 
-
-   private static Long getLong(Object rawValue) {
-      if (rawValue instanceof Long) {
-         return (Long) rawValue;
-      } else if (rawValue instanceof Integer) {
-         return Long.valueOf((Integer) rawValue);
-      } else {
-         throw new IllegalArgumentException();
-      }
+   /**
+    * Start this service with a list of songs to delete.
+    *
+    * @param context The context that is used to start the service.
+    * @param songs The list of songs to delete.
+    */
+   public static void start(Context context, DeletionItem[] songs) {
+      Intent serviceIntent = new Intent(context, DeletionService.class);
+      serviceIntent.putExtra(SONGS_ARGUMENT, songs);
+      context.startService(serviceIntent);
    }
 }

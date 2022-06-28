@@ -21,7 +21,7 @@ class MockSweyerPluginPlatform extends SweyerPluginPlatform {
   }
 
   @override
-  Future<bool> deleteSongs(List<Map> songs) {
+  Future<bool> deleteSongs(List<Map<String, dynamic>> songs) {
     // TODO: implement deleteSongs
     throw UnimplementedError();
   }

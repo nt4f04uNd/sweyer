@@ -123,12 +123,11 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   }
 
   @override
-  Future<bool> deleteSongs(List<Map> songs) async {
+  Future<bool> deleteSongs(List<Map<String, dynamic>> songs) async {
     try {
-      return (await methodChannel.invokeMethod<bool>(
-        'deleteSongs',
-        {'songs': songs},
-      ))!;
+      return (await methodChannel.invokeMethod<bool>('deleteSongs', {
+        'songs': songs,
+      }))!;
     } on PlatformException catch (ex) {
       throw SweyerMethodChannelException._throw(ex, const [SweyerMethodChannelException.intentSender]);
     }

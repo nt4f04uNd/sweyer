@@ -23,7 +23,16 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.Serializable
 import java.util.concurrent.Executors
+
+
+/**
+ * An item that is to be deleted.
+ * @property id The id of the item.
+ * @property path The absolute path to this item on the file system, if available.
+ */
+data class DeletionItem(val id: Long, val path: String?) : Serializable
 
 
 /**
@@ -306,9 +315,10 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                 }
                 "deleteSongs" -> {
-                    val serviceIntent = Intent(binding!!.applicationContext, DeletionService::class.java)
-          serviceIntent.putExtra("songs", call.argument<ArrayList<HashMap<*, *>?>>("songs")!!)
-                    binding!!.applicationContext.startService(serviceIntent)
+                    val songs = call.argument<ArrayList<HashMap<String, Any>>>("songs")!!
+                    DeletionService.start(binding!!.applicationContext, songs.map { song ->
+            DeletionItem(getLong(song["id"]), song["filesystemPath"] as String?)
+          }.toTypedArray())
                     // Save the result to report to the flutter code later in `sendResultFromIntent`
                     this.result = result
                 }
