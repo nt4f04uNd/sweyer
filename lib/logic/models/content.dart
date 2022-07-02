@@ -3,27 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:equatable/equatable.dart';
 
-
 /// A type of a content.
 enum ContentType<T extends Content> {
   /// A song.
   song<Song>(Icons.music_note_rounded),
-  
+
   /// A collection of songs by their creator.
   album<Album>(Icons.album_rounded),
-  
+
   /// A collection of songs by the user.
   playlist<Playlist>(Icons.queue_music_rounded),
-  
+
   /// A creator of songs.
   artist<Artist>(Icons.person_rounded);
-  
+
   const ContentType(this.icon);
-  
+
   /// The icon representing this content type.
   final IconData icon;
 }
-
 
 /// Represents some content in the app (songs, album, etc).
 ///
