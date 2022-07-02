@@ -10,7 +10,11 @@ limit set to 120 characters (instead of default 80).
 
 VSCode workspace is already configured to use 120 line break automatically.
 
-To run it manually, use this command
+Android Studio's default formatter unfortunately adds its own rules beyond
+regular `flutter format`, so please only use the `Reformat Code with 'dart format'`
+action for formatting.
+
+To run it from console, use this command
 
 ```flutter format -l 120 .```
 
