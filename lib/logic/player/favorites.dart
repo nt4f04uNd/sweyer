@@ -17,7 +17,7 @@ class FavoritesControl with Control {
   @visibleForTesting
   final repository = FavoritesRepository();
 
-  final _favoriteSetsMap = ContentMap.fromFactory((_) => <int>{});
+  final _favoriteSetsMap = ContentMap.fromFactory((contentType) => <int>{});
 
   bool _useMediaStoreFavorites(ContentType contentType) =>
       contentType == ContentType.song &&

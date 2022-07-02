@@ -38,12 +38,16 @@ class MediaStoreContentObserver extends ContentObserver {
   String get _uri {
     switch (contentType) {
       case ContentType.song:
+        // MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         return 'content://media/external/audio/media';
       case ContentType.album:
+        // MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
         return 'content://media/external/audio/albums';
       case ContentType.playlist:
+        // MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI
         return 'content://media/external/audio/playlists';
       case ContentType.artist:
+        // MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
         return 'content://media/external/audio/artists';
     }
   }

@@ -26,10 +26,13 @@ extension QuickActionSerialization on QuickAction {
 class ContentMap<V> {
   /// The value for [ContentType.song].
   V songValue;
+
   /// The value for [ContentType.album].
   V albumValue;
+
   /// The value for [ContentType.playlist].
   V playlistValue;
+
   /// The value for [ContentType.artist].
   V artistValue;
 
@@ -100,8 +103,12 @@ class ContentTuple {
   final List<Playlist> playlists;
   final List<Artist> artists;
 
-  const ContentTuple(
-      {this.songs = const [], this.albums = const [], this.playlists = const [], this.artists = const []});
+  const ContentTuple({
+    this.songs = const [],
+    this.albums = const [],
+    this.playlists = const [],
+    this.artists = const [],
+  });
 
   /// Get the list corresponding to the [type].
   List<T> get<T extends Content>(ContentType type) {
@@ -122,6 +129,7 @@ class ContentTuple {
 
   /// Whether there is any content in this tuple.
   bool get notEmpty => ContentType.values.any((contentType) => get(contentType).isNotEmpty);
+
   /// Whether there is no content in this tuple.
   bool get empty => !notEmpty;
 
