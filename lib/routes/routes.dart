@@ -607,9 +607,9 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         final arguments = route.arguments! as ArtistContentArguments;
         final ArtistContentRoute actualRoute;
         if (arguments is ArtistContentArguments<Song>) {
-          actualRoute = ArtistContentRoute<Song>(contentType: ContentType.song, arguments: arguments);
+          actualRoute = ArtistContentRoute(contentType: ContentType.song, arguments: arguments);
         } else if (arguments is ArtistContentArguments<Album>) {
-          actualRoute = ArtistContentRoute<Album>(contentType: ContentType.album, arguments: arguments);
+          actualRoute = ArtistContentRoute(contentType: ContentType.album, arguments: arguments);
         } else {
           throw ArgumentError();
         }

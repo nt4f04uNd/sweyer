@@ -111,8 +111,10 @@ class ContentTuple {
   });
 
   /// Get the list corresponding to the [type].
-  List<T> get<T extends Content>(ContentType type) {
-    switch (type) {
+  List<T> get<T extends Content>(ContentType<T> type) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (type as ContentType) {
       case ContentType.song:
         return songs as List<T>;
       case ContentType.album:
@@ -320,11 +322,13 @@ class ContentControl extends Control {
 
   /// Returns content of specified [contentType].
   List<T> getContent<T extends Content>(
-    ContentType contentType, {
+    ContentType<T> contentType, {
     bool filterFavorite = false,
   }) {
     final List<T> contentList;
-    switch (contentType) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
       case ContentType.song:
         contentList = state.allSongs.songs as List<T>;
         break;
@@ -349,7 +353,7 @@ class ContentControl extends Control {
     if (contentType == ContentType.album) {
       return state.albums[id] as T?;
     }
-    return getContent<T>(contentType).firstWhereOrNull((el) => el.id == id);
+    return getContent(contentType).firstWhereOrNull((el) => el.id == id);
   }
 
   /// Refetches all the content.
@@ -381,7 +385,7 @@ class ContentControl extends Control {
           dispose();
           return;
         }
-        sort<Song>(emitChangeEvent: false, contentType: contentType);
+        sort(emitChangeEvent: false, contentType: contentType);
         if (updateQueues) {
           QueueControl.instance.removeObsolete(emitChangeEvent: false);
         }
@@ -395,7 +399,7 @@ class ContentControl extends Control {
         if (origin is Album && state.albums[origin.id] == null) {
           QueueControl.instance.resetQueueAsFallback();
         }
-        sort<Album>(emitChangeEvent: false, contentType: contentType);
+        sort(emitChangeEvent: false, contentType: contentType);
         break;
       case ContentType.playlist:
         state.playlists = await ContentChannel.instance.retrievePlaylists();
@@ -406,7 +410,7 @@ class ContentControl extends Control {
         if (origin is Playlist && state.playlists.firstWhereOrNull((el) => el == origin) == null) {
           QueueControl.instance.resetQueueAsFallback();
         }
-        sort<Playlist>(emitChangeEvent: false, contentType: contentType);
+        sort(emitChangeEvent: false, contentType: contentType);
         break;
       case ContentType.artist:
         state.artists = await ContentChannel.instance.retrieveArtists();
@@ -417,7 +421,7 @@ class ContentControl extends Control {
         if (origin is Artist && state.artists.firstWhereOrNull((el) => el == origin) == null) {
           QueueControl.instance.resetQueueAsFallback();
         }
-        sort<Artist>(emitChangeEvent: false, contentType: contentType);
+        sort(emitChangeEvent: false, contentType: contentType);
         break;
     }
     if (emitChangeEvent) {
@@ -426,7 +430,7 @@ class ContentControl extends Control {
   }
 
   /// Searches for content by given [query] and the [contentType].
-  List<T> search<T extends Content>(String query, {required ContentType contentType}) {
+  List<T> search<T extends Content>(String query, {required ContentType<T> contentType}) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
     final words = query.split(' ');
@@ -452,7 +456,9 @@ class ContentControl extends Control {
           .contains(query);
     }
 
-    switch (contentType) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
       case ContentType.song:
         return state.allSongs.songs
             .where((song) {
@@ -528,13 +534,15 @@ class ContentControl extends Control {
   /// Sorts songs, albums, etc.
   /// See [ContentState.sorts].
   void sort<T extends Content>({
-    required ContentType contentType,
+    required ContentType<T> contentType,
     Sort<T>? sort,
     bool emitChangeEvent = true,
   }) {
     final sorts = state.sorts;
     sort ??= sorts.get(contentType) as Sort<T>;
-    switch (contentType) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
       case ContentType.song:
         final castedSort = sort as SongSort;
         sorts.set(castedSort, key: contentType);

@@ -112,16 +112,13 @@ class _BrowserParentProvider {
           ),
         ];
       case 'songs':
-        return ContentControl.instance.getContent<Song>(ContentType.song).map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.song).map((el) => el.toMediaItem()).toList();
       case 'albums':
-        return ContentControl.instance.getContent<Album>(ContentType.album).map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.album).map((el) => el.toMediaItem()).toList();
       case 'playlists':
-        return ContentControl.instance
-            .getContent<Playlist>(ContentType.playlist)
-            .map((el) => el.toMediaItem())
-            .toList();
+        return ContentControl.instance.getContent(ContentType.playlist).map((el) => el.toMediaItem()).toList();
       case 'artists':
-        return ContentControl.instance.getContent<Artist>(ContentType.artist).map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.artist).map((el) => el.toMediaItem()).toList();
       default:
         if (id == null) {
           throw StateError('');
@@ -253,7 +250,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
 
   @override
   Future<void> prepareFromSearch(String query, [Map<String, dynamic>? extras]) async {
-    final songs = ContentControl.instance.search<Song>(query, contentType: ContentType.song);
+    final songs = ContentControl.instance.search(query, contentType: ContentType.song);
     if (songs.isNotEmpty) {
       QueueControl.instance.setSearchedQueue(query, songs);
       await player.setSong(ContentControl.instance.state.allSongs.byId.get(songs[0].id));
@@ -284,7 +281,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
 
   @override
   Future<void> playFromSearch(String query, [Map<String, dynamic>? extras]) async {
-    final songs = ContentControl.instance.search<Song>(query, contentType: ContentType.song);
+    final songs = ContentControl.instance.search(query, contentType: ContentType.song);
     if (songs.isNotEmpty) {
       QueueControl.instance.setSearchedQueue(query, songs);
       await player.setSong(ContentControl.instance.state.allSongs.byId.get(songs[0].id));
@@ -500,7 +497,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @override
   Future<List<MediaItem>> search(String query, [Map<String, dynamic>? extras]) async {
     return ContentControl.instance
-        .search<Song>(query, contentType: ContentType.song)
+        .search(query, contentType: ContentType.song)
         .map((song) => song.toMediaItem())
         .toList();
   }

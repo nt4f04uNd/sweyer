@@ -7,16 +7,18 @@ abstract class SortFeature<T extends Content> extends Enum<String> {
   const SortFeature._(String value) : super(value);
 
   /// Returns sort feature values for a given content.
-  static List<SortFeature> getValuesForContent(ContentType contentType) {
-    switch (contentType) {
+  static List<SortFeature<T>> getValuesForContent<T extends Content>(ContentType<T> contentType) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
       case ContentType.song:
-        return SongSortFeature.values;
+        return SongSortFeature.values as List<SortFeature<T>>;
       case ContentType.album:
-        return AlbumSortFeature.values;
+        return AlbumSortFeature.values as List<SortFeature<T>>;
       case ContentType.playlist:
-        return PlaylistSortFeature.values;
+        return PlaylistSortFeature.values as List<SortFeature<T>>;
       case ContentType.artist:
-        return ArtistSortFeature.values;
+        return ArtistSortFeature.values as List<SortFeature<T>>;
     }
   }
 

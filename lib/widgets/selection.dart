@@ -535,10 +535,10 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     }
   }
 
-  static ContentSelectionController _of(BuildContext context) {
+  static ContentSelectionController<T> _of<T extends SelectionEntry>(BuildContext context) {
     final widget = context.getElementForInheritedWidgetOfExactType<_ContentSelectionControllerProvider>()!.widget
         as _ContentSelectionControllerProvider;
-    return widget.controller;
+    return widget.controller as ContentSelectionController<T>;
   }
 
   /// Returns true when data, or song origins inside it, have at least one song,
@@ -1495,7 +1495,7 @@ class RemoveFromQueueSelectionAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final controller = ContentSelectionController._of(context) as ContentSelectionController<SelectionEntry<Song>>;
+    final controller = ContentSelectionController._of<SelectionEntry<Song>>(context);
     return _ActionBuilder(
       controller: controller,
       shown: () => true,

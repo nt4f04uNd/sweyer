@@ -136,7 +136,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localController = controller ?? ScrollController();
-    return AppScrollbar.forContent<T>(
+    return AppScrollbar.forContent(
       contentType: contentType,
       list: list,
       controller: localController,
@@ -209,7 +209,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final item = list[index];
-              final child = ContentTile<T>(
+              final child = ContentTile(
                 contentType: contentType,
                 content: item,
                 selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
@@ -286,7 +286,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
               key: ValueKey(item.id),
               enabled: reorderingEnabled,
               index: index,
-              child: ContentTile<T>(
+              child: ContentTile(
                 contentType: contentType,
                 content: item,
                 selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,

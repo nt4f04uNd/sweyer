@@ -49,8 +49,10 @@ extension AppLocalizationsExtension on AppLocalizations {
     }
   }
 
-  String sortFeature<T extends Content>(ContentType contentType, SortFeature<T> feature) {
-    switch (contentType) {
+  String sortFeature<T extends Content>(ContentType<T> contentType, SortFeature<T> feature) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
       case ContentType.song:
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:

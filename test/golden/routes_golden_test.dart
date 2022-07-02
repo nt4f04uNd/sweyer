@@ -95,9 +95,9 @@ void main() {
     testAppGoldens('sort_feature_dialog', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.text(
-          l10n.sortFeature<Song>(
+          l10n.sortFeature(
             ContentType.song,
-            ContentControl.instance.state.sorts.get(ContentType.song).feature as SongSortFeature,
+            ContentControl.instance.state.sorts.get(ContentType.song).feature,
           ),
         ));
         await tester.pumpAndSettle();
@@ -206,7 +206,7 @@ void main() {
       expect(playerRouteController.value, 1.0);
       await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
     }
-    
+
     testAppGoldens('player_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.byType(SongTile));

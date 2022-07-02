@@ -107,9 +107,9 @@ void main() {
       tester.expectSongTiles(songs);
 
       // Change sort feature
-      await tester.tap(find.text(l10n.sortFeature<Song>(ContentType.song, SongSortFeature.dateModified)));
+      await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.dateModified)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.sortFeature<Song>(ContentType.song, SongSortFeature.title)));
+      await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.title)));
       await tester.pump();
       tester.expectSongTiles(songs.reversed);
     });

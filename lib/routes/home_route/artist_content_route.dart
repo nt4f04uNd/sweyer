@@ -10,7 +10,7 @@ class ArtistContentRoute<T extends Content> extends StatefulWidget {
     required this.arguments,
   }) : super(key: key);
 
-  final ContentType contentType;
+  final ContentType<T> contentType;
   final ArtistContentArguments<T> arguments;
 
   @override
@@ -28,7 +28,9 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
     _contentChangeSubscription = ContentControl.instance.onContentChange.listen((event) {
       setState(() {
         // Update contents
-        switch (widget.contentType) {
+        // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+        switch (widget.contentType as ContentType) {
+          // ignore: unnecessary_cast
           case ContentType.song:
             list = widget.arguments.artist.songs as List<T>;
             break;
@@ -113,7 +115,9 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           ContentListHeaderAction(
                             icon: const Icon(Icons.shuffle_rounded),
                             onPressed: () {
-                              switch (widget.contentType) {
+                              // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+                              // ignore: unnecessary_cast
+                              switch (widget.contentType as ContentType) {
                                 case ContentType.song:
                                   QueueControl.instance.setOriginQueue(
                                     origin: artist,
@@ -142,7 +146,9 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           ContentListHeaderAction(
                             icon: const Icon(Icons.play_arrow_rounded),
                             onPressed: () {
-                              switch (widget.contentType) {
+                              // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+                              // ignore: unnecessary_cast
+                              switch (widget.contentType as ContentType) {
                                 case ContentType.song:
                                   QueueControl.instance.setOriginQueue(
                                     origin: artist,

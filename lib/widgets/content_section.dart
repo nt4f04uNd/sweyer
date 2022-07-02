@@ -70,7 +70,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
     if (child == null) {
       builder = (index) {
         final item = list[index];
-        return ContentTile<T>(
+        return ContentTile(
           contentType: contentType,
           content: item,
           selectionIndex: selectionIndexMapper != null ? selectionIndexMapper!(index) : index,

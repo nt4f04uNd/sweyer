@@ -23,7 +23,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.selectionController,
   }) : super(key: key);
 
-  final ContentType contentType;
+  final ContentType<T> contentType;
   final T content;
   final Widget? trailing;
   final bool? current;
@@ -85,7 +85,9 @@ class ContentTile<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(!selectable || selectable && selectionIndex != null, 'If tile is selectable, an `index` must be provided');
-    switch (contentType) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
       case ContentType.song:
         return !selectable
             ? SongTile(

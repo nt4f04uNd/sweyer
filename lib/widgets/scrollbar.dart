@@ -49,7 +49,7 @@ class AppScrollbar extends StatefulWidget {
   @factory
   static AppScrollbar forContent<T extends Content>({
     Key? key,
-    required ContentType contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     required Widget child,
     required ScrollController controller,
@@ -70,7 +70,9 @@ class AppScrollbar extends StatefulWidget {
               final l10n = getl10n(context);
               final item = list[(controller.position.pixels / kSongTileHeight - 1).clamp(0.0, list.length - 1).round()];
               return NFScrollLabel(text: () {
-                switch (contentType) {
+                // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+                // ignore: unnecessary_cast
+                switch (contentType as ContentType) {
                   case ContentType.song:
                     return (item as Song).title[0].toUpperCase();
                   case ContentType.album:
