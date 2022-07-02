@@ -32,7 +32,11 @@ dependencies:
   cloud_functions: ^3.2.4
   package_info_plus: ^1.4.2
   url_launcher: ^6.0.3
-  rive: ^0.9.0
+  # rive: ^0.9.0  TODO: Switch back once https://github.com/rive-app/rive-flutter/pull/244 is merged
+  rive:
+    git:
+      url: https://github.com/Abestanis/rive-flutter.git
+      ref: feature/fake_clock_compatibility
   auto_size_text: ^3.0.0-nullsafety.0
   marquee: ^2.1.0
   equatable: ^2.0.0
