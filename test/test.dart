@@ -246,6 +246,7 @@ void testAppGoldens(
   bool? skip,
   Object? tags = _defaultTagObject,
 }) {
+  EditableText.debugDeterministicCursor = true;
   for (final lightTheme in [false, true]) {
     testGoldens(
       '$description ${_getThemeMessage(lightTheme)}',
