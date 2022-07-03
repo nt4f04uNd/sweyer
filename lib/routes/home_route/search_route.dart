@@ -50,7 +50,7 @@ class ContentSearchDelegate {
 
 /// Search results container.
 class _Results {
-  ContentMap<List<Content>> map = ContentMap.fromFactory((_) => []);
+  ContentMap<List<Content>> map = ContentMap.fromFactory((contentType) => []);
 
   List<Song> get songs => map.get(ContentType.song).cast<Song>();
   List<Album> get albums => map.get(ContentType.album).cast<Album>();
@@ -135,7 +135,7 @@ class _SearchStateDelegate {
     }
   }
 
-  ContentMap<BuildContext?> chipContextMap = ContentMap.fromFactory((_) => null);
+  ContentMap<BuildContext?> chipContextMap = ContentMap.fromFactory((contentType) => null);
 
   /// Saves chips context to be able to scroll it when [contentType] changes.
   void registerChipContext(BuildContext context, ContentType contentType) {

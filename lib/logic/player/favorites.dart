@@ -8,7 +8,8 @@ import 'package:sweyer/sweyer.dart';
 @visibleForTesting
 class FavoritesRepository {
   final serializersMap = ContentMap<IntSerializerType>.fromFactory(
-      (contentType) => IntListSerializer('favorites_${contentType.name}.json'));
+    (contentType) => IntListSerializer('favorites_${contentType.name}.json'),
+  );
 }
 
 class FavoritesControl with Control {

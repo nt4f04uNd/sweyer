@@ -1221,9 +1221,10 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 
 /// Action that queues a [Song] or a [SongOrigin] to be played next.
 class _PlayNextSelectionAction extends StatelessWidget {
-  final ContentType? contentType;
-
   const _PlayNextSelectionAction({this.contentType, Key? key}) : super(key: key);
+
+  /// The type of content to be played next.
+  final ContentType? contentType;
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty) {
@@ -1314,9 +1315,10 @@ class _PlayNextSelectionAction extends StatelessWidget {
 
 /// Action that adds a [Song] or a [SongOrigin] to the end of the queue.
 class _AddToQueueSelectionAction extends StatelessWidget {
-  final ContentType? contentType;
-
   const _AddToQueueSelectionAction({this.contentType, Key? key}) : super(key: key);
+
+  /// The type of content to be added to the queue.
+  final ContentType? contentType;
 
   void _handleSongs(List<SelectionEntry<Song>> entries) {
     if (entries.isEmpty) {
