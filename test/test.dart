@@ -230,15 +230,15 @@ extension WidgetTesterExtension on WidgetTester {
     expect(foundSongs, songs);
   }
 
-  /// Expand the player route.
+  /// From the home route, navigate to the queue screen in the player route.
   Future<void> expandPlayerRoute() async {
     await tap(find.byType(TrackPanel));
     await pumpAndSettle();
     expect(playerRouteController.value, 1.0);
   }
 
-  /// Navigate to the queue screen in the player route.
-  Future<void> openQueueScreen() async {
+  /// From the home route, navigate to the player route.
+  Future<void> openPlayerQueueScreen() async {
     await expandPlayerRoute();
     await flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
     await pumpAndSettle();

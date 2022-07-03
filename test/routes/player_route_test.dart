@@ -52,7 +52,7 @@ void main() {
       const query = 'Query';
       await tester.runAppTest(() async {
         QueueControl.instance.setSearchedQueue(query, [songWith()]);
-        await tester.openQueueScreen();
+        await tester.openPlayerQueueScreen();
         expect(find.text(l10n.upNext), findsOneWidget);
         expect(find.text(l10n.foundByQuery('"$query"'), findRichText: true), findsOneWidget);
       });
@@ -62,7 +62,7 @@ void main() {
       const query = 'Query';
       await tester.runAppTest(() async {
         QueueControl.instance.setSearchedQueue(query, [songWith()]);
-        await tester.openQueueScreen();
+        await tester.openPlayerQueueScreen();
         await tester.tap(find.byIcon(Icons.chevron_right_rounded));
         await tester.pumpAndSettle();
         expect(find.byType(SearchRoute), findsOneWidget);
@@ -204,7 +204,7 @@ void main() {
 
   testWidgets('handles back presses correctly', (WidgetTester tester) async {
     await tester.runAppTest(() async {
-      await tester.openQueueScreen();
+      await tester.openPlayerQueueScreen();
       await tester.tap(find.byIcon(Icons.queue_rounded));
       await tester.pumpAndSettle();
       expect(find.text(l10n.newPlaylist), findsOneWidget);

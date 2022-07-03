@@ -209,13 +209,13 @@ void main() {
 
     testAppGoldens('queue_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await tester.openQueueScreen();
+        await tester.openPlayerQueueScreen();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route'));
     });
 
     testAppGoldens('queue_route_selection', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await tester.openQueueScreen();
+        await tester.openPlayerQueueScreen();
         await tester.longPress(find.descendant(
           of: find.byType(PlayerRoute),
           matching: find.byType(SongTile),
