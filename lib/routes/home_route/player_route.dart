@@ -35,8 +35,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
   void initState() {
     super.initState();
     initSelectionController(
-      // Don't remove the generic <Song> parameter, otherwise RemoveFromQueueSelectionAction will throw.
-      () => ContentSelectionController.create<Song>(
+      () => ContentSelectionController.create(
         vsync: this,
         context: context,
         contentType: ContentType.song,

@@ -49,8 +49,8 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
   ///
   /// If [listen] is `true`, the [handleSelection] is attached to the controller.
   /// If [listenStatus] is `true`, the [handleSelectionStatus] is attached to the controller.
-  void initSelectionController(
-    ValueGetter<ContentSelectionController> factory, {
+  void initSelectionController<C extends Content>(
+    ValueGetter<ContentSelectionController<SelectionEntry<C>>> factory, {
     bool listen = true,
     bool listenStatus = false,
   }) {
