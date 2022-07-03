@@ -88,13 +88,17 @@ class HomeRoutes<T> extends _Routes<T> {
 class _HomeRoutesFactory {
   const _HomeRoutesFactory();
 
-  HomeRoutes content<T extends Content>(T content) {
-    return contentPick<T, ValueGetter<dynamic>>(
-      song: () => throw ArgumentError(),
-      album: () => HomeRoutes._(HomeRoutes.album.location, PersistentQueueArguments(queue: content as Album)),
-      playlist: () => HomeRoutes._(HomeRoutes.playlist.location, PersistentQueueArguments(queue: content as Playlist)),
-      artist: () => HomeRoutes._(HomeRoutes.artist.location, content as Artist),
-    )();
+  HomeRoutes content(Content content) {
+    switch (content.type) {
+      case ContentType.song:
+        throw ArgumentError();
+      case ContentType.album:
+        return HomeRoutes._(HomeRoutes.album.location, PersistentQueueArguments(queue: content as Album));
+      case ContentType.playlist:
+        return HomeRoutes._(HomeRoutes.playlist.location, PersistentQueueArguments(queue: content as Playlist));
+      case ContentType.artist:
+        return HomeRoutes._(HomeRoutes.artist.location, content as Artist);
+    }
   }
 
   HomeRoutes<ArtistContentArguments<T>> artistContent<T extends Content>(Artist artist, List<T> list) {
@@ -110,7 +114,7 @@ class _HomeRoutesFactory {
 
   HomeRoutes persistentQueue<T extends PersistentQueue>(T persistentQueue) {
     if (persistentQueue is Album || persistentQueue is Playlist) {
-      return content<T>(persistentQueue);
+      return content(persistentQueue);
     } else {
       throw ArgumentError();
     }
@@ -603,9 +607,9 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         final arguments = route.arguments! as ArtistContentArguments;
         final ArtistContentRoute actualRoute;
         if (arguments is ArtistContentArguments<Song>) {
-          actualRoute = ArtistContentRoute<Song>(arguments: arguments);
+          actualRoute = ArtistContentRoute(contentType: ContentType.song, arguments: arguments);
         } else if (arguments is ArtistContentArguments<Album>) {
-          actualRoute = ArtistContentRoute<Album>(arguments: arguments);
+          actualRoute = ArtistContentRoute(contentType: ContentType.album, arguments: arguments);
         } else {
           throw ArgumentError();
         }

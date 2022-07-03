@@ -89,51 +89,59 @@ class _BrowserParentProvider {
           MediaItem(
             id: _BrowseParent.songs.value,
             album: '',
-            title: staticl10n.contents<Song>(),
+            title: staticl10n.contents(ContentType.song),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.albums.value,
             album: '',
-            title: staticl10n.contents<Album>(),
+            title: staticl10n.contents(ContentType.album),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.playlists.value,
             album: '',
-            title: staticl10n.contents<Playlist>(),
+            title: staticl10n.contents(ContentType.playlist),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.artists.value,
             album: '',
-            title: staticl10n.contents<Artist>(),
+            title: staticl10n.contents(ContentType.artist),
             playable: false,
           ),
         ];
       case 'songs':
-        return ContentControl.instance.getContent<Song>().map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.song).map((el) => el.toMediaItem()).toList();
       case 'albums':
-        return ContentControl.instance.getContent<Album>().map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.album).map((el) => el.toMediaItem()).toList();
       case 'playlists':
-        return ContentControl.instance.getContent<Playlist>().map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.playlist).map((el) => el.toMediaItem()).toList();
       case 'artists':
-        return ContentControl.instance.getContent<Artist>().map((el) => el.toMediaItem()).toList();
+        return ContentControl.instance.getContent(ContentType.artist).map((el) => el.toMediaItem()).toList();
       default:
         if (id == null) {
           throw StateError('');
         }
         switch (_parent.value) {
           case 'albums':
-            return ContentControl.instance.getContentById<Album>(id)!.songs.map((song) => song.toMediaItem()).toList();
+            return ContentControl.instance
+                .getContentById(id, ContentType.album)!
+                .songs
+                .map((song) => song.toMediaItem())
+                .toList();
           case 'playlists':
             return ContentControl.instance
-                .getContentById<Playlist>(id)!
+                .getContentById(id, ContentType.playlist)!
                 .songs
                 .map((song) => song.toMediaItem())
                 .toList();
           case 'artists':
-            return ContentControl.instance.getContentById<Artist>(id)!.songs.map((song) => song.toMediaItem()).toList();
+            return ContentControl.instance
+                .getContentById(id, ContentType.artist)!
+                .songs
+                .map((song) => song.toMediaItem())
+                .toList();
           default:
             throw UnimplementedError();
         }
@@ -148,19 +156,19 @@ class _BrowserParentProvider {
     } else {
       switch (parent.value) {
         case 'albums':
-          final album = ContentControl.instance.getContentById<Album>(parent.id!);
+          final album = ContentControl.instance.getContentById(parent.id!, ContentType.album);
           if (album != null) {
             QueueControl.instance.setOriginQueue(origin: album, songs: album.songs);
           }
           break;
         case 'playlists':
-          final playlist = ContentControl.instance.getContentById<Playlist>(parent.id!);
+          final playlist = ContentControl.instance.getContentById(parent.id!, ContentType.playlist);
           if (playlist != null) {
             QueueControl.instance.setOriginQueue(origin: playlist, songs: playlist.songs);
           }
           break;
         case 'artists':
-          final artist = ContentControl.instance.getContentById<Artist>(parent.id!);
+          final artist = ContentControl.instance.getContentById(parent.id!, ContentType.artist);
           if (artist != null) {
             QueueControl.instance.setOriginQueue(origin: artist, songs: artist.songs);
           }
@@ -242,7 +250,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
 
   @override
   Future<void> prepareFromSearch(String query, [Map<String, dynamic>? extras]) async {
-    final songs = ContentControl.instance.search<Song>(query);
+    final songs = ContentControl.instance.search(query, contentType: ContentType.song);
     if (songs.isNotEmpty) {
       QueueControl.instance.setSearchedQueue(query, songs);
       await player.setSong(ContentControl.instance.state.allSongs.byId.get(songs[0].id));
@@ -273,7 +281,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
 
   @override
   Future<void> playFromSearch(String query, [Map<String, dynamic>? extras]) async {
-    final songs = ContentControl.instance.search<Song>(query);
+    final songs = ContentControl.instance.search(query, contentType: ContentType.song);
     if (songs.isNotEmpty) {
       QueueControl.instance.setSearchedQueue(query, songs);
       await player.setSong(ContentControl.instance.state.allSongs.byId.get(songs[0].id));
@@ -488,7 +496,10 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
 
   @override
   Future<List<MediaItem>> search(String query, [Map<String, dynamic>? extras]) async {
-    return ContentControl.instance.search<Song>(query).map((song) => song.toMediaItem()).toList();
+    return ContentControl.instance
+        .search(query, contentType: ContentType.song)
+        .map((song) => song.toMediaItem())
+        .toList();
   }
 
   @override
@@ -751,7 +762,7 @@ class MusicPlayer extends AudioPlayer {
         ShowFunctions.instance.showToast(msg: message);
         playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
-        ContentControl.instance.refetch<Song>();
+        ContentControl.instance.refetch(ContentType.song);
       } else {
         // Other exceptions are not expected, rethrow.
         rethrow;

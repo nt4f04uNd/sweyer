@@ -47,8 +47,8 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
   bool tabBarDragged = false;
   static bool _mainTabsCreated = false;
 
-  Type indexToContentType(int index) {
-    return Content.enumerate()[index];
+  ContentType indexToContentType(int index) {
+    return ContentType.values[index];
   }
 
   @override
@@ -108,25 +108,25 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
       TabCollapse(
         index: 0,
         tabController: tabController,
-        icon: const Icon(Song.icon),
+        icon: Icon(ContentType.song.icon),
         label: l10n.tracks,
       ),
       TabCollapse(
         index: 1,
         tabController: tabController,
-        icon: const Icon(Album.icon),
+        icon: Icon(ContentType.album.icon),
         label: l10n.albums,
       ),
       TabCollapse(
         index: 2,
         tabController: tabController,
-        icon: const Icon(Playlist.icon, size: 28.0),
+        icon: Icon(ContentType.playlist.icon, size: 28.0),
         label: l10n.playlists,
       ),
       TabCollapse(
         index: 3,
         tabController: tabController,
-        icon: const Icon(Artist.icon),
+        icon: Icon(ContentType.artist.icon),
         label: l10n.artists,
       ),
     ];
@@ -218,7 +218,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                   context: context,
                 ),
                 getAll: () => ContentControl.instance.getContent(
-                  contentType: selectionController.primaryContentType!,
+                  selectionController.primaryContentType!,
                   filterFavorite: FavoritesControl.instance.showOnlyFavorites,
                 ),
               ),
@@ -237,7 +237,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                   context: context,
                 ),
                 getAll: () => ContentControl.instance.getContent(
-                  contentType: selectionController.primaryContentType!,
+                  selectionController.primaryContentType!,
                   filterFavorite: FavoritesControl.instance.showOnlyFavorites,
                 ),
               ),
@@ -284,7 +284,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                                       controller: tabController,
                                       physics: const _TabsScrollPhysics(),
                                       children: [
-                                        for (final contentType in Content.enumerate())
+                                        for (final contentType in ContentType.values)
                                           _ContentTab(
                                             contentType: contentType,
                                             selectionController: selectionController,
@@ -388,7 +388,7 @@ class _ContentTab extends StatefulWidget {
     required this.selectionController,
   }) : super(key: key);
 
-  final Type contentType;
+  final ContentType contentType;
   final ContentSelectionController selectionController;
 
   @override
@@ -404,14 +404,17 @@ class _ContentTabState extends State<_ContentTab>
 
   bool get showLabel {
     final contentType = widget.contentType;
-    final SortFeature feature = ContentControl.instance.state.sorts.getValue(contentType)!.feature;
-    return contentPick<Content, bool>(
-      contentType: contentType,
-      song: feature == SongSortFeature.title,
-      album: feature == AlbumSortFeature.title,
-      playlist: feature == PlaylistSortFeature.name,
-      artist: feature == ArtistSortFeature.name,
-    );
+    final SortFeature feature = ContentControl.instance.state.sorts.get(contentType).feature;
+    switch (contentType) {
+      case ContentType.song:
+        return feature == SongSortFeature.title;
+      case ContentType.album:
+        return feature == AlbumSortFeature.title;
+      case ContentType.playlist:
+        return feature == PlaylistSortFeature.name;
+      case ContentType.artist:
+        return feature == ArtistSortFeature.name;
+    }
   }
 
   @override
@@ -424,7 +427,7 @@ class _ContentTabState extends State<_ContentTab>
       valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
       builder: (context, showOnlyFavorites, child) {
         final list = ContentControl.instance.getContent(
-          contentType: contentType,
+          contentType,
           filterFavorite: showOnlyFavorites,
         );
         final showDisabledActions =
@@ -447,13 +450,17 @@ class _ContentTabState extends State<_ContentTab>
                   list: list,
                   showScrollbarLabel: showLabel,
                   selectionController: selectionController,
-                  onItemTap: contentPick<Content, ValueSetter<int>>(
-                    contentType: contentType,
-                    song: (index) => QueueControl.instance.resetQueue(),
-                    album: (index) {},
-                    playlist: (index) {},
-                    artist: (index) {},
-                  ),
+                  onItemTap: (index) {
+                    switch (contentType) {
+                      case ContentType.song:
+                        QueueControl.instance.resetQueue();
+                        break;
+                      case ContentType.album:
+                      case ContentType.playlist:
+                      case ContentType.artist:
+                        break;
+                    }
+                  },
                   leading: Column(
                     children: [
                       if (selectionRoute)
@@ -490,17 +497,16 @@ class _ContentTabState extends State<_ContentTab>
                                           onPressed: showDisabledActions
                                               ? null
                                               : () {
-                                                  contentPick<Content, VoidCallback>(
-                                                    contentType: contentType,
-                                                    song: () {
+                                                  switch (contentType) {
+                                                    case ContentType.song:
                                                       QueueControl.instance.setQueue(
                                                         type: QueueType.allSongs,
                                                         modified: false,
                                                         shuffled: true,
                                                         shuffleFrom: list as List<Song>,
                                                       );
-                                                    },
-                                                    album: () {
+                                                      break;
+                                                    case ContentType.album:
                                                       final shuffleResult =
                                                           ContentUtils.shuffleSongOrigins(list as List<Album>);
                                                       QueueControl.instance.setQueue(
@@ -509,8 +515,8 @@ class _ContentTabState extends State<_ContentTab>
                                                         songs: shuffleResult.shuffledSongs,
                                                         shuffleFrom: shuffleResult.songs,
                                                       );
-                                                    },
-                                                    playlist: () {
+                                                      break;
+                                                    case ContentType.playlist:
                                                       final shuffleResult =
                                                           ContentUtils.shuffleSongOrigins(list as List<Playlist>);
                                                       QueueControl.instance.setQueue(
@@ -519,8 +525,8 @@ class _ContentTabState extends State<_ContentTab>
                                                         songs: shuffleResult.shuffledSongs,
                                                         shuffleFrom: shuffleResult.songs,
                                                       );
-                                                    },
-                                                    artist: () {
+                                                      break;
+                                                    case ContentType.artist:
                                                       final shuffleResult =
                                                           ContentUtils.shuffleSongOrigins(list as List<Artist>);
                                                       QueueControl.instance.setQueue(
@@ -529,8 +535,8 @@ class _ContentTabState extends State<_ContentTab>
                                                         songs: shuffleResult.shuffledSongs,
                                                         shuffleFrom: shuffleResult.songs,
                                                       );
-                                                    },
-                                                  )();
+                                                      break;
+                                                  }
                                                   MusicPlayer.instance
                                                       .setSong(QueueControl.instance.state.current.songs[0]);
                                                   MusicPlayer.instance.play();
@@ -542,22 +548,29 @@ class _ContentTabState extends State<_ContentTab>
                                           onPressed: showDisabledActions
                                               ? null
                                               : () {
-                                                  contentPick<Content, VoidCallback>(
-                                                    contentType: contentType,
-                                                    song: () => QueueControl.instance.resetQueue(),
-                                                    album: () => QueueControl.instance.setQueue(
-                                                      type: QueueType.allAlbums,
-                                                      songs: ContentUtils.joinSongOrigins(list as List<Album>),
-                                                    ),
-                                                    playlist: () => QueueControl.instance.setQueue(
-                                                      type: QueueType.allPlaylists,
-                                                      songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
-                                                    ),
-                                                    artist: () => QueueControl.instance.setQueue(
-                                                      type: QueueType.allArtists,
-                                                      songs: ContentUtils.joinSongOrigins(list as List<Artist>),
-                                                    ),
-                                                  )();
+                                                  switch (contentType) {
+                                                    case ContentType.song:
+                                                      QueueControl.instance.resetQueue();
+                                                      break;
+                                                    case ContentType.album:
+                                                      QueueControl.instance.setQueue(
+                                                        type: QueueType.allAlbums,
+                                                        songs: ContentUtils.joinSongOrigins(list as List<Album>),
+                                                      );
+                                                      break;
+                                                    case ContentType.playlist:
+                                                      QueueControl.instance.setQueue(
+                                                        type: QueueType.allPlaylists,
+                                                        songs: ContentUtils.joinSongOrigins(list as List<Playlist>),
+                                                      );
+                                                      break;
+                                                    case ContentType.artist:
+                                                      QueueControl.instance.setQueue(
+                                                        type: QueueType.allArtists,
+                                                        songs: ContentUtils.joinSongOrigins(list as List<Artist>),
+                                                      );
+                                                      break;
+                                                  }
                                                   MusicPlayer.instance
                                                       .setSong(QueueControl.instance.state.current.songs[0]);
                                                   MusicPlayer.instance.play();
@@ -569,7 +582,7 @@ class _ContentTabState extends State<_ContentTab>
                             ),
                           ),
                         ),
-                      if (contentType == Playlist && !selectionRoute)
+                      if (contentType == ContentType.playlist && !selectionRoute)
                         CreatePlaylistInListAction(enabled: selectionController.notInSelection),
                     ],
                   ),

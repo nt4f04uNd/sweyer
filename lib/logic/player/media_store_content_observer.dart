@@ -6,7 +6,7 @@ import 'package:sweyer/sweyer.dart';
 class MediaStoreContentChangeEvent {
   final int id;
   final int flags;
-  final Type contentType;
+  final ContentType contentType;
 
   const MediaStoreContentChangeEvent({
     required this.id,
@@ -16,14 +16,10 @@ class MediaStoreContentChangeEvent {
 }
 
 /// An Android MediaStore content observer.
-class MediaStoreContentObserver<T extends Content> extends ContentObserver {
-  MediaStoreContentObserver([this.contentType])
-      : assert(
-          Content.enumerate().contains(T),
-          "Specified type must be a subtype of Content",
-        );
+class MediaStoreContentObserver extends ContentObserver {
+  MediaStoreContentObserver(this.contentType);
 
-  final Type? contentType;
+  final ContentType contentType;
 
   Stream<MediaStoreContentChangeEvent> get onChangeStream => _changeSubject;
   final _changeSubject = PublishSubject<MediaStoreContentChangeEvent>();
@@ -39,17 +35,22 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
     );
   }
 
-  String get _uri => contentPick<T, String>(
-        contentType: contentType,
+  String get _uri {
+    switch (contentType) {
+      case ContentType.song:
         // MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        song: 'content://media/external/audio/media',
+        return 'content://media/external/audio/media';
+      case ContentType.album:
         // MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
-        album: 'content://media/external/audio/albums',
+        return 'content://media/external/audio/albums';
+      case ContentType.playlist:
         // MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI
-        playlist: 'content://media/external/audio/playlists',
+        return 'content://media/external/audio/playlists';
+      case ContentType.artist:
         // MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
-        artist: 'content://media/external/audio/artists',
-      );
+        return 'content://media/external/audio/artists';
+    }
+  }
 
   @override
   void dispose() {
@@ -71,7 +72,7 @@ class MediaStoreContentObserver<T extends Content> extends ContentObserver {
             _changeSubject.add(MediaStoreContentChangeEvent(
               id: id,
               flags: flags,
-              contentType: contentType ?? T,
+              contentType: contentType,
             ));
           }
         }

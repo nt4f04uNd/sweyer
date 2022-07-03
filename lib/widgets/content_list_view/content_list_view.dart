@@ -36,7 +36,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     this.itemBuilder,
     this.itemTrailingBuilder,
@@ -61,7 +61,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) : super(key: key);
 
   /// An explicit content type.
-  final Type? contentType;
+  final ContentType<T> contentType;
 
   /// Content list.
   final List<T> list;
@@ -136,7 +136,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localController = controller ?? ScrollController();
-    return AppScrollbar.forContent<T>(
+    return AppScrollbar.forContent(
       contentType: contentType,
       list: list,
       controller: localController,
@@ -149,7 +149,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
         slivers: [
           SliverPadding(
             padding: padding,
-            sliver: sliver<T>(
+            sliver: sliver(
               contentType: contentType,
               list: list,
               itemBuilder: itemBuilder,
@@ -184,7 +184,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @factory
   static MultiSliver sliver<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     _ItemBuilder? itemBuilder,
     IndexedWidgetBuilder? itemTrailingBuilder,
@@ -205,11 +205,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
       children: [
         if (leading != null) leading,
         SliverFixedExtentList(
-          itemExtent: ContentTile.getHeight<T>(contentType),
+          itemExtent: ContentTile.getHeight(contentType),
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final item = list[index];
-              final child = ContentTile<T>(
+              final child = ContentTile(
                 contentType: contentType,
                 content: item,
                 selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
@@ -253,7 +253,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @factory
   static MultiSliver reorderableSliver<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     required ReorderCallback onReorder,
     bool reorderingEnabled = true,
@@ -286,7 +286,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
               key: ValueKey(item.id),
               enabled: reorderingEnabled,
               index: index,
-              child: ContentTile<T>(
+              child: ContentTile(
                 contentType: contentType,
                 content: item,
                 selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,

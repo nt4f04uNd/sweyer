@@ -1,7 +1,27 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:equatable/equatable.dart';
+
+/// A type of a content.
+enum ContentType<T extends Content> {
+  /// A song.
+  song<Song>(Icons.music_note_rounded),
+
+  /// A collection of songs by their creator.
+  album<Album>(Icons.album_rounded),
+
+  /// A collection of songs by the user.
+  playlist<Playlist>(Icons.queue_music_rounded),
+
+  /// A creator of songs.
+  artist<Artist>(Icons.person_rounded);
+
+  const ContentType(this.icon);
+
+  /// The icon representing this content type.
+  final IconData icon;
+}
 
 /// Represents some content in the app (songs, album, etc).
 ///
@@ -9,10 +29,13 @@ import 'package:equatable/equatable.dart';
 abstract class Content with EquatableMixin {
   const Content();
 
+  // The type of this content.
+  ContentType get type;
+
   /// A unique ID of the content.
   int get id;
 
-  /// Title the content.
+  /// Title of the content.
   String get title;
 
   /// Creates a copy of this content with the given fields replaced with new values.
@@ -24,14 +47,8 @@ abstract class Content with EquatableMixin {
   /// Converts the content to map.
   Map<String, dynamic> toMap();
 
-  /// Enumerates all the types of content (derived from this class).
-  static List<Type> enumerate() => [Song, Album, Playlist, Artist];
-
   /// An icon for this content type.
-  IconData get contentIcon => ContentUtils.contentIcon(runtimeType);
-
-  /// An ID string for this content type.
-  String get contentTypeId => ContentUtils.contentTypeId(runtimeType);
+  IconData get icon => type.icon;
 
   /// Whether the content was marked as favorite by user.
   bool get isFavorite => FavoritesControl.instance.isFavorite(this);
@@ -66,11 +83,11 @@ abstract class SongOrigin extends Content {
     }
     switch (entry.type) {
       case SongOriginType.album:
-        return ContentControl.instance.getContentById<Album>(entry.id);
+        return ContentControl.instance.getContentById(entry.id, ContentType.album);
       case SongOriginType.playlist:
-        return ContentControl.instance.getContentById<Playlist>(entry.id);
+        return ContentControl.instance.getContentById(entry.id, ContentType.playlist);
       case SongOriginType.artist:
-        return ContentControl.instance.getContentById<Artist>(entry.id);
+        return ContentControl.instance.getContentById(entry.id, ContentType.artist);
       default:
         throw UnimplementedError();
     }

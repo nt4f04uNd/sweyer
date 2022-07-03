@@ -6,9 +6,11 @@ import 'package:sweyer/sweyer.dart';
 class ArtistContentRoute<T extends Content> extends StatefulWidget {
   const ArtistContentRoute({
     Key? key,
+    required this.contentType,
     required this.arguments,
   }) : super(key: key);
 
+  final ContentType<T> contentType;
   final ArtistContentArguments<T> arguments;
 
   @override
@@ -26,12 +28,19 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
     _contentChangeSubscription = ContentControl.instance.onContentChange.listen((event) {
       setState(() {
         // Update contents
-        list = contentPick<T, ValueGetter<List<T>>>(
-          song: () => widget.arguments.artist.songs as List<T>,
-          album: () => widget.arguments.artist.albums as List<T>,
-          playlist: () => throw UnimplementedError(),
-          artist: () => throw UnimplementedError(),
-        )();
+        // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+        switch (widget.contentType as ContentType) {
+          // ignore: unnecessary_cast
+          case ContentType.song:
+            list = widget.arguments.artist.songs as List<T>;
+            break;
+          case ContentType.album:
+            list = widget.arguments.artist.albums as List<T>;
+            break;
+          case ContentType.playlist:
+          case ContentType.artist:
+            throw UnimplementedError();
+        }
       });
     });
   }
@@ -47,7 +56,8 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
     final l10n = getl10n(context);
     final artist = widget.arguments.artist;
     final selectionRoute = selectionRouteOf(context);
-    return ContentSelectionControllerCreator<T>(
+    return ContentSelectionControllerCreator(
+      contentType: widget.contentType,
       builder: (context, selectionController, child) => Scaffold(
         appBar: AppBar(
           title: AnimationSwitcher(
@@ -88,12 +98,14 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
         ),
         body: StreamBuilder(
           stream: PlaybackControl.instance.onSongChange,
-          builder: (context, snapshot) => ContentListView<T>(
+          builder: (context, snapshot) => ContentListView(
+            contentType: widget.contentType,
             list: list,
             selectionController: selectionController,
             leading: selectionRoute
-                ? ContentListHeader<T>.onlyCount(count: list.length)
-                : ContentListHeader<T>(
+                ? ContentListHeader.onlyCount(contentType: widget.contentType, count: list.length)
+                : ContentListHeader(
+                    contentType: widget.contentType,
                     count: list.length,
                     selectionController: selectionController,
                     trailing: Padding(
@@ -103,15 +115,17 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           ContentListHeaderAction(
                             icon: const Icon(Icons.shuffle_rounded),
                             onPressed: () {
-                              contentPick<T, VoidCallback>(
-                                song: () {
+                              // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+                              // ignore: unnecessary_cast
+                              switch (widget.contentType as ContentType) {
+                                case ContentType.song:
                                   QueueControl.instance.setOriginQueue(
                                     origin: artist,
                                     shuffled: true,
                                     songs: list as List<Song>,
                                   );
-                                },
-                                album: () {
+                                  break;
+                                case ContentType.album:
                                   final shuffleResult = ContentUtils.shuffleSongOrigins(list as List<Album>);
                                   QueueControl.instance.setOriginQueue(
                                     origin: artist,
@@ -119,10 +133,11 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                                     songs: shuffleResult.songs,
                                     shuffledSongs: shuffleResult.shuffledSongs,
                                   );
-                                },
-                                playlist: () => throw UnimplementedError(),
-                                artist: () => throw UnimplementedError(),
-                              )();
+                                  break;
+                                case ContentType.playlist:
+                                case ContentType.artist:
+                                  throw UnimplementedError();
+                              }
                               MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                               MusicPlayer.instance.play();
                               playerRouteController.open();
@@ -131,22 +146,25 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           ContentListHeaderAction(
                             icon: const Icon(Icons.play_arrow_rounded),
                             onPressed: () {
-                              contentPick<T, VoidCallback>(
-                                song: () {
+                              // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+                              // ignore: unnecessary_cast
+                              switch (widget.contentType as ContentType) {
+                                case ContentType.song:
                                   QueueControl.instance.setOriginQueue(
                                     origin: artist,
                                     songs: list as List<Song>,
                                   );
-                                },
-                                album: () {
+                                  break;
+                                case ContentType.album:
                                   QueueControl.instance.setOriginQueue(
                                     origin: artist,
                                     songs: ContentUtils.joinSongOrigins(list as List<Album>),
                                   );
-                                },
-                                playlist: () => throw UnimplementedError(),
-                                artist: () => throw UnimplementedError(),
-                              )();
+                                  break;
+                                case ContentType.playlist:
+                                case ContentType.artist:
+                                  throw UnimplementedError();
+                              }
                               MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
                               MusicPlayer.instance.play();
                               playerRouteController.open();

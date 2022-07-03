@@ -6,7 +6,7 @@ import 'package:sweyer/sweyer.dart';
 class ContentTile<T extends Content> extends StatelessWidget {
   const ContentTile({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.content,
     this.trailing,
     this.current,
@@ -23,7 +23,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.selectionController,
   }) : super(key: key);
 
-  final Type? contentType;
+  final ContentType<T> contentType;
   final T content;
   final Widget? trailing;
   final bool? current;
@@ -40,20 +40,23 @@ class ContentTile<T extends Content> extends StatelessWidget {
   final bool handleTapInSelection;
   final ContentSelectionController? selectionController;
 
-  static double getHeight<T extends Content>(Type? contentType) {
-    return contentPick<T, double>(
-      contentType: contentType,
-      song: kSongTileHeight,
-      album: kPersistentQueueTileHeight,
-      playlist: kPersistentQueueTileHeight,
-      artist: kArtistTileHeight,
-    );
+  static double getHeight(ContentType contentType) {
+    switch (contentType) {
+      case ContentType.song:
+        return kSongTileHeight;
+      case ContentType.album:
+        return kPersistentQueueTileHeight;
+      case ContentType.playlist:
+        return kPersistentQueueTileHeight;
+      case ContentType.artist:
+        return kArtistTileHeight;
+    }
   }
 
   bool get selectable => selectionController != null;
 
-  ValueGetter<Widget> forPersistentQueue<Q extends PersistentQueue>() {
-    return () => !selectable
+  Widget forPersistentQueue<Q extends PersistentQueue>() {
+    return !selectable
         ? PersistentQueueTile<Q>(
             queue: content as Q,
             onTap: onTap,
@@ -82,64 +85,68 @@ class ContentTile<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(!selectable || selectable && selectionIndex != null, 'If tile is selectable, an `index` must be provided');
-
-    return contentPick<T, ValueGetter<Widget>>(
-      contentType: contentType,
-      song: () => !selectable
-          ? SongTile(
-              song: content as Song,
-              trailing: trailing,
-              current: current,
-              onTap: onTap,
-              enableDefaultOnTap: enableDefaultOnTap,
-              horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
-              backgroundColor: backgroundColor,
-              variant: songTileVariant,
-              clickBehavior: songTileClickBehavior,
-            )
-          : SongTile.selectable(
-              song: content as Song,
-              selectionIndex: selectionIndex!,
-              selectionController: selectionController,
-              selected: selected,
-              longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-              handleTapInSelection: handleTapInSelection,
-              trailing: trailing,
-              current: current,
-              onTap: onTap,
-              enableDefaultOnTap: enableDefaultOnTap,
-              horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
-              backgroundColor: backgroundColor,
-              variant: songTileVariant,
-              clickBehavior: songTileClickBehavior,
-            ),
-      album: forPersistentQueue<Album>(),
-      playlist: forPersistentQueue<Playlist>(),
-      artist: () => !selectable
-          ? ArtistTile(
-              artist: content as Artist,
-              trailing: trailing,
-              current: current,
-              onTap: onTap,
-              enableDefaultOnTap: enableDefaultOnTap,
-              horizontalPadding: horizontalPadding,
-              backgroundColor: backgroundColor,
-            )
-          : ArtistTile.selectable(
-              artist: content as Artist,
-              selectionIndex: selectionIndex!,
-              selectionController: selectionController,
-              selected: selected,
-              longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-              handleTapInSelection: handleTapInSelection,
-              trailing: trailing,
-              current: current,
-              onTap: onTap,
-              enableDefaultOnTap: enableDefaultOnTap,
-              horizontalPadding: horizontalPadding,
-              backgroundColor: backgroundColor,
-            ),
-    )();
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
+      case ContentType.song:
+        return !selectable
+            ? SongTile(
+                song: content as Song,
+                trailing: trailing,
+                current: current,
+                onTap: onTap,
+                enableDefaultOnTap: enableDefaultOnTap,
+                horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
+                backgroundColor: backgroundColor,
+                variant: songTileVariant,
+                clickBehavior: songTileClickBehavior,
+              )
+            : SongTile.selectable(
+                song: content as Song,
+                selectionIndex: selectionIndex!,
+                selectionController: selectionController,
+                selected: selected,
+                longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+                handleTapInSelection: handleTapInSelection,
+                trailing: trailing,
+                current: current,
+                onTap: onTap,
+                enableDefaultOnTap: enableDefaultOnTap,
+                horizontalPadding: horizontalPadding ?? kSongTileHorizontalPadding,
+                backgroundColor: backgroundColor,
+                variant: songTileVariant,
+                clickBehavior: songTileClickBehavior,
+              );
+      case ContentType.album:
+        return forPersistentQueue<Album>();
+      case ContentType.playlist:
+        return forPersistentQueue<Playlist>();
+      case ContentType.artist:
+        return !selectable
+            ? ArtistTile(
+                artist: content as Artist,
+                trailing: trailing,
+                current: current,
+                onTap: onTap,
+                enableDefaultOnTap: enableDefaultOnTap,
+                horizontalPadding: horizontalPadding,
+                backgroundColor: backgroundColor,
+              )
+            : ArtistTile.selectable(
+                artist: content as Artist,
+                selectionIndex: selectionIndex!,
+                selectionController: selectionController,
+                selected: selected,
+                longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+                handleTapInSelection: handleTapInSelection,
+                trailing: trailing,
+                current: current,
+                onTap: onTap,
+                enableDefaultOnTap: enableDefaultOnTap,
+                horizontalPadding: horizontalPadding,
+                backgroundColor: backgroundColor,
+              );
+    }
   }
 }
 

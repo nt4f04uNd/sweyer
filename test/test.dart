@@ -229,6 +229,20 @@ extension WidgetTesterExtension on WidgetTester {
     final foundSongs = songTiles.map((e) => e.song);
     expect(foundSongs, songs);
   }
+
+  /// From the home route, navigate to the player route.
+  Future<void> expandPlayerRoute() async {
+    await tap(find.byType(TrackPanel));
+    await pumpAndSettle();
+    expect(playerRouteController.value, 1.0);
+  }
+
+  /// From the home route, navigate to the queue screen in the player route.
+  Future<void> openPlayerQueueScreen() async {
+    await expandPlayerRoute();
+    await flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
+    await pumpAndSettle();
+  }
 }
 
 final _testersLightTheme = <WidgetTester>{};

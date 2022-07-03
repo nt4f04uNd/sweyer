@@ -7,10 +7,9 @@ import 'package:sweyer/sweyer.dart';
 
 @visibleForTesting
 class FavoritesRepository {
-  final serializersMap = ContentMap<IntSerializerType>({
-    for (final contentType in Content.enumerate())
-      contentType: IntListSerializer('favorites_${ContentUtils.contentTypeId(contentType)}.json')
-  });
+  final serializersMap = ContentMap<IntSerializerType>.fromFactory(
+    (contentType) => IntListSerializer('favorites_${contentType.name}.json'),
+  );
 }
 
 class FavoritesControl with Control {
@@ -19,20 +18,20 @@ class FavoritesControl with Control {
   @visibleForTesting
   final repository = FavoritesRepository();
 
-  final _favoriteSetsMap = ContentMap<Set<int>>();
+  final _favoriteSetsMap = ContentMap.fromFactory((contentType) => <int>{});
 
-  bool _useMediaStoreFavorites(Type contentType) =>
-      contentType == Song &&
+  bool _useMediaStoreFavorites(ContentType contentType) =>
+      contentType == ContentType.song &&
       DeviceInfoControl.instance.useScopedStorageForFileModifications &&
       Settings.useMediaStoreForFavoriteSongs.value;
 
-  MediaStoreContentObserver<Song>? _mediaStoreContentObserver;
+  MediaStoreContentObserver? _mediaStoreContentObserver;
 
   @override
   Future<void> init() async {
     super.init();
     _showOnlyFavoritesNotifier.value = false;
-    for (final contentType in Content.enumerate()) {
+    for (final contentType in ContentType.values) {
       await _initContentType(contentType);
     }
     _registerMediaStoreObserver();
@@ -41,13 +40,15 @@ class FavoritesControl with Control {
 
   @override
   void dispose() {
-    _favoriteSetsMap.clear();
+    for (var element in _favoriteSetsMap.entries) {
+      element.value.clear();
+    }
     _disposeMediaStoreObserver();
     Settings.useMediaStoreForFavoriteSongs.removeListener(_useMediaStoreForFavoriteSongsListener);
     super.dispose();
   }
 
-  Future<void> _initContentType(Type contentType) async {
+  Future<void> _initContentType(ContentType contentType) async {
     final Set<int> favoriteSet = {};
     if (_useMediaStoreFavorites(contentType)) {
       for (final song in ContentControl.instance.state.allSongs.songs) {
@@ -56,12 +57,12 @@ class FavoritesControl with Control {
         }
       }
     } else {
-      final serializer = repository.serializersMap.getValue(contentType);
-      await serializer!.init();
+      final serializer = repository.serializersMap.get(contentType);
+      await serializer.init();
       final savedIds = await serializer.read();
       favoriteSet.addAll(savedIds);
     }
-    _favoriteSetsMap.setValue(favoriteSet, key: contentType);
+    _favoriteSetsMap.set(favoriteSet, key: contentType);
   }
 
   Future<void> _useMediaStoreForFavoriteSongsListener() async {
@@ -70,12 +71,12 @@ class FavoritesControl with Control {
     } else {
       _disposeMediaStoreObserver();
     }
-    await _initContentType(Song);
+    await _initContentType(ContentType.song);
     ContentControl.instance.emitContentChange();
   }
 
   void _registerMediaStoreObserver() {
-    _mediaStoreContentObserver = MediaStoreContentObserver()
+    _mediaStoreContentObserver = MediaStoreContentObserver(ContentType.song)
       ..onChangeStream.listen(_handleMediaStoreSongsChange)
       ..register();
   }
@@ -98,8 +99,8 @@ class FavoritesControl with Control {
       _mediaStoreUpdateTimer?.cancel();
       _mediaStoreUpdateTimer = Timer(_mediaStoreUpdateDebounceInterval, () async {
         _endMediaStoreUpdate();
-        await ContentControl.instance.refetch<Song>();
-        final favoriteSet = _favoriteSetsMap.getValue<Song>()!;
+        await ContentControl.instance.refetch(ContentType.song);
+        final favoriteSet = _favoriteSetsMap.get(ContentType.song);
         for (final song in ContentControl.instance.state.allSongs.songs) {
           if (song.isFavoriteInMediaStore! && !favoriteSet.contains(song.id)) {
             favoriteSet.add(song.id);
@@ -123,11 +124,11 @@ class FavoritesControl with Control {
 
   /// Whether the given [content] is favorite.
   bool isFavorite<T extends Content>(T content) {
-    final favoriteSet = _favoriteSetsMap.getValue<T>(content.runtimeType);
+    final favoriteSet = _favoriteSetsMap.get(content.type);
     if (content is Song) {
-      return favoriteSet!.contains(content.sourceId);
+      return favoriteSet.contains(content.sourceId);
     }
-    return favoriteSet!.contains(content.id);
+    return favoriteSet.contains(content.id);
   }
 
   /// Sets whether a given tuple of content is favorite.
@@ -135,11 +136,11 @@ class FavoritesControl with Control {
     required ContentTuple contentTuple,
     required bool value,
   }) async {
-    for (final contentType in Content.enumerate()) {
+    for (final contentType in ContentType.values) {
       final contentList = contentTuple.get(contentType);
-      final newFavoriteSet = _favoriteSetsMap.getValue(contentType)!.toSet();
+      final newFavoriteSet = _favoriteSetsMap.get(contentType).toSet();
       Iterable<int> ids;
-      if (contentType == Song) {
+      if (contentType == ContentType.song) {
         ids = (contentList as List<Song>).map((el) => el.sourceId);
       } else {
         ids = contentList.map((el) => el.id);
@@ -160,10 +161,10 @@ class FavoritesControl with Control {
           final songs = (contentList as List<Song>).toSet();
           await ContentControl.instance.setSongsFavorite(songs, value);
         } else {
-          final serializer = repository.serializersMap.getValue(contentType);
-          await serializer!.save(newFavoriteSet.toList());
+          final serializer = repository.serializersMap.get(contentType);
+          await serializer.save(newFavoriteSet.toList());
         }
-        _favoriteSetsMap.setValue(newFavoriteSet, key: contentType);
+        _favoriteSetsMap.set(newFavoriteSet, key: contentType);
         ContentControl.instance.emitContentChange();
         QueueControl.instance.emitQueueChange();
       } catch (ex, stack) {
@@ -185,10 +186,7 @@ class FavoritesControl with Control {
     final currentSong = PlaybackControl.instance.currentSong;
     return FavoritesControl.instance.setFavorite(
       contentTuple: ContentTuple(
-        [currentSong],
-        const [],
-        const [],
-        const [],
+        songs: [currentSong],
       ),
       value: !currentSong.isFavorite,
     );

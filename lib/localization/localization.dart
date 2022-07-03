@@ -19,34 +19,41 @@ AppLocalizations get staticl10n {
 extension AppLocalizationsExtension on AppLocalizations {
   //* Content ******************
 
-  /// Picks a string of a [Content] in plural form.
+  /// Picks a string of a [ContentType] in plural form.
   /// For example "tracks".
-  String contents<T extends Content>([Type? contentType]) {
-    return contentPick<T, ValueGetter<String>>(
-      contentType: contentType,
-      song: () => tracks,
-      album: () => albums,
-      playlist: () => playlists,
-      artist: () => artists,
-    )();
+  String contents(ContentType contentType) {
+    switch (contentType) {
+      case ContentType.song:
+        return tracks;
+      case ContentType.album:
+        return albums;
+      case ContentType.playlist:
+        return playlists;
+      case ContentType.artist:
+        return artists;
+    }
   }
 
-  /// Calls a `plural` getter from Intl for a [Content].
+  /// Calls a `plural` getter from Intl for a [ContentType].
   /// Returns string in form "5 songs".
-  String contentsPlural<T extends Content>(int count, [Type? contentType]) {
-    return contentPick<T, ValueGetter<String>>(
-      contentType: contentType,
-      song: () => tracksPlural(count),
-      album: () => albumsPlural(count),
-      playlist: () => playlistsPlural(count),
-      artist: () => artistsPlural(count),
-    )();
+  String contentsPlural(ContentType contentType, int count) {
+    switch (contentType) {
+      case ContentType.song:
+        return tracksPlural(count);
+      case ContentType.album:
+        return albumsPlural(count);
+      case ContentType.playlist:
+        return playlistsPlural(count);
+      case ContentType.artist:
+        return artistsPlural(count);
+    }
   }
 
-  String sortFeature<T extends Content>(SortFeature<T> feature, [Type? contentType]) {
-    return contentPick<T, ValueGetter<String>>(
-      contentType: contentType,
-      song: () {
+  String sortFeature<T extends Content>(ContentType<T> contentType, SortFeature<T> feature) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
+      case ContentType.song:
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
             return dateModified;
@@ -61,8 +68,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-      album: () {
+      case ContentType.album:
         switch (feature as AlbumSortFeature) {
           case AlbumSortFeature.title:
             return title;
@@ -75,8 +81,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-      playlist: () {
+      case ContentType.playlist:
         switch (feature as PlaylistSortFeature) {
           case PlaylistSortFeature.dateModified:
             return dateModified;
@@ -87,8 +92,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-      artist: () {
+      case ContentType.artist:
         switch (feature as ArtistSortFeature) {
           case ArtistSortFeature.name:
             return name;
@@ -99,8 +103,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-    )();
+    }
   }
 
   /// Transforms the [text] so it can be safely embedded into [StyledText] text.

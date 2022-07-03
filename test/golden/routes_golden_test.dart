@@ -70,7 +70,7 @@ void main() {
 
     testAppGoldens('albums_tab', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await tester.tap(find.byIcon(Album.icon));
+        await tester.tap(find.byIcon(ContentType.album.icon));
         await tester.pumpAndSettle();
         expect(find.byType(typeOf<PersistentQueueTile<Album>>()), findsOneWidget);
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.albums_tab'));
@@ -78,7 +78,7 @@ void main() {
 
     testAppGoldens('playlists_tab', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await tester.tap(find.byIcon(Playlist.icon));
+        await tester.tap(find.byIcon(ContentType.playlist.icon));
         await tester.pumpAndSettle();
         expect(find.byType(typeOf<PersistentQueueTile<Playlist>>()), findsOneWidget);
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.playlists_tab'));
@@ -86,7 +86,7 @@ void main() {
 
     testAppGoldens('artists_tab', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await tester.tap(find.byIcon(Artist.icon));
+        await tester.tap(find.byIcon(ContentType.artist.icon));
         await tester.pumpAndSettle();
         expect(find.byType(typeOf<ArtistTile>()), findsOneWidget);
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.artists_tab'));
@@ -95,8 +95,9 @@ void main() {
     testAppGoldens('sort_feature_dialog', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.text(
-          l10n.sortFeature<Song>(
-            ContentControl.instance.state.sorts.getValue<Song>()!.feature as SongSortFeature,
+          l10n.sortFeature(
+            ContentType.song,
+            ContentControl.instance.state.sorts.get(ContentType.song).feature,
           ),
         ));
         await tester.pumpAndSettle();
@@ -137,14 +138,14 @@ void main() {
   group('persistent_queue_route', () {
     testAppGoldens('album_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(albumWith()));
+        HomeRouter.instance.goto(HomeRoutes.factory.content(albumWith()));
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'persistent_queue_route.album_route'));
     });
 
     testAppGoldens('playlist_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlistWith()));
+        HomeRouter.instance.goto(HomeRoutes.factory.content(playlistWith()));
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'persistent_queue_route.playlist_route'));
     });
@@ -153,7 +154,7 @@ void main() {
   group('selection_route', () {
     testAppGoldens('selection_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlistWith()));
+        HomeRouter.instance.goto(HomeRoutes.factory.content(playlistWith()));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.pumpAndSettle();
@@ -162,7 +163,7 @@ void main() {
 
     testAppGoldens('selection_route_settings', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlistWith()));
+        HomeRouter.instance.goto(HomeRoutes.factory.content(playlistWith()));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.pumpAndSettle();
@@ -178,7 +179,7 @@ void main() {
   group('artist_route', () {
     testAppGoldens('artist_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(artistWith()));
+        HomeRouter.instance.goto(HomeRoutes.factory.content(artistWith()));
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'artist_route.artist_route'));
     });
@@ -208,11 +209,18 @@ void main() {
 
     testAppGoldens('queue_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await tester.tap(find.byType(SongTile));
-        await tester.pumpAndSettle();
-        expect(playerRouteController.value, 1.0);
-        await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
+        await tester.openPlayerQueueScreen();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route'));
+    });
+
+    testAppGoldens('queue_route_selection', (WidgetTester tester) async {
+      await tester.runAppTest(() async {
+        await tester.openPlayerQueueScreen();
+        await tester.longPress(find.descendant(
+          of: find.byType(PlayerRoute),
+          matching: find.byType(SongTile),
+        ));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route_selection'));
     });
   });
 

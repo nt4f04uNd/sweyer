@@ -16,6 +16,12 @@ linter:
     library_private_types_in_public_api: false
     sort_child_properties_last: false
     prefer_const_constructors_in_immutables: false
+    exhaustive_cases: true
+
+analyzer:
+  errors:
+    exhaustive_cases: error
+    missing_enum_constant_in_switch: error
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
