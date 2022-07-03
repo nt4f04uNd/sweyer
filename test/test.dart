@@ -246,23 +246,28 @@ void testAppGoldens(
   bool? skip,
   Object? tags = _defaultTagObject,
 }) {
-  EditableText.debugDeterministicCursor = true;
-  for (final lightTheme in [false, true]) {
-    testGoldens(
-      '$description ${_getThemeMessage(lightTheme)}',
-      (tester) async {
-        try {
-          ThemeControl.instance.setThemeLightMode(lightTheme);
-          if (lightTheme) {
-            _testersLightTheme.add(tester);
+  final previousDeterministicCursor = EditableText.debugDeterministicCursor;
+  try {
+    EditableText.debugDeterministicCursor = true;
+    for (final lightTheme in [false, true]) {
+      testGoldens(
+        '$description ${_getThemeMessage(lightTheme)}',
+        (tester) async {
+          try {
+            ThemeControl.instance.setThemeLightMode(lightTheme);
+            if (lightTheme) {
+              _testersLightTheme.add(tester);
+            }
+            return await test(tester);
+          } finally {
+            _testersLightTheme.remove(tester);
           }
-          return await test(tester);
-        } finally {
-          _testersLightTheme.remove(tester);
-        }
-      },
-      tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
-    );
+        },
+        tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
+      );
+    }
+  } finally {
+    EditableText.debugDeterministicCursor = previousDeterministicCursor;
   }
 }
 
