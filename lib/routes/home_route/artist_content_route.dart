@@ -29,8 +29,8 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
       setState(() {
         // Update contents
         // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+        // ignore: unnecessary_cast
         switch (widget.contentType as ContentType) {
-          // ignore: unnecessary_cast
           case ContentType.song:
             list = widget.arguments.artist.songs as List<T>;
             break;
