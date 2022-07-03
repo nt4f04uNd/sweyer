@@ -25,10 +25,10 @@ import 'test.dart';
 
 final _testSong = Song(
   id: 0,
-  album: 'album',
-  albumId: 0,
-  artist: 'artist',
-  artistId: 0,
+  album: _testAlbum.album,
+  albumId: _testAlbum.id,
+  artist: _testArtist.artist,
+  artistId: _testArtist.id,
   genre: 'genre',
   genreId: 0,
   title: 'title',
@@ -41,8 +41,6 @@ final _testSong = Song(
   isFavoriteInMediaStore: false,
   generationAdded: 0,
   generationModified: 0,
-  origin: _testAlbum,
-  duplicationIndex: 0,
 );
 
 const _testAlbum = Album(
