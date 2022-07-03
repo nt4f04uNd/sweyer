@@ -45,7 +45,7 @@
             android:resource="@xml/automotive_app_desc"/>
 
         <meta-data android:name="com.google.android.gms.car.notification.SmallIcon"
-            android:resource="@drawable/round_music_note_white_48" /> -->
+            android:resource="@drawable/round_music_note" /> -->
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
