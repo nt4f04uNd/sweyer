@@ -199,14 +199,6 @@ void main() {
   });
 
   group('player_route', () {
-    /// Open the player queue screen.
-    Future<void> openPlayerQueue(WidgetTester tester) async {
-      await tester.tap(find.byType(SongTile));
-      await tester.pumpAndSettle();
-      expect(playerRouteController.value, 1.0);
-      await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
-    }
-
     testAppGoldens('player_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.byType(SongTile));
@@ -217,13 +209,13 @@ void main() {
 
     testAppGoldens('queue_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await openPlayerQueue(tester);
+        await tester.openQueueScreen();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route'));
     });
 
     testAppGoldens('queue_route_selection', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        await openPlayerQueue(tester);
+        await tester.openQueueScreen();
         tester.longPress(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(SongTile)));
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route_selection'));
     });

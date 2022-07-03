@@ -8,23 +8,10 @@ void main() {
     await setUpAppTest();
   });
 
-  Future<void> expandPlayerRoute(WidgetTester tester) async {
-    await tester.tap(find.byType(TrackPanel));
-    await tester.pumpAndSettle();
-    expect(playerRouteController.value, 1.0);
-  }
-
-  /// Navigate to the queue screen in the player route.
-  Future<void> openQueueScreen(WidgetTester tester) async {
-    await expandPlayerRoute(tester);
-    await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
-    await tester.pumpAndSettle();
-  }
-
   testWidgets('can expand/collapse by tapping the button', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       // Tap collapse button
       await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
@@ -51,7 +38,7 @@ void main() {
     testWidgets('can open by swiping to left', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         // Expand the route
-        await expandPlayerRoute(tester);
+        await tester.expandPlayerRoute();
 
         expect(find.text(l10n.upNext), findsNothing);
         await tester.flingFrom(Offset.zero, const Offset(-400.0, 0.0), 1000.0);
@@ -65,7 +52,7 @@ void main() {
       const query = 'Query';
       await tester.runAppTest(() async {
         QueueControl.instance.setSearchedQueue(query, [songWith()]);
-        await openQueueScreen(tester);
+        await tester.openQueueScreen();
         expect(find.text(l10n.upNext), findsOneWidget);
         expect(find.text(l10n.foundByQuery('"$query"'), findRichText: true), findsOneWidget);
       });
@@ -75,7 +62,7 @@ void main() {
       const query = 'Query';
       await tester.runAppTest(() async {
         QueueControl.instance.setSearchedQueue(query, [songWith()]);
-        await openQueueScreen(tester);
+        await tester.openQueueScreen();
         await tester.tap(find.byIcon(Icons.chevron_right_rounded));
         await tester.pumpAndSettle();
         expect(find.byType(SearchRoute), findsOneWidget);
@@ -92,7 +79,7 @@ void main() {
   testWidgets('shows correct track info', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       /// Expect 3 because:
       /// 1 - from [SongTile]
@@ -114,7 +101,7 @@ void main() {
   testWidgets('shuffle button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       expect(QueueControl.instance.state.shuffled, false);
       await tester.tap(find.byType(ShuffleButton));
@@ -127,7 +114,7 @@ void main() {
   testWidgets('loop button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       expect(MusicPlayer.instance.looping, false);
       await tester.tap(find.byType(LoopButton));
@@ -151,7 +138,7 @@ void main() {
     PlaybackControl.instance.changeSong(songs[1]);
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       expect(PlaybackControl.instance.currentSong, songs[1]);
 
@@ -177,7 +164,7 @@ void main() {
     PlaybackControl.instance.changeSong(songs[1]);
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       expect(PlaybackControl.instance.currentSong, songs[1]);
 
@@ -192,7 +179,7 @@ void main() {
   testWidgets('play/pause button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       // Expand the route
-      await expandPlayerRoute(tester);
+      await tester.expandPlayerRoute();
 
       final button = find.descendant(
         of: find.byType(SharedAxisTabView),
@@ -217,7 +204,7 @@ void main() {
 
   testWidgets('handles back presses correctly', (WidgetTester tester) async {
     await tester.runAppTest(() async {
-      await openQueueScreen(tester);
+      await tester.openQueueScreen();
       await tester.tap(find.byIcon(Icons.queue_rounded));
       await tester.pumpAndSettle();
       expect(find.text(l10n.newPlaylist), findsOneWidget);
