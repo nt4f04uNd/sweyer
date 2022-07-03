@@ -216,7 +216,10 @@ void main() {
     testAppGoldens('queue_route_selection', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.openQueueScreen();
-        tester.longPress(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(SongTile)));
+        await tester.longPress(find.descendant(
+          of: find.byType(PlayerRoute),
+          matching: find.byType(SongTile),
+        ));
       }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route_selection'));
     });
   });
