@@ -2,9 +2,9 @@ import 'dart:math' as math;
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:boxy/boxy.dart';
-import 'package:rive/rive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -743,13 +743,13 @@ class SelectionCheckmark extends StatefulWidget {
   _SelectionCheckmarkState createState() => _SelectionCheckmarkState();
 }
 
-class _SelectionCheckmarkState extends State<SelectionCheckmark> {
-  SMITrigger? _checkBoxAnimation;
+class _SelectionCheckmarkState extends State<SelectionCheckmark> with TickerProviderStateMixin {
+  late final AnimationController _checkBoxAnimation;
 
   @override
   void initState() {
     super.initState();
-    _update();
+    _checkBoxAnimation = AnimationController(vsync: this);
     widget.animation.addStatusListener(_handleStatusChange);
   }
 
@@ -766,12 +766,13 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
   @override
   void dispose() {
     widget.animation.removeStatusListener(_handleStatusChange);
+    _checkBoxAnimation.dispose();
     super.dispose();
   }
 
   void _update() {
     if (widget.animation.status == AnimationStatus.forward) {
-      _checkBoxAnimation?.fire();
+      _checkBoxAnimation.forward();
     }
   }
 
@@ -798,15 +799,21 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
             color: constants.AppColors.androidGreen,
             borderRadius: BorderRadius.all(Radius.circular(200.0)),
           ),
-          child: RiveAnimation.asset(
+          child: Lottie.asset(
             constants.Assets.assetAnimationCheckmark,
-            onInit: (artBoard) {
-              artBoard.setForegroundColor(ThemeControl.instance.theme.colorScheme.secondaryContainer);
-              final controller = StateMachineController.fromArtboard(artBoard, 'State Machine');
-              artBoard.addController(controller!);
-              _checkBoxAnimation = controller.findInput<bool>('play') as SMITrigger;
-              _checkBoxAnimation?.fire();
+            controller: _checkBoxAnimation,
+            onLoaded: (composition) {
+              _checkBoxAnimation.duration = composition.duration;
+              _checkBoxAnimation.forward();
             },
+            delegates: LottieDelegates(
+              values: [
+                ValueDelegate.strokeColor(
+                  const ['Main Layer', 'Color'],
+                  value: ThemeControl.instance.theme.colorScheme.secondaryContainer,
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:rive/rive.dart';
+import 'package:lottie/lottie.dart';
 import 'package:sweyer/constants.dart' as constants;
 
 const double _kIconSize = 22.0;
@@ -29,27 +29,19 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 }
 
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with TickerProviderStateMixin {
-  late AnimationController controller;
+  late AnimationController _controller;
   StreamSubscription<bool>? _playingSubscription;
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
-  SMIBool? _isPlayingAnimationInput;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _update();
+    _controller = AnimationController(vsync: this);
   }
 
   void _update() {
-    if (player.playing) {
-      _isPlayingAnimationInput?.value = true;
-    } else {
-      controller.value = 1.0;
-      _isPlayingAnimationInput?.value = false;
+    if (!player.playing) {
+      _controller.value = 1.0;
     }
     _playingSubscription?.cancel();
     _playingSubscription = player.playingStream.listen((playing) {
@@ -74,24 +66,18 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
   @override
   void dispose() {
     _playingSubscription?.cancel();
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   /// Animates to state where it shows "play" button.
   void _play() {
-    if (_isPlayingAnimationInput?.value == true) {
-      controller.forward();
-      _isPlayingAnimationInput?.value = false;
-    }
+    _controller.forward();
   }
 
   /// Animates to state where it shows "pause" button.
   void _pause() {
-    if (_isPlayingAnimationInput?.value == false) {
-      controller.reverse();
-      _isPlayingAnimationInput?.value = true;
-    }
+    _controller.reverse();
   }
 
   void _handlePress() {
@@ -105,7 +91,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
   @override
   Widget build(BuildContext context) {
     final baseAnimation = CurvedAnimation(
-      parent: controller,
+      parent: _controller,
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
@@ -127,14 +113,19 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
           // Needed because for some reason the color is not updated on theme change.
           key: ValueKey(color),
           child: RepaintBoundary(
-            child: RiveAnimation.asset(
+            child: Lottie.asset(
               constants.Assets.assetAnimationPlayPause,
-              onInit: (artBoard) {
-                artBoard.setForegroundColor(color);
-                final controller = StateMachineController.fromArtboard(artBoard, 'State Machine');
-                artBoard.addController(controller!);
-                _isPlayingAnimationInput = controller.findInput<bool>('playing') as SMIBool;
+              controller: _controller,
+              onLoaded: (composition) {
+                _controller.duration = composition.duration;
+                _update();
               },
+              delegates: LottieDelegates(
+                values: [
+                  ValueDelegate.color(const ['Left Shape Layer', 'Left Shape', 'Left Shape Fill'], value: color),
+                  ValueDelegate.color(const ['Right Shape Layer', 'Right Shape', 'Right Shape Fill'], value: color),
+                ],
+              ),
             ),
           ),
         ),

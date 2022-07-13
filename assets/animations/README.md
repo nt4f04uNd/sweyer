@@ -1,4 +1,4 @@
 ## Animation sources
 
-* [`checkmark.riv`](checkmark.riv) - TODO: Replace with iframe
-* [`play_pause.riv`](play_pause.riv) - TODO: Replace with iframe
+* [`checkmark.json`](checkmark.json)
+* [`play_pause.json`](play_pause.json)
