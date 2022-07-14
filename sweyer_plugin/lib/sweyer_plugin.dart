@@ -76,7 +76,7 @@ abstract class SweyerPlugin {
   }) async =>
       await SweyerPluginPlatform.instance.loadAlbumArt(uri: uri, size: size, cancellationSignalId: signal._id);
 
-  /// Tries to tell system to recreate album art by [albumId].
+  /// Tries to tell the system to recreate album art by [albumId].
   ///
   /// Sometimes `MediaStore` tells that there's an album art for some song, but the actual file
   /// by some path doesn't exist. Supposedly, what happens is that Android detects reads on this
@@ -119,13 +119,13 @@ abstract class SweyerPlugin {
   ) async =>
       (await SweyerPluginPlatform.instance.retrieveGenres()).map(factory);
 
-  /// Sets songs' favorite flag to [value].
+  /// Sets the songs favorite flag to [value].
   ///
   /// The returned value indicates the success of the operation.
   ///
   /// Throws:
-  ///  * [SweyerMethodChannelException.sdk] when it's called below Android 30
-  ///  * [SweyerMethodChannelException.intentSender]
+  ///  * [SweyerPluginChannelException.sdk] when it's called below Android 30
+  ///  * [SweyerPluginChannelException.intentSender]
   static Future<bool> setSongsFavorite(Set<MediaStoreSong> songs, bool value) =>
       SweyerPluginPlatform.instance.setSongsFavorite(songs.map((song) => song.sourceId).toList(), value);
 
@@ -134,14 +134,14 @@ abstract class SweyerPlugin {
   /// The returned value indicates the success of the operation.
   ///
   /// Throws:
-  ///  * [SweyerMethodChannelException.intentSender]
+  ///  * [SweyerPluginChannelException.intentSender]
   static Future<bool> deleteSongs(Set<MediaStoreSong> songs) => SweyerPluginPlatform.instance.deleteSongs(
       songs.map((song) => {'id': song.sourceId, 'filesystemPath': song.filesystemPath}).toList(growable: false));
 
   static Future<void> createPlaylist(String name) => SweyerPluginPlatform.instance.createPlaylist(name);
 
   /// Throws:
-  ///  * [SweyerMethodChannelException.playlistNotExists] when playlist doesn't exist.
+  ///  * [SweyerPluginChannelException.playlistNotExists] when the playlist doesn't exist.
   static Future<void> renamePlaylist(MediaStorePlaylist playlist, String name) =>
       SweyerPluginPlatform.instance.renamePlaylist(playlist.id, name);
 
@@ -149,7 +149,7 @@ abstract class SweyerPlugin {
       SweyerPluginPlatform.instance.removePlaylists(playlists.map((playlist) => playlist.id).toList());
 
   /// Throws:
-  ///  * [SweyerMethodChannelException.playlistNotExists] when playlist doesn't exist.
+  ///  * [SweyerPluginChannelException.playlistNotExists] when the playlist doesn't exist.
   static Future<void> insertSongsInPlaylist({
     required int index,
     required List<MediaStoreSong> songs,
@@ -161,7 +161,8 @@ abstract class SweyerPlugin {
         index: index, songIds: songs.map((song) => song.sourceId).toList(), playlistId: playlist.id);
   }
 
-  /// Moves song in playlist, returned value indicates whether the operation was successful.
+  /// Moves the song at the index [from] in the [playlist] to the index [to].
+  /// The returned value indicates whether the operation was successful.
   static Future<bool> moveSongInPlaylist({required MediaStorePlaylist playlist, required int from, required int to}) {
     assert(from >= 0);
     assert(to >= 0);
@@ -170,12 +171,13 @@ abstract class SweyerPlugin {
   }
 
   /// Throws:
-  ///  * [SweyerMethodChannelException.playlistNotExists] when playlist doesn't exist.
+  ///  * [SweyerPluginChannelException.playlistNotExists] when the playlist doesn't exist.
   static Future<void> removeFromPlaylistAt({required List<int> indexes, required MediaStorePlaylist playlist}) {
     assert(indexes.isNotEmpty);
     return SweyerPluginPlatform.instance.removeFromPlaylistAt(indexes: indexes, playlistId: playlist.id);
   }
 
-  /// Checks if open intent is view (user tried to open file with app).
+  /// Checks if the intent that started the app is a view intent
+  /// (indicating that the user tried to open a file with app).
   static Future<bool> isIntentActionView() => SweyerPluginPlatform.instance.isIntentActionView();
 }

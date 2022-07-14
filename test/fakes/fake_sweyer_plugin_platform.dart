@@ -89,12 +89,12 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
   @override
   Future<Iterable<Map<String, dynamic>>> retrieveAlbums() async {
     final albumsList = albums ?? [albumWith()];
-    return albumsList.map((album) => album.toMap()).toList();
+    return albumsList.map((album) => album.toMap());
   }
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrieveArtists() async {
-    return (artists ?? [artistWith()]).map((artist) => artist.toMap()).toList();
+    return (artists ?? [artistWith()]).map((artist) => artist.toMap());
   }
 
   @override
@@ -104,12 +104,12 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrievePlaylists() async {
-    return (playlists ?? [playlistWith()]).map((playlist) => playlist.toMap()).toList();
+    return (playlists ?? [playlistWith()]).map((playlist) => playlist.toMap());
   }
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrieveSongs() async {
-    return (songs ?? [songWith()]).map((song) => song.toMap()).toList();
+    return (songs ?? [songWith()]).map((song) => song.toMap());
   }
 
   @override
