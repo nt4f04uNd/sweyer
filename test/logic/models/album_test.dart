@@ -7,7 +7,6 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     album = albumWith();
     contentControl = FakeContentControl();
-    ContentControl.instance = contentControl;
   });
 
   test('Sorts tracks', () async {
@@ -18,8 +17,10 @@ void main() {
     final song3 = songWith(id: 4, track: '3', title: 'Third Song');
     final song4 = songWith(id: 1, track: '4', title: 'Fourth Song');
     final song10 = songWith(id: 3, track: '10', title: 'Tenth Song');
-    contentControl
-        .setContent(ContentTuple([nullSong1, nullSong2, song1, song2, song3, song4, song10], [album], [], []));
+    contentControl.setContent(ContentTuple(
+      songs: [nullSong1, nullSong2, song1, song2, song3, song4, song10],
+      albums: [album],
+    ));
     expect(album.songs, [song1, song2, song3, song4, song10, nullSong1, nullSong2]);
   });
 
@@ -30,7 +31,7 @@ void main() {
     final song3 = songWith(id: 4, track: '3/X', title: 'Third Song');
     final song4 = songWith(id: 1, track: '4/0', title: 'Fourth Song');
     final song10 = songWith(id: 3, track: '10/10', title: 'Tenth Song');
-    contentControl.setContent(ContentTuple([nullSong1, song1, song2, song3, song4, song10], [album], [], []));
+    contentControl.setContent(ContentTuple(songs: [nullSong1, song1, song2, song3, song4, song10], albums: [album]));
     expect(album.songs, [song1, song2, song3, song4, song10, nullSong1]);
   });
 
@@ -41,7 +42,7 @@ void main() {
     final song3 = songWith(id: 4, track: '3 /  10', title: 'Third Song');
     final song4 = songWith(id: 1, track: ' 4 / 10 ', title: 'Fourth Song');
     final song10 = songWith(id: 3, track: ' 10 /10', title: 'Tenth Song');
-    contentControl.setContent(ContentTuple([nullSong1, song1, song2, song3, song4, song10], [album], [], []));
+    contentControl.setContent(ContentTuple(songs: [nullSong1, song1, song2, song3, song4, song10], albums: [album]));
     expect(album.songs, [song1, song2, song3, song4, song10, nullSong1]);
   });
 }

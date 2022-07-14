@@ -20,13 +20,13 @@ class Album extends PersistentQueue {
   /// Returns songs that belong to this album.
   @override
   List<Song> get songs {
-    return ContentControl.instance.getContent<Song>(contentType: Song).fold<List<Song>>([], (prev, el) {
+    return ContentControl.instance.getContent(ContentType.song).fold<List<Song>>([], (prev, el) {
       if (el.albumId == id) {
         prev.add(el.copyWith(origin: this));
       }
       return prev;
     })
-      ..sort(_compareTracks);
+      ..sort(_compareSongs);
   }
 
   @override
@@ -117,7 +117,7 @@ class Album extends PersistentQueue {
       };
 
   /// Compare [song1] with [song2]. This can be used to sort the tracks of the album.
-  int _compareTracks(Song song1, Song song2) => song1.trackPosition == song2.trackPosition
+  int _compareSongs(Song song1, Song song2) => song1.trackPosition == song2.trackPosition
       ? song1.title.compareTo(song2.title)
       : song2.trackPosition == null
           ? -1

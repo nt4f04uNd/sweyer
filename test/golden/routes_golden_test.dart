@@ -25,7 +25,6 @@ void main() {
     testAppGoldens('searching_screen', (WidgetTester tester) async {
       ContentControl.instance.dispose();
       final fake = FakeContentControl();
-      ContentControl.instance = fake;
       fake.init();
       // Fake ContentControl.init in a way to trigger the home screen rebuild
       fake.initializing = true;

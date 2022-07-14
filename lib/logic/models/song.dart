@@ -30,8 +30,9 @@ class Song extends Content {
 
   /// The track number of this song on the album, if any.
   final String? track;
+
   /// Numeric track position of this song on the album, if any.
-  late int? trackPosition;
+  late int? trackPosition = _parseTrackPosition(track);
   final int dateAdded;
   final int dateModified;
 
@@ -122,9 +123,7 @@ class Song extends Content {
     required this.generationModified,
     this.duplicationIndex,
     this.origin,
-  }) {
-    trackPosition = _parseTrackPosition(track);
-  }
+  });
 
   @override
   SongCopyWith get copyWith => _SongCopyWith(this);
@@ -190,7 +189,7 @@ class Song extends Content {
         'generationModified': generationModified,
       };
 
-  /// Try to the numeric album track from the text [position].
+  /// Try to parse the numeric album track from the text [position].
   int? _parseTrackPosition(String? position) {
     if (position == null) {
       return null;
