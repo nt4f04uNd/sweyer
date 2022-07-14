@@ -743,8 +743,8 @@ class SelectionCheckmark extends StatefulWidget {
   _SelectionCheckmarkState createState() => _SelectionCheckmarkState();
 }
 
-class _SelectionCheckmarkState extends State<SelectionCheckmark> with TickerProviderStateMixin {
-  late final AnimationController _checkBoxAnimation;
+class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTickerProviderStateMixin {
+  late AnimationController _checkBoxAnimation;
 
   @override
   void initState() {

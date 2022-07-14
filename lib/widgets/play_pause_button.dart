@@ -28,7 +28,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
 
-class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with TickerProviderStateMixin {
+class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   StreamSubscription<bool>? _playingSubscription;
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
