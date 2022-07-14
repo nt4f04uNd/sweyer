@@ -13,7 +13,6 @@ import 'package:package_info_plus_platform_interface/method_channel_package_info
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flare_flutter/flare_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as constants;
@@ -92,8 +91,6 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
   binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
   binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
-  // Prepare flare.
-  FlareTesting.setup();
 
   // Fake prefs values.
   //
@@ -263,22 +260,28 @@ void testAppGoldens(
   bool? skip,
   Object? tags = _defaultTagObject,
 }) {
-  for (final lightTheme in [false, true]) {
-    testGoldens(
-      '$description ${_getThemeMessage(lightTheme)}',
-      (tester) async {
-        try {
-          ThemeControl.instance.setThemeLightMode(lightTheme);
-          if (lightTheme) {
-            _testersLightTheme.add(tester);
+  final previousDeterministicCursor = EditableText.debugDeterministicCursor;
+  try {
+    EditableText.debugDeterministicCursor = true;
+    for (final lightTheme in [false, true]) {
+      testGoldens(
+        '$description ${_getThemeMessage(lightTheme)}',
+        (tester) async {
+          try {
+            ThemeControl.instance.setThemeLightMode(lightTheme);
+            if (lightTheme) {
+              _testersLightTheme.add(tester);
+            }
+            return await test(tester);
+          } finally {
+            _testersLightTheme.remove(tester);
           }
-          return await test(tester);
-        } finally {
-          _testersLightTheme.remove(tester);
-        }
-      },
-      tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
-    );
+        },
+        tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
+      );
+    }
+  } finally {
+    EditableText.debugDeterministicCursor = previousDeterministicCursor;
   }
 }
 

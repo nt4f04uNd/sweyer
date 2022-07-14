@@ -2,9 +2,9 @@ import 'dart:math' as math;
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:boxy/boxy.dart';
-import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -751,13 +751,13 @@ class SelectionCheckmark extends StatefulWidget {
   _SelectionCheckmarkState createState() => _SelectionCheckmarkState();
 }
 
-class _SelectionCheckmarkState extends State<SelectionCheckmark> {
-  String _flareAnimation = 'stop';
+class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTickerProviderStateMixin {
+  late AnimationController _checkBoxAnimation;
 
   @override
   void initState() {
     super.initState();
-    _update();
+    _checkBoxAnimation = AnimationController(vsync: this);
     widget.animation.addStatusListener(_handleStatusChange);
   }
 
@@ -774,12 +774,13 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
   @override
   void dispose() {
     widget.animation.removeStatusListener(_handleStatusChange);
+    _checkBoxAnimation.dispose();
     super.dispose();
   }
 
   void _update() {
     if (widget.animation.status == AnimationStatus.forward) {
-      _flareAnimation = 'play';
+      _checkBoxAnimation.forward();
     }
   }
 
@@ -806,15 +807,21 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> {
             color: constants.AppColors.androidGreen,
             borderRadius: BorderRadius.all(Radius.circular(200.0)),
           ),
-          child: FlareActor(
+          child: Lottie.asset(
             constants.Assets.assetAnimationCheckmark,
-            animation: _flareAnimation,
-            color: ThemeControl.instance.theme.colorScheme.secondaryContainer,
-            callback: (name) {
-              setState(() {
-                _flareAnimation = 'stop';
-              });
+            controller: _checkBoxAnimation,
+            onLoaded: (composition) {
+              _checkBoxAnimation.duration = composition.duration;
+              _checkBoxAnimation.forward();
             },
+            delegates: LottieDelegates(
+              values: [
+                ValueDelegate.strokeColor(
+                  const ['Main Layer', 'Color'],
+                  value: ThemeControl.instance.theme.colorScheme.secondaryContainer,
+                ),
+              ],
+            ),
           ),
         ),
       ),

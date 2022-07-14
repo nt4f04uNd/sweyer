@@ -191,7 +191,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
       animationDuration: 200,
       curve: Curves.easeOutCubic,
       animateFromLastPercent: true,
-      radius: kSongTileArtSize - progressLineHeight,
+      radius: (kSongTileArtSize - progressLineHeight) / 2,
       lineWidth: progressLineHeight,
       circularStrokeCap: CircularStrokeCap.round,
       progressColor: ThemeControl.instance.theme.colorScheme.primary,
