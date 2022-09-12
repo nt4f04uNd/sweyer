@@ -72,6 +72,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   // when player route is opened, for example
                   !HomeRouter.instance.drawerCanBeOpened);
         },
+        shouldEagerlyWin: (event) {
+          return controller.value == 0.0 && HomeRouter.instance.drawerCanBeOpened && event.delta.dx > 0.0;
+        },
         onBarrierTap: controller.close,
         barrier: Container(color: Colors.black26),
         controller: controller,
