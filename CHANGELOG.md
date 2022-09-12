@@ -10,8 +10,8 @@
   - CI
   - Automatic and golden tests
 
-All the work related to this version can be found in this [project](https://github.com/users/nt4f04uNd/projects/4/views/1 
-)
+All the work related to this version can be found in this [project](https://github.com/users/nt4f04uNd/projects/4/views/1)
+
 ## 1.0.7
 
 - Fix bug that localization didn't fallback to English as a default language
