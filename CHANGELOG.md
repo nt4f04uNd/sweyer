@@ -1,3 +1,17 @@
+## 1.0.8
+
+- Added favorites
+- Added German language support
+- Changed notification stop icon
+- Fixed back button on dialogs
+- Other bug fixes
+- Not important for users:
+  - Flutter 3 migration
+  - CI
+  - Automatic and golden tests
+
+All the work related to this version can be found in this [project](https://github.com/users/nt4f04uNd/projects/4/views/1 
+)
 ## 1.0.7
 
 - Fix bug that localization didn't fallback to English as a default language
