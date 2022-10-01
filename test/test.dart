@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 export 'package:sweyer/sweyer.dart';
@@ -141,6 +142,31 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   });
   binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel,
       (MethodCall methodCall) async {
+    return null;
+  });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider_macos'),
+      (MethodCall methodCall) async {
+    if (methodCall.method == 'getTemporaryDirectory' || methodCall.method == 'getApplicationSupportDirectory') {
+      Directory('./temp').createSync();
+      return './temp';
+    }
+    return null;
+  });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.tekartik.sqflite'),
+      (MethodCall methodCall) async {
+    if (methodCall.method == 'getDatabasesPath') {
+      Directory('./temp').createSync();
+      return './temp';
+    }
+    if (methodCall.method == 'openDatabase') {
+      return 0;
+    }
+    if (methodCall.method == 'query') {
+      return {};
+    }
+    if (methodCall.method == 'execute') {
+      return null;
+    }
     return null;
   });
   LicenseRegistry.reset();
