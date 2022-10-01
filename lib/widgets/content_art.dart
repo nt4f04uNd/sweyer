@@ -694,7 +694,7 @@ class _ContentArtState extends State<ContentArt> {
       _loaders = [
         _SongArtSourceLoader(
           state: this,
-          song: content.firstSong,
+          song: content.songs.first,
           size: widget.size,
         ),
       ];
@@ -861,7 +861,7 @@ class _ContentArtState extends State<ContentArt> {
     final oldContent = oldWidget.source?._content;
     final content = widget.source?._content;
     if (oldContent != content ||
-        oldContent is Album && content is Album && oldContent.firstSong != content.firstSong ||
+        oldContent is Album && content is Album && oldContent.songs.first != content.songs.first ||
         oldContent is Playlist && content is Playlist && !listEquals(oldContent.songIds, content.songIds)) {
       _update();
     }

@@ -68,7 +68,6 @@ void main() {
     // Use fake
     ContentControl.instance.dispose();
     final fake = FakeContentControl();
-    ContentControl.instance = fake;
     fake.init();
 
     expect(Permissions.instance.granted, true);
