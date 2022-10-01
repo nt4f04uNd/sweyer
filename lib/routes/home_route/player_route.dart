@@ -666,10 +666,6 @@ class _MainTabState extends State<_MainTab> {
   @override
   Widget build(BuildContext context) {
     final theme = ThemeControl.instance.theme;
-    final animation = ColorTween(
-      begin: theme.colorScheme.secondary,
-      end: theme.colorScheme.background,
-    ).animate(playerRouteController);
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
@@ -677,43 +673,54 @@ class _MainTabState extends State<_MainTab> {
     final mediaQuery = MediaQuery.of(context);
     return AnimatedBuilder(
       animation: playerRouteController,
-      builder: (context, child) => Scaffold(
-        body: child,
-        resizeToAvoidBottomInset: false,
-        backgroundColor: animation.value,
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          toolbarHeight: math.max(
-            TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
-            theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
-          ),
-          leading: FadeTransition(
-            opacity: fadeAnimation,
-            child: RepaintBoundary(
-              child: NFIconButton(
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                size: 40.0,
-                onPressed: playerRouteController.close,
-              ),
+      builder: (context, child) => Stack(
+        children: [
+          AnimationSwitcher(
+            animation: playerRouteController,
+            child1: Container(
+              color: theme.colorScheme.secondary,
             ),
+            child2: const PlayerInterfaceBackgroundWidget(),
           ),
-          actions: <Widget>[
-            FadeTransition(
-              opacity: fadeAnimation,
-              child: Row(
-                children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: Prefs.devMode,
-                    builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
+          Scaffold(
+            body: child,
+            resizeToAvoidBottomInset: false,
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              elevation: 0.0,
+              backgroundColor: Colors.transparent,
+              toolbarHeight: math.max(
+                TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
+                theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
+              ),
+              leading: FadeTransition(
+                opacity: fadeAnimation,
+                child: RepaintBoundary(
+                  child: NFIconButton(
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                    size: 40.0,
+                    onPressed: playerRouteController.close,
                   ),
-                  const FavoriteButton(),
-                  const SizedBox(width: 5.0),
-                ],
+                ),
               ),
+              actions: <Widget>[
+                FadeTransition(
+                  opacity: fadeAnimation,
+                  child: Row(
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: Prefs.devMode,
+                        builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
+                      ),
+                      const FavoriteButton(),
+                      const SizedBox(width: 5.0),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       child: Center(
         child: Column(
@@ -973,11 +980,14 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
             builder: (context, constraints) => AnimatedBuilder(
               animation: controller,
               builder: (context, child) {
-                final newArt = ContentArt.playerRoute(
-                  key: ValueKey(currentSong),
-                  size: constraints.maxWidth,
-                  loadAnimationDuration: Duration.zero,
-                  source: ContentArtSource.song(currentSong),
+                final newArt = ContentArtLoadBuilder(
+                  builder: (onLoad) => ContentArt.playerRoute(
+                    key: ValueKey(currentSong),
+                    size: constraints.maxWidth,
+                    loadAnimationDuration: Duration.zero,
+                    source: ContentArtSource.song(currentSong),
+                    onLoad: onLoad,
+                  ),
                 );
                 if (art == null ||
                     controller.status == AnimationStatus.reverse ||

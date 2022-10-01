@@ -2,6 +2,7 @@
 ///
 /// It exports everything except constants, see `constants.dart`.
 
+export 'package:sweyer/features/features.dart';
 export 'package:sweyer/localization/localization.dart';
 export 'package:sweyer/logic/logic.dart';
 export 'package:sweyer/routes/routes.dart';

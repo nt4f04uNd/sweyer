@@ -108,6 +108,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
             ),
             builder: (context, child) => ListView(
               children: [
+                const PlayerInterfaceColorStyleSettingWidget(),
                 Theme(
                   data: ThemeControl.instance.theme.copyWith(
                     splashFactory: NFListTileInkRipple.splashFactory,

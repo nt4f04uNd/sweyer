@@ -91,43 +91,16 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
     final sort = getSort();
-    Widget buildItem(SortFeature feature) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NFListTileInkRipple.splashFactory,
-        ),
-        child: Builder(
-          // i need the proper context to pop the dialog
-          builder: (context) => _RadioListTile<SortFeature>(
-            title: Text(
-              l10n.sortFeature(contentType, feature),
-              style: ThemeControl.instance.theme.textTheme.subtitle1,
-            ),
-            value: feature,
-            groupValue: sort.feature,
-            onChanged: (_) {
-              ContentControl.instance.sort(
-                contentType: contentType,
-                sort: sort.copyWith(feature: feature).withDefaultOrder,
-              );
-              Navigator.pop(context);
-            },
-          ),
-        ),
-      );
-    }
-
-    ShowFunctions.instance.showAlert(
-      context,
-      ui: constants.UiTheme.modalOverGrey.auto,
-      title: Text(l10n.sort),
-      titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
-      contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
-      closeButton: const SizedBox.shrink(),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: SortFeature.getValuesForContent(contentType).map((el) => buildItem(el)).toList(),
+    ShowFunctions.instance.showRadio<SortFeature>(
+      context: context,
+      title: l10n.sort,
+      items: SortFeature.getValuesForContent(contentType),
+      itemTitleBuilder: (item) => l10n.sortFeature(contentType, item),
+      onItemSelected: (item) => ContentControl.instance.sort(
+        contentType: contentType,
+        sort: sort.copyWith(feature: item).withDefaultOrder,
       ),
+      groupValueGetter: () => sort.feature,
     );
   }
 

@@ -253,6 +253,7 @@ class ContentControl extends Control {
         PlaybackControl.instance.init();
         await MusicPlayer.instance.init();
         await FavoritesControl.instance.init();
+        PlayerInterfaceColorStyleControl.instance.init();
       }
       _initializeCompleter = null;
     }
@@ -279,6 +280,7 @@ class ContentControl extends Control {
       PlaybackControl.instance.dispose();
       MusicPlayer.instance.dispose();
       FavoritesControl.instance.dispose();
+      PlayerInterfaceColorStyleControl.instance.dispose();
     }
     super.dispose();
   }

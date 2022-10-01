@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
@@ -34,6 +35,8 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 /// Whether running on scoped storage, and should use bytes to load album
 /// arts from `MediaStore`.
 bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
+
+typedef ContentArtOnLoadCallback = FutureOr Function(ui.Image);
 
 class ContentArtSource with EquatableMixin {
   const ContentArtSource(Content content) : _content = content;
@@ -200,7 +203,7 @@ class ContentArt extends StatefulWidget {
   final double? currentIndicatorScale;
 
   /// Called when art is loaded.
-  final Function(ui.Image)? onLoad;
+  final ContentArtOnLoadCallback? onLoad;
 
   /// Above Android Q and above album art loads from bytes, and performs an animation on load.
   /// This defines the duration of this animation.
@@ -827,7 +830,8 @@ class _ContentArtState extends State<ContentArt> {
                 throw StateError('');
               }
               final image = await boundary.toImage();
-              widget.onLoad!(image);
+              await widget.onLoad!(image);
+              image.dispose();
             });
           });
         });

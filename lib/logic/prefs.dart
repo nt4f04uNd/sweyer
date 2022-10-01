@@ -160,4 +160,12 @@ abstract class Settings {
   static final useMediaStoreForFavoriteSongs = PrefNotifier(
     const BoolPref('use_media_store_for_favorite_songs', true),
   );
+
+  static final playerInterfaceColorStyle = PrefNotifier(
+    EnumPref(
+      'player_interface_color_style',
+      PlayerInterfaceColorStyle.values,
+      PlayerInterfaceColorStyle.artColor,
+    ),
+  );
 }

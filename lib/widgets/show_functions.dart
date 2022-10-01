@@ -245,4 +245,51 @@ class ShowFunctions extends NFShowFunctions {
       ui: ui,
     );
   }
+
+  Future<void> showRadio<T>({
+    required BuildContext context,
+    required String title,
+    required List<T> items,
+    required String Function(T) itemTitleBuilder,
+    required ValueSetter<T> onItemSelected,
+    required ValueGetter<T> groupValueGetter,
+  }) {
+    final l10n = getl10n(context);
+
+    Widget buildItem(T item) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          splashFactory: NFListTileInkRipple.splashFactory,
+        ),
+        child: Builder(
+          // i need the proper context to pop the dialog
+          builder: (context) => AppRadioListTile<T>(
+            title: Text(
+              itemTitleBuilder(item),
+              style: ThemeControl.instance.theme.textTheme.subtitle1,
+            ),
+            value: item,
+            groupValue: groupValueGetter(),
+            onChanged: (value) {
+              onItemSelected(value);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      );
+    }
+
+    return ShowFunctions.instance.showAlert(
+      context,
+      ui: constants.UiTheme.modalOverGrey.auto,
+      title: Text(l10n.sort),
+      titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
+      contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
+      closeButton: const SizedBox.shrink(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: items.map((el) => buildItem(el)).toList(),
+      ),
+    );
+  }
 }
