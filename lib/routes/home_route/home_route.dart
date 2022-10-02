@@ -34,50 +34,57 @@ class _InitialRouteState extends State<InitialRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return RouteAwareWidget(
-      onPushNext: () => _onTop = false,
-      onPopNext: () => _onTop = true,
-      child: ValueListenableBuilder(
-        valueListenable: ContentControl.instance.disposed,
-        builder: (context, value, child) {
-          if (ContentControl.instance.stateNullable == null) {
-            _animateNotMainUi();
-            return const _SongsEmptyScreen();
-          } else {
-            return StreamBuilder(
-              stream: ContentControl.instance.onContentChange,
-              builder: (context, snapshot) {
-                if (Permissions.instance.notGranted) {
-                  _animateNotMainUi();
-                  return const _NoPermissionsScreen();
-                }
-                if (ContentControl.instance.initializing) {
-                  _animateNotMainUi();
-                  return const _SearchingSongsScreen();
-                }
-                if (ContentControl.instance.state.allSongs.isEmpty) {
-                  _animateNotMainUi();
-                  return const _SongsEmptyScreen();
-                }
-                if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
-                  final theme = Theme.of(context);
-                  SystemUiStyleController.instance.animateSystemUiOverlay(
-                    to: theme.systemUiThemeExtension.grey,
-                  );
-                }
-                return StreamBuilder<bool>(
-                    stream: ThemeControl.instance.themeChanging,
-                    builder: (context, snapshot) {
-                      if (snapshot.data == true) {
-                        return const SizedBox.shrink();
-                      }
-                      return const Home();
-                    });
-              },
-            );
-          }
-        },
-      ),
+    return Stack(
+      children: [
+        Overlay(
+          key: AppRouter.instance.artOverlayKey,
+        ),
+        RouteAwareWidget(
+          onPushNext: () => _onTop = false,
+          onPopNext: () => _onTop = true,
+          child: ValueListenableBuilder(
+            valueListenable: ContentControl.instance.disposed,
+            builder: (context, value, child) {
+              if (ContentControl.instance.stateNullable == null) {
+                _animateNotMainUi();
+                return const _SongsEmptyScreen();
+              } else {
+                return StreamBuilder(
+                  stream: ContentControl.instance.onContentChange,
+                  builder: (context, snapshot) {
+                    if (Permissions.instance.notGranted) {
+                      _animateNotMainUi();
+                      return const _NoPermissionsScreen();
+                    }
+                    if (ContentControl.instance.initializing) {
+                      _animateNotMainUi();
+                      return const _SearchingSongsScreen();
+                    }
+                    if (ContentControl.instance.state.allSongs.isEmpty) {
+                      _animateNotMainUi();
+                      return const _SongsEmptyScreen();
+                    }
+                    if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
+                      final theme = Theme.of(context);
+                      SystemUiStyleController.instance.animateSystemUiOverlay(
+                        to: theme.systemUiThemeExtension.grey,
+                      );
+                    }
+                    return StreamBuilder<bool>(
+                        stream: ThemeControl.instance.themeChanging,
+                        builder: (context, snapshot) {
+                          if (snapshot.data == true) {
+                            return const SizedBox.shrink();
+                          }
+                          return const Home();
+                        });
+                  },
+                );
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -92,8 +99,6 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-  static GlobalKey<OverlayState> artOverlayKey = GlobalKey();
-  static GlobalKey<OverlayState> overlayKey = GlobalKey();
   final router = HomeRouter.main();
   DateTime? _lastBackPressTime;
   late ChildBackButtonDispatcher _backButtonDispatcher;
@@ -115,7 +120,6 @@ class HomeState extends State<Home> {
           onBackButtonPressed: _onBackPressed,
           child: Stack(
             children: <Widget>[
-              Overlay(key: artOverlayKey),
               Padding(
                 padding: const EdgeInsets.only(bottom: kSongTileHeight),
                 child: Router<HomeRoutes>(
@@ -126,7 +130,7 @@ class HomeState extends State<Home> {
                 ),
               ),
               const PlayerRoute(),
-              Overlay(key: overlayKey),
+              Overlay(key: router.overlayKey),
               const DrawerWidget(),
             ],
           ),

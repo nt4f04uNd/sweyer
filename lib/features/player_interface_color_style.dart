@@ -50,7 +50,7 @@ class PlayerInterfaceColorStyleControl extends Control {
 
   SystemUiOverlayStyle get systemUiOverlayStyleForSelection {
     return SystemUiStyleController.instance.lastUi.copyWith(
-      systemNavigationBarColor: shadeColor(0.3,  PlayerInterfaceColorStyleControl.instance.currentBackgroundColor.value),
+      systemNavigationBarColor: shadeColor(0.3, PlayerInterfaceColorStyleControl.instance.currentBackgroundColor.value),
     );
   }
 
@@ -79,18 +79,22 @@ class PlayerInterfaceColorStyleSettingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text('Стиль проигрывателя'),
-      onTap: () {
-        ShowFunctions.instance.showRadio<PlayerInterfaceColorStyle>(
-          context: context,
-          title: 'Стиль проигрывателя',
-          items: PlayerInterfaceColorStyle.values,
-          itemTitleBuilder: (item) => item.name,
-          onItemSelected: (item) => Settings.playerInterfaceColorStyle.set(item),
-          groupValueGetter: () => Settings.playerInterfaceColorStyle.value,
-        );
-      },
+    final l10n = getl10n(context);
+    return PlayerInterfaceColorStyleSettingBuilder(
+      builder: (context, value, child) => ListTile(
+        title: Text(l10n.playerInterfaceColorStyle),
+        subtitle: Text(l10n.getPlayerInterfaceColorStyleValue(value)),
+        onTap: () {
+          ShowFunctions.instance.showRadio<PlayerInterfaceColorStyle>(
+            context: context,
+            title: l10n.playerInterfaceColorStyle,
+            items: PlayerInterfaceColorStyle.values,
+            itemTitleBuilder: (item) => l10n.getPlayerInterfaceColorStyleValue(item),
+            onItemSelected: (item) => Settings.playerInterfaceColorStyle.set(item),
+            groupValueGetter: () => Settings.playerInterfaceColorStyle.value,
+          );
+        },
+      ),
     );
   }
 }

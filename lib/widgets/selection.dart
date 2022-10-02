@@ -588,7 +588,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         ),
       );
 
-      final localOverlay = overlay ?? HomeState.overlayKey.currentState!;
+      final localOverlay = overlay ?? HomeRouter.instance.overlayKey.currentState!;
       localOverlay.insert(_overlayEntry!);
 
       // Animate system UI

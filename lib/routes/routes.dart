@@ -308,6 +308,8 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
 
+  final GlobalKey<OverlayState> artOverlayKey = GlobalKey();
+
   late final _TransitionSettings transitionSettings = _TransitionSettings(
     grey: StackFadeRouteTransitionSettings(uiStyle: staticTheme.systemUiThemeExtension.grey),
     greyDismissible: StackFadeRouteTransitionSettings(
@@ -502,6 +504,8 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
 
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+
+  final GlobalKey<OverlayState> overlayKey = GlobalKey();
 
   @override
   Future<void> setNewRoutePath(HomeRoutes configuration) async {}

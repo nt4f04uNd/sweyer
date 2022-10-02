@@ -892,7 +892,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
         artOverlayEntry = OverlayEntry(
           builder: (context) => child,
         );
-        HomeState.artOverlayKey.currentState!.insert(artOverlayEntry!);
+        AppRouter.instance.artOverlayKey.currentState!.insert(artOverlayEntry!);
       }
     });
   }

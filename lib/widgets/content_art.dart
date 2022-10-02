@@ -797,9 +797,9 @@ class _ContentArtState extends State<ContentArt> {
   ///  * otherwise it should be called manually (see _deliverLoad call in [build])
   ///
   /// It's an error to call this method, when [loaded] is not true.
-  Future<void> _deliverLoad() async {
+  Future<void> _deliverLoad({bool force = false}) async {
     assert(loaded);
-    if (!_delivered) {
+    if (force || !_delivered) {
       _delivered = true;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (mounted) {
@@ -868,6 +868,15 @@ class _ContentArtState extends State<ContentArt> {
         oldContent is Album && content is Album && oldContent.songs.first != content.songs.first ||
         oldContent is Playlist && content is Playlist && !listEquals(oldContent.songIds, content.songIds)) {
       _update();
+    } else if (oldWidget.onLoad != widget.onLoad) {
+      if (widget.onLoad != null) {
+        globalKey = GlobalKey();
+      }
+      if (!_delivered) {
+        _update();
+      } else {
+        _deliverLoad(force: true);
+      }
     }
     super.didUpdateWidget(oldWidget);
   }

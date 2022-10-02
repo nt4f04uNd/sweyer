@@ -90,7 +90,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with S
 
   @override
   Widget build(BuildContext context) {
-      final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final baseAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,

@@ -161,6 +161,8 @@ abstract class Settings {
     const BoolPref('use_media_store_for_favorite_songs', true),
   );
 
+  /// How to color the player route interface.
+  /// See [PlayerInterfaceColorStyleControl] and related widgets.
   static final playerInterfaceColorStyle = PrefNotifier(
     EnumPref(
       'player_interface_color_style',

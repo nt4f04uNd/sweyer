@@ -260,5 +260,8 @@
   "accept": "Принять",
   "cancel": "Отмена",
   "copied": "Скопировано",
-  "gitHubRepo": "GitHub репозиторий"
+  "gitHubRepo": "GitHub репозиторий",
+  "defaultValue": "По умолчанию",
+  "playerInterfaceColorStyle": "Цветовая тема плеера",
+  "playerInterfaceColorStyleArtColor": "На основе обложки трека"
 }

@@ -131,7 +131,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
   }
 
   Widget _buildInfo() {
-  final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final List<Widget> children = [
       Text(
         widget.queue.title,
@@ -273,7 +273,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
     const checkmarkGridMargin = 10.0;
     const favoriteIndicatorMargin = 17.0;
     const favoriteIndicatorLargeSize = 28.0;
-     final theme = Theme.of(context);
+    final theme = Theme.of(context);
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
       children: [
