@@ -34,14 +34,15 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
   void _handleControllerStatusChange(AnimationStatus status) {
     // Change system UI on expanding/collapsing the drawer.
+    final theme = Theme.of(context);
     if (_onTop) {
       if (status == AnimationStatus.dismissed) {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: constants.UiTheme.grey.auto,
+          to: theme.systemUiThemeExtension.grey,
         );
       } else {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: constants.UiTheme.drawerScreen.auto,
+          to: theme.systemUiThemeExtension.drawerScreen,
         );
       }
     }

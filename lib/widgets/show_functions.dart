@@ -3,7 +3,6 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart' hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
@@ -69,7 +68,7 @@ class ShowFunctions extends NFShowFunctions {
 
     await showDialog(
       context,
-      ui: constants.UiTheme.modalOverGrey.auto,
+      ui: theme.systemUiThemeExtension.modalOverGrey,
       title: Text(l10n.newPlaylist),
       content: Builder(
         builder: (context) => AppTextField(
@@ -283,7 +282,7 @@ class ShowFunctions extends NFShowFunctions {
 
     return ShowFunctions.instance.showAlert(
       context,
-      ui: constants.UiTheme.modalOverGrey.auto,
+      ui: theme.systemUiThemeExtension.modalOverGrey,
       title: Text(l10n.sort),
       titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),

@@ -24,8 +24,9 @@ class _InitialRouteState extends State<InitialRoute> {
 
   void _animateNotMainUi() {
     if (_onTop && playerRouteController.value == 0.0) {
+      final theme = Theme.of(context);
       SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: constants.UiTheme.black.auto,
+        to: theme.systemUiThemeExtension.black,
         duration: const Duration(milliseconds: 550),
       );
     }
@@ -59,8 +60,9 @@ class _InitialRouteState extends State<InitialRoute> {
                   return const _SongsEmptyScreen();
                 }
                 if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
+                  final theme = Theme.of(context);
                   SystemUiStyleController.instance.animateSystemUiOverlay(
-                    to: constants.UiTheme.grey.auto,
+                    to: theme.systemUiThemeExtension.grey,
                   );
                 }
                 return StreamBuilder<bool>(
@@ -90,6 +92,7 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
+  static GlobalKey<OverlayState> artOverlayKey = GlobalKey();
   static GlobalKey<OverlayState> overlayKey = GlobalKey();
   final router = HomeRouter.main();
   DateTime? _lastBackPressTime;
@@ -112,6 +115,7 @@ class HomeState extends State<Home> {
           onBackButtonPressed: _onBackPressed,
           child: Stack(
             children: <Widget>[
+              Overlay(key: artOverlayKey),
               Padding(
                 padding: const EdgeInsets.only(bottom: kSongTileHeight),
                 child: Router<HomeRoutes>(

@@ -111,9 +111,9 @@ class App extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   static NFThemeData nfThemeData = NFThemeData(
-    systemUiStyle: constants.UiTheme.black.auto,
-    modalSystemUiStyle: constants.UiTheme.modal.auto,
-    bottomSheetSystemUiStyle: constants.UiTheme.bottomSheet.auto,
+    systemUiStyle: staticTheme.systemUiThemeExtension.black,
+    modalSystemUiStyle: staticTheme.systemUiThemeExtension.modal,
+    bottomSheetSystemUiStyle: staticTheme.systemUiThemeExtension.bottomSheet,
   );
 
   static void rebuildAllChildren() {

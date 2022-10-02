@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:sweyer/constants/constants.dart';
 import 'package:sweyer/sweyer.dart';
 
-import '../colors.dart';
-import 'app_theme.dart';
-
 export 'app_theme.dart';
-export 'player_route_theme.dart';
+export 'system_ui_theme.dart';
 
 abstract class Theme {
   static const Color defaultPrimaryColor = AppColors.deepPurpleAccent;
@@ -18,6 +15,7 @@ abstract class Theme {
     light: ThemeData(
       extensions: [
         AppTheme.light,
+        SystemUiTheme.light,
       ],
       //******** General ********
       fontFamily: 'Manrope',
@@ -145,6 +143,7 @@ abstract class Theme {
     dark: ThemeData(
       extensions: [
         AppTheme.dark,
+        SystemUiTheme.dark,
       ],
       //******** General ********
       fontFamily: 'Manrope',
@@ -252,88 +251,6 @@ abstract class Theme {
         ),
         backgroundColor: Color(0xff070707),
       ),
-    ),
-  );
-}
-
-abstract class UiTheme {
-  /// Default theme for all screens.
-  ///
-  /// Theme where nav bar is [black] (with default dark theme).
-  /// For light this means [white].
-  ///
-  /// The opposite is [grey].
-  static final ThemeContainer<SystemUiOverlayStyle> black = ThemeContainer(
-    /// [withOpacity] needed for smooth transition to [drawerScreen].
-    light: SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.white.withOpacity(0.0),
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-    dark: SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.black,
-      systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.light,
-      statusBarColor: AppColors.grey.withOpacity(0.0),
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
-
-  /// Theme where nav bar is [grey] (with default dark theme).
-  /// For light this means [eee].
-  ///
-  /// The opposite is [black].
-  static final ThemeContainer<SystemUiOverlayStyle> grey = ThemeContainer(
-    light: black.light.copyWith(systemNavigationBarColor: AppColors.eee),
-    dark: black.dark.copyWith(systemNavigationBarColor: AppColors.grey),
-  );
-
-  /// Theme for the drawer screen.
-  static final ThemeContainer<SystemUiOverlayStyle> drawerScreen = ThemeContainer(
-    light: black.light.copyWith(
-      statusBarColor: Colors.white,
-      systemNavigationBarColor: Colors.white,
-    ),
-    dark: black.dark.copyWith(
-      statusBarColor: AppColors.grey,
-      systemNavigationBarColor: AppColors.grey,
-    ),
-  );
-
-  /// Theme for the bottom sheet dialog.
-  static final ThemeContainer<SystemUiOverlayStyle> bottomSheet = ThemeContainer(
-    light: black.light.copyWith(
-      systemNavigationBarColor: Colors.white,
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
-    ),
-    dark: black.dark.copyWith(
-      systemNavigationBarColor: Colors.black,
-    ),
-  );
-
-  /// Theme for the modal dialog.
-  static final ThemeContainer<SystemUiOverlayStyle> modal = ThemeContainer(
-    light: black.light.copyWith(
-      systemNavigationBarColor: const Color(0xff757575),
-      systemNavigationBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
-    ),
-    dark: black.dark,
-  );
-
-  /// Theme for the modal dialog that is displayed over [grey].
-  static final ThemeContainer<SystemUiOverlayStyle> modalOverGrey = ThemeContainer(
-    light: modal.light.copyWith(
-      systemNavigationBarColor: const Color(0xff6d6d6d),
-    ),
-    dark: modal.dark.copyWith(
-      systemNavigationBarColor: const Color(0xff0d0d0d),
     ),
   );
 }

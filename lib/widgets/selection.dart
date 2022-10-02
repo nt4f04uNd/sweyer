@@ -4,6 +4,7 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:boxy/boxy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -328,14 +329,12 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
   }
 }
 
-/// Signature, used for [ContentSelectionController.actionsBuilder].
-typedef _ActionsBuilder = _SelectionActionsBar Function(BuildContext);
-
 class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> with RouteAware {
   ContentSelectionController._({
     required AnimationController animationController,
     required this.context,
     required this.actionsBuilder,
+    this.systemUiOverlayStyle,
     this.overlay,
     this.ignoreWhen,
     Set<T>? data,
@@ -347,6 +346,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ContentSelectionController._alwaysInSelection({
     required this.context,
     required this.actionsBuilder,
+    this.systemUiOverlayStyle,
     this.overlay,
     Set<T>? data,
   })  : ignoreWhen = null,
@@ -357,7 +357,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   final BuildContext context;
 
   /// Will build selection controls overlay widget.
-  final _ActionsBuilder? actionsBuilder;
+  final WidgetBuilder? actionsBuilder;
+
+  final ValueGetter<SystemUiOverlayStyle>? systemUiOverlayStyle;
 
   /// An overlay to use. By default the one provided by [HomeState.overlayKey]
   /// is used.
@@ -414,6 +416,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     required BuildContext context,
     ContentType<T>? contentType,
     bool actionsBar = true,
+    ValueGetter<SystemUiOverlayStyle>? systemUiOverlayStyle,
+    Widget Function(BuildContext context, Widget child)? actionsBarWrapperBuilder,
     List<Widget> Function(BuildContext)? additionalPlayActionsBuilder,
     bool counter = false,
     bool closeButton = false,
@@ -426,10 +430,11 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         vsync: vsync,
         duration: kSelectionDuration,
       ),
+      systemUiOverlayStyle: systemUiOverlayStyle,
       actionsBuilder: !actionsBar
           ? null
           : (context) {
-              return _SelectionActionsBar(
+              final actionsBar = _SelectionActionsBar(
                 left: [
                   _ActionsSelectionTitle(
                     selectedTitle: false,
@@ -439,6 +444,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
                 ],
                 right: _getActions(contentType, additionalPlayActionsBuilder?.call(context) ?? const [])(),
               );
+              return actionsBarWrapperBuilder?.call(context, actionsBar) ?? actionsBar;
             },
     );
   }
@@ -588,8 +594,12 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       // Animate system UI
       final lastUi = SystemUiStyleController.instance.lastUi;
       _lastNavColor = lastUi.systemNavigationBarColor;
+      final theme = Theme.of(context);
       SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: lastUi.copyWith(systemNavigationBarColor: constants.UiTheme.grey.auto.systemNavigationBarColor),
+        to: systemUiOverlayStyle?.call() ??
+            lastUi.copyWith(
+              systemNavigationBarColor: theme.systemUiThemeExtension.grey.systemNavigationBarColor,
+            ),
         duration: kSelectionDuration,
         curve: _SelectionActionsBar.forwardCurve,
       );
@@ -1666,7 +1676,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
     final theme = Theme.of(context);
     ShowFunctions.instance.showDialog(
       context,
-      ui: constants.UiTheme.modalOverGrey.auto,
+      ui: theme.systemUiThemeExtension.modalOverGrey,
       title: Builder(
         builder: (context) {
           final l10n = getl10n(context);
@@ -1962,7 +1972,7 @@ void _showActionConfirmationDialog<E extends Content>({
 
   ShowFunctions.instance.showDialog(
     context,
-    ui: constants.UiTheme.modalOverGrey.auto,
+    ui: theme.systemUiThemeExtension.modalOverGrey,
     title: Builder(
       builder: (context) {
         final l10n = getl10n(context);

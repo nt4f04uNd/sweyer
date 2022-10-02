@@ -5,7 +5,7 @@ import 'package:palette_generator/palette_generator.dart';
 
 Future<PaletteGenerator> createPalette(EncodedImage image) => PaletteGenerator.fromByteData(
       image,
-      maximumColorCount: 50,
+      maximumColorCount: 100,
     );
 
 /// A widget that draws the swatches for the [PaletteGenerator] it is given,

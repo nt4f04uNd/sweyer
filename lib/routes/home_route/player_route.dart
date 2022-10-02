@@ -40,6 +40,8 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
         context: context,
         contentType: ContentType.song,
         closeButton: true,
+        systemUiOverlayStyle: () => PlayerInterfaceColorStyleControl.instance.systemUiOverlayStyleForSelection,
+        actionsBarWrapperBuilder: (context, child) => PlayerInterfaceThemeOverride(child: child),
         additionalPlayActionsBuilder: (context) => const [
           RemoveFromQueueSelectionAction(),
         ],
@@ -89,14 +91,11 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
   }
 
   void _handleControllerChange() {
-    final systemNavigationBarColorTween = ColorTween(
-      begin: constants.UiTheme.grey.auto.systemNavigationBarColor,
-      end: constants.UiTheme.black.auto.systemNavigationBarColor,
-    );
+    final overlayStyle = PlayerInterfaceColorStyleControl.instance.systemUiOverlayStyle;
     // Change system UI on expanding/collapsing the player route.
     SystemUiStyleController.instance.setSystemUiOverlay(
       SystemUiStyleController.instance.lastUi.copyWith(
-        systemNavigationBarColor: systemNavigationBarColorTween.evaluate(controller),
+        systemNavigationBarColor: overlayStyle.systemNavigationBarColor,
       ),
     );
   }
@@ -135,26 +134,38 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
         backgroundColor: backgroundColor,
         body: Stack(
           children: <Widget>[
-            SharedAxisTabView(
-              children: _tabs,
-              controller: tabController,
-              tabBuilder: (context, animation, secondaryAnimation, child) {
-                if (child is _QueueTab) {
-                  if (animation != _queueTabAnimation) {
-                    if (_queueTabAnimation != null) {
-                      _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
+            AnimatedBuilder(
+              animation: playerRouteController,
+              builder: (context, child) => AnimationSwitcher(
+                animation: playerRouteController,
+                child1: Container(
+                  color: theme.colorScheme.secondary,
+                ),
+                child2: const PlayerInterfaceBackgroundWidget(),
+              ),
+            ),
+            PlayerInterfaceThemeOverride(
+              child: SharedAxisTabView(
+                children: _tabs,
+                controller: tabController,
+                tabBuilder: (context, animation, secondaryAnimation, child) {
+                  if (child is _QueueTab) {
+                    if (animation != _queueTabAnimation) {
+                      if (_queueTabAnimation != null) {
+                        _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
+                      }
+                      _queueTabAnimation = animation;
+                      animation.addStatusListener(
+                        _handleQueueTabAnimationStatus,
+                      );
                     }
-                    _queueTabAnimation = animation;
-                    animation.addStatusListener(
-                      _handleQueueTabAnimationStatus,
-                    );
                   }
-                }
-                return IgnorePointer(
-                  ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
-                  child: child,
-                );
-              },
+                  return IgnorePointer(
+                    ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
+                    child: child,
+                  );
+                },
+              ),
             ),
             TrackPanel(onTap: controller.open),
           ],
@@ -623,6 +634,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final list = QueueControl.instance.state.current.songs;
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Padding(
@@ -678,54 +690,43 @@ class _MainTabState extends State<_MainTab> {
     final mediaQuery = MediaQuery.of(context);
     return AnimatedBuilder(
       animation: playerRouteController,
-      builder: (context, child) => Stack(
-        children: [
-          AnimationSwitcher(
-            animation: playerRouteController,
-            child1: Container(
-              color: theme.colorScheme.secondary,
-            ),
-            child2: const PlayerInterfaceBackgroundWidget(),
+      builder: (context, child) => Scaffold(
+        body: child,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          toolbarHeight: math.max(
+            TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
+            theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
           ),
-          Scaffold(
-            body: child,
-            resizeToAvoidBottomInset: false,
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              elevation: 0.0,
-              backgroundColor: Colors.transparent,
-              toolbarHeight: math.max(
-                TrackPanel.height(mediaQuery.textScaleFactor) - mediaQuery.padding.top,
-                theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
+          leading: FadeTransition(
+            opacity: fadeAnimation,
+            child: RepaintBoundary(
+              child: NFIconButton(
+                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                size: 40.0,
+                onPressed: playerRouteController.close,
               ),
-              leading: FadeTransition(
-                opacity: fadeAnimation,
-                child: RepaintBoundary(
-                  child: NFIconButton(
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                    size: 40.0,
-                    onPressed: playerRouteController.close,
-                  ),
-                ),
-              ),
-              actions: <Widget>[
-                FadeTransition(
-                  opacity: fadeAnimation,
-                  child: Row(
-                    children: [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: Prefs.devMode,
-                        builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
-                      ),
-                      const FavoriteButton(),
-                      const SizedBox(width: 5.0),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
-        ],
+          actions: <Widget>[
+            FadeTransition(
+              opacity: fadeAnimation,
+              child: Row(
+                children: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: Prefs.devMode,
+                    builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
+                  ),
+                  const FavoriteButton(),
+                  const SizedBox(width: 5.0),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       child: Center(
         child: Column(
@@ -881,6 +882,26 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
   /// When `true`, should use fade animation instead of scale.
   bool get useFade => playerRouteController.value == 0.0;
 
+  OverlayEntry? artOverlayEntry;
+
+  /// We need this so that color thief always can capture a color.
+  void _insertArtOverlay(Widget child) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (mounted) {
+        _removeArtOverlayEntry();
+        artOverlayEntry = OverlayEntry(
+          builder: (context) => child,
+        );
+        HomeState.artOverlayKey.currentState!.insert(artOverlayEntry!);
+      }
+    });
+  }
+
+  void _removeArtOverlayEntry() {
+    artOverlayEntry?.remove();
+    artOverlayEntry = null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -912,6 +933,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
 
   @override
   void dispose() {
+    _removeArtOverlayEntry();
     controller.dispose();
     fadeController.dispose();
     _songChangeSubscription.cancel();
@@ -987,26 +1009,36 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
             builder: (context, constraints) => AnimatedBuilder(
               animation: controller,
               builder: (context, child) {
-                final newArt = ContentArtLoadBuilder(
-                  builder: (onLoad) => ContentArt.playerRoute(
-                    key: ValueKey(currentSong),
-                    size: constraints.maxWidth,
-                    loadAnimationDuration: Duration.zero,
-                    source: ContentArtSource.song(currentSong),
-                    onLoad: onLoad,
-                  ),
+                final newArt = ContentArt.playerRoute(
+                  key: ValueKey(currentSong),
+                  size: constraints.maxWidth,
+                  loadAnimationDuration: Duration.zero,
+                  source: ContentArtSource.song(currentSong),
                 );
                 if (art == null ||
                     controller.status == AnimationStatus.reverse ||
                     controller.status == AnimationStatus.dismissed ||
                     useFade) {
                   art = newArt;
+                  _insertArtOverlay(ContentArtLoadBuilder(
+                    builder: (onLoad) => ContentArt.playerRoute(
+                      key: ValueKey(currentSong),
+                      size: constraints.maxWidth,
+                      loadAnimationDuration: Duration.zero,
+                      source: ContentArtSource.song(currentSong),
+                      onLoad: onLoad,
+                    ),
+                  ));
                 }
+
                 return ScaleTransition(
                   scale: animation,
                   child: Stack(
                     children: [
-                      Opacity(opacity: useFade ? 0.0 : 1.0, child: newArt),
+                      Opacity(
+                        opacity: useFade ? 0.0 : 1.0,
+                        child: newArt,
+                      ),
                       _fade(art!),
                     ],
                   ),

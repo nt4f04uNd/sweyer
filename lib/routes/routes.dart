@@ -10,7 +10,6 @@ import 'package:equatable/equatable.dart';
 import 'package:sweyer/routes/settings_route/general_settings.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 import 'settings_route/licenses_route.dart';
 
@@ -310,12 +309,12 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
 
   late final _TransitionSettings transitionSettings = _TransitionSettings(
-    grey: StackFadeRouteTransitionSettings(uiStyle: constants.UiTheme.grey.auto),
+    grey: StackFadeRouteTransitionSettings(uiStyle: staticTheme.systemUiThemeExtension.grey),
     greyDismissible: StackFadeRouteTransitionSettings(
       opaque: false,
       dismissible: true,
       dismissBarrier: _dismissBarrier,
-      uiStyle: constants.UiTheme.grey.auto,
+      uiStyle: staticTheme.systemUiThemeExtension.grey,
     ),
     dismissible: StackFadeRouteTransitionSettings(
       opaque: false,
@@ -345,11 +344,12 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
   VoidCallback? _setState;
   void updateTransitionSettings({bool themeChanged = false}) {
     final dismissBarrier = _dismissBarrier;
-    transitionSettings.grey.uiStyle = constants.UiTheme.grey.auto;
-    transitionSettings.greyDismissible.uiStyle = constants.UiTheme.grey.auto;
+    transitionSettings.grey.uiStyle = staticTheme.systemUiThemeExtension.grey;
+    transitionSettings.greyDismissible.uiStyle = staticTheme.systemUiThemeExtension.grey;
     transitionSettings.greyDismissible.dismissBarrier = dismissBarrier;
     transitionSettings.dismissible.dismissBarrier = dismissBarrier;
-    transitionSettings.initial.uiStyle = _mainScreenShown ? constants.UiTheme.grey.auto : constants.UiTheme.black.auto;
+    transitionSettings.initial.uiStyle =
+        _mainScreenShown ? staticTheme.systemUiThemeExtension.grey : staticTheme.systemUiThemeExtension.black;
     transitionSettings.theme.dismissBarrier = dismissBarrier;
     if (themeChanged) {
       _setState?.call();

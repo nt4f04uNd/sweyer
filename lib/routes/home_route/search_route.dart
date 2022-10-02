@@ -1198,7 +1198,7 @@ class _SuggestionsHeader extends StatelessWidget {
           onPressed: () {
             ShowFunctions.instance.showDialog(
               context,
-              ui: constants.UiTheme.modalOverGrey.auto,
+              ui: theme.systemUiThemeExtension.modalOverGrey,
               title: Text(l10n.searchClearHistory),
               buttonSplashColor: theme.appThemeExtension.glowSplashColor,
               acceptButton: AppButton.pop(
@@ -1260,7 +1260,7 @@ class _SuggestionTile extends StatelessWidget {
       onLongPress: () {
         ShowFunctions.instance.showDialog(
           context,
-          ui: constants.UiTheme.modalOverGrey.auto,
+          ui: theme.systemUiThemeExtension.modalOverGrey,
           title: Text(l10n.searchHistory),
           titlePadding: defaultAlertTitlePadding.copyWith(bottom: 4.0),
           contentPadding: defaultAlertContentPadding.copyWith(bottom: 6.0),

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sweyer/constants/theme/app_theme.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as constants;
@@ -80,8 +79,8 @@ class ThemeControl {
     ));
     await Future.delayed(const Duration(milliseconds: 500));
     if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor !=
-        constants.UiTheme.black.auto.systemNavigationBarColor) {
-      final ui = constants.UiTheme.grey.auto;
+        theme.systemUiThemeExtension.black.systemNavigationBarColor) {
+      final ui = theme.systemUiThemeExtension.grey;
       await SystemUiStyleController.instance.animateSystemUiOverlay(
         to: ui,
         curve: Curves.easeOut,
@@ -102,9 +101,9 @@ class ThemeControl {
     _rebuildOperation?.cancel();
     setThemeLightMode(_brightness == Brightness.dark);
     App.nfThemeData = App.nfThemeData.copyWith(
-      systemUiStyle: constants.UiTheme.black.auto,
-      modalSystemUiStyle: constants.UiTheme.modal.auto,
-      bottomSheetSystemUiStyle: constants.UiTheme.bottomSheet.auto,
+      systemUiStyle: theme.systemUiThemeExtension.black,
+      modalSystemUiStyle: theme.systemUiThemeExtension.modal,
+      bottomSheetSystemUiStyle: theme.systemUiThemeExtension.bottomSheet,
     );
 
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
@@ -119,7 +118,7 @@ class ThemeControl {
     });
 
     await SystemUiStyleController.instance.animateSystemUiOverlay(
-      to: constants.UiTheme.black.auto,
+      to: theme.systemUiThemeExtension.black,
       curve: Curves.easeIn,
       duration: const Duration(milliseconds: 160),
     );
@@ -146,9 +145,10 @@ class ThemeControl {
     constants.Theme.app = constants.Theme.app.copyWith(
       light: constants.Theme.app.light.copyWith(
         extensions: [
-          constants.Theme.app.light.extension<AppTheme>()!.copyWith(
-                artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
-              ),
+          constants.Theme.app.light.appThemeExtension.copyWith(
+            artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+          ),
+          constants.Theme.app.light.systemUiThemeExtension,
         ],
         primaryColor: color,
         toggleableActiveColor: color,
@@ -173,9 +173,10 @@ class ThemeControl {
       ),
       dark: constants.Theme.app.dark.copyWith(
         extensions: [
-          constants.Theme.app.dark.extension<AppTheme>()!.copyWith(
-                artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
-              ),
+          constants.Theme.app.dark.appThemeExtension.copyWith(
+            artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+          ),
+          constants.Theme.app.dark.systemUiThemeExtension,
         ],
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
