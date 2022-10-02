@@ -39,26 +39,7 @@ class PlayerInterfaceColorStyleControl extends Control {
   }
 }
 
-class PlayerInterfaceColorStyleSettingBuilder extends StatelessWidget {
-  const PlayerInterfaceColorStyleSettingBuilder({
-    Key? key,
-    required this.builder,
-    this.child,
-  }) : super(key: key);
-
-  final ValueWidgetBuilder<PlayerInterfaceColorStyle> builder;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<PlayerInterfaceColorStyle>(
-      valueListenable: Settings.playerInterfaceColorStyle,
-      builder: builder,
-      child: child,
-    );
-  }
-}
-
+/// Allows to choose the [PlayerInterfaceColorStyle].
 class PlayerInterfaceColorStyleSettingWidget extends StatelessWidget {
   const PlayerInterfaceColorStyleSettingWidget({Key? key}) : super(key: key);
 
@@ -80,6 +61,28 @@ class PlayerInterfaceColorStyleSettingWidget extends StatelessWidget {
   }
 }
 
+/// A shorthand builder for [Settings.playerInterfaceColorStyle].
+class PlayerInterfaceColorStyleSettingBuilder extends StatelessWidget {
+  const PlayerInterfaceColorStyleSettingBuilder({
+    Key? key,
+    required this.builder,
+    this.child,
+  }) : super(key: key);
+
+  final ValueWidgetBuilder<PlayerInterfaceColorStyle> builder;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<PlayerInterfaceColorStyle>(
+      valueListenable: Settings.playerInterfaceColorStyle,
+      builder: builder,
+      child: child,
+    );
+  }
+}
+
+/// A background to be used by [PlayerRoute].
 class PlayerInterfaceBackgroundWidget extends StatelessWidget {
   const PlayerInterfaceBackgroundWidget({Key? key}) : super(key: key);
 
@@ -121,6 +124,7 @@ class _SolidPaletteColorBackground extends StatelessWidget {
   }
 }
 
+/// Provides a [ContentArt.onLoad] function.
 class ContentArtLoadBuilder extends StatelessWidget {
   const ContentArtLoadBuilder({
     Key? key,
