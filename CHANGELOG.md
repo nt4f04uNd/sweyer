@@ -2,11 +2,13 @@
 
 - Added favorites
 - Added German language support
+- Added "Player color theme" setting
 - Changed notification stop icon
 - Fixed back button on dialogs
 - Other bug fixes
 - Not important for users:
   - Flutter 3 migration
+  - Rewrite theme with ThemeExtensions
   - CI
   - Automatic and golden tests
 
