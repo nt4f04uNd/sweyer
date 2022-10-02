@@ -480,7 +480,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   }
 
   ThemeData buildAppBarTheme() {
-    final ThemeData theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return theme.copyWith(
       primaryColor: theme.backgroundColor,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
@@ -998,7 +998,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     final count = favoritesChip ? null : delegate.results.map.get(widget.contentType!).length;
-    final colorScheme = ThemeControl.instance.theme.colorScheme;
+    final colorScheme = theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
       end: theme.appThemeExtension.contrast,
@@ -1047,7 +1047,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                   )
                 : IgnorePointer(
                     child: Theme(
-                      data: ThemeControl.instance.theme.copyWith(canvasColor: Colors.transparent),
+                      data: theme.copyWith(canvasColor: Colors.transparent),
                       child: RawChip(
                         shape: StadiumBorder(
                           side: BorderSide(
@@ -1121,6 +1121,7 @@ class _SuggestionsState extends State<_Suggestions> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return AnimatedBuilder(
       animation: _SearchStateDelegate._of(context)!.searchDelegate._setStateNotifier,
       builder: (context, child) => FutureBuilder<void>(
@@ -1146,7 +1147,7 @@ class _SuggestionsState extends State<_Suggestions> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: ThemeControl.instance.theme.hintColor,
+                          color: theme.hintColor,
                         ),
                       ),
                     ),
@@ -1193,7 +1194,7 @@ class _SuggestionsHeader extends StatelessWidget {
         padding: const EdgeInsets.only(top: 5.0),
         child: NFIconButton(
           icon: const Icon(Icons.delete_sweep_rounded),
-          color: ThemeControl.instance.theme.hintColor,
+          color: theme.hintColor,
           onPressed: () {
             ShowFunctions.instance.showDialog(
               context,
@@ -1253,7 +1254,7 @@ class _SuggestionTile extends StatelessWidget {
         padding: const EdgeInsets.only(left: 2.0),
         child: Icon(
           Icons.history_rounded,
-          color: ThemeControl.instance.theme.iconTheme.color,
+          color: theme.iconTheme.color,
         ),
       ),
       onLongPress: () {

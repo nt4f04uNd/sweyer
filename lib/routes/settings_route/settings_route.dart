@@ -166,6 +166,7 @@ class _FooterState extends State<_Footer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 40.0),
       child: Column(
@@ -179,7 +180,7 @@ class _FooterState extends State<_Footer> {
                 padding: const EdgeInsets.only(left: 2.5, right: 2.5),
                 child: NFIconButton(
                   icon: const SweyerLogo(),
-                  splashColor: ThemeControl.instance.theme.colorScheme.primary,
+                  splashColor: theme.colorScheme.primary,
                   size: 60.0,
                   iconSize: 42.0,
                   onPressed: _handleSecretLogoClick,
@@ -192,7 +193,7 @@ class _FooterState extends State<_Footer> {
                     appName,
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: ThemeControl.instance.theme.textTheme.headline6!.color,
+                      color: theme.textTheme.headline6!.color,
                     ),
                   ),
                   Text(
@@ -209,7 +210,7 @@ class _FooterState extends State<_Footer> {
               getl10n(context).gitHubRepo,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.instance.theme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -219,7 +220,7 @@ class _FooterState extends State<_Footer> {
               MaterialLocalizations.of(context).licensesPageTitle,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.instance.theme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

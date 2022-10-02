@@ -157,6 +157,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     return StreamBuilder(
       stream: ThemeControl.instance.themeChanging,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
+        final theme = ThemeControl.instance.theme;
         return NFTheme(
           data: App.nfThemeData,
           child: MaterialApp.router(
@@ -164,8 +165,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             // checkerboardRasterCacheImages: true,
             debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
             title: constants.Config.applicationTitle,
-            theme: ThemeControl.instance.theme,
-            color: ThemeControl.instance.theme.colorScheme.primary,
+            theme: theme,
+            color: theme.colorScheme.primary,
             supportedLocales: constants.Config.supportedLocales,
             scrollBehavior: _ScrollBehavior(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -181,9 +182,10 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 class _ScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    final theme = Theme.of(context);
     return GlowingOverscrollIndicator(
       axisDirection: axisDirection,
-      color: ThemeControl.instance.theme.colorScheme.background,
+      color: theme.colorScheme.background,
       child: child,
     );
   }

@@ -790,6 +790,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTick
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return IgnorePointer(
       ignoring: widget.ignorePointer,
       child: AnimatedBuilder(
@@ -818,7 +819,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTick
               values: [
                 ValueDelegate.strokeColor(
                   const ['Main Layer', 'Color'],
-                  value: ThemeControl.instance.theme.colorScheme.secondaryContainer,
+                  value: theme.colorScheme.secondaryContainer,
                 ),
               ],
             ),
@@ -877,6 +878,7 @@ class _SelectionActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final selectionAnimation = ContentSelectionController._of(context).animation;
     final fadeAnimation = CurvedAnimation(
       curve: forwardCurve,
@@ -900,7 +902,7 @@ class _SelectionActionsBar extends StatelessWidget {
           opacity: fadeAnimation,
           child: Container(
             height: kSongTileHeight,
-            color: ThemeControl.instance.theme.colorScheme.secondary,
+            color: theme.colorScheme.secondary,
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Material(
               color: Colors.transparent,
@@ -1086,6 +1088,7 @@ class _ActionsSelectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final controller = ContentSelectionController._of(context);
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
@@ -1111,7 +1114,7 @@ class _ActionsSelectionTitle extends StatelessWidget {
             child: NFIconButton(
               size: NFConstants.iconButtonSize,
               iconSize: NFConstants.iconSize,
-              color: ThemeControl.instance.theme.colorScheme.onSurface,
+              color: theme.colorScheme.onSurface,
               onPressed: () => controller.close(),
               icon: const Icon(Icons.close_rounded),
             ),
@@ -1216,7 +1219,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
       valueIncreased: controller.lengthIncreased,
       child: Text(
         selectionCount.toString(),
-        style: widget.textStyle ?? appBarTitleTextStyle,
+        style: widget.textStyle ?? appBarTitleTextStyle(context),
       ),
     );
   }
@@ -1759,7 +1762,7 @@ class _FavoriteSelectionActionState extends State<_FavoriteSelectionAction> {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return _ActionBuilder(
       controller: controller,
       shown: () => true,
@@ -2087,7 +2090,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     assert(T == Song || T == Playlist);
 
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final correctedMoreTextWidth = moreTextWidth * mediaQuery.textScaleFactor;
 

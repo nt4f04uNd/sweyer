@@ -97,6 +97,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
   Widget _buildTile() {
     final source = ContentArtSource.artist(widget.artist);
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Material(
       color: widget.backgroundColor,
       child: InkWell(
@@ -132,7 +133,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                       Text(
                         ContentUtils.localizedArtist(widget.artist.artist, l10n),
                         overflow: TextOverflow.ellipsis,
-                        style: ThemeControl.instance.theme.textTheme.headline6,
+                        style: theme.textTheme.headline6,
                       ),
                     ],
                   ),

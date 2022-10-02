@@ -117,7 +117,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller ?? PrimaryScrollController.of(context)!;
-    final theme = ThemeControl.instance.theme;
+  final theme = Theme.of(context);
     final highlightColor = theme.highlightColor;
     return Theme(
       data: theme.copyWith(

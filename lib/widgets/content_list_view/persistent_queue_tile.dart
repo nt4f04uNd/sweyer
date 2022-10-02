@@ -2,7 +2,6 @@ import 'package:boxy/boxy.dart';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 /// Needed for scrollbar computations.
 const double kPersistentQueueTileHeight = kPersistentQueueTileArtSize + _tileVerticalPadding * 2;
@@ -132,7 +131,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
   }
 
   Widget _buildInfo() {
-    final theme = ThemeControl.instance.theme;
+  final theme = Theme.of(context);
     final List<Widget> children = [
       Text(
         widget.queue.title,
@@ -274,7 +273,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
     const checkmarkGridMargin = 10.0;
     const favoriteIndicatorMargin = 17.0;
     const favoriteIndicatorLargeSize = 28.0;
-    final theme = ThemeControl.instance.theme;
+     final theme = Theme.of(context);
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
       children: [

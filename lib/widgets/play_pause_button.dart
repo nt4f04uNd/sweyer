@@ -90,6 +90,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with S
 
   @override
   Widget build(BuildContext context) {
+      final theme = Theme.of(context);
     final baseAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,
@@ -101,7 +102,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with S
     ).animate(baseAnimation);
     final scaleAnimation = Tween(begin: 1.05, end: 0.89).animate(baseAnimation);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final color = widget.iconColor ?? ThemeControl.instance.theme.iconTheme.color!;
+    final color = widget.iconColor ?? theme.iconTheme.color!;
     return NFIconButton(
       size: textScaleFactor * (widget.size ?? _kButtonSize),
       iconSize: textScaleFactor * (widget.iconSize ?? _kIconSize),

@@ -126,7 +126,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
 
   Widget _buildInfo() {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+ final theme = Theme.of(context);
     final artSize = mediaQuery.size.width;
     final summary = ContentUtils.joinDot([
       l10n.contentsPlural(ContentType.song, songs.length),
@@ -248,7 +248,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+ final theme = Theme.of(context);
     final l10n = getl10n(context);
     mediaQuery = MediaQuery.of(context);
 

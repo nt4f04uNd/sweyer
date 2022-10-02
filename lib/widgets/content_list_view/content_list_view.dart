@@ -281,6 +281,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
           itemCount: list.length,
           onReorder: onReorder,
           itemBuilder: (context, index) {
+            final theme = Theme.of(context);
             final item = list[index];
             final child = ReorderableDelayedDragStartListener(
               key: ValueKey(item.id),
@@ -305,9 +306,8 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 current: currentTest?.call(index),
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableDefaultOnTap: enableDefaultOnTap,
-                backgroundColor: backgroundColorBuilder == null
-                    ? ThemeControl.instance.theme.colorScheme.background
-                    : backgroundColorBuilder(index),
+                backgroundColor:
+                    backgroundColorBuilder == null ? theme.colorScheme.background : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
                 trailing: AnimatedSwitcher(

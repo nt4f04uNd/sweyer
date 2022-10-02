@@ -150,10 +150,11 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Theme(
       data: Theme.of(context).copyWith(
         //This will change the drawer background
-        canvasColor: ThemeControl.instance.theme.colorScheme.surface,
+        canvasColor: theme.colorScheme.surface,
       ),
       child: Drawer(
         elevation: elevation,
@@ -176,7 +177,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
-                          color: ThemeControl.instance.theme.textTheme.headline6!.color,
+                          color: theme.textTheme.headline6!.color,
                         ),
                       ),
                     ),
@@ -236,7 +237,7 @@ class DrawerMenuItem extends StatelessWidget {
               child: Icon(
                 icon,
                 size: iconSize,
-                color: ThemeControl.instance.theme.iconTheme.color,
+                color: theme.iconTheme.color,
               ),
             )
           : null,

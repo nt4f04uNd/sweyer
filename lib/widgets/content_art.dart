@@ -912,7 +912,7 @@ class _ContentArtState extends State<ContentArt> {
     if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
       // We should show the art now.
       _deliverLoad();
-      final theme = ThemeControl.instance.theme;
+      final theme = Theme.of(context);
       child = Container(
         alignment: Alignment.center,
         color: theme.colorScheme.primary,
@@ -955,6 +955,8 @@ class _ContentArtState extends State<ContentArt> {
   Widget build(BuildContext context) {
     assert(_loaders.isEmpty || _loaders.length == 1 || _loaders.length == 4);
 
+    final theme = Theme.of(context);
+
     Widget child;
     Widget? currentIndicator;
     if (!loaded) {
@@ -974,7 +976,7 @@ class _ContentArtState extends State<ContentArt> {
       if (widget.current) {
         child = Container(
           alignment: Alignment.center,
-          color: ThemeControl.instance.theme.colorScheme.primary,
+          color: theme.colorScheme.primary,
           width: widget.size,
           height: widget.size,
         );

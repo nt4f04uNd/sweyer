@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/sweyer.dart';
 
 /// Creates a setting item with [title], [description] and [content] sections
 class SettingItem extends StatelessWidget {
@@ -25,6 +24,7 @@ class SettingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
       child: Column(
@@ -52,7 +52,7 @@ class SettingItem extends StatelessWidget {
               child: Text(
                 description!,
                 style: TextStyle(
-                  color: ThemeControl.instance.theme.textTheme.caption!.color,
+                  color: theme.textTheme.caption!.color,
                 ),
               ),
             ),

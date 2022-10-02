@@ -185,6 +185,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
   @override
   Widget build(BuildContext context) {
     final song = PlaybackControl.instance.currentSong;
+    final theme = Theme.of(context);
     return CircularPercentIndicator(
       percent: _progress,
       animation: true,
@@ -194,7 +195,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
       radius: (kSongTileArtSize - progressLineHeight) / 2,
       lineWidth: progressLineHeight,
       circularStrokeCap: CircularStrokeCap.round,
-      progressColor: ThemeControl.instance.theme.colorScheme.primary,
+      progressColor: theme.colorScheme.primary,
       backgroundColor: Colors.transparent,
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,

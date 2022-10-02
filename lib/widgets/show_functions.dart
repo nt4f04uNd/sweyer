@@ -21,7 +21,7 @@ class ShowFunctions extends NFShowFunctions {
     Color? textColor,
     Color? backgroundColor,
   }) async {
-    backgroundColor ??= ThemeControl.instance.theme.colorScheme.primary;
+    backgroundColor ??= staticTheme.colorScheme.primary;
 
     return Fluttertoast.showToast(
       msg: msg,
@@ -107,7 +107,7 @@ class ShowFunctions extends NFShowFunctions {
   void showError({required String errorDetails}) {
     final context = AppRouter.instance.navigatorKey.currentContext!;
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final globalKey = GlobalKey<NFSnackbarEntryState>();
     NFSnackbarController.showSnackbar(
       NFSnackbarEntry(
@@ -161,7 +161,7 @@ class ShowFunctions extends NFShowFunctions {
                             // scrollPhysics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                             style: const TextStyle(fontSize: 11.0),
                             selectionControls: NFTextSelectionControls(
-                              backgroundColor: ThemeControl.instance.theme.colorScheme.background,
+                              backgroundColor: theme.colorScheme.background,
                             ),
                           ),
                         ),
@@ -256,6 +256,7 @@ class ShowFunctions extends NFShowFunctions {
     required ValueGetter<T> groupValueGetter,
   }) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
 
     Widget buildItem(T item) {
       return Theme(
@@ -267,7 +268,7 @@ class ShowFunctions extends NFShowFunctions {
           builder: (context) => AppRadioListTile<T>(
             title: Text(
               itemTitleBuilder(item),
-              style: ThemeControl.instance.theme.textTheme.subtitle1,
+              style: theme.textTheme.subtitle1,
             ),
             value: item,
             groupValue: groupValueGetter(),

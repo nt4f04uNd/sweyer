@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class _ReorderOperation {
   final int oldIndex;
@@ -174,7 +173,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             stream: ContentControl.instance.onContentChange,
             builder: (context, snapshot) {
               final theme = Theme.of(context);
-              final selectedTileColor = ThemeControl.instance.theme.colorScheme.primary;
+              final selectedTileColor = theme.colorScheme.primary;
               final selectedSplashColor = theme.appThemeExtension.glowSplashColorOnContrast;
               late StateSetter setListState;
               if (!tapped || selectedSong != null && !songs.contains(selectedSong)) {
@@ -191,8 +190,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                     enableDefaultOnTap: false,
                     leading: InListContentAction.song(
                       color: selectedSong == null ? selectedTileColor : null,
-                      iconColor: selectedSong == null ? ThemeControl.instance.theme.colorScheme.onPrimary : null,
-                      textColor: selectedSong == null ? ThemeControl.instance.theme.colorScheme.onPrimary : null,
+                      iconColor: selectedSong == null ? theme.colorScheme.onPrimary : null,
+                      textColor: selectedSong == null ? theme.colorScheme.onPrimary : null,
                       splashColor: selectedSong == null ? selectedSplashColor : null,
                       icon: SweyerIcons.play_next,
                       text: l10n.insertAtTheBeginning,
@@ -210,7 +209,6 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                       return Colors.transparent;
                     },
                     itemBuilder: (context, index, child) {
-                      final theme = ThemeControl.instance.theme;
                       final selected = selectedSong == songs[index];
                       return Theme(
                         data: theme.copyWith(
@@ -360,6 +358,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
 
   Widget _buildInfo() {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     const titleFontSize = 24.0;
     final title = Text(
@@ -457,7 +456,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   textStyle: TextStyle(
                                     fontWeight: FontWeight.w900,
                                     fontSize: 15.0,
-                                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                                    color: theme.colorScheme.onBackground,
                                   ),
                                 ),
                               ),
@@ -470,7 +469,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(
-                                  color: ThemeControl.instance.theme.textTheme.subtitle2!.color,
+                                  color: theme.textTheme.subtitle2!.color,
                                   height: 1.2,
                                   fontWeight: FontWeight.w900,
                                   fontSize: 14.0,
@@ -581,7 +580,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -727,7 +726,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                     l10n.nothingHere,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      color: ThemeControl.instance.theme.hintColor,
+                                      color: theme.hintColor,
                                     ),
                                   ),
                                 ),
@@ -765,14 +764,7 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
     vsync: this,
     duration: const Duration(milliseconds: 240),
   );
-  late final colorAnimation = ColorTween(
-    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
-    end: ThemeControl.instance.theme.iconTheme.color,
-  ).animate(CurvedAnimation(
-    parent: controller,
-    curve: Curves.easeOut,
-    reverseCurve: Curves.easeIn,
-  ));
+  late Animation<Color?> colorAnimation;
 
   bool get enabled => widget.onPressed != null;
 
@@ -782,6 +774,20 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
     if (enabled) {
       controller.forward();
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final theme = Theme.of(context);
+    colorAnimation = ColorTween(
+      begin: theme.colorScheme.onSurface.withOpacity(0.12),
+      end: theme.iconTheme.color,
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    ));
   }
 
   @override

@@ -118,7 +118,8 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = ThemeControl.instance.theme.colorScheme.background;
+    final theme = Theme.of(context);
+    final backgroundColor = theme.colorScheme.background;
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     return Slidable(
@@ -314,7 +315,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   }
 
   /// The style that should be used for the queue description text in the app bar.
-  TextStyle get _queueDescriptionStyle => ThemeControl.instance.theme.textTheme.subtitle2!.copyWith(
+  TextStyle get _queueDescriptionStyle => Theme.of(context).textTheme.subtitle2!.copyWith(
         fontSize: 14.0,
         height: 1.0,
         fontWeight: FontWeight.w700,
@@ -341,6 +342,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         key = ValueKey(l10n.allArtists);
         break;
       case QueueType.searched:
+        final theme = Theme.of(context);
         final query = QueueControl.instance.state.searchQuery!;
         text = WidgetSpan(
           child: StyledText(
@@ -351,7 +353,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
               'query': StyledTextTag(
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: ThemeControl.instance.theme.colorScheme.onBackground,
+                  color: theme.colorScheme.onBackground,
                 ),
               ),
             },
@@ -360,6 +362,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         key = ValueKey(l10n.foundByQuery(query));
         break;
       case QueueType.origin:
+        final theme = Theme.of(context);
         final origin = QueueControl.instance.state.origin!;
         if (origin is Album) {
           text = WidgetSpan(
@@ -371,7 +374,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 'name': StyledTextTag(
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onBackground,
                   ),
                 ),
               },
@@ -379,6 +382,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           );
           key = ValueKey(l10n.albumQueue(origin.nameDotYear));
         } else if (origin is Playlist) {
+          final theme = Theme.of(context);
           text = WidgetSpan(
             child: StyledText(
               overflow: TextOverflow.ellipsis,
@@ -388,7 +392,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 'name': StyledTextTag(
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onBackground,
                   ),
                 ),
               },
@@ -396,6 +400,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           );
           key = ValueKey(l10n.playlistQueue(origin.name));
         } else if (origin is Artist) {
+          final theme = Theme.of(context);
           final artist = ContentUtils.localizedArtist(origin.artist, l10n);
           text = WidgetSpan(
             child: StyledText(
@@ -406,7 +411,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 'name': StyledTextTag(
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onBackground,
                   ),
                 ),
               },
@@ -466,7 +471,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   Widget build(BuildContext context) {
     final currentSongIndex = PlaybackControl.instance.currentSongIndex;
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final origin = QueueControl.instance.state.origin;
     final topScreenPadding = MediaQuery.of(context).padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
@@ -665,7 +670,7 @@ class _MainTab extends StatefulWidget {
 class _MainTabState extends State<_MainTab> {
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
@@ -757,6 +762,7 @@ class _PlaybackButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -777,7 +783,7 @@ class _PlaybackButtons extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: ThemeControl.instance.theme.colorScheme.secondary,
+            color: theme.colorScheme.secondary,
             borderRadius: BorderRadius.circular(100.0),
           ),
           child: const Material(
@@ -813,6 +819,7 @@ class _InfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return NFIconButton(
       icon: const Icon(Icons.info_outline_rounded),
       size: 40.0,
@@ -837,7 +844,7 @@ class _InfoButton extends StatelessWidget {
                       songInfo,
                       style: const TextStyle(fontSize: 13.0),
                       selectionControls: NFTextSelectionControls(
-                        backgroundColor: ThemeControl.instance.theme.colorScheme.background,
+                        backgroundColor: theme.colorScheme.background,
                       ),
                     ),
                   ),
@@ -1023,7 +1030,7 @@ class _SaveQueueAsPlaylistAction extends StatefulWidget {
 class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> with TickerProviderStateMixin {
   Future<void> _handleTap() async {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final songs = QueueControl.instance.state.current.songs;
     final playlist = await ShowFunctions.instance.showCreatePlaylist(this, context);
 

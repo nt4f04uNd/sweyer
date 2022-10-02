@@ -46,6 +46,7 @@ class _DevRouteState extends State<DevRoute> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.debug),
@@ -67,7 +68,7 @@ class _DevRouteState extends State<DevRoute> {
           ),
           NFListTile(
             title: Text(l10n.quitDevMode),
-            splashColor: ThemeControl.instance.theme.colorScheme.error,
+            splashColor: theme.colorScheme.error,
             onTap: _quitDevMode,
           ),
         ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class ListHeader extends StatelessWidget {
   const ListHeader({
@@ -24,10 +23,11 @@ class ListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(
             fontSize: 16.0,
-            color: ThemeControl.instance.theme.hintColor,
+            color: theme.hintColor,
             fontWeight: FontWeight.w700,
           ),
       child: Container(
@@ -119,8 +119,9 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final textStyle = TextStyle(
-      color: ThemeControl.instance.theme.colorScheme.onBackground,
+      color: theme.colorScheme.onBackground,
       fontSize: 14.0,
       fontWeight: FontWeight.w800,
     );
@@ -190,56 +191,6 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     return IgnoreInSelection(
       controller: selectionController!,
       child: child,
-    );
-  }
-}
-
-class _RadioListTile<T> extends StatelessWidget {
-  const _RadioListTile({
-    Key? key,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-    this.title,
-  }) : super(key: key);
-
-  final T value;
-  final T groupValue;
-  final ValueChanged<T> onChanged;
-  final Widget? title;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        onChanged(value);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 14.0),
-        child: Row(
-          children: [
-            Radio<T>(
-              activeColor: ThemeControl.instance.isDark
-                  ? ThemeControl.instance.theme.colorScheme.onBackground
-                  : ThemeControl.instance.theme.colorScheme.primary,
-              value: value,
-              splashRadius: 0.0,
-              groupValue: groupValue,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onChanged: (value) {
-                if (value != null) {
-                  onChanged(value);
-                }
-              },
-            ),
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: title,
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

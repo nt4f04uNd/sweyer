@@ -88,7 +88,7 @@ class PlayerInterfaceBackgroundWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return PlayerInterfaceColorStyleSettingBuilder(
       builder: (context, value, child) {
         switch (value) {
@@ -109,7 +109,7 @@ class _SolidPaletteColorBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return StreamBuilder(
       stream: PlaybackControl.instance.onSongChange,
       builder: (context, snapshot) => ValueListenableBuilder<PaletteGenerator?>(

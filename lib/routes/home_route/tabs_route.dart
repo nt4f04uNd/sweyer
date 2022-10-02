@@ -7,12 +7,15 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
 /// Returns app style used for app bar title.
-TextStyle get appBarTitleTextStyle => TextStyle(
-      fontWeight: FontWeight.w700,
-      color: ThemeControl.instance.theme.textTheme.headline6!.color,
-      fontSize: 22.0,
-      fontFamily: 'Roboto',
-    );
+TextStyle appBarTitleTextStyle(BuildContext context) {
+  final theme = Theme.of(context);
+  return TextStyle(
+    fontWeight: FontWeight.w700,
+    color: theme.textTheme.headline6!.color,
+    fontSize: 22.0,
+    fontFamily: 'Roboto',
+  );
+}
 
 /// Needed to change physics of the [TabBarView].
 class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
@@ -180,7 +183,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final searchButton = NFIconButton(
       icon: const Icon(Icons.search_rounded),
@@ -248,7 +251,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
             ? const SizedBox.shrink()
             : Text(
                 constants.Config.applicationTitle,
-                style: appBarTitleTextStyle,
+                style: appBarTitleTextStyle(context),
               ),
       ),
       titleSelection: selectionRoute
@@ -421,7 +424,7 @@ class _ContentTabState extends State<_ContentTab>
   Widget build(BuildContext context) {
     super.build(context);
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final contentType = widget.contentType;
     return ValueListenableBuilder<bool>(
       valueListenable: FavoritesControl.instance.onShowOnlyFavorites,
