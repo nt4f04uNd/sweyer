@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:sweyer/constants/theme/app_theme.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/services.dart';
 import 'package:sweyer/constants.dart' as constants;
@@ -11,14 +12,10 @@ class ThemeControl {
   static ThemeControl instance = ThemeControl();
 
   bool _ready = false;
-  late Color _colorForBlend;
   late Brightness _brightness;
 
   /// Whether the start up ui animation has ended.
   bool get ready => _ready;
-
-  /// Primary application color adjusted for blending into album arts.
-  Color get colorForBlend => _colorForBlend;
 
   /// App theme  brightness
   Brightness get brightness => _brightness;
@@ -128,7 +125,7 @@ class ThemeControl {
     );
   }
 
-  /// Accepts new primary color, updates [colorForBlend] and changes theme dependent on it.
+  /// Accepts new primary color and changes theme dependent on it.
   void changePrimaryColor(Color color) {
     _rebuildOperation?.cancel();
     _applyPrimaryColor(color);
@@ -146,9 +143,13 @@ class ThemeControl {
 
   void _applyPrimaryColor(Color color) {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
-    _colorForBlend = ContentArt.getColorToBlendInDefaultArt(color);
     constants.Theme.app = constants.Theme.app.copyWith(
       light: constants.Theme.app.light.copyWith(
+        extensions: [
+          constants.Theme.app.light.extension<AppTheme>()!.copyWith(
+                artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+              ),
+        ],
         primaryColor: color,
         toggleableActiveColor: color,
         colorScheme: constants.Theme.app.light.colorScheme.copyWith(
@@ -171,6 +172,11 @@ class ThemeControl {
         ),
       ),
       dark: constants.Theme.app.dark.copyWith(
+        extensions: [
+          constants.Theme.app.dark.extension<AppTheme>()!.copyWith(
+                artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+              ),
+        ],
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,

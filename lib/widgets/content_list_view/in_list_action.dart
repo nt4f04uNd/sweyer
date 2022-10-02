@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 /// Action to be displayed directly in the content list.
 class InListContentAction extends StatefulWidget {
@@ -90,6 +89,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FadeTransition(
       opacity: fadeAnimation,
       child: TweenAnimationBuilder<Color?>(
@@ -114,7 +114,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                   height: kSongTileArtSize,
                   width: kSongTileArtSize,
                   decoration: BoxDecoration(
-                    color: constants.Theme.glowSplashColor.auto,
+                    color: theme.appThemeExtension.glowSplashColor,
                     borderRadius: const BorderRadius.all(Radius.circular(kArtBorderRadius)),
                   ),
                   alignment: Alignment.center,

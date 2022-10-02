@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 /// Button to switch loop mode
 class LoopButton extends StatelessWidget {
@@ -282,6 +281,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   Widget _buildElevated() {
+    final theme = Theme.of(context);
     return ElevatedButton(
       child: _buildChild(),
       onPressed: onPressed,
@@ -295,7 +295,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? constants.Theme.glowSplashColorOnContrast.auto),
+                MaterialStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
@@ -308,6 +308,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   Widget _buildFlat() {
+    final theme = Theme.of(context);
     return TextButton(
       child: _buildChild(),
       onPressed: onPressed,
@@ -320,7 +321,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? constants.Theme.glowSplashColorOnContrast.auto),
+                MaterialStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
@@ -362,10 +363,11 @@ class ShuffleQueueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return AppButton(
       text: l10n.shuffleContentList,
       icon: const Icon(Icons.shuffle_rounded, size: 22.0),
-      color: constants.Theme.contrast.auto,
+      color: theme.appThemeExtension.contrast,
       textColor: ThemeControl.instance.theme.colorScheme.background,
       borderRadius: 4.0,
       fontSize: 15.0,

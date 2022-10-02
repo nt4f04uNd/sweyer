@@ -163,6 +163,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
   }
 
   Widget _buildTile() {
+    final theme = Theme.of(context);
     final source = ContentArtSource.persistentQueue(widget.queue);
 
     final Widget child;
@@ -243,7 +244,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: onTap,
-                      splashColor: constants.Theme.glowSplashColor.auto,
+                      splashColor: theme.appThemeExtension.glowSplashColor,
                       onLongPress: handleLongPress,
                       splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
                     ),

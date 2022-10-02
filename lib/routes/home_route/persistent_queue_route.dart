@@ -173,8 +173,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
           body: StreamBuilder(
             stream: ContentControl.instance.onContentChange,
             builder: (context, snapshot) {
+              final theme = Theme.of(context);
               final selectedTileColor = ThemeControl.instance.theme.colorScheme.primary;
-              final selectedSplashColor = constants.Theme.glowSplashColorOnContrast.auto;
+              final selectedSplashColor = theme.appThemeExtension.glowSplashColorOnContrast;
               late StateSetter setListState;
               if (!tapped || selectedSong != null && !songs.contains(selectedSong)) {
                 // Set last song on start and when the songs update and selected song was deleted

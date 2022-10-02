@@ -50,6 +50,7 @@ class ShowFunctions extends NFShowFunctions {
   /// Shows a dialog to create a playlist.
   Future<Playlist?> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final TextEditingController controller = TextEditingController();
     final enabled = ValueNotifier(false);
     controller.addListener(() {
@@ -82,12 +83,12 @@ class ShowFunctions extends NFShowFunctions {
           },
         ),
       ),
-      buttonSplashColor: constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: theme.appThemeExtension.glowSplashColor,
       acceptButton: ValueListenableBuilder<bool>(
         valueListenable: enabled,
         builder: (context, value, child) => AppButton.flat(
           text: l10n.create,
-          splashColor: constants.Theme.glowSplashColor.auto,
+          splashColor: theme.appThemeExtension.glowSplashColor,
           onPressed: !value
               ? null
               : () async {

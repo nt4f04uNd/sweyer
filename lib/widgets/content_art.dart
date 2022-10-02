@@ -902,6 +902,7 @@ class _ContentArtState extends State<ContentArt> {
   }
 
   Widget _buildDefault([bool forPlaylist = false, int? cacheSize]) {
+    final theme = Theme.of(context);
     final size = _getSize(forPlaylist);
     cacheSize ??= _getCacheSize(forPlaylist, size);
     if (cacheSize != null) {
@@ -935,7 +936,7 @@ class _ContentArtState extends State<ContentArt> {
         cacheHeight: cacheSize,
         color: widget.color != null
             ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
-            : ThemeControl.instance.colorForBlend,
+            : theme.appThemeExtension.artColorForBlend,
         colorBlendMode: BlendMode.plus,
         frameBuilder: frameBuilder,
         fit: BoxFit.cover,

@@ -22,15 +22,16 @@ class _DevRouteState extends State<DevRoute> {
 
   Future<void> _quitDevMode() async {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final res = await ShowFunctions.instance.showDialog(
       context,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
-      buttonSplashColor: constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: theme.appThemeExtension.glowSplashColor,
       acceptButton: AppButton.pop(
         text: l10n.accept,
         popResult: true,
-        splashColor: constants.Theme.glowSplashColor.auto,
+        splashColor: theme.appThemeExtension.glowSplashColor,
         textColor: constants.AppColors.red,
       ),
     );
@@ -107,6 +108,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return SettingItem(
       title: l10n.devAnimationsSlowMo,
       trailing: ChangedSwitcher(
@@ -122,7 +124,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        inactiveColor: constants.Theme.sliderInactiveColor.auto,
+        inactiveColor: theme.appThemeExtension.sliderInactiveColor,
         min: 0.001,
         max: 10,
         divisions: 100,

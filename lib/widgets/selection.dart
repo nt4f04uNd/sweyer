@@ -1660,6 +1660,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
   const _AddToPlaylistSelectionAction({Key? key}) : super(key: key);
 
   void _handleTap(BuildContext context, ContentSelectionController controller) {
+    final theme = Theme.of(context);
     ShowFunctions.instance.showDialog(
       context,
       ui: constants.UiTheme.modalOverGrey.auto,
@@ -1700,7 +1701,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           );
         },
       ),
-      buttonSplashColor: constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: theme.appThemeExtension.glowSplashColor,
       acceptButton: const SizedBox(),
       // acceptButton: Builder(
       //   builder: (context) => AppButton.pop(
@@ -1954,6 +1955,8 @@ void _showActionConfirmationDialog<E extends Content>({
     entry = list.first;
   }
 
+  final theme = Theme.of(context);
+
   ShowFunctions.instance.showDialog(
     context,
     ui: constants.UiTheme.modalOverGrey.auto,
@@ -1992,12 +1995,12 @@ void _showActionConfirmationDialog<E extends Content>({
         },
       ),
     ),
-    buttonSplashColor: constants.Theme.glowSplashColor.auto,
+    buttonSplashColor: theme.appThemeExtension.glowSplashColor,
     acceptButton: Builder(
       builder: (context) => AppButton.pop(
         text: localizedAction(getl10n(context)),
         popResult: true,
-        splashColor: constants.Theme.glowSplashColor.auto,
+        splashColor: theme.appThemeExtension.glowSplashColor,
         textColor: constants.AppColors.red,
         onPressed: () {
           onSubmit();

@@ -227,6 +227,7 @@ class DrawerMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return NFListTile(
       dense: true,
       leading: icon != null
@@ -243,7 +244,7 @@ class DrawerMenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: constants.Theme.drawerMenuItemColor.auto,
+          color: theme.appThemeExtension.drawerMenuItemColor,
         ),
       ),
       onTap: onTap,

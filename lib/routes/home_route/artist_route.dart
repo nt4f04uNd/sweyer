@@ -1,14 +1,10 @@
 import 'dart:async';
-// import 'dart:ui' as ui;
 import 'dart:math' as math;
 
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class ArtistRoute extends StatefulWidget {
   const ArtistRoute({Key? key, required this.artist}) : super(key: key);
@@ -128,9 +124,6 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     }
   }
 
-  PaletteGenerator? palette;
-  static Future<PaletteGenerator> _isolate(image) => createPalette(image);
-
   Widget _buildInfo() {
     final l10n = getl10n(context);
     final theme = ThemeControl.instance.theme;
@@ -156,20 +149,6 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                       borderRadius: 0.0,
                       defaultArtIcon: ContentType.artist.icon,
                       defaultArtIconScale: 4.5,
-                      // onLoad: (image) async {
-                      // palette = await compute<ui.Image, PaletteGenerator>(_isolate, image);
-                      // palette = await _isolate(image);
-                      // if (mounted) {
-                      //   WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                      //     if (mounted) {
-                      //       setState(() {});
-                      //       _debugOverlay = DebugOverlay(
-                      //         (context) => PaletteSwatches(generator: palette),
-                      //       );
-                      //     }
-                      //   });
-                      // }
-                      // },
                       source: ContentArtSource.artist(widget.artist),
                     ),
                     Positioned.fill(
@@ -198,7 +177,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               style: TextStyle(
                                 height: 1.0,
                                 fontWeight: FontWeight.w800,
-                                color: constants.Theme.contrast.auto,
+                                color: theme.appThemeExtension.contrast,
                                 fontSize: 36.0,
                               ),
                             ),
@@ -383,7 +362,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           ).animate(backButtonAnimation);
 
                           final splashColorAnimation = ColorTween(
-                            begin: constants.Theme.glowSplashColorOnContrast.auto,
+                            begin: theme.appThemeExtension.glowSplashColorOnContrast,
                             end: theme.splashColor,
                           ).animate(backButtonAnimation);
 
