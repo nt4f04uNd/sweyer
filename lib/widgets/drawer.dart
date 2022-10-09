@@ -74,7 +74,10 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   !HomeRouter.instance.drawerCanBeOpened);
         },
         shouldEagerlyWin: (event) {
-          return controller.value == 0.0 && HomeRouter.instance.drawerCanBeOpened && event.delta.dx > 0.0;
+          return controller.value == 0.0 &&
+              HomeRouter.instance.drawerCanBeOpened &&
+              event.delta.dy.abs() < 8.0 &&
+              event.delta.dx > 5.0;
         },
         onBarrierTap: controller.close,
         barrier: Container(color: Colors.black26),
