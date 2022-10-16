@@ -283,7 +283,7 @@ class ShowFunctions extends NFShowFunctions {
     return ShowFunctions.instance.showAlert(
       context,
       ui: theme.systemUiThemeExtension.modalOverGrey,
-      title: Text(l10n.sort),
+      title: Text(title),
       titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
       closeButton: const SizedBox.shrink(),

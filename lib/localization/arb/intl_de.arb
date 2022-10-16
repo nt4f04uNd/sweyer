@@ -313,5 +313,5 @@
   "gitHubRepo": "GitHub Repository",
   "defaultValue": "Standard",
   "playerInterfaceColorStyle": "Player-Farbthema",
-  "playerInterfaceColorStyleArtColor": "Basierend auf Track-Art"
+  "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild"
 }
