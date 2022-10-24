@@ -56,7 +56,6 @@ class Artist extends SongOrigin {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       title: title,
       artist: null,

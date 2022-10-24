@@ -103,6 +103,9 @@ class Song extends Content {
   /// Needed to display [ContentArtSource] and passed to [ContentArtSource].
   String get contentUri => 'content://media/external/audio/media/$sourceId';
 
+  /// The content URI of the art.
+  String get artContentUri => 'content://media/external/audio/media/$sourceId/albumart';
+
   Song({
     required this.id,
     required this.album,
@@ -132,9 +135,7 @@ class Song extends Content {
   MediaItem toMediaItem() {
     return MediaItem(
       id: sourceId.toString(),
-      uri: contentUri,
-      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
-      artUri: null,
+      artUri: Uri.parse(artContentUri),
       album: getAlbum()?.album,
       title: title,
       artist: ContentUtils.localizedArtist(artist, staticl10n),
@@ -142,7 +143,9 @@ class Song extends Content {
       duration: Duration(milliseconds: duration),
       playable: true,
       rating: null,
-      extras: null,
+      extras: {
+        'loadThumbnailUri': contentUri,
+      },
     );
   }
 

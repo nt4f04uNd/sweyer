@@ -77,9 +77,13 @@ dependencies:
 
     # path: C:/dev/projects/native/audio_service/audio_service
 
+    # git: 
+    #   url: https://github.com/nt4f04uNd/audio_service
+    #   ref: sweyer
+    #   path: audio_service
     git: 
       url: https://github.com/nt4f04uNd/audio_service
-      ref: sweyer
+      ref: feature/default-album-art
       path: audio_service
 
     # git: 

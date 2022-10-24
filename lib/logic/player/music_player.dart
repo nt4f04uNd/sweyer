@@ -1,6 +1,7 @@
 export 'backend.dart';
 export 'content_channel.dart';
 export 'content.dart';
+export 'default_art.dart';
 export 'favorites.dart';
 export 'media_store_content_observer.dart';
 export 'playback.dart';
@@ -437,7 +438,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   }
 
   @override
-  Future<void> setRating(Rating rating, Map? extras) {
+  Future<void> setRating(Rating rating, [Map<String, dynamic>? extras]) {
     // TODO: implement setRating
     throw UnimplementedError();
     return super.setRating(rating, extras);
@@ -502,25 +503,43 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
         .toList();
   }
 
+  // TODO: https://github.com/nt4f04uNd/sweyer/issues/76
+  // Below we are using a hack around limited support of actions in notification https://github.com/ryanheise/audio_service/issues/633
+  // I use these methods as loop on/off button in notification.
+  // [SeekHandler.rewind] and [SeekHandler.fastForward] are the proper implementation.
+  // Previously this was using a fork of audio service with a custom notification action API,
+  // which can be found in the issue https://github.com/nt4f04uNd/sweyer/issues/76
   @override
-  Future<void> onNotificationAction(String action) async {
-    switch (action) {
-      case 'loop_on':
-      case 'loop_off':
-        return player.switchLooping();
-      case 'play_prev':
-        return player.playPrev();
-      case 'pause':
-      case 'play':
-        return player.playPause();
-      case 'play_next':
-        return player.playNext();
-      case 'stop':
-        return stop();
-      default:
-        throw UnimplementedError();
-    }
+  Future<void> rewind() async {
+    player.switchLooping();
+    // await super.rewind();
   }
+
+  @override
+  Future<void> fastForward() async {
+    player.switchLooping();
+    // await super.fastForward();
+  }
+
+  // @override
+  // Future<void> onNotificationAction(String action) async {
+  //   switch (action) {
+  //     case 'loop_on':
+  //     case 'loop_off':
+  //       return player.switchLooping();
+  //     case 'play_prev':
+  //       return player.playPrev();
+  //     case 'pause':
+  //     case 'play':
+  //       return player.playPause();
+  //     case 'play_next':
+  //       return player.playNext();
+  //     case 'stop':
+  //       return stop();
+  //     default:
+  //       throw UnimplementedError();
+  //   }
+  // }
 
   @override
   Future<void> didChangeLocales(List<Locale>? locales) async {
@@ -537,45 +556,51 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     final l10n = staticl10n;
     playbackState.add(playbackState.value!.copyWith(
       controls: [
-        // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
         if (player.looping)
           MediaControl(
             androidIcon: 'drawable/round_loop_one',
             label: l10n.loopOn,
-            action: 'loop_on',
+            // action: 'loop_on',
+            action: MediaAction.rewind,
           )
         else
           MediaControl(
             androidIcon: 'drawable/round_loop',
             label: l10n.loopOff,
-            action: 'loop_off',
+            // action: 'loop_off',
+            action: MediaAction.fastForward,
           ),
         MediaControl(
           androidIcon: 'drawable/round_skip_previous',
           label: l10n.previous,
-          action: 'play_prev',
+          // action: 'play_prev',
+          action: MediaAction.skipToPrevious,
         ),
         if (playing)
           MediaControl(
             androidIcon: 'drawable/round_pause',
             label: l10n.pause,
-            action: 'pause',
+            // action: 'pause',
+            action: MediaAction.pause,
           )
         else
           MediaControl(
             androidIcon: 'drawable/round_play_arrow',
             label: l10n.play,
-            action: 'play',
+            // action: 'play',
+            action: MediaAction.play,
           ),
         MediaControl(
           androidIcon: 'drawable/round_skip_next',
           label: l10n.next,
-          action: 'play_next',
+          // action: 'play_next',
+          action: MediaAction.skipToNext,
         ),
         MediaControl(
           androidIcon: 'drawable/round_stop',
           label: l10n.stop,
-          action: 'stop',
+          // action: 'stop',
+          action: MediaAction.stop,
         ),
       ],
       systemActions: const {
@@ -614,7 +639,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
         ProcessingState.ready: AudioProcessingState.ready,
         ProcessingState.completed: AudioProcessingState.completed,
         // Excluding idle state because it makes notification to reappear.
-      }[player.processingState == ProcessingState.idle ? ProcessingState.loading : player.processingState],
+      }[player.processingState == ProcessingState.idle ? ProcessingState.loading : player.processingState]!,
       playing: playing,
       updatePosition: player.position,
       bufferedPosition: player.bufferedPosition,
@@ -635,14 +660,6 @@ class MusicPlayer extends AudioPlayer {
   @visibleForTesting
   static AudioHandler? handler;
 
-  /// Updates service state media item.
-  void updateServiceMediaItem() {
-    final song = PlaybackControl.instance.currentSongNullable;
-    if (song != null && handler!.running) {
-      handler!.mediaItem.add(song.toMediaItem());
-    }
-  }
-
   Future<void> init() async {
     await restoreLastSong();
 
@@ -652,7 +669,8 @@ class MusicPlayer extends AudioPlayer {
     // which can be disposed and recreated.
     handler?._init(this);
     handler ??= await AudioService.init(
-      builder: () {
+      builder: () async {
+        await DefaultArtControl.instance.init();
         return AudioHandler(MusicPlayer.instance);
       },
       config: AudioServiceConfig(
@@ -669,7 +687,6 @@ class MusicPlayer extends AudioPlayer {
         // artDownscaleHeight,
         fastForwardInterval: const Duration(seconds: 5),
         rewindInterval: const Duration(seconds: 5),
-        androidEnableQueue: true,
         preloadArtwork: false,
         // androidBrowsableRootExtras,
       ),
