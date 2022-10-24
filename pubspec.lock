@@ -55,7 +55,7 @@ packages:
     description:
       path: audio_service
       ref: "feature/default-album-art"
-      resolved-ref: "6e60b71868e93c908e9a2b6482e2b8e9ce545880"
+      resolved-ref: "8321c3570e5e2ba3f96d147ac438e5721a92c162"
       url: "https://github.com/nt4f04uNd/audio_service"
     source: git
     version: "0.18.7"
