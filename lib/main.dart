@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ Future<void> main() async {
     ThemeControl.instance.initSystemUi();
     await Permissions.instance.init();
     await ContentControl.instance.init();
-    runApp(const App());
+    runApp(const ProviderScope(child: App()));
   }, reportError);
 }
 

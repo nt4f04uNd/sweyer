@@ -50,6 +50,8 @@ dependencies:
   android_content_provider: ^0.2.2
   collection: ^1.16.0
   theme_tailor_annotation: ^1.0.3
+  riverpod: ^2.1.1
+  flutter_riverpod: ^2.1.1
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 

@@ -313,5 +313,6 @@
   "gitHubRepo": "GitHub Repository",
   "defaultValue": "Standard",
   "playerInterfaceColorStyle": "Player-Farbthema",
-  "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild"
+  "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthema"
 }

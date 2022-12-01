@@ -130,10 +130,10 @@ extension AppLocalizationsExtension on AppLocalizations {
 
   String getPlayerInterfaceColorStyleValue(PlayerInterfaceColorStyle playerInterfaceColorStyle) {
     switch (playerInterfaceColorStyle) {
-      case PlayerInterfaceColorStyle.themeColor:
-        return defaultValue;
       case PlayerInterfaceColorStyle.artColor:
         return playerInterfaceColorStyleArtColor;
+      case PlayerInterfaceColorStyle.themeBackgroundColor:
+        return playerInterfaceColorStyleThemeBackgroundColor;
     }
   }
 }

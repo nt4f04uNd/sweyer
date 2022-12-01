@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
+export 'player_interface_color_style_builders.dart';
+
 enum PlayerInterfaceColorStyle {
-  themeColor,
   artColor,
+  themeBackgroundColor,
 }
 
 class PlayerInterfaceColorStyleControl extends Control {
@@ -28,6 +31,9 @@ class PlayerInterfaceColorStyleControl extends Control {
 
   @override
   void dispose() {
+    if (disposed.value) {
+      return;
+    }
     _currentPalette.dispose();
     _currentBackgroundColor.dispose();
     Settings.playerInterfaceColorStyle.removeListener(_handlePlayerInterfaceStyle);
@@ -64,10 +70,10 @@ class PlayerInterfaceColorStyleControl extends Control {
 
   void _handlePlayerInterfaceStyle() {
     switch (Settings.playerInterfaceColorStyle.value) {
-      case PlayerInterfaceColorStyle.themeColor:
-        updatePalette(staticTheme, null);
-        break;
       case PlayerInterfaceColorStyle.artColor:
+        break;
+      case PlayerInterfaceColorStyle.themeBackgroundColor:
+        updatePalette(staticTheme, null);
         break;
     }
   }
@@ -131,8 +137,6 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
   static ThemeData _getTheme(BuildContext context, Color backgroundColor) {
     final theme = Theme.of(context);
     switch (Settings.playerInterfaceColorStyle.value) {
-      case PlayerInterfaceColorStyle.themeColor:
-        return theme;
       case PlayerInterfaceColorStyle.artColor:
         return theme.copyWith(
           colorScheme: theme.colorScheme.copyWith(
@@ -168,6 +172,8 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
             theme.systemUiThemeExtension,
           ],
         );
+      case PlayerInterfaceColorStyle.themeBackgroundColor:
+        return theme;
     }
   }
 
@@ -200,12 +206,12 @@ class PlayerInterfaceBackgroundWidget extends StatelessWidget {
     return PlayerInterfaceColorStyleSettingBuilder(
       builder: (context, value, child) {
         switch (value) {
-          case PlayerInterfaceColorStyle.themeColor:
+          case PlayerInterfaceColorStyle.artColor:
+            return const _SolidPaletteColorBackground();
+          case PlayerInterfaceColorStyle.themeBackgroundColor:
             return Container(
               color: theme.colorScheme.background,
             );
-          case PlayerInterfaceColorStyle.artColor:
-            return const _SolidPaletteColorBackground();
         }
       },
     );
@@ -257,34 +263,18 @@ class ContentArtLoadBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlayerInterfaceColorStyleSettingBuilder(
       builder: (context, value, child) {
-        final ContentArtOnLoadCallback? onLoad;
         switch (value) {
-          case PlayerInterfaceColorStyle.themeColor:
-            onLoad = null;
-            break;
           case PlayerInterfaceColorStyle.artColor:
-            final theme = Theme.of(context);
-            onLoad = (image) async {
-              final byteData = await image.toByteData();
-              if (byteData == null) {
-                return;
-              }
-              final palette = await compute<EncodedImage, PaletteGenerator>(
-                (image) => createPalette(image),
-                EncodedImage(
-                  byteData,
-                  width: image.width,
-                  height: image.height,
-                ),
-              );
-              PlayerInterfaceColorStyleControl.instance.updatePalette(
-                theme,
-                palette,
-              );
-            };
-            break;
+            return Consumer(
+              builder: (context, ref, child) {
+                final playerInterfaceColorStyleArtColorBuilder =
+                    ref.watch(playerInterfaceColorStyleArtColorBuilderProvider);
+                return builder(playerInterfaceColorStyleArtColorBuilder.buildOnLoad(context));
+              },
+            );
+          case PlayerInterfaceColorStyle.themeBackgroundColor:
+            return builder(null);
         }
-        return builder(onLoad);
       },
     );
   }

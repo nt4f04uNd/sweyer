@@ -801,7 +801,7 @@ class _ContentArtState extends State<ContentArt> {
     assert(loaded);
     if (force || !_delivered) {
       _delivered = true;
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
         if (mounted) {
           setState(() {
             /* rebuild to change animated switcher child */
@@ -814,9 +814,9 @@ class _ContentArtState extends State<ContentArt> {
         ///
         /// And the third is for the called above `setState`, because calling it
         /// will cause image to be rebuilt to trigger [AnimatedSwitcher] animation.
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+          WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+            WidgetsBinding.instance.scheduleFrameCallback((timeStamp) async {
               if (!mounted) {
                 return;
               }
@@ -830,7 +830,9 @@ class _ContentArtState extends State<ContentArt> {
                 throw StateError('');
               }
               final image = await boundary.toImage();
-              await widget.onLoad!(image);
+              await Future.microtask(() async {
+                await widget.onLoad!(image);
+              });
               image.dispose();
             });
           });

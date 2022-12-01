@@ -261,7 +261,7 @@
   "cancel": "Отмена",
   "copied": "Скопировано",
   "gitHubRepo": "GitHub репозиторий",
-  "defaultValue": "По умолчанию",
   "playerInterfaceColorStyle": "Цветовая тема плеера",
-  "playerInterfaceColorStyleArtColor": "На основе обложки трека"
+  "playerInterfaceColorStyleArtColor": "На основе обложки трека",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Цвет фона из темы"
 }
