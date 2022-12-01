@@ -5,13 +5,13 @@ TestDescription getTestDescription({
   required PlayerInterfaceColorStyle? playerInterfaceColorStyle,
 }) {
   TestDescription description = const TestDescriptorBase();
-  description = TestDescriptorWithPlayerInterfaceColorStyle(
-    description,
-    playerInterfaceColorStyle: playerInterfaceColorStyle,
-  );
   description = TestDescriptorWithLightAndDarkTheme(
     description,
     lightTheme: lightTheme,
+  );
+  description = TestDescriptorWithPlayerInterfaceColorStyle(
+    description,
+    playerInterfaceColorStyle: playerInterfaceColorStyle,
   );
   return description;
 }
@@ -63,7 +63,7 @@ class TestDescriptorWithLightAndDarkTheme extends RequiredTestDescriptor {
 
   @override
   String buildDescription(String description) {
-    final original = wrapped.buildFileName(description);
+    final original = wrapped.buildDescription(description);
     return '$original | theme ${_getMessage()}';
   }
 }
@@ -89,7 +89,7 @@ class TestDescriptorWithPlayerInterfaceColorStyle extends RequiredTestDescriptor
 
   @override
   String buildDescription(String description) {
-    final original = wrapped.buildFileName(description);
+    final original = wrapped.buildDescription(description);
     if (playerInterfaceColorStyle == null) {
       return original;
     }

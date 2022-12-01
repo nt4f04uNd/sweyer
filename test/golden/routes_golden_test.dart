@@ -212,13 +212,13 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(playerRouteController.value, 1.0);
       }, goldenCaptureCallback: () => tester.screenMatchesGolden('player_route.player_route'));
-    });
+    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
 
     testAppGoldens('queue_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.openPlayerQueueScreen();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden('player_route.queue_route'));
-    });
+    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
 
     testAppGoldens('queue_route_selection', (WidgetTester tester) async {
       await tester.runAppTest(() async {
@@ -228,7 +228,7 @@ void main() {
           matching: find.byType(SongTile),
         ));
       }, goldenCaptureCallback: () => tester.screenMatchesGolden('player_route.queue_route_selection'));
-    });
+    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
   });
 
   group('search_route', () {
