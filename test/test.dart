@@ -414,7 +414,13 @@ class FakeSystemUiStyleController implements SystemUiStyleController {
   Duration duration = Duration.zero;
 
   @override
-  SystemUiOverlayStyle get actualUi => const SystemUiOverlayStyle();
+  SystemUiOverlayStyle actualUi = const SystemUiOverlayStyle();
+
+  @override
+  SystemUiOverlayStyle lastUi = const SystemUiOverlayStyle();
+
+  @override
+  Stream<SystemUiOverlayStyle> get onUiChange => const Stream.empty();
 
   @override
   Future<void> animateSystemUiOverlay({
@@ -422,14 +428,13 @@ class FakeSystemUiStyleController implements SystemUiStyleController {
     required SystemUiOverlayStyle to,
     Curve? curve,
     Duration? duration,
-  }) async {}
+  }) async {
+    setSystemUiOverlay(to);
+  }
 
   @override
-  SystemUiOverlayStyle get lastUi => const SystemUiOverlayStyle();
-
-  @override
-  Stream<SystemUiOverlayStyle> get onUiChange => const Stream.empty();
-
-  @override
-  void setSystemUiOverlay(SystemUiOverlayStyle ui) {}
+  void setSystemUiOverlay(SystemUiOverlayStyle ui) {
+    actualUi = ui;
+    lastUi = ui;
+  }
 }

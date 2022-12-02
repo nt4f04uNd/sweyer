@@ -830,9 +830,7 @@ class _ContentArtState extends State<ContentArt> {
                 throw StateError('');
               }
               final image = await boundary.toImage();
-              await Future.microtask(() async {
-                await widget.onLoad!(image);
-              });
+              await widget.onLoad!(image);
               image.dispose();
             });
           });
