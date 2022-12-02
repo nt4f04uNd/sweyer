@@ -13,6 +13,14 @@ enum PlayerInterfaceColorStyle {
   themeBackgroundColor,
 }
 
+Color _shadeForSecondaryColor(Color color) {
+  return shadeColor(
+    0.3,
+    color,
+    minBit: 15,
+  );
+}
+
 class PlayerInterfaceColorStyleControl extends Control {
   static PlayerInterfaceColorStyleControl instance = PlayerInterfaceColorStyleControl();
 
@@ -56,7 +64,9 @@ class PlayerInterfaceColorStyleControl extends Control {
 
   SystemUiOverlayStyle get systemUiOverlayStyleForSelection {
     return SystemUiStyleController.instance.lastUi.copyWith(
-      systemNavigationBarColor: shadeColor(0.3, PlayerInterfaceColorStyleControl.instance.currentBackgroundColor.value),
+      systemNavigationBarColor: _shadeForSecondaryColor(
+        PlayerInterfaceColorStyleControl.instance.currentBackgroundColor.value,
+      ),
     );
   }
 
@@ -158,10 +168,10 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
           colorScheme: theme.colorScheme.copyWith(
             primary: Colors.white,
             onSurface: Colors.white,
-            secondary: shadeColor(0.3, backgroundColor),
+            secondary: _shadeForSecondaryColor(backgroundColor),
           ),
           appBarTheme: theme.appBarTheme.copyWith(
-            color: shadeColor(0.3, backgroundColor),
+            color: _shadeForSecondaryColor(backgroundColor),
           ),
           tooltipTheme: theme.tooltipTheme.copyWith(
             textStyle: const TextStyle(
