@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class Seekbar extends StatefulWidget {
   const Seekbar({
@@ -140,7 +139,8 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.color ?? ThemeControl.instance.theme.colorScheme.primary;
+    final theme = Theme.of(context);
+    final color = widget.color ?? theme.colorScheme.primary;
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final scaleFactor = textScaleFactor == 1.0 ? 1.0 : textScaleFactor * 1.1;
     return Container(
@@ -157,7 +157,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.instance.theme.textTheme.headline6!.color,
+                color: theme.textTheme.headline6!.color,
               ),
             ),
           ),
@@ -170,7 +170,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
                   thumbColor: color,
                   overlayColor: color.withOpacity(ThemeControl.instance.isLight ? 0.12 : 0.24),
                   activeTrackColor: color,
-                  inactiveTrackColor: constants.Theme.sliderInactiveColor.auto,
+                  inactiveTrackColor: theme.appThemeExtension.sliderInactiveColor,
                   overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),
                   thumbShape: RoundSliderThumbShape(
                     pressedElevation: 3.0,
@@ -195,7 +195,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
-                color: ThemeControl.instance.theme.textTheme.headline6!.color,
+                color: theme.textTheme.headline6!.color,
               ),
             ),
           ),

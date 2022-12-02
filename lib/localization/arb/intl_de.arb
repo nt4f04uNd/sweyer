@@ -310,5 +310,9 @@
   "accept": "Akzeptieren",
   "cancel": "Abbrechen",
   "copied": "Kopiert",
-  "gitHubRepo": "GitHub Repository"
+  "gitHubRepo": "GitHub Repository",
+  "defaultValue": "Standard",
+  "playerInterfaceColorStyle": "Player-Farbthema",
+  "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthemas"
 }

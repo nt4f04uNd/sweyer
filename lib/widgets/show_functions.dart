@@ -3,7 +3,6 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart' hide showBottomSheet, showGeneralDialog, showModalBottomSheet;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:collection/collection.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 /// Class that contains composed 'show' functions, like [showDialog] and others
 class ShowFunctions extends NFShowFunctions {
@@ -21,7 +20,7 @@ class ShowFunctions extends NFShowFunctions {
     Color? textColor,
     Color? backgroundColor,
   }) async {
-    backgroundColor ??= ThemeControl.instance.theme.colorScheme.primary;
+    backgroundColor ??= staticTheme.colorScheme.primary;
 
     return Fluttertoast.showToast(
       msg: msg,
@@ -50,6 +49,7 @@ class ShowFunctions extends NFShowFunctions {
   /// Shows a dialog to create a playlist.
   Future<Playlist?> showCreatePlaylist(TickerProvider vsync, BuildContext context) async {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final TextEditingController controller = TextEditingController();
     final enabled = ValueNotifier(false);
     controller.addListener(() {
@@ -68,7 +68,7 @@ class ShowFunctions extends NFShowFunctions {
 
     await showDialog(
       context,
-      ui: constants.UiTheme.modalOverGrey.auto,
+      ui: theme.systemUiThemeExtension.modalOverGrey,
       title: Text(l10n.newPlaylist),
       content: Builder(
         builder: (context) => AppTextField(
@@ -82,12 +82,12 @@ class ShowFunctions extends NFShowFunctions {
           },
         ),
       ),
-      buttonSplashColor: constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: theme.appThemeExtension.glowSplashColor,
       acceptButton: ValueListenableBuilder<bool>(
         valueListenable: enabled,
         builder: (context, value, child) => AppButton.flat(
           text: l10n.create,
-          splashColor: constants.Theme.glowSplashColor.auto,
+          splashColor: theme.appThemeExtension.glowSplashColor,
           onPressed: !value
               ? null
               : () async {
@@ -106,7 +106,7 @@ class ShowFunctions extends NFShowFunctions {
   void showError({required String errorDetails}) {
     final context = AppRouter.instance.navigatorKey.currentContext!;
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final globalKey = GlobalKey<NFSnackbarEntryState>();
     NFSnackbarController.showSnackbar(
       NFSnackbarEntry(
@@ -160,7 +160,7 @@ class ShowFunctions extends NFShowFunctions {
                             // scrollPhysics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                             style: const TextStyle(fontSize: 11.0),
                             selectionControls: NFTextSelectionControls(
-                              backgroundColor: ThemeControl.instance.theme.colorScheme.background,
+                              backgroundColor: theme.colorScheme.background,
                             ),
                           ),
                         ),
@@ -243,6 +243,54 @@ class ShowFunctions extends NFShowFunctions {
       additionalActions: additionalActions,
       borderRadius: borderRadius,
       ui: ui,
+    );
+  }
+
+  Future<void> showRadio<T>({
+    required BuildContext context,
+    required String title,
+    required List<T> items,
+    required String Function(T) itemTitleBuilder,
+    required ValueSetter<T> onItemSelected,
+    required ValueGetter<T> groupValueGetter,
+  }) {
+    final l10n = getl10n(context);
+    final theme = Theme.of(context);
+
+    Widget buildItem(T item) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          splashFactory: NFListTileInkRipple.splashFactory,
+        ),
+        child: Builder(
+          // i need the proper context to pop the dialog
+          builder: (context) => AppRadioListTile<T>(
+            title: Text(
+              itemTitleBuilder(item),
+              style: theme.textTheme.subtitle1,
+            ),
+            value: item,
+            groupValue: groupValueGetter(),
+            onChanged: (value) {
+              onItemSelected(value);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      );
+    }
+
+    return ShowFunctions.instance.showAlert(
+      context,
+      ui: theme.systemUiThemeExtension.modalOverGrey,
+      title: Text(title),
+      titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
+      contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
+      closeButton: const SizedBox.shrink(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: items.map((el) => buildItem(el)).toList(),
+      ),
     );
   }
 }

@@ -19,7 +19,7 @@ void main() {
       await tester.runAppTest(() async {
         await tester.tap(find.text(l10n.grant));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'home_route.permissions_screen'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('home_route.permissions_screen'));
     });
 
     testAppGoldens('searching_screen', (WidgetTester tester) async {
@@ -35,7 +35,6 @@ void main() {
         expect(find.byType(Spinner), findsOneWidget);
       },
           goldenCaptureCallback: () => tester.screenMatchesGolden(
-                tester,
                 'home_route.searching_screen',
                 customPump: (WidgetTester tester) async {
                   await tester.pump(const Duration(milliseconds: 400));
@@ -49,7 +48,7 @@ void main() {
       });
       await tester.runAppTest(() async {
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'home_route.no_songs_screen'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('home_route.no_songs_screen'));
     });
   });
 
@@ -58,13 +57,13 @@ void main() {
       await tester.runAppTest(() async {
         await tester.tap(find.byType(AnimatedMenuCloseButton));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.drawer'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.drawer'));
     });
 
     testAppGoldens('songs_tab', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.songs_tab'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.songs_tab'));
     });
 
     testAppGoldens('albums_tab', (WidgetTester tester) async {
@@ -72,7 +71,7 @@ void main() {
         await tester.tap(find.byIcon(ContentType.album.icon));
         await tester.pumpAndSettle();
         expect(find.byType(typeOf<PersistentQueueTile<Album>>()), findsOneWidget);
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.albums_tab'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.albums_tab'));
     });
 
     testAppGoldens('playlists_tab', (WidgetTester tester) async {
@@ -80,7 +79,7 @@ void main() {
         await tester.tap(find.byIcon(ContentType.playlist.icon));
         await tester.pumpAndSettle();
         expect(find.byType(typeOf<PersistentQueueTile<Playlist>>()), findsOneWidget);
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.playlists_tab'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.playlists_tab'));
     });
 
     testAppGoldens('artists_tab', (WidgetTester tester) async {
@@ -88,7 +87,7 @@ void main() {
         await tester.tap(find.byIcon(ContentType.artist.icon));
         await tester.pumpAndSettle();
         expect(find.byType(typeOf<ArtistTile>()), findsOneWidget);
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.artists_tab'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.artists_tab'));
     });
 
     testAppGoldens('sort_feature_dialog', (WidgetTester tester) async {
@@ -100,7 +99,7 @@ void main() {
           ),
         ));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.sort_feature_dialog'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.sort_feature_dialog'));
     });
 
     testAppGoldens('selection_songs_tab', (WidgetTester tester) async {
@@ -108,7 +107,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.longPress(find.byType(SongTile));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'tabs_route.selection_songs_tab'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.selection_songs_tab'));
     });
 
     testAppGoldens('selection_deletion_dialog_songs_tab', (WidgetTester tester) async {
@@ -128,9 +127,7 @@ void main() {
         await tester.tap(find.byType(SelectAllSelectionAction).last);
         await tester.tap(find.byType(DeleteSongsAppBarAction).last);
         await tester.pumpAndSettle();
-      },
-          goldenCaptureCallback: () =>
-              tester.screenMatchesGolden(tester, 'tabs_route.selection_deletion_dialog_songs_tab'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.selection_deletion_dialog_songs_tab'));
     });
   });
 
@@ -151,14 +148,14 @@ void main() {
       await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(albumWith()));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'persistent_queue_route.album_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('persistent_queue_route.album_route'));
     });
 
     testAppGoldens('playlist_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlistWith()));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'persistent_queue_route.playlist_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('persistent_queue_route.playlist_route'));
     });
   });
 
@@ -169,7 +166,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('selection_route.selection_route'));
     });
 
     testAppGoldens('selection_route_settings', (WidgetTester tester) async {
@@ -183,7 +180,7 @@ void main() {
           matching: find.byIcon(Icons.settings_rounded),
         ));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'selection_route.selection_route_settings'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('selection_route.selection_route_settings'));
     });
   });
 
@@ -192,7 +189,7 @@ void main() {
       await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(artistWith()));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'artist_route.artist_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('artist_route.artist_route'));
     });
   });
 
@@ -203,7 +200,6 @@ void main() {
         await tester.pumpAndSettle();
       },
           goldenCaptureCallback: () => tester.screenMatchesGolden(
-                tester,
                 'artist_content_route.artist_content_route_songs',
               ));
     });
@@ -213,16 +209,16 @@ void main() {
     testAppGoldens('player_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.byType(SongTile));
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(playerRouteController.value, 1.0);
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.player_route'));
-    });
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('player_route.player_route'));
+    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
 
     testAppGoldens('queue_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.openPlayerQueueScreen();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route'));
-    });
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('player_route.queue_route'));
+    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
 
     testAppGoldens('queue_route_selection', (WidgetTester tester) async {
       await tester.runAppTest(() async {
@@ -231,8 +227,8 @@ void main() {
           of: find.byType(PlayerRoute),
           matching: find.byType(SongTile),
         ));
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'player_route.queue_route_selection'));
-    });
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('player_route.queue_route_selection'));
+    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
   });
 
   group('search_route', () {
@@ -240,7 +236,7 @@ void main() {
       await tester.runAppTest(() async {
         await tester.tap(find.byIcon(Icons.search_rounded));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'search_route.search_suggestions_empty'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('search_route.search_suggestions_empty'));
     });
 
     testAppGoldens('search_suggestions', (WidgetTester tester) async {
@@ -250,7 +246,7 @@ void main() {
         SearchHistory.instance.add('entry_3');
         await tester.tap(find.byIcon(Icons.search_rounded));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'search_route.search_suggestions'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('search_route.search_suggestions'));
     });
 
     testAppGoldens('search_suggestions_delete', (WidgetTester tester) async {
@@ -262,7 +258,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.delete_sweep_rounded));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'search_route.search_suggestions_delete'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('search_route.search_suggestions_delete'));
     });
 
     testAppGoldens('results', (WidgetTester tester) async {
@@ -271,7 +267,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), 't');
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'search_route.results'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('search_route.results'));
     });
 
     testAppGoldens('results_empty', (WidgetTester tester) async {
@@ -280,7 +276,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), 'some_query');
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'search_route.results_empty'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('search_route.results_empty'));
     });
   });
 
@@ -291,7 +287,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text(l10n.settings));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'settings_route.settings_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('settings_route.settings_route'));
     });
 
     testAppGoldens('general_settings_route', (WidgetTester tester) async {
@@ -302,7 +298,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text(l10n.general));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'settings_route.general_settings_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('settings_route.general_settings_route'));
     });
 
     testAppGoldens('theme_settings_route', (WidgetTester tester) async {
@@ -313,7 +309,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text(l10n.theme));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'settings_route.theme_settings_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('settings_route.theme_settings_route'));
     });
 
     testAppGoldens('licenses_route', (WidgetTester tester) async {
@@ -324,7 +320,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Licenses'));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'settings_route.licenses_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('settings_route.licenses_route'));
     });
 
     testAppGoldens('license_details_route', (WidgetTester tester) async {
@@ -337,7 +333,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('test_package'));
         await tester.pumpAndSettle();
-      }, goldenCaptureCallback: () => tester.screenMatchesGolden(tester, 'settings_route.license_details_route'));
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('settings_route.license_details_route'));
     });
   });
 }

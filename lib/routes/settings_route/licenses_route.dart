@@ -233,17 +233,18 @@ class _PackageListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Ink(
       child: NFListTile(
         dense: true,
         title: Text(
           packageName,
           overflow: TextOverflow.ellipsis,
-          style: ThemeControl.instance.theme.textTheme.headline6,
+          style: theme.textTheme.headline6,
         ),
         subtitle: Text(
           MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses),
-          style: ThemeControl.instance.theme.textTheme.subtitle2,
+          style: theme.textTheme.subtitle2,
         ),
         selected: isSelected,
         onTap: onTap,
@@ -1144,6 +1145,7 @@ class _DetailView extends StatelessWidget {
     }
     final double screenHeight = MediaQuery.of(context).size.height;
     final double minHeight = (screenHeight - kToolbarHeight) / screenHeight;
+    final theme = Theme.of(context);
 
     return DraggableScrollableSheet(
       initialChildSize: minHeight,
@@ -1153,7 +1155,7 @@ class _DetailView extends StatelessWidget {
       builder: (BuildContext context, ScrollController controller) {
         return MouseRegion(
           child: Card(
-            color: ThemeControl.instance.theme.colorScheme.secondary,
+            color: theme.colorScheme.secondary,
             elevation: _kCardElevation,
             clipBehavior: Clip.antiAlias,
             margin: const EdgeInsets.fromLTRB(

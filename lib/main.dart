@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ Future<void> main() async {
     ThemeControl.instance.initSystemUi();
     await Permissions.instance.init();
     await ContentControl.instance.init();
-    runApp(const App());
+    runApp(const ProviderScope(child: App()));
   }, reportError);
 }
 
@@ -111,9 +112,9 @@ class App extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   static NFThemeData nfThemeData = NFThemeData(
-    systemUiStyle: constants.UiTheme.black.auto,
-    modalSystemUiStyle: constants.UiTheme.modal.auto,
-    bottomSheetSystemUiStyle: constants.UiTheme.bottomSheet.auto,
+    systemUiStyle: staticTheme.systemUiThemeExtension.black,
+    modalSystemUiStyle: staticTheme.systemUiThemeExtension.modal,
+    bottomSheetSystemUiStyle: staticTheme.systemUiThemeExtension.bottomSheet,
   );
 
   static void rebuildAllChildren() {
@@ -131,6 +132,17 @@ class App extends StatefulWidget {
 
 late SlidableController _playerRouteController;
 late SlidableController _drawerController;
+
+/// TODO: https://github.com/nt4f04uNd/sweyer/issues/81#issuecomment-1335575679
+/// This is a hack.
+///
+/// [playerRouteController] is used inside [PlayerInterfaceColorStyleControl], which
+/// is faked and initialized before the app actually runs, meaning that
+/// at some poing it could use unitialized [playerRouteController].
+///
+/// This happens in [testAppGoldens] with playerInterfaceColorStylesToTest: {PlayerInterfaceColorStyle.themeBackgroundColor},
+/// `player_route.player_route` can be used as an example of this.
+bool playerRouteControllerInitialized = false;
 SlidableController get playerRouteController => _playerRouteController;
 SlidableController get drawerController => _drawerController;
 
@@ -146,6 +158,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       vsync: this,
       springDescription: playerRouteSpringDescription,
     );
+    playerRouteControllerInitialized = true;
     NFWidgets.init(
       navigatorKey: AppRouter.instance.navigatorKey,
       routeObservers: [routeObserver, homeRouteObserver],
@@ -157,6 +170,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     return StreamBuilder(
       stream: ThemeControl.instance.themeChanging,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
+        final theme = ThemeControl.instance.theme;
         return NFTheme(
           data: App.nfThemeData,
           child: MaterialApp.router(
@@ -164,11 +178,11 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             // checkerboardRasterCacheImages: true,
             debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
             title: constants.Config.applicationTitle,
-            color: ThemeControl.instance.theme.colorScheme.primary,
+            theme: theme,
+            color: theme.colorScheme.primary,
             supportedLocales: constants.Config.supportedLocales,
             scrollBehavior: _ScrollBehavior(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
-            theme: ThemeControl.instance.theme,
             routerDelegate: AppRouter.instance,
             routeInformationParser: AppRouteInformationParser(),
           ),
@@ -181,9 +195,10 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 class _ScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    final theme = Theme.of(context);
     return GlowingOverscrollIndicator(
       axisDirection: axisDirection,
-      color: ThemeControl.instance.theme.colorScheme.background,
+      color: theme.colorScheme.background,
       child: child,
     );
   }

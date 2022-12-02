@@ -133,7 +133,7 @@ class Song extends Content {
     return MediaItem(
       id: sourceId.toString(),
       uri: contentUri,
-      defaultArtBlendColor: ThemeControl.instance.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       album: getAlbum()?.album,
       title: title,

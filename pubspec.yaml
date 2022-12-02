@@ -42,13 +42,16 @@ dependencies:
   boxy: ^2.0.0
   back_button_interceptor: ^6.0.0
   flutter_sticky_header: ^0.6.0
-  palette_generator: ^0.3.0
+  palette_generator: ^0.3.3+2
   cached_network_image: ^3.0.0
   flutter_cache_manager: ^3.1.1
   clock: ^1.1.0
   styled_text: ^5.1.0
   android_content_provider: ^0.2.2
   collection: ^1.16.0
+  theme_tailor_annotation: ^1.0.3
+  riverpod: ^2.1.1
+  flutter_riverpod: ^2.1.1
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 
@@ -94,8 +97,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  build_runner: ^2.2.1
   flutter_lints: ^2.0.1
   golden_toolkit: ^0.13.0
+  theme_tailor: 1.0.6
 
 flutter:
   generate: true

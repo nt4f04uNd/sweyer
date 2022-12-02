@@ -480,7 +480,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   }
 
   ThemeData buildAppBarTheme() {
-    final ThemeData theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return theme.copyWith(
       primaryColor: theme.backgroundColor,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
@@ -996,11 +996,12 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       controller.reverse();
     }
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final count = favoritesChip ? null : delegate.results.map.get(widget.contentType!).length;
-    final colorScheme = ThemeControl.instance.theme.colorScheme;
+    final colorScheme = theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
-      end: constants.Theme.contrast.auto,
+      end: theme.appThemeExtension.contrast,
     );
     final baseAnimation = CurvedAnimation(
       parent: controller,
@@ -1010,11 +1011,11 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     final colorAnimation = colorTween.animate(baseAnimation);
     final textColorAnimation = ColorTween(
       begin: colorScheme.onBackground,
-      end: favoritesChip ? Colors.redAccent : constants.Theme.contrast.autoReverse,
+      end: favoritesChip ? Colors.redAccent : theme.appThemeExtension.contrastInverse,
     ).animate(baseAnimation);
     final splashColorAnimation = ColorTween(
-      begin: constants.Theme.glowSplashColor.auto,
-      end: constants.Theme.glowSplashColorOnContrast.auto,
+      begin: theme.appThemeExtension.glowSplashColor,
+      end: theme.appThemeExtension.glowSplashColorOnContrast,
     ).animate(baseAnimation);
     return SizedBox(
       height: _ContentChip.height,
@@ -1027,7 +1028,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
               ? null
               : StadiumBorder(
                   side: BorderSide(
-                    color: constants.Theme.contrast.auto.withOpacity(0.05),
+                    color: theme.appThemeExtension.contrast.withOpacity(0.05),
                     width: 1.0,
                   ),
                 ),
@@ -1046,11 +1047,11 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                   )
                 : IgnorePointer(
                     child: Theme(
-                      data: ThemeControl.instance.theme.copyWith(canvasColor: Colors.transparent),
+                      data: theme.copyWith(canvasColor: Colors.transparent),
                       child: RawChip(
                         shape: StadiumBorder(
                           side: BorderSide(
-                            color: constants.Theme.contrast.auto.withOpacity(0.05),
+                            color: theme.appThemeExtension.contrast.withOpacity(0.05),
                             width: 1.0,
                           ),
                         ),
@@ -1120,52 +1121,56 @@ class _SuggestionsState extends State<_Suggestions> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return FutureBuilder<void>(
-      future: _loadFuture,
-      builder: (context, snapshot) {
-        if (SearchHistory.instance.history == null) {
-          return const Center(
-            child: Spinner(),
-          );
-        }
-        return SizedBox(
-          width: double.infinity,
-          child: SearchHistory.instance.history!.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 160.0,
-                      left: 50.0,
-                      right: 50.0,
-                    ),
-                    child: Text(
-                      l10n.searchHistoryPlaceholder,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: ThemeControl.instance.theme.hintColor,
+    final theme = Theme.of(context);
+    return AnimatedBuilder(
+      animation: _SearchStateDelegate._of(context)!.searchDelegate._setStateNotifier,
+      builder: (context, child) => FutureBuilder<void>(
+        future: _loadFuture,
+        builder: (context, snapshot) {
+          if (SearchHistory.instance.history == null) {
+            return const Center(
+              child: Spinner(),
+            );
+          }
+          return SizedBox(
+            width: double.infinity,
+            child: SearchHistory.instance.history!.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 160.0,
+                        left: 50.0,
+                        right: 50.0,
+                      ),
+                      child: Text(
+                        l10n.searchHistoryPlaceholder,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: theme.hintColor,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : ScrollConfiguration(
-                  behavior: const GlowlessScrollBehavior(),
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: ClampingScrollPhysics(),
+                  )
+                : ScrollConfiguration(
+                    behavior: const GlowlessScrollBehavior(),
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: ClampingScrollPhysics(),
+                      ),
+                      itemCount: SearchHistory.instance.history!.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const _SuggestionsHeader();
+                        }
+                        index--;
+                        return _SuggestionTile(index: index);
+                      },
                     ),
-                    itemCount: SearchHistory.instance.history!.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return const _SuggestionsHeader();
-                      }
-                      index--;
-                      return _SuggestionTile(index: index);
-                    },
                   ),
-                ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -1181,6 +1186,7 @@ class _SuggestionsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return ListHeader(
       margin: const EdgeInsets.fromLTRB(16.0, 3.0, 7.0, 0.0),
       leading: Text(l10n.searchHistory),
@@ -1188,17 +1194,17 @@ class _SuggestionsHeader extends StatelessWidget {
         padding: const EdgeInsets.only(top: 5.0),
         child: NFIconButton(
           icon: const Icon(Icons.delete_sweep_rounded),
-          color: ThemeControl.instance.theme.hintColor,
+          color: theme.hintColor,
           onPressed: () {
             ShowFunctions.instance.showDialog(
               context,
-              ui: constants.UiTheme.modalOverGrey.auto,
+              ui: theme.systemUiThemeExtension.modalOverGrey,
               title: Text(l10n.searchClearHistory),
-              buttonSplashColor: constants.Theme.glowSplashColor.auto,
+              buttonSplashColor: theme.appThemeExtension.glowSplashColor,
               acceptButton: AppButton.pop(
                 text: l10n.delete,
                 popResult: true,
-                splashColor: constants.Theme.glowSplashColor.auto,
+                splashColor: theme.appThemeExtension.glowSplashColor,
                 textColor: constants.AppColors.red,
                 onPressed: () => clearHistory(context),
               ),
@@ -1233,6 +1239,7 @@ class _SuggestionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return NFListTile(
       onTap: () => _handleTap(context),
       title: Text(
@@ -1247,13 +1254,13 @@ class _SuggestionTile extends StatelessWidget {
         padding: const EdgeInsets.only(left: 2.0),
         child: Icon(
           Icons.history_rounded,
-          color: ThemeControl.instance.theme.iconTheme.color,
+          color: theme.iconTheme.color,
         ),
       ),
       onLongPress: () {
         ShowFunctions.instance.showDialog(
           context,
-          ui: constants.UiTheme.modalOverGrey.auto,
+          ui: theme.systemUiThemeExtension.modalOverGrey,
           title: Text(l10n.searchHistory),
           titlePadding: defaultAlertTitlePadding.copyWith(bottom: 4.0),
           contentPadding: defaultAlertContentPadding.copyWith(bottom: 6.0),
@@ -1266,11 +1273,11 @@ class _SuggestionTile extends StatelessWidget {
               'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),
             },
           ),
-          buttonSplashColor: constants.Theme.glowSplashColor.auto,
+          buttonSplashColor: theme.appThemeExtension.glowSplashColor,
           acceptButton: AppButton.pop(
             text: l10n.remove,
             popResult: true,
-            splashColor: constants.Theme.glowSplashColor.auto,
+            splashColor: theme.appThemeExtension.glowSplashColor,
             textColor: constants.AppColors.red,
             onPressed: () => _removeEntry(context, index),
           ),

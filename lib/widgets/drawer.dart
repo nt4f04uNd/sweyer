@@ -34,14 +34,15 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
   void _handleControllerStatusChange(AnimationStatus status) {
     // Change system UI on expanding/collapsing the drawer.
+    final theme = Theme.of(context);
     if (_onTop) {
       if (status == AnimationStatus.dismissed) {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: constants.UiTheme.grey.auto,
+          to: theme.systemUiThemeExtension.grey,
         );
       } else {
         SystemUiStyleController.instance.animateSystemUiOverlay(
-          to: constants.UiTheme.drawerScreen.auto,
+          to: theme.systemUiThemeExtension.drawerScreen,
         );
       }
     }
@@ -73,7 +74,10 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   !HomeRouter.instance.drawerCanBeOpened);
         },
         shouldEagerlyWin: (event) {
-          return controller.value == 0.0 && HomeRouter.instance.drawerCanBeOpened && event.delta.dx > 0.0;
+          return controller.value == 0.0 &&
+              HomeRouter.instance.drawerCanBeOpened &&
+              event.delta.dy.abs() < 8.0 &&
+              event.delta.dx > 5.0;
         },
         onBarrierTap: controller.close,
         barrier: Container(color: Colors.black26),
@@ -150,10 +154,11 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Theme(
       data: Theme.of(context).copyWith(
         //This will change the drawer background
-        canvasColor: ThemeControl.instance.theme.colorScheme.surface,
+        canvasColor: theme.colorScheme.surface,
       ),
       child: Drawer(
         elevation: elevation,
@@ -176,7 +181,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w800,
-                          color: ThemeControl.instance.theme.textTheme.headline6!.color,
+                          color: theme.textTheme.headline6!.color,
                         ),
                       ),
                     ),
@@ -227,6 +232,7 @@ class DrawerMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return NFListTile(
       dense: true,
       leading: icon != null
@@ -235,7 +241,7 @@ class DrawerMenuItem extends StatelessWidget {
               child: Icon(
                 icon,
                 size: iconSize,
-                color: ThemeControl.instance.theme.iconTheme.color,
+                color: theme.iconTheme.color,
               ),
             )
           : null,
@@ -243,7 +249,7 @@ class DrawerMenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: constants.Theme.drawerMenuItemColor.auto,
+          color: theme.appThemeExtension.drawerMenuItemColor,
         ),
       ),
       onTap: onTap,

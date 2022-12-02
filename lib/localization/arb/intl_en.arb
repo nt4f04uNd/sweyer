@@ -310,5 +310,9 @@
   "accept": "Accept",
   "cancel": "Cancel",
   "copied": "Copied",
-  "gitHubRepo": "GitHub repo"
+  "gitHubRepo": "GitHub repo",
+  "defaultValue": "Default",
+  "playerInterfaceColorStyle": "Player color theme",
+  "playerInterfaceColorStyleArtColor": "Based on track art",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Theme background color"
 }

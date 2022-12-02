@@ -11,14 +11,10 @@ class ThemeControl {
   static ThemeControl instance = ThemeControl();
 
   bool _ready = false;
-  late Color _colorForBlend;
   late Brightness _brightness;
 
   /// Whether the start up ui animation has ended.
   bool get ready => _ready;
-
-  /// Primary application color adjusted for blending into album arts.
-  Color get colorForBlend => _colorForBlend;
 
   /// App theme  brightness
   Brightness get brightness => _brightness;
@@ -83,8 +79,8 @@ class ThemeControl {
     ));
     await Future.delayed(const Duration(milliseconds: 500));
     if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor !=
-        constants.UiTheme.black.auto.systemNavigationBarColor) {
-      final ui = constants.UiTheme.grey.auto;
+        theme.systemUiThemeExtension.black.systemNavigationBarColor) {
+      final ui = theme.systemUiThemeExtension.grey;
       await SystemUiStyleController.instance.animateSystemUiOverlay(
         to: ui,
         curve: Curves.easeOut,
@@ -105,9 +101,9 @@ class ThemeControl {
     _rebuildOperation?.cancel();
     setThemeLightMode(_brightness == Brightness.dark);
     App.nfThemeData = App.nfThemeData.copyWith(
-      systemUiStyle: constants.UiTheme.black.auto,
-      modalSystemUiStyle: constants.UiTheme.modal.auto,
-      bottomSheetSystemUiStyle: constants.UiTheme.bottomSheet.auto,
+      systemUiStyle: theme.systemUiThemeExtension.black,
+      modalSystemUiStyle: theme.systemUiThemeExtension.modal,
+      bottomSheetSystemUiStyle: theme.systemUiThemeExtension.bottomSheet,
     );
 
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
@@ -122,13 +118,13 @@ class ThemeControl {
     });
 
     await SystemUiStyleController.instance.animateSystemUiOverlay(
-      to: constants.UiTheme.black.auto,
+      to: theme.systemUiThemeExtension.black,
       curve: Curves.easeIn,
       duration: const Duration(milliseconds: 160),
     );
   }
 
-  /// Accepts new primary color, updates [colorForBlend] and changes theme dependent on it.
+  /// Accepts new primary color and changes theme dependent on it.
   void changePrimaryColor(Color color) {
     _rebuildOperation?.cancel();
     _applyPrimaryColor(color);
@@ -146,9 +142,15 @@ class ThemeControl {
 
   void _applyPrimaryColor(Color color) {
     AppRouter.instance.updateTransitionSettings(themeChanged: true);
-    _colorForBlend = ContentArt.getColorToBlendInDefaultArt(color);
     constants.Theme.app = constants.Theme.app.copyWith(
       light: constants.Theme.app.light.copyWith(
+        extensions: [
+          constants.Theme.app.light.appThemeExtension.copyWith(
+            artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+            currentIndicatorBackgroundColorWithDefaultArt: color,
+          ),
+          constants.Theme.app.light.systemUiThemeExtension,
+        ],
         primaryColor: color,
         toggleableActiveColor: color,
         colorScheme: constants.Theme.app.light.colorScheme.copyWith(
@@ -171,6 +173,13 @@ class ThemeControl {
         ),
       ),
       dark: constants.Theme.app.dark.copyWith(
+        extensions: [
+          constants.Theme.app.dark.appThemeExtension.copyWith(
+            artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+            currentIndicatorBackgroundColorWithDefaultArt: color,
+          ),
+          constants.Theme.app.dark.systemUiThemeExtension,
+        ],
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,

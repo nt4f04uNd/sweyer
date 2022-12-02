@@ -143,6 +143,7 @@ void _openStandalonePlayerRoute(BuildContext context) {
       transitionSettings: RouteTransitionSettings(opaque: false, transitionDuration: const Duration(milliseconds: 500)),
       builder: (context) => const _StandalonePlayer(),
       animationBuilder: (context, animation, secondaryAnimation, child) {
+        final theme = Theme.of(context);
         final fadeAnimation = CurvedAnimation(
           parent: animation,
           curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
@@ -172,7 +173,7 @@ void _openStandalonePlayerRoute(BuildContext context) {
                     }
                   },
                   child: Container(
-                    color: ThemeControl.instance.theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value),
+                    color: theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value),
                   ),
                 ),
                 BackdropFilter(

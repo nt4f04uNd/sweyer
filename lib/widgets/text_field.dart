@@ -37,7 +37,7 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return TextField(
       selectionControls: NFTextSelectionControls(),
       controller: widget.controller,

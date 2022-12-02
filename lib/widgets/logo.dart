@@ -12,12 +12,13 @@ class SweyerLogo extends StatelessWidget {
 
   final double size;
 
-  /// Background color to be used instead of [ThemeControl.instance.colorForBlend],
+  /// Background color to be used instead of [AppTheme.artColorForBlend],
   /// which is applied by default.
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final cacheSize = (size * 1.65 * MediaQuery.of(context).devicePixelRatio).round();
     return ClipRRect(
       borderRadius: const BorderRadius.all(
@@ -34,7 +35,7 @@ class SweyerLogo extends StatelessWidget {
                 constants.Assets.assetLogoMask,
                 color: color != null
                     ? ContentArt.getColorToBlendInDefaultArt(color!)
-                    : ThemeControl.instance.colorForBlend,
+                    : theme.appThemeExtension.artColorForBlend,
                 cacheHeight: cacheSize,
                 cacheWidth: cacheSize,
                 colorBlendMode: BlendMode.plus,

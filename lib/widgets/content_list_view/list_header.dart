@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class ListHeader extends StatelessWidget {
   const ListHeader({
@@ -24,10 +23,11 @@ class ListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(
             fontSize: 16.0,
-            color: ThemeControl.instance.theme.hintColor,
+            color: theme.hintColor,
             fontWeight: FontWeight.w700,
           ),
       child: Container(
@@ -91,43 +91,16 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
     final sort = getSort();
-    Widget buildItem(SortFeature feature) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NFListTileInkRipple.splashFactory,
-        ),
-        child: Builder(
-          // i need the proper context to pop the dialog
-          builder: (context) => _RadioListTile<SortFeature>(
-            title: Text(
-              l10n.sortFeature(contentType, feature),
-              style: ThemeControl.instance.theme.textTheme.subtitle1,
-            ),
-            value: feature,
-            groupValue: sort.feature,
-            onChanged: (_) {
-              ContentControl.instance.sort(
-                contentType: contentType,
-                sort: sort.copyWith(feature: feature).withDefaultOrder,
-              );
-              Navigator.pop(context);
-            },
-          ),
-        ),
-      );
-    }
-
-    ShowFunctions.instance.showAlert(
-      context,
-      ui: constants.UiTheme.modalOverGrey.auto,
-      title: Text(l10n.sort),
-      titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
-      contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
-      closeButton: const SizedBox.shrink(),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: SortFeature.getValuesForContent(contentType).map((el) => buildItem(el)).toList(),
+    ShowFunctions.instance.showRadio<SortFeature>(
+      context: context,
+      title: l10n.sort,
+      items: SortFeature.getValuesForContent(contentType),
+      itemTitleBuilder: (item) => l10n.sortFeature(contentType, item),
+      onItemSelected: (item) => ContentControl.instance.sort(
+        contentType: contentType,
+        sort: sort.copyWith(feature: item).withDefaultOrder,
       ),
+      groupValueGetter: () => sort.feature,
     );
   }
 
@@ -146,8 +119,9 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final textStyle = TextStyle(
-      color: ThemeControl.instance.theme.colorScheme.onBackground,
+      color: theme.colorScheme.onBackground,
       fontSize: 14.0,
       fontWeight: FontWeight.w800,
     );
@@ -217,56 +191,6 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     return IgnoreInSelection(
       controller: selectionController!,
       child: child,
-    );
-  }
-}
-
-class _RadioListTile<T> extends StatelessWidget {
-  const _RadioListTile({
-    Key? key,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-    this.title,
-  }) : super(key: key);
-
-  final T value;
-  final T groupValue;
-  final ValueChanged<T> onChanged;
-  final Widget? title;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        onChanged(value);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 14.0),
-        child: Row(
-          children: [
-            Radio<T>(
-              activeColor: ThemeControl.instance.isDark
-                  ? ThemeControl.instance.theme.colorScheme.onBackground
-                  : ThemeControl.instance.theme.colorScheme.primary,
-              value: value,
-              splashRadius: 0.0,
-              groupValue: groupValue,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onChanged: (value) {
-                if (value != null) {
-                  onChanged(value);
-                }
-              },
-            ),
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: title,
-              ),
-          ],
-        ),
-      ),
     );
   }
 }
