@@ -81,10 +81,11 @@ void main() {
       // Expand the route
       await tester.expandPlayerRoute();
 
-      /// Expect 3 because:
+      /// Expect 5 because:
       /// 1 - from [SongTile]
       /// 2 - from [TrackPanel]
-      /// 3 - from [PlayerRoute]
+      /// 3 and 4 - from [PlayerRoute] - it shows current and previous song arts and animates between them
+      /// 5 - also from [PlayerRoute] invisible overlay, used to extract art color 
 
       final currentSong = PlaybackControl.instance.currentSong;
       expect(find.text(currentSong.title), findsNWidgets(3));
@@ -93,7 +94,7 @@ void main() {
       expect(find.textContaining(currentSong.artist), findsNWidgets(3));
       expect(
         find.byWidgetPredicate((widget) => widget is ContentArt && widget.source == ContentArtSource.song(currentSong)),
-        findsNWidgets(4), // PlayerRoute shows two arts and animates between them
+        findsNWidgets(5),
       );
     });
   });
