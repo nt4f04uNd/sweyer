@@ -132,6 +132,17 @@ class App extends StatefulWidget {
 
 late SlidableController _playerRouteController;
 late SlidableController _drawerController;
+
+/// TODO: https://github.com/nt4f04uNd/sweyer/issues/81#issuecomment-1335575679
+/// This is a hack.
+///
+/// [playerRouteController] is used inside [PlayerInterfaceColorStyleControl], which
+/// is faked and initialized before the app actually runs, meaning that
+/// at some poing it could use unitialized [playerRouteController].
+///
+/// This happens in [testAppGoldens] with playerInterfaceColorStylesToTest: {PlayerInterfaceColorStyle.themeBackgroundColor},
+/// `player_route.player_route` can be used as an example of this.
+bool playerRouteControllerInitialized = false;
 SlidableController get playerRouteController => _playerRouteController;
 SlidableController get drawerController => _drawerController;
 
@@ -147,6 +158,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       vsync: this,
       springDescription: playerRouteSpringDescription,
     );
+    playerRouteControllerInitialized = true;
     NFWidgets.init(
       navigatorKey: AppRouter.instance.navigatorKey,
       routeObservers: [routeObserver, homeRouteObserver],

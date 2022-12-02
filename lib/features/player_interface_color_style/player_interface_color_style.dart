@@ -94,6 +94,9 @@ class PlayerInterfaceColorStyleControl extends Control {
   }
 
   void _handleCurrentBackgroundColor() {
+    if (!playerRouteControllerInitialized) {
+      return;
+    }
     if (AppRouter.instance.currentRoute.hasSameLocation(AppRoutes.initial) ||
         AppRouter.instance.currentRoute.hasSameLocation(AppRoutes.selection)) {
       SystemUiStyleController.instance.animateSystemUiOverlay(
