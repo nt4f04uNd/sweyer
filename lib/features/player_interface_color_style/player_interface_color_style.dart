@@ -25,7 +25,7 @@ class PlayerInterfaceColorStyleControl extends Control {
     super.init();
     _currentPalette = ValueNotifier(null);
     _currentBackgroundColor = ValueNotifier(Colors.black);
-    updatePalette(staticTheme, null);
+    _updatePalette(staticTheme, null);
     Settings.playerInterfaceColorStyle.addListener(_handlePlayerInterfaceStyle);
   }
 
@@ -61,6 +61,11 @@ class PlayerInterfaceColorStyleControl extends Control {
   }
 
   void updatePalette(ThemeData theme, PaletteGenerator? value) {
+    _updatePalette(theme, value);
+    _handleCurrentBackgroundColor();
+  }
+
+  void _updatePalette(ThemeData theme, PaletteGenerator? value) {
     _currentPalette.value = value;
     _currentBackgroundColor.value = shadeColor(
       -0.5,
@@ -75,6 +80,17 @@ class PlayerInterfaceColorStyleControl extends Control {
       case PlayerInterfaceColorStyle.themeBackgroundColor:
         updatePalette(staticTheme, null);
         break;
+    }
+  }
+
+  void _handleCurrentBackgroundColor() {
+    if (AppRouter.instance.currentRoute.hasSameLocation(AppRoutes.initial) ||
+        AppRouter.instance.currentRoute.hasSameLocation(AppRoutes.selection)) {
+      SystemUiStyleController.instance.animateSystemUiOverlay(
+        to: PlayerInterfaceColorStyleControl.instance.systemUiOverlayStyle,
+        duration: _ArtColorWidget.duration,
+        curve: _ArtColorWidget.curve,
+      );
     }
   }
 }
@@ -197,20 +213,32 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
 }
 
 /// A background to be used by [PlayerRoute].
-class PlayerInterfaceBackgroundWidget extends StatelessWidget {
-  const PlayerInterfaceBackgroundWidget({Key? key}) : super(key: key);
+class PlayerInterfaceColorWidget extends StatelessWidget {
+  const PlayerInterfaceColorWidget({
+    Key? key,
+    this.child,
+    this.color,
+  }) : super(key: key);
+
+  final Widget? child;
+  final ValueGetter<Color?>? color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return PlayerInterfaceColorStyleSettingBuilder(
+      child: child,
       builder: (context, value, child) {
         switch (value) {
           case PlayerInterfaceColorStyle.artColor:
-            return const _SolidPaletteColorBackground();
+            return _ArtColorWidget(
+              child: child,
+              color: color,
+            );
           case PlayerInterfaceColorStyle.themeBackgroundColor:
             return Container(
-              color: theme.colorScheme.background,
+              color: color?.call() ?? theme.colorScheme.background,
+              child: child,
             );
         }
       },
@@ -218,34 +246,32 @@ class PlayerInterfaceBackgroundWidget extends StatelessWidget {
   }
 }
 
-class _SolidPaletteColorBackground extends StatelessWidget {
-  const _SolidPaletteColorBackground({Key? key}) : super(key: key);
+class _ArtColorWidget extends StatelessWidget {
+  const _ArtColorWidget({
+    Key? key,
+    required this.child,
+    required this.color,
+  }) : super(key: key);
+
+  final Widget? child;
+  final ValueGetter<Color?>? color;
 
   static const duration = Duration(milliseconds: 240);
   static const curve = Curves.easeOutCubic;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: PlaybackControl.instance.onSongChange,
-      builder: (context, snapshot) => ValueListenableBuilder<Color>(
-        valueListenable: PlayerInterfaceColorStyleControl.instance.currentBackgroundColor,
-        builder: (context, value, child) {
-          if (AppRouter.instance.currentRoute.hasSameLocation(AppRoutes.initial) ||
-              AppRouter.instance.currentRoute.hasSameLocation(AppRoutes.selection)) {
-            SystemUiStyleController.instance.animateSystemUiOverlay(
-              to: PlayerInterfaceColorStyleControl.instance.systemUiOverlayStyle,
-              duration: duration,
-              curve: curve,
-            );
-          }
-          return AnimatedContainer(
-            duration: duration,
-            curve: curve,
-            color: value,
-          );
-        },
-      ),
+    return ValueListenableBuilder<Color>(
+      child: child,
+      valueListenable: PlayerInterfaceColorStyleControl.instance.currentBackgroundColor,
+      builder: (context, value, child) {
+        return AnimatedContainer(
+          duration: duration,
+          curve: curve,
+          color: color?.call() ?? value,
+          child: child,
+        );
+      },
     );
   }
 }

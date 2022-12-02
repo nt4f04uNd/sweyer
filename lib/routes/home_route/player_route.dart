@@ -141,7 +141,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
                 child1: Container(
                   color: theme.colorScheme.secondary,
                 ),
-                child2: const PlayerInterfaceBackgroundWidget(),
+                child2: const PlayerInterfaceColorWidget(),
               ),
             ),
             PlayerInterfaceThemeOverride(
@@ -493,136 +493,139 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final appBar = Material(
       elevation: 2.0,
       color: theme.appBarTheme.backgroundColor,
-      child: Container(
-        height: appBarHeight,
-        margin: EdgeInsets.only(top: topScreenPadding),
-        padding: const EdgeInsets.only(
-          top: 24.0,
-          bottom: 0.0,
-        ),
-        child: FadeTransition(
-          opacity: fadeAnimation,
-          child: RepaintBoundary(
-            child: GestureDetector(
-              onTap: _handleTitleTap,
-              child: AnimationSwitcher(
-                animation: CurvedAnimation(
-                  curve: Curves.easeOutCubic,
-                  reverseCurve: Curves.easeInCubic,
-                  parent: widget.selectionController.animation,
-                ),
-                child2: Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 10.0,
-                    left: 42.0,
-                    right: 12.0,
+      child: PlayerInterfaceColorWidget(
+        color: () => theme.appBarTheme.backgroundColor,
+        child: Container(
+          height: appBarHeight,
+          margin: EdgeInsets.only(top: topScreenPadding),
+          padding: const EdgeInsets.only(
+            top: 24.0,
+            bottom: 0.0,
+          ),
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: RepaintBoundary(
+              child: GestureDetector(
+                onTap: _handleTitleTap,
+                child: AnimationSwitcher(
+                  animation: CurvedAnimation(
+                    curve: Curves.easeOutCubic,
+                    reverseCurve: Curves.easeInCubic,
+                    parent: widget.selectionController.animation,
                   ),
-                  child: Row(
-                    children: [
-                      SelectionCounter(controller: widget.selectionController),
-                      const Spacer(),
-                      SelectAllSelectionAction<Song>(
-                        controller: widget.selectionController,
-                        entryFactory: (content, index) => SelectionEntry<Song>.fromContent(
-                          content: content,
-                          index: index,
-                          context: context,
+                  child2: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 10.0,
+                      left: 42.0,
+                      right: 12.0,
+                    ),
+                    child: Row(
+                      children: [
+                        SelectionCounter(controller: widget.selectionController),
+                        const Spacer(),
+                        SelectAllSelectionAction<Song>(
+                          controller: widget.selectionController,
+                          entryFactory: (content, index) => SelectionEntry<Song>.fromContent(
+                            content: content,
+                            index: index,
+                            context: context,
+                          ),
+                          getAll: () => QueueControl.instance.state.current.songs,
                         ),
-                        getAll: () => QueueControl.instance.state.current.songs,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                child1: Padding(
-                  padding: EdgeInsets.only(
-                    left: origin != null ? 12.0 : 20.0,
-                    right: 12.0,
-                  ),
-                  child: Row(
-                    children: [
-                      if (origin != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
-                          child: ContentArt(
-                            source: ContentArtSource.origin(origin),
-                            borderRadius: _getBorderRadius(origin),
-                            size: kSongTileArtSize - 8.0,
+                  child1: Padding(
+                    padding: EdgeInsets.only(
+                      left: origin != null ? 12.0 : 20.0,
+                      right: 12.0,
+                    ),
+                    child: Row(
+                      children: [
+                        if (origin != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
+                            child: ContentArt(
+                              source: ContentArtSource.origin(origin),
+                              borderRadius: _getBorderRadius(origin),
+                              size: kSongTileArtSize - 8.0,
+                            ),
+                          ),
+                        Flexible(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  Text(
+                                    l10n.upNext,
+                                    style: theme.textTheme.headline6!.copyWith(
+                                      fontSize: 24,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  _crossFade(
+                                    !QueueControl.instance.state.modified,
+                                    const SizedBox(height: 18.0),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 5.0),
+                                      child: Icon(
+                                        Icons.edit_rounded,
+                                        size: 18.0,
+                                      ),
+                                    ),
+                                  ),
+                                  _crossFade(
+                                    !QueueControl.instance.state.shuffled,
+                                    const SizedBox(height: 20.0),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 2.0),
+                                      child: Icon(
+                                        Icons.shuffle_rounded,
+                                        size: 20.0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: AnimatedSwitcher(
+                                      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                        return Stack(
+                                          alignment: Alignment.centerLeft,
+                                          children: <Widget>[
+                                            ...previousChildren,
+                                            if (currentChild != null) currentChild,
+                                          ],
+                                        );
+                                      },
+                                      duration: const Duration(milliseconds: 400),
+                                      switchInCurve: Curves.easeOut,
+                                      switchOutCurve: Curves.easeIn,
+                                      child: _buildTitleText(l10n),
+                                    ),
+                                  ),
+                                  if (origin != null || type == QueueType.searched)
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 18.0,
+                                      color: theme.textTheme.subtitle2!.color,
+                                    ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                      Flexible(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: [
-                                Text(
-                                  l10n.upNext,
-                                  style: theme.textTheme.headline6!.copyWith(
-                                    fontSize: 24,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                _crossFade(
-                                  !QueueControl.instance.state.modified,
-                                  const SizedBox(height: 18.0),
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 5.0),
-                                    child: Icon(
-                                      Icons.edit_rounded,
-                                      size: 18.0,
-                                    ),
-                                  ),
-                                ),
-                                _crossFade(
-                                  !QueueControl.instance.state.shuffled,
-                                  const SizedBox(height: 20.0),
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 2.0),
-                                    child: Icon(
-                                      Icons.shuffle_rounded,
-                                      size: 20.0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: AnimatedSwitcher(
-                                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                                      return Stack(
-                                        alignment: Alignment.centerLeft,
-                                        children: <Widget>[
-                                          ...previousChildren,
-                                          if (currentChild != null) currentChild,
-                                        ],
-                                      );
-                                    },
-                                    duration: const Duration(milliseconds: 400),
-                                    switchInCurve: Curves.easeOut,
-                                    switchOutCurve: Curves.easeIn,
-                                    child: _buildTitleText(l10n),
-                                  ),
-                                ),
-                                if (origin != null || type == QueueType.searched)
-                                  Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 18.0,
-                                    color: theme.textTheme.subtitle2!.color,
-                                  ),
-                              ],
-                            ),
+                        Column(
+                          children: const [
+                            _SaveQueueAsPlaylistAction(),
                           ],
-                        ),
-                      ),
-                      Column(
-                        children: const [
-                          _SaveQueueAsPlaylistAction(),
-                        ],
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

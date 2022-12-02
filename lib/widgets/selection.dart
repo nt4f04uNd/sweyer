@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
@@ -552,7 +553,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// non-empty array.
   bool get hasAtLeastOneSong => data.any((el) => el is! SelectionEntry<Playlist> || el.data.songIds.isNotEmpty);
 
-  Color? _lastNavColor;
+  SystemUiOverlayStyle? _lastUi;
+  StreamSubscription? _lastUiSub;
   OverlayEntry? _overlayEntry;
   SlidableController? _dismissibleRouteController;
   ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.instance.selectionNotifier;
@@ -592,17 +594,31 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       localOverlay.insert(_overlayEntry!);
 
       // Animate system UI
-      final lastUi = SystemUiStyleController.instance.lastUi;
-      _lastNavColor = lastUi.systemNavigationBarColor;
-      final theme = Theme.of(context);
-      SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: systemUiOverlayStyle?.call() ??
+      Future<void> _animateSystemUi([SystemUiOverlayStyle? lastUi]) async {
+        lastUi ??= SystemUiStyleController.instance.lastUi;
+        _lastUi = lastUi;
+        _lastUiSub?.cancel();
+        _lastUiSub = null;
+        final theme = Theme.of(context);
+        final to = systemUiOverlayStyle?.call() ??
             lastUi.copyWith(
               systemNavigationBarColor: theme.systemUiThemeExtension.grey.systemNavigationBarColor,
-            ),
-        duration: kSelectionDuration,
-        curve: _SelectionActionsBar.forwardCurve,
-      );
+            );
+        await SystemUiStyleController.instance.animateSystemUiOverlay(
+          to: to,
+          duration: kSelectionDuration,
+          curve: _SelectionActionsBar.forwardCurve,
+        );
+        _lastUiSub = SystemUiStyleController.instance.onUiChange.listen((color) {
+          _lastUi = color;
+        });
+        if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor != to.systemNavigationBarColor) {
+          // Restart if we were interrupted by other system UI update
+          _animateSystemUi(_lastUi);
+        }
+      }
+
+      _animateSystemUi();
     }
 
     _notifier.value = this;
@@ -638,17 +654,19 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   void _animateNavBack() {
-    if (_lastNavColor == null) {
+    if (_lastUi == null) {
       return;
     }
     SystemUiStyleController.instance.animateSystemUiOverlay(
       to: SystemUiStyleController.instance.lastUi.copyWith(
-        systemNavigationBarColor: _lastNavColor,
+        systemNavigationBarColor: _lastUi!.systemNavigationBarColor,
       ),
       duration: kSelectionDuration,
       curve: _SelectionActionsBar.reverseCurve.flipped,
     );
-    _lastNavColor = null;
+    _lastUi = null;
+    _lastUiSub?.cancel();
+    _lastUiSub = null;
   }
 
   void _removeOverlay() {
@@ -910,33 +928,35 @@ class _SelectionActionsBar extends StatelessWidget {
         ),
         child: FadeTransition(
           opacity: fadeAnimation,
-          child: Container(
-            height: kSongTileHeight,
-            color: theme.colorScheme.secondary,
-            padding: const EdgeInsets.only(bottom: 6.0),
-            child: Material(
-              color: Colors.transparent,
-              child: ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(children: left),
-                    const SizedBox(width: 10.0, height: double.infinity),
-                    Expanded(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: ScrollConfiguration(
-                          behavior: const GlowlessScrollBehavior(),
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            reverse: true,
-                            itemCount: rightList.length,
-                            itemBuilder: (context, index) => Center(child: rightList[index]),
+          child: PlayerInterfaceColorWidget(
+            color: () => theme.colorScheme.secondary,
+            child: Container(
+              height: kSongTileHeight,
+              padding: const EdgeInsets.only(bottom: 6.0),
+              child: Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: left),
+                      const SizedBox(width: 10.0, height: double.infinity),
+                      Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: ScrollConfiguration(
+                            behavior: const GlowlessScrollBehavior(),
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              reverse: true,
+                              itemCount: rightList.length,
+                              itemBuilder: (context, index) => Center(child: rightList[index]),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
