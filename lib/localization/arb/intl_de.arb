@@ -314,5 +314,5 @@
   "defaultValue": "Standard",
   "playerInterfaceColorStyle": "Player-Farbthema",
   "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild",
-  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthema"
+  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthemas"
 }
