@@ -11,6 +11,7 @@ part of 'app_theme.dart';
 class AppTheme extends ThemeExtension<AppTheme> {
   const AppTheme({
     required this.artColorForBlend,
+    required this.currentIndicatorBackgroundColorWithDefaultArt,
     required this.sliderInactiveColor,
     required this.appBarBorderColor,
     required this.drawerMenuItemColor,
@@ -21,6 +22,7 @@ class AppTheme extends ThemeExtension<AppTheme> {
   });
 
   final Color artColorForBlend;
+  final Color currentIndicatorBackgroundColorWithDefaultArt;
   final Color sliderInactiveColor;
   final Color appBarBorderColor;
   final Color drawerMenuItemColor;
@@ -31,6 +33,8 @@ class AppTheme extends ThemeExtension<AppTheme> {
 
   static final AppTheme light = AppTheme(
     artColorForBlend: _$AppTheme.artColorForBlend[0],
+    currentIndicatorBackgroundColorWithDefaultArt:
+        _$AppTheme.currentIndicatorBackgroundColorWithDefaultArt[0],
     sliderInactiveColor: _$AppTheme.sliderInactiveColor[0],
     appBarBorderColor: _$AppTheme.appBarBorderColor[0],
     drawerMenuItemColor: _$AppTheme.drawerMenuItemColor[0],
@@ -42,6 +46,8 @@ class AppTheme extends ThemeExtension<AppTheme> {
 
   static final AppTheme dark = AppTheme(
     artColorForBlend: _$AppTheme.artColorForBlend[1],
+    currentIndicatorBackgroundColorWithDefaultArt:
+        _$AppTheme.currentIndicatorBackgroundColorWithDefaultArt[1],
     sliderInactiveColor: _$AppTheme.sliderInactiveColor[1],
     appBarBorderColor: _$AppTheme.appBarBorderColor[1],
     drawerMenuItemColor: _$AppTheme.drawerMenuItemColor[1],
@@ -59,6 +65,7 @@ class AppTheme extends ThemeExtension<AppTheme> {
   @override
   AppTheme copyWith({
     Color? artColorForBlend,
+    Color? currentIndicatorBackgroundColorWithDefaultArt,
     Color? sliderInactiveColor,
     Color? appBarBorderColor,
     Color? drawerMenuItemColor,
@@ -69,6 +76,9 @@ class AppTheme extends ThemeExtension<AppTheme> {
   }) {
     return AppTheme(
       artColorForBlend: artColorForBlend ?? this.artColorForBlend,
+      currentIndicatorBackgroundColorWithDefaultArt:
+          currentIndicatorBackgroundColorWithDefaultArt ??
+              this.currentIndicatorBackgroundColorWithDefaultArt,
       sliderInactiveColor: sliderInactiveColor ?? this.sliderInactiveColor,
       appBarBorderColor: appBarBorderColor ?? this.appBarBorderColor,
       drawerMenuItemColor: drawerMenuItemColor ?? this.drawerMenuItemColor,
@@ -86,6 +96,10 @@ class AppTheme extends ThemeExtension<AppTheme> {
     return AppTheme(
       artColorForBlend:
           Color.lerp(artColorForBlend, other.artColorForBlend, t)!,
+      currentIndicatorBackgroundColorWithDefaultArt: Color.lerp(
+          currentIndicatorBackgroundColorWithDefaultArt,
+          other.currentIndicatorBackgroundColorWithDefaultArt,
+          t)!,
       sliderInactiveColor:
           Color.lerp(sliderInactiveColor, other.sliderInactiveColor, t)!,
       appBarBorderColor:
@@ -107,6 +121,9 @@ class AppTheme extends ThemeExtension<AppTheme> {
             other is AppTheme &&
             const DeepCollectionEquality()
                 .equals(artColorForBlend, other.artColorForBlend) &&
+            const DeepCollectionEquality().equals(
+                currentIndicatorBackgroundColorWithDefaultArt,
+                other.currentIndicatorBackgroundColorWithDefaultArt) &&
             const DeepCollectionEquality()
                 .equals(sliderInactiveColor, other.sliderInactiveColor) &&
             const DeepCollectionEquality()
@@ -127,6 +144,8 @@ class AppTheme extends ThemeExtension<AppTheme> {
     return Object.hash(
         runtimeType,
         const DeepCollectionEquality().hash(artColorForBlend),
+        const DeepCollectionEquality()
+            .hash(currentIndicatorBackgroundColorWithDefaultArt),
         const DeepCollectionEquality().hash(sliderInactiveColor),
         const DeepCollectionEquality().hash(appBarBorderColor),
         const DeepCollectionEquality().hash(drawerMenuItemColor),
@@ -140,6 +159,8 @@ class AppTheme extends ThemeExtension<AppTheme> {
 extension AppThemeBuildContextProps on BuildContext {
   AppTheme get _appTheme => Theme.of(this).extension<AppTheme>()!;
   Color get artColorForBlend => _appTheme.artColorForBlend;
+  Color get currentIndicatorBackgroundColorWithDefaultArt =>
+      _appTheme.currentIndicatorBackgroundColorWithDefaultArt;
   Color get sliderInactiveColor => _appTheme.sliderInactiveColor;
   Color get appBarBorderColor => _appTheme.appBarBorderColor;
   Color get drawerMenuItemColor => _appTheme.drawerMenuItemColor;

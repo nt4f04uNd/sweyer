@@ -72,7 +72,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
   @override
   void dispose() {
     tabController.dispose();
-    selectionController.dispose();
+    disposeSelectionController();
     controller.removeListener(_handleControllerChange);
     controller.removeStatusListener(_handleControllerStatusChange);
     super.dispose();

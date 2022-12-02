@@ -15,6 +15,11 @@ class _$AppTheme {
     ContentArt.getColorToBlendInDefaultArt(constants.Theme.defaultPrimaryColor),
   ];
 
+  static final currentIndicatorBackgroundColorWithDefaultArt = [
+    constants.Theme.defaultPrimaryColor,
+    constants.Theme.defaultPrimaryColor,
+  ];
+
   static final sliderInactiveColor = [
     Colors.black.withOpacity(0.2),
     Colors.white.withOpacity(0.2),

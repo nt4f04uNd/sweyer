@@ -985,7 +985,7 @@ class _ContentArtState extends State<ContentArt> {
       if (widget.current) {
         child = Container(
           alignment: Alignment.center,
-          color: theme.colorScheme.primary,
+          color: theme.appThemeExtension.currentIndicatorBackgroundColorWithDefaultArt,
           width: widget.size,
           height: widget.size,
         );

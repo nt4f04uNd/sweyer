@@ -184,7 +184,9 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
           disabledColor: Colors.grey.shade400,
           unselectedWidgetColor: Colors.grey.shade400,
           extensions: [
-            theme.appThemeExtension,
+            theme.appThemeExtension.copyWith(
+              currentIndicatorBackgroundColorWithDefaultArt: Colors.transparent,
+            ),
             theme.systemUiThemeExtension,
           ],
         );

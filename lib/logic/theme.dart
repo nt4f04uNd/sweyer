@@ -147,6 +147,7 @@ class ThemeControl {
         extensions: [
           constants.Theme.app.light.appThemeExtension.copyWith(
             artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+            currentIndicatorBackgroundColorWithDefaultArt: color,
           ),
           constants.Theme.app.light.systemUiThemeExtension,
         ],
@@ -175,6 +176,7 @@ class ThemeControl {
         extensions: [
           constants.Theme.app.dark.appThemeExtension.copyWith(
             artColorForBlend: ContentArt.getColorToBlendInDefaultArt(color),
+            currentIndicatorBackgroundColorWithDefaultArt: color,
           ),
           constants.Theme.app.dark.systemUiThemeExtension,
         ],
