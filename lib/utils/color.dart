@@ -13,9 +13,9 @@ Color shadeColor(double factor, Color color) {
   var b = (color.value & 0xff).clamp(0, 0xff);
 
   factor = (1 + factor);
-  r = (((color.value >> 16) & 0xff).clamp(0, 0xff) * factor).toInt().clamp(0, 0xff);
-  g = (((color.value >> 8) & 0xff).clamp(0, 0xff) * factor).toInt().clamp(0, 0xff);
-  b = ((color.value & 0xff).clamp(0, 0xff) * factor).toInt().clamp(0, 0xff);
+  r = (r * factor).toInt().clamp(0, 0xff);
+  g = (g * factor).toInt().clamp(0, 0xff);
+  b = (b * factor).toInt().clamp(0, 0xff);
 
   return Color((0xff << 24) + (r << 16) + (g << 8) + b);
 }
