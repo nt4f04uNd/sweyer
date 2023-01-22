@@ -17,13 +17,12 @@ TextStyle _titleTheme(ThemeData theme) => theme.textTheme.headline6!;
 
 /// Calculate the height of one line of text rendered with the [style] and [textScaleFactor].
 double _lineHeight(TextStyle style, double textScaleFactor) {
-  final TextPainter textPainter = TextPainter(
+  return TextPainter(
     text: TextSpan(text: "", style: style),
     maxLines: 1,
     textDirection: TextDirection.ltr,
     textScaleFactor: textScaleFactor,
-  )..layout(minWidth: 0, maxWidth: double.infinity);
-  return textPainter.size.height;
+  ).preferredLineHeight;
 }
 
 /// The height of the title and subtitle part of the [SongTile] widget for the given [context].
