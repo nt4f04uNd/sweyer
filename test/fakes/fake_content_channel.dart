@@ -1,8 +1,30 @@
 import 'dart:ui';
 import 'dart:typed_data';
+import 'dart:collection';
 
 import 'package:flutter/services.dart';
 import '../test.dart';
+
+/// An Entry in the [FakeContentChannel.favoriteRequestLog].
+class FavoriteLogEntry {
+  /// The set of songs that were modified.
+  final Set<Song> songs;
+
+  /// `true` if a request was made to make the songs favorite, `false` if the request was made to unfavor them.
+  final bool setFavorite;
+
+  const FavoriteLogEntry(this.songs, this.setFavorite);
+
+  @override
+  String toString() => '${runtimeType.toString()}(songs=$songs, setFavorite=$setFavorite)';
+
+  @override
+  bool operator ==(Object other) =>
+      other is FavoriteLogEntry && setFavorite == other.setFavorite && setEquals(songs, other.songs);
+
+  @override
+  int get hashCode => Object.hash(Object.hashAllUnordered(songs), setFavorite);
+}
 
 class FakeContentChannel implements ContentChannel {
   FakeContentChannel(TestWidgetsFlutterBinding binding) {
@@ -94,8 +116,13 @@ class FakeContentChannel implements ContentChannel {
     return songs ?? [songWith()];
   }
 
+  /// The log of all recorded [setSongsFavorite] calls.
+  List<FavoriteLogEntry> get favoriteRequestLog => UnmodifiableListView(_favoriteRequestLog);
+  final List<FavoriteLogEntry> _favoriteRequestLog = [];
+
   @override
   Future<bool> setSongsFavorite(Set<Song> songs, bool value) async {
+    _favoriteRequestLog.add(FavoriteLogEntry(songs, value));
     return true;
   }
 }

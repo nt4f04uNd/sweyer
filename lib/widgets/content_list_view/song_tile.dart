@@ -95,6 +95,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.current,
     this.onTap,
     this.enableDefaultOnTap = true,
+    this.showFavoriteIndicator = true,
     this.variant = kSongTileVariant,
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
@@ -113,6 +114,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.current,
     this.onTap,
     this.enableDefaultOnTap = true,
+    this.showFavoriteIndicator = true,
     this.variant = kSongTileVariant,
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
@@ -143,6 +145,9 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   /// Whether to handle taps by default.
   /// By default plays song on tap.
   final bool enableDefaultOnTap;
+
+  /// Whether to show the trailing favorite heart indicator.
+  final bool showFavoriteIndicator;
 
   final SongTileVariant variant;
 
@@ -284,7 +289,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    FavoriteIndicator(shown: widget.song.isFavorite),
+                    if (widget.showFavoriteIndicator) FavoriteIndicator(shown: widget.song.isFavorite),
                     if (widget.trailing != null) widget.trailing!,
                     if (selectionRoute) buildAddToSelection(),
                   ],

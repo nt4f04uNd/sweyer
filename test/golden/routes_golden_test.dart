@@ -301,6 +301,47 @@ void main() {
       }, goldenCaptureCallback: () => tester.screenMatchesGolden('settings_route.general_settings_route'));
     });
 
+    testAppGoldens('general_settings_favorite_conflict_dialog', (WidgetTester tester) async {
+      final localFavoriteAndMediaStoreSong = songWith(id: 1, isFavoriteInMediaStore: true);
+      final localFavoriteButNotInMediaStoreSong = songWith(id: 2, title: 'Local only favorite');
+      final mediaStoreFavoriteButNotLocalSong =
+          songWith(id: 3, isFavoriteInMediaStore: true, title: 'MediaStore only favorite');
+      await tester.runAsync(() async {
+        await setUpAppTest(() async {
+          FakeContentChannel.instance.songs = [
+            songWith(),
+            localFavoriteAndMediaStoreSong,
+            localFavoriteButNotInMediaStoreSong,
+            mediaStoreFavoriteButNotLocalSong,
+          ];
+        });
+      });
+      await tester.runAppTest(
+        () async {
+          await Settings.useMediaStoreForFavoriteSongs.set(false);
+          await tester.pumpAndSettle(); // Wait for the listener in FavoriteControl to execute
+          await FakeFavoritesControl.instance.setFavorite(
+            contentTuple: ContentTuple(songs: [localFavoriteAndMediaStoreSong, localFavoriteButNotInMediaStoreSong]),
+            value: true,
+          );
+          await FakeFavoritesControl.instance.setFavorite(
+            contentTuple: ContentTuple(songs: [mediaStoreFavoriteButNotLocalSong]),
+            value: false,
+          );
+          await tester.tap(find.byType(AnimatedMenuCloseButton));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(l10n.settings));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(l10n.general));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(l10n.useMediaStoreForFavoriteSongsSetting));
+          await tester.pumpAndSettle();
+        },
+        goldenCaptureCallback: () =>
+            tester.screenMatchesGolden('settings_route.general_settings_favorite_conflict_dialog'),
+      );
+    });
+
     testAppGoldens('theme_settings_route', (WidgetTester tester) async {
       await tester.runAppTest(() async {
         await tester.tap(find.byType(AnimatedMenuCloseButton));

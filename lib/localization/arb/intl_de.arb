@@ -314,5 +314,7 @@
   "defaultValue": "Standard",
   "playerInterfaceColorStyle": "Player-Farbthema",
   "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild",
-  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthemas"
+  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthemas",
+  "resolveConflict": "Konflikt auflößen",
+  "conflictExplanation": "Das System hat andere Lieblingstitel als Sweyer, bitte wähle welche als Favorit markiert bleiben sollen. Es werden nur die Lieder angezeigt, die im Konflikt stehen."
 }
