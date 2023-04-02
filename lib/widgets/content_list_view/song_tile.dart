@@ -1,9 +1,42 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
-const double kSongTileHeight = kSongTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
+
+/// The padding that is added to the top of the subtitle widget.
+const _subtitleTopPadding = 4.0;
+
+/// The padding that is added to the bottom of the subtitle widget.
+const _subtitleBottomPadding = 3.0;
+
+/// The [TextStyle] used for the title text from the [theme].
+TextStyle _titleTheme(ThemeData theme) => theme.textTheme.headline6!;
+
+/// Calculate the height of one line of text rendered with the [style] and [textScaleFactor].
+double _lineHeight(TextStyle style, double textScaleFactor) {
+  return TextPainter(
+    text: TextSpan(text: "", style: style),
+    maxLines: 1,
+    textDirection: TextDirection.ltr,
+    textScaleFactor: textScaleFactor,
+  ).preferredLineHeight;
+}
+
+/// The height of the title and subtitle part of the [SongTile] widget for the given [context].
+double kSongTileTextHeight(context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return _lineHeight(_titleTheme(theme), textScaleFactor) +
+      _lineHeight(ArtistWidget.defaultTextStyle(theme), textScaleFactor) +
+      _subtitleTopPadding +
+      _subtitleBottomPadding;
+}
+
+double kSongTileHeight(BuildContext context) =>
+    math.max(kSongTileArtSize, kSongTileTextHeight(context)) + _tileVerticalPadding * 2;
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
@@ -221,7 +254,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
     Widget title = Text(
       widget.song.title,
       overflow: TextOverflow.ellipsis,
-      style: theme.textTheme.headline6,
+      style: _titleTheme(theme),
     );
     Widget subtitle = ArtistWidget(
       artist: widget.song.artist,
@@ -279,9 +312,9 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         title,
-                        const SizedBox(height: 4.0),
+                        const SizedBox(height: _subtitleTopPadding),
                         subtitle,
-                        const SizedBox(height: 3.0),
+                        const SizedBox(height: _subtitleBottomPadding),
                       ],
                     ),
                   ),

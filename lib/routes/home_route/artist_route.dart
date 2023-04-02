@@ -259,7 +259,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
           /// always be fully scrollable, even if there's not enough content for that.
           var additionalHeight = constraints.maxHeight - //
               _fullAppBarHeight - //
-              kSongTileHeight * math.min(songs.length, 5) - //
+              kSongTileHeight(context) * math.min(songs.length, 5) - //
               48.0;
 
           if (albums.isNotEmpty) {
