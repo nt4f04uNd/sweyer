@@ -28,22 +28,23 @@ class SettingItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           //******** Title ********
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Text(
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Text(
                   title,
                   style: const TextStyle(fontSize: 16.0),
                 ),
-              ),
-              if (trailing != null) trailing!
-            ],
+                if (trailing != null) trailing!,
+              ],
+            ),
           ),
           //******** Description ********
           if (description != null)

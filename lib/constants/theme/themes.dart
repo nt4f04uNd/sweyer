@@ -208,12 +208,12 @@ abstract class Theme {
         headline3: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         headline4: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         headline5: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        // Title in song tiles
         headline6: TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.white,
           fontSize: 15.0,
         ),
-        // Title in song tiles
         subtitle1: TextStyle(
           fontWeight: FontWeight.w600,
           color: Colors.white,

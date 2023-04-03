@@ -6,6 +6,7 @@ import 'package:boxy/boxy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:lottie/lottie.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -435,7 +436,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       actionsBuilder: !actionsBar
           ? null
           : (context) {
-              final actionsBar = _SelectionActionsBar(
+              final actionsBar = SelectionActionsBar(
                 left: [
                   _ActionsSelectionTitle(
                     selectedTitle: false,
@@ -473,11 +474,13 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       context: context,
       overlay: overlay,
       actionsBuilder: (context) {
-        return _SelectionActionsBar(
+        return SelectionActionsBar(
           left: const [
-            _ActionsSelectionTitle(
-              counter: true,
-            )
+            FittedBox(
+              child: _ActionsSelectionTitle(
+                counter: true,
+              ),
+            ),
           ],
           right: actionsBuilder?.call(context) ?? const [],
         );
@@ -607,7 +610,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         await SystemUiStyleController.instance.animateSystemUiOverlay(
           to: to,
           duration: kSelectionDuration,
-          curve: _SelectionActionsBar.forwardCurve,
+          curve: SelectionActionsBar.forwardCurve,
         );
         _lastUiSub = SystemUiStyleController.instance.onUiChange.listen((color) {
           _lastUi = color;
@@ -662,7 +665,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         systemNavigationBarColor: _lastUi!.systemNavigationBarColor,
       ),
       duration: kSelectionDuration,
-      curve: _SelectionActionsBar.reverseCurve.flipped,
+      curve: SelectionActionsBar.reverseCurve.flipped,
     );
     _lastUi = null;
     _lastUiSub?.cancel();
@@ -883,8 +886,9 @@ class IgnoreInSelection extends StatelessWidget {
   }
 }
 
-class _SelectionActionsBar extends StatelessWidget {
-  const _SelectionActionsBar({
+@visibleForTesting
+class SelectionActionsBar extends StatelessWidget {
+  const SelectionActionsBar({
     Key? key,
     this.left = const [],
     this.right = const [],
@@ -944,15 +948,23 @@ class _SelectionActionsBar extends StatelessWidget {
                       Expanded(
                         child: Material(
                           color: Colors.transparent,
-                          child: ScrollConfiguration(
-                            behavior: const GlowlessScrollBehavior(),
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              itemCount: rightList.length,
-                              itemBuilder: (context, index) => Center(child: rightList[index]),
-                            ),
-                          ),
+                          child: HookBuilder(builder: (context) {
+                            final scrollController = useScrollController();
+                            return AppScrollbar(
+                              isAlwaysShown: true,
+                              controller: scrollController,
+                              child: ScrollConfiguration(
+                                behavior: const GlowlessScrollBehavior(),
+                                child: ListView.builder(
+                                  controller: scrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  reverse: true,
+                                  itemCount: rightList.length,
+                                  itemBuilder: (context, index) => Center(child: rightList[index]),
+                                ),
+                              ),
+                            );
+                          }),
                         ),
                       ),
                     ],
@@ -1119,21 +1131,24 @@ class _ActionsSelectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final controller = ContentSelectionController._of(context);
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
       child: Padding(
         padding: EdgeInsets.only(
-            left: selectedTitle
-                ? 0.0
-                : closeButton
-                    ? 5.0
-                    : 10.0),
+          left: selectedTitle
+              ? 0.0
+              : closeButton
+                  ? 5.0
+                  : 10.0,
+        ),
         child: const SelectionCounter(
-            textStyle: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 19.0,
-        )),
+          textStyle: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 19.0,
+          ),
+        ),
       ),
     );
     return Row(
@@ -1151,7 +1166,10 @@ class _ActionsSelectionTitle extends StatelessWidget {
           ),
         if (selectedTitle && counter)
           Padding(
-            padding: EdgeInsets.only(bottom: 4.0, left: closeButton ? 12.0 : 30.0),
+            padding: EdgeInsets.only(
+              bottom: 4.0,
+              left: closeButton ? 12.0 : 30.0 / textScaleFactor,
+            ),
             child: EmergeAnimation(
               animation: controller.animation,
               child: StyledText(
@@ -1710,7 +1728,8 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           final playlists = ContentControl.instance.state.playlists;
           final screenSize = MediaQuery.of(context).size;
           return SizedBox(
-            height: kSongTileHeight(context) + playlists.length * kPersistentQueueTileHeight,
+            height:
+                kSongTileHeight(context) + playlists.length * kPersistentQueueTileHeight(ContentType.playlist, context),
             width: screenSize.width,
             child: ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),

@@ -91,7 +91,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
       onWillPop: _handlePop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.theme),
+          title: AppBarTitleMarquee(text: l10n.theme),
           leading: IgnorePointer(
             ignoring: !canPop,
             child: const NFBackButton(),

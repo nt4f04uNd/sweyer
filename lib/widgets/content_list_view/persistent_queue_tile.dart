@@ -1,15 +1,83 @@
+import 'dart:math' as math;
+
 import 'package:boxy/boxy.dart';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
 
-/// Needed for scrollbar computations.
-const double kPersistentQueueTileHeight = kPersistentQueueTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
 const double kPersistentQueueTileHorizontalPadding = 16.0;
 const double _gridArtSize = 220.0;
 const double _gridArtAssetScale = 1.2;
 const double _gridCurrentIndicatorScale = 1.7;
+
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _subtitleTheme(ContentType contentType, ThemeData theme) => contentType == ContentType.album
+    ? ArtistWidget.defaultTextStyle(theme)?.merge(const TextStyle(fontSize: 14.0, height: 1.0))
+    : theme.textTheme.subtitle2?.merge(const TextStyle(fontSize: 14.0, height: 1.0));
+
+/// Needed for scrollbar computations.
+double kPersistentQueueTileHeight(ContentType contentType, BuildContext context) {
+  switch (contentType) {
+    case ContentType.song:
+    case ContentType.artist:
+      throw ArgumentError();
+    case ContentType.album:
+    case ContentType.playlist:
+      return _calculatePersistentQueueTileHeight(contentType, context);
+  }
+}
+
+double kPersistentQueueGridTileHeight(
+  ContentType contentType,
+  BuildContext context, [
+  double gridArtSize = _gridArtSize,
+]) =>
+    _calculatePersistentQueueGridTileHeight(
+      contentType,
+      context,
+      gridArtSize,
+    );
+
+double _calculatePersistentQueueTileHeight(ContentType contentType, BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return memo3<double, double, double?, double?>(
+    () =>
+        math.max(
+          kPersistentQueueTileArtSize,
+          _kPresisentQueueTileTextHeight(contentType, context),
+        ) +
+        _tileVerticalPadding * 2,
+    textScaleFactor,
+    _titleTheme(theme)?.fontSize,
+    _subtitleTheme(contentType, theme)?.fontSize,
+  );
+}
+
+double _calculatePersistentQueueGridTileHeight(
+  ContentType contentType,
+  BuildContext context,
+  double gridArtSize,
+) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return memo4<double, double, double, double?, double?>(
+    () => gridArtSize + _kPresisentQueueTileTextHeight(contentType, context) + _tileVerticalPadding * 2,
+    textScaleFactor,
+    gridArtSize,
+    _titleTheme(theme)?.fontSize,
+    _subtitleTheme(contentType, theme)?.fontSize,
+  );
+}
+
+/// The height of the title and subtitle part of the [SongTile].
+double _kPresisentQueueTileTextHeight(ContentType contentType, BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return calculateLineHeight(_titleTheme(theme), textScaleFactor) +
+      calculateLineHeight(_subtitleTheme(contentType, theme), textScaleFactor);
+}
 
 class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<SelectionEntry> {
   const PersistentQueueTile({
@@ -136,7 +204,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
       Text(
         widget.queue.title,
         overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.headline6,
+        style: _titleTheme(theme),
       ),
     ];
     final queue = widget.queue;
@@ -144,13 +212,13 @@ class _PersistentQueueTileState<T extends PersistentQueue>
       children.add(ArtistWidget(
         artist: queue.artist,
         trailingText: queue.year.toString(),
-        textStyle: const TextStyle(fontSize: 14.0, height: 1.0),
+        textStyle: _subtitleTheme(widget.queue.type, theme),
       ));
     } else if (queue is Playlist) {
       final l10n = getl10n(context);
       children.add(Text(
         l10n.contentsPlural(ContentType.song, queue.length),
-        style: theme.textTheme.subtitle2!.merge(const TextStyle(fontSize: 14.0, height: 1.0)),
+        style: _subtitleTheme(widget.queue.type, theme),
       ));
     }
     return Column(
@@ -176,7 +244,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
             ContentArt(
               size: widget.gridArtSize,
               defaultArtIconScale: (widget.gridArtSize / kPersistentQueueTileArtSize) / 1.5,
-              defaultArtIcon: widget.queue.icon,
+              defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(widget.queue),
               assetHighRes: true,
               currentIndicatorScale: widget.gridCurrentIndicatorScale,
               assetScale: widget.gridArtAssetScale,
@@ -202,12 +270,12 @@ class _PersistentQueueTileState<T extends PersistentQueue>
               child: widget.small
                   ? ContentArt.songTile(
                       source: source,
-                      defaultArtIcon: widget.queue.icon,
+                      defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(widget.queue),
                       current: current,
                     )
                   : ContentArt.persistentQueueTile(
                       source: source,
-                      defaultArtIcon: widget.queue.icon,
+                      defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(widget.queue),
                       current: current,
                     ),
             ),
@@ -239,15 +307,17 @@ class _PersistentQueueTileState<T extends PersistentQueue>
           Align(
             alignment: Alignment.topCenter,
             child: CustomBoxy(
-              delegate: _BoxyDelegate(() => Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onTap,
-                      splashColor: theme.appThemeExtension.glowSplashColor,
-                      onLongPress: handleLongPress,
-                      splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
-                    ),
-                  )),
+              delegate: _BoxyDelegate(
+                () => Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onTap,
+                    splashColor: theme.appThemeExtension.glowSplashColor,
+                    onLongPress: handleLongPress,
+                    splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
+                  ),
+                ),
+              ),
               children: [
                 LayoutId(id: #tile, child: child),
               ],

@@ -180,6 +180,9 @@ class FavoritesControl with Control {
   }
 
   void _registerMediaStoreObserver() {
+    if (!_useMediaStoreFavorites(ContentType.song)) {
+      return;
+    }
     _mediaStoreContentObserver = MediaStoreContentObserver(ContentType.song)
       ..onChangeStream.listen(_handleMediaStoreSongsChange)
       ..register();

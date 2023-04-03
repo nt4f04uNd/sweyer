@@ -66,7 +66,9 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
               reverseCurve: Curves.easeInCubic,
               parent: selectionController.animation,
             ),
-            child1: Text(ContentUtils.localizedArtist(artist.artist, l10n)),
+            child1: AppBarTitleMarquee(
+              text: ContentUtils.localizedArtist(artist.artist, l10n),
+            ),
             child2: SelectionCounter(controller: selectionController),
           ),
           actions: [

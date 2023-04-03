@@ -921,16 +921,17 @@ class _ContentArtState extends State<ContentArt> {
     if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
       // We should show the art now.
       _deliverLoad();
+      const defaultArtIconSize = 32.0;
       final theme = Theme.of(context);
       child = Container(
         alignment: Alignment.center,
         color: theme.colorScheme.primary,
-        width: widget.size,
-        height: widget.size,
+        width: size,
+        height: size,
         child: Icon(
           widget.defaultArtIcon,
           color: theme.colorScheme.onPrimary,
-          size: 32.0,
+          size: forPlaylist ? defaultArtIconSize / 2 : defaultArtIconSize,
         ),
       );
       if (widget.defaultArtIconScale != 1.0) {

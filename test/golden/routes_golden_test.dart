@@ -176,7 +176,7 @@ void main() {
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.pumpAndSettle();
         await tester.tap(find.descendant(
-          of: find.byType(SelectionRoute),
+          of: find.byType(SelectionActionsBar),
           matching: find.byIcon(Icons.settings_rounded),
         ));
         await tester.pumpAndSettle();

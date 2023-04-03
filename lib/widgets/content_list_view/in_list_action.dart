@@ -130,6 +130,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                     child: Text(
                       widget.text,
                       overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
                       style: theme.textTheme.headline6?.copyWith(color: widget.textColor),
                     ),
                   ),

@@ -16,10 +16,12 @@ class SweyerLogo extends StatelessWidget {
   /// which is applied by default.
   final Color? color;
 
+  static const _scale = 1.65;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cacheSize = (size * 1.65 * MediaQuery.of(context).devicePixelRatio).round();
+    final cacheSize = (size * _scale * MediaQuery.of(context).devicePixelRatio).round();
     return ClipRRect(
       borderRadius: const BorderRadius.all(
         Radius.circular(8.0),
@@ -30,7 +32,7 @@ class SweyerLogo extends StatelessWidget {
         child: Stack(
           children: [
             Transform.scale(
-              scale: 1.65,
+              scale: _scale,
               child: Image.asset(
                 constants.Assets.assetLogoMask,
                 color: color != null

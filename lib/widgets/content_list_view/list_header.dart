@@ -8,6 +8,7 @@ class ListHeader extends StatelessWidget {
     this.leading,
     this.trailing,
     this.color,
+    this.wrap = false,
     this.margin = const EdgeInsets.only(
       top: 10.0,
       bottom: 2.0,
@@ -19,6 +20,7 @@ class ListHeader extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final Color? color;
+  final bool wrap;
   final EdgeInsetsGeometry margin;
 
   @override
@@ -33,12 +35,27 @@ class ListHeader extends StatelessWidget {
       child: Container(
         color: color,
         padding: margin,
-        child: Row(
-          children: [
-            if (leading != null) Expanded(child: leading!),
-            if (trailing != null) trailing!,
-          ],
-        ),
+        child: wrap
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (leading != null) leading!,
+                      if (trailing != null) trailing!,
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  if (leading != null) Expanded(child: leading!),
+                  if (trailing != null) trailing!,
+                ],
+              ),
       ),
     );
   }
@@ -127,6 +144,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     );
     final sort = getSort();
     final child = ListHeader(
+      wrap: true,
       margin: const EdgeInsets.only(
         top: 10.0,
         bottom: 4.0,
@@ -152,6 +170,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                 splashFactory: NFListTileInkRipple.splashFactory,
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   ContentListHeaderAction(

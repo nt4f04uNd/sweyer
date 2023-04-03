@@ -6,17 +6,6 @@ import 'package:flutter/physics.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
-/// Returns app style used for app bar title.
-TextStyle appBarTitleTextStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  return TextStyle(
-    fontWeight: FontWeight.w700,
-    color: theme.textTheme.headline6!.color,
-    fontSize: 22.0,
-    fontFamily: 'Roboto',
-  );
-}
-
 /// Needed to change physics of the [TabBarView].
 class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
   const _TabsScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
@@ -249,15 +238,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         padding: const EdgeInsets.only(left: 15.0),
         child: selectionRoute
             ? const SizedBox.shrink()
-            : Text(
-                constants.Config.applicationTitle,
-                style: appBarTitleTextStyle(context),
-              ),
+            : const AppBarTitleMarquee(text: constants.Config.applicationTitle),
       ),
       titleSelection: selectionRoute
-          ? Text(
-              homeRouter!.selectionArguments!.title(context),
-            )
+          ? AppBarTitleMarquee(text: homeRouter!.selectionArguments!.title(context))
           : Padding(
               padding: const EdgeInsets.only(left: 14.0),
               child: SelectionCounter(controller: selectionController),

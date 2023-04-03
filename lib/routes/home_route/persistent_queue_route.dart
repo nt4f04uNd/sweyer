@@ -163,9 +163,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         final l10n = getl10n(context);
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              l10n.trackAfterWhichToInsert,
-              style: const TextStyle(fontSize: 20.0),
+            title: AppBarTitleMarquee(
+              text: l10n.trackAfterWhichToInsert,
+              fontSize: 20.0,
             ),
             leading: const NFBackButton(),
           ),
@@ -361,9 +361,10 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     const titleFontSize = 24.0;
+    const maxLines = 3;
     final title = Text(
       isPlaylist ? textEditingController.text : queue.title,
-      maxLines: 2,
+      maxLines: maxLines,
       overflow: TextOverflow.ellipsis,
       style: const TextStyle(
         fontWeight: FontWeight.w900,
@@ -390,7 +391,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   children: [
                     ContentArt(
                       size: 130.0,
-                      defaultArtIcon: queue.icon,
+                      defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(queue),
                       defaultArtIconScale: 2,
                       assetHighRes: true,
                       assetScale: 1.5,
@@ -407,56 +408,51 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             else if (isPlaylist)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                                child: Stack(
-                                  alignment: Alignment.bottomLeft,
-                                  children: [
-                                    AnimatedSwitcher(
-                                      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                                        return Stack(
-                                          alignment: Alignment.centerLeft,
-                                          children: <Widget>[
-                                            ...previousChildren,
-                                            if (currentChild != null) currentChild,
-                                          ],
-                                        );
-                                      },
-                                      duration: const Duration(milliseconds: 300),
-                                      switchInCurve: Curves.easeOut,
-                                      switchOutCurve: Curves.easeIn,
-                                      child: editing
-                                          ? AppTextField(
-                                              controller: textEditingController,
-                                              isDense: true,
-                                              contentPadding: const EdgeInsets.only(top: -9.0, bottom: -6.0),
-                                              textStyle: const TextStyle(
-                                                fontSize: 24.0,
-                                                fontWeight: FontWeight.w800,
-                                                decoration: TextDecoration.underline,
-                                              ),
-                                              hintStyle: const TextStyle(
-                                                fontSize: 22.0,
-                                                height: 1.1,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            )
-                                          : SizedBox(
-                                              height: titleFontSize * textScaleFactor,
-                                              child: title,
-                                            ),
-                                    ),
-                                  ],
+                                child: AnimatedSwitcher(
+                                  layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                    return Stack(
+                                      alignment: Alignment.centerLeft,
+                                      children: <Widget>[
+                                        ...previousChildren,
+                                        if (currentChild != null) currentChild,
+                                      ],
+                                    );
+                                  },
+                                  duration: const Duration(milliseconds: 300),
+                                  switchInCurve: Curves.easeOut,
+                                  switchOutCurve: Curves.easeIn,
+                                  child: editing
+                                      ? AppTextField(
+                                          controller: textEditingController,
+                                          isDense: true,
+                                          maxLines: maxLines,
+                                          contentPadding: const EdgeInsets.only(top: -9.0, bottom: -6.0),
+                                          textStyle: const TextStyle(
+                                            fontSize: 24.0,
+                                            fontWeight: FontWeight.w800,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          hintStyle: const TextStyle(
+                                            fontSize: 22.0,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        )
+                                      : title,
                                 ),
                               ),
                             if (isAlbum)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
-                                child: ArtistWidget(
-                                  artist: album.artist,
-                                  overflow: TextOverflow.clip,
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 15.0,
-                                    color: theme.colorScheme.onBackground,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(maxHeight: 30.0 * textScaleFactor),
+                                  child: ArtistWidget(
+                                    artist: album.artist,
+                                    overflow: TextOverflow.clip,
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 15.0,
+                                      color: theme.colorScheme.onBackground,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -633,7 +629,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             opacity: 1.0 - appBarController.value > 0.35 ? 1.0 : 0.0,
                             curve: Curves.easeOut,
                             duration: const Duration(milliseconds: 400),
-                            child: Text(queue.title),
+                            child: AppBarTitleMarquee(text: queue.title),
                           ),
                           child2: SelectionCounter(controller: selectionController),
                         ),
