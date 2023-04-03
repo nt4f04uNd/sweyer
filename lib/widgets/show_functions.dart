@@ -254,7 +254,6 @@ class ShowFunctions extends NFShowFunctions {
     required ValueSetter<T> onItemSelected,
     required ValueGetter<T> groupValueGetter,
   }) {
-    final l10n = getl10n(context);
     final theme = Theme.of(context);
 
     Widget buildItem(T item) {
@@ -287,9 +286,14 @@ class ShowFunctions extends NFShowFunctions {
       titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
       closeButton: const SizedBox.shrink(),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: items.map((el) => buildItem(el)).toList(),
+      content: AppScrollbar(
+        isAlwaysShown: true,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: items.map((el) => buildItem(el)).toList(),
+          ),
+        ),
       ),
     );
   }

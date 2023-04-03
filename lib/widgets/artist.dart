@@ -17,15 +17,15 @@ class ArtistWidget extends StatelessWidget {
   final String? trailingText;
   final TextOverflow overflow;
   final TextStyle? textStyle;
-  
+
   /// The default [TextStyle] used for text in this widget from the [theme].
-  static TextStyle defaultTextStyle(ThemeData theme) => theme.textTheme.subtitle2!;
+  static TextStyle? defaultTextStyle(ThemeData theme) => theme.textTheme.subtitle2;
 
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final localizedArtist = ContentUtils.localizedArtist(artist, l10n);
-    final style = defaultTextStyle(Theme.of(context)).merge(textStyle);
+    final style = defaultTextStyle(Theme.of(context))?.merge(textStyle);
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,

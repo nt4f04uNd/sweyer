@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -5,19 +6,23 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
-class DevRoute extends StatefulWidget {
+class DevRoute extends ConsumerStatefulWidget {
   const DevRoute({Key? key}) : super(key: key);
 
   @override
-  State<DevRoute> createState() => _DevRouteState();
+  ConsumerState<DevRoute> createState() => _DevRouteState();
 }
 
-class _DevRouteState extends State<DevRoute> {
+class _DevRouteState extends ConsumerState<DevRoute> {
   void _testToast() {
     ShowFunctions.instance.showToast(
       msg: 'Test',
       toastLength: Toast.LENGTH_LONG,
     );
+  }
+
+  void _showDebugOverlay() {
+    ref.watch(debugManagerProvider).showOverlay();
   }
 
   Future<void> _quitDevMode() async {
@@ -56,12 +61,16 @@ class _DevRouteState extends State<DevRoute> {
         children: <Widget>[
           Expanded(
             child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
                 NFListTile(
                   title: Text(l10n.devTestToast),
                   onTap: _testToast,
                 ),
+                NFListTile(
+                  title: Text(l10n.debugShowDebugOverlay),
+                  onTap: _showDebugOverlay,
+                ),
+                const MaterialAppSwitchesWidget(),
                 const _TimeDilationSlider(),
               ],
             ),

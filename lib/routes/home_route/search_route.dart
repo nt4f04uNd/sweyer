@@ -7,6 +7,7 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
@@ -511,7 +512,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     final showChips = stateDelegate.results.notEmpty;
     return PreferredSize(
       preferredSize: Size.fromHeight(
-        showChips ? AppBarBorder.height + _ContentChip.height + bottomPadding : AppBarBorder.height,
+        showChips ? AppBarBorder.height + _ContentChip.height(context) + bottomPadding : AppBarBorder.height,
       ),
       child: ValueListenableBuilder<ContentType?>(
         valueListenable: stateDelegate.onContentTypeChange,
@@ -538,7 +539,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: _ContentChip.height,
+                height: _ContentChip.height(context),
                 child: GestureDetector(
                   onPanDown: (_) {
                     widget.delegate._chipsBarDragged = true;
@@ -923,7 +924,13 @@ class _ContentChip extends StatefulWidget {
   final ContentType? contentType;
   final bool favoritesChip;
 
-  static const double height = 34.0;
+  static const double _baseHeight = 34.0;
+  static double height(BuildContext context) => _baseHeight * math.max(1.0, MediaQuery.textScaleFactorOf(context));
+
+  /// Unfortunately, chips have a hardcoded height computation inside them,
+  /// here heuristically trying to add some padding to label to
+  /// make the border look right.
+  static double additionalPadding(BuildContext context) => 5.0 * math.max(1.0, MediaQuery.textScaleFactorOf(context));
 
   @override
   _ContentChipState createState() => _ContentChipState();
@@ -1018,7 +1025,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       end: theme.appThemeExtension.glowSplashColorOnContrast,
     ).animate(baseAnimation);
     return SizedBox(
-      height: _ContentChip.height,
+      height: _ContentChip.height(context),
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) => Material(
@@ -1038,7 +1045,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
             onTap: _handleTap,
             child: favoritesChip
                 ? SizedBox(
-                    width: _ContentChip.height,
+                    width: _ContentChip.height(context),
                     child: Icon(
                       active ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
                       size: 20.0,
@@ -1049,6 +1056,10 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                     child: Theme(
                       data: theme.copyWith(canvasColor: Colors.transparent),
                       child: RawChip(
+                        padding: EdgeInsets.symmetric(
+                          vertical: _ContentChip.additionalPadding(context),
+                          horizontal: _ContentChip.additionalPadding(context),
+                        ),
                         shape: StadiumBorder(
                           side: BorderSide(
                             color: theme.appThemeExtension.contrast.withOpacity(0.05),

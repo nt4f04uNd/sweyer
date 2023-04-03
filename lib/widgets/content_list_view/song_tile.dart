@@ -13,30 +13,37 @@ const _subtitleTopPadding = 4.0;
 const _subtitleBottomPadding = 3.0;
 
 /// The [TextStyle] used for the title text from the [theme].
-TextStyle _titleTheme(ThemeData theme) => theme.textTheme.headline6!;
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _subtitleTheme(ThemeData theme) => ArtistWidget.defaultTextStyle(theme);
 
-/// Calculate the height of one line of text rendered with the [style] and [textScaleFactor].
-double _lineHeight(TextStyle style, double textScaleFactor) {
-  return TextPainter(
-    text: TextSpan(text: "", style: style),
-    maxLines: 1,
-    textDirection: TextDirection.ltr,
-    textScaleFactor: textScaleFactor,
-  ).preferredLineHeight;
-}
+double kSongTileHeight(BuildContext context) => _calculateSongTileHeight(context);
 
-/// The height of the title and subtitle part of the [SongTile] widget for the given [context].
-double kSongTileTextHeight(context) {
+double _calculateSongTileHeight(BuildContext context) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);
-  return _lineHeight(_titleTheme(theme), textScaleFactor) +
-      _lineHeight(ArtistWidget.defaultTextStyle(theme), textScaleFactor) +
+  return memo3<double, double, double?, double?>(
+    () =>
+        math.max(
+          kSongTileArtSize,
+          _kSongTileTextHeight(context),
+        ) +
+        _tileVerticalPadding * 2,
+    textScaleFactor,
+    _titleTheme(theme)?.fontSize,
+    _subtitleTheme(theme)?.fontSize,
+  );
+}
+
+/// The height of the title and subtitle part of the [SongTile].
+double _kSongTileTextHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return calculateLineHeight(_titleTheme(theme), textScaleFactor) +
+      calculateLineHeight(_subtitleTheme(theme), textScaleFactor) +
       _subtitleTopPadding +
       _subtitleBottomPadding;
 }
 
-double kSongTileHeight(BuildContext context) =>
-    math.max(kSongTileArtSize, kSongTileTextHeight(context)) + _tileVerticalPadding * 2;
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;

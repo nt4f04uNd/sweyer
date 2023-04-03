@@ -17,7 +17,7 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
     final l10n = getl10n(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.general),
+        title: AppBarTitleMarquee(text: l10n.general),
         leading: const NFBackButton(),
       ),
       body: ListView(

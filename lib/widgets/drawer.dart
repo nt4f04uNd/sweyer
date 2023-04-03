@@ -156,8 +156,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     return Theme(
-      data: Theme.of(context).copyWith(
-        //This will change the drawer background
+      data: theme.copyWith(
+        // This will change the drawer background
         canvasColor: theme.colorScheme.surface,
       ),
       child: Drawer(
@@ -169,24 +169,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SweyerLogo(),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Text(
-                        constants.Config.applicationTitle,
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w800,
-                          color: theme.textTheme.headline6!.color,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0, right: 22.0),
+                child: const _LogoAndTitle(),
               ),
               const Divider(),
               const SizedBox(height: 7.0),
@@ -254,6 +238,39 @@ class DrawerMenuItem extends StatelessWidget {
       ),
       onTap: onTap,
       onLongPress: onLongPress,
+    );
+  }
+}
+
+class _LogoAndTitle extends StatelessWidget {
+  const _LogoAndTitle({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final title = Padding(
+      padding: const EdgeInsets.only(left: 10.0),
+      child: Text(
+        constants.Config.applicationTitle,
+        style: TextStyle(
+          fontSize: 30.0,
+          fontWeight: FontWeight.w800,
+          color: theme.textTheme.headline6!.color,
+        ),
+      ),
+    );
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          const SweyerLogo(),
+          FittedBox(child: title),
+        ],
+      ),
     );
   }
 }

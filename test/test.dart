@@ -18,7 +18,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as constants;
-import 'package:sweyer/features/features.dart';
 
 export 'fakes/fakes.dart';
 

@@ -6,7 +6,6 @@ import 'package:flutter/physics.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 
 final SpringDescription playerRouteSpringDescription = SpringDescription.withDampingRatio(
@@ -188,7 +187,7 @@ class _QueueTab extends StatefulWidget {
 }
 
 class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
-  static const double appBarHeight = 81.0;
+  static const double baseAppBarHeight = 81.0;
 
   /// This is set in parent via global key
   bool opened = false;
@@ -359,6 +358,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           child: StyledText(
             overflow: TextOverflow.ellipsis,
             style: _queueDescriptionStyle,
+            // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+            textScaleFactor: 1.0,
             text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
             tags: {
               'query': StyledTextTag(
@@ -380,6 +381,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
+              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              textScaleFactor: 1.0,
               text: l10n.albumQueue('<name>${l10n.escapeStyled(origin.nameDotYear)}</name>'),
               tags: {
                 'name': StyledTextTag(
@@ -398,6 +401,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
+              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              textScaleFactor: 1.0,
               text: l10n.playlistQueue('<name>${l10n.escapeStyled(origin.name)}</name>'),
               tags: {
                 'name': StyledTextTag(
@@ -417,6 +422,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
+              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              textScaleFactor: 1.0,
               text: l10n.artistQueue('<name>${l10n.escapeStyled(artist)}</name>'),
               tags: {
                 'name': StyledTextTag(
@@ -485,17 +492,28 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final theme = Theme.of(context);
     final origin = QueueControl.instance.state.origin;
     final mediaQuery = MediaQuery.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final appBarHeight =
+        textScaleFactor <= 1.0 ? baseAppBarHeight : baseAppBarHeight / 2 + baseAppBarHeight / 2 * textScaleFactor;
     final topScreenPadding = mediaQuery.padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
+    final appBarAnimation = ColorTween(
+      begin: Theme.of(HomeRouter.instance.navigatorKey.currentContext!).appBarTheme.backgroundColor,
+      end: theme.appBarTheme.backgroundColor,
+    ).animate(playerRouteController);
     final appBar = Material(
       elevation: 2.0,
-      color: theme.appBarTheme.backgroundColor,
-      child: PlayerInterfaceColorWidget(
-        color: () => theme.appBarTheme.backgroundColor,
+      color: Colors.transparent,
+      child: AnimatedBuilder(
+        animation: appBarAnimation,
+        builder: (context, child) => PlayerInterfaceColorWidget(
+          color: () => appBarAnimation.value,
+          child: child,
+        ),
         child: Container(
           height: appBarHeight,
           margin: EdgeInsets.only(top: topScreenPadding),
@@ -692,6 +710,7 @@ class _MainTabState extends State<_MainTab> {
       parent: playerRouteController,
     );
     final mediaQuery = MediaQuery.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return AnimatedBuilder(
       animation: playerRouteController,
       builder: (context, child) => Scaffold(
@@ -743,14 +762,14 @@ class _MainTabState extends State<_MainTab> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Seekbar(),
+              children: [
+                const Seekbar(),
                 Padding(
                   padding: EdgeInsets.only(
-                    bottom: 40.0,
+                    bottom: 40.0 / textScaleFactor,
                     top: 10.0,
                   ),
-                  child: _PlaybackButtons(),
+                  child: const _PlaybackButtons(),
                 ),
               ],
             ),
@@ -769,51 +788,56 @@ class _PlaybackButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const ShuffleButton(),
-        const SizedBox(width: buttonMargin),
-        Container(
-          padding: const EdgeInsets.only(right: buttonMargin),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: NFIconButton(
-            size: 50.0,
-            iconSize: textScaleFactor * 30.0,
-            icon: const Icon(Icons.skip_previous_rounded),
-            onPressed: MusicPlayer.instance.playPrev,
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.secondary,
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: const Material(
-            color: Colors.transparent,
-            child: AnimatedPlayPauseButton(
-              iconSize: 26.0,
-              size: 70.0,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: buttonMargin),
+      child: FittedBox(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const ShuffleButton(),
+            const SizedBox(width: buttonMargin),
+            Container(
+              padding: const EdgeInsets.only(right: buttonMargin),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: NFIconButton(
+                size: textScaleFactor * 50.0,
+                iconSize: textScaleFactor * 30.0,
+                icon: const Icon(Icons.skip_previous_rounded),
+                onPressed: MusicPlayer.instance.playPrev,
+              ),
             ),
-          ),
+            Container(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary,
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: const Material(
+                color: Colors.transparent,
+                child: AnimatedPlayPauseButton(
+                  iconSize: 26.0,
+                  size: 70.0,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(left: buttonMargin),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: NFIconButton(
+                size: textScaleFactor * 50.0,
+                iconSize: textScaleFactor * 30.0,
+                icon: const Icon(Icons.skip_next_rounded),
+                onPressed: MusicPlayer.instance.playNext,
+              ),
+            ),
+            const SizedBox(width: buttonMargin),
+            const LoopButton(),
+          ],
         ),
-        Container(
-          padding: const EdgeInsets.only(left: buttonMargin),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: NFIconButton(
-            size: textScaleFactor * 50.0,
-            iconSize: textScaleFactor * 30.0,
-            icon: const Icon(Icons.skip_next_rounded),
-            onPressed: MusicPlayer.instance.playNext,
-          ),
-        ),
-        const SizedBox(width: buttonMargin),
-        const LoopButton(),
-      ],
+      ),
     );
   }
 }
@@ -981,6 +1005,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
       parent: controller,
     ));
     final currentSong = PlaybackControl.instance.currentSong;
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -988,13 +1013,17 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: NFMarquee(
             key: ValueKey(currentSong),
-            fontWeight: FontWeight.w900,
+            textStyle: const TextStyle(fontWeight: FontWeight.w900),
+            alignment: Alignment.center,
             text: currentSong.title,
             fontSize: 20.0,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 2.0, bottom: 30.0),
+          padding: EdgeInsets.only(
+            top: 2.0,
+            bottom: 30.0 / textScaleFactor,
+          ),
           child: ArtistWidget(
             artist: currentSong.artist,
             textStyle: const TextStyle(

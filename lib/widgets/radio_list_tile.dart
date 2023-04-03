@@ -39,9 +39,11 @@ class AppRadioListTile<T> extends StatelessWidget {
               },
             ),
             if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: title,
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: title,
+                ),
               ),
           ],
         ),

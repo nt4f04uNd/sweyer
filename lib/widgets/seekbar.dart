@@ -143,64 +143,86 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
     final color = widget.color ?? theme.colorScheme.primary;
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final scaleFactor = textScaleFactor == 1.0 ? 1.0 : textScaleFactor * 1.1;
+
+    final wrapLabels = textScaleFactor > 1.5;
+
+    final leftLabel = Container(
+      width: 36.0 * scaleFactor,
+      transform: Matrix4.translationValues(5.0, 0.0, 0.0),
+      child: Text(
+        formatDuration(_duration * workingValue!),
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w700,
+          color: theme.textTheme.headline6!.color,
+        ),
+      ),
+    );
+
+    final rightLabel = Container(
+      width: 36.0 * scaleFactor,
+      transform: Matrix4.translationValues(-5.0, 0.0, 0.0),
+      child: Text(
+        formatDuration(_duration),
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w700,
+          color: theme.textTheme.headline6!.color,
+        ),
+      ),
+    );
+
+    final slider = AnimatedBuilder(
+      animation: thumbSizeAnimation,
+      builder: (context, child) => SliderTheme(
+        data: SliderThemeData(
+          trackHeight: 2.0,
+          thumbColor: color,
+          overlayColor: color.withOpacity(ThemeControl.instance.isLight ? 0.12 : 0.24),
+          activeTrackColor: color,
+          inactiveTrackColor: theme.appThemeExtension.sliderInactiveColor,
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),
+          thumbShape: RoundSliderThumbShape(
+            pressedElevation: 3.0,
+            enabledThumbRadius: thumbSizeAnimation.value,
+          ),
+        ),
+        child: child!,
+      ),
+      child: Slider(
+        value: _isDragging ? _localValue : _value,
+        onChangeStart: _handleChangeStart,
+        onChanged: _handleChanged,
+        onChangeEnd: _handleChangeEnd,
+      ),
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            width: 36.0 * scaleFactor,
-            transform: Matrix4.translationValues(5.0, 0.0, 0.0),
-            child: Text(
-              formatDuration(_duration * workingValue!),
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w700,
-                color: theme.textTheme.headline6!.color,
-              ),
-            ),
-          ),
-          Expanded(
-            child: AnimatedBuilder(
-              animation: thumbSizeAnimation,
-              builder: (context, child) => SliderTheme(
-                data: SliderThemeData(
-                  trackHeight: 2.0,
-                  thumbColor: color,
-                  overlayColor: color.withOpacity(ThemeControl.instance.isLight ? 0.12 : 0.24),
-                  activeTrackColor: color,
-                  inactiveTrackColor: theme.appThemeExtension.sliderInactiveColor,
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),
-                  thumbShape: RoundSliderThumbShape(
-                    pressedElevation: 3.0,
-                    enabledThumbRadius: thumbSizeAnimation.value,
-                  ),
+      child: wrapLabels
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                slider,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    leftLabel,
+                    rightLabel,
+                  ],
                 ),
-                child: child!,
-              ),
-              child: Slider(
-                value: _isDragging ? _localValue : _value,
-                onChangeStart: _handleChangeStart,
-                onChanged: _handleChanged,
-                onChangeEnd: _handleChangeEnd,
-              ),
+              ],
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                leftLabel,
+                Expanded(child: slider),
+                rightLabel,
+              ],
             ),
-          ),
-          Container(
-            width: 36.0 * scaleFactor,
-            transform: Matrix4.translationValues(-5.0, 0.0, 0.0),
-            child: Text(
-              formatDuration(_duration),
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w700,
-                color: theme.textTheme.headline6!.color,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

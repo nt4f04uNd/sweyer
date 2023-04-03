@@ -82,7 +82,7 @@ class _SelectionRouteState extends State<SelectionRoute> {
     widget.selectionArguments.selectionController = controller;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
-        controller.overlay = nestedHomeRouter.navigatorKey.currentState!.overlay;
+        controller.overlay = AppRouter.instance.navigatorKey.currentState!.overlay;
         controller.activate();
       }
     });
@@ -96,11 +96,14 @@ class _SelectionRouteState extends State<SelectionRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return Router<HomeRoutes>(
-      routerDelegate: nestedHomeRouter,
-      routeInformationParser: HomeRouteInformationParser(),
-      routeInformationProvider: HomeRouteInformationProvider(),
-      backButtonDispatcher: _backButtonDispatcher,
+    return Padding(
+      padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
+      child: Router<HomeRoutes>(
+        routerDelegate: nestedHomeRouter,
+        routeInformationParser: HomeRouteInformationParser(),
+        routeInformationProvider: HomeRouteInformationProvider(),
+        backButtonDispatcher: _backButtonDispatcher,
+      ),
     );
   }
 }

@@ -80,14 +80,14 @@ class TrackPanel extends StatelessWidget {
                               children: <Widget>[
                                 NFMarquee(
                                   key: ValueKey(PlaybackControl.instance.currentSong.id),
-                                  fontWeight: FontWeight.w700,
+                                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
                                   text: PlaybackControl.instance.currentSong.title,
                                   fontSize: 16,
                                   velocity: 26.0,
                                   blankSpace: 40.0,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  padding: EdgeInsets.only(bottom: 4.0 / textScaleFactor),
                                   child: ArtistWidget(
                                     artist: PlaybackControl.instance.currentSong.artist,
                                   ),

@@ -265,5 +265,10 @@
   "playerInterfaceColorStyleArtColor": "На основе обложки трека",
   "playerInterfaceColorStyleThemeBackgroundColor": "Цвет фона из темы",
   "resolveConflict": "Разрешить конфликт",
-  "conflictExplanation": "Избранные треки в системе отличаются от Sweyer, выберите, какие из них следует оставить в качестве избранных. Показаны только конфликтующие треки."
+  "conflictExplanation": "Избранные треки в системе отличаются от Sweyer, выберите, какие из них следует оставить в качестве избранных. Показаны только конфликтующие треки.",
+  "debugTextScaleFactor": "Text scale factor",
+  "debugShowDebugOverlay": "Show debug overlay",
+  "debugShowPerformanceOverlay": "Show performance overlay",
+  "debugShowCheckerboardRasterCacheImages": "Show checkerboard raster cache images",
+  "debugShowSemanticsDebugger": "Show semantics debugger"
 }

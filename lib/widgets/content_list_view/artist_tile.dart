@@ -1,11 +1,39 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
 
-/// Needed for scrollbar computations.
-const double kArtistTileHeight = kArtistTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
 const double _horizontalPadding = 16.0;
+
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+
+/// Needed for scrollbar computations.
+double kArtistTileHeight(BuildContext context) => _calculateArtistTileHeight(context);
+
+double _calculateArtistTileHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return memo3<double, double, double?, double?>(
+    () =>
+        math.max(
+          kArtistTileArtSize,
+          _kSongTileTextHeight(context),
+        ) +
+        _tileVerticalPadding * 2,
+    textScaleFactor,
+    _titleTheme(theme)?.fontSize,
+    0.0,
+  );
+}
+
+/// The height of the title and subtitle part of the [SongTile].
+double _kSongTileTextHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return calculateLineHeight(_titleTheme(theme), textScaleFactor);
+}
 
 class ArtistTile extends SelectableWidget<SelectionEntry> {
   const ArtistTile({
@@ -133,7 +161,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                       Text(
                         ContentUtils.localizedArtist(widget.artist.artist, l10n),
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.headline6,
+                        style: _titleTheme(theme),
                       ),
                     ],
                   ),

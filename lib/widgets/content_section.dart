@@ -100,11 +100,16 @@ class ContentSection<T extends Content> extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  l10n.contents(contentType),
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w800,
+                Expanded(
+                  child: Text(
+                    l10n.contents(contentType),
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 AnimatedSwitcher(

@@ -7,6 +7,7 @@ class AppTextField extends StatefulWidget {
     this.onSubmit,
     this.autofocus = false,
     this.isDense = false,
+    this.maxLines = 1,
     this.textStyle,
     this.hintStyle,
     this.contentPadding,
@@ -17,6 +18,7 @@ class AppTextField extends StatefulWidget {
   final ValueSetter<String>? onSubmit;
   final bool autofocus;
   final bool isDense;
+  final int maxLines;
   final TextStyle? textStyle;
   final TextStyle? hintStyle;
   final EdgeInsetsGeometry? contentPadding;
@@ -43,7 +45,8 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       autofocus: widget.autofocus,
       style: theme.textTheme.headline6?.merge(widget.textStyle) ?? widget.textStyle,
-      maxLines: 1,
+      minLines: 1,
+      maxLines: widget.maxLines,
       onSubmitted: widget.onSubmit,
       decoration: InputDecoration(
         border: InputBorder.none,

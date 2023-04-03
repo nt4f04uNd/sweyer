@@ -546,29 +546,12 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
     LocalKey key,
     StackFadeRouteTransitionSettings transitionSettings,
     Widget child,
-  ) {
-    if (selectionRoute) {
-      child = Padding(
-        padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
+  ) =>
+      StackFadePage(
+        key: key,
+        transitionSettings: transitionSettings,
         child: child,
       );
-    }
-    return StackFadePage(
-      key: key,
-      transitionSettings: transitionSettings,
-      child: child,
-    );
-  }
-
-  Widget _buildChild(BuildContext context, Widget child) {
-    if (selectionRoute) {
-      child = Padding(
-        padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
-        child: child,
-      );
-    }
-    return child;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -632,7 +615,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         final arguments = route.arguments! as SearchArguments;
         pages.add(SearchPage(
           key: ValueKey('${HomeRoutes.search.location}/$i'),
-          child: _buildChild(context, SearchRoute(delegate: arguments._delegate)),
+          child: SearchRoute(delegate: arguments._delegate),
           transitionSettings: transitionSettings.grey,
         ));
       } else {
