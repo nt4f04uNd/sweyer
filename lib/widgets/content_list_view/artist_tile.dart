@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-
 import 'package:sweyer/sweyer.dart';
 
 const double _tileVerticalPadding = 8.0;
@@ -15,21 +14,25 @@ double kArtistTileHeight(BuildContext context) => _calculateArtistTileHeight(con
 double _calculateArtistTileHeight(BuildContext context) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);
-  return memo3<double, double, double?, double?>(
-    () =>
-        math.max(
-          kArtistTileArtSize,
-          _kSongTileTextHeight(context),
-        ) +
-        _tileVerticalPadding * 2,
+  return _calculateArtistTileHeightMemo(
     textScaleFactor,
     _titleTheme(theme)?.fontSize,
     0.0,
+    context,
   );
 }
 
-/// The height of the title and subtitle part of the [SongTile].
-double _kSongTileTextHeight(BuildContext context) {
+final _calculateArtistTileHeightMemo = imemo3plus1(
+  (double a1, double? a2, double? a3, BuildContext context) =>
+      math.max(
+        kArtistTileArtSize,
+        _kArtistTileTextHeight(context),
+      ) +
+      _tileVerticalPadding * 2,
+);
+
+/// The height of the title part of the [ArtistTile].
+double _kArtistTileTextHeight(BuildContext context) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);
   return calculateLineHeight(_titleTheme(theme), textScaleFactor);

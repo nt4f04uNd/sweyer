@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:boxy/boxy.dart';
 import 'package:flutter/material.dart';
-
 import 'package:sweyer/sweyer.dart';
+import 'package:tuple/tuple.dart';
 
 const double _tileVerticalPadding = 8.0;
 const double kPersistentQueueTileHorizontalPadding = 16.0;
@@ -42,18 +42,27 @@ double kPersistentQueueGridTileHeight(
 double _calculatePersistentQueueTileHeight(ContentType contentType, BuildContext context) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);
-  return memo3<double, double, double?, double?>(
-    () =>
-        math.max(
-          kPersistentQueueTileArtSize,
-          _kPresisentQueueTileTextHeight(contentType, context),
-        ) +
-        _tileVerticalPadding * 2,
+  return _calculatePersistentQueueTileHeightMemo(
     textScaleFactor,
     _titleTheme(theme)?.fontSize,
     _subtitleTheme(contentType, theme)?.fontSize,
+    Tuple2(contentType, context),
   );
 }
+
+final _calculatePersistentQueueTileHeightMemo = imemo3plus1(
+  (
+    double a1,
+    double? a2,
+    double? a3,
+    Tuple2<ContentType, BuildContext> a4,
+  ) =>
+      math.max(
+        kPersistentQueueTileArtSize,
+        _kPresisentQueueTileTextHeight(a4.item1, a4.item2),
+      ) +
+      _tileVerticalPadding * 2,
+);
 
 double _calculatePersistentQueueGridTileHeight(
   ContentType contentType,
@@ -62,16 +71,27 @@ double _calculatePersistentQueueGridTileHeight(
 ) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);
-  return memo4<double, double, double, double?, double?>(
-    () => gridArtSize + _kPresisentQueueTileTextHeight(contentType, context) + _tileVerticalPadding * 2,
+  return _calculatePersistentQueueGridTileHeightMemo(
     textScaleFactor,
     gridArtSize,
     _titleTheme(theme)?.fontSize,
     _subtitleTheme(contentType, theme)?.fontSize,
+    Tuple2(contentType, context),
   );
 }
 
-/// The height of the title and subtitle part of the [SongTile].
+final _calculatePersistentQueueGridTileHeightMemo = imemo4plus1(
+  (
+    double a1,
+    double gridArtSize,
+    double? a3,
+    double? a4,
+    Tuple2<ContentType, BuildContext> a5,
+  ) =>
+      gridArtSize + _kPresisentQueueTileTextHeight(a5.item1, a5.item2) + _tileVerticalPadding * 2,
+);
+
+/// The height of the title and subtitle part of the [PersistentQueueTile].
 double _kPresisentQueueTileTextHeight(ContentType contentType, BuildContext context) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);

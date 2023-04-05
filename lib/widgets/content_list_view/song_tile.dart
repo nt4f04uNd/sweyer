@@ -21,18 +21,22 @@ double kSongTileHeight(BuildContext context) => _calculateSongTileHeight(context
 double _calculateSongTileHeight(BuildContext context) {
   final textScaleFactor = MediaQuery.of(context).textScaleFactor;
   final theme = Theme.of(context);
-  return memo3<double, double, double?, double?>(
-    () =>
-        math.max(
-          kSongTileArtSize,
-          _kSongTileTextHeight(context),
-        ) +
-        _tileVerticalPadding * 2,
+  return _calculateSongTileHeightMemo(
     textScaleFactor,
     _titleTheme(theme)?.fontSize,
     _subtitleTheme(theme)?.fontSize,
+    context,
   );
 }
+
+final _calculateSongTileHeightMemo = imemo3plus1(
+  (double a1, double? a2, double? a3, BuildContext context) =>
+      math.max(
+        kSongTileArtSize,
+        _kSongTileTextHeight(context),
+      ) +
+      _tileVerticalPadding * 2,
+);
 
 /// The height of the title and subtitle part of the [SongTile].
 double _kSongTileTextHeight(BuildContext context) {
