@@ -692,7 +692,7 @@ packages:
     description:
       path: "."
       ref: "3.0.0"
-      resolved-ref: caef528f2670f3b74adfef8c0e2d24515345dd30
+      resolved-ref: 1ccf1295213f4b269e75b590d8d76bc509009f80
       url: "https://github.com/nt4f04uNd/nt4f04unds_widgets/"
     source: git
     version: "3.0.0"
