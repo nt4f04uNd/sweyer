@@ -15,14 +15,13 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.17.0
   uuid: ^3.0.4
   path: ^1.8.0
   async: ^2.5.0
   rxdart: ^0.26.0
   sliver_tools: ^0.2.1
   animations: ^2.0.2
-  permission_handler: ^9.0.0
+  permission_handler: ^10.2.0
   shared_preferences: ^2.0.5
   path_provider: ^2.0.1
   percent_indicator: ^4.2.2
@@ -33,7 +32,7 @@ dependencies:
   package_info_plus: ^1.4.2
   url_launcher: ^6.0.3
   lottie: ^1.3.0
-  auto_size_text: ^3.0.0-nullsafety.0
+  auto_size_text: ^3.0.0
   marquee: ^2.1.0
   equatable: ^2.0.0
   device_info_plus: ^4.0.0
@@ -54,7 +53,6 @@ dependencies:
   flutter_riverpod: ^2.1.1
   hooks_riverpod: ^2.3.2
   flutter_hooks: ^0.18.6
-  quiver: any
   freezed_annotation: ^2.2.0
   json_annotation: ^4.7.0
   memoize: ^3.0.0
@@ -83,16 +81,12 @@ dependencies:
     # See https://github.com/ryanheise/audio_service/issues/633
 
     # path: C:/dev/projects/native/audio_service/audio_service
+    # path: /Users/nt4f04und/dev/prj/audio_service/audio_service
 
     git: 
       url: https://github.com/nt4f04uNd/audio_service
       ref: sweyer
       path: audio_service
-
-    # git: 
-    #   url: C:\dev\projects\native\audio_service
-    #   ref: one-isolate
-    #   path: audio_service
   nt4f04unds_widgets:
     # path: c:/dev/projects/native/nt4f04unds_widgets/
     # path: /Users/nt4f04und/dev/prj/nt4f04unds_widgets
