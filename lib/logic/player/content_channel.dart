@@ -17,9 +17,9 @@ class CancellationSignal {
   Future<void> cancel() {
     return ContentChannel._channel.invokeMethod<void>(
       'cancelAlbumArtLoading',
-      {'id': _id}
+      {'id': _id},
     );
-  } 
+  }
 }
 
 class ContentChannelException extends Enum with EquatableMixin {
@@ -34,7 +34,7 @@ class ContentChannelException extends Enum with EquatableMixin {
   /// Generic error.
   static const unexpected = ContentChannelException._('UNEXPECTED_ERROR');
 
-  /// On Android 30 requets like `MediaStore.createDeletionRequest` require
+  /// On Android 30 requests like `MediaStore.createDeletionRequest` require
   /// calling `startIntentSenderForResult`, which might throw this exception.
   static const intentSender = ContentChannelException._('INTENT_SENDER_ERROR');
 
@@ -57,8 +57,8 @@ class ContentChannelException extends Enum with EquatableMixin {
 }
 
 /// Communication bridge with the platform for all content-related methods.
-/// 
-/// Methods can thow various [ContentChannelException]s.
+///
+/// Methods can throw various [ContentChannelException]s.
 class ContentChannel {
   static const MethodChannel _channel = MethodChannel('content_channel');
 
@@ -72,27 +72,31 @@ class ContentChannel {
   /// Throws:
   ///  * [ContentChannelException.io] when art fails to load
   ///  * [ContentChannelException.sdk] when it's called below Android 29
-  Future<Uint8List?> loadAlbumArt({ required String uri, required Size size, required CancellationSignal signal }) async {
+  Future<Uint8List?> loadAlbumArt({
+    required String uri,
+    required Size size,
+    required CancellationSignal signal,
+  }) async {
     try {
       return await _channel.invokeMethod<Uint8List>(
         'loadAlbumArt',
         {
           'id': signal._id,
-          'uri': uri, 
+          'uri': uri,
           'width': size.width.toInt(),
           'height': size.height.toInt(),
         },
       );
-    } on PlatformException catch(ex) {
+    } on PlatformException catch (ex) {
       throw ContentChannelException._throw(ex, const [ContentChannelException.io, ContentChannelException.sdk]);
     }
   }
 
   /// Tries to tell system to recreate album art by [albumId].
   ///
-  /// Sometimes `MediaStore` tells that there's an albumart for some song, but the actual file
+  /// Sometimes `MediaStore` tells that there's an album art for some song, but the actual file
   /// by some path doesn't exist. Supposedly, what happens is that Android detects reads on this
-  /// entry from something like `InputStream` in Java and regenerates albumthumbs if they do not exist
+  /// entry from something like `InputStream` in Java and regenerates album thumbs if they do not exist
   /// (because this is just a caches that system tends to clear out if it thinks it should),
   /// but (yet again, supposedly) this is not the case when Flutter accesses this file. System cannot
   /// detect it and does not recreate the thumb, so we do this instead.
@@ -146,13 +150,16 @@ class ContentChannel {
       final res = await _channel.invokeMethod<bool>(
         'setSongsFavorite',
         {
-          'songs': songs.map((song) => song.toMap()).toList(),
+          'songIds': songs.map((song) => song.sourceId).toList(),
           'value': value,
         },
       );
       return res!;
-    } on PlatformException catch(ex) {
-      throw ContentChannelException._throw(ex, const [ContentChannelException.sdk, ContentChannelException.intentSender]);
+    } on PlatformException catch (ex) {
+      throw ContentChannelException._throw(
+        ex,
+        const [ContentChannelException.sdk, ContentChannelException.intentSender],
+      );
     }
   }
 
@@ -169,7 +176,7 @@ class ContentChannel {
         {'songs': songs.map((song) => song.toMap()).toList()},
       );
       return res!;
-    } on PlatformException catch(ex) {
+    } on PlatformException catch (ex) {
       throw ContentChannelException._throw(ex, const [ContentChannelException.intentSender]);
     }
   }
@@ -177,7 +184,7 @@ class ContentChannel {
   Future<void> createPlaylist(String name) async {
     try {
       return await _channel.invokeMethod<void>('createPlaylist', {'name': name});
-    } on PlatformException catch(ex) {
+    } on PlatformException catch (ex) {
       throw ContentChannelException._throw(ex, const []);
     }
   }
@@ -193,7 +200,7 @@ class ContentChannel {
           'name': name,
         },
       );
-    } on PlatformException catch(ex) {
+    } on PlatformException catch (ex) {
       throw ContentChannelException._throw(ex, const [ContentChannelException.playlistNotExists]);
     }
   }
@@ -204,7 +211,11 @@ class ContentChannel {
 
   /// Throws:
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
-  Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
+  Future<void> insertSongsInPlaylist({
+    required int index,
+    required List<Song> songs,
+    required Playlist playlist,
+  }) async {
     assert(songs.isNotEmpty);
     assert(index >= 0 && index <= playlist.songIds.length + 1);
     try {
@@ -216,13 +227,17 @@ class ContentChannel {
           'songIds': songs.map((el) => el.sourceId).toList(),
         },
       );
-    } on PlatformException catch(ex) {
+    } on PlatformException catch (ex) {
       throw ContentChannelException._throw(ex, const [ContentChannelException.playlistNotExists]);
     }
   }
 
   /// Moves song in playlist, returned value indicates whether the operation was successful.
-  Future<bool> moveSongInPlaylist({ required Playlist playlist, required int from, required int to }) async {
+  Future<bool> moveSongInPlaylist({
+    required Playlist playlist,
+    required int from,
+    required int to,
+  }) async {
     assert(from >= 0);
     assert(to >= 0);
     assert(from != to);
@@ -239,7 +254,10 @@ class ContentChannel {
 
   /// Throws:
   ///  * [ContentChannelException.playlistNotExists] when playlist doesn't exist.
-  Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
+  Future<void> removeFromPlaylistAt({
+    required List<int> indexes,
+    required Playlist playlist,
+  }) async {
     assert(indexes.isNotEmpty);
     try {
       return await _channel.invokeMethod<void>(
@@ -249,7 +267,7 @@ class ContentChannel {
           'indexes': indexes,
         },
       );
-    } on PlatformException catch(ex) {
+    } on PlatformException catch (ex) {
       throw ContentChannelException._throw(ex, const [ContentChannelException.playlistNotExists]);
     }
   }

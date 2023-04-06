@@ -15,7 +15,7 @@ enum QueueType {
   /// Queue of all playlists.
   allPlaylists,
 
-  /// Queue of all artistt.
+  /// Queue of all artists.
   allArtists,
 
   /// Queue of searched tracks.
@@ -24,7 +24,7 @@ enum QueueType {
   /// Queue that has same [SongOrigin].
   origin,
 
-  /// Some arbitrary queue. Сannot have modified state.
+  /// Some arbitrary queue. Cannot have modified state.
   ///
   /// Made up when:
   /// * user adds a song to [persistent] queue, that’s not included in it
@@ -45,6 +45,7 @@ class Queue implements _QueueOperations<Song> {
   /// Queue songs.
   List<Song> get songs => _songs;
   List<Song> _songs;
+
   /// Sets songs.
   void setSongs(List<Song> value) {
     _songs = value;
@@ -164,7 +165,7 @@ abstract class _QueueOperations<T> {
   /// Removes song.
   bool remove(T arg);
 
-  /// Retruns song.
+  /// Returns song.
   Song? get(T arg);
 
   /// Returns song index.
@@ -177,7 +178,7 @@ abstract class _QueueOperations<T> {
   Song? getPrev(T arg);
 }
 
-/// Implements opertions on [queue] by IDs of the [Song]s.
+/// Implements operations on [queue] by IDs of the [Song]s.
 class _QueueOperationsById implements _QueueOperations<int> {
   const _QueueOperationsById(this.queue);
   final Queue queue;
@@ -236,8 +237,7 @@ enum PoolQueueType {
 /// Represents the state in [QueueControl].
 @visibleForTesting
 class QueuesState {
-  QueuesState(Map<PoolQueueType, Queue> pool)
-      : _pool = pool;
+  QueuesState(Map<PoolQueueType, Queue> pool) : _pool = pool;
 
   final Map<PoolQueueType, Queue> _pool;
 
@@ -246,8 +246,9 @@ class QueuesState {
   QueueType _type = QueueType.allSongs;
 
   PoolQueueType get _internalType {
-    if (shuffled)
+    if (shuffled) {
       return PoolQueueType.shuffled;
+    }
     return PoolQueueType.queue;
   }
 
@@ -259,6 +260,7 @@ class QueuesState {
     }
     return _pool[_internalType]!;
   }
+
   Queue get _queue => _pool[PoolQueueType.queue]!;
   Queue get _shuffledQueue => _pool[PoolQueueType.shuffled]!;
 
@@ -288,9 +290,9 @@ class QueuesState {
   /// This is a map to store ids of duplicated songs in queue.
   ///
   /// The key is string, because [jsonEncode] and [jsonDecode] can only
-  /// work with `Map<String, dynamic>`. Convertion to int doesn't seem to be a
+  /// work with `Map<String, dynamic>`. Conversion to int doesn't seem to be a
   /// benefit, so keeping this as string.
-  /// 
+  ///
   /// See [ContentUtils.deduplicateSong] for discussion about the
   /// logic behind this.
   IdMap idMap = {};
@@ -376,7 +378,11 @@ class QueueControl extends Control {
   Stream<void> get onQueueChanged => _onQueueChangeSubject.stream;
   late PublishSubject<void> _onQueueChangeSubject;
 
-  /// Must be called before the song is instreted to the current queue,
+  void emitQueueChange() {
+    _onQueueChangeSubject.add(null);
+  }
+
+  /// Must be called before the song is inserted to the current queue,
   /// calls [ContentUtils.deduplicateSong].
   void _deduplicateSong(Song song) {
     final result = ContentUtils.deduplicateSong(
@@ -389,16 +395,14 @@ class QueueControl extends Control {
     }
   }
 
-  /// Marks queues modified and traverses it to be unshuffled, preseving the shuffled
+  /// Marks queues modified and traverses it to be unshuffled, preserving the shuffled
   /// queue contents.
   void _unshuffle() {
     setQueue(
       emitChangeEvent: false,
       modified: true,
       shuffled: false,
-      songs: state._shuffled
-          ? List.from(state._shuffledQueue.songs)
-          : null,
+      songs: state._shuffled ? List.from(state._shuffledQueue.songs) : null,
     );
   }
 
@@ -502,7 +506,7 @@ class QueueControl extends Control {
   ///
   /// If currently some song origin is already playing, will first save the current queue to
   /// [Song.origin] in its items.
-  /// 
+  ///
   /// In difference with [playNext], always traverses the playlist into [QueueType.arbitrary].
   void playOriginNext(SongOrigin origin) {
     final songs = origin.songs;
@@ -624,7 +628,7 @@ class QueueControl extends Control {
   /// * fall back to the first song in [QueueType.all]
   /// * fall back to [QueueType.all]
   /// * stop the playback
-  /// 
+  ///
   /// TODO: add return value ?
   void removeAllFromQueueAt(List<int> indexes) {
     final queues = state;
@@ -640,7 +644,7 @@ class QueueControl extends Control {
       }
       if (containsCurrent) {
         /// TODO: add to [Queue] something like relative indexing, that allows negative indexes
-        /// and imporove this
+        /// and improve this
         MusicPlayer.instance.setSong(state.current.songs[0]);
       }
       setQueue(modified: true);
@@ -649,7 +653,7 @@ class QueueControl extends Control {
 
   /// A shorthand for setting [QueueType.searched].
   void setSearchedQueue(String query, List<Song> songs) {
-     setQueue(
+    setQueue(
       type: QueueType.searched,
       searchQuery: query,
       modified: false,
@@ -690,7 +694,7 @@ class QueueControl extends Control {
   /// Resets queue to all songs, pauses the player and sets the first song as
   /// current.
   ///
-  /// This fucntion should be called if queue is found to be broken
+  /// This function should be called if queue is found to be broken
   /// and there's no straight way to figure out where to fallback.
   void resetQueueAsFallback() {
     setQueue(
@@ -715,7 +719,7 @@ class QueueControl extends Control {
   ///   will be used as new queue, without being shuffled.
   /// * [shuffleFrom] is a list of songs to fall back when [shuffle]
   ///   thereafter will be set to `false`.
-  ///   
+  ///
   ///   By default it will also be shuffled and set to shuffled queue,
   ///   unless [songs] are specified, which will override this value.
   ///
@@ -723,14 +727,14 @@ class QueueControl extends Control {
   ///   from current queue.
   /// * [origin] is the song origin being set, only applied when [type] is [QueueType.origin].
   ///   When [QueueType.origin] is set and currently it's not origin, this parameter is required.
-  ///   Otherwise it can be omitted and for updating other paramters only.
+  ///   Otherwise it can be omitted and for updating other parameters only.
   ///
   ///   With playlist origin the [Playlist.idMap] will be used to update the
   ///   [ContentState.idMap].
   /// * [searchQuery] is the search query the playlist was searched by,
   ///   only applied when [type] is [QueueType.searched].
   ///   Similarly as for [origin], when [QueueType.searched] is set and currently it's not searched,
-  ///   this parameter is required. Otherwise it can be omitted for updating other paramters only.
+  ///   this parameter is required. Otherwise it can be omitted for updating other parameters only.
   /// * [emitChangeEvent] is whether to emit a song list change event
   /// * [setIdMapFromPlaylist] allows to configure whether to set the [Playlist.idMap]
   ///   when set [origin] is playlist. Needed to not override the map at the app start.
@@ -754,8 +758,8 @@ class QueueControl extends Control {
     final queues = state;
 
     @pragma('vm:prefer-inline')
-    List<Song> copySongs(List<Song> _songs) {
-      return copied ? _songs : List.from(_songs);
+    List<Song> copySongs(List<Song> songs) {
+      return copied ? songs : List.from(songs);
     }
 
     assert(
@@ -763,16 +767,12 @@ class QueueControl extends Control {
       "It's invalid to set empty songs queue",
     );
     assert(
-      type != QueueType.origin ||
-      queues._origin != null ||
-      origin != null,
-      "When you set `origin` queue and currently none set, you must provide the `origin` paramenter",
+      type != QueueType.origin || queues._origin != null || origin != null,
+      "When you set `origin` queue and currently none set, you must provide the `origin` parameter",
     );
     assert(
-      type != QueueType.searched ||
-      queues._searchQuery != null ||
-      searchQuery != null,
-      "When you set `searched` queue and currently none set, you must provide the `searchQuery` paramenter",
+      type != QueueType.searched || queues._searchQuery != null || searchQuery != null,
+      "When you set `searched` queue and currently none set, you must provide the `searchQuery` parameter",
     );
 
     type ??= queues._type;
@@ -817,9 +817,7 @@ class QueueControl extends Control {
 
     if (shuffled) {
       queues._shuffledQueue.setSongs(
-        songs != null
-          ? copySongs(songs)
-          : Queue.shuffleSongs(shuffleFrom ?? queues.current.songs),
+        songs != null ? copySongs(songs) : Queue.shuffleSongs(shuffleFrom ?? queues.current.songs),
       );
       if (shuffleFrom != null) {
         queues._queue.setSongs(copySongs(shuffleFrom));
@@ -840,11 +838,7 @@ class QueueControl extends Control {
       repository.saveCurrentQueue();
     }
 
-    if (state.idMap.isNotEmpty &&
-        !modified &&
-        !shuffled &&
-        type != QueueType.origin &&
-        type != QueueType.arbitrary) {
+    if (state.idMap.isNotEmpty && !modified && !shuffled && type != QueueType.origin && type != QueueType.arbitrary) {
       state.idMap.clear();
       state.idMapDirty = false;
       repository.saveIdMap();
@@ -854,12 +848,12 @@ class QueueControl extends Control {
     }
 
     if (emitChangeEvent) {
-      _onQueueChangeSubject.add(null);
+      emitQueueChange();
     }
   }
 
   /// Checks queue pool and removes obsolete songs - that are no longer on all songs data.
-  void removeObsolete({ bool emitChangeEvent = true }) {
+  void removeObsolete({bool emitChangeEvent = true}) {
     final allSongs = ContentControl.instance.state.allSongs;
     assert(allSongs.isNotEmpty);
     state._queue.compareAndRemoveObsolete(allSongs);
@@ -885,9 +879,9 @@ class QueueControl extends Control {
         player.setSong(state.current.songs[0]);
       }
     }
-  
+
     if (emitChangeEvent) {
-      _onQueueChangeSubject.add(null);
+      emitQueueChange();
     }
   }
 
@@ -900,7 +894,7 @@ class QueueControl extends Control {
     final shuffled = repository.queueShuffled.get();
     final modified = repository.queueModified.get();
     final songOrigin = repository.songOrigin.get();
-    final type =  repository.queueType.get();
+    final type = repository.queueType.get();
 
     state.idMap = await repository.idMap.read();
 
@@ -918,7 +912,7 @@ class QueueControl extends Control {
           queueSongs.add(song);
         }
       }
-    } catch(ex, stack) {
+    } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
@@ -942,7 +936,7 @@ class QueueControl extends Control {
           }
         }
       }
-    } catch(ex, stack) {
+    } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
         ex,
         stack,

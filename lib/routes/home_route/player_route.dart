@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/physics.dart';
+import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 import 'package:flutter/material.dart';
 
 final SpringDescription playerRouteSpringDescription = SpringDescription.withDampingRatio(
@@ -20,8 +21,7 @@ class PlayerRoute extends StatefulWidget {
   _PlayerRouteState createState() => _PlayerRouteState();
 }
 
-class _PlayerRouteState extends State<PlayerRoute>
-    with SingleTickerProviderStateMixin, SelectionHandlerMixin {
+class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStateMixin, SelectionHandlerMixin {
   final _queueTabKey = GlobalKey<_QueueTabState>();
   late List<Widget> _tabs;
   late SlidableController controller;
@@ -33,17 +33,21 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   void initState() {
     super.initState();
-    initSelectionController(() => ContentSelectionController.create<Song>(
+    initSelectionController(
+      () => ContentSelectionController.create(
         vsync: this,
         context: context,
+        contentType: ContentType.song,
         closeButton: true,
+        systemUiOverlayStyle: () => PlayerInterfaceColorStyleControl.instance.systemUiOverlayStyleForSelection,
+        actionsBarWrapperBuilder: (context, child) => PlayerInterfaceThemeOverride(child: child),
         additionalPlayActionsBuilder: (context) => const [
           RemoveFromQueueSelectionAction(),
         ],
       ),
       listenStatus: true,
     );
-  
+
     _tabs = [
       const _MainTab(),
       _QueueTab(
@@ -67,7 +71,7 @@ class _PlayerRouteState extends State<PlayerRoute>
   @override
   void dispose() {
     tabController.dispose();
-    selectionController.dispose();
+    disposeSelectionController();
     controller.removeListener(_handleControllerChange);
     controller.removeStatusListener(_handleControllerStatusChange);
     super.dispose();
@@ -86,14 +90,11 @@ class _PlayerRouteState extends State<PlayerRoute>
   }
 
   void _handleControllerChange() {
-    final systemNavigationBarColorTween = ColorTween(
-      begin: Constants.UiTheme.grey.auto.systemNavigationBarColor,
-      end: Constants.UiTheme.black.auto.systemNavigationBarColor,
-    );
+    final overlayStyle = PlayerInterfaceColorStyleControl.instance.systemUiOverlayStyle;
     // Change system UI on expanding/collapsing the player route.
-    SystemUiStyleController.setSystemUiOverlay(
-      SystemUiStyleController.lastUi.copyWith(
-        systemNavigationBarColor: systemNavigationBarColorTween.evaluate(controller),
+    SystemUiStyleController.instance.setSystemUiOverlay(
+      SystemUiStyleController.instance.lastUi.copyWith(
+        systemNavigationBarColor: overlayStyle.systemNavigationBarColor,
       ),
     );
   }
@@ -115,41 +116,55 @@ class _PlayerRouteState extends State<PlayerRoute>
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = ThemeControl.theme.colorScheme.background;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
+    final backgroundColor = theme.colorScheme.background;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
     return Slidable(
       controller: controller,
-      start: 1.0 - kSongTileHeight / screenHeight,
+      start: 1.0 - TrackPanel.height(context) / screenHeight,
       end: 0.0,
       direction: slideDirection,
       barrier: Container(
-        color: ThemeControl.isDark ? Colors.black : Colors.black26,
+        color: ThemeControl.instance.isDark ? Colors.black : Colors.black26,
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: backgroundColor,
         body: Stack(
           children: <Widget>[
-            SharedAxisTabView(
-              children: _tabs,
-              controller: tabController,
-              tabBuilder: (context, animation, secondaryAnimation, child) {
-                if (child is _QueueTab) {
-                  if (animation != _queueTabAnimation) {
-                    if (_queueTabAnimation != null) {
-                      _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
+            AnimatedBuilder(
+              animation: playerRouteController,
+              builder: (context, child) => AnimationSwitcher(
+                animation: playerRouteController,
+                child1: Container(
+                  color: theme.colorScheme.secondary,
+                ),
+                child2: const PlayerInterfaceColorWidget(),
+              ),
+            ),
+            PlayerInterfaceThemeOverride(
+              child: SharedAxisTabView(
+                children: _tabs,
+                controller: tabController,
+                tabBuilder: (context, animation, secondaryAnimation, child) {
+                  if (child is _QueueTab) {
+                    if (animation != _queueTabAnimation) {
+                      if (_queueTabAnimation != null) {
+                        _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
+                      }
+                      _queueTabAnimation = animation;
+                      animation.addStatusListener(
+                        _handleQueueTabAnimationStatus,
+                      );
                     }
-                    _queueTabAnimation = animation;
-                    animation.addStatusListener(
-                      _handleQueueTabAnimationStatus,
-                    );
                   }
-                }
-                return IgnorePointer(
-                  ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
-                  child: child,
-                );
-              },
+                  return IgnorePointer(
+                    ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
+                    child: child,
+                  );
+                },
+              ),
             ),
             TrackPanel(onTap: controller.open),
           ],
@@ -160,7 +175,7 @@ class _PlayerRouteState extends State<PlayerRoute>
 }
 
 class _QueueTab extends StatefulWidget {
-  _QueueTab({
+  const _QueueTab({
     Key? key,
     required this.selectionController,
   }) : super(key: key);
@@ -172,14 +187,13 @@ class _QueueTab extends StatefulWidget {
 }
 
 class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
-
-  static const double appBarHeight = 81.0;
+  static const double baseAppBarHeight = 81.0;
 
   /// This is set in parent via global key
   bool opened = false;
   final ScrollController scrollController = ScrollController();
 
-  /// A bool var to disable show/hide in tracklist controller listener when manual [scrollToSong] is performing
+  /// A bool var to disable show/hide in track list controller listener when manual [scrollToSong] is performing
   late StreamSubscription<Song> _songChangeSubscription;
   late StreamSubscription<void> _queueChangeSubscription;
 
@@ -188,7 +202,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       jumpToSong(PlaybackControl.instance.currentSongIndex);
     });
 
@@ -198,8 +212,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
       if (ContentControl.instance.state.allSongs.isNotEmpty) {
         setState(() {/* update ui list as data list may have changed */});
         if (!opened) {
-          WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-            // Jump when tracklist changes (e.g. shuffle happened)
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            // Jump when track list changes (e.g. shuffle happened)
             jumpToSong();
             // Post framing it because we need to be sure that list gets updated before we jump.
           });
@@ -211,8 +225,12 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         /* update current track indicator */
       });
       if (!opened) {
-        // Scroll when track changes
-        await scrollToSong();
+        WidgetsBinding.instance.addPostFrameCallback((timestamp) async {
+          if (mounted) {
+            // Scroll when track changes
+            await scrollToSong();
+          }
+        });
       }
     });
   }
@@ -230,7 +248,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   /// If optional [index] is provided - scrolls to it.
   Future<void> scrollToSong([int? index]) async {
     index ??= PlaybackControl.instance.currentSongIndex;
-    final extent = index * kSongTileHeight;
+    final extent = index * kSongTileHeight(context);
     final pixels = scrollController.position.pixels;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
@@ -255,12 +273,13 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   ///
   /// If optional [index] is provided - jumps to it.
   void jumpToSong([int? index]) {
-    if (!mounted)
+    if (!mounted) {
       return;
+    }
     index ??= PlaybackControl.instance.currentSongIndex;
     final min = scrollController.position.minScrollExtent;
     final max = scrollController.position.maxScrollExtent;
-    scrollController.jumpTo((index * kSongTileHeight).clamp(min, max));
+    scrollController.jumpTo((index * kSongTileHeight(context)).clamp(min, max));
   }
 
   /// Jump to song when changing tab to main.
@@ -281,14 +300,11 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         return;
       case QueueType.origin:
         final origin = QueueControl.instance.state.origin!;
-        if (origin is Album)
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Album>(origin));
-        else if (origin is Playlist)
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(origin));
-        else if (origin is Artist)
-          HomeRouter.instance.goto(HomeRoutes.factory.content<Artist>(origin));
-        else
+        if (origin is Album || origin is Playlist || origin is Artist) {
+          HomeRouter.instance.goto(HomeRoutes.factory.content(origin));
+        } else {
           throw UnimplementedError;
+        }
         return;
       case QueueType.allSongs:
       case QueueType.allAlbums:
@@ -300,99 +316,146 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   }
 
   double _getBorderRadius(SongOrigin origin) {
-    if (origin is PersistentQueue)
+    if (origin is PersistentQueue) {
       return 8.0;
-    else if (origin is Artist)
+    } else if (origin is Artist) {
       return kArtistTileArtSize;
+    }
     throw UnimplementedError();
   }
 
-  List<TextSpan> _getQueueType(AppLocalizations l10n) {
-    final List<TextSpan> text = [];
-    switch (QueueControl.instance.state.type) {
-      case QueueType.allSongs:
-        text.add(TextSpan(text: l10n.allTracks));
-        break;
-      case QueueType.allAlbums:
-        text.add(TextSpan(text: l10n.allAlbums));
-        break;
-      case QueueType.allPlaylists:
-        text.add(TextSpan(text: l10n.allPlaylists));
-        break;
-      case QueueType.allArtists:
-        text.add(TextSpan(text: l10n.allArtists));
-        break;
-      case QueueType.searched:
-        final query = QueueControl.instance.state.searchQuery!;
-        text.add(TextSpan(
-          text: '${l10n.found} ${l10n.byQuery.toLowerCase()} ',
-        ));
-        text.add(TextSpan(
-          text: '"$query"',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: ThemeControl.theme.colorScheme.onBackground,
-          ),
-        ));
-        break;
-      case QueueType.origin:
-        final origin = QueueControl.instance.state.origin!;
-        if (origin is Album) {
-          text.add(TextSpan(text: '${l10n.album} '));
-          text.add(TextSpan(
-            text: origin.nameDotYear,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.theme.colorScheme.onBackground,
-            ),
-          ));
-        } else if (origin is Playlist) {
-          text.add(TextSpan(text: '${l10n.playlist} '));
-          text.add(TextSpan(
-            text: origin.name,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.theme.colorScheme.onBackground,
-            ),
-          ));
-        } else if (origin is Artist) {
-          text.add(TextSpan(text: '${l10n.artist} '));
-          text.add(TextSpan(
-            text: ContentUtils.localizedArtist(origin.artist, l10n),
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: ThemeControl.theme.colorScheme.onBackground,
-            ),
-          ));
-        } else {
-          throw UnimplementedError();
-        }
-        break;
-      case QueueType.arbitrary:
-        text.add(TextSpan(text: l10n.arbitraryQueue));
-        break;
-    }
-    return text;
-  }
-
-  Text _buildTitleText(List<TextSpan> text) {
-    return Text.rich(
-      TextSpan(children: text),
-      key: ValueKey(text.fold<String>('', (prev, el) => prev + el.text!)),
-      overflow: TextOverflow.ellipsis,
-      style: ThemeControl.theme.textTheme.subtitle2!.copyWith(
+  /// The style that should be used for the queue description text in the app bar.
+  TextStyle get _queueDescriptionStyle => Theme.of(context).textTheme.subtitle2!.copyWith(
         fontSize: 14.0,
         height: 1.0,
         fontWeight: FontWeight.w700,
-      ),
+      );
+
+  Text _buildTitleText(AppLocalizations l10n) {
+    final InlineSpan text;
+    final Key key;
+    switch (QueueControl.instance.state.type) {
+      case QueueType.allSongs:
+        text = TextSpan(text: l10n.allTracks);
+        key = ValueKey(l10n.allTracks);
+        break;
+      case QueueType.allAlbums:
+        text = TextSpan(text: l10n.allAlbums);
+        key = ValueKey(l10n.allAlbums);
+        break;
+      case QueueType.allPlaylists:
+        text = TextSpan(text: l10n.allPlaylists);
+        key = ValueKey(l10n.allPlaylists);
+        break;
+      case QueueType.allArtists:
+        text = TextSpan(text: l10n.allArtists);
+        key = ValueKey(l10n.allArtists);
+        break;
+      case QueueType.searched:
+        final theme = Theme.of(context);
+        final query = QueueControl.instance.state.searchQuery!;
+        text = WidgetSpan(
+          child: StyledText(
+            overflow: TextOverflow.ellipsis,
+            style: _queueDescriptionStyle,
+            // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+            textScaleFactor: 1.0,
+            text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
+            tags: {
+              'query': StyledTextTag(
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.onBackground,
+                ),
+              ),
+            },
+          ),
+        );
+        key = ValueKey(l10n.foundByQuery(query));
+        break;
+      case QueueType.origin:
+        final theme = Theme.of(context);
+        final origin = QueueControl.instance.state.origin!;
+        if (origin is Album) {
+          text = WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              textScaleFactor: 1.0,
+              text: l10n.albumQueue('<name>${l10n.escapeStyled(origin.nameDotYear)}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
+            ),
+          );
+          key = ValueKey(l10n.albumQueue(origin.nameDotYear));
+        } else if (origin is Playlist) {
+          final theme = Theme.of(context);
+          text = WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              textScaleFactor: 1.0,
+              text: l10n.playlistQueue('<name>${l10n.escapeStyled(origin.name)}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
+            ),
+          );
+          key = ValueKey(l10n.playlistQueue(origin.name));
+        } else if (origin is Artist) {
+          final theme = Theme.of(context);
+          final artist = ContentUtils.localizedArtist(origin.artist, l10n);
+          text = WidgetSpan(
+            child: StyledText(
+              overflow: TextOverflow.ellipsis,
+              style: _queueDescriptionStyle,
+              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              textScaleFactor: 1.0,
+              text: l10n.artistQueue('<name>${l10n.escapeStyled(artist)}</name>'),
+              tags: {
+                'name': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onBackground,
+                  ),
+                ),
+              },
+            ),
+          );
+          key = ValueKey(l10n.artistQueue(artist));
+        } else {
+          throw UnimplementedError('Unhandled origin: $origin');
+        }
+        break;
+      case QueueType.arbitrary:
+        text = TextSpan(text: l10n.arbitraryQueue);
+        key = ValueKey(l10n.arbitraryQueue);
+        break;
+    }
+    return Text.rich(
+      text,
+      key: key,
+      overflow: TextOverflow.ellipsis,
+      style: _queueDescriptionStyle,
     );
   }
 
   AnimatedCrossFade _crossFade(bool showFirst, Widget firstChild, Widget secondChild) {
     return AnimatedCrossFade(
-      crossFadeState: showFirst
-        ? CrossFadeState.showFirst
-        : CrossFadeState.showSecond,
+      crossFadeState: showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       duration: const Duration(milliseconds: 400),
       layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
         // TODO: remove `layoutBuilder` build when https://github.com/flutter/flutter/issues/82614 is resolved
@@ -426,147 +489,162 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   Widget build(BuildContext context) {
     final currentSongIndex = PlaybackControl.instance.currentSongIndex;
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     final origin = QueueControl.instance.state.origin;
-    final topScreenPadding = MediaQuery.of(context).padding.top;
+    final mediaQuery = MediaQuery.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final appBarHeight =
+        textScaleFactor <= 1.0 ? baseAppBarHeight : baseAppBarHeight / 2 + baseAppBarHeight / 2 * textScaleFactor;
+    final topScreenPadding = mediaQuery.padding.top;
     final appBarHeightWithPadding = appBarHeight + topScreenPadding;
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
+    final appBarAnimation = ColorTween(
+      begin: Theme.of(HomeRouter.instance.navigatorKey.currentContext!).appBarTheme.backgroundColor,
+      end: theme.appBarTheme.backgroundColor,
+    ).animate(playerRouteController);
     final appBar = Material(
       elevation: 2.0,
-      color: theme.appBarTheme.color,
-      child: Container(
-        height: appBarHeight,
-        margin: EdgeInsets.only(top: topScreenPadding),
-        padding: const EdgeInsets.only(
-          top: 24.0,
-          bottom: 0.0,
+      color: Colors.transparent,
+      child: AnimatedBuilder(
+        animation: appBarAnimation,
+        builder: (context, child) => PlayerInterfaceColorWidget(
+          color: () => appBarAnimation.value,
+          child: child,
         ),
-        child: FadeTransition(
-          opacity: fadeAnimation,
-          child: RepaintBoundary(
-            child: GestureDetector(
-              onTap: _handleTitleTap,
-              child: AnimationSwitcher(
-                animation: CurvedAnimation(
-                  curve: Curves.easeOutCubic,
-                  reverseCurve: Curves.easeInCubic,
-                  parent: widget.selectionController.animation,
-                ),
-                child2: Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 10.0,
-                    left: 42.0,
-                    right: 12.0,
+        child: Container(
+          height: appBarHeight,
+          margin: EdgeInsets.only(top: topScreenPadding),
+          padding: const EdgeInsets.only(
+            top: 24.0,
+            bottom: 0.0,
+          ),
+          child: FadeTransition(
+            opacity: fadeAnimation,
+            child: RepaintBoundary(
+              child: GestureDetector(
+                onTap: _handleTitleTap,
+                child: AnimationSwitcher(
+                  animation: CurvedAnimation(
+                    curve: Curves.easeOutCubic,
+                    reverseCurve: Curves.easeInCubic,
+                    parent: widget.selectionController.animation,
                   ),
-                  child: Row(
-                    children: [
-                      SelectionCounter(controller: widget.selectionController),
-                      const Spacer(),
-                      SelectAllSelectionAction<Song>(
-                        controller: widget.selectionController,
-                        entryFactory: (content, index) => SelectionEntry<Song>.fromContent(
-                          content: content,
-                          index: index,
-                          context: context,
+                  child2: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 10.0,
+                      left: 42.0,
+                      right: 12.0,
+                    ),
+                    child: Row(
+                      children: [
+                        SelectionCounter(controller: widget.selectionController),
+                        const Spacer(),
+                        SelectAllSelectionAction<Song>(
+                          controller: widget.selectionController,
+                          entryFactory: (content, index) => SelectionEntry<Song>.fromContent(
+                            content: content,
+                            index: index,
+                            context: context,
+                          ),
+                          getAll: () => QueueControl.instance.state.current.songs,
                         ),
-                        getAll: () => QueueControl.instance.state.current.songs,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                child1: Padding(
-                  padding: EdgeInsets.only(
-                    left: origin != null ? 12.0 : 20.0,
-                    right: 12.0,
-                  ),
-                  child: Row(
-                    children: [
-                      if (origin != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
-                          child: ContentArt(
-                            source: ContentArtSource.origin(origin),
-                            borderRadius: _getBorderRadius(origin),
-                            size: kSongTileArtSize - 8.0,
+                  child1: Padding(
+                    padding: EdgeInsets.only(
+                      left: origin != null ? 12.0 : 20.0,
+                      right: 12.0,
+                    ),
+                    child: Row(
+                      children: [
+                        if (origin != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0, right: 10.0),
+                            child: ContentArt(
+                              source: ContentArtSource.origin(origin),
+                              borderRadius: _getBorderRadius(origin),
+                              size: kSongTileArtSize - 8.0,
+                            ),
+                          ),
+                        Flexible(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  Text(
+                                    l10n.upNext,
+                                    style: theme.textTheme.headline6!.copyWith(
+                                      fontSize: 24,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  _crossFade(
+                                    !QueueControl.instance.state.modified,
+                                    const SizedBox(height: 18.0),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 5.0),
+                                      child: Icon(
+                                        Icons.edit_rounded,
+                                        size: 18.0,
+                                      ),
+                                    ),
+                                  ),
+                                  _crossFade(
+                                    !QueueControl.instance.state.shuffled,
+                                    const SizedBox(height: 20.0),
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 2.0),
+                                      child: Icon(
+                                        Icons.shuffle_rounded,
+                                        size: 20.0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: AnimatedSwitcher(
+                                      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                        return Stack(
+                                          alignment: Alignment.centerLeft,
+                                          children: <Widget>[
+                                            ...previousChildren,
+                                            if (currentChild != null) currentChild,
+                                          ],
+                                        );
+                                      },
+                                      duration: const Duration(milliseconds: 400),
+                                      switchInCurve: Curves.easeOut,
+                                      switchOutCurve: Curves.easeIn,
+                                      child: _buildTitleText(l10n),
+                                    ),
+                                  ),
+                                  if (origin != null || type == QueueType.searched)
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 18.0,
+                                      color: theme.textTheme.subtitle2!.color,
+                                    ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                      Flexible(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: [
-                                Text(
-                                  l10n.upNext,
-                                  style: theme.textTheme.headline6!.copyWith(
-                                    fontSize: 24,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                _crossFade(
-                                  !QueueControl.instance.state.modified,
-                                  const SizedBox(height: 18.0),
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 5.0),
-                                    child: Icon(
-                                      Icons.edit_rounded,
-                                      size: 18.0,
-                                    ),
-                                  )
-                                ),
-                                _crossFade(
-                                  !QueueControl.instance.state.shuffled,
-                                  const SizedBox(height: 20.0),
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 2.0),
-                                    child: Icon(
-                                      Icons.shuffle_rounded,
-                                      size: 20.0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: AnimatedSwitcher(
-                                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                                      return Stack(
-                                        alignment: Alignment.centerLeft,
-                                        children: <Widget>[
-                                          ...previousChildren,
-                                          if (currentChild != null) currentChild,
-                                        ],
-                                      );
-                                    },
-                                    duration: const Duration(milliseconds: 400),
-                                    switchInCurve: Curves.easeOut,
-                                    switchOutCurve: Curves.easeIn,
-                                    child: _buildTitleText(_getQueueType(l10n)),
-                                  ),
-                                ),
-                                if (origin != null || type == QueueType.searched)
-                                  Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 18.0,
-                                    color: theme.textTheme.subtitle2!.color,
-                                  ),
-                              ],
-                            ),
+                        Column(
+                          children: const [
+                            _SaveQueueAsPlaylistAction(),
                           ],
-                        ),
-                      ),
-                      Column(
-                        children: const [
-                          _SaveQueueAsPlaylistAction(),
-                        ],
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -578,6 +656,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final list = QueueControl.instance.state.current.songs;
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Padding(
@@ -585,17 +664,17 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: ValueListenableBuilder<SelectionController?>(
               valueListenable: ContentControl.instance.selectionNotifier,
               builder: (context, value, child) {
-                return ContentListView<Song>(
+                return ContentListView(
+                  contentType: ContentType.song,
                   list: list,
                   controller: scrollController,
                   selectionController: widget.selectionController,
                   padding: EdgeInsets.only(
                     top: 4.0,
-                    bottom: value == null ? 0.0 : kSongTileHeight + 4.0,
+                    bottom: value == null ? 0.0 : kSongTileHeight(context) + 4.0,
                   ),
-                  songTileVariant: QueueControl.instance.state.origin is Album
-                    ? SongTileVariant.number
-                    : SongTileVariant.albumArt,
+                  songTileVariant:
+                      QueueControl.instance.state.origin is Album ? SongTileVariant.number : SongTileVariant.albumArt,
                   songTileClickBehavior: SongTileClickBehavior.playPause,
                   currentTest: (index) => index == currentSongIndex,
                   alwaysShowScrollbar: true,
@@ -625,24 +704,26 @@ class _MainTab extends StatefulWidget {
 class _MainTabState extends State<_MainTab> {
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.theme;
-    final animation = ColorTween(
-      begin: theme.colorScheme.secondary,
-      end: theme.colorScheme.background,
-    ).animate(playerRouteController);
+    final theme = Theme.of(context);
     final fadeAnimation = CurvedAnimation(
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
+    final mediaQuery = MediaQuery.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return AnimatedBuilder(
       animation: playerRouteController,
       builder: (context, child) => Scaffold(
         body: child,
         resizeToAvoidBottomInset: false,
-        backgroundColor: animation.value,
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: Colors.transparent,
+          toolbarHeight: math.max(
+            TrackPanel.height(context) - mediaQuery.padding.top,
+            theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
+          ),
           leading: FadeTransition(
             opacity: fadeAnimation,
             child: RepaintBoundary(
@@ -654,16 +735,17 @@ class _MainTabState extends State<_MainTab> {
             ),
           ),
           actions: <Widget>[
-            ValueListenableBuilder<bool>(
-              valueListenable: Prefs.devMode,
-              builder: (context, value, child) => value
-                ? child!
-                : const SizedBox.shrink(),
-              child: FadeTransition(
-                opacity: fadeAnimation,
-                child: const RepaintBoundary(
-                  child: _InfoButton(),
-                ),
+            FadeTransition(
+              opacity: fadeAnimation,
+              child: Row(
+                children: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: Prefs.devMode,
+                    builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
+                  ),
+                  const FavoriteButton(),
+                  const SizedBox(width: 5.0),
+                ],
               ),
             ),
           ],
@@ -675,19 +757,19 @@ class _MainTabState extends State<_MainTab> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const _TrackShowcase(),
+            const TrackShowcase(),
             Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Seekbar(),
+              children: [
+                const Seekbar(),
                 Padding(
                   padding: EdgeInsets.only(
-                    bottom: 40.0,
+                    bottom: 40.0 / textScaleFactor,
                     top: 10.0,
                   ),
-                  child: _PlaybackButtons(),
+                  child: const _PlaybackButtons(),
                 ),
               ],
             ),
@@ -704,52 +786,58 @@ class _PlaybackButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const ShuffleButton(),
-        const SizedBox(width: buttonMargin),
-        Container(
-          padding: const EdgeInsets.only(right: buttonMargin),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: NFIconButton(
-            size: 50.0,
-            iconSize: textScaleFactor * 30.0,
-            icon: const Icon(Icons.skip_previous_rounded),
-            onPressed: MusicPlayer.instance.playPrev,
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: ThemeControl.theme.colorScheme.secondary,
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: const Material(
-            color: Colors.transparent,
-            child: AnimatedPlayPauseButton(
-              iconSize: 26.0,
-              size: 70.0,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: buttonMargin),
+      child: FittedBox(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const ShuffleButton(),
+            const SizedBox(width: buttonMargin),
+            Container(
+              padding: const EdgeInsets.only(right: buttonMargin),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: NFIconButton(
+                size: textScaleFactor * 50.0,
+                iconSize: textScaleFactor * 30.0,
+                icon: const Icon(Icons.skip_previous_rounded),
+                onPressed: MusicPlayer.instance.playPrev,
+              ),
             ),
-          ),
+            Container(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary,
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: const Material(
+                color: Colors.transparent,
+                child: AnimatedPlayPauseButton(
+                  iconSize: 26.0,
+                  size: 70.0,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(left: buttonMargin),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: NFIconButton(
+                size: textScaleFactor * 50.0,
+                iconSize: textScaleFactor * 30.0,
+                icon: const Icon(Icons.skip_next_rounded),
+                onPressed: MusicPlayer.instance.playNext,
+              ),
+            ),
+            const SizedBox(width: buttonMargin),
+            const LoopButton(),
+          ],
         ),
-        Container(
-          padding: const EdgeInsets.only(left: buttonMargin),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: NFIconButton(
-            size: textScaleFactor * 50.0,
-            iconSize: textScaleFactor * 30.0,
-            icon: const Icon(Icons.skip_next_rounded),
-            onPressed: MusicPlayer.instance.playNext,
-          ),
-        ),
-        const SizedBox(width: buttonMargin),
-        const LoopButton(),
-      ],
+      ),
     );
   }
 }
@@ -760,62 +848,58 @@ class _InfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return Padding(
-      padding: const EdgeInsets.only(right: 5.0),
-      child: NFIconButton(
-        icon: const Icon(Icons.info_outline_rounded),
-        size: 40.0,
-        onPressed: () {
-          String songInfo = PlaybackControl.instance.currentSong
-            .toMap()
-            .toString()
-            .replaceAll(r', ', ',\n');
-          // Remove curly braces
-          songInfo = songInfo.substring(1, songInfo.length - 1);
-          ShowFunctions.instance.showAlert(
-            context,
-            title: Text(
-              l10n.songInformation,
-              textAlign: TextAlign.center,
-            ),
-            contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
-            content: PrimaryScrollController(
-              controller: ScrollController(),
-              child: Builder(
-                builder: (context) {
-                  return AppScrollbar(
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        songInfo,
-                        style: const TextStyle(fontSize: 13.0),
-                        selectionControls: NFTextSelectionControls(
-                          backgroundColor: ThemeControl.theme.colorScheme.background,
-                        ),
+    final theme = Theme.of(context);
+    return NFIconButton(
+      icon: const Icon(Icons.info_outline_rounded),
+      size: 40.0,
+      onPressed: () {
+        String songInfo = PlaybackControl.instance.currentSong.toMap().toString().replaceAll(r', ', ',\n');
+        // Remove curly braces
+        songInfo = songInfo.substring(1, songInfo.length - 1);
+        ShowFunctions.instance.showAlert(
+          context,
+          title: Text(
+            l10n.songInformation,
+            textAlign: TextAlign.center,
+          ),
+          contentPadding: defaultAlertContentPadding.copyWith(top: 4.0),
+          content: PrimaryScrollController(
+            controller: ScrollController(),
+            child: Builder(
+              builder: (context) {
+                return AppScrollbar(
+                  child: SingleChildScrollView(
+                    child: SelectableText(
+                      songInfo,
+                      style: const TextStyle(fontSize: 13.0),
+                      selectionControls: NFTextSelectionControls(
+                        backgroundColor: theme.colorScheme.background,
                       ),
                     ),
-                  );
-                }
-              ),
+                  ),
+                );
+              },
             ),
-            additionalActions: [
-              NFCopyButton(text: songInfo),
-            ],
-          );
-        },
-      ),
+          ),
+          additionalActions: [
+            CopyButton(text: songInfo),
+          ],
+        );
+      },
     );
   }
 }
 
 /// A widget that displays all information about current song
-class _TrackShowcase extends StatefulWidget {
-  const _TrackShowcase({Key? key}) : super(key: key);
+@visibleForTesting
+class TrackShowcase extends StatefulWidget {
+  const TrackShowcase({Key? key}) : super(key: key);
 
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
 }
 
-class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderStateMixin {
+class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateMixin {
   late StreamSubscription<Song> _songChangeSubscription;
   late AnimationController controller;
   late AnimationController fadeController;
@@ -823,13 +907,33 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
 
   static const defaultDuration = Duration(milliseconds: 160);
 
-  /// When `true`, should use fade animation instaed of scale.
+  /// When `true`, should use fade animation instead of scale.
   bool get useFade => playerRouteController.value == 0.0;
+
+  OverlayEntry? artOverlayEntry;
+
+  /// We need this so that color thief always can capture a color.
+  void _insertArtOverlay(Widget child) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (mounted) {
+        _removeArtOverlayEntry();
+        artOverlayEntry = OverlayEntry(
+          builder: (context) => child,
+        );
+        AppRouter.instance.artOverlayKey.currentState!.insert(artOverlayEntry!);
+      }
+    });
+  }
+
+  void _removeArtOverlayEntry() {
+    artOverlayEntry?.remove();
+    artOverlayEntry = null;
+  }
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController( 
+    controller = AnimationController(
       vsync: this,
       duration: defaultDuration,
     );
@@ -850,12 +954,14 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
   }
 
   void _handleStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
+    if (status == AnimationStatus.completed) {
       controller.reverse();
+    }
   }
 
   @override
   void dispose() {
+    _removeArtOverlayEntry();
     controller.dispose();
     fadeController.dispose();
     _songChangeSubscription.cancel();
@@ -876,7 +982,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
       end: 1.0,
     ).animate(CurvedAnimation(
       curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
-      reverseCurve:const Interval(0.5, 1.0, curve: Curves.easeInCubic),
+      reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeInCubic),
       parent: fadeController,
     ));
     return FadeTransition(
@@ -899,6 +1005,7 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
       parent: controller,
     ));
     final currentSong = PlaybackControl.instance.currentSong;
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -906,13 +1013,17 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: NFMarquee(
             key: ValueKey(currentSong),
-            fontWeight: FontWeight.w900,
+            textStyle: const TextStyle(fontWeight: FontWeight.w900),
+            alignment: Alignment.center,
             text: currentSong.title,
             fontSize: 20.0,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 2.0, bottom: 30.0),
+          padding: EdgeInsets.only(
+            top: 2.0,
+            bottom: 30.0 / textScaleFactor,
+          ),
           child: ArtistWidget(
             artist: currentSong.artist,
             textStyle: const TextStyle(
@@ -938,15 +1049,29 @@ class _TrackShowcaseState extends State<_TrackShowcase> with TickerProviderState
                   source: ContentArtSource.song(currentSong),
                 );
                 if (art == null ||
-                    controller.status == AnimationStatus.reverse || controller.status == AnimationStatus.dismissed ||
+                    controller.status == AnimationStatus.reverse ||
+                    controller.status == AnimationStatus.dismissed ||
                     useFade) {
                   art = newArt;
+                  _insertArtOverlay(ContentArtLoadBuilder(
+                    builder: (onLoad) => ContentArt.playerRoute(
+                      key: ValueKey(currentSong),
+                      size: constraints.maxWidth,
+                      loadAnimationDuration: Duration.zero,
+                      source: ContentArtSource.song(currentSong),
+                      onLoad: onLoad,
+                    ),
+                  ));
                 }
+
                 return ScaleTransition(
                   scale: animation,
                   child: Stack(
                     children: [
-                      Opacity(opacity: useFade ? 0.0 : 1.0, child: newArt),
+                      Opacity(
+                        opacity: useFade ? 0.0 : 1.0,
+                        child: newArt,
+                      ),
                       _fade(art!),
                     ],
                   ),
@@ -969,9 +1094,8 @@ class _SaveQueueAsPlaylistAction extends StatefulWidget {
 
 class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> with TickerProviderStateMixin {
   Future<void> _handleTap() async {
-    
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     final songs = QueueControl.instance.state.current.songs;
     final playlist = await ShowFunctions.instance.showCreatePlaylist(this, context);
 
@@ -1007,9 +1131,10 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
               title: Text(l10n.saved, style: TextStyle(fontSize: 15.0, color: theme.colorScheme.onPrimary)),
               trailing: AppButton(
                 text: l10n.view,
+                horizontalPadding: 20.0,
                 onPressed: () {
                   key.currentState!.close();
-                  HomeRouter.instance.goto(HomeRoutes.factory.content<Playlist>(playlist));
+                  HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
                 },
               ),
             ),

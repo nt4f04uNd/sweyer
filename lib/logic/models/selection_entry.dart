@@ -18,36 +18,23 @@ class SelectionEntry<T extends Content> {
     required int index,
     required BuildContext context,
   }) {
-    return contentPick<T, ValueGetter<SelectionEntry<T>>>(
-      contentType: content.runtimeType,
-      song: () {
+    switch (content.type) {
+      case ContentType.song:
         final song = content as Song;
         return SelectionEntry<Song>(
           data: content,
-          index: selectionRouteOf(context)
-            ? ContentControl.instance.state.allSongs.getIndex(song)
-            : index,
-          origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin
-            ? song.origin
-            : null,
+          index: selectionRouteOf(context) ? ContentControl.instance.state.allSongs.getIndex(song) : index,
+          origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin ? song.origin : null,
         ) as SelectionEntry<T>;
-      },
-      album: () => SelectionEntry<Album>(
-        index: index,
-        data: content as Album,
-        origin: null,
-      ) as SelectionEntry<T>,
-      playlist: () => SelectionEntry<Playlist>(
-        index: index,
-        data: content as Playlist,
-        origin: null,
-      ) as SelectionEntry<T>,
-      artist: () => SelectionEntry<Artist>(
-        index: index,
-        data: content as Artist,
-        origin: null,
-      ) as SelectionEntry<T>,
-    )();
+      case ContentType.album:
+      case ContentType.playlist:
+      case ContentType.artist:
+        return SelectionEntry<T>(
+          index: index,
+          data: content,
+          origin: null,
+        );
+    }
   }
 
   /// The content data.
@@ -59,7 +46,7 @@ class SelectionEntry<T extends Content> {
   /// Usually the selection controller is created per one screen with one list.
   /// In this case the index can be taken just as index of item in the list.
   /// Aside from that, for this case when the controller is in selection any
-  /// sorting or reordering operatins must not happen, otherwise might mixup and
+  /// sorting or reordering operations must not happen, otherwise might mix up and
   /// the correct order might be lost.
   ///
   /// But in some cases it's not enough to imply index from the list and we
@@ -68,7 +55,7 @@ class SelectionEntry<T extends Content> {
   ///
   /// See also:
   ///  * [SelectableState.selectionRoute] and [SongTile] state for example of custom indexing
-  ///  * [ContentUtils.selectionSortAndPack], which is the default way of sorting
+  ///  * [ContentUtils.selectionPackAndSort], which is the default way of sorting
   ///    the content for further usage
   final int index;
 
@@ -88,9 +75,6 @@ class SelectionEntry<T extends Content> {
     // if (other.runtimeType != runtimeType)
     //   return false;
 
-    return other is SelectionEntry 
-        && other.data == data
-        && other.index == index
-        && other.origin == origin;
+    return other is SelectionEntry && other.data == data && other.index == index && other.origin == origin;
   }
 }

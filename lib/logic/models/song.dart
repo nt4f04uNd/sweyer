@@ -1,51 +1,61 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Represends a song.
+/// Represents a song.
 ///
 /// Songs are always playable, trashed or pending songs on Android Q are excluded.
 class Song extends Content {
+  @override
+  ContentType get type => ContentType.song;
+
   /// This is the main song ID used for comparisons.
-  /// 
+  ///
   /// Initially, this is equal to the source song [sourceId], but if song is
   /// found to be duplicated within some queue and this queue is currently
   /// being processed in some way (for example, played), it might be altered
   /// with a negative value.
   @override
   int id;
+
   /// Album name.
   final String? album;
   final int? albumId;
   final String artist;
   final int artistId;
-  // TODO: vodoo shenanigans on android versions with this (and other places where i can)
+  // TODO: Voodoo shenanigans on android versions with this (and other places where i can)
   final String? genre;
   final int? genreId;
   @override
   final String title;
+
   /// The track number of this song on the album, if any.
   final String? track;
+
+  /// Numeric track position of this song on the album, if any.
+  late int? trackPosition = _parseTrackPosition(track);
   final int dateAdded;
   final int dateModified;
+
   /// Duration in milliseconds
   final int duration;
   final int size;
   final String? data;
 
-  /// Indicates that user marked this song as favorite.
+  /// Whether the content was marked as favorite in MediaStore.
   ///
-  /// In native only available starting from Android R, below this favorite logic
-  /// is implemented in app itself.
-  final bool? isFavorite;
+  /// Only available starting from Android R (30), below this is always `null`.
+  ///
+  /// See also:
+  ///  * [isFavorite] getter
+  final bool? isFavoriteInMediaStore;
 
   /// Generation number at which metadata for this media item was first inserted.
-  /// 
+  ///
   /// Available starting from Android R, in lower is `null`.
   final int? generationAdded;
 
   /// Generation number at which metadata for this media item was last changed.
-  /// 
+  ///
   /// Available starting from Android R, in lower is `null`.
   final int? generationModified;
 
@@ -59,7 +69,7 @@ class Song extends Content {
   /// Index of a duplicate song within its duplicates in its queue.
   ///
   /// For example if there are 4 duplicates a song in the queue,
-  /// and the song is inserted to the end, its duplication index will be 
+  /// and the song is inserted to the end, its duplication index will be
   /// last `index + 1`, i.e `3 + 1 = 4`.
   ///
   /// Set by [DuplicatingSongOriginMixin]s.
@@ -71,18 +81,15 @@ class Song extends Content {
   /// Not copied with [copyWith].
   IdMap? idMap;
 
-  /// An icon for this content type.
-  static const icon = Icons.music_note_rounded;
-
   @override
   List<Object?> get props => [id];
 
   /// Returns source song ID.
   int get sourceId => ContentUtils.getSourceId(
-    id,
-    origin: origin,
-    idMap: idMap,
-  );
+        id,
+        origin: origin,
+        idMap: idMap,
+      );
 
   /// Returns the song artist.
   Artist getArtist() => ContentControl.instance.state.artists.firstWhere((el) => el.id == artistId);
@@ -111,7 +118,7 @@ class Song extends Content {
     required this.duration,
     required this.size,
     required this.data,
-    required this.isFavorite,
+    required this.isFavoriteInMediaStore,
     required this.generationAdded,
     required this.generationModified,
     this.duplicationIndex,
@@ -126,7 +133,7 @@ class Song extends Content {
     return MediaItem(
       id: sourceId.toString(),
       uri: contentUri,
-      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       album: getAlbum()?.album,
       title: title,
@@ -155,7 +162,7 @@ class Song extends Content {
       duration: map['duration'] as int,
       size: map['size'] as int,
       data: map['data'] as String?,
-      isFavorite: map['isFavorite'] as bool?,
+      isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool?,
       generationAdded: map['generationAdded'] as int?,
       generationModified: map['generationModified'] as int?,
     );
@@ -163,24 +170,36 @@ class Song extends Content {
 
   @override
   Map<String, dynamic> toMap() => <String, dynamic>{
-      'id': id,
-      'album': album,
-      'albumId': albumId,
-      'artist': artist,
-      'artistId': artistId,
-      'genre': genre,
-      'genreId': genreId,
-      'title': title,
-      'track': track,
-      'dateAdded': dateAdded,
-      'dateModified': dateModified,
-      'duration': duration,
-      'size': size,
-      'data': data,
-      'isFavorite': isFavorite,
-      'generationAdded': generationAdded,
-      'generationModified': generationModified,
-    };
+        'id': id,
+        'album': album,
+        'albumId': albumId,
+        'artist': artist,
+        'artistId': artistId,
+        'genre': genre,
+        'genreId': genreId,
+        'title': title,
+        'track': track,
+        'dateAdded': dateAdded,
+        'dateModified': dateModified,
+        'duration': duration,
+        'size': size,
+        'data': data,
+        'isFavoriteInMediaStore': isFavoriteInMediaStore,
+        'generationAdded': generationAdded,
+        'generationModified': generationModified,
+      };
+
+  /// Try to parse the numeric album track from the text [position].
+  int? _parseTrackPosition(String? position) {
+    if (position == null) {
+      return null;
+    }
+    int slashPosition = position.indexOf('/');
+    if (slashPosition != -1) {
+      position = position.substring(0, slashPosition);
+    }
+    return int.tryParse(position.trim());
+  }
 }
 
 /// The `copyWith` function type for [Song].
@@ -200,7 +219,7 @@ abstract class SongCopyWith {
     int duration,
     int size,
     String? data,
-    bool? isFavorite,
+    bool? isFavoriteInMediaStore,
     int? generationAdded,
     int? generationModified,
     int? duplicationIndex,
@@ -234,7 +253,7 @@ class _SongCopyWith extends SongCopyWith {
     Object duration = _undefined,
     Object size = _undefined,
     Object? data = _undefined,
-    Object? isFavorite = _undefined,
+    Object? isFavoriteInMediaStore = _undefined,
     Object? generationAdded = _undefined,
     Object? generationModified = _undefined,
     Object? duplicationIndex = _undefined,
@@ -255,7 +274,8 @@ class _SongCopyWith extends SongCopyWith {
       duration: duration == _undefined ? value.duration : duration as int,
       size: size == _undefined ? value.size : size as int,
       data: data == _undefined ? value.data : data as String?,
-      isFavorite: isFavorite == _undefined ? value.isFavorite : isFavorite as bool?,
+      isFavoriteInMediaStore:
+          isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool?,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
       generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
       duplicationIndex: duplicationIndex == _undefined ? value.duplicationIndex : duplicationIndex as int?,

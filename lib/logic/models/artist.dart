@@ -1,16 +1,15 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Artist extends SongOrigin {
+  @override
+  ContentType get type => ContentType.artist;
+
   @override
   final int id;
   final String artist;
   final int numberOfAlbums;
   final int numberOfTracks;
-
-  /// An icon for this content type.
-  static const icon = Icons.person_rounded;
 
   @override
   List<Object> get props => [id];
@@ -18,7 +17,7 @@ class Artist extends SongOrigin {
   @override
   String get title => artist;
 
-  /// Returns songs for this artst.
+  /// Returns songs for this artist.
   @override
   List<Song> get songs {
     return ContentControl.instance.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
@@ -32,11 +31,9 @@ class Artist extends SongOrigin {
   @override
   int get length => numberOfTracks;
 
-  /// Returns albums for this artst.
+  /// Returns albums for this artist.
   List<Album> get albums {
-    return ContentControl.instance.state.albums.values
-      .where((el) => el.artistId == id)
-      .toList();
+    return ContentControl.instance.state.albums.values.where((el) => el.artistId == id).toList();
   }
 
   /// Whether this artist represents an unknown artist.
@@ -59,7 +56,7 @@ class Artist extends SongOrigin {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       title: title,
       artist: null,
@@ -89,11 +86,11 @@ class Artist extends SongOrigin {
 
   @override
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'artist': artist,
-    'numberOfAlbums': numberOfAlbums,
-    'numberOfTracks': numberOfTracks,
-  };
+        'id': id,
+        'artist': artist,
+        'numberOfAlbums': numberOfAlbums,
+        'numberOfTracks': numberOfTracks,
+      };
 }
 
 /// The `copyWith` function type for [Artist].

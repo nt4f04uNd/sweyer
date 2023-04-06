@@ -8,4 +8,4 @@ if not defined in_subprocess (cmd /k set in_subprocess=y ^& %0 %*) & exit )
 cd %~dp0
 cd ..
 
-flutter build apk --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
+fvm flutter build apk --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols

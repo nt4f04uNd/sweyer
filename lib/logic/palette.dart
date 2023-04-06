@@ -1,13 +1,12 @@
-import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
-Future<PaletteGenerator> createPalette(ui.Image image) => PaletteGenerator.fromImage(
-  image,
-  maximumColorCount: 50,
-);
+Future<PaletteGenerator> createPalette(EncodedImage image) => PaletteGenerator.fromByteData(
+      image,
+      maximumColorCount: 100,
+    );
 
 /// A widget that draws the swatches for the [PaletteGenerator] it is given,
 /// and shows the selected target colors.
@@ -53,10 +52,7 @@ class PaletteSwatches extends StatelessWidget {
   }
 }
 
-
 const Color _kBackgroundColor = Color(0xffa0a0a0);
-const Color _kSelectionRectangleBackground = Color(0x15000000);
-const Color _kSelectionRectangleBorder = Color(0x80000000);
 const Color _kPlaceholderColor = Color(0x80404040);
 
 /// A small square of color with an optional label.
@@ -71,16 +67,16 @@ class PaletteSwatch extends StatelessWidget {
     Key? key,
     this.color,
     this.label,
-  }) : paletteColor = null,
-       super(key: key);
+  })  : paletteColor = null,
+        super(key: key);
 
   const PaletteSwatch.forPalette({
     Key? key,
     PaletteColor? color,
     this.label,
-  }) : paletteColor = color,
-       color = null,
-       super(key: key);
+  })  : paletteColor = color,
+        color = null,
+        super(key: key);
 
   /// The color of the swatch.
   final Color? color;
@@ -100,40 +96,39 @@ class PaletteSwatch extends StatelessWidget {
     final HSLColor backgroundAsHsl = HSLColor.fromColor(_kBackgroundColor);
     final double colorDistance = math.sqrt(
       math.pow(hslColor.saturation - backgroundAsHsl.saturation, 2.0) +
-      math.pow(hslColor.lightness - backgroundAsHsl.lightness, 2.0)
+          math.pow(hslColor.lightness - backgroundAsHsl.lightness, 2.0),
     );
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: color == null
-        ? const Placeholder(
-            fallbackWidth: 34.0,
-            fallbackHeight: 20.0,
-            color: Color(0xff404040),
-            strokeWidth: 2.0,
-          )
-        : Container(
-            decoration: BoxDecoration(
-              color: color,
-              border: Border.all(
-                width: 1.0,
-                color: _kPlaceholderColor,
-                style: colorDistance < 0.2
-                  ? BorderStyle.solid
-                  : BorderStyle.none,
+          ? const Placeholder(
+              fallbackWidth: 34.0,
+              fallbackHeight: 20.0,
+              color: Color(0xff404040),
+              strokeWidth: 2.0,
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: color,
+                border: Border.all(
+                  width: 1.0,
+                  color: _kPlaceholderColor,
+                  style: colorDistance < 0.2 ? BorderStyle.solid : BorderStyle.none,
+                ),
               ),
+              width: 34.0,
+              height: 20.0,
             ),
-            width: 34.0,
-            height: 20.0,
-          ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final color = _buildSwatch(this.color ?? paletteColor?.color);
-    if (label == null)
+    if (label == null) {
       return color;
+    }
     final titleText = _buildSwatch(paletteColor?.titleTextColor);
     final bodyText = _buildSwatch(paletteColor?.bodyTextColor);
     return Container(

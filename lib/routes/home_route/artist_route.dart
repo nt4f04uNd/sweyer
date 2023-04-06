@@ -1,17 +1,13 @@
 import 'dart:async';
-// import 'dart:ui' as ui;
 import 'dart:math' as math;
 
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 class ArtistRoute extends StatefulWidget {
-  ArtistRoute({Key? key, required this.artist}) : super(key: key);
+  const ArtistRoute({Key? key, required this.artist}) : super(key: key);
 
   final Artist artist;
 
@@ -34,7 +30,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
   static const _buttonSectionBottomPadding = 12.0;
   static const _buttonSectionHeight = _buttonSectionButtonHeight + _buttonSectionBottomPadding;
 
-  static const _albumsSectionHeight = 280.0;
+  static const _sectionTitleHeight = 48.0;
 
   /// Amount of pixels user always can scroll.
   double get _alwaysCanScrollExtent => (_artScrollExtent + _buttonSectionHeight).ceilToDouble();
@@ -71,12 +67,12 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     scrollController.addListener(_handleScroll);
 
     initSelectionController(() => ContentSelectionController.create(
-      vsync: AppRouter.instance.navigatorKey.currentState!,
-      context: context,
-      closeButton: true,
-      ignoreWhen: () => playerRouteController.opened,
-    ));
-  
+          vsync: AppRouter.instance.navigatorKey.currentState!,
+          context: context,
+          closeButton: true,
+          ignoreWhen: () => playerRouteController.opened,
+        ));
+
     _contentChangeSubscription = ContentControl.instance.onContentChange.listen(_handleContentChange);
   }
 
@@ -89,7 +85,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     super.dispose();
   }
 
-   void _handleContentChange(void event) {
+  void _handleContentChange(void event) {
     setState(() {
       _updateContent();
     });
@@ -100,7 +96,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     albums = widget.artist.albums;
     if (songs.isEmpty && albums.isEmpty) {
       if (postFrame) {
-        WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           if (mounted) {
             _quitBecauseNotFound();
           }
@@ -128,17 +124,13 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     }
   }
 
-  PaletteGenerator? palette;
-  static Future<PaletteGenerator> _isolate(image) => createPalette(image);
-
   Widget _buildInfo() {
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     final artSize = mediaQuery.size.width;
     final summary = ContentUtils.joinDot([
-      l10n.contentsPluralWithCount<Song>(songs.length),
-      if (albums.isNotEmpty)
-        l10n.contentsPluralWithCount<Album>(albums.length),
+      l10n.contentsPlural(ContentType.song, songs.length),
+      if (albums.isNotEmpty) l10n.contentsPlural(ContentType.album, albums.length),
       ContentUtils.bulkDuration(songs),
     ]);
     return Column(
@@ -155,22 +147,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                       assetHighRes: true,
                       size: artSize,
                       borderRadius: 0.0,
-                      defaultArtIcon: Artist.icon,
+                      defaultArtIcon: ContentType.artist.icon,
                       defaultArtIconScale: 4.5,
-                      // onLoad: (image) async {
-                        // palette = await compute<ui.Image, PaletteGenerator>(_isolate, image);
-                        // palette = await _isolate(image);
-                        // if (mounted) {
-                        //   WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                        //     if (mounted) {
-                        //       setState(() {});
-                        //       _debugOverlay = DebugOverlay(
-                        //         (context) => PaletteSwatches(generator: palette),
-                        //       );
-                        //     }
-                        //   });
-                        // }
-                      // },
                       source: ContentArtSource.artist(widget.artist),
                     ),
                     Positioned.fill(
@@ -180,7 +158,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                             colors: [theme.colorScheme.background.withOpacity(0.0), theme.colorScheme.background],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                          )
+                          ),
                         ),
                       ),
                     ),
@@ -189,23 +167,26 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                       left: 13.0,
                       right: 13.0,
                       child: Align(
-                        alignment: Alignment.bottomCenter, 
+                        alignment: Alignment.bottomCenter,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              ContentUtils.localizedArtist(widget.artist.artist, l10n),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                height: 1.0,
-                                fontWeight: FontWeight.w800,
-                                color: Constants.Theme.contrast.auto,
-                                fontSize: 36.0,
+                            Flexible(
+                              child: Text(
+                                ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  height: 1.0,
+                                  fontWeight: FontWeight.w800,
+                                  color: theme.appThemeExtension.contrast,
+                                  fontSize: 36.0,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 7.0),
                             Text(
                               summary,
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 16.0,
                                 height: 1.0,
@@ -270,22 +251,24 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     final l10n = getl10n(context);
     mediaQuery = MediaQuery.of(context);
+
+    final albumsSectionHeight = kPersistentQueueGridTileHeight(ContentType.album, context);
 
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
           /// The height to add at the end of the scroll view to make the top info part of the route
           /// always be fully scrollable, even if there's not enough content for that.
-          var additionalHeight = constraints.maxHeight -
-            _fullAppBarHeight -
-            kSongTileHeight * math.min(songs.length, 5) -
-            48.0;
+          var additionalHeight = constraints.maxHeight - //
+              _fullAppBarHeight - //
+              kSongTileHeight(context) * math.min(songs.length, 5) - //
+              _sectionTitleHeight;
 
           if (albums.isNotEmpty) {
-            additionalHeight -= _albumsSectionHeight + 48.0;
+            additionalHeight -= albumsSectionHeight + _sectionTitleHeight;
           }
 
           return ScrollConfiguration(
@@ -304,16 +287,20 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                             child: _buildInfo(),
                           ),
                         ),
-
                         if (songs.isNotEmpty)
                           SliverToBoxAdapter(
-                            child: ContentSection<Song>(
+                            child: ContentSection(
+                              contentType: ContentType.song,
                               list: songs,
                               selectionController: selectionController,
                               maxPreviewCount: 5,
-                              onHeaderTap: selectionController.inSelection && !selectionRoute || songs.length <= 5 ? null : () {
-                                HomeRouter.of(context).goto(HomeRoutes.factory.artistContent<Song>(widget.artist, songs));
-                              },
+                              onHeaderTap: selectionController.inSelection && !selectionRoute || songs.length <= 5
+                                  ? null
+                                  : () {
+                                      HomeRouter.of(context).goto(
+                                        HomeRoutes.factory.artistContent<Song>(widget.artist, songs),
+                                      );
+                                    },
                               contentTileTapHandler: () {
                                 QueueControl.instance.setOriginQueue(
                                   origin: widget.artist,
@@ -322,17 +309,21 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               },
                             ),
                           ),
-
                         if (albums.isNotEmpty)
                           MultiSliver(
                             children: [
-                              ContentSection<Album>.custom(
+                              ContentSection.custom(
+                                contentType: ContentType.album,
                                 list: albums,
-                                onHeaderTap: selectionController.inSelection && !selectionRoute ? null : () {
-                                  HomeRouter.of(context).goto(HomeRoutes.factory.artistContent<Album>(widget.artist, albums));
-                                },
+                                onHeaderTap: selectionController.inSelection && !selectionRoute
+                                    ? null
+                                    : () {
+                                        HomeRouter.of(context).goto(
+                                          HomeRoutes.factory.artistContent<Album>(widget.artist, albums),
+                                        );
+                                      },
                                 child: SizedBox(
-                                  height: _albumsSectionHeight,
+                                  height: albumsSectionHeight,
                                   child: ListView.separated(
                                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                     scrollDirection: Axis.horizontal,
@@ -342,12 +333,13 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                                         queue: albums[index],
                                         selectionIndex: index,
                                         selected: selectionController.data
-                                          .firstWhereOrNull((el) => el.data == albums[index]) != null,
+                                                .firstWhereOrNull((el) => el.data == albums[index]) !=
+                                            null,
                                         selectionController: selectionController,
                                         grid: true,
                                       );
                                     },
-                                    separatorBuilder: (BuildContext context, int index) { 
+                                    separatorBuilder: (BuildContext context, int index) {
                                       return const SizedBox(width: 16.0);
                                     },
                                   ),
@@ -355,7 +347,6 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               ),
                             ],
                           ),
-                        
                         if (additionalHeight > 0)
                           SliverToBoxAdapter(
                             child: Container(height: additionalHeight),
@@ -376,7 +367,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           ).animate(backButtonAnimation);
 
                           final splashColorAnimation = ColorTween(
-                            begin: Constants.Theme.glowSplashColorOnContrast.auto,
+                            begin: theme.appThemeExtension.glowSplashColorOnContrast,
                             end: theme.splashColor,
                           ).animate(backButtonAnimation);
 
@@ -398,8 +389,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           automaticallyImplyLeading: false,
                           titleSpacing: 0.0,
                           backgroundColor: appBarController.isDismissed
-                            ? theme.colorScheme.background
-                            : theme.colorScheme.background.withOpacity(0.0),
+                              ? theme.colorScheme.background
+                              : theme.colorScheme.background.withOpacity(0.0),
                           title: AnimationSwitcher(
                             animation: CurvedAnimation(
                               curve: Curves.easeOutCubic,
@@ -407,14 +398,12 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               parent: selectionController.animation,
                             ),
                             child1: AnimatedOpacity(
-                              opacity: _appBarTitleVisible
-                                ? 1.0
-                                : 0.0,
+                              opacity: _appBarTitleVisible ? 1.0 : 0.0,
                               curve: Curves.easeOut,
                               duration: const Duration(milliseconds: 400),
                               child: RepaintBoundary(
-                                child: Text(
-                                  ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                                child: AppBarTitleMarquee(
+                                  text: ContentUtils.localizedArtist(widget.artist.artist, l10n),
                                 ),
                               ),
                             ),
@@ -424,10 +413,10 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           bottom: PreferredSize(
                             preferredSize: const Size.fromHeight(AppBarBorder.height),
                             child: scrollController.offset <= _artScrollExtent
-                              ? const SizedBox(height: 1)
-                              : AppBarBorder(
-                                  shown: scrollController.offset > _alwaysCanScrollExtent,
-                                ),
+                                ? const SizedBox(height: 1)
+                                : AppBarBorder(
+                                    shown: scrollController.offset > _alwaysCanScrollExtent,
+                                  ),
                           ),
                         ),
                       ),

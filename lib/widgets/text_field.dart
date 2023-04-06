@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class AppTextField extends StatefulWidget {
-  AppTextField({
+  const AppTextField({
     Key? key,
     this.onSubmit,
     this.autofocus = false,
     this.isDense = false,
+    this.maxLines = 1,
     this.textStyle,
     this.hintStyle,
     this.contentPadding,
@@ -17,6 +18,7 @@ class AppTextField extends StatefulWidget {
   final ValueSetter<String>? onSubmit;
   final bool autofocus;
   final bool isDense;
+  final int maxLines;
   final TextStyle? textStyle;
   final TextStyle? hintStyle;
   final EdgeInsetsGeometry? contentPadding;
@@ -29,7 +31,7 @@ class AppTextField extends StatefulWidget {
 
 class _AppTextFieldState extends State<AppTextField> {
   @override
-  void dispose() { 
+  void dispose() {
     widget.onDispose?.call();
     super.dispose();
   }
@@ -37,14 +39,14 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     return TextField(
       selectionControls: NFTextSelectionControls(),
       controller: widget.controller,
       autofocus: widget.autofocus,
-      style: theme.textTheme.headline6?.merge(widget.textStyle)
-        ?? widget.textStyle,
-      maxLines: 1,
+      style: theme.textTheme.headline6?.merge(widget.textStyle) ?? widget.textStyle,
+      minLines: 1,
+      maxLines: widget.maxLines,
       onSubmitted: widget.onSubmit,
       decoration: InputDecoration(
         border: InputBorder.none,

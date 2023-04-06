@@ -1,3 +1,52 @@
+[@Abestanis]: https://github.com/Abestanis
+
+## 1.0.8
+
+All the work related to this version can be found in this [project](https://github.com/users/nt4f04uNd/projects/4/views/1)
+
+### Enhancements:
+- [Added favorites](https://github.com/nt4f04uNd/sweyer/pull/34) **(@nt4f04und)**
+  - Also [allow to keep favorites when enabling/disabling using the MediaStore favorites](https://github.com/nt4f04uNd/sweyer/pull/71) by **[@Abestanis]**
+- [Added "Player color theme" setting](https://github.com/nt4f04uNd/sweyer/pull/79) **(@nt4f04und)**
+- [Added German language support](https://github.com/nt4f04uNd/sweyer/pull/25) **([@Abestanis])**
+- [Changed notification stop icon](https://github.com/nt4f04uNd/sweyer/pull/56) **([@Abestanis])**
+- [Sort album tracks](https://github.com/nt4f04uNd/sweyer/pull/72) **([@Abestanis])**
+- [Add setting to disable back button exit confirmation on home page](https://github.com/nt4f04uNd/sweyer/pull/26) **([@Abestanis])**
+- [Hide gear button on selection screen](https://github.com/nt4f04uNd/sweyer/pull/50) **([@Abestanis])**
+
+### Bug fixes:
+- [Fixed back button on dialogs](https://github.com/nt4f04uNd/sweyer/pull/58) **([@Abestanis])**
+- [Fix splash screen animation](https://github.com/nt4f04uNd/sweyer/pull/30) **([@Abestanis])**
+- [Fix design bug on search page](https://github.com/nt4f04uNd/sweyer/pull/29) **([@Abestanis])**
+- [Fix visual bug in song tiles (1)](https://github.com/nt4f04uNd/sweyer/pull/51) **([@Abestanis])**
+- [Fix visual bug in song tiles (2)](https://github.com/nt4f04uNd/sweyer/pull/52) **([@Abestanis])**
+- [Fix visual bug in song tiles (3)](https://github.com/nt4f04uNd/sweyer/pull/59) **([@Abestanis])**
+- [Fix opening the search page from a search query](https://github.com/nt4f04uNd/sweyer/pull/55) **([@Abestanis])**
+- [Fix not updating the player notification when stopping playback](https://github.com/nt4f04uNd/sweyer/pull/57) **([@Abestanis])**
+- [Fix layout with various text scale factors](https://github.com/nt4f04uNd/sweyer/issues/66)  **([@Abestanis], @nt4f04und)**
+- [Fix selection animations](https://github.com/nt4f04uNd/sweyer/pull/69) **([@Abestanis])**
+- [Add marquee in some places where text is very long](https://github.com/nt4f04uNd/sweyer/pull/82) **(@nt4f04und)**
+- [Show scrollbars in places where need to indicate to user that area is scrollable (for example, selection actions bar)](https://github.com/nt4f04uNd/sweyer/pull/82) **(@nt4f04und)**
+- [Fix - content art for playlist now shows correct default icon for songs without content art](https://github.com/nt4f04uNd/sweyer/pull/82) **(@nt4f04und)**
+- [Fix layout related to max lines in album/playlist pages](https://github.com/nt4f04uNd/sweyer/pull/82) **(@nt4f04und)**
+- Some debug features
+- Other bug fixes
+
+### Not important for users:
+  - [Add bug and feature request templates to issues](https://github.com/nt4f04uNd/sweyer/pull/39) **([@Abestanis])**
+  - [Add readme Google Play store badge](https://github.com/nt4f04uNd/sweyer/pull/64) **([@Abestanis])**
+  - [Unit and golden tests](https://github.com/nt4f04uNd/sweyer/pull/21) **(@nt4f04und, [@Abestanis])**
+  - [Refactor the content type system](https://github.com/nt4f04uNd/sweyer/pull/70) **([@Abestanis])**
+  - [Flutter 3 migration](https://github.com/nt4f04uNd/sweyer/pull/61) **(@nt4f04und)**
+  - [Rewrite theme with ThemeExtensions](https://github.com/nt4f04uNd/sweyer/issues/79) **(@nt4f04und)**
+  - CI
+    - [Setup CI](https://github.com/nt4f04uNd/sweyer/pull/21) **(@nt4f04und)**
+    - [Golden test files update workflow](https://github.com/nt4f04uNd/sweyer/pull/35) **([@Abestanis])**
+  - [Codecov](https://github.com/nt4f04uNd/sweyer/pull/32) [![Codecov](https://codecov.io/gh/nt4f04uNd/sweyer/branch/master/graph/badge.svg)](https://codecov.io/gh/nt4f04uNd/sweyer) **([@Abestanis])**
+  - [Use Lottie instead of Flare and update some dependencies](https://github.com/nt4f04uNd/sweyer/pull/63) **([@Abestanis])**
+  - [Optimize Android assets](https://github.com/nt4f04uNd/sweyer/pull/68) **([@Abestanis])**
+  - [Fix typos](https://github.com/nt4f04uNd/sweyer/pull/65) **([@Abestanis])**
+
 ## 1.0.7
 
 - Fix bug that localization didn't fallback to English as a default language
@@ -36,7 +85,7 @@
   was saved only for the current app session, when it was added, and was not restored.
 - Optimized scrollbar and listviews
 - Became media browser service, support for Android Auto
-- Fixed that album arts were not recached (below Android 10)
+- Fixed that album arts were not re-cached (below Android 10)
 - Refactored a lot of code and fixed a lot of other bugs
 - Changed player backend (non-UX)
 
@@ -45,7 +94,7 @@
 - localization (ru, en)
 - revamped design, changed logo, some fancy animations
 - ability to change primary color in theme settings
-- bottom bar is now swipable
+- bottom bar is now swipeable
 - sidebar can be swiped out from any place on the screen
 - albums
 - queue system
@@ -55,3 +104,4 @@
 
 - basic playback
 - dark and light theme
+

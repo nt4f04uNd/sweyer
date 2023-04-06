@@ -1,8 +1,11 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
+import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Album extends PersistentQueue {
+  @override
+  ContentType get type => ContentType.album;
+
   final String album;
   final String? albumArt;
   final String artist;
@@ -11,23 +14,19 @@ class Album extends PersistentQueue {
   final int? lastYear;
   final int numberOfSongs;
 
-  /// An icon for this content type.
-  static const icon = Icons.album_rounded;
-
   @override
   String get title => album;
 
   /// Returns songs that belong to this album.
   @override
   List<Song> get songs {
-    return ContentControl.instance.state.allSongs.songs
-      .fold<List<Song>>([], (prev, el) {
-        if (el.albumId == id) {
-          prev.add(el.copyWith(origin: this));
-        }
-        return prev;
-      })
-      .toList();
+    return ContentControl.instance.getContent(ContentType.song).fold<List<Song>>([], (prev, el) {
+      if (el.albumId == id) {
+        prev.add(el.copyWith(origin: this));
+      }
+      return prev;
+    })
+      ..sort(_compareSongs);
   }
 
   @override
@@ -38,21 +37,15 @@ class Album extends PersistentQueue {
 
   /// Gets album normalized year.
   int get year {
-    return lastYear == null || lastYear! < 1000
-      ? DateTime.now().year
-      : lastYear!;
+    return lastYear == null || lastYear! < 1000 ? clock.now().year : lastYear!;
   }
 
-  Song get firstSong {
-    return ContentControl.instance.state.allSongs.songs.firstWhere((el) => el.albumId == id);
-  }
-
-  /// Returns string in format `album name • year`. 
+  /// Returns string in format `album name • year`.
   String get nameDotYear {
     return ContentUtils.appendYearWithDot(album, year);
   }
 
-  /// Returns string in format `Album • year`. 
+  /// Returns string in format `Album • year`.
   String albumDotName(AppLocalizations l10n) {
     return ContentUtils.appendYearWithDot(l10n.album, year);
   }
@@ -79,7 +72,7 @@ class Album extends PersistentQueue {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       title: album,
       artist: ContentUtils.localizedArtist(artist, staticl10n),
@@ -113,15 +106,22 @@ class Album extends PersistentQueue {
 
   @override
   Map<String, dynamic> toMap() => <String, dynamic>{
-      'id': id,
-      'album': album,
-      'albumArt': albumArt,
-      'artist': artist,
-      'artistId': artistId,
-      'firstYear': firstYear,
-      'lastYear': lastYear,
-      'numberOfSongs': numberOfSongs,
-    };
+        'id': id,
+        'album': album,
+        'albumArt': albumArt,
+        'artist': artist,
+        'artistId': artistId,
+        'firstYear': firstYear,
+        'lastYear': lastYear,
+        'numberOfSongs': numberOfSongs,
+      };
+
+  /// Compare [song1] with [song2]. This can be used to sort the tracks of the album.
+  int _compareSongs(Song song1, Song song2) => song1.trackPosition == song2.trackPosition
+      ? song1.title.compareTo(song2.title)
+      : song2.trackPosition == null
+          ? -1
+          : song1.trackPosition?.compareTo(song2.trackPosition!) ?? 1;
 }
 
 /// The `copyWith` function type for [Album].

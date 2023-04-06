@@ -1,8 +1,9 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 export 'artist_content_route.dart';
 export 'artist_route.dart';
@@ -23,8 +24,9 @@ class _InitialRouteState extends State<InitialRoute> {
 
   void _animateNotMainUi() {
     if (_onTop && playerRouteController.value == 0.0) {
-      SystemUiStyleController.animateSystemUiOverlay(
-        to: Constants.UiTheme.black.auto,
+      final theme = Theme.of(context);
+      SystemUiStyleController.instance.animateSystemUiOverlay(
+        to: theme.systemUiThemeExtension.black,
         duration: const Duration(milliseconds: 550),
       );
     }
@@ -32,49 +34,57 @@ class _InitialRouteState extends State<InitialRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return RouteAwareWidget(
-      onPushNext: () => _onTop = false,
-      onPopNext: () => _onTop = true,
-      child: ValueListenableBuilder(
-        valueListenable: ContentControl.instance.disposed,
-        builder: (context, value, child) {
-          if (ContentControl.instance.stateNullable == null) {
-            _animateNotMainUi();
-            return const _SongsEmptyScreen();
-          } else {
-            return StreamBuilder(
-              stream: ContentControl.instance.onContentChange,
-              builder: (context, snapshot) {
-                if (Permissions.instance.notGranted) {
-                  _animateNotMainUi();
-                  return const _NoPermissionsScreen();
-                }
-                if (ContentControl.instance.initializing) {
-                  _animateNotMainUi();
-                  return const _SearchingSongsScreen();
-                }
-                if (ContentControl.instance.state.allSongs.isEmpty) {
-                  _animateNotMainUi();
-                  return const _SongsEmptyScreen();
-                }
-                if (ThemeControl.ready && _onTop && playerRouteController.value == 0.0) {
-                  SystemUiStyleController.animateSystemUiOverlay(
-                    to: Constants.UiTheme.grey.auto,
-                  );
-                }
-                return StreamBuilder<bool>(
-                  stream: ThemeControl.themeChaning,
+    return Stack(
+      children: [
+        Overlay(
+          key: AppRouter.instance.artOverlayKey,
+        ),
+        RouteAwareWidget(
+          onPushNext: () => _onTop = false,
+          onPopNext: () => _onTop = true,
+          child: ValueListenableBuilder(
+            valueListenable: ContentControl.instance.disposed,
+            builder: (context, value, child) {
+              if (ContentControl.instance.stateNullable == null) {
+                _animateNotMainUi();
+                return const _SongsEmptyScreen();
+              } else {
+                return StreamBuilder(
+                  stream: ContentControl.instance.onContentChange,
                   builder: (context, snapshot) {
-                    if (snapshot.data == true)
-                      return const SizedBox.shrink();
-                    return const Home();
-                  }
+                    if (Permissions.instance.notGranted) {
+                      _animateNotMainUi();
+                      return const _NoPermissionsScreen();
+                    }
+                    if (ContentControl.instance.initializing) {
+                      _animateNotMainUi();
+                      return const _SearchingSongsScreen();
+                    }
+                    if (ContentControl.instance.state.allSongs.isEmpty) {
+                      _animateNotMainUi();
+                      return const _SongsEmptyScreen();
+                    }
+                    if (ThemeControl.instance.ready && _onTop && playerRouteController.value == 0.0) {
+                      final theme = Theme.of(context);
+                      SystemUiStyleController.instance.animateSystemUiOverlay(
+                        to: theme.systemUiThemeExtension.grey,
+                      );
+                    }
+                    return StreamBuilder<bool>(
+                        stream: ThemeControl.instance.themeChanging,
+                        builder: (context, snapshot) {
+                          if (snapshot.data == true) {
+                            return const SizedBox.shrink();
+                          }
+                          return const Home();
+                        });
+                  },
                 );
-              },
-            );
-          }
-        },
-      ),
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -89,32 +99,58 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-  static GlobalKey<OverlayState> overlayKey = GlobalKey();
   final router = HomeRouter.main();
+  DateTime? _lastBackPressTime;
+  late ChildBackButtonDispatcher _backButtonDispatcher;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Defer back button dispatching to the child router
+    _backButtonDispatcher = Router.of(context).backButtonDispatcher!.createChildBackButtonDispatcher();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(bottom: kSongTileHeight),
-            child: Router<HomeRoutes>(
-              routerDelegate: router,
-              routeInformationParser: HomeRouteInformationParser(),
-              routeInformationProvider: HomeRouteInformationProvider(),
-              backButtonDispatcher: HomeRouteBackButtonDispatcher(
-                Router.of(context).backButtonDispatcher!,
+      body: RouterDelegateProvider<HomeRouter>(
+        delegate: router,
+        child: BackButtonListener(
+          onBackButtonPressed: _onBackPressed,
+          child: Stack(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
+                child: Router<HomeRoutes>(
+                  routerDelegate: router,
+                  routeInformationParser: HomeRouteInformationParser(),
+                  routeInformationProvider: HomeRouteInformationProvider(),
+                  backButtonDispatcher: _backButtonDispatcher,
+                ),
               ),
-            ),
+              const PlayerRoute(),
+              Overlay(key: router.overlayKey),
+              const DrawerWidget(),
+            ],
           ),
-          const PlayerRoute(),
-          Overlay(key: overlayKey),
-          const DrawerWidget(),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<bool> _onBackPressed() async {
+    if (Settings.confirmExitingWithBackButton.get()) {
+      final now = clock.now();
+      // Show toast when user presses back button on main route, that
+      // asks from user to press again to confirm that he wants to quit the app
+      if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > constants.Config.backPressCloseTimeout) {
+        _lastBackPressTime = now;
+        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -159,12 +195,13 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     return CenterContentScreen(
-      text: l10n.noMusic + ' :(',
-      widget: ButtonTheme(
-        minWidth: 130.0, // specific value
-        height: 40.0,
-        child: NFButton(
-          variant: NFButtonVariant.raised,
+      text: l10n.noMusic,
+      widget: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 40.0,
+          minWidth: 130.0,
+        ),
+        child: AppButton(
           loading: _fetching,
           text: l10n.refresh,
           onPressed: _handleRefetch,
@@ -186,8 +223,9 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
   bool _fetching = false;
 
   Future<void> _handlePermissionRequest() async {
-    if (_fetching)
+    if (_fetching) {
       return;
+    }
     setState(() {
       _fetching = true;
     });
@@ -204,11 +242,12 @@ class _NoPermissionsScreenState extends State<_NoPermissionsScreen> {
     final l10n = getl10n(context);
     return CenterContentScreen(
       text: l10n.allowAccessToExternalStorage,
-      widget: ButtonTheme(
-        minWidth: 130.0, // specific value
-        height: 40.0,
-        child: NFButton(
-          variant: NFButtonVariant.raised,
+      widget: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 40.0,
+          minWidth: 130.0,
+        ),
+        child: AppButton(
           loading: _fetching,
           text: l10n.grant,
           onPressed: _handlePermissionRequest,

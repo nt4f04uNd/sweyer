@@ -14,7 +14,10 @@ import 'package:sweyer/sweyer.dart';
 /// other similar callbacks.
 ///
 /// The argument [index] is index of the item.
-typedef _ItemTest = bool Function(int index);
+typedef ContentItemTest = bool Function(int index);
+
+/// Signature used for [ContentListView.selectionIndexMapper].
+typedef IndexMapper = int Function(int index);
 
 /// Signature used for [ContentListView.backgroundColorBuilder].
 ///
@@ -33,7 +36,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     this.itemBuilder,
     this.itemTrailingBuilder,
@@ -42,6 +45,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.leading,
     this.currentTest,
     this.selectedTest,
+    this.selectionIndexMapper,
     this.longPressSelectionGestureEnabledTest,
     this.handleTapInSelectionTest,
     this.onItemTap,
@@ -57,11 +61,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) : super(key: key);
 
   /// An explicit content type.
-  final Type? contentType;
+  final ContentType<T> contentType;
 
   /// Content list.
   final List<T> list;
-  
+
   /// Builder that allows to wrap the prebuilt item tile tile.
   /// For example can be used to add [Dismissible].
   final _ItemBuilder? itemBuilder;
@@ -80,16 +84,19 @@ class ContentListView<T extends Content> extends StatelessWidget {
   final Widget? leading;
 
   /// Returned value is passed to [ContentTile.current].
-  final _ItemTest? currentTest;
+  final ContentItemTest? currentTest;
 
   /// Returned value is passed to [ContentTile.selected].
-  final _ItemTest? selectedTest;
+  final ContentItemTest? selectedTest;
+
+  /// Returned value is passed to [ContentTile.selectionIndex].
+  final IndexMapper? selectionIndexMapper;
 
   /// Returned value is passed to [ContentTile.longPressSelectionGestureEnabled].
-  final _ItemTest? longPressSelectionGestureEnabledTest;
+  final ContentItemTest? longPressSelectionGestureEnabledTest;
 
   /// Returned value is passed to [ContentTile.handleTapInSelection].
-  final _ItemTest? handleTapInSelectionTest;
+  final ContentItemTest? handleTapInSelectionTest;
 
   /// Callback to be called on item tap.
   final ValueSetter<int>? onItemTap;
@@ -129,7 +136,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localController = controller ?? ScrollController();
-    return AppScrollbar.forContent<T>(
+    return AppScrollbar.forContent(
       contentType: contentType,
       list: list,
       controller: localController,
@@ -142,7 +149,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
         slivers: [
           SliverPadding(
             padding: padding,
-            sliver: sliver<T>(
+            sliver: sliver(
               contentType: contentType,
               list: list,
               itemBuilder: itemBuilder,
@@ -171,22 +178,23 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// not to slivers.
   ///
   /// Padding is also removed, since it's possible to just wrap it with [SliverPadding].
-  /// 
+  ///
   /// See also:
   ///  * [reorderableSliver] which creates a reorderable sliver
   @factory
   static MultiSliver sliver<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     _ItemBuilder? itemBuilder,
     IndexedWidgetBuilder? itemTrailingBuilder,
     ContentSelectionController? selectionController,
     Widget? leading,
-    _ItemTest? currentTest,
-    _ItemTest? selectedTest,
-    _ItemTest? longPressSelectionGestureEnabledTest,
-    _ItemTest? handleTapInSelectionTest,
+    ContentItemTest? currentTest,
+    ContentItemTest? selectedTest,
+    IndexMapper? selectionIndexMapper,
+    ContentItemTest? longPressSelectionGestureEnabledTest,
+    ContentItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     ValueSetter<int>? onItemTap,
@@ -195,41 +203,42 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) {
     return MultiSliver(
       children: [
-        if (leading != null)
-          leading,
-        SliverFixedExtentList(
-          itemExtent: ContentTile.getHeight<T>(contentType),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final item = list[index];
-              final child = ContentTile<T>(
-                contentType: contentType,
-                content: item,
-                selectionIndex: index,
-                selected: selectedTest != null
-                  ? selectedTest(index)
-                  : selectionController?.data.contains(SelectionEntry<T>.fromContent(
-                      content: item,
-                      index: index,
-                      context: context,
-                    ))
-                  ?? false,
-                longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
-                handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
-                selectionController: selectionController,
-                trailing: itemTrailingBuilder?.call(context, index),
-                current: currentTest?.call(index),
-                onTap: onItemTap == null ? null : () => onItemTap(index),
-                backgroundColor: backgroundColorBuilder == null ? Colors.transparent : backgroundColorBuilder(index),
-                enableDefaultOnTap: enableDefaultOnTap,
-                songTileVariant: songTileVariant,
-                songTileClickBehavior: songTileClickBehavior,
-              );
-              return itemBuilder?.call(context, index, child) ?? child;
-            },
-            childCount: list.length,
-          ),
-        ),
+        if (leading != null) leading,
+        Builder(builder: (context) {
+          return SliverFixedExtentList(
+            itemExtent: ContentTile.getHeight(contentType, context),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final item = list[index];
+                final child = ContentTile(
+                  contentType: contentType,
+                  content: item,
+                  selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
+                  selected: selectedTest != null
+                      ? selectedTest(index)
+                      : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                            content: item,
+                            index: index,
+                            context: context,
+                          )) ??
+                          false,
+                  longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index) ?? true,
+                  handleTapInSelection: handleTapInSelectionTest?.call(index) ?? true,
+                  selectionController: selectionController,
+                  trailing: itemTrailingBuilder?.call(context, index),
+                  current: currentTest?.call(index),
+                  onTap: onItemTap == null ? null : () => onItemTap(index),
+                  backgroundColor: backgroundColorBuilder == null ? Colors.transparent : backgroundColorBuilder(index),
+                  enableDefaultOnTap: enableDefaultOnTap,
+                  songTileVariant: songTileVariant,
+                  songTileClickBehavior: songTileClickBehavior,
+                );
+                return itemBuilder?.call(context, index, child) ?? child;
+              },
+              childCount: list.length,
+            ),
+          );
+        }),
       ],
     );
   }
@@ -240,13 +249,13 @@ class ContentListView<T extends Content> extends StatelessWidget {
   /// not to slivers.
   ///
   /// Padding is also removed, since it's possible to just wrap it with [SliverPadding].
-  /// 
+  ///
   /// See also:
   ///  * [sliver] which creates a not reorderable sliver
   @factory
   static MultiSliver reorderableSliver<T extends Content>({
     Key? key,
-    Type? contentType,
+    required ContentType<T> contentType,
     required List<T> list,
     required ReorderCallback onReorder,
     bool reorderingEnabled = true,
@@ -254,10 +263,11 @@ class ContentListView<T extends Content> extends StatelessWidget {
     IndexedWidgetBuilder? itemTrailingBuilder,
     ContentSelectionController? selectionController,
     Widget? leading,
-    _ItemTest? currentTest,
-    _ItemTest? selectedTest,
-    _ItemTest? longPressSelectionGestureEnabledTest,
-    _ItemTest? handleTapInSelectionTest,
+    ContentItemTest? currentTest,
+    ContentItemTest? selectedTest,
+    IndexMapper? selectionIndexMapper,
+    ContentItemTest? longPressSelectionGestureEnabledTest,
+    ContentItemTest? handleTapInSelectionTest,
     SongTileVariant songTileVariant = kSongTileVariant,
     SongTileClickBehavior songTileClickBehavior = kSongTileClickBehavior,
     ValueSetter<int>? onItemTap,
@@ -266,42 +276,40 @@ class ContentListView<T extends Content> extends StatelessWidget {
   }) {
     return MultiSliver(
       children: [
-        if (leading != null)
-          leading,
+        if (leading != null) leading,
         SliverReorderableList(
           // TODO: itemExtent is broken https://github.com/flutter/flutter/issues/84901
           // itemExtent: ContentTile.getHeight<T>(contentType),
           itemCount: list.length,
           onReorder: onReorder,
           itemBuilder: (context, index) {
+            final theme = Theme.of(context);
             final item = list[index];
             final child = ReorderableDelayedDragStartListener(
               key: ValueKey(item.id),
               enabled: reorderingEnabled,
               index: index,
-              child: ContentTile<T>(
+              child: ContentTile(
                 contentType: contentType,
                 content: item,
-                selectionIndex: index,
+                selectionIndex: selectionIndexMapper != null ? selectionIndexMapper(index) : index,
                 selected: selectedTest != null
-                  ? selectedTest(index)
-                  : selectionController?.data.contains(SelectionEntry<T>.fromContent(
-                      content: item,
-                      index: index,
-                      context: context,
-                    ))
-                  ?? false,
-                longPressSelectionGestureEnabled: longPressSelectionGestureEnabledTest?.call(index)
-                  ?? !reorderingEnabled,
-                handleTapInSelection: handleTapInSelectionTest?.call(index)
-                  ?? !reorderingEnabled,
+                    ? selectedTest(index)
+                    : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                          content: item,
+                          index: index,
+                          context: context,
+                        )) ??
+                        false,
+                longPressSelectionGestureEnabled:
+                    longPressSelectionGestureEnabledTest?.call(index) ?? !reorderingEnabled,
+                handleTapInSelection: handleTapInSelectionTest?.call(index) ?? !reorderingEnabled,
                 selectionController: selectionController,
                 current: currentTest?.call(index),
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableDefaultOnTap: enableDefaultOnTap,
-                backgroundColor: backgroundColorBuilder == null
-                  ? ThemeControl.theme.colorScheme.background
-                  : backgroundColorBuilder(index),
+                backgroundColor:
+                    backgroundColorBuilder == null ? theme.colorScheme.background : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
                 trailing: AnimatedSwitcher(
@@ -320,15 +328,15 @@ class ContentListView<T extends Content> extends StatelessWidget {
                     );
                   },
                   child: !reorderingEnabled
-                    ? itemTrailingBuilder?.call(context, index) ?? const SizedBox.shrink()
-                    : ReorderableDragStartListener(
-                        enabled: reorderingEnabled,
-                        index: index,
-                        child: const Icon(
-                          Icons.drag_handle,
-                          size: 30.0,
+                      ? itemTrailingBuilder?.call(context, index) ?? const SizedBox.shrink()
+                      : ReorderableDragStartListener(
+                          enabled: reorderingEnabled,
+                          index: index,
+                          child: const Icon(
+                            Icons.drag_handle,
+                            size: 30.0,
+                          ),
                         ),
-                      ),
                 ),
               ),
             );

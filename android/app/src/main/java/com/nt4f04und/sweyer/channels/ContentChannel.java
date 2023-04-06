@@ -233,10 +233,10 @@ public enum ContentChannel {
                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                   this.result = result;
                   Boolean value = call.argument("value");
-                  ArrayList<HashMap<String, Object>> songs = call.argument("songs");
+                  ArrayList<ArrayList<Object>> songIds = call.argument("songIds");
                   ArrayList<Uri> uris = new ArrayList<>();
-                  for (HashMap<String, Object> song : songs) {
-                     Long id = GeneralHandler.getLong(song.get("id"));
+                  for (Object songId : songIds) {
+                     Long id = GeneralHandler.getLong(songId);
                      uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id));
                   }
                   PendingIntent pendingIntent = MediaStore.createFavoriteRequest(
@@ -254,7 +254,7 @@ public enum ContentChannel {
                Intent serviceIntent = new Intent(GeneralHandler.getAppContext(), DeletionService.class);
                serviceIntent.putExtra("songs", (ArrayList<HashMap<?, ?>>) call.argument("songs"));
                GeneralHandler.getAppContext().startService(serviceIntent);
-               // Save the result to report to the flutter code later in `sendResultFromIntent(`
+               // Save the result to report to the flutter code later in `sendResultFromIntent`
                this.result = result;
                break;
             }
@@ -322,16 +322,16 @@ public enum ContentChannel {
                Handler handler = new Handler(Looper.getMainLooper());
                Executors.newSingleThreadExecutor().execute(() -> {
                   try {
-                     ArrayList<Object> songIds = call.argument("ids");
-                     ArrayList<String> songIdStrings = new ArrayList<>();
-                     for (Object id : songIds) {
-                        songIdStrings.add(id.toString());
+                     ArrayList<Object> ids = call.argument("ids");
+                     ArrayList<String> idsStrings = new ArrayList<>();
+                     for (Object id : ids) {
+                        idsStrings.add(id.toString());
                      }
                      ContentResolver resolver = getContentResolver();
                      resolver.delete(
                              MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                             FetchHandler.buildWhereForCount(MediaStore.Audio.Playlists._ID, songIdStrings.size()),
-                             songIdStrings.toArray(new String[0])
+                             FetchHandler.buildWhereForCount(MediaStore.Audio.Playlists._ID, ids.size()),
+                             idsStrings.toArray(new String[0])
                      );
                      resolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null);
                      handler.post(() -> {
@@ -418,7 +418,7 @@ public enum ContentChannel {
                         ArrayList<Object> indexes = call.argument("indexes");
                         ArrayList<String> stringIndexes = new ArrayList<>();
                         for (Object index : indexes) {
-                           // Android seems to require indexes to be offsetted by 1.
+                           // Android seems to require indexes to be offset by 1.
                            //
                            // It might be because when songs are inserted into the playlist,
                            // the indexing is quite similar an there it makes sense, because we need

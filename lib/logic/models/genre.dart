@@ -1,6 +1,10 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+
 class Genre extends Content {
+  @override
+  ContentType get type => ContentType.song; // FIXME: Add a real content type for genres.
+
   @override
   final int id;
   final String name;
@@ -31,10 +35,10 @@ class Genre extends Content {
 
   @override
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'songIds': songIds,
-  };
+        'id': id,
+        'name': name,
+        'songIds': songIds,
+      };
 
   @override
   MediaItem toMediaItem() {

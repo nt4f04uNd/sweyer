@@ -11,33 +11,37 @@ import 'package:sweyer/sweyer.dart';
 class ContentSection<T extends Content> extends StatelessWidget {
   const ContentSection({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     this.onHeaderTap,
     this.maxPreviewCount = 5,
     this.selectionController,
     this.contentTileTapHandler,
-  }) : child = null,
-       super(key: key);
+    this.selectedTest,
+    this.selectionIndexMapper,
+  })  : child = null,
+        super(key: key);
 
   const ContentSection.custom({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.list,
     required this.child,
     this.onHeaderTap,
-  }) : selectionController = null,
-       contentTileTapHandler = null,
-       maxPreviewCount = 0,
-       super(key: key);
+  })  : selectionController = null,
+        contentTileTapHandler = null,
+        selectedTest = null,
+        selectionIndexMapper = null,
+        maxPreviewCount = 0,
+        super(key: key);
 
-  final Type? contentType;
+  final ContentType<T> contentType;
   final List<T> list;
 
   final Widget? child;
 
   /// If specified, header will become tappable and near content name there will
-  /// be chevron icon, idicating that it's tappable.
+  /// be chevron icon, indicating that it's tappable.
   final VoidCallback? onHeaderTap;
 
   /// Max amount of items shown in section.
@@ -52,30 +56,39 @@ class ContentSection<T extends Content> extends StatelessWidget {
   /// additional callbacks.
   final VoidCallback? contentTileTapHandler;
 
+  /// Returned value is passed to [ContentTile.selected].
+  final ContentItemTest? selectedTest;
+
+  /// Returned value is passed to [ContentTile.selectionIndex].
+  final IndexMapper? selectionIndexMapper;
+
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    
+
     Widget Function(int)? builder;
     if (child == null) {
       builder = (index) {
         final item = list[index];
-        return ContentTile<T>(
+        return ContentTile(
           contentType: contentType,
           content: item,
-          selectionIndex: index,
-          selected: selectionController?.data.contains(SelectionEntry<T>.fromContent(
-            content: item,
-            index: index,
-            context: context,
-          )) ?? false,
+          selectionIndex: selectionIndexMapper != null ? selectionIndexMapper!(index) : index,
+          selected: selectedTest != null
+              ? selectedTest!(index)
+              : selectionController?.data.contains(SelectionEntry<T>.fromContent(
+                    content: item,
+                    index: index,
+                    context: context,
+                  )) ??
+                  false,
           selectionController: selectionController,
           onTap: () => contentTileTapHandler?.call(),
           horizontalPadding: 12.0,
         );
       };
     }
-  
+
     final count = list.length;
 
     return Column(
@@ -87,23 +100,26 @@ class ContentSection<T extends Content> extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  l10n.contents<T>(contentType),
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w800,
+                Expanded(
+                  child: Text(
+                    l10n.contents(contentType),
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 240),
                   switchInCurve: Curves.easeOut,
                   switchOutCurve: Curves.easeIn,
-                  child: onHeaderTap == null
-                    ? const SizedBox.shrink()
-                    : const Icon(Icons.chevron_right_rounded),
+                  child: onHeaderTap == null ? const SizedBox.shrink() : const Icon(Icons.chevron_right_rounded),
                 ),
               ],
-            ), 
+            ),
           ),
         ),
         if (child != null)
@@ -111,8 +127,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
         else
           Column(
             children: [
-              for (int index = 0; index < math.min(maxPreviewCount, count); index++)
-                builder!(index),
+              for (int index = 0; index < math.min(maxPreviewCount, count); index++) builder!(index),
             ],
           )
       ],

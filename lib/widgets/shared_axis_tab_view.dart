@@ -7,8 +7,8 @@ class SharedAxisTabController extends ChangeNotifier {
   SharedAxisTabController({
     required this.length,
     int initialIndex = 0,
-  }) : _index = initialIndex,
-      _prevIndex = initialIndex;
+  })  : _index = initialIndex,
+        _prevIndex = initialIndex;
 
   /// The total number of tabs.
   final int length;
@@ -25,11 +25,12 @@ class SharedAxisTabController extends ChangeNotifier {
   /// nor by user drag.
   bool canChange = true;
 
-  /// Changes the tab and notifies liteners.
+  /// Changes the tab and notifies listeners.
   /// Updates can be disabled with [canChange] `false`.
   void changeTab(int value) {
-    if (!canChange)
+    if (!canChange) {
       return;
+    }
     assert(value >= 0 && (value < length || length == 0));
     _prevIndex = _index;
     _index = value;
@@ -38,7 +39,7 @@ class SharedAxisTabController extends ChangeNotifier {
 }
 
 /// Create tab view and animates tab changes with [SharedAxisTransition].
-/// 
+///
 /// See also:
 /// * [SharedAxisTabController] that controls this view
 class SharedAxisTabView extends StatefulWidget {
@@ -49,7 +50,12 @@ class SharedAxisTabView extends StatefulWidget {
     this.tabBuilder = _defaultTabBuilder,
   }) : super(key: key);
 
-  static Widget _defaultTabBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  static Widget _defaultTabBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return child;
   }
 
@@ -57,12 +63,12 @@ class SharedAxisTabView extends StatefulWidget {
   final List<Widget> children;
 
   /// Controls this widget's opened tab state.
-  /// 
+  ///
   /// Must not be null and the length of it must match the [children] length.
   final SharedAxisTabController controller;
 
   /// Allows to add hook into tab build process.
-  /// Specifying this doens't affect the animation this view provides by defaults.
+  /// Specifying this doesn't affect the animation this view provides by defaults.
   final RouteTransitionsBuilder tabBuilder;
 
   @override
@@ -71,6 +77,7 @@ class SharedAxisTabView extends StatefulWidget {
 
 class _SharedAxisTabViewState extends State<SharedAxisTabView> {
   double dragDelta = 0.0;
+
   /// Whether can transition by swipe.
   bool canTransition = true;
 
@@ -81,7 +88,7 @@ class _SharedAxisTabViewState extends State<SharedAxisTabView> {
       if (controller.length != widget.children.length) {
         throw ArgumentError(
           "Controller's length property (${controller.length}) does not match the "
-          "number of tabs (${widget.children.length}) present in TabBar's tabs property."
+          "number of tabs (${widget.children.length}) present in TabBar's tabs property.",
         );
       }
       return true;

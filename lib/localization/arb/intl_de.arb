@@ -1,0 +1,325 @@
+{
+  "playback": "Wiedergabe",
+  "@playback": {
+    "description": "Wird als Name für den Benachrichtigungskanal in den Einstellungen benutzt"
+  },
+  "playbackControls": "Wiedergabesteuerung",
+  "@playbackControls": {
+    "description": "Wird als Beschreibung für den Benachrichtigungskanal in den Einstellungen benutzt"
+  },
+  "play": "Wiedergeben",
+  "pause": "Pause",
+  "stop": "Stop",
+  "next": "Nächstes",
+  "previous": "Vorherige",
+  "loopOff": "Wiederholen aus",
+  "loopOn": "Wiederholen an",
+  "search": "Suche",
+  "shuffleAll": "Alle zufällig wiedergeben",
+  "playRecent": "Kürzliche wiedergeben",
+  "artistUnknown": "Unbekannter Künstler",
+  "@artistUnknown": {
+    "description": "Bezeichnung für einen unbekannten Künstler"
+  },
+  "track": "Lied",
+  "tracks": "Lieder",
+  "tracksPlural": "{count, plural, =1{{count} Lied} other{{count} Lieder}}",
+  "@tracksPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "album": "Album",
+  "albumQueue": "Album {name}",
+  "@albumQueue": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Albumname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "albums": "Alben",
+  "albumsPlural": "{count, plural, =1{{count} Album} other{{count} Alben}}",
+  "@albumsPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "playlist": "Wiedergabeliste",
+  "playlistQueue": "Wiedergabeliste {name}",
+  "@playlistQueue": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Wiedergablelistenname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "playlists": "Wiedergabelisten",
+  "playlistsPlural": "{count, plural, =1{{count} Wiedergabeliste} other{{count} Wiedergabelisten}}",
+  "@playlistsPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artist": "Künstler",
+  "artistQueue": "Künstler {name}",
+  "@artistQueue": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Artist name"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "artists": "Künstler",
+  "artistsPlural": "{count, plural, other{{count} Künstler}}",
+  "@artistsPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "albumNotFound": "Album nicht gefunden",
+  "artistNotFound": "Künstler nicht gefunden",
+  "allTracks": "Alle Lieder",
+  "allAlbums": "Alle Alben",
+  "allPlaylists": "Alle Wiedergabelisten",
+  "allArtists": "Alle Künstler",
+  "arbitraryQueue": "Zufällige Abspielliste",
+  "shuffled": "Zufällig",
+  "@shuffled": {
+    "description": "Notiz: Momentan unbenutzt"
+  },
+  "modified": "Verändert",
+  "@modified": {
+    "description": "Notiz: Momentan unbenutzt"
+  },
+  "selectedPlural": "Ausgewählte",
+  "@selectedPlural": {
+    "description": "Sollte im Plural sein"
+  },
+  "newPlaylist": "Neue Wiedergabeliste",
+  "trackAfterWhichToInsert": "Hinter diesem Lied einfügen",
+  "insertAtTheBeginning": "Am Anfang einfügen",
+  "saveQueueAsPlaylist": "Als Wiedergabeliste speichern",
+  "playContentList": "Wiedergeben",
+  "@playContentList": {
+    "description": "Name der Wiedergabetaste"
+  },
+  "shuffleContentList": "Zufallswiedergabe",
+  "@shuffleContentList": {
+    "description": "Name der zufälligen Wiedergabetaste"
+  },
+  "debug": "Debug",
+  "areYouSure": "Bist du sicher?",
+  "reset": "Zurücksetzen",
+  "save": "Speichern",
+  "saved": "Gespeichert",
+  "view": "Ansicht",
+  "secondsShorthand": "s",
+  "@secondsShorthand": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "minutesShorthand": "min",
+  "@minutesShorthand": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "and": "Und",
+  "@and": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "more": "Mehr",
+  "@more": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "andNMore": "Und {count} weitere",
+  "@andNMore": {
+    "placeholders": {
+      "count": {}
+    },
+    "description": "Beispiel: 'Und 3 weitere'"
+  },
+  "done": "Fertig",
+  "create": "Erstellen",
+  "addTracks": "Lieder hinzufügen",
+  "@addTracks": {
+    "description": "Der Titel für die + Taste in der Wiedergabelistenanzeige"
+  },
+  "remove": "Entfernen",
+  "removeTracks": "{count, plural, =1{Lied entfernen} other{{count} Lieder entfernen}}",
+  "@removeTracks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "removeTracksConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} entfernen möchtest?} other{Bist du sicher, dass du die ausgewählten Lieder entfernen möchtest?}}",
+  "@removeTracksConfirmation": {
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Lied Name"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen für die Singular-Version dieser Übersetzung xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "delete": "Löschen",
+  "deleteTracks": "{count, plural, =1{Lied löschen} other{{count} Lieder löschen}}",
+  "@deleteTracks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteTracksConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} löschen möchtest?} other{Bist du sicher, dass du die ausgewählten Lieder löschen möchtest?}}",
+  "@deleteTracksConfirmation": {
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Liedname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen für die Singular-Version dieser Übersetzung xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "deletePlaylists": "{count, plural, =1{Wiedergabeliste löschen} other{{count} Wiedergabelisten löschen}}",
+  "@deletePlaylists": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deletePlaylistsConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} löschen möchtest?} other{Bist du sicher, dass du die ausgewählten Wiedergabelisten löschen möchtest?}}",
+  "@deletePlaylistsConfirmation": {
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Wiedergabelistenname"
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen für die Singular-Version dieser Übersetzung xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "deletion": "Löschung",
+  "editPlaylist": "Wiedergabeliste bearbeiten",
+  "refresh": "Aktualisieren",
+  "grant": "Erlauben",
+  "nothingHere": "Hier ist noch nichts",
+  "details": "Details",
+  "songInformation": "Lied Informationen",
+  "editMetadata": "Metadaten bearbeiten",
+  "@editMetadata": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "foundByQuery": "Durch Suche nach {query} gefunden",
+  "@foundByQuery": {
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "\"Suchtext\""
+      }
+    },
+    "description": "Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "upNext": "Als Nächstes",
+  "pressOnceAgainToExit": "Nochmal drücken zum Verlassen",
+  "noMusic": "Es gibt keine Musik auf deinem Gerät :(",
+  "searchingForTracks": "Suche nach Liedern...",
+  "allowAccessToExternalStorage": "Bitte erlaube den Zugriff auf den Speicher",
+  "allowAccessToExternalStorageManually": "Erlaube den Zugriff auf den Speicher manuell",
+  "selected": "{counter} ausgewählt",
+  "@selected": {
+    "placeholders": {
+      "counter": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "actions": "Aktionen",
+  "@actions": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "goToAlbum": "Gehe zum Album",
+  "goToArtist": "Gehe zum Künstler",
+  "playNext": "Als Nächstes wiedergeben",
+  "addToPlaylist": "Zur Wiedergabeliste hinzufügen",
+  "removeFromPlaylist": "Aus Wiedergabeliste entfernen",
+  "addToFavorites": "Zu Favoriten hinzufügen",
+  "addToQueue": "Zur Abspielliste hinzufügen",
+  "removeFromQueue": "Aus Abspielliste entfernen",
+  "share": "Teilen",
+  "@share": {
+    "description": "TODO: Momentan unbenutzt"
+  },
+  "selectAll": "Alle auswählen",
+  "sort": "Sortieren",
+  "title": "Titel",
+  "name": "Name",
+  "dateModified": "Änderungsdatum",
+  "dateAdded": "Hinzufügungsdatum",
+  "year": "Jahr",
+  "numberOfTracks": "Anzahl der Lieder",
+  "numberOfAlbums": "Anzahl der Alben",
+  "devModeGreet": "Fertig! Du bist jetzt ein Entwickler",
+  "onThePathToDevMode": "Etwas sollte jetzt passieren...",
+  "@onThePathToDevMode": {
+    "description": "Wird angezeigt, wenn der Nutzer 4 mal auf das Logo der App klickt"
+  },
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Du bist fast da, nur noch 1 Klick verbleibend...} other{Du bist fast da, nur noch {remainingClicks} Klicks verbleibend...}}",
+  "@onThePathToDevModeClicksRemaining": {
+    "placeholders": {
+      "remainingClicks": {}
+    },
+    "description": "Wird angezeigt, wenn der Nutzer dabei ist, ein Entwickler zu werden, Part 2"
+  },
+  "devTestToast": "Popup testen",
+  "devAnimationsSlowMo": "Verlangsame Animationen",
+  "quitDevMode": "Verlasse den Entwicklermodus",
+  "quitDevModeDescription": "Entwicklermodus verlassen?",
+  "settings": "Einstellungen",
+  "general": "Allgemein",
+  "theme": "Design",
+  "settingLightMode": "Heller Modus",
+  "searchHistory": "Suchverlauf",
+  "searchHistoryPlaceholder": "Dein Suchverlauf wird hier angezeigt",
+  "searchNothingFound": "Nichts gefunden",
+  "searchHistoryRemoveEntryDescription": "Willst du {searchText} wirklich aus dem Suchverlauf entfernen?",
+  "@searchHistoryRemoveEntryDescription": {
+    "placeholders": {
+      "searchText": {
+        "type": "String",
+        "example": "Suchtext"
+      }
+    },
+    "description": "searchText ist der Suchverlaufseintrag, der entfernt werdens soll. Warnung: Diese Buchstaben müssen xml-formatiert werden: Alle Anführungsstriche und &<>"
+  },
+  "searchClearHistory": "Suchverlauf löschen?",
+  "oopsErrorOccurred": "😮 Ups! Es ist ein Fehler aufgetreten",
+  "errorDetails": "Fehlerdetails",
+  "deletionError": "Fehler beim Löschen",
+  "playlistDoesNotExistError": "Die Wiedergabeliste wurde nicht gefunden, vielleicht ist sie entfernt worden",
+  "playbackError": "Während der Wiedergabe ist ein Fehler aufgetreten",
+  "openAppSettingsError": "Fehler beim Öffnen der App Einstellungen",
+  "confirmExitingWithBackButtonSetting": "Bestätige das Verlassen der App mit der Zurück-Taste",
+  "useMediaStoreForFavoriteSongsSetting": "Verwende das Android-System für Lieblingstitel",
+  "warning": "Warnung",
+  "close": "Schließen",
+  "accept": "Akzeptieren",
+  "cancel": "Abbrechen",
+  "copied": "Kopiert",
+  "gitHubRepo": "GitHub Repository",
+  "defaultValue": "Standard",
+  "playerInterfaceColorStyle": "Player-Farbthema",
+  "playerInterfaceColorStyleArtColor": "Basierend auf dem Coverbild",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Hintergrundfarbe des Farbthemas",
+  "resolveConflict": "Konflikt auflößen",
+  "conflictExplanation": "Das System hat andere Lieblingstitel als Sweyer, bitte wähle welche als Favorit markiert bleiben sollen. Es werden nur die Lieder angezeigt, die im Konflikt stehen.",
+  "debugTextScaleFactor": "Text scale factor",
+  "debugShowDebugOverlay": "Show debug overlay",
+  "debugShowPerformanceOverlay": "Show performance overlay",
+  "debugShowCheckerboardRasterCacheImages": "Show checkerboard raster cache images",
+  "debugShowSemanticsDebugger": "Show semantics debugger"
+}

@@ -14,6 +14,7 @@
 *.ipr
 *.iws
 .idea/
+!.idea/codeStyles/
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
@@ -76,15 +77,22 @@
 
 # Ignore key props
 key.properties
+**/*.keystore
+**/*.jks
 
 # gen_l10n untranslated messages output, see l10n.yaml
 untranslated-messages.txt
 
 .fvm/flutter_sdk
 
-# ignore golden failure outputs
+# Ignore golden failure outputs
 **/failures/*.png
+
+# Coverage results
+coverage
 
 .project
 .classpath
 .settings
+
+temp/

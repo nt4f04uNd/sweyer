@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 const double _colorItemSize = 36.0;
 const double _colorItemActiveBorderWidth = 2.5;
@@ -12,22 +12,22 @@ class ThemeSettingsRoute extends StatefulWidget {
   _ThemeSettingsRouteState createState() => _ThemeSettingsRouteState();
 }
 
-class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
-    with SingleTickerProviderStateMixin {
-  Color prevPrimaryColor = ThemeControl.theme.colorScheme.primary;
-  Color primaryColor = ThemeControl.theme.colorScheme.primary;
-  bool get switched => ThemeControl.isLight;
-  bool get canPop => !ThemeControl.themeChaning.valueWrapper!.value;
+class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTickerProviderStateMixin {
+  late Color prevPrimaryColor;
+  late Color primaryColor;
+  bool firstRender = true;
+  bool get switched => ThemeControl.instance.isLight;
+  bool get canPop => !ThemeControl.instance.themeChanging.valueWrapper!.value;
   late AnimationController controller;
 
   static const List<Color> colors = [
-    Constants.AppColors.deepPurpleAccent,
-    Constants.AppColors.yellow,
-    Constants.AppColors.blue,
-    Constants.AppColors.red,
-    Constants.AppColors.orange,
-    Constants.AppColors.pink,
-    Constants.AppColors.androidGreen,
+    constants.AppColors.deepPurpleAccent,
+    constants.AppColors.yellow,
+    constants.AppColors.blue,
+    constants.AppColors.red,
+    constants.AppColors.orange,
+    constants.AppColors.pink,
+    constants.AppColors.androidGreen,
   ];
 
   @override
@@ -40,13 +40,24 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final theme = Theme.of(context);
+    if (firstRender) {
+      firstRender = false;
+      prevPrimaryColor = theme.colorScheme.primary;
+      primaryColor = theme.colorScheme.primary;
+    }
+  }
+
+  @override
   void dispose() {
     controller.dispose();
     super.dispose();
   }
 
   void _handleThemeSwitch(bool value) {
-    ThemeControl.switchTheme();
+    ThemeControl.instance.switchTheme();
   }
 
   void _handleColorTap(Color color) {
@@ -58,7 +69,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
         ).evaluate(controller)!;
       });
       primaryColor = color;
-      ThemeControl.changePrimaryColor(color);
+      ThemeControl.instance.changePrimaryColor(color);
       controller.reset();
       controller.forward();
     }
@@ -71,6 +82,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final animation = ColorTween(
       begin: prevPrimaryColor,
       end: primaryColor,
@@ -79,7 +91,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
       onWillPop: _handlePop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.theme),
+          title: AppBarTitleMarquee(text: l10n.theme),
           leading: IgnorePointer(
             ignoring: !canPop,
             child: const NFBackButton(),
@@ -109,8 +121,9 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
             ),
             builder: (context, child) => ListView(
               children: [
+                const PlayerInterfaceColorStyleSettingWidget(),
                 Theme(
-                  data: ThemeControl.theme.copyWith(
+                  data: theme.copyWith(
                     splashFactory: NFListTileInkRipple.splashFactory,
                   ),
                   child: SwitchListTile(
@@ -122,7 +135,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute>
                 ),
                 child!,
                 Image.asset(
-                  Constants.Assets.ASSET_LOGO_MASK,
+                  constants.Assets.assetLogoMask,
                   color: ContentArt.getColorToBlendInDefaultArt(animation.value!),
                   colorBlendMode: BlendMode.plus,
                   fit: BoxFit.cover,

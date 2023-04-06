@@ -1,12 +1,15 @@
 export 'backend.dart';
 export 'content_channel.dart';
 export 'content.dart';
+export 'favorites.dart';
+export 'media_store_content_observer.dart';
 export 'playback.dart';
 export 'queue.dart';
 export 'serialization.dart';
 
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:clock/clock.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
@@ -44,7 +47,7 @@ class _BrowseParent extends Enum {
 
   _BrowseParent withId(int id) {
     assert(nested, "This parent cannot have and id, because it's not nested");
-    return _BrowseParent(value, id: id, nested: false); 
+    return _BrowseParent(value, id: id, nested: false);
   }
 }
 
@@ -57,91 +60,88 @@ class _BrowserParentProvider {
   List<MediaItem> handleGetChildren(String parentMediaId) {
     final id = int.tryParse(parentMediaId);
     if (id != null) {
-        _parent = _parent.withId(id);
+      _parent = _parent.withId(id);
     } else {
       switch (parentMediaId) {
         case 'root':
-          _parent = _BrowseParent.root; break;
+          _parent = _BrowseParent.root;
+          break;
         case 'songs':
-          _parent = _BrowseParent.songs; break;
+          _parent = _BrowseParent.songs;
+          break;
         case 'albums':
-          _parent = _BrowseParent.albums; break;
+          _parent = _BrowseParent.albums;
+          break;
         case 'playlists':
-          _parent = _BrowseParent.playlists; break;
+          _parent = _BrowseParent.playlists;
+          break;
         case 'artists':
-          _parent = _BrowseParent.artists; break;
+          _parent = _BrowseParent.artists;
+          break;
       }
     }
 
     switch (parentMediaId) {
       case AudioService.recentRootId:
-        return QueueControl.instance.state.current
-          .songs
-          .map((song) => song.toMediaItem())
-          .toList();
+        return QueueControl.instance.state.current.songs.map((song) => song.toMediaItem()).toList();
       case 'root':
         return [
           MediaItem(
             id: _BrowseParent.songs.value,
             album: '',
-            title: staticl10n.contents<Song>(),
+            title: staticl10n.contents(ContentType.song),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.albums.value,
             album: '',
-            title: staticl10n.contents<Album>(),
+            title: staticl10n.contents(ContentType.album),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.playlists.value,
             album: '',
-            title: staticl10n.contents<Playlist>(),
+            title: staticl10n.contents(ContentType.playlist),
             playable: false,
           ),
           MediaItem(
             id: _BrowseParent.artists.value,
             album: '',
-            title: staticl10n.contents<Artist>(),
+            title: staticl10n.contents(ContentType.artist),
             playable: false,
           ),
         ];
       case 'songs':
-        return ContentControl.instance.getContent<Song>()
-          .map((el) => el.toMediaItem())
-          .toList();
+        return ContentControl.instance.getContent(ContentType.song).map((el) => el.toMediaItem()).toList();
       case 'albums':
-        return ContentControl.instance.getContent<Album>()
-          .map((el) => el.toMediaItem())
-          .toList();
+        return ContentControl.instance.getContent(ContentType.album).map((el) => el.toMediaItem()).toList();
       case 'playlists':
-        return ContentControl.instance.getContent<Playlist>()
-          .map((el) => el.toMediaItem())
-          .toList();
+        return ContentControl.instance.getContent(ContentType.playlist).map((el) => el.toMediaItem()).toList();
       case 'artists':
-        return ContentControl.instance.getContent<Artist>()
-          .map((el) => el.toMediaItem())
-          .toList();
+        return ContentControl.instance.getContent(ContentType.artist).map((el) => el.toMediaItem()).toList();
       default:
         if (id == null) {
           throw StateError('');
         }
         switch (_parent.value) {
           case 'albums':
-            return ContentControl.instance.getContentById<Album>(id)
-              !.songs
-              .map((song) => song.toMediaItem())
-              .toList();
+            return ContentControl.instance
+                .getContentById(id, ContentType.album)!
+                .songs
+                .map((song) => song.toMediaItem())
+                .toList();
           case 'playlists':
-            return ContentControl.instance.getContentById<Playlist>(id)
-              !.songs
-              .map((song) => song.toMediaItem())
-              .toList();
+            return ContentControl.instance
+                .getContentById(id, ContentType.playlist)!
+                .songs
+                .map((song) => song.toMediaItem())
+                .toList();
           case 'artists':
-            return ContentControl.instance.getContentById<Artist>(id)
-              !.songs
-              .map((song) => song.toMediaItem())
-              .toList();
+            return ContentControl.instance
+                .getContentById(id, ContentType.artist)!
+                .songs
+                .map((song) => song.toMediaItem())
+                .toList();
           default:
             throw UnimplementedError();
         }
@@ -156,19 +156,19 @@ class _BrowserParentProvider {
     } else {
       switch (parent.value) {
         case 'albums':
-          final album = ContentControl.instance.getContentById<Album>(parent.id!);
+          final album = ContentControl.instance.getContentById(parent.id!, ContentType.album);
           if (album != null) {
             QueueControl.instance.setOriginQueue(origin: album, songs: album.songs);
           }
           break;
         case 'playlists':
-          final playlist = ContentControl.instance.getContentById<Playlist>(parent.id!);
+          final playlist = ContentControl.instance.getContentById(parent.id!, ContentType.playlist);
           if (playlist != null) {
             QueueControl.instance.setOriginQueue(origin: playlist, songs: playlist.songs);
           }
           break;
         case 'artists':
-          final artist = ContentControl.instance.getContentById<Artist>(parent.id!);
+          final artist = ContentControl.instance.getContentById(parent.id!, ContentType.artist);
           if (artist != null) {
             QueueControl.instance.setOriginQueue(origin: artist, songs: artist.songs);
           }
@@ -180,42 +180,47 @@ class _BrowserParentProvider {
   }
 }
 
-class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
-  _AudioHandler() {
-    _init();
+@visibleForTesting
+class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
+  AudioHandler(MusicPlayer player) {
+    _init(player);
   }
 
   bool _disposed = false;
-  bool _running = false;
-  MusicPlayer player = MusicPlayer.instance;
+  @visibleForTesting
+  bool running = false;
+  late MusicPlayer player;
+  late StreamSubscription playbackSubscriber;
+  late StreamSubscription queueSubscriber;
 
-  Future<void> _init() async {
-    WidgetsBinding.instance!.addObserver(this);
-    
-    DateTime? _lastEvent;
+  void _init(MusicPlayer player) {
+    _disposed = false;
+    this.player = player;
+    WidgetsBinding.instance.addObserver(this);
+
+    DateTime? lastEvent;
     player.positionStream.listen((event) {
-      final now = DateTime.now();
-      if (_lastEvent == null || now.difference(_lastEvent!) > const Duration(milliseconds: 1000)) {
-        _lastEvent = now;
+      final now = clock.now();
+      if (lastEvent == null || now.difference(lastEvent!) > const Duration(milliseconds: 1000)) {
+        lastEvent = now;
         _setState();
       }
     });
     player.playingStream.listen((playing) {
       _setState();
-      _lastEvent = DateTime.now();
-      if (playing)
-        _running = true;
+      lastEvent = clock.now();
+      if (playing) {
+        running = true;
+      }
     });
     player.loopingStream.listen((event) => _setState());
-    PlaybackControl.instance.onSongChange.listen((song) {
+    playbackSubscriber = PlaybackControl.instance.onSongChange.listen((song) {
       mediaItem.add(song.toMediaItem());
       _setState();
     });
-    QueueControl.instance.onQueueChanged.listen((_) {
+    queueSubscriber = QueueControl.instance.onQueueChanged.listen((_) {
       queue.add(
-        QueueControl.instance.state.current.songs
-          .map((el) => el.toMediaItem())
-          .toList(),
+        QueueControl.instance.state.current.songs.map((el) => el.toMediaItem()).toList(),
       );
       _setState();
     });
@@ -223,7 +228,10 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   void dispose() {
     _disposed = true;
-    WidgetsBinding.instance!.removeObserver(this);
+    stop();
+    playbackSubscriber.cancel();
+    queueSubscriber.cancel();
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -242,7 +250,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> prepareFromSearch(String query, [Map<String, dynamic>? extras]) async {
-    final songs = ContentControl.instance.search<Song>(query);
+    final songs = ContentControl.instance.search(query, contentType: ContentType.song);
     if (songs.isNotEmpty) {
       QueueControl.instance.setSearchedQueue(query, songs);
       await player.setSong(ContentControl.instance.state.allSongs.byId.get(songs[0].id));
@@ -273,7 +281,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> playFromSearch(String query, [Map<String, dynamic>? extras]) async {
-    final songs = ContentControl.instance.search<Song>(query);
+    final songs = ContentControl.instance.search(query, contentType: ContentType.song);
     if (songs.isNotEmpty) {
       QueueControl.instance.setSearchedQueue(query, songs);
       await player.setSong(ContentControl.instance.state.allSongs.byId.get(songs[0].id));
@@ -310,10 +318,16 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
         hookPressedCount += 1;
         hookTimer ??= Timer(const Duration(milliseconds: 600), () {
           switch (hookPressedCount) {
-            case 1: player.playPause(); break;
-            case 2: player.playNext(); break;
+            case 1:
+              player.playPause();
+              break;
+            case 2:
+              player.playNext();
+              break;
             case 3:
-            default: player.playPrev(); break;
+            default:
+              player.playPrev();
+              break;
           }
           hookPressedCount = 0;
           hookTimer = null;
@@ -330,10 +344,8 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<void> stop() async {
-    _running = false;
-    // TODO: currently stop seeks to the beginning, use stop when https://github.com/ryanheise/just_audio/issues/366 is resolved
-    // await player.stop();
-    await player.pause();
+    running = false;
+    await player.stop();
     await super.stop();
   }
 
@@ -450,8 +462,7 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
     QueueControl.instance.setQueue(
-      shuffled: shuffleMode == AudioServiceShuffleMode.all ||
-                shuffleMode == AudioServiceShuffleMode.group,
+      shuffled: shuffleMode == AudioServiceShuffleMode.all || shuffleMode == AudioServiceShuffleMode.group,
     );
   }
 
@@ -472,13 +483,9 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
     super.subscribeToChildren(parentMediaId);
     switch (parentMediaId) {
       case AudioService.recentRootId:
-        return QueueControl.instance.onQueueChanged
-          .map<Map<String, dynamic>>((_) => {})
-          .shareValue();
+        return QueueControl.instance.onQueueChanged.map<Map<String, dynamic>>((_) => {}).shareValue();
       default: // I have a single event stream for all updates of the library
-        return ContentControl.instance.onContentChange
-          .map<Map<String, dynamic>>((_) => {})
-          .shareValue();
+        return ContentControl.instance.onContentChange.map<Map<String, dynamic>>((_) => {}).shareValue();
     }
   }
 
@@ -489,88 +496,84 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
 
   @override
   Future<List<MediaItem>> search(String query, [Map<String, dynamic>? extras]) async {
-    return ContentControl.instance.search<Song>(query)
-      .map((song) => song.toMediaItem())
-      .toList();
+    return ContentControl.instance
+        .search(query, contentType: ContentType.song)
+        .map((song) => song.toMediaItem())
+        .toList();
   }
 
   @override
   Future<void> onNotificationAction(String action) async {
     switch (action) {
       case 'loop_on':
-      case 'loop_off': return player.switchLooping();
-      case 'play_prev': return player.playPrev();
+      case 'loop_off':
+        return player.switchLooping();
+      case 'play_prev':
+        return player.playPrev();
       case 'pause':
-      case 'play': return player.playPause();
-      case 'play_next': return player.playNext();
-      case 'stop': return stop();
-      default: throw UnimplementedError();
+      case 'play':
+        return player.playPause();
+      case 'play_next':
+        return player.playNext();
+      case 'stop':
+        return stop();
+      default:
+        throw UnimplementedError();
     }
   }
 
   @override
   Future<void> didChangeLocales(List<Locale>? locales) async {
     mediaItem.add(PlaybackControl.instance.currentSong.toMediaItem());
-    queue.add(QueueControl.instance.state.current
-      .songs
-      .map((el) => el.toMediaItem())
-      .toList(),
-    );
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    _setState();
+    queue.add(QueueControl.instance.state.current.songs.map((el) => el.toMediaItem()).toList());
   }
 
   /// Broadcasts the current state to all clients.
   void _setState() {
-    if (_disposed || !_running)
+    if (_disposed) {
       return;
+    }
     final playing = player.playing;
     final l10n = staticl10n;
-    final color = WidgetsBinding.instance!.window.platformBrightness == Brightness.dark
-      ? 'white'
-      : 'black';
     playbackState.add(playbackState.value!.copyWith(
       controls: [
         // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
         if (player.looping)
           MediaControl(
-            androidIcon: 'drawable/round_loop_on_${color}_24',
+            androidIcon: 'drawable/round_loop_one',
             label: l10n.loopOn,
             action: 'loop_on',
           )
         else
           MediaControl(
-            androidIcon: 'drawable/round_loop_${color}_24',
+            androidIcon: 'drawable/round_loop',
             label: l10n.loopOff,
-            action:'loop_off',
+            action: 'loop_off',
           ),
         MediaControl(
-          androidIcon: 'drawable/round_skip_previous_${color}_36',
+          androidIcon: 'drawable/round_skip_previous',
           label: l10n.previous,
           action: 'play_prev',
         ),
         if (playing)
           MediaControl(
-            androidIcon: 'drawable/round_pause_${color}_36',
+            androidIcon: 'drawable/round_pause',
             label: l10n.pause,
             action: 'pause',
           )
         else
           MediaControl(
-            androidIcon: 'drawable/round_play_arrow_${color}_36',
+            androidIcon: 'drawable/round_play_arrow',
             label: l10n.play,
             action: 'play',
           ),
         MediaControl(
-          androidIcon: 'drawable/round_skip_next_${color}_36',
+          androidIcon: 'drawable/round_skip_next',
           label: l10n.next,
           action: 'play_next',
         ),
         MediaControl(
-          androidIcon: 'drawable/round_close_${color}_24',
+          androidIcon: 'drawable/round_stop',
           label: l10n.stop,
           action: 'stop',
         ),
@@ -602,23 +605,16 @@ class _AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObs
         MediaAction.seekForward,
       },
       androidCompactActionIndices: const [1, 2, 3],
-      repeatMode: player.looping
-        ? AudioServiceRepeatMode.one
-        : AudioServiceRepeatMode.all,
-      shuffleMode: QueueControl.instance.state.shuffled
-        ? AudioServiceShuffleMode.all
-        : AudioServiceShuffleMode.none,
+      repeatMode: player.looping ? AudioServiceRepeatMode.one : AudioServiceRepeatMode.all,
+      shuffleMode: QueueControl.instance.state.shuffled ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
         ProcessingState.loading: AudioProcessingState.loading,
         ProcessingState.buffering: AudioProcessingState.buffering,
         ProcessingState.ready: AudioProcessingState.ready,
         ProcessingState.completed: AudioProcessingState.completed,
-      }[ // Excluding idle state because it makes notification to reappear.
-        player.processingState == ProcessingState.idle
-          ? ProcessingState.loading
-          : player.processingState
-      ],
+        // Excluding idle state because it makes notification to reappear.
+      }[player.processingState == ProcessingState.idle ? ProcessingState.loading : player.processingState],
       playing: playing,
       updatePosition: player.position,
       bufferedPosition: player.bufferedPosition,
@@ -636,27 +632,35 @@ class MusicPlayer extends AudioPlayer {
     return _instance ??= MusicPlayer._();
   }
 
-  static _AudioHandler? _handler;
+  @visibleForTesting
+  static AudioHandler? handler;
 
   /// Updates service state media item.
   void updateServiceMediaItem() {
     final song = PlaybackControl.instance.currentSongNullable;
-    if (song != null && _handler!._running) {
-      _handler!.mediaItem.add(song.toMediaItem());
+    if (song != null && handler!.running) {
+      handler!.mediaItem.add(song.toMediaItem());
     }
   }
 
   Future<void> init() async {
     await restoreLastSong();
-    _handler ??= await AudioService.init(builder: () {
-        return _AudioHandler();
+
+    // Reinitialize the AudioHandler if it already exists. Otherwise it is
+    // initialized by the AudioService. The AudioService must only ever be
+    // initialized once per process, but the handler depends on the MusicPlayer,
+    // which can be disposed and recreated.
+    handler?._init(this);
+    handler ??= await AudioService.init(
+      builder: () {
+        return AudioHandler(MusicPlayer.instance);
       },
       config: AudioServiceConfig(
         androidResumeOnClick: true,
         androidNotificationChannelName: staticl10n.playback,
         androidNotificationChannelDescription: staticl10n.playbackControls,
         // notificationColor,
-        androidNotificationIcon: 'drawable/round_music_note_white_48',
+        androidNotificationIcon: 'drawable/round_music_note',
         androidShowNotificationBadge: false,
         androidNotificationClickStartsActivity: true,
         androidNotificationOngoing: false,
@@ -678,23 +682,21 @@ class MusicPlayer extends AudioPlayer {
       }
     });
 
-    positionStream.listen((position) { 
+    positionStream.listen((position) {
       Prefs.songPosition.set(position.inSeconds);
     });
 
     // Restore from prefs.
     await Future.wait([
       seek(Duration(seconds: Prefs.songPosition.get())),
-      setLoopMode(Prefs.loopMode.get()
-        ? LoopMode.one
-        : LoopMode.off),
+      setLoopMode(Prefs.loopMode.get() ? LoopMode.one : LoopMode.off),
     ]);
   }
 
   @override
   Future<void> dispose() {
     _instance = null;
-    _handler?.stop();
+    handler?.dispose();
     return super.dispose();
   }
 
@@ -707,9 +709,7 @@ class MusicPlayer extends AudioPlayer {
     if (current.isNotEmpty) {
       final songId = Prefs.songId.get();
       await setSong(
-        songId == null
-          ? current.songs[0]
-          : current.byId.get(songId) ?? current.songs[0],
+        songId == null ? current.songs[0] : current.byId.get(songId) ?? current.songs[0],
         fromBeginningWhenSame: false,
       );
     }
@@ -740,13 +740,14 @@ class MusicPlayer extends AudioPlayer {
   ///
   /// Calling this function with the same song will just seek to the
   /// beginning. To disable this [fromBeginningWhenSame] can be set to false.
-  Future<void> setSong(Song? song, { bool fromBeginningWhenSame = true }) async {
+  Future<void> setSong(Song? song, {bool fromBeginningWhenSame = true}) async {
     song ??= ContentControl.instance.state.allSongs.songs[0];
     final previousCurrentSong = PlaybackControl.instance.currentSongNullable;
     PlaybackControl.instance.changeSong(song);
     if (previousCurrentSong == PlaybackControl.instance.currentSong) {
-      if (fromBeginningWhenSame)
+      if (fromBeginningWhenSame) {
         await seek(Duration.zero);
+      }
       return;
     }
     try {
@@ -761,7 +762,7 @@ class MusicPlayer extends AudioPlayer {
         ShowFunctions.instance.showToast(msg: message);
         playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
-        ContentControl.instance.refetch<Song>();
+        ContentControl.instance.refetch(ContentType.song);
       } else {
         // Other exceptions are not expected, rethrow.
         rethrow;
@@ -783,8 +784,8 @@ class MusicPlayer extends AudioPlayer {
     }
   }
 
-  /// Plays the song after current, or if speceified, then after [song].
-  Future<void> playNext({ Song? song }) async {
+  /// Plays the song after current, or if specified, then after [song].
+  Future<void> playNext({Song? song}) async {
     song = QueueControl.instance.state.current.getNext(
       song ?? PlaybackControl.instance.currentSong,
     );
@@ -801,8 +802,8 @@ class MusicPlayer extends AudioPlayer {
     }
   }
 
-  /// Plays the song before current, or if speceified, then before [song].
-  Future<void> playPrev({ Song? song }) async {
+  /// Plays the song before current, or if specified, then before [song].
+  Future<void> playPrev({Song? song}) async {
     song = QueueControl.instance.state.current.getPrev(
       song ?? PlaybackControl.instance.currentSong,
     );

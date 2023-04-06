@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 // import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
@@ -23,99 +22,129 @@ extension QuickActionSerialization on QuickAction {
   String get value => EnumToString.convertToString(this);
 }
 
-/// Picks some value based on the provided `T` type of [Content].
-///
-/// Instead of `T`, you can explicitly specify [contentType].
-///
-/// The [fallback] can be specified in cases when the type is [Content].
-/// Generally, it's better never use it, but in some cases, like selection actions,
-/// that can react to [ContentSelectionController]s of mixed types, it is relevant to use it.
-///
-/// The point of this function is to structurize and generalize the places where multiple contents
-/// an be used. It also allows to ensure that every existing content in the app is supported in all
-/// places it should be supported, this is extra useful when new content type is added.
-V contentPick<T extends Content, V>({
-  Type? contentType,
-  required V song,
-  required V album,
-  required V playlist,
-  required V artist,
-  V? fallback,
-}) {
-  switch (contentType ?? T) {
-    case Song:
-      return song;
-    case Album:
-      return album;
-    case Playlist:
-      return playlist;
-    case Artist:
-      return artist;
-    case Content:
-      if (fallback != null)
-        return fallback;
-      throw UnimplementedError();
-    default:
-      throw UnimplementedError();
-  }
-}
-
-/// Analogue of [contentPick] for [PersistentQueue]s.
-V persistentQueuePick<T extends PersistentQueue, V>({
-  Type? contentType,
-  required V album,
-  required V playlist,
-  V? fallback,
-}) {
-  switch (contentType ?? T) {
-    case Album:
-      return album;
-    case Playlist:
-      return playlist;
-    case Content:
-      if (fallback != null)
-        return fallback;
-      throw UnimplementedError();
-    default:
-      throw UnimplementedError();
-  }
-}
-
-/// A [Map] container for the [Content] as key, and `V` as value entry.
+/// A [Map] container for the [ContentType] as key, and [V] as value entry.
 class ContentMap<V> {
-  /// Creates a content map from initial value [map].
-  ///
-  /// If none specified, will initialize with empty map.
-  ContentMap([Map<Type, V>? map]) : _map = map ?? {};
+  /// The value for [ContentType.song].
+  V songValue;
 
-  final Map<Type, V> _map;
+  /// The value for [ContentType.album].
+  V albumValue;
+
+  /// The value for [ContentType.playlist].
+  V playlistValue;
+
+  /// The value for [ContentType.artist].
+  V artistValue;
+
+  ContentMap({
+    required this.songValue,
+    required this.albumValue,
+    required this.playlistValue,
+    required this.artistValue,
+  });
+
+  /// Create a content map and initialize it with the values returned by the [factory],
+  /// which will be called once with each [ContentType].
+  factory ContentMap.fromFactory(V Function(ContentType contentType) factory) {
+    return ContentMap(
+      songValue: factory(ContentType.song),
+      albumValue: factory(ContentType.album),
+      playlistValue: factory(ContentType.playlist),
+      artistValue: factory(ContentType.artist),
+    );
+  }
 
   /// Map values.
-  Iterable<V> get values => _map.values;
+  Iterable<V> get values => ContentType.values.map((type) => get(type));
 
   /// Map entries.
-  Iterable<MapEntry<Type, V>> get entries => _map.entries;
+  Iterable<MapEntry<ContentType, V>> get entries => ContentType.values.map((type) => MapEntry(type, get(type)));
 
-  /// Returs a [Sort] per `T` [Content] from the map.
-  /// 
-  /// If [key] was explicitly provided, will use it instead.
-  V getValue<T extends Content>([Type? key]) {
-    assert(
-      Content.enumerate().contains(key ?? T),
-      "Specified type must be a subtype of Content",
-    );
-    return _map[key ?? T]!;
+  /// Returns the value for the [type] from the map.
+  V get(ContentType type) {
+    switch (type) {
+      case ContentType.song:
+        return songValue;
+      case ContentType.album:
+        return albumValue;
+      case ContentType.playlist:
+        return playlistValue;
+      case ContentType.artist:
+        return artistValue;
+    }
   }
 
-  /// Puts a [Sort] typed with `T` into the map.
-  /// 
-  /// If [key] was explicitly provided, will use it instead.
-  void setValue<T extends Content>(V value, {Type? key}) {
-    assert(
-      Content.enumerate().contains(key ?? T),
-      "Specified type must be a subtype of Content",
-    );
-    _map[key ?? T] = value;
+  /// Puts a [value] for the [key] into the map.
+  void set(V value, {required ContentType key}) {
+    switch (key) {
+      case ContentType.song:
+        songValue = value;
+        break;
+      case ContentType.album:
+        albumValue = value;
+        break;
+      case ContentType.playlist:
+        playlistValue = value;
+        break;
+      case ContentType.artist:
+        artistValue = value;
+        break;
+    }
+  }
+}
+
+/// A container for list of all content types.
+///
+/// This is like a [ContentMap] that contains lists and
+/// always guarantees to have a value in it for given content type.
+class ContentTuple {
+  final List<Song> songs;
+  final List<Album> albums;
+  final List<Playlist> playlists;
+  final List<Artist> artists;
+
+  const ContentTuple({
+    this.songs = const [],
+    this.albums = const [],
+    this.playlists = const [],
+    this.artists = const [],
+  });
+
+  /// Get the list corresponding to the [type].
+  List<T> get<T extends Content>(ContentType<T> type) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (type as ContentType) {
+      case ContentType.song:
+        return songs as List<T>;
+      case ContentType.album:
+        return albums as List<T>;
+      case ContentType.playlist:
+        return playlists as List<T>;
+      case ContentType.artist:
+        return artists as List<T>;
+    }
+  }
+
+  /// Get a merged list of all lists for all content types.
+  List<Content> get merged => [for (final contentType in ContentType.values) ...get(contentType)];
+
+  /// Whether there is any content in this tuple.
+  bool get notEmpty => ContentType.values.any((contentType) => get(contentType).isNotEmpty);
+
+  /// Whether there is no content in this tuple.
+  bool get empty => !notEmpty;
+
+  /// Test whether the [test] function evaluates to `true` for any of the content in this tuple.
+  bool any(bool Function(Content element) test) {
+    for (final contentType in ContentType.values) {
+      for (final content in get(contentType)) {
+        if (test(content)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 
@@ -151,7 +180,7 @@ class ContentRepository {
 //   }
 // }
 
-/// Contols content state and allows to perform related actions, for example:
+/// Controls content state and allows to perform related actions, for example:
 ///
 /// * fetch songs
 /// * search
@@ -182,8 +211,9 @@ class ContentControl extends Control {
 
   /// Emit event to [onContentChange].
   void emitContentChange() {
-    if (!disposed.value)
+    if (!disposed.value) {
       _contentSubject.add(null);
+    }
   }
 
   // /// Recently pressed quick action.
@@ -195,7 +225,7 @@ class ContentControl extends Control {
   bool get initializing => _initializeCompleter != null;
   Completer<void>? _initializeCompleter;
 
-  /// The main data app initialization function, inits all queues.
+  /// The main data app initialization function, initializes all queues.
   /// Also handles no-permissions situations.
   @override
   Future<void> init() async {
@@ -206,15 +236,15 @@ class ContentControl extends Control {
       selectionNotifier = ValueNotifier(null);
     }
     if (Permissions.instance.granted) {
-      // TODO: prevent initalizing if already initizlied
+      // TODO: prevent initializing if already initialized
       _initializeCompleter = Completer();
       emitContentChange(); // update UI to show "Searching songs" screen
       _restoreSorts();
       await Future.any([
         _initializeCompleter!.future,
         Future.wait([
-          for (final contentType in Content.enumerate())
-            refetch(contentType: contentType, updateQueues: false, emitChangeEvent: false),
+          for (final contentType in ContentType.values)
+            refetch(contentType, updateQueues: false, emitChangeEvent: false),
         ]),
       ]);
       if (!_empty && _initializeCompleter != null && !_initializeCompleter!.isCompleted) {
@@ -222,6 +252,8 @@ class ContentControl extends Control {
         await QueueControl.instance.init();
         PlaybackControl.instance.init();
         await MusicPlayer.instance.init();
+        await FavoritesControl.instance.init();
+        PlayerInterfaceColorStyleControl.instance.init();
       }
       _initializeCompleter = null;
     }
@@ -238,27 +270,29 @@ class ContentControl extends Control {
       // _quickActions.clearShortcutItems();
       _initializeCompleter?.complete();
       _initializeCompleter = null;
-      // TODO: this might still deliver some pedning events to listeneres, see https://github.com/dart-lang/sdk/issues/45653
+      // TODO: This might still deliver some pending events to listeners, see https://github.com/dart-lang/sdk/issues/45653
       _contentSubject.close();
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         selectionNotifier.dispose();
       });
       _state = null;
       QueueControl.instance.dispose();
       PlaybackControl.instance.dispose();
       MusicPlayer.instance.dispose();
+      FavoritesControl.instance.dispose();
+      PlayerInterfaceColorStyleControl.instance.dispose();
     }
     super.dispose();
   }
 
   /// Restores [sorts] from [Prefs].
   Future<void> _restoreSorts() async {
-    state.sorts = ContentMap({
-      Song: repository.songSort.get(),
-      Album: repository.albumSort.get(),
-      Playlist: repository.playlistSort.get(),
-      Artist: repository.artistSort.get(),
-    });
+    state.sorts = ContentMap(
+      songValue: repository.songSort.get(),
+      albumValue: repository.albumSort.get(),
+      playlistValue: repository.playlistSort.get(),
+      artistValue: repository.artistSort.get(),
+    );
   }
 
   // void _initQuickActions() {
@@ -287,60 +321,78 @@ class ContentControl extends Control {
   //     ShortcutItem(type: QuickAction.playRecent.value, localizedTitle: staticl10n.playRecent, icon: 'round_play_arrow_white_36')
   //   ]);
   // }
-  
-  /// Returns content of specified type.
-  List<T> getContent<T extends Content>([Type? contentType]) {
-    return contentPick<T, ValueGetter<List<T>>>(
-      contentType: contentType,
-      song: () => state.allSongs.songs as List<T>,
-      album: () => state.albums.values.toList() as List<T>,
-      playlist: () => state.playlists as List<T>,
-      artist: () => state.artists as List<T>,
-    )();
+
+  /// Returns content of specified [contentType].
+  List<T> getContent<T extends Content>(
+    ContentType<T> contentType, {
+    bool filterFavorite = false,
+  }) {
+    final List<T> contentList;
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
+      case ContentType.song:
+        contentList = state.allSongs.songs as List<T>;
+        break;
+      case ContentType.album:
+        contentList = state.albums.values.toList() as List<T>;
+        break;
+      case ContentType.playlist:
+        contentList = state.playlists as List<T>;
+        break;
+      case ContentType.artist:
+        contentList = state.artists as List<T>;
+        break;
+    }
+    if (filterFavorite) {
+      return ContentUtils.filterFavorite(contentList).toList();
+    }
+    return contentList;
   }
 
   /// Returns content of specified type with ID.
-  T? getContentById<T extends Content>(int id, [Type? contentType]) {
-    if ((contentType ?? T) == Album)
+  T? getContentById<T extends Content>(int id, ContentType<T> contentType) {
+    if (contentType == ContentType.album) {
       return state.albums[id] as T?;
-    return getContent<T>(contentType).firstWhereOrNull((el) => el.id == id);
+    }
+    return getContent(contentType).firstWhereOrNull((el) => el.id == id);
   }
 
   /// Refetches all the content.
   Future<void> refetchAll() async {
     await Future.wait([
-      for (final contentType in Content.enumerate())
-        refetch(contentType: contentType),
+      for (final contentType in ContentType.values) refetch(contentType),
     ]);
-    if (!disposed.value)
+    if (!disposed.value) {
       await MusicPlayer.instance.restoreLastSong();
+    }
   }
 
-  /// Refetches content by the `T` content type.
+  /// Refetches content by the [contentType].
   ///
-  /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling [QueueControl.removeObsolete].
-  /// (only works with [Song]s).
-  Future<void> refetch<T extends Content>({
-    Type? contentType,
+  /// When [updateQueues] is `true`, checks checks the queues for obsolete songs by calling
+  /// [QueueControl.removeObsolete] (only works with [Song]s).
+  Future<void> refetch(
+    ContentType contentType, {
     bool updateQueues = true,
     bool emitChangeEvent = true,
   }) async {
-    if (disposed.value)
+    if (disposed.value) {
       return;
-    await contentPick<T, AsyncCallback>(
-      contentType: contentType,
-      song: () async {
+    }
+    switch (contentType) {
+      case ContentType.song:
         state.allSongs.setSongs(await ContentChannel.instance.retrieveSongs());
         if (_empty) {
           dispose();
           return;
         }
-        sort<Song>(emitChangeEvent: false);
+        sort(emitChangeEvent: false, contentType: contentType);
         if (updateQueues) {
           QueueControl.instance.removeObsolete(emitChangeEvent: false);
         }
-      },
-      album: () async {
+        break;
+      case ContentType.album:
         state.albums = await ContentChannel.instance.retrieveAlbums();
         if (disposed.value) {
           return;
@@ -349,9 +401,9 @@ class ContentControl extends Control {
         if (origin is Album && state.albums[origin.id] == null) {
           QueueControl.instance.resetQueueAsFallback();
         }
-        sort<Album>(emitChangeEvent: false);
-      },
-      playlist: () async {
+        sort(emitChangeEvent: false, contentType: contentType);
+        break;
+      case ContentType.playlist:
         state.playlists = await ContentChannel.instance.retrievePlaylists();
         if (disposed.value) {
           return;
@@ -360,9 +412,9 @@ class ContentControl extends Control {
         if (origin is Playlist && state.playlists.firstWhereOrNull((el) => el == origin) == null) {
           QueueControl.instance.resetQueueAsFallback();
         }
-        sort<Playlist>(emitChangeEvent: false);
-      },
-      artist: () async {
+        sort(emitChangeEvent: false, contentType: contentType);
+        break;
+      case ContentType.artist:
         state.artists = await ContentChannel.instance.retrieveArtists();
         if (disposed.value) {
           return;
@@ -371,16 +423,16 @@ class ContentControl extends Control {
         if (origin is Artist && state.artists.firstWhereOrNull((el) => el == origin) == null) {
           QueueControl.instance.resetQueueAsFallback();
         }
-        sort<Artist>(emitChangeEvent: false);
-      },
-    )();
+        sort(emitChangeEvent: false, contentType: contentType);
+        break;
+    }
     if (emitChangeEvent) {
       emitContentChange();
     }
   }
 
-  /// Searches for content by given [query] and the `T` content type.
-  List<T> search<T extends Content>(String query, { Type? contentType }) {
+  /// Searches for content by given [query] and the [contentType].
+  List<T> search<T extends Content>(String query, {required ContentType<T> contentType}) {
     // Lowercase to bring strings to one format
     query = query.toLowerCase();
     final words = query.split(' ');
@@ -391,114 +443,140 @@ class ContentControl extends Control {
     //
     // final year = int.tryParse(words[0]);
 
-    /// Splits string by spaces, or dashes, or bar, or paranthesis
+    /// Splits string by spaces, or dashes, or bar, or parenthesis
     final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
     final l10n = staticl10n;
+
     /// Checks whether a [string] is abbreviation for the [query].
     /// For example: "big baby tape - bbt"
     bool isAbbreviation(String string) {
-      return string.toLowerCase()
-            .split(abbreviationRegexp)
-            .map((word) => word.isNotEmpty ? word[0] : '')
-            .join()
-            .contains(query);
+      return string
+          .toLowerCase()
+          .split(abbreviationRegexp)
+          .map((word) => word.isNotEmpty ? word[0] : '')
+          .join()
+          .contains(query);
     }
-    final contentInterable = contentPick<T, ValueGetter<Iterable<T>>>(
-      contentType: contentType,
-      song: () {
-        return state.allSongs.songs.where((song) {
-          // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            song.title.toLowerCase().contains(word) ||
-            ContentUtils.localizedArtist(song.artist, l10n).toLowerCase().contains(word) ||
-            (song.album?.toLowerCase().contains(word) ?? false)
-          ).toList();
-          final fullQuery = wordsTest.every((e) => e);
-          // Abbreviation search
-          final abbreviation = isAbbreviation(song.title);
-          return fullQuery || abbreviation;
-        }).cast<T>();
-      },
-      album: () {
-        return state.albums.values.where((album) {
-          // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            ContentUtils.localizedArtist(album.artist, l10n).toLowerCase().contains(word) ||
-            album.album.toLowerCase().contains(word),
-          ).toList();
-          final fullQuery = wordsTest.every((e) => e);
-          // Abbreviation search
-          final abbreviation = isAbbreviation(album.album);
-          return fullQuery || abbreviation;
-        }).cast<T>();
-      },
-      playlist: () {
-        return state.playlists.where((playlist) {
-          // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            playlist.name.toLowerCase().contains(word),
-          ).toList();
-          final fullQuery = wordsTest.every((e) => e);
-          // Abbreviation search
-          final abbreviation = isAbbreviation(playlist.name);
-          return fullQuery || abbreviation;
-        }).cast<T>();
-      },
-      artist: () {
-        return state.artists.where((artist) {
-          // Exact query search
-          final wordsTest = words.map<bool>((word) =>
-            artist.artist.toLowerCase().contains(word),
-          ).toList();
-          final fullQuery = wordsTest.every((e) => e);
-          // Abbreviation search
-          final abbreviation = isAbbreviation(artist.artist);
-          return fullQuery || abbreviation;
-        }).cast<T>();
-      },
-    )();
-    return contentInterable.toList();
+
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
+      case ContentType.song:
+        return state.allSongs.songs
+            .where((song) {
+              // Exact query search
+              final wordsTest = words
+                  .map<bool>(
+                    (word) =>
+                        song.title.toLowerCase().contains(word) ||
+                        ContentUtils.localizedArtist(song.artist, l10n).toLowerCase().contains(word) ||
+                        (song.album?.toLowerCase().contains(word) ?? false),
+                  )
+                  .toList();
+              final fullQuery = wordsTest.every((e) => e);
+              // Abbreviation search
+              final abbreviation = isAbbreviation(song.title);
+              return fullQuery || abbreviation;
+            })
+            .cast<T>()
+            .toList();
+      case ContentType.album:
+        return state.albums.values
+            .where((album) {
+              // Exact query search
+              final wordsTest = words
+                  .map<bool>(
+                    (word) =>
+                        ContentUtils.localizedArtist(album.artist, l10n).toLowerCase().contains(word) ||
+                        album.album.toLowerCase().contains(word),
+                  )
+                  .toList();
+              final fullQuery = wordsTest.every((e) => e);
+              // Abbreviation search
+              final abbreviation = isAbbreviation(album.album);
+              return fullQuery || abbreviation;
+            })
+            .cast<T>()
+            .toList();
+      case ContentType.playlist:
+        return state.playlists
+            .where((playlist) {
+              // Exact query search
+              final wordsTest = words
+                  .map<bool>(
+                    (word) => playlist.name.toLowerCase().contains(word),
+                  )
+                  .toList();
+              final fullQuery = wordsTest.every((e) => e);
+              // Abbreviation search
+              final abbreviation = isAbbreviation(playlist.name);
+              return fullQuery || abbreviation;
+            })
+            .cast<T>()
+            .toList();
+      case ContentType.artist:
+        return state.artists
+            .where((artist) {
+              // Exact query search
+              final wordsTest = words
+                  .map<bool>(
+                    (word) => artist.artist.toLowerCase().contains(word),
+                  )
+                  .toList();
+              final fullQuery = wordsTest.every((e) => e);
+              // Abbreviation search
+              final abbreviation = isAbbreviation(artist.artist);
+              return fullQuery || abbreviation;
+            })
+            .cast<T>()
+            .toList();
+    }
   }
 
   /// Sorts songs, albums, etc.
   /// See [ContentState.sorts].
-  void sort<T extends Content>({ Type? contentType, Sort<T>? sort, bool emitChangeEvent = true }) {
+  void sort<T extends Content>({
+    required ContentType<T> contentType,
+    Sort<T>? sort,
+    bool emitChangeEvent = true,
+  }) {
     final sorts = state.sorts;
-    sort ??= sorts.getValue<T>(contentType) as Sort<T>;
-    contentPick<T, VoidCallback>(
-      contentType: contentType,
-      song: () {
-        final _sort = sort! as SongSort;
-        sorts.setValue<Song>(_sort);
-        repository.songSort.set(_sort);
-        final comparator = _sort.comparator;
+    sort ??= sorts.get(contentType) as Sort<T>;
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
+      case ContentType.song:
+        final castedSort = sort as SongSort;
+        sorts.set(castedSort, key: contentType);
+        repository.songSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.allSongs.songs.sort(comparator);
-      },
-      album: () {
-        final _sort = sort! as AlbumSort;
-        sorts.setValue<Album>(_sort);
-        repository.albumSort.set(_sort);
-        final comparator = _sort.comparator;
+        break;
+      case ContentType.album:
+        final castedSort = sort as AlbumSort;
+        sorts.set(castedSort, key: contentType);
+        repository.albumSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.albums = Map.fromEntries(state.albums.entries.toList()
           ..sort((a, b) {
             return comparator(a.value, b.value);
           }));
-      },
-      playlist: () {
-        final _sort = sort! as PlaylistSort;
-        sorts.setValue<Playlist>(_sort);
-        repository.playlistSort.set(_sort);
-        final comparator = _sort.comparator;
+        break;
+      case ContentType.playlist:
+        final castedSort = sort as PlaylistSort;
+        sorts.set(castedSort, key: contentType);
+        repository.playlistSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.playlists.sort(comparator);
-      },
-      artist: () {
-        final _sort = sort! as ArtistSort;
-        sorts.setValue<Artist>(_sort);
-        repository.artistSort.set(_sort);
-        final comparator = _sort.comparator;
+        break;
+      case ContentType.artist:
+        final castedSort = sort as ArtistSort;
+        sorts.set(castedSort, key: contentType);
+        repository.artistSort.set(castedSort);
+        final comparator = castedSort.comparator;
         state.artists.sort(comparator);
-      },
-    )();
+        break;
+    }
     // Emit event to track change stream
     if (emitChangeEvent) {
       emitContentChange();
@@ -524,13 +602,11 @@ class ContentControl extends Control {
   ///
   /// The songs must have a source ID (non-negative).
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
-    // todo: implement
-    songs = _ensureSongsAreSource(songs);
-    if (DeviceInfoControl.instance.sdkInt >= 30) {
+    if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       try {
         final result = await ContentChannel.instance.setSongsFavorite(songs, value);
         if (result) {
-          await refetch<Song>();
+          await refetch(ContentType.song);
         }
       } catch (ex, stack) {
         FirebaseCrashlytics.instance.recordError(
@@ -543,8 +619,6 @@ class ContentControl extends Control {
         );
         debugPrint('setSongsFavorite error: $ex');
       }
-    } else {
-     
     }
   }
 
@@ -555,8 +629,9 @@ class ContentControl extends Control {
     songs = _ensureSongsAreSource(songs);
 
     void _removeFromState() {
-      for (final song in songs)
+      for (final song in songs) {
         state.allSongs.byId.remove(song.id);
+      }
       if (songs.isEmpty) {
         dispose();
       } else {
@@ -572,7 +647,7 @@ class ContentControl extends Control {
     try {
       final result = await ContentChannel.instance.deleteSongs(songs);
       await refetchAll();
-      if (DeviceInfoControl.instance.sdkInt >= 30 && result) {
+      if (DeviceInfoControl.instance.useScopedStorageForFileModifications && result) {
         _removeFromState();
       }
     } catch (ex, stack) {
@@ -595,8 +670,8 @@ class ContentControl extends Control {
   /// To avoid this, both songs and playlists should be refetched.
   Future<void> refetchSongsAndPlaylists() async {
     await Future.wait([
-      refetch<Song>(emitChangeEvent: false),
-      refetch<Playlist>(emitChangeEvent: false),
+      refetch(ContentType.song, emitChangeEvent: false),
+      refetch(ContentType.playlist, emitChangeEvent: false),
     ]);
     emitContentChange();
   }
@@ -606,7 +681,7 @@ class ContentControl extends Control {
   /// * else returns the string unmodified.
   Future<String> correctPlaylistName(String name) async {
     // Update the playlist in case they are outdated
-    await refetch<Playlist>(emitChangeEvent: false);
+    await refetch(ContentType.playlist, emitChangeEvent: false);
 
     // If such name already exists, find the max duplicate number and make the name
     // "name (max + 1)" instead.
@@ -628,7 +703,7 @@ class ContentControl extends Control {
       // * `)?`: close optional capturing group\
       // * `$`: match string end
       final regexp = RegExp(name.toString() + r'( \(([^)]+)\))?$');
-      int? max; 
+      int? max;
       for (final el in state.playlists) {
         final match = regexp.firstMatch(el.name);
         if (match != null) {
@@ -643,7 +718,7 @@ class ContentControl extends Control {
         name = '$name (${max + 1})';
       }
     }
-  
+
     return name;
   }
 
@@ -664,30 +739,44 @@ class ContentControl extends Control {
       await ContentChannel.instance.renamePlaylist(playlist, name);
       await refetchSongsAndPlaylists();
       return name;
-    } on ContentChannelException catch(ex) {
-      if (ex == ContentChannelException.playlistNotExists)
+    } on ContentChannelException catch (ex) {
+      if (ex == ContentChannelException.playlistNotExists) {
         return null;
+      }
       rethrow;
     }
   }
 
   /// Inserts songs in the playlist at the given [index].
-  Future<void> insertSongsInPlaylist({ required int index, required List<Song> songs, required Playlist playlist }) async {
+  Future<void> insertSongsInPlaylist({
+    required int index,
+    required List<Song> songs,
+    required Playlist playlist,
+  }) async {
     await ContentChannel.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Moves song in playlist, returned value indicates whether the operation was successful.
-  Future<void> moveSongInPlaylist({ required Playlist playlist, required int from, required int to, bool emitChangeEvent = true }) async {
+  Future<void> moveSongInPlaylist({
+    required Playlist playlist,
+    required int from,
+    required int to,
+    bool emitChangeEvent = true,
+  }) async {
     if (from != to) {
       await ContentChannel.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
-      if (emitChangeEvent)
+      if (emitChangeEvent) {
         await refetchSongsAndPlaylists();
+      }
     }
   }
 
   /// Removes songs from playlist at given [indexes].
-  Future<void> removeFromPlaylistAt({ required List<int> indexes, required Playlist playlist }) async {
+  Future<void> removeFromPlaylistAt({
+    required List<int> indexes,
+    required Playlist playlist,
+  }) async {
     await ContentChannel.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
@@ -711,8 +800,9 @@ class ContentControl extends Control {
   }
 }
 
-
 class ContentUtils {
+  ContentUtils._();
+
   /// Android unknown artist.
   static const unknownArtist = '<unknown>';
 
@@ -726,8 +816,9 @@ class ContentUtils {
 
   /// Joins list with the [dot].
   static String joinDot(List list) {
-    if (list.isEmpty)
+    if (list.isEmpty) {
       return '';
+    }
     var result = list.first;
     for (int i = 1; i < list.length; i++) {
       final string = list[i].toString();
@@ -738,9 +829,27 @@ class ContentUtils {
     return result;
   }
 
+  /// Returns a default icon for the playlist art.
+  ///
+  /// This is needed to show the playlist icon with the empty playlist,
+  /// and the song with non-empty, because non-empty playlist
+  /// shows arts of the first 4 songs in it.
+  static IconData defaultIconForPlaylistArt(PersistentQueue queue) {
+    switch (queue.type) {
+      case ContentType.song:
+      case ContentType.artist:
+        // (This is unreachable)
+        throw ArgumentError();
+      case ContentType.album:
+        return queue.type.icon;
+      case ContentType.playlist:
+        return queue.length > 0 ? ContentType.song.icon : queue.icon;
+    }
+  }
+
   /// Appends dot and year to [string].
   static String appendYearWithDot(String string, int year) {
-    return '$string $dot $year'; 
+    return '$string $dot $year';
   }
 
   /// Checks whether a [Song] is currently playing.
@@ -753,20 +862,11 @@ class ContentUtils {
   static bool originIsCurrent(SongOrigin origin) {
     final queues = QueueControl.instance.state;
     return queues.type == QueueType.origin && origin == queues.origin ||
-           queues.type != QueueType.origin && origin == PlaybackControl.instance.currentSongOrigin;
+        queues.type != QueueType.origin && origin == PlaybackControl.instance.currentSongOrigin;
   }
 
-  /// Returns a default icon for a [PersistentQueue].
-  static IconData persistentQueueIcon(PersistentQueue queue) {
-    return persistentQueuePick<PersistentQueue, IconData>(
-      contentType: queue.runtimeType,
-      album: Album.icon,
-      playlist: Playlist.icon,
-    );
-  }
-
-  /// Computes the duration of mulitple [songs] and returs it as formatted string.
-  static String bulkDuration(List<Song> songs) {
+  /// Computes the duration of multiple [songs] and returns it as formatted string.
+  static String bulkDuration(Iterable<Song> songs) {
     final duration = Duration(milliseconds: songs.fold(0, (prev, el) => prev + el.duration));
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
@@ -796,7 +896,7 @@ class ContentUtils {
   }
 
   /// Joins and returns a list of all songs of specified [origins] list.
-  static List<Song> joinSongOrigins(List<SongOrigin> origins) {
+  static List<Song> joinSongOrigins(Iterable<SongOrigin> origins) {
     final List<Song> songs = [];
     for (final origin in origins) {
       for (final song in origin.songs) {
@@ -809,7 +909,7 @@ class ContentUtils {
 
   /// Joins specified [origins] list and returns a list of all songs and a
   /// shuffled variant of it.
-  static ShuffleResult shuffleSongOrigins(List<SongOrigin> origins) {
+  static ShuffleResult shuffleSongOrigins(Iterable<SongOrigin> origins) {
     final List<Song> songs = joinSongOrigins(origins);
     final List<Song> shuffledSongs = [];
     for (final origin in List<SongOrigin>.from(origins)..shuffle()) {
@@ -824,40 +924,58 @@ class ContentUtils {
     );
   }
 
-  /// Accepts a collection of content, exctracts songs from each entry
+  /// Accepts a collection of content, extracts songs from each entry
   /// and returns a one flattened array of songs.
-  static List<Song> flatten(List<Content> collection) {
+  static List<Song> flatten(Iterable<Content> collection) {
     final List<Song> songs = [];
     for (final content in collection) {
-      if (content is Song) {
-        songs.add(content);
-      } else if (content is Album) {
-        songs.addAll(content.songs);
-      } else if (content is Playlist) {
-        songs.addAll(content.songs);
-      } else if (content is Artist) {
-        songs.addAll(content.songs);
-      } else {
-        throw UnimplementedError();
+      switch (content.type) {
+        case ContentType.song:
+          songs.add(content as Song);
+          break;
+        case ContentType.album:
+          songs.addAll((content as Album).songs);
+          break;
+        case ContentType.playlist:
+          songs.addAll((content as Playlist).songs);
+          break;
+        case ContentType.artist:
+          songs.addAll((content as Artist).songs);
+          break;
       }
-      assert(() {
-        contentPick<Song, void>(
-          song: null,
-          album: null,
-          playlist: null,
-          artist: null,
-        );
-        return true;
-      }());
     }
     return songs;
+  }
+
+  /// Filter content collection by favorite.
+  static Iterable<T> filterFavorite<T extends Content>(Iterable<T> content) {
+    return content.where((el) => el.isFavorite);
+  }
+
+  /// Receives a selection data set, extracts all types of contents,
+  /// and returns the result.
+  static ContentTuple selectionPack(Set<SelectionEntry<Content>> data) {
+    return _selectionPack(
+      data: data,
+      sort: false,
+    );
   }
 
   /// Receives a selection data set, extracts all types of contents,
   /// sorts them by index in ascending order and returns the result.
   ///
   /// See also discussion in [SelectionEntry].
-  static SortAndPackResult selectionSortAndPack(Set<SelectionEntry<Content>> data) {
+  static ContentTuple selectionPackAndSort(Set<SelectionEntry<Content>> data) {
+    return _selectionPack(
+      data: data,
+      sort: true,
+    );
+  }
+
+  static ContentTuple _selectionPack({
+    required Set<SelectionEntry<Content>> data,
+    required bool sort,
+  }) {
     final List<SelectionEntry<Song>> songs = [];
     final List<SelectionEntry<Album>> albums = [];
     final List<SelectionEntry<Playlist>> playlists = [];
@@ -875,24 +993,17 @@ class ContentUtils {
         throw UnimplementedError();
       }
     }
-    assert(() {
-      contentPick<Song, void>(
-        song: null,
-        album: null,
-        playlist: null,
-        artist: null,
-      );
-      return true;
-    }());
-    songs.sort((a, b) => a.index.compareTo(b.index));
-    albums.sort((a, b) => a.index.compareTo(b.index));
-    playlists.sort((a, b) => a.index.compareTo(b.index));
-    artists.sort((a, b) => a.index.compareTo(b.index));
-    return SortAndPackResult(
-      songs.map((el) => el.data).toList(),
-      albums.map((el) => el.data).toList(),
-      playlists.map((el) => el.data).toList(),
-      artists.map((el) => el.data).toList(),
+    if (sort) {
+      songs.sort((a, b) => a.index.compareTo(b.index));
+      albums.sort((a, b) => a.index.compareTo(b.index));
+      playlists.sort((a, b) => a.index.compareTo(b.index));
+      artists.sort((a, b) => a.index.compareTo(b.index));
+    }
+    return ContentTuple(
+      songs: songs.map((el) => el.data).toList(),
+      albums: albums.map((el) => el.data).toList(),
+      playlists: playlists.map((el) => el.data).toList(),
+      artists: artists.map((el) => el.data).toList(),
     );
   }
 
@@ -901,8 +1012,8 @@ class ContentUtils {
   /// If [idMap] is null, [ContentState.idMap] will be used.
   static int getSourceId(int id, {required SongOrigin? origin, IdMap? idMap}) {
     return id < 0
-      ? (idMap ?? QueueControl.instance.state.idMap)[IdMapKey(id: id, originEntry: origin?.toSongOriginEntry())]!
-      : id;
+        ? (idMap ?? QueueControl.instance.state.idMap)[IdMapKey(id: id, originEntry: origin?.toSongOriginEntry())]!
+        : id;
   }
 
   /// Checks the [song] for being a duplicate within the [origin], and if
@@ -912,11 +1023,11 @@ class ContentUtils {
   /// The [list] is the list of songs contained in this origin.
   ///
   /// This must be called before the song is inserted to the queue, otherwise
-  /// the song might be conidiered as a duplicate of itself, which will be incorrect.
+  /// the song might be considered as a duplicate of itself, which will be incorrect.
   /// The function asserts that.
   ///
   /// Marks the queue as dirty, so the next [setQueue] will save it.
-  /// 
+  ///
   /// The returned value indicates whether the duplicate song was found and
   /// [source] was changed.
   static bool deduplicateSong({
@@ -928,7 +1039,7 @@ class ContentUtils {
       final sourceSong = ContentControl.instance.state.allSongs.byId.get(song.sourceId);
       if (identical(sourceSong, song)) {
         throw ArgumentError(
-          "Tried to handle duplicate on the source song in `allSongs`. This may lead " 
+          "Tried to handle duplicate on the source song in `allSongs`. This may lead "
           "to that the source song ID is lost, copy the song first",
         );
       }
@@ -938,7 +1049,7 @@ class ContentUtils {
       final sameSong = list.firstWhereOrNull((el) => identical(el, song));
       if (identical(sameSong, song)) {
         throw ArgumentError(
-          "The provided `song` is contained in the given `list`. This is incorrect " 
+          "The provided `song` is contained in the given `list`. This is incorrect "
           "usage of this function, it should be called before the song is inserted to "
           "the `list`",
         );
@@ -965,22 +1076,4 @@ class ShuffleResult {
   const ShuffleResult(this.songs, this.shuffledSongs);
   final List<Song> songs;
   final List<Song> shuffledSongs;
-}
-
-
-/// Result of [ContentUtils.selectionSortAndPack].
-class SortAndPackResult {
-  final List<Song> songs;
-  final List<Album> albums;
-  final List<Playlist> playlists;
-  final List<Artist> artists;
-
-  SortAndPackResult(this.songs, this.albums, this.playlists, this.artists);
-
-  List<Content> get merged => [
-    ...songs,
-    ...albums,
-    ...playlists,
-    ...artists,
-  ];
 }

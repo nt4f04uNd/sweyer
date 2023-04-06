@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 /// Action to be displayed directly in the content list.
 class InListContentAction extends StatefulWidget {
-  /// Creats action with paddings for song list.
+  /// Create action with paddings for song list.
   const InListContentAction.song({
     Key? key,
     required this.icon,
@@ -14,10 +13,10 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  }) : horizontalPadding = kSongTileHorizontalPadding,
-       super(key: key);
+  })  : horizontalPadding = kSongTileHorizontalPadding,
+        super(key: key);
 
-  /// Creats action with paddings for persistent queue list.
+  /// Create action with paddings for persistent queue list.
   const InListContentAction.persistentQueue({
     Key? key,
     required this.icon,
@@ -27,8 +26,8 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  }) : horizontalPadding = kPersistentQueueTileHorizontalPadding,
-       super(key: key);
+  })  : horizontalPadding = kPersistentQueueTileHorizontalPadding,
+        super(key: key);
 
   final IconData icon;
   final String text;
@@ -62,13 +61,13 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
   bool get enabled => widget.onTap != null;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     if (enabled) {
       controller.forward();
-    } 
+    }
   }
-  
+
   @override
   void didUpdateWidget(covariant InListContentAction oldWidget) {
     previousColor = oldWidget.color;
@@ -90,6 +89,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FadeTransition(
       opacity: fadeAnimation,
       child: TweenAnimationBuilder<Color?>(
@@ -105,7 +105,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
           onTap: widget.onTap,
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
-            height: kSongTileHeight,
+            height: kSongTileHeight(context),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,7 +114,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                   height: kSongTileArtSize,
                   width: kSongTileArtSize,
                   decoration: BoxDecoration(
-                    color: Constants.Theme.glowSplashColor.auto,
+                    color: theme.appThemeExtension.glowSplashColor,
                     borderRadius: const BorderRadius.all(Radius.circular(kArtBorderRadius)),
                   ),
                   alignment: Alignment.center,
@@ -126,11 +126,12 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
                 ),
                 Expanded(
                   child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
+                    padding: const EdgeInsets.only(left: 16.0),
                     child: Text(
                       widget.text,
                       overflow: TextOverflow.ellipsis,
-                      style: ThemeControl.theme.textTheme.headline6?.copyWith(color: widget.textColor),
+                      maxLines: 3,
+                      style: theme.textTheme.headline6?.copyWith(color: widget.textColor),
                     ),
                   ),
                 ),
@@ -145,7 +146,7 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
 
 class CreatePlaylistInListAction extends StatefulWidget {
   const CreatePlaylistInListAction({
-    Key? key ,
+    Key? key,
     this.enabled = true,
   }) : super(key: key);
 

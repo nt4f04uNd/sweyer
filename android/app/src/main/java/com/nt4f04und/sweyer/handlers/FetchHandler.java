@@ -86,7 +86,7 @@ public class FetchHandler {
               // * IS_DRM
               //
               // * IS_TRASHED - trashed items are excluded, see `selection` above
-              // * IS_PENDING - pedning items are excluded, see `selection` above
+              // * IS_PENDING - pending items are excluded, see `selection` above
               //
               // * MIME_TYPE
               // * NUM_TRACKS - the number of songs in the origin this media comes from
@@ -138,7 +138,7 @@ public class FetchHandler {
             map.put("size", cursor.getInt(11));
             map.put("data", cursor.getString(12));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-               map.put("isFavorite", cursor.getInt(13) == 1);
+               map.put("isFavoriteInMediaStore", cursor.getInt(13) == 1);
                map.put("generationAdded", cursor.getInt(14));
                map.put("generationModified", cursor.getInt(15));
                map.put("genre", cursor.getString(16));

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -10,7 +11,7 @@ const double progressLineHeight = 3.0;
 
 /// Renders current playing track
 class TrackPanel extends StatelessWidget {
-  TrackPanel({
+  const TrackPanel({
     Key? key,
     this.onTap,
   }) : super(key: key);
@@ -51,7 +52,7 @@ class TrackPanel extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                    height: kSongTileHeight * math.max(0.95, textScaleFactor),
+                    height: TrackPanel.height(context),
                     padding: const EdgeInsets.only(
                       left: 16.0,
                       right: 16.0,
@@ -79,14 +80,14 @@ class TrackPanel extends StatelessWidget {
                               children: <Widget>[
                                 NFMarquee(
                                   key: ValueKey(PlaybackControl.instance.currentSong.id),
-                                  fontWeight: FontWeight.w700,
+                                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
                                   text: PlaybackControl.instance.currentSong.title,
                                   fontSize: 16,
                                   velocity: 26.0,
                                   blankSpace: 40.0,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  padding: EdgeInsets.only(bottom: 4.0 / textScaleFactor),
                                   child: ArtistWidget(
                                     artist: PlaybackControl.instance.currentSong.artist,
                                   ),
@@ -116,6 +117,9 @@ class TrackPanel extends StatelessWidget {
       },
     );
   }
+
+  /// The height of this widget given a [context].
+  static double height(BuildContext context) => kSongTileHeight(context);
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {
@@ -128,7 +132,7 @@ class RotatingAlbumArtWithProgress extends StatefulWidget {
 class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgress> {
   static const min = 0.001;
 
-  double initRotation = math.Random(DateTime.now().second).nextDouble();
+  double initRotation = math.Random(clock.now().second).nextDouble();
 
   /// Actual track position value
   Duration _value = Duration.zero;
@@ -181,16 +185,17 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
   @override
   Widget build(BuildContext context) {
     final song = PlaybackControl.instance.currentSong;
+    final theme = Theme.of(context);
     return CircularPercentIndicator(
       percent: _progress,
       animation: true,
       animationDuration: 200,
       curve: Curves.easeOutCubic,
       animateFromLastPercent: true,
-      radius: kSongTileArtSize - progressLineHeight,
+      radius: (kSongTileArtSize - progressLineHeight) / 2,
       lineWidth: progressLineHeight,
       circularStrokeCap: CircularStrokeCap.round,
-      progressColor: ThemeControl.theme.colorScheme.primary,
+      progressColor: theme.colorScheme.primary,
       backgroundColor: Colors.transparent,
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,

@@ -11,6 +11,7 @@ class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
   final VoidCallback onPressed;
 
   static const size = kSongTileArtSize;
+
   /// The padding that is preferred between this action and other UI elements.
   static const preferredPadding = 4.0;
 

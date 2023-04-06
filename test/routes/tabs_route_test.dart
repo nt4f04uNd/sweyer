@@ -50,22 +50,22 @@ void main() {
       expect(find.byType(SongTile), findsOneWidget);
 
       // Switch to albums tab
-      await tester.tap(find.byIcon(Album.icon));
+      await tester.tap(find.byIcon(ContentType.album.icon));
       await tester.pumpAndSettle();
       expect(find.byType(typeOf<PersistentQueueTile<Album>>()), findsOneWidget);
 
       // Switch to playlists tab
-      await tester.tap(find.byIcon(Playlist.icon));
+      await tester.tap(find.byIcon(ContentType.playlist.icon));
       await tester.pumpAndSettle();
       expect(find.byType(typeOf<PersistentQueueTile<Playlist>>()), findsOneWidget);
 
       // Switch to artists tab
-      await tester.tap(find.byIcon(Artist.icon));
+      await tester.tap(find.byIcon(ContentType.artist.icon));
       await tester.pumpAndSettle();
       expect(find.byType(typeOf<ArtistTile>()), findsOneWidget);
 
       // Switch back to songs tab
-      await tester.tap(find.byIcon(Song.icon));
+      await tester.tap(find.byIcon(ContentType.song.icon));
       await tester.pumpAndSettle();
       expect(find.byType(typeOf<SongTile>()), findsOneWidget);
     });
@@ -107,9 +107,9 @@ void main() {
       tester.expectSongTiles(songs);
 
       // Change sort feature
-      await tester.tap(find.text(l10n.sortFeature<Song>(SongSortFeature.dateModified)));
+      await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.dateModified)));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.sortFeature<Song>(SongSortFeature.title).toLowerCase()));
+      await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.title)));
       await tester.pump();
       tester.expectSongTiles(songs.reversed);
     });
@@ -128,14 +128,15 @@ void main() {
     });
     await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
-      expect(find.text('3 ${l10n.tracksPlural(3).toLowerCase()}'), findsOneWidget);
+      expect(find.text(l10n.tracksPlural(3)), findsOneWidget);
 
       // Change songs length
       ContentControl.instance.state.allSongs.songs.removeLast();
+      ContentControl.instance.emitContentChange();
       await tester.pump();
 
       tester.expectSongTiles(songs.toList()..removeLast());
-      expect(find.text('2 ${l10n.tracksPlural(2).toLowerCase()}'), findsOneWidget);
+      expect(find.text(l10n.tracksPlural(2)), findsOneWidget);
     });
   });
 }

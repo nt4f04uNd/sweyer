@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sweyer/sweyer.dart';
 
 /// Creates a setting item with [title], [description] and [content] sections
 class SettingItem extends StatelessWidget {
@@ -25,26 +24,27 @@ class SettingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           //******** Title ********
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Text(
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Text(
                   title,
                   style: const TextStyle(fontSize: 16.0),
                 ),
-              ),
-              if (trailing != null)
-                trailing!
-            ],
+                if (trailing != null) trailing!,
+              ],
+            ),
           ),
           //******** Description ********
           if (description != null)
@@ -53,7 +53,7 @@ class SettingItem extends StatelessWidget {
               child: Text(
                 description!,
                 style: TextStyle(
-                  color: ThemeControl.theme.textTheme.caption!.color,
+                  color: theme.textTheme.caption!.color,
                 ),
               ),
             ),
@@ -70,7 +70,7 @@ class SettingItem extends StatelessWidget {
 ///
 /// The [child] is untouchable in the animation.
 class ChangedSwitcher extends StatefulWidget {
-  ChangedSwitcher({
+  const ChangedSwitcher({
     Key? key,
     this.child,
     this.changed = false,
@@ -100,9 +100,7 @@ class _ChangedSwitcherState extends State<ChangedSwitcher> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          padding: widget.changed
-              ? EdgeInsets.zero
-              : const EdgeInsets.only(right: 3.0),
+          padding: widget.changed ? EdgeInsets.zero : const EdgeInsets.only(right: 3.0),
           child: widget.child,
         ),
       ),

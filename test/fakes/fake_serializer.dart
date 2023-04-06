@@ -1,10 +1,6 @@
 import 'package:sweyer/logic/logic.dart';
 
-/// All methods, do nothing except [read], which just returns the [value].
-class FakeJsonSerializer<R, S> extends JsonSerializer<R, S> {
-  FakeJsonSerializer(this.value);
-  final R value;
-
+abstract class _FakeJsonSerializer<R, S> extends JsonSerializer<R, S> {
   @override
   String get fileName => '';
 
@@ -15,10 +11,32 @@ class FakeJsonSerializer<R, S> extends JsonSerializer<R, S> {
   Future<void> init() async {}
 
   @override
+  Future<void> save(S data) async {}
+}
+
+/// All methods do nothing, except [read], which just returns the [value].
+class FakeJsonSerializer<R, S> extends _FakeJsonSerializer<R, S> {
+  FakeJsonSerializer(this.value);
+  final R value;
+
+  @override
+  Future<R> read() async {
+    return value;
+  }
+}
+
+/// Like [FakeJsonSerializer] but the [value] can be updated.
+class UpdatableFakeSerializer<R> extends _FakeJsonSerializer<R, R> {
+  UpdatableFakeSerializer(this.value);
+  R value;
+
+  @override
   Future<R> read() async {
     return value;
   }
 
   @override
-  Future<void> save(S data) async {}
+  Future<void> save(R data) async {
+    value = data;
+  }
 }

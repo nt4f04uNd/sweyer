@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sweyer/sweyer.dart';
 
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// import 'general_settings.dart';
-// import 'licenses_route.dart';
 
 class SettingsRoute extends StatefulWidget {
   const SettingsRoute({Key? key}) : super(key: key);
@@ -17,9 +14,9 @@ class SettingsRoute extends StatefulWidget {
 }
 
 class _SettingsRouteState extends State<SettingsRoute> {
-  // void _handleClickGeneralSettings() {
-  //   _pushRoute(const GeneralSettingsRoute());
-  // }
+  void _handleClickGeneralSettings() {
+    AppRouter.instance.goto(AppRoutes.generalSettings);
+  }
 
   void _handleClickThemeSettings() {
     AppRouter.instance.goto(AppRoutes.themeSettings);
@@ -30,7 +27,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
     final l10n = getl10n(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.settings),
+        title: AppBarTitleMarquee(text: l10n.settings),
         leading: const NFBackButton(),
       ),
       body: Column(
@@ -42,14 +39,14 @@ class _SettingsRouteState extends State<SettingsRoute> {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(top: 10.0),
               children: <Widget>[
-                // MenuItem(
-                //   l10n.general,
-                //   icon: Icons.menu_book_rounded,
-                //   iconSize: 25.0,
-                //   fontSize: 16.0,
-                //   onTap: _handleClickGeneralSettings,
-                // ),
-                MenuItem(
+                DrawerMenuItem(
+                  l10n.general,
+                  icon: Icons.build_rounded,
+                  iconSize: 25.0,
+                  fontSize: 16.0,
+                  onTap: _handleClickGeneralSettings,
+                ),
+                DrawerMenuItem(
                   l10n.theme,
                   icon: Icons.palette_rounded,
                   iconSize: 25.0,
@@ -59,7 +56,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
               ],
             ),
           ),
-          _Footer(),
+          const _Footer(),
         ],
       ),
     );
@@ -67,7 +64,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 }
 
 class _Footer extends StatefulWidget {
-  _Footer({Key? key}) : super(key: key);
+  const _Footer({Key? key}) : super(key: key);
 
   @override
   _FooterState createState() => _FooterState();
@@ -81,7 +78,7 @@ class _FooterState extends State<_Footer> {
   String appVersion = '';
 
   String get appName {
-    return Constants.Config.APPLICATION_TITLE + '@$appVersion';
+    return '${constants.Config.applicationTitle}@$appVersion';
   }
 
   @override
@@ -100,8 +97,11 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleGithubTap() {
-    const url = Constants.Config.GITHUB_REPO_URL;
-    launch(url);
+    final url = Uri.parse(constants.Config.githubRepoUrl);
+    launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    );
   }
 
   void _handleLicenseTap() {
@@ -109,8 +109,9 @@ class _FooterState extends State<_Footer> {
   }
 
   void _handleSecretLogoClick() {
-    if (Prefs.devMode.get())
+    if (Prefs.devMode.get()) {
       return;
+    }
     final int remainingClicks = clicksForDevMode - 1 - _clickCount;
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final theme = Theme.of(context);
@@ -134,7 +135,7 @@ class _FooterState extends State<_Footer> {
               size: NFConstants.iconSize * textScaleFactor,
             ),
             title: Text(l10n.devModeGreet, style: textStyle),
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
           ),
         ),
       );
@@ -144,7 +145,7 @@ class _FooterState extends State<_Footer> {
           important: true,
           child: NFSnackbar(
             title: Text(l10n.onThePathToDevMode, style: textStyle),
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
           ),
         ),
       );
@@ -154,12 +155,10 @@ class _FooterState extends State<_Footer> {
           important: true,
           child: NFSnackbar(
             title: Text(
-              l10n.almostThere + ', ' + (remainingClicks == 1
-                      ? l10n.onThePathToDevModeLastClick
-                      : l10n.onThePathToDevModeClicksRemaining(remainingClicks)),
+              l10n.onThePathToDevModeClicksRemaining(remainingClicks),
               style: textStyle,
             ),
-            color: Constants.AppColors.androidGreen,
+            color: constants.AppColors.androidGreen,
           ),
         ),
       );
@@ -170,9 +169,15 @@ class _FooterState extends State<_Footer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
+      padding: const EdgeInsets.only(
+        bottom: 40.0,
+        left: 16.0,
+        right: 16.0,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -183,50 +188,51 @@ class _FooterState extends State<_Footer> {
                 padding: const EdgeInsets.only(left: 2.5, right: 2.5),
                 child: NFIconButton(
                   icon: const SweyerLogo(),
-                  splashColor: ThemeControl.theme.colorScheme.primary,
+                  splashColor: theme.colorScheme.primary,
                   size: 60.0,
                   iconSize: 42.0,
                   onPressed: _handleSecretLogoClick,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    appName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: ThemeControl.theme.textTheme.headline6!.color,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      appName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: theme.textTheme.headline6!.color,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Copyright (c) 2019, nt4f04uNd',
-                    style: Theme.of(context)
-                        .textTheme
-                        .caption!
-                        .copyWith(height: 1.0),
-                  ),
-                ],
+                    Text(
+                      'Copyright (c) 2019, nt4f04uNd',
+                      style: Theme.of(context).textTheme.caption!.copyWith(height: 1.0),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
           GestureDetector(
             onTap: _handleGithubTap,
             child: Text(
-              'github repo',
+              getl10n(context).gitHubRepo,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.theme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
           GestureDetector(
             onTap: _handleLicenseTap,
             child: Text(
-              MaterialLocalizations.of(context).licensesPageTitle.toLowerCase(),
+              MaterialLocalizations.of(context).licensesPageTitle,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.theme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

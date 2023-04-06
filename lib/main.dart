@@ -3,8 +3,10 @@ import 'dart:isolate';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sweyer/media_query_wrapper.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -38,33 +40,29 @@ Future<void> reportFlutterError(FlutterErrorDetails details) async {
   await FirebaseCrashlytics.instance.recordFlutterError(details);
 }
 
-
 class _WidgetsBindingObserver extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       /// This ensures that proper UI will be applied when activity is resumed.
-      /// 
+      ///
       /// See:
       /// * https://github.com/flutter/flutter/issues/21265
       /// * https://github.com/ryanheise/audio_service/issues/662
-      /// 
+      ///
       /// [SystemUiOverlayStyle.statusBarBrightness] is only honored on iOS,
       /// so I can safely use that here.
-      final lastUi = SystemUiStyleController.lastUi;
-      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
-        statusBarBrightness:
-          lastUi.statusBarBrightness == null ||
-          lastUi.statusBarBrightness == Brightness.dark
+      final lastUi = SystemUiStyleController.instance.lastUi;
+      SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
+        statusBarBrightness: lastUi.statusBarBrightness == null || lastUi.statusBarBrightness == Brightness.dark
             ? Brightness.light
-            : Brightness.dark
+            : Brightness.dark,
       ));
+
       /// Defensive programming if I some time later decide to add iOS support.
-      SystemUiStyleController.setSystemUiOverlay(SystemUiStyleController.lastUi.copyWith(
-        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark
-          ? Brightness.light
-          : Brightness.dark
+      SystemUiStyleController.instance.setSystemUiOverlay(SystemUiStyleController.instance.lastUi.copyWith(
+        statusBarBrightness: lastUi.statusBarBrightness == Brightness.dark ? Brightness.light : Brightness.dark,
       ));
     }
   }
@@ -95,14 +93,14 @@ Future<void> main() async {
   FlutterError.onError = reportFlutterError;
 
   runZonedGuarded<Future<void>>(() async {
-    WidgetsBinding.instance!.addObserver(_WidgetsBindingObserver());
+    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
     await DeviceInfoControl.instance.init();
-    ThemeControl.init();
-    ThemeControl.initSystemUi();
+    ThemeControl.instance.init();
+    ThemeControl.instance.initSystemUi();
     await Permissions.instance.init();
     await ContentControl.instance.init();
-    runApp(const App());
+    runApp(const ProviderScope(child: App()));
   }, reportError);
 }
 
@@ -115,9 +113,9 @@ class App extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   static NFThemeData nfThemeData = NFThemeData(
-    systemUiStyle: Constants.UiTheme.black.auto,
-    modalSystemUiStyle: Constants.UiTheme.modal.auto,
-    bottomSheetSystemUiStyle: Constants.UiTheme.bottomSheet.auto,
+    systemUiStyle: staticTheme.systemUiThemeExtension.black,
+    modalSystemUiStyle: staticTheme.systemUiThemeExtension.modal,
+    bottomSheetSystemUiStyle: staticTheme.systemUiThemeExtension.bottomSheet,
   );
 
   static void rebuildAllChildren() {
@@ -125,6 +123,7 @@ class App extends StatefulWidget {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
+
     (AppRouter.instance.navigatorKey.currentContext as Element?)!.visitChildren(rebuild);
   }
 
@@ -134,6 +133,17 @@ class App extends StatefulWidget {
 
 late SlidableController _playerRouteController;
 late SlidableController _drawerController;
+
+/// TODO: https://github.com/nt4f04uNd/sweyer/issues/81#issuecomment-1335575679
+/// This is a hack.
+///
+/// [playerRouteController] is used inside [PlayerInterfaceColorStyleControl], which
+/// is faked and initialized before the app actually runs, meaning that
+/// at some poing it could use unitialized [playerRouteController].
+///
+/// This happens in [testAppGoldens] with playerInterfaceColorStylesToTest: {PlayerInterfaceColorStyle.themeBackgroundColor},
+/// `player_route.player_route` can be used as an example of this.
+bool playerRouteControllerInitialized = false;
 SlidableController get playerRouteController => _playerRouteController;
 SlidableController get drawerController => _drawerController;
 
@@ -149,6 +159,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       vsync: this,
       springDescription: playerRouteSpringDescription,
     );
+    playerRouteControllerInitialized = true;
     NFWidgets.init(
       navigatorKey: AppRouter.instance.navigatorKey,
       routeObservers: [routeObserver, homeRouteObserver],
@@ -157,32 +168,34 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: ThemeControl.themeChaning,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return NFTheme(
-        data: App.nfThemeData,
-          child: MaterialApp.router(
-            // showPerformanceOverlay: true,
-            // checkerboardRasterCacheImages: true,
-            debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-            // TODO: remove when invesigate the https://github.com/flutter/flutter/issues/12994
-            useInheritedMediaQuery: true, // used in tests
-            title: Constants.Config.APPLICATION_TITLE,
-            color: ThemeControl.theme.colorScheme.primary,
-            supportedLocales: Constants.Config.supportedLocales,
-            scrollBehavior: _ScrollBehavior(),
-            localizationsDelegates:
-              AppLocalizations.localizationsDelegates
-              + const [
-                NFLocalizations.delegate,
-              ],
-            theme: ThemeControl.theme,
-            routerDelegate: AppRouter.instance,
-            routeInformationParser: AppRouteInformationParser(),
-          ),
+    return MediaQueryWrapper(
+      child: Consumer(builder: (context, ref, child) {
+        final materialAppSwitchesState = ref.watch(materialAppSwitchesStateHolderProvider.select((value) => value));
+        return StreamBuilder(
+          stream: ThemeControl.instance.themeChanging,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            final theme = ThemeControl.instance.theme;
+            return NFTheme(
+              data: App.nfThemeData,
+              child: MaterialApp.router(
+                showPerformanceOverlay: materialAppSwitchesState.showPerformanceOverlay,
+                checkerboardRasterCacheImages: materialAppSwitchesState.checkerboardRasterCacheImages,
+                showSemanticsDebugger: materialAppSwitchesState.showSemanticsDebugger,
+                useInheritedMediaQuery: true,
+                debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+                title: constants.Config.applicationTitle,
+                theme: theme,
+                color: theme.colorScheme.primary,
+                supportedLocales: constants.Config.supportedLocales,
+                scrollBehavior: _ScrollBehavior(),
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                routerDelegate: AppRouter.instance,
+                routeInformationParser: AppRouteInformationParser(),
+              ),
+            );
+          },
         );
-      },
+      }),
     );
   }
 }
@@ -190,9 +203,10 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 class _ScrollBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    final theme = Theme.of(context);
     return GlowingOverscrollIndicator(
       axisDirection: axisDirection,
-      color: ThemeControl.theme.colorScheme.background,
+      color: theme.colorScheme.background,
       child: child,
     );
   }

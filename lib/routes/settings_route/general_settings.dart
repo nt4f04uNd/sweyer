@@ -17,11 +17,29 @@ class _GeneralSettingsRouteState extends State<GeneralSettingsRoute> {
     final l10n = getl10n(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.general),
+        title: AppBarTitleMarquee(text: l10n.general),
+        leading: const NFBackButton(),
       ),
       body: ListView(
         physics: const NeverScrollableScrollPhysics(),
-        children: const [
+        children: [
+          ValueListenableBuilder<bool>(
+            valueListenable: Settings.confirmExitingWithBackButton,
+            builder: (context, value, child) => SwitchListTile(
+              title: Text(l10n.confirmExitingWithBackButtonSetting),
+              value: value,
+              onChanged: Settings.confirmExitingWithBackButton.set,
+            ),
+          ),
+          if (DeviceInfoControl.instance.useScopedStorageForFileModifications)
+            ValueListenableBuilder<bool>(
+              valueListenable: Settings.useMediaStoreForFavoriteSongs,
+              builder: (context, value, child) => SwitchListTile(
+                title: Text(l10n.useMediaStoreForFavoriteSongsSetting),
+                value: value,
+                onChanged: Settings.useMediaStoreForFavoriteSongs.set,
+              ),
+            ),
           // _MinFileDurationSlider(
           //   initValue: minFileDuration,
           // ),

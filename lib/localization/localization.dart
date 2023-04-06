@@ -9,7 +9,7 @@ AppLocalizations getl10n(BuildContext context) => AppLocalizations.of(context)!;
 /// Gets [AppLocalizations] without context.
 AppLocalizations get staticl10n {
   try {
-    return lookupAppLocalizations(WidgetsBinding.instance!.window.locale);
+    return lookupAppLocalizations(WidgetsBinding.instance.window.locale);
   } catch (ex) {
     // Load default locale.
     return lookupAppLocalizations(const Locale('en', 'US'));
@@ -19,54 +19,41 @@ AppLocalizations get staticl10n {
 extension AppLocalizationsExtension on AppLocalizations {
   //* Content ******************
 
-  String get track {
-    return tracksPlural(1);
-  }
-
-  String get album {
-    return albumsPlural(1);
-  }
-
-  String get playlist {
-    return playlistsPlural(1);
-  }
-
-  String get artist {
-    return artistsPlural(1);
-  }
-
-  /// Picks a string of a [Content] in plural form.
+  /// Picks a string of a [ContentType] in plural form.
   /// For example "tracks".
-  String contents<T extends Content>([Type? contentType]) {
-    return contentPick<T, ValueGetter<String>>(
-      contentType: contentType,
-      song: () => tracks,
-      album: () => albums,
-      playlist: () => playlists,
-      artist: () => artists,
-    )();
+  String contents(ContentType contentType) {
+    switch (contentType) {
+      case ContentType.song:
+        return tracks;
+      case ContentType.album:
+        return albums;
+      case ContentType.playlist:
+        return playlists;
+      case ContentType.artist:
+        return artists;
+    }
   }
 
+  /// Calls a `plural` getter from Intl for a [ContentType].
   /// Returns string in form "5 songs".
-  String contentsPluralWithCount<T extends Content>(int count, [Type? contentType]) {
-    return '$count ${contentsPlural<T>(count, contentType).toLowerCase()}';
+  String contentsPlural(ContentType contentType, int count) {
+    switch (contentType) {
+      case ContentType.song:
+        return tracksPlural(count);
+      case ContentType.album:
+        return albumsPlural(count);
+      case ContentType.playlist:
+        return playlistsPlural(count);
+      case ContentType.artist:
+        return artistsPlural(count);
+    }
   }
 
-  /// Calls a `plural` getter from Intl for a [Content].
-  String contentsPlural<T extends Content>(int count, [Type? contentType]) {
-    return contentPick<T, ValueGetter<String>>(
-      contentType: contentType,
-      song: () => tracksPlural(count),
-      album: () => albumsPlural(count),
-      playlist: () => playlistsPlural(count),
-      artist: () => artistsPlural(count),
-    )();
-  }
-
-  String sortFeature<T extends Content>(SortFeature<T> feature, [Type? contentType]) {
-    return contentPick<T, ValueGetter<String>>(
-      contentType: contentType,
-      song: () {
+  String sortFeature<T extends Content>(ContentType<T> contentType, SortFeature<T> feature) {
+    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
+    // ignore: unnecessary_cast
+    switch (contentType as ContentType) {
+      case ContentType.song:
         switch (feature as SongSortFeature) {
           case SongSortFeature.dateModified:
             return dateModified;
@@ -77,12 +64,11 @@ extension AppLocalizationsExtension on AppLocalizations {
           case SongSortFeature.artist:
             return artist;
           case SongSortFeature.album:
-            return albumsPlural(1);
+            return album;
           default:
             throw UnimplementedError();
         }
-      },
-      album: () {
+      case ContentType.album:
         switch (feature as AlbumSortFeature) {
           case AlbumSortFeature.title:
             return title;
@@ -95,8 +81,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-      playlist: () {
+      case ContentType.playlist:
         switch (feature as PlaylistSortFeature) {
           case PlaylistSortFeature.dateModified:
             return dateModified;
@@ -107,8 +92,7 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-      artist: () {
+      case ContentType.artist:
         switch (feature as ArtistSortFeature) {
           case ArtistSortFeature.name:
             return name;
@@ -119,7 +103,37 @@ extension AppLocalizationsExtension on AppLocalizations {
           default:
             throw UnimplementedError();
         }
-      },
-    )();
+    }
+  }
+
+  /// Transforms the [text] so it can be safely embedded into [StyledText] text.
+  /// See: https://pub.dev/packages/styled_text#escaping--special-characters
+  String escapeStyled(String text) {
+    return text.replaceAllMapped(RegExp('["\'&<> ]'), (match) {
+      switch (match.group(0)) {
+        case '"':
+          return '&quot;';
+        case '\'':
+          return '&apos;';
+        case '&':
+          return '&amp;';
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case ' ':
+          return '&space;';
+      }
+      throw UnimplementedError('"${match.group(0)}" is not implemented');
+    });
+  }
+
+  String getPlayerInterfaceColorStyleValue(PlayerInterfaceColorStyle playerInterfaceColorStyle) {
+    switch (playerInterfaceColorStyle) {
+      case PlayerInterfaceColorStyle.artColor:
+        return playerInterfaceColorStyleArtColor;
+      case PlayerInterfaceColorStyle.themeBackgroundColor:
+        return playerInterfaceColorStyleThemeBackgroundColor;
+    }
   }
 }

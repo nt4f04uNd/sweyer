@@ -1,16 +1,103 @@
+import 'dart:math' as math;
+
 import 'package:boxy/boxy.dart';
 import 'package:flutter/material.dart';
-
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:tuple/tuple.dart';
 
-/// Needed for scrollbar computations.
-const double kPersistentQueueTileHeight = kPersistentQueueTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
 const double kPersistentQueueTileHorizontalPadding = 16.0;
 const double _gridArtSize = 220.0;
 const double _gridArtAssetScale = 1.2;
 const double _gridCurrentIndicatorScale = 1.7;
+
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _subtitleTheme(ContentType contentType, ThemeData theme) => contentType == ContentType.album
+    ? ArtistWidget.defaultTextStyle(theme)?.merge(const TextStyle(fontSize: 14.0, height: 1.0))
+    : theme.textTheme.subtitle2?.merge(const TextStyle(fontSize: 14.0, height: 1.0));
+
+/// Needed for scrollbar computations.
+double kPersistentQueueTileHeight(ContentType contentType, BuildContext context) {
+  switch (contentType) {
+    case ContentType.song:
+    case ContentType.artist:
+      throw ArgumentError();
+    case ContentType.album:
+    case ContentType.playlist:
+      return _calculatePersistentQueueTileHeight(contentType, context);
+  }
+}
+
+double kPersistentQueueGridTileHeight(
+  ContentType contentType,
+  BuildContext context, [
+  double gridArtSize = _gridArtSize,
+]) =>
+    _calculatePersistentQueueGridTileHeight(
+      contentType,
+      context,
+      gridArtSize,
+    );
+
+double _calculatePersistentQueueTileHeight(ContentType contentType, BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return _calculatePersistentQueueTileHeightMemo(
+    textScaleFactor,
+    _titleTheme(theme)?.fontSize,
+    _subtitleTheme(contentType, theme)?.fontSize,
+    Tuple2(contentType, context),
+  );
+}
+
+final _calculatePersistentQueueTileHeightMemo = imemo3plus1(
+  (
+    double a1,
+    double? a2,
+    double? a3,
+    Tuple2<ContentType, BuildContext> a4,
+  ) =>
+      math.max(
+        kPersistentQueueTileArtSize,
+        _kPresisentQueueTileTextHeight(a4.item1, a4.item2),
+      ) +
+      _tileVerticalPadding * 2,
+);
+
+double _calculatePersistentQueueGridTileHeight(
+  ContentType contentType,
+  BuildContext context,
+  double gridArtSize,
+) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return _calculatePersistentQueueGridTileHeightMemo(
+    textScaleFactor,
+    gridArtSize,
+    _titleTheme(theme)?.fontSize,
+    _subtitleTheme(contentType, theme)?.fontSize,
+    Tuple2(contentType, context),
+  );
+}
+
+final _calculatePersistentQueueGridTileHeightMemo = imemo4plus1(
+  (
+    double a1,
+    double gridArtSize,
+    double? a3,
+    double? a4,
+    Tuple2<ContentType, BuildContext> a5,
+  ) =>
+      gridArtSize + _kPresisentQueueTileTextHeight(a5.item1, a5.item2) + _tileVerticalPadding * 2,
+);
+
+/// The height of the title and subtitle part of the [PersistentQueueTile].
+double _kPresisentQueueTileTextHeight(ContentType contentType, BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return calculateLineHeight(_titleTheme(theme), textScaleFactor) +
+      calculateLineHeight(_subtitleTheme(contentType, theme), textScaleFactor);
+}
 
 class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<SelectionEntry> {
   const PersistentQueueTile({
@@ -27,9 +114,10 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.gridCurrentIndicatorScale = _gridCurrentIndicatorScale,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : assert(!grid || !small),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-       super(key: key);
+  })  : assert(!grid || !small),
+        horizontalPadding =
+            horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
+        super(key: key);
 
   const PersistentQueueTile.selectable({
     Key? key,
@@ -50,18 +138,19 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.gridCurrentIndicatorScale = _gridCurrentIndicatorScale,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
-              selectionController is SelectionController<SelectionEntry<T>>),
-       assert(!grid || !small),
-       horizontalPadding = horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-       super.selectable(
-         key: key,
-         selectionIndex: selectionIndex,
-         selected: selected,
-         longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-         handleTapInSelection: handleTapInSelection,
-         selectionController: selectionController,
-       );
+  })  : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
+            selectionController is SelectionController<SelectionEntry<T>>),
+        assert(!grid || !small),
+        horizontalPadding =
+            horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
+        super.selectable(
+          key: key,
+          selectionIndex: selectionIndex,
+          selected: selected,
+          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
+          handleTapInSelection: handleTapInSelection,
+          selectionController: selectionController,
+        );
 
   final T queue;
 
@@ -69,8 +158,8 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   final Widget? trailing;
 
   /// Whether this queue is currently playing, if yes, enables animated
-  /// [CurrentIndicator] over the ablum art.
-  /// 
+  /// [CurrentIndicator] over the album art.
+  ///
   /// If not specified, by default uses [ContentUtils.originIsCurrent].
   final bool? current;
   final VoidCallback? onTap;
@@ -88,7 +177,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
 
   /// The size of the art when [grid] is `true`.
   final double gridArtSize;
-  
+
   /// Value passed to [ContentArt.assetScale] when [grid] is `true`.
   final double gridArtAssetScale;
 
@@ -106,15 +195,14 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
   _PersistentQueueTileState<T> createState() => _PersistentQueueTileState();
 }
 
-class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableState<SelectionEntry<T>, PersistentQueueTile<T>>
-  with ContentTileComponentsMixin {
-
+class _PersistentQueueTileState<T extends PersistentQueue>
+    extends SelectableState<SelectionEntry<T>, PersistentQueueTile<T>> with ContentTileComponentsMixin {
   @override
   SelectionEntry<T> toSelectionEntry() => SelectionEntry<T>.fromContent(
-    content: widget.queue,
-    index: widget.selectionIndex!,
-    context: context,
-  );
+        content: widget.queue,
+        index: widget.selectionIndex!,
+        context: context,
+      );
 
   void _handleTap() {
     super.handleTap(() {
@@ -124,18 +212,19 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 
   bool get current {
-    if (widget.current != null)
+    if (widget.current != null) {
       return widget.current!;
+    }
     return ContentUtils.originIsCurrent(widget.queue);
   }
 
   Widget _buildInfo() {
-    final theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     final List<Widget> children = [
       Text(
         widget.queue.title,
         overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.headline6,
+        style: _titleTheme(theme),
       ),
     ];
     final queue = widget.queue;
@@ -143,13 +232,13 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
       children.add(ArtistWidget(
         artist: queue.artist,
         trailingText: queue.year.toString(),
-        textStyle: const TextStyle(fontSize: 14.0, height: 1.0),
+        textStyle: _subtitleTheme(widget.queue.type, theme),
       ));
     } else if (queue is Playlist) {
       final l10n = getl10n(context);
       children.add(Text(
-        l10n.contentsPluralWithCount<Song>(queue.length),
-        style: theme.textTheme.subtitle2!.merge(const TextStyle(fontSize: 14.0, height: 1.0)),
+        l10n.contentsPlural(ContentType.song, queue.length),
+        style: _subtitleTheme(widget.queue.type, theme),
       ));
     }
     return Column(
@@ -161,6 +250,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 
   Widget _buildTile() {
+    final theme = Theme.of(context);
     final source = ContentArtSource.persistentQueue(widget.queue);
 
     final Widget child;
@@ -174,7 +264,7 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             ContentArt(
               size: widget.gridArtSize,
               defaultArtIconScale: (widget.gridArtSize / kPersistentQueueTileArtSize) / 1.5,
-              defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
+              defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(widget.queue),
               assetHighRes: true,
               currentIndicatorScale: widget.gridCurrentIndicatorScale,
               assetScale: widget.gridArtAssetScale,
@@ -198,16 +288,16 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: widget.small
-                ? ContentArt.songTile(
-                    source: source,
-                    defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
-                    current: current,
-                  )
-                : ContentArt.persistentQueueTile(
-                    source: source,
-                    defaultArtIcon: ContentUtils.persistentQueueIcon(widget.queue),
-                    current: current,
-                  ),
+                  ? ContentArt.songTile(
+                      source: source,
+                      defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(widget.queue),
+                      current: current,
+                    )
+                  : ContentArt.persistentQueueTile(
+                      source: source,
+                      defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(widget.queue),
+                      current: current,
+                    ),
             ),
             Expanded(
               child: Padding(
@@ -215,28 +305,21 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
                 child: _buildInfo(),
               ),
             ),
-            if (selectionRoute)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.trailing != null)
-                    widget.trailing!,
-                  buildAddToSelection(),
-                ],
-              )
-            else if (widget.trailing != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: widget.trailing,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FavoriteIndicator(shown: widget.queue.isFavorite),
+                if (widget.trailing != null) widget.trailing!,
+                if (selectionRoute) buildAddToSelection(),
+              ],
+            ),
           ],
         ),
       );
     }
 
-    final onTap = widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection
-      ? _handleTap
-      : widget.onTap;
+    final onTap =
+        widget.enableDefaultOnTap || selectable && widget.selectionController!.inSelection ? _handleTap : widget.onTap;
 
     if (widget.grid) {
       return Stack(
@@ -244,15 +327,17 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
           Align(
             alignment: Alignment.topCenter,
             child: CustomBoxy(
-              delegate: _BoxyDelegate(() => Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onTap,
-                  splashColor: Constants.Theme.glowSplashColor.auto,
-                  onLongPress: handleLongPress,
-                  splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
+              delegate: _BoxyDelegate(
+                () => Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onTap,
+                    splashColor: theme.appThemeExtension.glowSplashColor,
+                    onLongPress: handleLongPress,
+                    splashFactory: _InkRippleFactory(artSize: widget.gridArtSize),
+                  ),
                 ),
-              )),
+              ),
               children: [
                 LayoutId(id: #tile, child: child),
               ],
@@ -271,22 +356,25 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
 
   @override
   Widget build(BuildContext context) {
-    if (!selectable)
+    if (!selectable) {
       return _buildTile();
+    }
 
     const checkmarkGridMargin = 10.0;
-    final theme = ThemeControl.theme;
+    const favoriteIndicatorMargin = 17.0;
+    const favoriteIndicatorLargeSize = 28.0;
+    final theme = Theme.of(context);
     final artSize = widget.grid ? widget.gridArtSize : kPersistentQueueTileArtSize;
     return Stack(
       children: [
         _buildTile(),
         if (!selectionRoute)
-          if(animation.status == AnimationStatus.dismissed)
+          if (animation.status == AnimationStatus.dismissed)
             const SizedBox.shrink()
           else
             Positioned(
-              left: artSize + (widget.grid ? -checmarkLargeSize - checkmarkGridMargin : 2.0),
-              top: artSize + (widget.grid ? -checmarkLargeSize - checkmarkGridMargin : -7.0),
+              left: artSize + (widget.grid ? -checkmarkLargeSize - checkmarkGridMargin : 2.0),
+              top: artSize + (widget.grid ? -checkmarkLargeSize - checkmarkGridMargin : -7.0),
               child: buildSelectionCheckmark(forceLarge: widget.grid),
             )
         else if (widget.grid)
@@ -295,10 +383,22 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
             // 8 padding is already in `buildAddToSelection`, so add 10 more to reach `checkmarkMargin`
             right: 2.0,
             child: Theme(
-              data: theme.copyWith(// TODO: probably add some dimming so it's better seen no matter the picture?
+              data: theme.copyWith(
+                // TODO: probably add some dimming so it's better seen no matter the picture?
                 iconTheme: theme.iconTheme.copyWith(color: Colors.white),
               ),
               child: buildAddToSelection(),
+            ),
+          ),
+        if (widget.grid)
+          Positioned(
+            left: selectionRoute ? 14.0 : 2.0,
+            top: selectionRoute
+                ? widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin * 1.5
+                : widget.gridArtSize - favoriteIndicatorLargeSize - favoriteIndicatorMargin,
+            child: FavoriteIndicator(
+              shown: widget.queue.isFavorite,
+              size: favoriteIndicatorLargeSize,
             ),
           ),
       ],
@@ -306,9 +406,8 @@ class _PersistentQueueTileState<T extends PersistentQueue> extends SelectableSta
   }
 }
 
-
 class _BoxyDelegate extends BoxyDelegate {
-  _BoxyDelegate(this.builder); 
+  _BoxyDelegate(this.builder);
   final ValueGetter<Widget> builder;
 
   @override
@@ -328,7 +427,6 @@ class _BoxyDelegate extends BoxyDelegate {
     );
   }
 }
-
 
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
   const _InkRippleFactory({required this.artSize});

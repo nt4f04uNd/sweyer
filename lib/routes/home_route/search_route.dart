@@ -7,13 +7,15 @@
 *--------------------------------------------------------------------------------------------*/
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:styled_text/styled_text.dart';
 
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/sweyer.dart';
 
 class _Notifier extends ChangeNotifier {
@@ -29,6 +31,7 @@ class ContentSearchDelegate {
   bool autoKeyboard = false;
 
   final _Notifier _setStateNotifier = _Notifier();
+
   /// Updates the search route.
   void setState() {
     _setStateNotifier.notify();
@@ -46,18 +49,14 @@ class ContentSearchDelegate {
   }
 }
 
-
 /// Search results container.
 class _Results {
-  ContentMap<List<Content>> map = ContentMap({
-    for (final contentType in Content.enumerate())
-      contentType: [],
-  });
+  ContentMap<List<Content>> map = ContentMap.fromFactory((contentType) => []);
 
-  List<Song> get songs => map.getValue<Song>().cast<Song>();
-  List<Album> get albums => map.getValue<Album>().cast<Album>();
-  List<Playlist> get playlists => map.getValue<Playlist>().cast<Playlist>();
-  List<Artist> get artists => map.getValue<Artist>().cast<Artist>();
+  List<Song> get songs => map.get(ContentType.song).cast<Song>();
+  List<Album> get albums => map.get(ContentType.album).cast<Album>();
+  List<Playlist> get playlists => map.get(ContentType.playlist).cast<Playlist>();
+  List<Artist> get artists => map.get(ContentType.artist).cast<Artist>();
 
   bool get empty => map.values.every((element) => element.isEmpty);
   bool get notEmpty => map.values.any((element) => element.isNotEmpty);
@@ -69,8 +68,8 @@ class _Results {
   }
 
   void search(String query) {
-    for (final contentType in Content.enumerate()) {
-      map.setValue(
+    for (final contentType in ContentType.values) {
+      map.set(
         ContentControl.instance.search(query, contentType: contentType),
         key: contentType,
       );
@@ -80,10 +79,9 @@ class _Results {
 
 class _SearchStateDelegate {
   _SearchStateDelegate(this.selectionController, this.searchDelegate)
-    : scrollController = ScrollController(),
-    singleListScrollController = ScrollController()
-    {
-    /// Initalize [prevQuery] and [trimmedQuery] values.
+      : scrollController = ScrollController(),
+        singleListScrollController = ScrollController() {
+    /// Initialize [prevQuery] and [trimmedQuery] values.
     onQueryChange();
   }
 
@@ -94,6 +92,7 @@ class _SearchStateDelegate {
   final ScrollController singleListScrollController;
   final ContentSelectionController selectionController;
   final ContentSearchDelegate searchDelegate;
+
   /// Used to check whether the body is scrolled.
   final ValueNotifier<bool> bodyScrolledNotifier = ValueNotifier<bool>(false);
   _Results results = _Results();
@@ -117,19 +116,19 @@ class _SearchStateDelegate {
     searchDelegate.setState();
   }
 
-  ValueListenable<Type?> get onContentTypeChange => selectionController.onContentTypeChange;
+  ValueListenable<ContentType?> get onContentTypeChange => selectionController.onContentTypeChange;
 
   /// Content type to filter results by.
   ///
   /// When null results are displayed as list of sections, see [ContentSection].
-  Type? get contentType => selectionController.primaryContentType;
-  set contentType(Type? value) {
+  ContentType? get contentType => selectionController.primaryContentType;
+  set contentType(ContentType? value) {
     selectionController.primaryContentType = value;
     bodyScrolledNotifier.value = false;
     if (value != null) {
       // Scroll to chip
       ensureVisible(
-        chipContextMap.getValue(value),
+        chipContextMap.get(value)!,
         duration: kTabScrollDuration,
         alignment: 0.5,
         alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
@@ -137,14 +136,20 @@ class _SearchStateDelegate {
     }
   }
 
-  ContentMap<BuildContext> chipContextMap = ContentMap();
+  ContentMap<BuildContext?> chipContextMap = ContentMap.fromFactory((contentType) => null);
+
   /// Saves chips context to be able to scroll it when [contentType] changes.
-  void registerChipContext(BuildContext context, Type contentType) {
-    chipContextMap.setValue(context, key: contentType);
+  void registerChipContext(BuildContext context, ContentType contentType) {
+    chipContextMap.set(context, key: contentType);
+  }
+
+  final showOnlyFavoritesNotifier = ValueNotifier(false);
+  bool get showOnlyFavorites => showOnlyFavoritesNotifier.value;
+  void toggleShowOnlyFavorites() {
+    showOnlyFavoritesNotifier.value = !showOnlyFavoritesNotifier.value;
   }
 
   void onSubmit() {
-    
     SearchHistory.instance.add(query);
   }
 
@@ -159,29 +164,32 @@ class _SearchStateDelegate {
         bodyScrolledNotifier.value = false;
         results.search(trimmedQuery);
       }
-      if (scrollController.hasClients)
+      if (scrollController.hasClients) {
         scrollController.jumpTo(0);
-      if (singleListScrollController.hasClients)
+      }
+      if (singleListScrollController.hasClients) {
         singleListScrollController.jumpTo(0);
+      }
     }
     prevQuery = trimmedQuery;
   }
 
   /// Handles tap to different content tiles.
-  void handleContentTap<T extends Content>([Type? contentType]) {
-    return contentPick<T, VoidCallback>(
-      contentType: contentType,
-      song: () {
+  void handleContentTap(ContentType contentType) {
+    switch (contentType) {
+      case ContentType.song:
         onSubmit();
         QueueControl.instance.setSearchedQueue(query, results.songs);
-      },
-      album: onSubmit,
-      playlist: onSubmit,
-      artist: onSubmit,
-    )();
+        break;
+      case ContentType.album:
+      case ContentType.playlist:
+      case ContentType.artist:
+        onSubmit();
+        break;
+    }
   }
 
-  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// Scrolls the [Scrollable]s that enclose the given context so as to make the
   /// given context visible.
   ///
   /// Copied from [Scrollable.ensureVisible].
@@ -218,10 +226,12 @@ class _SearchStateDelegate {
       scrollable = Scrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.zero)
+    if (futures.isEmpty || duration == Duration.zero) {
       return Future<void>.value();
-    if (futures.length == 1)
+    }
+    if (futures.length == 1) {
       return futures.single;
+    }
     return Future.wait<void>(futures).then<void>((List<void> _) => null);
   }
 
@@ -253,19 +263,28 @@ class _SearchStateDelegate {
     double target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset
-          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        target = viewport
+            .getOffsetToReveal(object, alignment, rect: targetRect)
+            .offset
+            .clamp(position.minScrollExtent, position.maxScrollExtent)
+            .toDouble();
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0, rect: targetRect).offset
-          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        target = viewport
+            .getOffsetToReveal(object, 1.0, rect: targetRect)
+            .offset
+            .clamp(position.minScrollExtent, position.maxScrollExtent)
+            .toDouble();
         if (target < position.pixels) {
           target = position.pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0, rect: targetRect).offset
-          .clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+        target = viewport
+            .getOffsetToReveal(object, 0.0, rect: targetRect)
+            .offset
+            .clamp(position.minScrollExtent, position.maxScrollExtent)
+            .toDouble();
         if (target > position.pixels) {
           target = position.pixels;
         }
@@ -273,7 +292,7 @@ class _SearchStateDelegate {
     }
 
     if (position.pixels > position.viewportDimension / 2 &&
-       (position.pixels - target).abs() < position.viewportDimension / 2 - 50) {
+        (position.pixels - target).abs() < position.viewportDimension / 2 - 50) {
       return Future<void>.value();
     }
 
@@ -313,9 +332,9 @@ class SearchPageRoute extends RouteTransition<SearchPage> {
     RouteSettings? settings,
     RouteTransitionSettings? transitionSettings,
   }) : super(
-         settings: settings,
-         transitionSettings: transitionSettings,
-       );
+          settings: settings,
+          transitionSettings: transitionSettings,
+        );
 
   final Widget child;
 
@@ -328,7 +347,8 @@ class SearchPageRoute extends RouteTransition<SearchPage> {
   }
 
   @override
-  Widget buildAnimation(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildAnimation(
+      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return FadeTransition(
       opacity: CurvedAnimation(
         parent: animation,
@@ -341,7 +361,7 @@ class SearchPageRoute extends RouteTransition<SearchPage> {
 }
 
 class SearchRoute extends StatefulWidget {
-  SearchRoute({
+  const SearchRoute({
     Key? key,
     required this.delegate,
   }) : super(key: key);
@@ -363,17 +383,17 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     super.initState();
 
     initSelectionController(() => ContentSelectionController.create(
-      vsync: AppRouter.instance.navigatorKey.currentState!,
-      context: context,
-      closeButton: true,
-      ignoreWhen: () => playerRouteController.opened ||
-                        HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
-    ));
+          vsync: AppRouter.instance.navigatorKey.currentState!,
+          context: context,
+          closeButton: true,
+          ignoreWhen: () =>
+              playerRouteController.opened || HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.search),
+        ));
 
     stateDelegate = _SearchStateDelegate(selectionController, widget.delegate);
     widget.delegate._setStateNotifier.addListener(_handleSetState);
     widget.delegate._queryTextController.addListener(_onQueryChanged);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
         _route = ModalRoute.of(context)!;
         _animation = _route.animation!;
@@ -433,7 +453,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   void _onFocusChanged() {
     if (focusNode.hasFocus) {
       if (widget.delegate.autoKeyboard) {
-        setState(() { });
+        setState(() {});
       }
     }
   }
@@ -461,10 +481,9 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   }
 
   ThemeData buildAppBarTheme() {
-    final ThemeData theme = ThemeControl.theme;
+    final theme = Theme.of(context);
     return theme.copyWith(
       primaryColor: theme.backgroundColor,
-      primaryColorBrightness: theme.appBarTheme.brightness,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
       textTheme: const TextTheme(
         headline6: TextStyle(
@@ -483,56 +502,44 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     );
   }
 
-  List<Widget> buildActions() {
-    return <Widget>[
-      if (widget.delegate.query.isEmpty)
-        const SizedBox.shrink()
-      else
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: NFIconButton(
-            icon: const Icon(Icons.clear_rounded),
-            onPressed: () {
-              widget.delegate.query = '';
-            },
-          ),
-        ),
-    ];
-  }
-
   PreferredSizeWidget buildBottom() {
     const bottomPadding = 12.0;
     final contentTypeEntries = stateDelegate.results.map.entries
-      .where((el) => el.value.isNotEmpty)
-      .toList();
-    final showChips = stateDelegate.results.notEmpty && contentTypeEntries.length > 1;
+        .where(
+          (el) => el.value.isNotEmpty,
+        )
+        .toList();
+    final showChips = stateDelegate.results.notEmpty;
     return PreferredSize(
       preferredSize: Size.fromHeight(
-        showChips
-          ? AppBarBorder.height + 34.0 + bottomPadding
-          : AppBarBorder.height,
+        showChips ? AppBarBorder.height + _ContentChip.height(context) + bottomPadding : AppBarBorder.height,
       ),
-      child: ValueListenableBuilder<Type?>(
+      child: ValueListenableBuilder<ContentType?>(
         valueListenable: stateDelegate.onContentTypeChange,
         builder: (context, contentTypeValue, child) {
-          if (!showChips)
+          if (!showChips) {
             return child!;
+          }
 
-          final List<Widget> children = [];
-          for (int i = 0; i < contentTypeEntries.length; i++) {
-            children.add(_ContentChip(
+          final List<Widget> children = [
+            _ContentChip.favorites(
               delegate: stateDelegate,
-              contentType: contentTypeEntries[i].key,
-            ));
-            if (i != contentTypeEntries.length - 1) {
+            ),
+          ];
+          if (contentTypeEntries.length > 1) {
+            for (int i = 0; i < contentTypeEntries.length; i++) {
               children.add(const SizedBox(width: 8.0));
+              children.add(_ContentChip(
+                delegate: stateDelegate,
+                contentType: contentTypeEntries[i].key,
+              ));
             }
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 34.0,
+                height: _ContentChip.height(context),
                 child: GestureDetector(
                   onPanDown: (_) {
                     widget.delegate._chipsBarDragged = true;
@@ -544,11 +551,11 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
                     widget.delegate._chipsBarDragged = false;
                   },
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(left: 12.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: children,
-                    )
+                    ),
                   ),
                 ),
               ),
@@ -558,9 +565,8 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
           );
         },
         child: ValueListenableBuilder<bool>(
-          valueListenable: stateDelegate.bodyScrolledNotifier,
-          builder: (context, scrolled, child) => AppBarBorder(shown: scrolled)
-        ),
+            valueListenable: stateDelegate.bodyScrolledNotifier,
+            builder: (context, scrolled, child) => AppBarBorder(shown: scrolled)),
       ),
     );
   }
@@ -583,99 +589,98 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
       case TargetPlatform.windows:
         routeName = searchFieldLabel;
     }
-    final title = Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: TextField(
-        selectionControls: NFTextSelectionControls(),
-        controller: widget.delegate._queryTextController,
-        focusNode: focusNode,
-        style: theme.textTheme.headline6,
-        textInputAction: TextInputAction.search,
-        onSubmitted: (String _) => stateDelegate.onSubmit(),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: searchFieldLabel,
-          hintStyle: theme.inputDecorationTheme.hintStyle,
-        ),
+    final title = TextField(
+      selectionControls: NFTextSelectionControls(),
+      controller: widget.delegate._queryTextController,
+      focusNode: focusNode,
+      style: theme.textTheme.headline6,
+      textInputAction: TextInputAction.search,
+      onSubmitted: (String _) => stateDelegate.onSubmit(),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hintText: searchFieldLabel,
+        hintStyle: theme.inputDecorationTheme.hintStyle,
       ),
     );
-    return RouteAwareWidget(
-      onPushNext: _handlePushNext,
-      child: Builder(
-        builder: (context) => Semantics(
-          explicitChildNodes: true,
-          scopesRoute: true,
-          namesRoute: true,
-          label: routeName,
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            extendBodyBehindAppBar: true,
-            appBar: PreferredSize(
-              preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
-              child: SelectionAppBar(
-                selectionController: stateDelegate.selectionController,
-                onMenuPressed: null,
-                showMenuButton: false,
-                titleSelection: selectionRoute ? title : Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
-                  child: SelectionCounter(controller: stateDelegate.selectionController),
+    final selectAllAction = ValueListenableBuilder<ContentType?>(
+      valueListenable: stateDelegate.onContentTypeChange,
+      builder: (context, contentType, child) => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) => EmergeAnimation(
+          animation: animation,
+          child: child,
+        ),
+        child: contentType == null
+            ? const SizedBox.shrink()
+            : SelectAllSelectionAction<Content>(
+                controller: selectionController,
+                entryFactory: (content, index) => SelectionEntry.fromContent(
+                  content: content,
+                  index: index,
+                  context: context,
                 ),
-                actionsSelection: selectionRoute
-                  ? [
-                      SelectAllSelectionAction<Content>(
-                        controller: selectionController,
-                        entryFactory: (content, index) => SelectionEntry.fromContent(
-                          content: content,
-                          index: index,
-                          context: context,
-                        ),
-                        getAll: () => stateDelegate.results.map.getValue(stateDelegate.contentType),
-                      ),
-                      ]
-                  : [
-                    DeleteSongsAppBarAction<Content>(
-                      controller: stateDelegate.selectionController,
-                    ),
-                    ValueListenableBuilder<Type?>(
-                      valueListenable: stateDelegate.onContentTypeChange,
-                      builder: (context, contentType, child) => AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        transitionBuilder: (child, animation) => EmergeAnimation(
-                          animation: animation,
-                          child: child,
-                        ),
-                        child: stateDelegate.contentType == null
-                          ? const SizedBox.shrink()
-                          : SelectAllSelectionAction<Content>(
-                              controller: selectionController,
-                              entryFactory: (content, index) => SelectionEntry.fromContent(
-                                content: content,
-                                index: index,
-                                context: context,
-                              ),
-                              getAll: () => stateDelegate.results.map.getValue(contentType),
-                            ),
-                      ),
-                    ),
-                  ],
-                elevationSelection: 0.0,
-                elevation: theme.appBarTheme.elevation!,
-                toolbarHeight: kToolbarHeight,
-                backgroundColor: theme.primaryColor,
-                iconTheme: theme.primaryIconTheme,
-                textTheme: theme.primaryTextTheme,
-                brightness: theme.primaryColorBrightness,
-                leading: buildLeading(),
-                actions: selectionRoute ? const [] : buildActions(),
-                bottom: bottom,
-                title: !selectionRoute ? title : const SizedBox.shrink(),
+                getAll: () {
+                  final list = stateDelegate.results.map.get(contentType);
+                  return stateDelegate.showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
+                },
               ),
-            ),
-            body: SafeArea(
-              child: _DelegateProvider(
-                delegate: stateDelegate,
+      ),
+    );
+    return _DelegateProvider(
+      delegate: stateDelegate,
+      child: RouteAwareWidget(
+        onPushNext: _handlePushNext,
+        child: Builder(
+          builder: (context) => Semantics(
+            explicitChildNodes: true,
+            scopesRoute: true,
+            namesRoute: true,
+            label: routeName,
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              extendBodyBehindAppBar: true,
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(kToolbarHeight + bottom.preferredSize.height),
+                child: SelectionAppBar(
+                  selectionController: stateDelegate.selectionController,
+                  onMenuPressed: null,
+                  showMenuButton: false,
+                  titleSelection: selectionRoute
+                      ? title
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 15.0),
+                          child: SelectionCounter(controller: stateDelegate.selectionController),
+                        ),
+                  actionsSelection: selectionRoute
+                      ? [
+                          if (widget.delegate.query.isNotEmpty) selectAllAction,
+                          if (widget.delegate.query.isNotEmpty) const _ClearButton(),
+                        ]
+                      : [
+                          DeleteSongsAppBarAction<Content>(
+                            controller: stateDelegate.selectionController,
+                          ),
+                          selectAllAction,
+                        ],
+                  elevationSelection: 0.0,
+                  elevation: theme.appBarTheme.elevation!,
+                  toolbarHeight: kToolbarHeight,
+                  backgroundColor: theme.primaryColor,
+                  iconTheme: theme.primaryIconTheme,
+                  textTheme: theme.primaryTextTheme,
+                  leading: buildLeading(),
+                  actions: selectionRoute
+                      ? const []
+                      : [
+                          if (widget.delegate.query.isNotEmpty) const _ClearButton(),
+                        ],
+                  bottom: bottom,
+                  title: !selectionRoute ? title : const SizedBox.shrink(),
+                ),
+              ),
+              body: SafeArea(
                 child: GestureDetector(
                   onTap: () => focusNode.unfocus(),
                   onVerticalDragDown: (_) => focusNode.unfocus(),
@@ -692,7 +697,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
 
 class _DelegateProvider extends InheritedWidget {
   const _DelegateProvider({
-    Key? key, 
+    Key? key,
     required this.delegate,
     required Widget child,
   }) : super(key: key, child: child);
@@ -728,8 +733,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
   }
 
   bool _handleNotification(_SearchStateDelegate delegate, ScrollNotification notification) {
-    delegate.bodyScrolledNotifier.value =
-      notification.metrics.pixels != notification.metrics.minScrollExtent;
+    delegate.bodyScrolledNotifier.value = notification.metrics.pixels != notification.metrics.minScrollExtent;
     return false;
   }
 
@@ -743,123 +747,190 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
       onPopNext: () => _onTop = true,
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) => _handleNotification(delegate, notification),
-        child: ValueListenableBuilder<Type?>(
-          valueListenable: delegate.onContentTypeChange,
-          builder: (context, contentType, child) {
-            if (delegate.trimmedQuery.isEmpty) {
-              return _Suggestions();
-            } else if (results.empty) {
-              // Displays a message that there's nothing found
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
-                      child: Icon(Icons.error_outline_rounded),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 80.0),
-                      child: Text(
-                        l10n.searchNothingFound,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              final contentTypeEntries = results.map.entries
-                .where((el) => el.value.isNotEmpty)
-                .toList();
-              final single = contentTypeEntries.length == 1;
-              final showSingleCategoryContentList = single || contentType != null;
-              final contentListContentType = single ? contentTypeEntries.single.key : contentType;
-              final index = contentType == null ? -1 : Content.enumerate().indexOf(contentType);
-              WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                _prevIndex = index;
-              });
-              return NFBackButtonListener(
-                onBackButtonPressed: () => _handlePop(delegate),
-                child:
-                StreamBuilder(
-                  stream: PlaybackControl.instance.onSongChange,
-                  builder: (context, snapshot) =>
-                StreamBuilder(stream: ContentControl.instance.onContentChange,
-                  builder: (context, snapshot) =>
-                  PageTransitionSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    reverse: !single && (contentType == null || index < _prevIndex),
-                    transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
-                        transitionType: SharedAxisTransitionType.horizontal,
-                        animation: animation,
-                        secondaryAnimation: secondaryAnimation,
-                        fillColor: Colors.transparent,
-                        child: child,
-                      ),
-                    child: Container(
-                      key: ValueKey(contentType),
-                      child: showSingleCategoryContentList
-                          ? () {
-                            final list = single
-                              ? contentTypeEntries.single.value
-                              : contentPick<Content, ValueGetter<List<Content>>>(
-                                  contentType: contentType,
-                                  song: () => delegate.results.songs,
-                                  album: () => delegate.results.albums,
-                                  playlist: () => delegate.results.playlists,
-                                  artist: () => delegate.results.artists,
-                                )();
-                            return ContentListView<Content>(
-                              contentType: contentListContentType,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: delegate.showOnlyFavoritesNotifier,
+          builder: (context, showOnlyFavorites, child) => ValueListenableBuilder<ContentType?>(
+            valueListenable: delegate.onContentTypeChange,
+            builder: (context, contentType, child) {
+              if (delegate.trimmedQuery.isEmpty) {
+                return const _Suggestions();
+              } else if (results.empty) {
+                return const _NothingFound();
+              } else {
+                final contentTypeEntries = results.map.entries
+                    .where(
+                      (el) => el.value.isNotEmpty,
+                    )
+                    .toList();
+                final single = contentTypeEntries.length == 1;
+                final showSingleCategoryContentList = single || contentType != null;
+                final contentListContentType = single ? contentTypeEntries.single.key : contentType;
+                final index = contentType == null ? -1 : ContentType.values.indexOf(contentType);
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  _prevIndex = index;
+                });
+                return BackButtonListener(
+                  onBackButtonPressed: () => _handlePop(delegate),
+                  child: StreamBuilder(
+                    stream: PlaybackControl.instance.onSongChange,
+                    builder: (context, snapshot) => StreamBuilder(
+                      stream: ContentControl.instance.onContentChange,
+                      builder: (context, snapshot) {
+                        IndexMapper getSelectionIndexMapper(
+                          List<Content> filteredList,
+                          Map<Content, int> listIndexMap,
+                        ) {
+                          return (index) => listIndexMap[filteredList[index]]!;
+                        }
+
+                        ContentItemTest getSelectedTest(List<Content> filteredList, Map<Content, int> listIndexMap) {
+                          return (index) => delegate.selectionController.data.contains(SelectionEntry.fromContent(
+                                content: filteredList[index],
+                                index: listIndexMap[filteredList[index]]!,
+                                context: context,
+                              ));
+                        }
+
+                        final Widget child;
+
+                        if (showSingleCategoryContentList) {
+                          final list = single ? contentTypeEntries.single.value : results.map.get(contentType!);
+                          final listIndexMap = {
+                            for (int i = 0; i < list.length; i++) list[i]: i,
+                          };
+                          final filteredList = showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
+                          if (filteredList.isEmpty) {
+                            child = const _NothingFound();
+                          } else {
+                            child = ContentListView(
+                              contentType: contentListContentType!,
                               controller: delegate.singleListScrollController,
                               selectionController: delegate.selectionController,
                               onItemTap: (index) => delegate.handleContentTap(contentListContentType),
-                              list: list,
+                              list: filteredList,
+                              selectedTest: getSelectedTest(filteredList, listIndexMap),
+                              selectionIndexMapper: getSelectionIndexMapper(filteredList, listIndexMap),
                             );
-                          }()
-                          : 
+                          }
+                        } else {
                           // AppScrollbar( // TODO: enable this when i have more content on search screen
                           //     controller: delegate.scrollController,
-                          //     child: 
-                              ListView(
-                                controller: delegate.scrollController,
-                                children: [
-                                  for (final entry in contentTypeEntries)
-                                    if (entry.value.isNotEmpty)
-                                      ContentSection(
-                                        contentType: entry.key,
-                                        list: results.map.getValue(entry.key),
-                                        onHeaderTap: () => delegate.contentType = entry.key,
-                                        selectionController: delegate.selectionController,
-                                        contentTileTapHandler: () => delegate.handleContentTap(entry.key),
-                                      ),
-                                ],
-                              ),
-                            ),
-                      ),
+                          //     child:
+                          final List<Widget> children = [];
+                          int emptyCount = 0;
+                          for (final entry in contentTypeEntries) {
+                            final list = results.map.get(entry.key);
+                            final listIndexMap = {
+                              for (int i = 0; i < list.length; i++) list[i]: i,
+                            };
+                            final filteredList = showOnlyFavorites ? ContentUtils.filterFavorite(list).toList() : list;
+                            if (filteredList.isEmpty) {
+                              emptyCount += 1;
+                              children.add(ContentSection.custom(
+                                contentType: entry.key,
+                                list: filteredList,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(l10n.searchNothingFound),
+                                  ),
+                                ),
+                                onHeaderTap: () => delegate.contentType = entry.key,
+                              ));
+                            } else {
+                              children.add(ContentSection(
+                                contentType: entry.key,
+                                list: filteredList,
+                                onHeaderTap: () => delegate.contentType = entry.key,
+                                selectionController: delegate.selectionController,
+                                contentTileTapHandler: () => delegate.handleContentTap(entry.key),
+                                selectedTest: getSelectedTest(filteredList, listIndexMap),
+                                selectionIndexMapper: getSelectionIndexMapper(filteredList, listIndexMap),
+                              ));
+                            }
+                          }
+                          if (emptyCount == contentTypeEntries.length) {
+                            child = const _NothingFound();
+                          } else {
+                            child = ListView(
+                              controller: delegate.scrollController,
+                              children: children,
+                            );
+                          }
+                        }
+                        return PageTransitionSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          reverse: !single && (contentType == null || index < _prevIndex),
+                          transitionBuilder: (child, animation, secondaryAnimation) => SharedAxisTransition(
+                            transitionType: SharedAxisTransitionType.horizontal,
+                            animation: animation,
+                            secondaryAnimation: secondaryAnimation,
+                            fillColor: Colors.transparent,
+                            child: child,
+                          ),
+                          child: Container(
+                            key: ValueKey(contentType),
+                            child: child,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
-            }
-          },
+              }
+            },
+          ),
         ),
       ),
     );
   }
 }
 
+class _ClearButton extends StatelessWidget {
+  const _ClearButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final delegate = _SearchStateDelegate._of(context)!;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: NFIconButton(
+        icon: const Icon(Icons.clear_rounded),
+        onPressed: () {
+          delegate.searchDelegate.query = '';
+        },
+      ),
+    );
+  }
+}
 
 class _ContentChip extends StatefulWidget {
   const _ContentChip({
     Key? key,
     required this.delegate,
     required this.contentType,
-  }) : super(key: key);
+  })  : favoritesChip = false,
+        super(key: key);
+
+  const _ContentChip.favorites({
+    Key? key,
+    required this.delegate,
+  })  : favoritesChip = true,
+        contentType = null,
+        super(key: key);
 
   final _SearchStateDelegate delegate;
-  final Type contentType;
+  final ContentType? contentType;
+  final bool favoritesChip;
+
+  static const double _baseHeight = 34.0;
+  static double height(BuildContext context) => _baseHeight * math.max(1.0, MediaQuery.textScaleFactorOf(context));
+
+  /// Unfortunately, chips have a hardcoded height computation inside them,
+  /// here heuristically trying to add some padding to label to
+  /// make the border look right.
+  static double additionalPadding(BuildContext context) => 5.0 * math.max(1.0, MediaQuery.textScaleFactorOf(context));
 
   @override
   _ContentChipState createState() => _ContentChipState();
@@ -869,33 +940,58 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
   static const borderRadius = BorderRadius.all(Radius.circular(50.0));
 
   late AnimationController controller;
-  
-  bool get active => widget.delegate.contentType == widget.contentType;
+
+  bool get favoritesChip => widget.favoritesChip;
+  _SearchStateDelegate get delegate => widget.delegate;
+
+  bool get active {
+    if (favoritesChip) {
+      return delegate.showOnlyFavoritesNotifier.value;
+    }
+    return delegate.contentType == widget.contentType;
+  }
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    widget.delegate.registerChipContext(context, widget.contentType);
+    if (favoritesChip) {
+      delegate.showOnlyFavoritesNotifier.addListener(_favoriteListener);
+    } else {
+      delegate.registerChipContext(context, widget.contentType!);
+    }
     if (active) {
       controller.forward();
     }
   }
 
   @override
-  void dispose() { 
+  void dispose() {
+    if (favoritesChip) {
+      delegate.showOnlyFavoritesNotifier.removeListener(_favoriteListener);
+    }
     controller.dispose();
     super.dispose();
   }
 
+  void _favoriteListener() {
+    setState(() {
+      // update since [active] has changed
+    });
+  }
+
   void _handleTap() {
+    if (favoritesChip) {
+      delegate.toggleShowOnlyFavorites();
+      return;
+    }
     if (active) {
-      widget.delegate.contentType = null;
+      delegate.contentType = null;
     } else {
-      if (widget.delegate.singleListScrollController.hasClients) {
-        widget.delegate.singleListScrollController.jumpTo(0);
+      if (delegate.singleListScrollController.hasClients) {
+        delegate.singleListScrollController.jumpTo(0);
       }
-      widget.delegate.contentType = widget.contentType;
+      delegate.contentType = widget.contentType;
     }
   }
 
@@ -907,11 +1003,12 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
       controller.reverse();
     }
     final l10n = getl10n(context);
-    final count = widget.delegate.results.map.getValue(widget.contentType).length;
-    final colorScheme =  ThemeControl.theme.colorScheme;
+    final theme = Theme.of(context);
+    final count = favoritesChip ? null : delegate.results.map.get(widget.contentType!).length;
+    final colorScheme = theme.colorScheme;
     final colorTween = ColorTween(
       begin: colorScheme.secondary,
-      end: Constants.Theme.contrast.auto,
+      end: theme.appThemeExtension.contrast,
     );
     final baseAnimation = CurvedAnimation(
       parent: controller,
@@ -921,50 +1018,103 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     final colorAnimation = colorTween.animate(baseAnimation);
     final textColorAnimation = ColorTween(
       begin: colorScheme.onBackground,
-      end: Constants.Theme.contrast.autoReverse,
+      end: favoritesChip ? Colors.redAccent : theme.appThemeExtension.contrastInverse,
     ).animate(baseAnimation);
     final splashColorAnimation = ColorTween(
-      begin: Constants.Theme.glowSplashColor.auto,
-      end: Constants.Theme.glowSplashColorOnContrast.auto,
+      begin: theme.appThemeExtension.glowSplashColor,
+      end: theme.appThemeExtension.glowSplashColorOnContrast,
     ).animate(baseAnimation);
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) => Material(
-        color: colorAnimation.value,
-        borderRadius: borderRadius,
-        child: NFInkWell(
-          borderRadius: borderRadius,
-          splashColor: splashColorAnimation.value,
-          onTap: _handleTap,
-            child: IgnorePointer(
-              child: Theme(
-                data: ThemeControl.theme.copyWith(canvasColor: Colors.transparent),
-                child: RawChip(
-                  shape: StadiumBorder(
-                    side: BorderSide(
-                      color: Constants.Theme.contrast.auto.withOpacity(0.05),
-                      width: 1.0
-                    ),
-                  ),
-                  backgroundColor: Colors.transparent,
-                  label: Text(
-                    l10n.contentsPluralWithCount(count, widget.contentType),
-                    style: TextStyle(
-                      color: textColorAnimation.value,
-                      fontWeight: FontWeight.w800,
-                    ),
+    return SizedBox(
+      height: _ContentChip.height(context),
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) => Material(
+          color: colorAnimation.value,
+          borderRadius: favoritesChip ? null : borderRadius,
+          shape: !favoritesChip
+              ? null
+              : StadiumBorder(
+                  side: BorderSide(
+                    color: theme.appThemeExtension.contrast.withOpacity(0.05),
+                    width: 1.0,
                   ),
                 ),
-              ),
-            ),
+          child: NFInkWell(
+            borderRadius: borderRadius,
+            splashColor: splashColorAnimation.value,
+            onTap: _handleTap,
+            child: favoritesChip
+                ? SizedBox(
+                    width: _ContentChip.height(context),
+                    child: Icon(
+                      active ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                      size: 20.0,
+                      color: textColorAnimation.value,
+                    ),
+                  )
+                : IgnorePointer(
+                    child: Theme(
+                      data: theme.copyWith(canvasColor: Colors.transparent),
+                      child: RawChip(
+                        padding: EdgeInsets.symmetric(
+                          vertical: _ContentChip.additionalPadding(context),
+                          horizontal: _ContentChip.additionalPadding(context),
+                        ),
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color: theme.appThemeExtension.contrast.withOpacity(0.05),
+                            width: 1.0,
+                          ),
+                        ),
+                        backgroundColor: Colors.transparent,
+                        label: Text(
+                          l10n.contentsPlural(widget.contentType!, count!),
+                          style: TextStyle(
+                            color: textColorAnimation.value,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Displays a message that there's nothing found.
+class _NothingFound extends StatelessWidget {
+  const _NothingFound({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
+            child: Icon(Icons.error_outline_rounded),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 80.0),
+            child: Text(
+              l10n.searchNothingFound,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _Suggestions extends StatefulWidget {
-  _Suggestions({Key? key}) : super(key: key);
+  const _Suggestions({Key? key}) : super(key: key);
 
   @override
   _SuggestionsState createState() => _SuggestionsState();
@@ -974,7 +1124,7 @@ class _SuggestionsState extends State<_Suggestions> {
   Future<void>? _loadFuture;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
     _loadFuture = SearchHistory.instance.load();
   }
@@ -982,56 +1132,59 @@ class _SuggestionsState extends State<_Suggestions> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    return FutureBuilder<void>(
-      future: _loadFuture,
-      builder: (context, snapshot) {
-        if (SearchHistory.instance.history == null) {
-          return const Center(
-            child: Spinner(),
-          );
-        }
-        return SizedBox(
-          width: double.infinity,
-          child: SearchHistory.instance.history!.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 160.0,
-                      left: 50.0,
-                      right: 50.0,
-                    ),
-                    child: Text(
-                      l10n.searchHistoryPlaceholder,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: ThemeControl.theme.hintColor,
+    final theme = Theme.of(context);
+    return AnimatedBuilder(
+      animation: _SearchStateDelegate._of(context)!.searchDelegate._setStateNotifier,
+      builder: (context, child) => FutureBuilder<void>(
+        future: _loadFuture,
+        builder: (context, snapshot) {
+          if (SearchHistory.instance.history == null) {
+            return const Center(
+              child: Spinner(),
+            );
+          }
+          return SizedBox(
+            width: double.infinity,
+            child: SearchHistory.instance.history!.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 160.0,
+                        left: 50.0,
+                        right: 50.0,
+                      ),
+                      child: Text(
+                        l10n.searchHistoryPlaceholder,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: theme.hintColor,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : ScrollConfiguration(
-                  behavior: const GlowlessScrollBehavior(),
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: ClampingScrollPhysics(),
+                  )
+                : ScrollConfiguration(
+                    behavior: const GlowlessScrollBehavior(),
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: ClampingScrollPhysics(),
+                      ),
+                      itemCount: SearchHistory.instance.history!.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const _SuggestionsHeader();
+                        }
+                        index--;
+                        return _SuggestionTile(index: index);
+                      },
                     ),
-                    itemCount: SearchHistory.instance.history!.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return const _SuggestionsHeader();
-                      }
-                      index--;
-                      return _SuggestionTile(index: index);
-                    },
                   ),
-                ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
-
 
 class _SuggestionsHeader extends StatelessWidget {
   const _SuggestionsHeader({Key? key}) : super(key: key);
@@ -1044,6 +1197,7 @@ class _SuggestionsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return ListHeader(
       margin: const EdgeInsets.fromLTRB(16.0, 3.0, 7.0, 0.0),
       leading: Text(l10n.searchHistory),
@@ -1051,17 +1205,18 @@ class _SuggestionsHeader extends StatelessWidget {
         padding: const EdgeInsets.only(top: 5.0),
         child: NFIconButton(
           icon: const Icon(Icons.delete_sweep_rounded),
-          color: ThemeControl.theme.hintColor,
+          color: theme.hintColor,
           onPressed: () {
             ShowFunctions.instance.showDialog(
               context,
-              ui: Constants.UiTheme.modalOverGrey.auto,
+              ui: theme.systemUiThemeExtension.modalOverGrey,
               title: Text(l10n.searchClearHistory),
-              buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-              acceptButton: NFButton.accept(
+              buttonSplashColor: theme.appThemeExtension.glowSplashColor,
+              acceptButton: AppButton.pop(
                 text: l10n.delete,
-                splashColor: Constants.Theme.glowSplashColor.auto,
-                textStyle: const TextStyle(color: Constants.AppColors.red),
+                popResult: true,
+                splashColor: theme.appThemeExtension.glowSplashColor,
+                textColor: constants.AppColors.red,
                 onPressed: () => clearHistory(context),
               ),
             );
@@ -1095,6 +1250,7 @@ class _SuggestionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return NFListTile(
       onTap: () => _handleTap(context),
       title: Text(
@@ -1109,35 +1265,32 @@ class _SuggestionTile extends StatelessWidget {
         padding: const EdgeInsets.only(left: 2.0),
         child: Icon(
           Icons.history_rounded,
-          color: ThemeControl.theme.iconTheme.color,
+          color: theme.iconTheme.color,
         ),
       ),
       onLongPress: () {
         ShowFunctions.instance.showDialog(
           context,
-          ui: Constants.UiTheme.modalOverGrey.auto,
+          ui: theme.systemUiThemeExtension.modalOverGrey,
           title: Text(l10n.searchHistory),
           titlePadding: defaultAlertTitlePadding.copyWith(bottom: 4.0),
           contentPadding: defaultAlertContentPadding.copyWith(bottom: 6.0),
-          content: Text.rich(
-            TextSpan(
-              style: const TextStyle(fontSize: 15.0),
-              children: [
-                TextSpan(text: l10n.searchHistoryRemoveEntryDescriptionP1),
-                TextSpan(
-                  text: '"${SearchHistory.instance.history![index]}"',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                TextSpan(text: l10n.searchHistoryRemoveEntryDescriptionP2),
-              ],
+          content: StyledText(
+            style: const TextStyle(fontSize: 15.0),
+            text: l10n.searchHistoryRemoveEntryDescription(
+              '<bold>${l10n.escapeStyled('"${SearchHistory.instance.history![index]}"')}</bold>',
             ),
+            tags: {
+              'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.w700)),
+            },
           ),
-          buttonSplashColor: Constants.Theme.glowSplashColor.auto,
-          acceptButton: NFButton.accept(
+          buttonSplashColor: theme.appThemeExtension.glowSplashColor,
+          acceptButton: AppButton.pop(
             text: l10n.remove,
-            splashColor: Constants.Theme.glowSplashColor.auto,
-            textStyle: const TextStyle(color: Constants.AppColors.red),
-            onPressed: () => _removeEntry(context, index)
+            popResult: true,
+            splashColor: theme.appThemeExtension.glowSplashColor,
+            textColor: constants.AppColors.red,
+            onPressed: () => _removeEntry(context, index),
           ),
         );
       },

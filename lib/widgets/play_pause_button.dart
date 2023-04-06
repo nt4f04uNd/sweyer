@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:flare_flutter/flare_actor.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:lottie/lottie.dart';
+import 'package:sweyer/constants.dart' as constants;
 
 const double _kIconSize = 22.0;
 const double _kButtonSize = 66.0;
@@ -28,34 +28,20 @@ class AnimatedPlayPauseButton extends StatefulWidget {
   AnimatedPlayPauseButtonState createState() => AnimatedPlayPauseButtonState();
 }
 
-class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with TickerProviderStateMixin {
-  late AnimationController controller;
+class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
   StreamSubscription<bool>? _playingSubscription;
   AudioPlayer get player => widget.player ?? MusicPlayer.instance;
-
-  late String _animation;
-  set animation(String value) {
-    setState(() {
-      _animation = value;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _update();
+    _controller = AnimationController(vsync: this);
   }
 
   void _update() {
-    if (player.playing) {
-      _animation = 'pause';
-    } else {
-      controller.value = 1.0;
-      _animation = 'play';
+    if (!player.playing) {
+      _controller.value = 1.0;
     }
     _playingSubscription?.cancel();
     _playingSubscription = player.playingStream.listen((playing) {
@@ -80,24 +66,18 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
   @override
   void dispose() {
     _playingSubscription?.cancel();
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
- /// Animates to state where it shows "play" button.
+  /// Animates to state where it shows "play" button.
   void _play() {
-    if (_animation != 'pause_play' && _animation != 'play') {
-      controller.forward();
-      animation = 'pause_play';
-    }
+    _controller.forward();
   }
 
   /// Animates to state where it shows "pause" button.
   void _pause() {
-    if (_animation != 'play_pause' && _animation != 'pause') {
-      controller.reverse();
-      animation = 'play_pause';
-    }
+    _controller.reverse();
   }
 
   void _handlePress() {
@@ -110,8 +90,9 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final baseAnimation = CurvedAnimation(
-      parent: controller,
+      parent: _controller,
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
@@ -121,7 +102,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
     ).animate(baseAnimation);
     final scaleAnimation = Tween(begin: 1.05, end: 0.89).animate(baseAnimation);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final color = widget.iconColor ?? ThemeControl.theme.iconTheme.color!;
+    final color = widget.iconColor ?? theme.iconTheme.color!;
     return NFIconButton(
       size: textScaleFactor * (widget.size ?? _kButtonSize),
       iconSize: textScaleFactor * (widget.iconSize ?? _kIconSize),
@@ -133,17 +114,19 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with T
           // Needed because for some reason the color is not updated on theme change.
           key: ValueKey(color),
           child: RepaintBoundary(
-            child: FlareActor(
-              Constants.Assets.ASSET_ANIMATION_PLAY_PAUSE,
-              animation: _animation,
-              callback: (value) {
-                if (value == 'pause_play' && _animation != 'play_pause') {
-                  animation = 'play';
-                } else if (value == 'play_pause' && _animation != 'pause_play') {
-                  animation = 'pause';
-                }
+            child: Lottie.asset(
+              constants.Assets.assetAnimationPlayPause,
+              controller: _controller,
+              onLoaded: (composition) {
+                _controller.duration = composition.duration;
+                _update();
               },
-              color: color,
+              delegates: LottieDelegates(
+                values: [
+                  ValueDelegate.color(const ['Left Shape Layer', 'Left Shape', 'Left Shape Fill'], value: color),
+                  ValueDelegate.color(const ['Right Shape Layer', 'Right Shape', 'Right Shape Fill'], value: color),
+                ],
+              ),
             ),
           ),
         ),

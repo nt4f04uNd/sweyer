@@ -13,8 +13,5 @@ jobs:
         with:
           testing_arguments: --coverage
 
-      - name: 📊 Check Code Coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v1
-        with:
-          path: coverage/lcov.info
-          min_coverage: 0
+      - name: ☂ Upload Code Coverage
+        uses: codecov/codecov-action@v3

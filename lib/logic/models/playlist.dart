@@ -1,16 +1,15 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
+  @override
+  ContentType get type => ContentType.playlist;
+
   final String data;
   final int dateAdded;
   final int dateModified;
   final String name;
   final List<int> songIds;
-
-  /// An icon for this content type.
-  static const icon = Icons.queue_music_rounded;
 
   @override
   String get title => name;
@@ -26,16 +25,16 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   late IdMap _idMap;
 
   /// For each array of songs a new instance of [idMap] will be created
-  /// and assonged to each [Song.idMap].
+  /// and assigned to each [Song.idMap].
   ///
-  /// The origin will also be set for interaction with queue instertions
+  /// The origin will also be set for interaction with queue insertions
   /// at functions like [QueueControl.playNext].
   @override
   List<Song> get songs {
     _idMap = {};
     // Key - song id
     // Value - duplication index
-    final _duplicationIndexMap = <int, int>{};
+    final duplicationIndexMap = <int, int>{};
     final List<Song> found = [];
     final List<int> notFoundIndices = [];
     for (int i = 0; i < songIds.length; i++) {
@@ -45,14 +44,14 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
         copiedSong.origin = this;
         copiedSong.idMap = idMap;
         final id = copiedSong.id;
-        final duplicationIndex = _duplicationIndexMap[id] ??= 0;
+        final duplicationIndex = duplicationIndexMap[id] ??= 0;
         copiedSong.duplicationIndex = duplicationIndex;
         ContentUtils.deduplicateSong(
           song: copiedSong,
           list: found,
           idMap: idMap,
         );
-        _duplicationIndexMap[id] = _duplicationIndexMap[id]! + 1;
+        duplicationIndexMap[id] = duplicationIndexMap[id]! + 1;
         found.add(copiedSong);
       } else {
         notFoundIndices.add(songIds[i]);
@@ -88,7 +87,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: ThemeControl.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       title: title,
       artist: null,
@@ -120,13 +119,13 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
 
   @override
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'data': data,
-    'dateAdded': dateAdded,
-    'dateModified': dateModified,
-    'name': name,
-    'songIds': songIds,
-  };
+        'id': id,
+        'data': data,
+        'dateAdded': dateAdded,
+        'dateModified': dateModified,
+        'name': name,
+        'songIds': songIds,
+      };
 }
 
 /// The `copyWith` function type for [Playlist].

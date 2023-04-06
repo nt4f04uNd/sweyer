@@ -42,6 +42,9 @@ abstract class JsonSerializer<R, S> {
   Future<void> save(S data);
 }
 
+/// The type for [IntListSerializer].
+typedef IntSerializerType = JsonSerializer<List<int>, List<int>>;
+
 /// Serializes a list of integers.
 class IntListSerializer extends JsonSerializer<List<int>, List<int>> {
   const IntListSerializer(this.fileName);
@@ -102,12 +105,10 @@ class SerializedQueueItem {
     );
   }
   Map<String, dynamic> toMap() => {
-    'id': id,
-    if (duplicationIndex != null)
-      'duplicationIndex': duplicationIndex,
-    if (originEntry != null)
-      'origin': originEntry!.toMap(),
-  };
+        'id': id,
+        if (duplicationIndex != null) 'duplicationIndex': duplicationIndex,
+        if (originEntry != null) 'origin': originEntry!.toMap(),
+      };
 }
 
 /// The type for [QueueSerializer].
@@ -160,13 +161,13 @@ class QueueSerializer extends QueueSerializerType {
   @override
   Future<void> save(List<Song> data) async {
     final file = await getFile();
-    final json = jsonEncode(data.map((song) =>
-      SerializedQueueItem(
-        id: song.id,
-        duplicationIndex: song.duplicationIndex,
-        originEntry: song.origin?.toSongOriginEntry()
-      ).toMap()
-    ).toList());
+    final json = jsonEncode(data
+        .map((song) => SerializedQueueItem(
+              id: song.id,
+              duplicationIndex: song.duplicationIndex,
+              originEntry: song.origin?.toSongOriginEntry(),
+            ).toMap())
+        .toList());
     await file.writeAsString(json);
     // debugPrint('$fileName: json saved');
   }
@@ -197,7 +198,7 @@ class IdMapSerializer extends IdMapSerializerType {
         final decodedKey = jsonDecode(entry.key);
         // Initially the id map was saved as just `Map<String, int>` where:
         // key was negative song id,
-        // value was the source positve id
+        // value was the source positive id
         //
         // This ensures there will be no errors in case someone migrates from
         // the old version.
@@ -232,8 +233,8 @@ class IdMapSerializer extends IdMapSerializerType {
   @override
   Future<void> save(IdMap data) async {
     final file = await getFile();
-    await file.writeAsString(jsonEncode(data.map((key, value) =>
-      MapEntry(jsonEncode(key.toMap()), value),
+    await file.writeAsString(jsonEncode(data.map(
+      (key, value) => MapEntry(jsonEncode(key.toMap()), value),
     )));
     // debugPrint('$fileName: json saved');
   }

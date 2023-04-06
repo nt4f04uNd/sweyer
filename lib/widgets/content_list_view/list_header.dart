@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
 
 class ListHeader extends StatelessWidget {
   const ListHeader({
@@ -9,6 +8,7 @@ class ListHeader extends StatelessWidget {
     this.leading,
     this.trailing,
     this.color,
+    this.wrap = false,
     this.margin = const EdgeInsets.only(
       top: 10.0,
       bottom: 2.0,
@@ -20,25 +20,42 @@ class ListHeader extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final Color? color;
+  final bool wrap;
   final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DefaultTextStyle(
       style: DefaultTextStyle.of(context).style.copyWith(
-        fontSize: 16.0,
-        color: ThemeControl.theme.hintColor,
-        fontWeight: FontWeight.w700,
-      ),
+            fontSize: 16.0,
+            color: theme.hintColor,
+            fontWeight: FontWeight.w700,
+          ),
       child: Container(
         color: color,
         padding: margin,
-        child: Row(
-          children: [
-            if (leading != null) Expanded(child: leading!),
-            if (trailing != null) trailing!,
-          ],
-        ),
+        child: wrap
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (leading != null) leading!,
+                      if (trailing != null) trailing!,
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  if (leading != null) Expanded(child: leading!),
+                  if (trailing != null) trailing!,
+                ],
+              ),
       ),
     );
   }
@@ -46,29 +63,30 @@ class ListHeader extends StatelessWidget {
 
 /// Displays content controls to sort content and content [count] at the trailing.
 class ContentListHeader<T extends Content> extends StatelessWidget {
-  /// Creats a default header with sort controls, count and slots widgets
+  /// Create a default header with sort controls, count and slots widgets
   /// for other widgets.
   const ContentListHeader({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.count,
     this.selectionController,
     this.leading,
     this.trailing,
-  }) : _onlyCount = false, super(key: key);
+  })  : _onlyCount = false,
+        super(key: key);
 
   /// Creates a header that shows only count.
   const ContentListHeader.onlyCount({
     Key? key,
-    this.contentType,
+    required this.contentType,
     required this.count,
-  }) : _onlyCount = true,
-       selectionController = null,
-       leading = null,
-       trailing = null,
-       super(key: key);
+  })  : _onlyCount = true,
+        selectionController = null,
+        leading = null,
+        trailing = null,
+        super(key: key);
 
-  final Type? contentType;
+  final ContentType<T> contentType;
 
   final bool _onlyCount;
 
@@ -85,50 +103,21 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// Additional widget to place before [count].
   final Widget? trailing;
 
-  Sort<T> getSort() => ContentControl.instance.state.sorts.getValue<T>(contentType) as Sort<T>;
+  Sort<T> getSort() => ContentControl.instance.state.sorts.get(contentType) as Sort<T>;
 
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
     final sort = getSort();
-    Widget buildItem(SortFeature feature) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NFListTileInkRipple.splashFactory,
-        ),
-        child: Builder( // i need the proper context to pop the dialog
-          builder: (context) => _RadioListTile<SortFeature>(
-            title: Text(
-              l10n.sortFeature<T>(feature as SortFeature<T>, contentType).toLowerCase(),
-              style: ThemeControl.theme.textTheme.subtitle1,
-            ),
-            value: feature,
-            groupValue: sort.feature,
-            onChanged: (_) {
-              ContentControl.instance.sort(
-                contentType: contentType,
-                sort: sort.copyWith(feature: feature).withDefaultOrder,
-              );
-              Navigator.pop(context);
-            },
-          ),
-        ),
-      );
-    }
-
-    ShowFunctions.instance.showAlert(
-      context,
-      ui: Constants.UiTheme.modalOverGrey.auto,
-      title: Text(l10n.sort),
-      titlePadding: defaultAlertTitlePadding.copyWith(top: 20.0),
-      contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
-      acceptButton: const SizedBox.shrink(),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: SortFeature
-          .getValuesForContent<T>(contentType)
-          .map((el) => buildItem(el))
-          .toList(),
+    ShowFunctions.instance.showRadio<SortFeature>(
+      context: context,
+      title: l10n.sort,
+      items: SortFeature.getValuesForContent(contentType),
+      itemTitleBuilder: (item) => l10n.sortFeature(contentType, item),
+      onItemSelected: (item) => ContentControl.instance.sort(
+        contentType: contentType,
+        sort: sort.copyWith(feature: item).withDefaultOrder,
       ),
+      groupValueGetter: () => sort.feature,
     );
   }
 
@@ -136,7 +125,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, right: 10.0),
       child: Text(
-        l10n.contentsPluralWithCount<T>(count, contentType),
+        l10n.contentsPlural(contentType, count),
         softWrap: false,
         overflow: TextOverflow.fade,
         style: textStyle,
@@ -147,13 +136,15 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final textStyle = TextStyle(
-      color: ThemeControl.theme.colorScheme.onBackground,
+      color: theme.colorScheme.onBackground,
       fontSize: 14.0,
       fontWeight: FontWeight.w800,
     );
     final sort = getSort();
     final child = ListHeader(
+      wrap: true,
       margin: const EdgeInsets.only(
         top: 10.0,
         bottom: 4.0,
@@ -161,114 +152,64 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
         right: 7.0,
       ),
       trailing: _onlyCount
-        ? null
-        : Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (trailing != null)
-              trailing!,
-            Flexible(
-              child: _buildCount(l10n, textStyle),
-            ),
-          ],
-        ),
-      leading: _onlyCount ? _buildCount(l10n, textStyle) : Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NFListTileInkRipple.splashFactory,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ContentListHeaderAction(
-              icon: Icon(sort.orderAscending 
-                ? Icons.north_rounded
-                : Icons.south_rounded),
-              onPressed: () {
-                ContentControl.instance.sort(
-                  contentType: contentType,
-                  sort: sort.copyWith(orderAscending: !sort.orderAscending),
-                );
-              },
-            ),
-            Flexible(
-              child: InkResponse(
-                onTap: () => _handleTap(context),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4.0,
-                    vertical: 2.0,
-                  ),
-                  child: Text(
-                    l10n.sortFeature<T>(sort.feature, contentType),
-                    softWrap: false,
-                    overflow: TextOverflow.fade,
-                    style: textStyle,
-                  ),
+          ? null
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (trailing != null) trailing!,
+                Flexible(
+                  child: _buildCount(l10n, textStyle),
                 ),
+              ],
+            ),
+      leading: _onlyCount
+          ? _buildCount(l10n, textStyle)
+          : Theme(
+              data: Theme.of(context).copyWith(
+                splashFactory: NFListTileInkRipple.splashFactory,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ContentListHeaderAction(
+                    icon: Icon(sort.orderAscending ? Icons.north_rounded : Icons.south_rounded),
+                    onPressed: () {
+                      ContentControl.instance.sort(
+                        contentType: contentType,
+                        sort: sort.copyWith(orderAscending: !sort.orderAscending),
+                      );
+                    },
+                  ),
+                  Flexible(
+                    child: InkResponse(
+                      onTap: () => _handleTap(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4.0,
+                          vertical: 2.0,
+                        ),
+                        child: Text(
+                          l10n.sortFeature(contentType, sort.feature),
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                          style: textStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (leading != null) leading!
+                ],
               ),
             ),
-            if (leading != null)
-              leading!
-          ],
-        ),
-      ),
     );
-    if (selectionController == null)
+    if (selectionController == null) {
       return child;
+    }
     return IgnoreInSelection(
       controller: selectionController!,
       child: child,
-    );
-  }
-}
-
-class _RadioListTile<T> extends StatelessWidget {
-  const _RadioListTile({
-    Key? key,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-    this.title,
-  }) : super(key: key);
-
-  final T value;
-  final T groupValue;
-  final ValueChanged<T> onChanged;
-  final Widget? title;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        onChanged(value);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 14.0),
-        child: Row(
-          children: [
-            Radio<T>(
-              activeColor: ThemeControl.isDark
-                  ? ThemeControl.theme.colorScheme.onBackground
-                  : ThemeControl.theme.colorScheme.primary,
-              value: value,
-              splashRadius: 0.0,
-              groupValue: groupValue,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onChanged: (value) {
-                if (value != null) {
-                  onChanged(value);
-                }
-              },
-            ),
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: title,
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

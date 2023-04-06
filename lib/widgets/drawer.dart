@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as Constants;
+import 'package:sweyer/constants.dart' as constants;
 
 /// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
@@ -14,7 +14,7 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
-  /// Indicates that current route with drawer is ontop and it can take the control
+  /// Indicates that current route with drawer is on top and it can take the control
   /// over the ui animations.
   bool _onTop = true;
   late SlidableController controller;
@@ -34,14 +34,15 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
   void _handleControllerStatusChange(AnimationStatus status) {
     // Change system UI on expanding/collapsing the drawer.
+    final theme = Theme.of(context);
     if (_onTop) {
       if (status == AnimationStatus.dismissed) {
-        SystemUiStyleController.animateSystemUiOverlay(
-          to: Constants.UiTheme.grey.auto,
+        SystemUiStyleController.instance.animateSystemUiOverlay(
+          to: theme.systemUiThemeExtension.grey,
         );
       } else {
-        SystemUiStyleController.animateSystemUiOverlay(
-          to: Constants.UiTheme.drawerScreen.auto,
+        SystemUiStyleController.instance.animateSystemUiOverlay(
+          to: theme.systemUiThemeExtension.drawerScreen,
         );
       }
     }
@@ -69,8 +70,14 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           return controller.value == 0.0 &&
               // when on another drag on the right to next tab
               (event.delta.dx < 0.0 ||
-                // when player route is opened, for example
-                !HomeRouter.instance.drawerCanBeOpened);
+                  // when player route is opened, for example
+                  !HomeRouter.instance.drawerCanBeOpened);
+        },
+        shouldEagerlyWin: (event) {
+          return controller.value == 0.0 &&
+              HomeRouter.instance.drawerCanBeOpened &&
+              event.delta.dy.abs() < 8.0 &&
+              event.delta.dx > 5.0;
         },
         onBarrierTap: controller.close,
         barrier: Container(color: Colors.black26),
@@ -90,7 +97,11 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 }
 
 class _DrawerWidgetContent extends StatefulWidget {
-  _DrawerWidgetContent({Key? key, required this.controller}) : super(key: key);
+  const _DrawerWidgetContent({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
   final SlidableController? controller;
 
   @override
@@ -143,10 +154,11 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Theme(
-      data: Theme.of(context).copyWith(
-        //This will change the drawer background
-        canvasColor: ThemeControl.theme.colorScheme.surface,
+      data: theme.copyWith(
+        // This will change the drawer background
+        canvasColor: theme.colorScheme.surface,
       ),
       child: Drawer(
         elevation: elevation,
@@ -157,28 +169,12 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SweyerLogo(),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Text(
-                        Constants.Config.APPLICATION_TITLE,
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w800,
-                          color: ThemeControl.theme.textTheme.headline6!.color,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                padding: const EdgeInsets.only(left: 22.0, top: 45.0, bottom: 7.0, right: 22.0),
+                child: const _LogoAndTitle(),
               ),
               const Divider(),
               const SizedBox(height: 7.0),
-              MenuItem(
+              DrawerMenuItem(
                 l10n.settings,
                 icon: Icons.settings_rounded,
                 onTap: _handleClickSettings,
@@ -186,7 +182,7 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
               ValueListenableBuilder<bool>(
                 valueListenable: Prefs.devMode,
                 builder: (context, value, child) => value ? child! : const SizedBox.shrink(),
-                child: MenuItem(
+                child: DrawerMenuItem(
                   l10n.debug,
                   icon: Icons.adb_rounded,
                   onTap: _handleClickDebug,
@@ -200,8 +196,8 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
   }
 }
 
-class MenuItem extends StatelessWidget {
-  const MenuItem(
+class DrawerMenuItem extends StatelessWidget {
+  const DrawerMenuItem(
     this.title, {
     Key? key,
     this.icon,
@@ -220,6 +216,7 @@ class MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return NFListTile(
       dense: true,
       leading: icon != null
@@ -228,7 +225,7 @@ class MenuItem extends StatelessWidget {
               child: Icon(
                 icon,
                 size: iconSize,
-                color: ThemeControl.theme.iconTheme.color,
+                color: theme.iconTheme.color,
               ),
             )
           : null,
@@ -236,11 +233,44 @@ class MenuItem extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: fontSize,
-          color: Constants.Theme.menuItemColor.auto,
+          color: theme.appThemeExtension.drawerMenuItemColor,
         ),
       ),
       onTap: onTap,
       onLongPress: onLongPress,
+    );
+  }
+}
+
+class _LogoAndTitle extends StatelessWidget {
+  const _LogoAndTitle({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final title = Padding(
+      padding: const EdgeInsets.only(left: 10.0),
+      child: Text(
+        constants.Config.applicationTitle,
+        style: TextStyle(
+          fontSize: 30.0,
+          fontWeight: FontWeight.w800,
+          color: theme.textTheme.headline6!.color,
+        ),
+      ),
+    );
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          const SweyerLogo(),
+          FittedBox(child: title),
+        ],
+      ),
     );
   }
 }

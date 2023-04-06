@@ -25,9 +25,9 @@ import 'package:sweyer/sweyer.dart';
 ///
 /// ## Unit-testing
 ///
-/// To unit-test a `Control`, one would simply need to create `MockControl`, which
+/// To unit-test a `Control`, one would simply need to create `FakeControl`, which
 /// mocks the `state` and/or `repository`, and then set the `Control.instance`
-/// to the `TestControl`.
+/// to the `FakeControl`.
 ///
 /// Known controls:
 ///
@@ -41,7 +41,6 @@ abstract class Control {
   /// Must be called when the control needs to be initialized.
   @mustCallSuper
   void init() {
-    assert(_disposed.value);
     _disposed.value = false;
   }
 
