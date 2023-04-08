@@ -11,7 +11,7 @@ void main() {
   final favoriteSong3 = songWith(id: 5, title: 'Song 5', isFavoriteInMediaStore: true);
 
   setUp(() async {
-    await setUpAppTest(() async {
+    await setUpAppTest(() {
       FakeContentChannel.instance.songs = [
         notFavoriteSong1,
         notFavoriteSong2,

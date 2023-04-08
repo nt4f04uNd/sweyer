@@ -69,6 +69,7 @@ void main() {
         permissionsObserver.isOpeningSettingsSuccessful = false;
         final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
         await tester.tap(find.text(l10n.grant));
+        await tester.pumpAndSettle();
         expect(permissionsObserver.openSettingsRequests, 1);
         expect(toastObserver.toastMessagesLog, [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError]);
 
