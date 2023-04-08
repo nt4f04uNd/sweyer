@@ -2,6 +2,7 @@
     package="com.nt4f04und.sweyer">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- Needed to stay awake feature in MediaPlayer -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />

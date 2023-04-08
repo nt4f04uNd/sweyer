@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -16,13 +17,16 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockJustAudio with MockPlatformInterfaceMixin implements JustAudioPlatform {
   MockAudioPlayer? mostRecentPlayer;
   final _players = <String, MockAudioPlayer>{};
+  final TestWidgetsFlutterBinding binding;
+
+  MockJustAudio(this.binding);
 
   @override
   Future<AudioPlayerPlatform> init(InitRequest request) async {
     if (_players.containsKey(request.id)) {
       throw PlatformException(code: "error", message: "Platform player ${request.id} already exists");
     }
-    final player = MockAudioPlayer(request);
+    final player = MockAudioPlayer(request, binding);
     _players[request.id] = player;
     mostRecentPlayer = player;
     return player;
@@ -100,8 +104,9 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   var _speed = 1.0;
   Completer<dynamic>? _playCompleter;
   Timer? _playTimer;
+  final TestWidgetsFlutterBinding binding;
 
-  MockAudioPlayer(InitRequest request)
+  MockAudioPlayer(InitRequest request, this.binding)
       : _id = request.id,
         audioLoadConfiguration = request.audioLoadConfiguration;
 
@@ -137,8 +142,10 @@ class MockAudioPlayer implements AudioPlayerPlatform {
     }
     _audioSource = audioSource;
     _index = request.initialIndex ?? 0;
-    // Simulate loading time.
-    await Future<dynamic>.delayed(const Duration(milliseconds: 100));
+    if (binding.inTest) {
+      // Simulate loading time.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
     _setPosition(request.initialPosition ?? Duration.zero);
     _processingState = ProcessingStateMessage.ready;
     _broadcastPlaybackEvent();
