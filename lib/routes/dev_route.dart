@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -5,14 +6,14 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
-class DevRoute extends StatefulWidget {
+class DevRoute extends ConsumerStatefulWidget {
   const DevRoute({Key? key}) : super(key: key);
 
   @override
-  State<DevRoute> createState() => _DevRouteState();
+  ConsumerState<DevRoute> createState() => _DevRouteState();
 }
 
-class _DevRouteState extends State<DevRoute> {
+class _DevRouteState extends ConsumerState<DevRoute> {
   void _testToast() {
     ShowFunctions.instance.showToast(
       msg: 'Test',
@@ -20,17 +21,22 @@ class _DevRouteState extends State<DevRoute> {
     );
   }
 
+  void _showDebugOverlay() {
+    ref.watch(debugManagerProvider).showOverlay();
+  }
+
   Future<void> _quitDevMode() async {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final res = await ShowFunctions.instance.showDialog(
       context,
       title: Text(l10n.areYouSure),
       content: Text(l10n.quitDevModeDescription),
-      buttonSplashColor: constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: theme.appThemeExtension.glowSplashColor,
       acceptButton: AppButton.pop(
         text: l10n.accept,
         popResult: true,
-        splashColor: constants.Theme.glowSplashColor.auto,
+        splashColor: theme.appThemeExtension.glowSplashColor,
         textColor: constants.AppColors.red,
       ),
     );
@@ -45,6 +51,7 @@ class _DevRouteState extends State<DevRoute> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.debug),
@@ -54,19 +61,23 @@ class _DevRouteState extends State<DevRoute> {
         children: <Widget>[
           Expanded(
             child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
                 NFListTile(
                   title: Text(l10n.devTestToast),
                   onTap: _testToast,
                 ),
+                NFListTile(
+                  title: Text(l10n.debugShowDebugOverlay),
+                  onTap: _showDebugOverlay,
+                ),
+                const MaterialAppSwitchesWidget(),
                 const _TimeDilationSlider(),
               ],
             ),
           ),
           NFListTile(
             title: Text(l10n.quitDevMode),
-            splashColor: ThemeControl.instance.theme.colorScheme.error,
+            splashColor: theme.colorScheme.error,
             onTap: _quitDevMode,
           ),
         ],
@@ -107,6 +118,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return SettingItem(
       title: l10n.devAnimationsSlowMo,
       trailing: ChangedSwitcher(
@@ -122,7 +134,7 @@ class _TimeDilationSliderState extends State<_TimeDilationSlider> {
         ),
       ),
       content: LabelledSlider(
-        inactiveColor: constants.Theme.sliderInactiveColor.auto,
+        inactiveColor: theme.appThemeExtension.sliderInactiveColor,
         min: 0.001,
         max: 10,
         divisions: 100,

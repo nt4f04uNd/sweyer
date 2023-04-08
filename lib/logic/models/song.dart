@@ -31,6 +31,9 @@ class Song extends Content with MediaStoreSong {
 
   /// The track number of this song on the album, if any.
   final String? track;
+
+  /// Numeric track position of this song on the album, if any.
+  late int? trackPosition = _parseTrackPosition(track);
   final int dateAdded;
   final int dateModified;
 
@@ -133,7 +136,7 @@ class Song extends Content with MediaStoreSong {
     return MediaItem(
       id: sourceId.toString(),
       uri: contentUri,
-      defaultArtBlendColor: ThemeControl.instance.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       album: getAlbum()?.album,
       title: title,
@@ -188,6 +191,18 @@ class Song extends Content with MediaStoreSong {
         'generationAdded': generationAdded,
         'generationModified': generationModified,
       };
+
+  /// Try to parse the numeric album track from the text [position].
+  int? _parseTrackPosition(String? position) {
+    if (position == null) {
+      return null;
+    }
+    int slashPosition = position.indexOf('/');
+    if (slashPosition != -1) {
+      position = position.substring(0, slashPosition);
+    }
+    return int.tryParse(position.trim());
+  }
 }
 
 /// The `copyWith` function type for [Song].

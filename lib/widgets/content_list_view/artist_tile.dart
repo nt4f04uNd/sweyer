@@ -1,11 +1,42 @@
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Needed for scrollbar computations.
-const double kArtistTileHeight = kArtistTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
 const double _horizontalPadding = 16.0;
+
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+
+/// Needed for scrollbar computations.
+double kArtistTileHeight(BuildContext context) => _calculateArtistTileHeight(context);
+
+double _calculateArtistTileHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return _calculateArtistTileHeightMemo(
+    textScaleFactor,
+    _titleTheme(theme)?.fontSize,
+    0.0,
+    context,
+  );
+}
+
+final _calculateArtistTileHeightMemo = imemo3plus1(
+  (double a1, double? a2, double? a3, BuildContext context) =>
+      math.max(
+        kArtistTileArtSize,
+        _kArtistTileTextHeight(context),
+      ) +
+      _tileVerticalPadding * 2,
+);
+
+/// The height of the title part of the [ArtistTile].
+double _kArtistTileTextHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return calculateLineHeight(_titleTheme(theme), textScaleFactor);
+}
 
 class ArtistTile extends SelectableWidget<SelectionEntry> {
   const ArtistTile({
@@ -97,6 +128,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
   Widget _buildTile() {
     final source = ContentArtSource.artist(widget.artist);
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return Material(
       color: widget.backgroundColor,
       child: InkWell(
@@ -132,7 +164,7 @@ class _ArtistTileState extends SelectableState<SelectionEntry<Artist>, ArtistTil
                       Text(
                         ContentUtils.localizedArtist(widget.artist.artist, l10n),
                         overflow: TextOverflow.ellipsis,
-                        style: ThemeControl.instance.theme.textTheme.headline6,
+                        style: _titleTheme(theme),
                       ),
                     ],
                   ),

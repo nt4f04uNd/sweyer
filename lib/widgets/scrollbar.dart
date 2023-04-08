@@ -68,7 +68,8 @@ class AppScrollbar extends StatefulWidget {
           ? null
           : (context) {
               final l10n = getl10n(context);
-              final item = list[(controller.position.pixels / kSongTileHeight - 1).clamp(0.0, list.length - 1).round()];
+              final item =
+                  list[(controller.position.pixels / kSongTileHeight(context) - 1).clamp(0.0, list.length - 1).round()];
               return NFScrollLabel(text: () {
                 // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
                 // ignore: unnecessary_cast
@@ -117,7 +118,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller ?? PrimaryScrollController.of(context)!;
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final highlightColor = theme.highlightColor;
     return Theme(
       data: theme.copyWith(

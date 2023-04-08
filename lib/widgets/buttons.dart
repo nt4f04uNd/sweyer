@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 /// Button to switch loop mode
 class LoopButton extends StatelessWidget {
@@ -18,7 +17,7 @@ class LoopButton extends StatelessWidget {
       builder: (context, snapshot) {
         return AnimatedIconButton(
           icon: const Icon(Icons.loop_rounded),
-          size: 40.0,
+          size: textScaleFactor * 40.0,
           iconSize: textScaleFactor * NFConstants.iconSize,
           active: snapshot.data!,
           onPressed: player.switchLooping,
@@ -34,12 +33,13 @@ class ShuffleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final theme = Theme.of(context);
     return StreamBuilder(
       stream: QueueControl.instance.onQueueChanged,
       builder: (context, snap) => AnimatedIconButton(
         icon: const Icon(Icons.shuffle_rounded),
-        color: ThemeControl.instance.theme.colorScheme.onSurface,
-        size: 40.0,
+        color: theme.colorScheme.onSurface,
+        size: textScaleFactor * 40.0,
         iconSize: textScaleFactor * NFConstants.iconSize,
         active: QueueControl.instance.state.shuffled,
         onPressed: () {
@@ -162,40 +162,28 @@ class AppButton extends StatefulWidget {
 class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMixin {
   late final controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 240))
     ..value = disabled ? 0.0 : 1.0;
-  late final colorAnimation = ColorTween(
-    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
-    end: widget.color ?? defaultColor,
-  ).animate(CurvedAnimation(
-    parent: controller,
-    curve: Curves.easeOut,
-    reverseCurve: Curves.easeIn,
-  ));
-  late final textColorAnimation = ColorTween(
-    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.38),
-    end: widget.textColor ?? defaultTextColor,
-  ).animate(CurvedAnimation(
-    parent: controller,
-    curve: Curves.easeOut,
-    reverseCurve: Curves.easeIn,
-  ));
+  late Animation<Color?> colorAnimation;
+  late Animation<Color?> textColorAnimation;
 
   bool get disabled => !widget.pop && widget.onPressed == null;
 
   Color get defaultColor {
+    final theme = Theme.of(context);
     switch (widget.type) {
       case AppButtonType.elevated:
-        return ThemeControl.instance.theme.colorScheme.primary;
+        return theme.colorScheme.primary;
       case AppButtonType.flat:
         return Colors.transparent;
     }
   }
 
   Color get defaultTextColor {
+    final theme = Theme.of(context);
     switch (widget.type) {
       case AppButtonType.elevated:
-        return ThemeControl.instance.theme.colorScheme.onPrimary;
+        return theme.colorScheme.onPrimary;
       case AppButtonType.flat:
-        return ThemeControl.instance.theme.colorScheme.onSecondary;
+        return theme.colorScheme.onSecondary;
     }
   }
 
@@ -225,6 +213,28 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final theme = Theme.of(context);
+    colorAnimation = ColorTween(
+      begin: theme.colorScheme.onSurface.withOpacity(0.12),
+      end: widget.color ?? defaultColor,
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    ));
+    textColorAnimation = ColorTween(
+      begin: theme.colorScheme.onSurface.withOpacity(0.38),
+      end: widget.textColor ?? defaultTextColor,
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    ));
   }
 
   Widget _buildText() {
@@ -282,6 +292,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   Widget _buildElevated() {
+    final theme = Theme.of(context);
     return ElevatedButton(
       child: _buildChild(),
       onPressed: onPressed,
@@ -295,11 +306,11 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? constants.Theme.glowSplashColorOnContrast.auto),
+                MaterialStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
-              fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
+              fontFamily: theme.textTheme.headline1!.fontFamily,
               fontWeight: widget.fontWeight,
               fontSize: widget.fontSize,
             )),
@@ -308,6 +319,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
   }
 
   Widget _buildFlat() {
+    final theme = Theme.of(context);
     return TextButton(
       child: _buildChild(),
       onPressed: onPressed,
@@ -320,11 +332,11 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? constants.Theme.glowSplashColorOnContrast.auto),
+                MaterialStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
-              fontFamily: ThemeControl.instance.theme.textTheme.headline1!.fontFamily,
+              fontFamily: theme.textTheme.headline1!.fontFamily,
               fontWeight: widget.fontWeight,
               fontSize: widget.fontSize,
             )),
@@ -362,11 +374,12 @@ class ShuffleQueueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     return AppButton(
       text: l10n.shuffleContentList,
       icon: const Icon(Icons.shuffle_rounded, size: 22.0),
-      color: constants.Theme.contrast.auto,
-      textColor: ThemeControl.instance.theme.colorScheme.background,
+      color: theme.appThemeExtension.contrast,
+      textColor: theme.colorScheme.background,
       borderRadius: 4.0,
       fontSize: 15.0,
       fontWeight: FontWeight.w700,
@@ -462,7 +475,7 @@ class HeartButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return AnimatedIconButton(
       active: active,
       duration: const Duration(milliseconds: 240),

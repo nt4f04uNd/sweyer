@@ -1,9 +1,53 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
 
 /// Needed for scrollbar label computations
-const double kSongTileHeight = kSongTileArtSize + _tileVerticalPadding * 2;
 const double _tileVerticalPadding = 8.0;
+
+/// The padding that is added to the top of the subtitle widget.
+const _subtitleTopPadding = 4.0;
+
+/// The padding that is added to the bottom of the subtitle widget.
+const _subtitleBottomPadding = 3.0;
+
+/// The [TextStyle] used for the title text from the [theme].
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _subtitleTheme(ThemeData theme) => ArtistWidget.defaultTextStyle(theme);
+
+double kSongTileHeight(BuildContext context) => _calculateSongTileHeight(context);
+
+double _calculateSongTileHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return _calculateSongTileHeightMemo(
+    textScaleFactor,
+    _titleTheme(theme)?.fontSize,
+    _subtitleTheme(theme)?.fontSize,
+    context,
+  );
+}
+
+final _calculateSongTileHeightMemo = imemo3plus1(
+  (double a1, double? a2, double? a3, BuildContext context) =>
+      math.max(
+        kSongTileArtSize,
+        _kSongTileTextHeight(context),
+      ) +
+      _tileVerticalPadding * 2,
+);
+
+/// The height of the title and subtitle part of the [SongTile].
+double _kSongTileTextHeight(BuildContext context) {
+  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final theme = Theme.of(context);
+  return calculateLineHeight(_titleTheme(theme), textScaleFactor) +
+      calculateLineHeight(_subtitleTheme(theme), textScaleFactor) +
+      _subtitleTopPadding +
+      _subtitleBottomPadding;
+}
+
 const double kSongTileHorizontalPadding = 10.0;
 const SongTileClickBehavior kSongTileClickBehavior = SongTileClickBehavior.play;
 const SongTileVariant kSongTileVariant = SongTileVariant.albumArt;
@@ -45,12 +89,13 @@ class SongNumber extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Widget child;
     if (current) {
       child = Padding(
         padding: const EdgeInsets.only(top: 2.0),
         child: CurrentIndicator(
-          color: ThemeControl.instance.theme.colorScheme.onBackground,
+          color: theme.colorScheme.onBackground,
         ),
       );
     } else if (number != null && number! > 0 && number! < 999) {
@@ -68,7 +113,7 @@ class SongNumber extends StatelessWidget {
         width: 7.0,
         height: 7.0,
         decoration: BoxDecoration(
-          color: ThemeControl.instance.theme.colorScheme.onBackground,
+          color: theme.colorScheme.onBackground,
           borderRadius: const BorderRadius.all(
             Radius.circular(100.0),
           ),
@@ -94,6 +139,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.current,
     this.onTap,
     this.enableDefaultOnTap = true,
+    this.showFavoriteIndicator = true,
     this.variant = kSongTileVariant,
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
@@ -112,6 +158,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.current,
     this.onTap,
     this.enableDefaultOnTap = true,
+    this.showFavoriteIndicator = true,
     this.variant = kSongTileVariant,
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
@@ -142,6 +189,9 @@ class SongTile extends SelectableWidget<SelectionEntry> {
   /// Whether to handle taps by default.
   /// By default plays song on tap.
   final bool enableDefaultOnTap;
+
+  /// Whether to show the trailing favorite heart indicator.
+  final bool showFavoriteIndicator;
 
   final SongTileVariant variant;
 
@@ -215,7 +265,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
     Widget title = Text(
       widget.song.title,
       overflow: TextOverflow.ellipsis,
-      style: theme.textTheme.headline6,
+      style: _titleTheme(theme),
     );
     Widget subtitle = ArtistWidget(
       artist: widget.song.artist,
@@ -273,9 +323,9 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         title,
-                        const SizedBox(height: 4.0),
+                        const SizedBox(height: _subtitleTopPadding),
                         subtitle,
-                        const SizedBox(height: 3.0),
+                        const SizedBox(height: _subtitleBottomPadding),
                       ],
                     ),
                   ),
@@ -283,7 +333,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    FavoriteIndicator(shown: widget.song.isFavorite),
+                    if (widget.showFavoriteIndicator) FavoriteIndicator(shown: widget.song.isFavorite),
                     if (widget.trailing != null) widget.trailing!,
                     if (selectionRoute) buildAddToSelection(),
                   ],

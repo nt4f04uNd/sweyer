@@ -20,12 +20,13 @@ class Album extends PersistentQueue with MediaStoreAlbum {
   /// Returns songs that belong to this album.
   @override
   List<Song> get songs {
-    return ContentControl.instance.state.allSongs.songs.fold<List<Song>>([], (prev, el) {
+    return ContentControl.instance.getContent(ContentType.song).fold<List<Song>>([], (prev, el) {
       if (el.albumId == id) {
         prev.add(el.copyWith(origin: this));
       }
       return prev;
-    }).toList();
+    })
+      ..sort(_compareSongs);
   }
 
   @override
@@ -37,10 +38,6 @@ class Album extends PersistentQueue with MediaStoreAlbum {
   /// Gets album normalized year.
   int get year {
     return lastYear == null || lastYear! < 1000 ? clock.now().year : lastYear!;
-  }
-
-  Song get firstSong {
-    return ContentControl.instance.state.allSongs.songs.firstWhere((el) => el.albumId == id);
   }
 
   /// Returns string in format `album name • year`.
@@ -75,7 +72,7 @@ class Album extends PersistentQueue with MediaStoreAlbum {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: ThemeControl.instance.colorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
       artUri: null,
       title: album,
       artist: ContentUtils.localizedArtist(artist, staticl10n),
@@ -118,6 +115,13 @@ class Album extends PersistentQueue with MediaStoreAlbum {
         'lastYear': lastYear,
         'numberOfSongs': numberOfSongs,
       };
+
+  /// Compare [song1] with [song2]. This can be used to sort the tracks of the album.
+  int _compareSongs(Song song1, Song song2) => song1.trackPosition == song2.trackPosition
+      ? song1.title.compareTo(song2.title)
+      : song2.trackPosition == null
+          ? -1
+          : song1.trackPosition?.compareTo(song2.trackPosition!) ?? 1;
 }
 
 /// The `copyWith` function type for [Album].

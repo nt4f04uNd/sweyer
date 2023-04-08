@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
@@ -35,6 +36,8 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 /// Whether running on scoped storage, and should use bytes to load album
 /// arts from `MediaStore`.
 bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
+
+typedef ContentArtOnLoadCallback = FutureOr Function(ui.Image);
 
 class ContentArtSource with EquatableMixin {
   const ContentArtSource(Content content) : _content = content;
@@ -201,7 +204,7 @@ class ContentArt extends StatefulWidget {
   final double? currentIndicatorScale;
 
   /// Called when art is loaded.
-  final Function(ui.Image)? onLoad;
+  final ContentArtOnLoadCallback? onLoad;
 
   /// Above Android Q and above album art loads from bytes, and performs an animation on load.
   /// This defines the duration of this animation.
@@ -695,7 +698,7 @@ class _ContentArtState extends State<ContentArt> {
       _loaders = [
         _SongArtSourceLoader(
           state: this,
-          song: content.firstSong,
+          song: content.songs.first,
           size: widget.size,
         ),
       ];
@@ -795,11 +798,11 @@ class _ContentArtState extends State<ContentArt> {
   ///  * otherwise it should be called manually (see _deliverLoad call in [build])
   ///
   /// It's an error to call this method, when [loaded] is not true.
-  Future<void> _deliverLoad() async {
+  Future<void> _deliverLoad({bool force = false}) async {
     assert(loaded);
-    if (!_delivered) {
+    if (force || !_delivered) {
       _delivered = true;
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
         if (mounted) {
           setState(() {
             /* rebuild to change animated switcher child */
@@ -812,9 +815,9 @@ class _ContentArtState extends State<ContentArt> {
         ///
         /// And the third is for the called above `setState`, because calling it
         /// will cause image to be rebuilt to trigger [AnimatedSwitcher] animation.
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+          WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+            WidgetsBinding.instance.scheduleFrameCallback((timeStamp) async {
               if (!mounted) {
                 return;
               }
@@ -828,7 +831,8 @@ class _ContentArtState extends State<ContentArt> {
                 throw StateError('');
               }
               final image = await boundary.toImage();
-              widget.onLoad!(image);
+              await widget.onLoad!(image);
+              image.dispose();
             });
           });
         });
@@ -862,9 +866,18 @@ class _ContentArtState extends State<ContentArt> {
     final oldContent = oldWidget.source?._content;
     final content = widget.source?._content;
     if (oldContent != content ||
-        oldContent is Album && content is Album && oldContent.firstSong != content.firstSong ||
+        oldContent is Album && content is Album && oldContent.songs.first != content.songs.first ||
         oldContent is Playlist && content is Playlist && !listEquals(oldContent.songIds, content.songIds)) {
       _update();
+    } else if (oldWidget.onLoad != widget.onLoad) {
+      if (widget.onLoad != null) {
+        globalKey = GlobalKey();
+      }
+      if (!_delivered) {
+        _update();
+      } else {
+        _deliverLoad(force: true);
+      }
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -899,6 +912,7 @@ class _ContentArtState extends State<ContentArt> {
   }
 
   Widget _buildDefault([bool forPlaylist = false, int? cacheSize]) {
+    final theme = Theme.of(context);
     final size = _getSize(forPlaylist);
     cacheSize ??= _getCacheSize(forPlaylist, size);
     if (cacheSize != null) {
@@ -908,16 +922,17 @@ class _ContentArtState extends State<ContentArt> {
     if (widget.defaultArtIcon != null && widget.source?._content is! Song?) {
       // We should show the art now.
       _deliverLoad();
-      final theme = ThemeControl.instance.theme;
+      const defaultArtIconSize = 32.0;
+      final theme = Theme.of(context);
       child = Container(
         alignment: Alignment.center,
         color: theme.colorScheme.primary,
-        width: widget.size,
-        height: widget.size,
+        width: size,
+        height: size,
         child: Icon(
           widget.defaultArtIcon,
           color: theme.colorScheme.onPrimary,
-          size: 32.0,
+          size: forPlaylist ? defaultArtIconSize / 2 : defaultArtIconSize,
         ),
       );
       if (widget.defaultArtIconScale != 1.0) {
@@ -932,7 +947,7 @@ class _ContentArtState extends State<ContentArt> {
         cacheHeight: cacheSize,
         color: widget.color != null
             ? ContentArt.getColorToBlendInDefaultArt(widget.color!)
-            : ThemeControl.instance.colorForBlend,
+            : theme.appThemeExtension.artColorForBlend,
         colorBlendMode: BlendMode.plus,
         frameBuilder: frameBuilder,
         fit: BoxFit.cover,
@@ -950,6 +965,8 @@ class _ContentArtState extends State<ContentArt> {
   @override
   Widget build(BuildContext context) {
     assert(_loaders.isEmpty || _loaders.length == 1 || _loaders.length == 4);
+
+    final theme = Theme.of(context);
 
     Widget child;
     Widget? currentIndicator;
@@ -970,7 +987,7 @@ class _ContentArtState extends State<ContentArt> {
       if (widget.current) {
         child = Container(
           alignment: Alignment.center,
-          color: ThemeControl.instance.theme.colorScheme.primary,
+          color: theme.appThemeExtension.currentIndicatorBackgroundColorWithDefaultArt,
           width: widget.size,
           height: widget.size,
         );

@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:boxy/boxy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:lottie/lottie.dart';
 import 'package:styled_text/styled_text.dart';
 
@@ -328,14 +331,12 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
   }
 }
 
-/// Signature, used for [ContentSelectionController.actionsBuilder].
-typedef _ActionsBuilder = _SelectionActionsBar Function(BuildContext);
-
 class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> with RouteAware {
   ContentSelectionController._({
     required AnimationController animationController,
     required this.context,
     required this.actionsBuilder,
+    this.systemUiOverlayStyle,
     this.overlay,
     this.ignoreWhen,
     Set<T>? data,
@@ -347,6 +348,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   ContentSelectionController._alwaysInSelection({
     required this.context,
     required this.actionsBuilder,
+    this.systemUiOverlayStyle,
     this.overlay,
     Set<T>? data,
   })  : ignoreWhen = null,
@@ -357,7 +359,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   final BuildContext context;
 
   /// Will build selection controls overlay widget.
-  final _ActionsBuilder? actionsBuilder;
+  final WidgetBuilder? actionsBuilder;
+
+  final ValueGetter<SystemUiOverlayStyle>? systemUiOverlayStyle;
 
   /// An overlay to use. By default the one provided by [HomeState.overlayKey]
   /// is used.
@@ -414,6 +418,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
     required BuildContext context,
     ContentType<T>? contentType,
     bool actionsBar = true,
+    ValueGetter<SystemUiOverlayStyle>? systemUiOverlayStyle,
+    Widget Function(BuildContext context, Widget child)? actionsBarWrapperBuilder,
     List<Widget> Function(BuildContext)? additionalPlayActionsBuilder,
     bool counter = false,
     bool closeButton = false,
@@ -426,10 +432,11 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         vsync: vsync,
         duration: kSelectionDuration,
       ),
+      systemUiOverlayStyle: systemUiOverlayStyle,
       actionsBuilder: !actionsBar
           ? null
           : (context) {
-              return _SelectionActionsBar(
+              final actionsBar = SelectionActionsBar(
                 left: [
                   _ActionsSelectionTitle(
                     selectedTitle: false,
@@ -439,6 +446,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
                 ],
                 right: _getActions(contentType, additionalPlayActionsBuilder?.call(context) ?? const [])(),
               );
+              return actionsBarWrapperBuilder?.call(context, actionsBar) ?? actionsBar;
             },
     );
   }
@@ -466,11 +474,13 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       context: context,
       overlay: overlay,
       actionsBuilder: (context) {
-        return _SelectionActionsBar(
+        return SelectionActionsBar(
           left: const [
-            _ActionsSelectionTitle(
-              counter: true,
-            )
+            FittedBox(
+              child: _ActionsSelectionTitle(
+                counter: true,
+              ),
+            ),
           ],
           right: actionsBuilder?.call(context) ?? const [],
         );
@@ -546,7 +556,8 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   /// non-empty array.
   bool get hasAtLeastOneSong => data.any((el) => el is! SelectionEntry<Playlist> || el.data.songIds.isNotEmpty);
 
-  Color? _lastNavColor;
+  SystemUiOverlayStyle? _lastUi;
+  StreamSubscription? _lastUiSub;
   OverlayEntry? _overlayEntry;
   SlidableController? _dismissibleRouteController;
   ValueNotifier<ContentSelectionController?> get _notifier => ContentControl.instance.selectionNotifier;
@@ -582,17 +593,35 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         ),
       );
 
-      final localOverlay = overlay ?? HomeState.overlayKey.currentState!;
+      final localOverlay = overlay ?? HomeRouter.instance.overlayKey.currentState!;
       localOverlay.insert(_overlayEntry!);
 
       // Animate system UI
-      final lastUi = SystemUiStyleController.instance.lastUi;
-      _lastNavColor = lastUi.systemNavigationBarColor;
-      SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: lastUi.copyWith(systemNavigationBarColor: constants.UiTheme.grey.auto.systemNavigationBarColor),
-        duration: kSelectionDuration,
-        curve: _SelectionActionsBar.forwardCurve,
-      );
+      Future<void> _animateSystemUi([SystemUiOverlayStyle? lastUi]) async {
+        lastUi ??= SystemUiStyleController.instance.lastUi;
+        _lastUi = lastUi;
+        _lastUiSub?.cancel();
+        _lastUiSub = null;
+        final theme = Theme.of(context);
+        final to = systemUiOverlayStyle?.call() ??
+            lastUi.copyWith(
+              systemNavigationBarColor: theme.systemUiThemeExtension.grey.systemNavigationBarColor,
+            );
+        await SystemUiStyleController.instance.animateSystemUiOverlay(
+          to: to,
+          duration: kSelectionDuration,
+          curve: SelectionActionsBar.forwardCurve,
+        );
+        _lastUiSub = SystemUiStyleController.instance.onUiChange.listen((color) {
+          _lastUi = color;
+        });
+        if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor != to.systemNavigationBarColor) {
+          // Restart if we were interrupted by other system UI update
+          _animateSystemUi(_lastUi);
+        }
+      }
+
+      _animateSystemUi();
     }
 
     _notifier.value = this;
@@ -628,17 +657,19 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
   }
 
   void _animateNavBack() {
-    if (_lastNavColor == null) {
+    if (_lastUi == null) {
       return;
     }
     SystemUiStyleController.instance.animateSystemUiOverlay(
       to: SystemUiStyleController.instance.lastUi.copyWith(
-        systemNavigationBarColor: _lastNavColor,
+        systemNavigationBarColor: _lastUi!.systemNavigationBarColor,
       ),
       duration: kSelectionDuration,
-      curve: _SelectionActionsBar.reverseCurve.flipped,
+      curve: SelectionActionsBar.reverseCurve.flipped,
     );
-    _lastNavColor = null;
+    _lastUi = null;
+    _lastUiSub?.cancel();
+    _lastUiSub = null;
   }
 
   void _removeOverlay() {
@@ -790,6 +821,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTick
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return IgnorePointer(
       ignoring: widget.ignorePointer,
       child: AnimatedBuilder(
@@ -818,7 +850,7 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTick
               values: [
                 ValueDelegate.strokeColor(
                   const ['Main Layer', 'Color'],
-                  value: ThemeControl.instance.theme.colorScheme.secondaryContainer,
+                  value: theme.colorScheme.secondaryContainer,
                 ),
               ],
             ),
@@ -854,8 +886,9 @@ class IgnoreInSelection extends StatelessWidget {
   }
 }
 
-class _SelectionActionsBar extends StatelessWidget {
-  const _SelectionActionsBar({
+@visibleForTesting
+class SelectionActionsBar extends StatelessWidget {
+  const SelectionActionsBar({
     Key? key,
     this.left = const [],
     this.right = const [],
@@ -877,6 +910,7 @@ class _SelectionActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final selectionAnimation = ContentSelectionController._of(context).animation;
     final fadeAnimation = CurvedAnimation(
       curve: forwardCurve,
@@ -898,33 +932,43 @@ class _SelectionActionsBar extends StatelessWidget {
         ),
         child: FadeTransition(
           opacity: fadeAnimation,
-          child: Container(
-            height: kSongTileHeight,
-            color: ThemeControl.instance.theme.colorScheme.secondary,
-            padding: const EdgeInsets.only(bottom: 6.0),
-            child: Material(
-              color: Colors.transparent,
-              child: ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(children: left),
-                    const SizedBox(width: 10.0, height: double.infinity),
-                    Expanded(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: ScrollConfiguration(
-                          behavior: const GlowlessScrollBehavior(),
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            reverse: true,
-                            itemCount: rightList.length,
-                            itemBuilder: (context, index) => Center(child: rightList[index]),
-                          ),
+          child: PlayerInterfaceColorWidget(
+            color: () => theme.colorScheme.secondary,
+            child: Container(
+              height: kSongTileHeight(context),
+              padding: const EdgeInsets.only(bottom: 6.0),
+              child: Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: left),
+                      const SizedBox(width: 10.0, height: double.infinity),
+                      Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: HookBuilder(builder: (context) {
+                            final scrollController = useScrollController();
+                            return AppScrollbar(
+                              isAlwaysShown: true,
+                              controller: scrollController,
+                              child: ScrollConfiguration(
+                                behavior: const GlowlessScrollBehavior(),
+                                child: ListView.builder(
+                                  controller: scrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  reverse: true,
+                                  itemCount: rightList.length,
+                                  itemBuilder: (context, index) => Center(child: rightList[index]),
+                                ),
+                              ),
+                            );
+                          }),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1086,21 +1130,25 @@ class _ActionsSelectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final controller = ContentSelectionController._of(context);
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
       child: Padding(
         padding: EdgeInsets.only(
-            left: selectedTitle
-                ? 0.0
-                : closeButton
-                    ? 5.0
-                    : 10.0),
+          left: selectedTitle
+              ? 0.0
+              : closeButton
+                  ? 5.0
+                  : 10.0,
+        ),
         child: const SelectionCounter(
-            textStyle: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 19.0,
-        )),
+          textStyle: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 19.0,
+          ),
+        ),
       ),
     );
     return Row(
@@ -1111,14 +1159,17 @@ class _ActionsSelectionTitle extends StatelessWidget {
             child: NFIconButton(
               size: NFConstants.iconButtonSize,
               iconSize: NFConstants.iconSize,
-              color: ThemeControl.instance.theme.colorScheme.onSurface,
+              color: theme.colorScheme.onSurface,
               onPressed: () => controller.close(),
               icon: const Icon(Icons.close_rounded),
             ),
           ),
         if (selectedTitle && counter)
           Padding(
-            padding: EdgeInsets.only(bottom: 4.0, left: closeButton ? 12.0 : 30.0),
+            padding: EdgeInsets.only(
+              bottom: 4.0,
+              left: closeButton ? 12.0 : 30.0 / textScaleFactor,
+            ),
             child: EmergeAnimation(
               animation: controller.animation,
               child: StyledText(
@@ -1216,7 +1267,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
       valueIncreased: controller.lengthIncreased,
       child: Text(
         selectionCount.toString(),
-        style: widget.textStyle ?? appBarTitleTextStyle,
+        style: widget.textStyle ?? appBarTitleTextStyle(context),
       ),
     );
   }
@@ -1660,9 +1711,10 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
   const _AddToPlaylistSelectionAction({Key? key}) : super(key: key);
 
   void _handleTap(BuildContext context, ContentSelectionController controller) {
+    final theme = Theme.of(context);
     ShowFunctions.instance.showDialog(
       context,
-      ui: constants.UiTheme.modalOverGrey.auto,
+      ui: theme.systemUiThemeExtension.modalOverGrey,
       title: Builder(
         builder: (context) {
           final l10n = getl10n(context);
@@ -1676,7 +1728,8 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           final playlists = ContentControl.instance.state.playlists;
           final screenSize = MediaQuery.of(context).size;
           return SizedBox(
-            height: kSongTileHeight + playlists.length * kPersistentQueueTileHeight,
+            height:
+                kSongTileHeight(context) + playlists.length * kPersistentQueueTileHeight(ContentType.playlist, context),
             width: screenSize.width,
             child: ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),
@@ -1700,7 +1753,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
           );
         },
       ),
-      buttonSplashColor: constants.Theme.glowSplashColor.auto,
+      buttonSplashColor: theme.appThemeExtension.glowSplashColor,
       acceptButton: const SizedBox(),
       // acceptButton: Builder(
       //   builder: (context) => AppButton.pop(
@@ -1758,7 +1811,7 @@ class _FavoriteSelectionActionState extends State<_FavoriteSelectionAction> {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final controller = ContentSelectionController._of(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     return _ActionBuilder(
       controller: controller,
       shown: () => true,
@@ -1954,9 +2007,11 @@ void _showActionConfirmationDialog<E extends Content>({
     entry = list.first;
   }
 
+  final theme = Theme.of(context);
+
   ShowFunctions.instance.showDialog(
     context,
-    ui: constants.UiTheme.modalOverGrey.auto,
+    ui: theme.systemUiThemeExtension.modalOverGrey,
     title: Builder(
       builder: (context) {
         final l10n = getl10n(context);
@@ -1992,12 +2047,12 @@ void _showActionConfirmationDialog<E extends Content>({
         },
       ),
     ),
-    buttonSplashColor: constants.Theme.glowSplashColor.auto,
+    buttonSplashColor: theme.appThemeExtension.glowSplashColor,
     acceptButton: Builder(
       builder: (context) => AppButton.pop(
         text: localizedAction(getl10n(context)),
         popResult: true,
-        splashColor: constants.Theme.glowSplashColor.auto,
+        splashColor: theme.appThemeExtension.glowSplashColor,
         textColor: constants.AppColors.red,
         onPressed: () {
           onSubmit();
@@ -2084,7 +2139,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
     assert(T == Song || T == Playlist);
 
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final correctedMoreTextWidth = moreTextWidth * mediaQuery.textScaleFactor;
 

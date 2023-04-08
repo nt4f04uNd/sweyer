@@ -68,7 +68,6 @@ void main() {
     // Use fake
     ContentControl.instance.dispose();
     final fake = FakeContentControl();
-    ContentControl.instance = fake;
     fake.init();
 
     expect(Permissions.instance.granted, true);
@@ -151,6 +150,36 @@ void main() {
       await BackButtonInterceptor.popRoute();
       expect(toastObserver.toastMessagesLog, []);
       expect(systemObserver.closeRequests, 1);
+    });
+  });
+
+  group('app does not overlap the track panel and the tab bar', () {
+    testWidgets('for the normal text scale', (WidgetTester tester) async {
+      await tester.runAppTest(() async {
+        final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
+        final trackPanelTop =
+            tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
+        expect(tabBarTop, trackPanelTop);
+      });
+    });
+    testWidgets('for large text scale', (WidgetTester tester) async {
+      // TODO: Increase the scale factor once the other unrelated overflows are handled.
+      tester.binding.window.platformDispatcher.textScaleFactorTestValue = 1.2; // 2.5;
+      await tester.runAppTest(() async {
+        final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
+        final trackPanelTop =
+            tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
+        expect(tabBarTop, trackPanelTop);
+      });
+    });
+    testWidgets('for small text scale', (WidgetTester tester) async {
+      tester.binding.window.platformDispatcher.textScaleFactorTestValue = 0.5;
+      await tester.runAppTest(() async {
+        final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
+        final trackPanelTop =
+            tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
+        expect(tabBarTop, trackPanelTop);
+      });
     });
   });
 }

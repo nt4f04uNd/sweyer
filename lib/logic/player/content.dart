@@ -254,6 +254,7 @@ class ContentControl extends Control {
         PlaybackControl.instance.init();
         await MusicPlayer.instance.init();
         await FavoritesControl.instance.init();
+        PlayerInterfaceColorStyleControl.instance.init();
       }
       _initializeCompleter = null;
     }
@@ -280,6 +281,7 @@ class ContentControl extends Control {
       PlaybackControl.instance.dispose();
       MusicPlayer.instance.dispose();
       FavoritesControl.instance.dispose();
+      PlayerInterfaceColorStyleControl.instance.dispose();
     }
     super.dispose();
   }
@@ -826,6 +828,24 @@ class ContentUtils {
       }
     }
     return result;
+  }
+
+  /// Returns a default icon for the playlist art.
+  ///
+  /// This is needed to show the playlist icon with the empty playlist,
+  /// and the song with non-empty, because non-empty playlist
+  /// shows arts of the first 4 songs in it.
+  static IconData defaultIconForPlaylistArt(PersistentQueue queue) {
+    switch (queue.type) {
+      case ContentType.song:
+      case ContentType.artist:
+        // (This is unreachable)
+        throw ArgumentError();
+      case ContentType.album:
+        return queue.type.icon;
+      case ContentType.playlist:
+        return queue.length > 0 ? ContentType.song.icon : queue.icon;
+    }
   }
 
   /// Appends dot and year to [string].

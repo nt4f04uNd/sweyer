@@ -1,0 +1,49 @@
+name: Bug report
+description: Report any issues that you have found with the app.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time and filling out this bug report!
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to reproduce
+      description: Please attach screenshots, videos or logs if you can.
+      placeholder: Describe what you did to trigger the bug.
+      value: |
+        1. Where are you starting? What can you see?
+        2. What do you click?
+        3. More steps…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: Tell us what you thought should happen.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What happened instead?
+      placeholder: Tell us what went actually happened.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Sweyer version
+      description: You can find the version information in App Menu -> Settings at the bottom. If you compiled the app yourself, please specify the commit here.
+      placeholder: e.g. 1.0.7
+    validations:
+      required: true
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+      description: The Andorid version of your device. 
+      placeholder: e.g. Android 12 or Android Snow Cone
+    validations:
+      required: false

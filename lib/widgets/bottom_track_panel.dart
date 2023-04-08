@@ -52,7 +52,7 @@ class TrackPanel extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: Container(
-                    height: TrackPanel.height(textScaleFactor),
+                    height: TrackPanel.height(context),
                     padding: const EdgeInsets.only(
                       left: 16.0,
                       right: 16.0,
@@ -80,14 +80,14 @@ class TrackPanel extends StatelessWidget {
                               children: <Widget>[
                                 NFMarquee(
                                   key: ValueKey(PlaybackControl.instance.currentSong.id),
-                                  fontWeight: FontWeight.w700,
+                                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
                                   text: PlaybackControl.instance.currentSong.title,
                                   fontSize: 16,
                                   velocity: 26.0,
                                   blankSpace: 40.0,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  padding: EdgeInsets.only(bottom: 4.0 / textScaleFactor),
                                   child: ArtistWidget(
                                     artist: PlaybackControl.instance.currentSong.artist,
                                   ),
@@ -118,8 +118,8 @@ class TrackPanel extends StatelessWidget {
     );
   }
 
-  /// The height of this widget given a [textScaleFactor].
-  static double height(double textScaleFactor) => kSongTileHeight * math.max(0.95, textScaleFactor);
+  /// The height of this widget given a [context].
+  static double height(BuildContext context) => kSongTileHeight(context);
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {
@@ -185,6 +185,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
   @override
   Widget build(BuildContext context) {
     final song = PlaybackControl.instance.currentSong;
+    final theme = Theme.of(context);
     return CircularPercentIndicator(
       percent: _progress,
       animation: true,
@@ -194,7 +195,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
       radius: (kSongTileArtSize - progressLineHeight) / 2,
       lineWidth: progressLineHeight,
       circularStrokeCap: CircularStrokeCap.round,
-      progressColor: ThemeControl.instance.theme.colorScheme.primary,
+      progressColor: theme.colorScheme.primary,
       backgroundColor: Colors.transparent,
       center: AlbumArtRotating(
         key: _rotatingArtGlobalKey,

@@ -1,23 +1,31 @@
 import 'dart:ui';
 import 'dart:typed_data';
+import 'dart:collection';
 
 import 'package:flutter/services.dart';
 import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 import '../test.dart';
 
-/// A 50x50 blue square png.
-const List<int> _kBlueSquarePng = <int>[
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, //
-  0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x32, 0x00, 0x00, 0x00, 0x32, 0x08, 0x06, //
-  0x00, 0x00, 0x00, 0x1e, 0x3f, 0x88, 0xb1, 0x00, 0x00, 0x00, 0x48, 0x49, 0x44, //
-  0x41, 0x54, 0x78, 0xda, 0xed, 0xcf, 0x31, 0x0d, 0x00, 0x30, 0x08, 0x00, 0xb0, //
-  0x61, 0x63, 0x2f, 0xfe, 0x2d, 0x61, 0x05, 0x34, 0xf0, 0x92, 0xd6, 0x41, 0x23, //
-  0x7f, 0xf5, 0x3b, 0x20, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, //
-  0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, //
-  0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, //
-  0x44, 0x44, 0x44, 0x36, 0x06, 0x03, 0x6e, 0x69, 0x47, 0x12, 0x8e, 0xea, 0xaa, //
-  0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
-];
+/// An Entry in the [FakeContentChannel.favoriteRequestLog].
+class FavoriteLogEntry {
+  /// The set of songs that were modified.
+  final Set<Song> songs;
+
+  /// `true` if a request was made to make the songs favorite, `false` if the request was made to unfavor them.
+  final bool setFavorite;
+
+  const FavoriteLogEntry(this.songs, this.setFavorite);
+
+  @override
+  String toString() => '${runtimeType.toString()}(songs=$songs, setFavorite=$setFavorite)';
+
+  @override
+  bool operator ==(Object other) =>
+      other is FavoriteLogEntry && setFavorite == other.setFavorite && setEquals(songs, other.songs);
+
+  @override
+  int get hashCode => Object.hash(Object.hashAllUnordered(songs), setFavorite);
+}
 
 class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
   FakeSweyerPluginPlatform(TestWidgetsFlutterBinding binding) {
@@ -66,7 +74,7 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
     required Size size,
     required String cancellationSignalId,
   }) async {
-    return Uint8List.fromList(_kBlueSquarePng);
+    return Uint8List.fromList(kBlueSquarePng);
   }
 
   @override
@@ -112,8 +120,13 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
     return (songs ?? [songWith()]).map((song) => song.toMap());
   }
 
+  /// The log of all recorded [setSongsFavorite] calls.
+  List<FavoriteLogEntry> get favoriteRequestLog => UnmodifiableListView(_favoriteRequestLog);
+  final List<FavoriteLogEntry> _favoriteRequestLog = [];
+
   @override
   Future<bool> setSongsFavorite(List<int> songIds, bool value) async {
+    _favoriteRequestLog.add(FavoriteLogEntry(songs, value));
     return true;
   }
 }

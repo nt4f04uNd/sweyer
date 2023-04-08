@@ -1,14 +1,10 @@
 import 'dart:async';
-// import 'dart:ui' as ui;
 import 'dart:math' as math;
 
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class ArtistRoute extends StatefulWidget {
   const ArtistRoute({Key? key, required this.artist}) : super(key: key);
@@ -34,7 +30,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
   static const _buttonSectionBottomPadding = 12.0;
   static const _buttonSectionHeight = _buttonSectionButtonHeight + _buttonSectionBottomPadding;
 
-  static const _albumsSectionHeight = 280.0;
+  static const _sectionTitleHeight = 48.0;
 
   /// Amount of pixels user always can scroll.
   double get _alwaysCanScrollExtent => (_artScrollExtent + _buttonSectionHeight).ceilToDouble();
@@ -128,12 +124,9 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
     }
   }
 
-  PaletteGenerator? palette;
-  static Future<PaletteGenerator> _isolate(image) => createPalette(image);
-
   Widget _buildInfo() {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final artSize = mediaQuery.size.width;
     final summary = ContentUtils.joinDot([
       l10n.contentsPlural(ContentType.song, songs.length),
@@ -156,20 +149,6 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                       borderRadius: 0.0,
                       defaultArtIcon: ContentType.artist.icon,
                       defaultArtIconScale: 4.5,
-                      // onLoad: (image) async {
-                      // palette = await compute<ui.Image, PaletteGenerator>(_isolate, image);
-                      // palette = await _isolate(image);
-                      // if (mounted) {
-                      //   WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-                      //     if (mounted) {
-                      //       setState(() {});
-                      //       _debugOverlay = DebugOverlay(
-                      //         (context) => PaletteSwatches(generator: palette),
-                      //       );
-                      //     }
-                      //   });
-                      // }
-                      // },
                       source: ContentArtSource.artist(widget.artist),
                     ),
                     Positioned.fill(
@@ -192,19 +171,22 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              ContentUtils.localizedArtist(widget.artist.artist, l10n),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                height: 1.0,
-                                fontWeight: FontWeight.w800,
-                                color: constants.Theme.contrast.auto,
-                                fontSize: 36.0,
+                            Flexible(
+                              child: Text(
+                                ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  height: 1.0,
+                                  fontWeight: FontWeight.w800,
+                                  color: theme.appThemeExtension.contrast,
+                                  fontSize: 36.0,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 7.0),
                             Text(
                               summary,
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 16.0,
                                 height: 1.0,
@@ -269,9 +251,11 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final l10n = getl10n(context);
     mediaQuery = MediaQuery.of(context);
+
+    final albumsSectionHeight = kPersistentQueueGridTileHeight(ContentType.album, context);
 
     return Scaffold(
       body: LayoutBuilder(
@@ -280,11 +264,11 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
           /// always be fully scrollable, even if there's not enough content for that.
           var additionalHeight = constraints.maxHeight - //
               _fullAppBarHeight - //
-              kSongTileHeight * math.min(songs.length, 5) - //
-              48.0;
+              kSongTileHeight(context) * math.min(songs.length, 5) - //
+              _sectionTitleHeight;
 
           if (albums.isNotEmpty) {
-            additionalHeight -= _albumsSectionHeight + 48.0;
+            additionalHeight -= albumsSectionHeight + _sectionTitleHeight;
           }
 
           return ScrollConfiguration(
@@ -339,7 +323,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                                         );
                                       },
                                 child: SizedBox(
-                                  height: _albumsSectionHeight,
+                                  height: albumsSectionHeight,
                                   child: ListView.separated(
                                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                     scrollDirection: Axis.horizontal,
@@ -383,7 +367,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           ).animate(backButtonAnimation);
 
                           final splashColorAnimation = ColorTween(
-                            begin: constants.Theme.glowSplashColorOnContrast.auto,
+                            begin: theme.appThemeExtension.glowSplashColorOnContrast,
                             end: theme.splashColor,
                           ).animate(backButtonAnimation);
 
@@ -418,8 +402,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                               curve: Curves.easeOut,
                               duration: const Duration(milliseconds: 400),
                               child: RepaintBoundary(
-                                child: Text(
-                                  ContentUtils.localizedArtist(widget.artist.artist, l10n),
+                                child: AppBarTitleMarquee(
+                                  text: ContentUtils.localizedArtist(widget.artist.artist, l10n),
                                 ),
                               ),
                             ),

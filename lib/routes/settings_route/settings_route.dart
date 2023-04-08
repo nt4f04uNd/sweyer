@@ -27,7 +27,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
     final l10n = getl10n(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.settings),
+        title: AppBarTitleMarquee(text: l10n.settings),
         leading: const NFBackButton(),
       ),
       body: Column(
@@ -98,7 +98,10 @@ class _FooterState extends State<_Footer> {
 
   void _handleGithubTap() {
     final url = Uri.parse(constants.Config.githubRepoUrl);
-    launchUrl(url);
+    launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    );
   }
 
   void _handleLicenseTap() {
@@ -166,9 +169,15 @@ class _FooterState extends State<_Footer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
+      padding: const EdgeInsets.only(
+        bottom: 40.0,
+        left: 16.0,
+        right: 16.0,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -179,27 +188,29 @@ class _FooterState extends State<_Footer> {
                 padding: const EdgeInsets.only(left: 2.5, right: 2.5),
                 child: NFIconButton(
                   icon: const SweyerLogo(),
-                  splashColor: ThemeControl.instance.theme.colorScheme.primary,
+                  splashColor: theme.colorScheme.primary,
                   size: 60.0,
                   iconSize: 42.0,
                   onPressed: _handleSecretLogoClick,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    appName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: ThemeControl.instance.theme.textTheme.headline6!.color,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      appName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: theme.textTheme.headline6!.color,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Copyright (c) 2019, nt4f04uNd',
-                    style: Theme.of(context).textTheme.caption!.copyWith(height: 1.0),
-                  ),
-                ],
+                    Text(
+                      'Copyright (c) 2019, nt4f04uNd',
+                      style: Theme.of(context).textTheme.caption!.copyWith(height: 1.0),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -207,9 +218,10 @@ class _FooterState extends State<_Footer> {
             onTap: _handleGithubTap,
             child: Text(
               getl10n(context).gitHubRepo,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.instance.theme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -217,9 +229,10 @@ class _FooterState extends State<_Footer> {
             onTap: _handleLicenseTap,
             child: Text(
               MaterialLocalizations.of(context).licensesPageTitle,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: ThemeControl.instance.theme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),

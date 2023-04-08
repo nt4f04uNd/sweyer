@@ -1,12 +1,11 @@
-import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:palette_generator/palette_generator.dart';
 
-Future<PaletteGenerator> createPalette(ui.Image image) => PaletteGenerator.fromImage(
+Future<PaletteGenerator> createPalette(EncodedImage image) => PaletteGenerator.fromByteData(
       image,
-      maximumColorCount: 50,
+      maximumColorCount: 100,
     );
 
 /// A widget that draws the swatches for the [PaletteGenerator] it is given,

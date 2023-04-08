@@ -94,3 +94,5 @@ coverage
 .project
 .classpath
 .settings
+
+temp/

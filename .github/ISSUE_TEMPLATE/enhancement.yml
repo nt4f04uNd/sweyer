@@ -1,0 +1,15 @@
+name: Feature request
+description: Do you have a suggestion?
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time to make a suggestion!
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggestion
+      description: Please feel welcome to include screenshots or sketches.
+      placeholder: I would like to ...
+    validations:
+      required: true

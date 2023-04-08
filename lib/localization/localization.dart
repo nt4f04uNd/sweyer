@@ -127,4 +127,13 @@ extension AppLocalizationsExtension on AppLocalizations {
       throw UnimplementedError('"${match.group(0)}" is not implemented');
     });
   }
+
+  String getPlayerInterfaceColorStyleValue(PlayerInterfaceColorStyle playerInterfaceColorStyle) {
+    switch (playerInterfaceColorStyle) {
+      case PlayerInterfaceColorStyle.artColor:
+        return playerInterfaceColorStyleArtColor;
+      case PlayerInterfaceColorStyle.themeBackgroundColor:
+        return playerInterfaceColorStyleThemeBackgroundColor;
+    }
+  }
 }

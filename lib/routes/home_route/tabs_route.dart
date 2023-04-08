@@ -6,14 +6,6 @@ import 'package:flutter/physics.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
-/// Returns app style used for app bar title.
-TextStyle get appBarTitleTextStyle => TextStyle(
-      fontWeight: FontWeight.w700,
-      color: ThemeControl.instance.theme.textTheme.headline6!.color,
-      fontSize: 22.0,
-      fontFamily: 'Roboto',
-    );
-
 /// Needed to change physics of the [TabBarView].
 class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
   const _TabsScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
@@ -180,7 +172,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final searchButton = NFIconButton(
       icon: const Icon(Icons.search_rounded),
@@ -246,15 +238,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         padding: const EdgeInsets.only(left: 15.0),
         child: selectionRoute
             ? const SizedBox.shrink()
-            : Text(
-                constants.Config.applicationTitle,
-                style: appBarTitleTextStyle,
-              ),
+            : const AppBarTitleMarquee(text: constants.Config.applicationTitle),
       ),
       titleSelection: selectionRoute
-          ? Text(
-              homeRouter!.selectionArguments!.title(context),
-            )
+          ? AppBarTitleMarquee(text: homeRouter!.selectionArguments!.title(context))
           : Padding(
               padding: const EdgeInsets.only(left: 14.0),
               child: SelectionCounter(controller: selectionController),
@@ -421,7 +408,7 @@ class _ContentTabState extends State<_ContentTab>
   Widget build(BuildContext context) {
     super.build(context);
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
     final contentType = widget.contentType;
     return ValueListenableBuilder<bool>(
       valueListenable: FavoritesControl.instance.onShowOnlyFavorites,

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 export 'package:sweyer/sweyer.dart';
@@ -7,6 +8,7 @@ import 'package:android_content_provider/android_content_provider.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:package_info_plus_platform_interface/package_info_platform_interface.dart';
 import 'package:package_info_plus_platform_interface/method_channel_package_info.dart';
@@ -22,6 +24,7 @@ export 'fakes/fakes.dart';
 
 import 'observer/observer.dart';
 import 'test.dart';
+import 'test_description.dart';
 
 final _testSong = Song(
   id: 0,
@@ -117,6 +120,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio();
   PackageInfoPlatform.instance = MethodChannelPackageInfo();
+  PlayerInterfaceColorStyleControl.instance = PlayerInterfaceColorStyleControl();
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'),
       (MethodCall methodCall) async {
     return {
@@ -140,6 +144,31 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   });
   binding.defaultBinaryMessenger.setMockMethodCallHandler(AndroidContentResolver.methodChannel,
       (MethodCall methodCall) async {
+    return null;
+  });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider_macos'),
+      (MethodCall methodCall) async {
+    if (methodCall.method == 'getTemporaryDirectory' || methodCall.method == 'getApplicationSupportDirectory') {
+      Directory('./temp').createSync();
+      return './temp';
+    }
+    return null;
+  });
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.tekartik.sqflite'),
+      (MethodCall methodCall) async {
+    if (methodCall.method == 'getDatabasesPath') {
+      Directory('./temp').createSync();
+      return './temp';
+    }
+    if (methodCall.method == 'openDatabase') {
+      return 0;
+    }
+    if (methodCall.method == 'query') {
+      return {};
+    }
+    if (methodCall.method == 'execute') {
+      return null;
+    }
     return null;
   });
   LicenseRegistry.reset();
@@ -179,7 +208,13 @@ extension WidgetTesterExtension on WidgetTester {
     await withClock(binding.clock, () async {
       // App only supports vertical orientation, so switch tests to use it.
       await binding.setSurfaceSize(kScreenSize);
-      await pumpWidget(const App(debugShowCheckedModeBanner: false));
+      await pumpWidget(ProviderScope(
+        overrides: [
+          playerInterfaceColorStyleArtColorBuilderProvider
+              .overrideWithValue(FakePlayerInterfaceColorStyleArtColorBuilder())
+        ],
+        child: const App(debugShowCheckedModeBanner: false),
+      ));
       await pump();
       await callback();
       await runAsync(() async {
@@ -200,16 +235,23 @@ extension WidgetTesterExtension on WidgetTester {
 
   /// Whether the current tester is running in [testAppGoldens] and
   /// in light mode.
-  bool get lightThemeGolden => _testersLightTheme.contains(this);
+  bool get lightThemeGolden => _testersLightTheme[this] ?? false;
+
+  /// Whether the current tester is running in [testAppGoldens] and
+  /// has non-default player interface style.
+  PlayerInterfaceColorStyle? get nonDefaultPlayerInterfaceColorStyle => _testersPlayerInterfaceColorStyle[this];
 
   Future<void> screenMatchesGolden(
-    WidgetTester tester,
     String name, {
     bool? autoHeight,
     Finder? finder,
     CustomPump? customPump,
   }) {
-    name = '$name.${_getThemeMessage(tester.lightThemeGolden)}';
+    final testDescription = getTestDescription(
+      lightTheme: lightThemeGolden,
+      playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle,
+    );
+    name = testDescription.buildFileName(name);
     return _screenMatchesGoldenWithTolerance(
       this,
       name,
@@ -241,8 +283,9 @@ extension WidgetTesterExtension on WidgetTester {
   }
 }
 
-final _testersLightTheme = <WidgetTester>{};
-String _getThemeMessage(bool lightTheme) => lightTheme ? 'light' : 'dark';
+final _testersLightTheme = <WidgetTester, bool>{};
+final _testersPlayerInterfaceColorStyle = <WidgetTester, PlayerInterfaceColorStyle?>{};
+const _defaultPlayerInterfaceColorStyle = PlayerInterfaceColorStyle.artColor;
 const Object _defaultTagObject = Object();
 
 /// Creates a golden test in two variants - in dark and light mode.
@@ -258,26 +301,41 @@ void testAppGoldens(
   Future<void> Function(WidgetTester) test, {
   bool? skip,
   Object? tags = _defaultTagObject,
+  Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
 }) {
+  assert(playerInterfaceColorStylesToTest.isNotEmpty);
   final previousDeterministicCursor = EditableText.debugDeterministicCursor;
   try {
     EditableText.debugDeterministicCursor = true;
     for (final lightTheme in [false, true]) {
-      testGoldens(
-        '$description ${_getThemeMessage(lightTheme)}',
-        (tester) async {
-          try {
-            ThemeControl.instance.setThemeLightMode(lightTheme);
-            if (lightTheme) {
-              _testersLightTheme.add(tester);
+      final nonDefaultPlayerInterfaceColorStyle = playerInterfaceColorStylesToTest.length > 1 ||
+          !playerInterfaceColorStylesToTest.contains(_defaultPlayerInterfaceColorStyle);
+
+      for (final playerInterfaceColorStyle in playerInterfaceColorStylesToTest) {
+        final testDescription = getTestDescription(
+          lightTheme: lightTheme,
+          playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
+        );
+
+        testGoldens(
+          testDescription.buildDescription(description),
+          (tester) async {
+            try {
+              ThemeControl.instance.setThemeLightMode(lightTheme);
+              Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
+              _testersLightTheme[tester] = lightTheme;
+              if (nonDefaultPlayerInterfaceColorStyle) {
+                _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
+              }
+              return await test(tester);
+            } finally {
+              _testersLightTheme.remove(tester);
+              _testersPlayerInterfaceColorStyle.remove(tester);
             }
-            return await test(tester);
-          } finally {
-            _testersLightTheme.remove(tester);
-          }
-        },
-        tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
-      );
+          },
+          tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
+        );
+      }
     }
   } finally {
     EditableText.debugDeterministicCursor = previousDeterministicCursor;
@@ -354,7 +412,13 @@ class FakeSystemUiStyleController implements SystemUiStyleController {
   Duration duration = Duration.zero;
 
   @override
-  SystemUiOverlayStyle get actualUi => const SystemUiOverlayStyle();
+  SystemUiOverlayStyle actualUi = const SystemUiOverlayStyle();
+
+  @override
+  SystemUiOverlayStyle lastUi = const SystemUiOverlayStyle();
+
+  @override
+  Stream<SystemUiOverlayStyle> get onUiChange => const Stream.empty();
 
   @override
   Future<void> animateSystemUiOverlay({
@@ -362,14 +426,13 @@ class FakeSystemUiStyleController implements SystemUiStyleController {
     required SystemUiOverlayStyle to,
     Curve? curve,
     Duration? duration,
-  }) async {}
+  }) async {
+    setSystemUiOverlay(to);
+  }
 
   @override
-  SystemUiOverlayStyle get lastUi => const SystemUiOverlayStyle();
-
-  @override
-  Stream<SystemUiOverlayStyle> get onUiChange => const Stream.empty();
-
-  @override
-  void setSystemUiOverlay(SystemUiOverlayStyle ui) {}
+  void setSystemUiOverlay(SystemUiOverlayStyle ui) {
+    actualUi = ui;
+    lastUi = ui;
+  }
 }

@@ -3,6 +3,7 @@ import '../test.dart';
 class FakeContentControl extends ContentControl {
   FakeContentControl() {
     instance = this;
+    ContentControl.instance = this;
   }
   static late FakeContentControl instance;
 

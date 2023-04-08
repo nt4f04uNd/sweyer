@@ -13,8 +13,9 @@ class ThemeSettingsRoute extends StatefulWidget {
 }
 
 class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTickerProviderStateMixin {
-  Color prevPrimaryColor = ThemeControl.instance.theme.colorScheme.primary;
-  Color primaryColor = ThemeControl.instance.theme.colorScheme.primary;
+  late Color prevPrimaryColor;
+  late Color primaryColor;
+  bool firstRender = true;
   bool get switched => ThemeControl.instance.isLight;
   bool get canPop => !ThemeControl.instance.themeChanging.valueWrapper!.value;
   late AnimationController controller;
@@ -36,6 +37,17 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
       vsync: this,
       duration: ThemeControl.primaryColorChangeDuration,
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final theme = Theme.of(context);
+    if (firstRender) {
+      firstRender = false;
+      prevPrimaryColor = theme.colorScheme.primary;
+      primaryColor = theme.colorScheme.primary;
+    }
   }
 
   @override
@@ -70,6 +82,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final animation = ColorTween(
       begin: prevPrimaryColor,
       end: primaryColor,
@@ -78,7 +91,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
       onWillPop: _handlePop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.theme),
+          title: AppBarTitleMarquee(text: l10n.theme),
           leading: IgnorePointer(
             ignoring: !canPop,
             child: const NFBackButton(),
@@ -108,8 +121,9 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
             ),
             builder: (context, child) => ListView(
               children: [
+                const PlayerInterfaceColorStyleSettingWidget(),
                 Theme(
-                  data: ThemeControl.instance.theme.copyWith(
+                  data: theme.copyWith(
                     splashFactory: NFListTileInkRipple.splashFactory,
                   ),
                   child: SwitchListTile(

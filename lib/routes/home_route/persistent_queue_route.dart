@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:sweyer/constants.dart' as constants;
 
 class _ReorderOperation {
   final int oldIndex;
@@ -164,17 +163,18 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         final l10n = getl10n(context);
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              l10n.trackAfterWhichToInsert,
-              style: const TextStyle(fontSize: 20.0),
+            title: AppBarTitleMarquee(
+              text: l10n.trackAfterWhichToInsert,
+              fontSize: 20.0,
             ),
             leading: const NFBackButton(),
           ),
           body: StreamBuilder(
             stream: ContentControl.instance.onContentChange,
             builder: (context, snapshot) {
-              final selectedTileColor = ThemeControl.instance.theme.colorScheme.primary;
-              final selectedSplashColor = constants.Theme.glowSplashColorOnContrast.auto;
+              final theme = Theme.of(context);
+              final selectedTileColor = theme.colorScheme.primary;
+              final selectedSplashColor = theme.appThemeExtension.glowSplashColorOnContrast;
               late StateSetter setListState;
               if (!tapped || selectedSong != null && !songs.contains(selectedSong)) {
                 // Set last song on start and when the songs update and selected song was deleted
@@ -190,8 +190,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                     enableDefaultOnTap: false,
                     leading: InListContentAction.song(
                       color: selectedSong == null ? selectedTileColor : null,
-                      iconColor: selectedSong == null ? ThemeControl.instance.theme.colorScheme.onPrimary : null,
-                      textColor: selectedSong == null ? ThemeControl.instance.theme.colorScheme.onPrimary : null,
+                      iconColor: selectedSong == null ? theme.colorScheme.onPrimary : null,
+                      textColor: selectedSong == null ? theme.colorScheme.onPrimary : null,
                       splashColor: selectedSong == null ? selectedSplashColor : null,
                       icon: SweyerIcons.play_next,
                       text: l10n.insertAtTheBeginning,
@@ -209,7 +209,6 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                       return Colors.transparent;
                     },
                     itemBuilder: (context, index, child) {
-                      final theme = ThemeControl.instance.theme;
                       final selected = selectedSong == songs[index];
                       return Theme(
                         data: theme.copyWith(
@@ -359,11 +358,13 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
 
   Widget _buildInfo() {
     final l10n = getl10n(context);
+    final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
     const titleFontSize = 24.0;
+    const maxLines = 3;
     final title = Text(
       isPlaylist ? textEditingController.text : queue.title,
-      maxLines: 2,
+      maxLines: maxLines,
       overflow: TextOverflow.ellipsis,
       style: const TextStyle(
         fontWeight: FontWeight.w900,
@@ -390,7 +391,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                   children: [
                     ContentArt(
                       size: 130.0,
-                      defaultArtIcon: queue.icon,
+                      defaultArtIcon: ContentUtils.defaultIconForPlaylistArt(queue),
                       defaultArtIconScale: 2,
                       assetHighRes: true,
                       assetScale: 1.5,
@@ -407,56 +408,51 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             else if (isPlaylist)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                                child: Stack(
-                                  alignment: Alignment.bottomLeft,
-                                  children: [
-                                    AnimatedSwitcher(
-                                      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                                        return Stack(
-                                          alignment: Alignment.centerLeft,
-                                          children: <Widget>[
-                                            ...previousChildren,
-                                            if (currentChild != null) currentChild,
-                                          ],
-                                        );
-                                      },
-                                      duration: const Duration(milliseconds: 300),
-                                      switchInCurve: Curves.easeOut,
-                                      switchOutCurve: Curves.easeIn,
-                                      child: editing
-                                          ? AppTextField(
-                                              controller: textEditingController,
-                                              isDense: true,
-                                              contentPadding: const EdgeInsets.only(top: -9.0, bottom: -6.0),
-                                              textStyle: const TextStyle(
-                                                fontSize: 24.0,
-                                                fontWeight: FontWeight.w800,
-                                                decoration: TextDecoration.underline,
-                                              ),
-                                              hintStyle: const TextStyle(
-                                                fontSize: 22.0,
-                                                height: 1.1,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            )
-                                          : SizedBox(
-                                              height: titleFontSize * textScaleFactor,
-                                              child: title,
-                                            ),
-                                    ),
-                                  ],
+                                child: AnimatedSwitcher(
+                                  layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                                    return Stack(
+                                      alignment: Alignment.centerLeft,
+                                      children: <Widget>[
+                                        ...previousChildren,
+                                        if (currentChild != null) currentChild,
+                                      ],
+                                    );
+                                  },
+                                  duration: const Duration(milliseconds: 300),
+                                  switchInCurve: Curves.easeOut,
+                                  switchOutCurve: Curves.easeIn,
+                                  child: editing
+                                      ? AppTextField(
+                                          controller: textEditingController,
+                                          isDense: true,
+                                          maxLines: maxLines,
+                                          contentPadding: const EdgeInsets.only(top: -9.0, bottom: -6.0),
+                                          textStyle: const TextStyle(
+                                            fontSize: 24.0,
+                                            fontWeight: FontWeight.w800,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          hintStyle: const TextStyle(
+                                            fontSize: 22.0,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        )
+                                      : title,
                                 ),
                               ),
                             if (isAlbum)
                               Padding(
                                 padding: const EdgeInsets.only(top: 8.0),
-                                child: ArtistWidget(
-                                  artist: album.artist,
-                                  overflow: TextOverflow.clip,
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 15.0,
-                                    color: ThemeControl.instance.theme.colorScheme.onBackground,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(maxHeight: 30.0 * textScaleFactor),
+                                  child: ArtistWidget(
+                                    artist: album.artist,
+                                    overflow: TextOverflow.clip,
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 15.0,
+                                      color: theme.colorScheme.onBackground,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -469,7 +465,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(
-                                  color: ThemeControl.instance.theme.textTheme.subtitle2!.color,
+                                  color: theme.textTheme.subtitle2!.color,
                                   height: 1.2,
                                   fontWeight: FontWeight.w900,
                                   fontSize: 14.0,
@@ -580,7 +576,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final theme = ThemeControl.instance.theme;
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -591,14 +587,16 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
             final mediaQuery = MediaQuery.of(context);
             final showAddSongsAction = isPlaylist && !selectionRoute;
 
+            final songTileHeight = kSongTileHeight(context);
+
             /// The height to add at the end of the scroll view to make the top info part of the route
             /// always be fully scrollable, even if there's not enough items for that.
             final additionalHeight = constraints.maxHeight -
                 _appBarHeight - //
                 AppBarBorder.height - //
                 mediaQuery.padding.top - //
-                kSongTileHeight * songs.length - //
-                (showAddSongsAction ? kSongTileHeight : 0.0); // InListContentAction
+                songTileHeight * songs.length - //
+                (showAddSongsAction ? songTileHeight : 0.0); // InListContentAction
 
             return ScrollConfiguration(
               behavior: const GlowlessScrollBehavior(),
@@ -631,7 +629,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             opacity: 1.0 - appBarController.value > 0.35 ? 1.0 : 0.0,
                             curve: Curves.easeOut,
                             duration: const Duration(milliseconds: 400),
-                            child: Text(queue.title),
+                            child: AppBarTitleMarquee(text: queue.title),
                           ),
                           child2: SelectionCounter(controller: selectionController),
                         ),
@@ -726,7 +724,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                     l10n.nothingHere,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      color: ThemeControl.instance.theme.hintColor,
+                                      color: theme.hintColor,
                                     ),
                                   ),
                                 ),
@@ -764,14 +762,7 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
     vsync: this,
     duration: const Duration(milliseconds: 240),
   );
-  late final colorAnimation = ColorTween(
-    begin: ThemeControl.instance.theme.colorScheme.onSurface.withOpacity(0.12),
-    end: ThemeControl.instance.theme.iconTheme.color,
-  ).animate(CurvedAnimation(
-    parent: controller,
-    curve: Curves.easeOut,
-    reverseCurve: Curves.easeIn,
-  ));
+  late Animation<Color?> colorAnimation;
 
   bool get enabled => widget.onPressed != null;
 
@@ -781,6 +772,20 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
     if (enabled) {
       controller.forward();
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final theme = Theme.of(context);
+    colorAnimation = ColorTween(
+      begin: theme.colorScheme.onSurface.withOpacity(0.12),
+      end: theme.iconTheme.color,
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    ));
   }
 
   @override
