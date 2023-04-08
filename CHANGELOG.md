@@ -1,5 +1,9 @@
 [@Abestanis]: https://github.com/Abestanis
 
+## 1.0.9
+
+- [Fix being unable to request permissions to view audio files on Android 13 or newer](https://github.com/nt4f04uNd/sweyer/pull/84) **([@Abestanis])**
+
 ## 1.0.8
 
 All the work related to this version can be found in this [project](https://github.com/users/nt4f04uNd/projects/4/views/1)

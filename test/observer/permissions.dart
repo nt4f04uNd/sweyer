@@ -39,6 +39,9 @@ class PermissionsChannelObserver {
           for (final int permissionValue in List<int>.from(call.arguments)) {
             final permission = Permission.byValue(permissionValue);
             _requestedPermissions.add(permission);
+          }
+          for (final int permissionValue in List<int>.from(call.arguments)) {
+            final permission = Permission.byValue(permissionValue);
             final permissionStatus = await getStatus(permission);
             permissionStatuses[permissionValue] = permissionStatus.index;
           }

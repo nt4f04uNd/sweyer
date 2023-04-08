@@ -118,7 +118,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   SweyerPluginPlatform.instance = FakeSweyerPluginPlatform(binding);
   QueueControl.instance = FakeQueueControl();
   ThemeControl.instance = FakeThemeControl();
-  JustAudioPlatform.instance = MockJustAudio();
+  JustAudioPlatform.instance = MockJustAudio(binding);
   PackageInfoPlatform.instance = MethodChannelPackageInfo();
   PlayerInterfaceColorStyleControl.instance = PlayerInterfaceColorStyleControl();
   binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'),
@@ -188,7 +188,11 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   ThemeControl.instance.init();
   ThemeControl.instance.initSystemUi();
   await Permissions.instance.init();
-  await ContentControl.instance.init();
+  if (binding.inTest) {
+    await binding.runAsync(() => ContentControl.instance.init());
+  } else {
+    await ContentControl.instance.init();
+  }
 
   // Called in the [App] widget
   NFWidgets.init(

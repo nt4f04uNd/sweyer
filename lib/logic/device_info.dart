@@ -15,6 +15,11 @@ class DeviceInfoControl extends Control {
   /// starting from API 29.
   bool get useScopedStorageForFileModifications => sdkInt >= 30;
 
+  /// Whether to use the more granular audio permission (READ_MEDIA_AUDIO).
+  ///
+  /// This must be used instead of the storage permission on API level 33 and onward.
+  bool get useAudioPermission => sdkInt >= 33;
+
   @override
   Future<void> init() async {
     super.init();

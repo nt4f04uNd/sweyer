@@ -13,53 +13,94 @@ void main() {
     await setUpAppTest();
   });
 
-  testWidgets('permissions screen - shows when are no permissions and pressing the button requests permissions',
-      (WidgetTester tester) async {
-    late PermissionsChannelObserver permissionsObserver;
-    await setUpAppTest(() {
-      permissionsObserver = PermissionsChannelObserver(tester.binding);
-      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+  group('permissions screen', () {
+    testWidgets('shows if no permissions were granted and pressing the button requests permissions',
+            (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
+      await setUpAppTest(() {
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
+      });
+      await tester.runAppTest(() async {
+        expect(permissionsObserver.checkedPermissions, [Permission.storage],
+            reason: 'Should always check the storage and audio permission on startup');
+        expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
+        final permissionGrantCompleter = Completer<PermissionStatus>();
+        permissionsObserver.setPermissionResolvable(Permission.storage, () => permissionGrantCompleter.future);
+        await tester.tap(find.text(l10n.grant));
+        expect(permissionsObserver.requestedPermissions, [Permission.storage, Permission.audio]);
+        await tester.pump();
+        expect(find.byType(CircularProgressIndicator), findsOneWidget,
+            reason: 'Indicate while waiting for the permission to be granted');
+        permissionGrantCompleter.complete(PermissionStatus.granted);
+        await tester.pumpAndSettle();
+        expect(find.byType(Home), findsOneWidget);
+      });
     });
-    await tester.runAppTest(() async {
-      expect(permissionsObserver.checkedPermissions, [Permission.storage],
-          reason: 'Should always check the storage permission on startup');
-      expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
-      final permissionGrantCompleter = Completer<PermissionStatus>();
-      permissionsObserver.setPermissionResolvable(Permission.storage, () => permissionGrantCompleter.future);
-      await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.requestedPermissions, [Permission.storage]);
-      await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget,
-          reason: 'Indicate while waiting for the permission to be granted');
-      permissionGrantCompleter.complete(PermissionStatus.granted);
-      await tester.pumpAndSettle();
-      expect(find.byType(Home), findsOneWidget);
-    });
-  });
 
-  testWidgets('permissions screen - shows toast and opens settings when permissions are denied',
-      (WidgetTester tester) async {
-    late PermissionsChannelObserver permissionsObserver;
-    await setUpAppTest(() {
-      permissionsObserver = PermissionsChannelObserver(tester.binding);
-      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+    /// On Android 13+ the storage permission is removed and reports as permanentlyDenied.
+    /// If the user granted audio permissions, we have access to the music
+    /// and don't want to show the permission request screen.
+    testWidgets('does not show when removed storage permission is permanently denied', (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
+      await setUpAppTest(() {
+        FakeDeviceInfoControl.instance.sdkInt = 33;
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.granted);
+      });
+      await tester.runAppTest(() async {
+        expect(Permissions.instance.granted, true);
+        expect(permissionsObserver.checkedPermissions, [Permission.audio]);
+        expect(find.byType(Home), findsOneWidget, reason: 'Audio permissions was already granted');
+      });
     });
-    await tester.runAppTest(() async {
-      permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
-      permissionsObserver.isOpeningSettingsSuccessful = false;
-      final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
-      await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.openSettingsRequests, 1);
-      expect(toastObserver.toastMessagesLog, [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError]);
 
-      permissionsObserver.isOpeningSettingsSuccessful = true;
-      await tester.tap(find.text(l10n.grant));
-      expect(permissionsObserver.openSettingsRequests, 2);
-      expect(toastObserver.toastMessagesLog, [
-        l10n.allowAccessToExternalStorageManually,
-        l10n.openAppSettingsError,
-        l10n.allowAccessToExternalStorageManually
-      ]);
+    /// The audio permission is new in Android 13 and reports as permanentlyDenied on earlier versions.
+    /// If the user granted storage permissions, we have access to the music
+    /// and don't want to show the permission request screen.
+    testWidgets('does not show when non-existent audio permission is permanently denied', (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
+      await setUpAppTest(() {
+        FakeDeviceInfoControl.instance.sdkInt = 32;
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
+      });
+      await tester.runAppTest(() async {
+        expect(Permissions.instance.granted, true);
+        expect(permissionsObserver.checkedPermissions, [Permission.storage]);
+        expect(find.byType(Home), findsOneWidget, reason: 'Storage permissions was already granted');
+      });
+    });
+
+    testWidgets('shows toast and opens settings when permissions are denied', (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
+      await setUpAppTest(() {
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
+      });
+      await tester.runAppTest(() async {
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
+        permissionsObserver.isOpeningSettingsSuccessful = false;
+        final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
+        await tester.tap(find.text(l10n.grant));
+        await tester.pumpAndSettle();
+        expect(permissionsObserver.openSettingsRequests, 1);
+        expect(toastObserver.toastMessagesLog, [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError]);
+
+        permissionsObserver.isOpeningSettingsSuccessful = true;
+        await tester.tap(find.text(l10n.grant));
+        expect(permissionsObserver.openSettingsRequests, 2);
+        expect(toastObserver.toastMessagesLog, [
+          l10n.allowAccessToExternalStorageManually,
+          l10n.openAppSettingsError,
+          l10n.allowAccessToExternalStorageManually
+        ]);
+      });
     });
   });
 

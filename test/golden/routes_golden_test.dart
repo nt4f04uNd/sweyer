@@ -15,6 +15,7 @@ void main() {
       await setUpAppTest(() {
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
       });
       await tester.runAppTest(() async {
         await tester.tap(find.text(l10n.grant));
@@ -112,13 +113,11 @@ void main() {
 
     testAppGoldens('selection_deletion_dialog_songs_tab', (WidgetTester tester) async {
       final List<Song> songs = List.unmodifiable(List.generate(10, (index) => songWith(id: index)));
-      await tester.runAsync(() async {
-        await setUpAppTest(() {
-          final fake = FakeDeviceInfoControl();
-          DeviceInfoControl.instance = fake;
-          fake.sdkInt = 29;
-          FakeSweyerPluginPlatform.instance.songs = songs.toList();
-        });
+      await setUpAppTest(() {
+        final fake = FakeDeviceInfoControl();
+        DeviceInfoControl.instance = fake;
+        fake.sdkInt = 29;
+        FakeSweyerPluginPlatform.instance.songs = songs.toList();
       });
       await tester.runAppTest(() async {
         await tester.pumpAndSettle();
@@ -133,17 +132,15 @@ void main() {
 
   group('persistent_queue_route', () {
     testAppGoldens('album_route', (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await setUpAppTest(() {
-          FakeContentChannel.instance.songs = [
-            songWith(id: 0, track: null, title: 'Null Song 1'),
-            songWith(id: 5, track: null, title: 'Null Song 2'),
-            songWith(id: 3, track: '1', title: 'First Song'),
-            songWith(id: 2, track: '2', title: 'Second Song'),
-            songWith(id: 4, track: '3', title: 'Third Song'),
-            songWith(id: 1, track: '4', title: 'Fourth Song'),
-          ];
-        });
+      await setUpAppTest(() {
+        FakeContentChannel.instance.songs = [
+          songWith(id: 0, track: null, title: 'Null Song 1'),
+          songWith(id: 5, track: null, title: 'Null Song 2'),
+          songWith(id: 3, track: '1', title: 'First Song'),
+          songWith(id: 2, track: '2', title: 'Second Song'),
+          songWith(id: 4, track: '3', title: 'Third Song'),
+          songWith(id: 1, track: '4', title: 'Fourth Song'),
+        ];
       });
       await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(albumWith()));
@@ -306,15 +303,13 @@ void main() {
       final localFavoriteButNotInMediaStoreSong = songWith(id: 2, title: 'Local only favorite');
       final mediaStoreFavoriteButNotLocalSong =
           songWith(id: 3, isFavoriteInMediaStore: true, title: 'MediaStore only favorite');
-      await tester.runAsync(() async {
-        await setUpAppTest(() async {
-          FakeContentChannel.instance.songs = [
-            songWith(),
-            localFavoriteAndMediaStoreSong,
-            localFavoriteButNotInMediaStoreSong,
-            mediaStoreFavoriteButNotLocalSong,
-          ];
-        });
+      await setUpAppTest(() {
+        FakeContentChannel.instance.songs = [
+          songWith(),
+          localFavoriteAndMediaStoreSong,
+          localFavoriteButNotInMediaStoreSong,
+          mediaStoreFavoriteButNotLocalSong,
+        ];
       });
       await tester.runAppTest(
         () async {
