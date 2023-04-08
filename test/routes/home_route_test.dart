@@ -43,7 +43,7 @@ void main() {
     // On Android 13+ the storage permission is removed and reports as permanentlyDenied.
     // If the user granted audio permissions, we have access to the music
     // and don't want to show the permission request screen.
-    testWidgets('does not show when one removed permission is permanently denied', (WidgetTester tester) async {
+    testWidgets('does not show when removed storage permission is permanently denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
       await setUpAppTest(() {
         permissionsObserver = PermissionsChannelObserver(tester.binding);
@@ -53,6 +53,22 @@ void main() {
       await tester.runAppTest(() async {
         expect(Permissions.instance.granted, true);
         expect(find.byType(Home), findsOneWidget, reason: 'Audio permissions was already granted');
+      });
+    });
+
+    // The audio permission is new in Android 13 and reports as permanentlyDenied on earlier versions.
+    // If the user granted storage permissions, we have access to the music
+    // and don't want to show the permission request screen.
+    testWidgets('does not show when non-existent audio permission is permanently denied', (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
+      await setUpAppTest(() {
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
+      });
+      await tester.runAppTest(() async {
+        expect(Permissions.instance.granted, true);
+        expect(find.byType(Home), findsOneWidget, reason: 'Storage permissions was already granted');
       });
     });
 
