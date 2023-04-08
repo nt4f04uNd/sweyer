@@ -15,6 +15,7 @@ void main() {
       await setUpAppTest(() {
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
       });
       await tester.runAppTest(() async {
         await tester.tap(find.text(l10n.grant));
