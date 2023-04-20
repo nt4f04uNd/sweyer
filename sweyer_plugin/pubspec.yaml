@@ -1,7 +1,10 @@
 name: sweyer_plugin
 description: Plugin for native components of Sweyer.
 version: 0.0.1
-homepage:
+homepage: https://github.com/nt4f04uNd/sweyer
+repository: https://github.com/nt4f04uNd/sweyer
+issue_tracker: https://github.com/nt4f04uNd/sweyer/issues
+publish_to: none
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
