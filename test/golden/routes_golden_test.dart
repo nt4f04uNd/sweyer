@@ -133,7 +133,7 @@ void main() {
   group('persistent_queue_route', () {
     testAppGoldens('album_route', (WidgetTester tester) async {
       await setUpAppTest(() {
-        FakeContentChannel.instance.songs = [
+        FakeSweyerPluginPlatform.instance.songs = [
           songWith(id: 0, track: null, title: 'Null Song 1'),
           songWith(id: 5, track: null, title: 'Null Song 2'),
           songWith(id: 3, track: '1', title: 'First Song'),
@@ -304,7 +304,7 @@ void main() {
       final mediaStoreFavoriteButNotLocalSong =
           songWith(id: 3, isFavoriteInMediaStore: true, title: 'MediaStore only favorite');
       await setUpAppTest(() {
-        FakeContentChannel.instance.songs = [
+        FakeSweyerPluginPlatform.instance.songs = [
           songWith(),
           localFavoriteAndMediaStoreSong,
           localFavoriteButNotInMediaStoreSong,

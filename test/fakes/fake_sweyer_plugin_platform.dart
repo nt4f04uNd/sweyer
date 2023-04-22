@@ -126,7 +126,10 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
 
   @override
   Future<bool> setSongsFavorite(List<int> songIds, bool value) async {
-    _favoriteRequestLog.add(FavoriteLogEntry(songs, value));
+    _favoriteRequestLog.add(FavoriteLogEntry(songIds.map((id) => _songById(id)!).toSet(), value));
     return true;
   }
+
+  /// Get a song by its [id].
+  Song? _songById(int id) => songs?.firstWhere((song) => song.id == id);
 }

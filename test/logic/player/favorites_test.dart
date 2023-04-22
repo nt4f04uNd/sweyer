@@ -12,7 +12,7 @@ void main() {
 
   setUp(() async {
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = [
+      FakeSweyerPluginPlatform.instance.songs = [
         notFavoriteSong1,
         notFavoriteSong2,
         notFavoriteSong3,
@@ -67,7 +67,7 @@ void main() {
         await tester.tap(findInDialog(find.text(mediaStoreFavoriteButNotLocalKeepSong.title)));
         await tester.tap(findInDialog(find.text(l10n.accept)));
         await tester.pumpAndSettle();
-        expect(FakeContentChannel.instance.favoriteRequestLog, [
+        expect(FakeSweyerPluginPlatform.instance.favoriteRequestLog, [
           FavoriteLogEntry({mediaStoreFavoriteButNotLocalUnFavorSong}, false),
           FavoriteLogEntry({localFavoriteButNotInMediaStoreKeepSong}, true),
         ]);
@@ -98,7 +98,7 @@ void main() {
         expect(find.text(l10n.resolveConflict), findsOneWidget);
         await tester.tap(find.text(l10n.cancel));
         await tester.pumpAndSettle();
-        expect(FakeContentChannel.instance.favoriteRequestLog, []);
+        expect(FakeSweyerPluginPlatform.instance.favoriteRequestLog, []);
         expect(Settings.useMediaStoreForFavoriteSongs.get(), false);
       });
     });
