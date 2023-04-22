@@ -146,7 +146,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
       (MethodCall methodCall) async {
     return null;
   });
-  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider_macos'),
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider'),
       (MethodCall methodCall) async {
     if (methodCall.method == 'getTemporaryDirectory' || methodCall.method == 'getApplicationSupportDirectory') {
       Directory('./temp').createSync();
