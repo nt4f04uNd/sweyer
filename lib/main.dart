@@ -4,7 +4,6 @@ import 'dart:isolate';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sweyer/media_query_wrapper.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
@@ -168,35 +167,32 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return MediaQueryWrapper(
-      child: Consumer(builder: (context, ref, child) {
-        final materialAppSwitchesState = ref.watch(materialAppSwitchesStateHolderProvider.select((value) => value));
-        return StreamBuilder(
-          stream: ThemeControl.instance.themeChanging,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            final theme = ThemeControl.instance.theme;
-            return NFTheme(
-              data: App.nfThemeData,
-              child: MaterialApp.router(
-                showPerformanceOverlay: materialAppSwitchesState.showPerformanceOverlay,
-                checkerboardRasterCacheImages: materialAppSwitchesState.checkerboardRasterCacheImages,
-                showSemanticsDebugger: materialAppSwitchesState.showSemanticsDebugger,
-                useInheritedMediaQuery: true,
-                debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-                title: constants.Config.applicationTitle,
-                theme: theme,
-                color: theme.colorScheme.primary,
-                supportedLocales: constants.Config.supportedLocales,
-                scrollBehavior: _ScrollBehavior(),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                routerDelegate: AppRouter.instance,
-                routeInformationParser: AppRouteInformationParser(),
-              ),
-            );
-          },
-        );
-      }),
-    );
+    return Consumer(builder: (context, ref, child) {
+      final materialAppSwitchesState = ref.watch(materialAppSwitchesStateHolderProvider.select((value) => value));
+      return StreamBuilder(
+        stream: ThemeControl.instance.themeChanging,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          final theme = ThemeControl.instance.theme;
+          return NFTheme(
+            data: App.nfThemeData,
+            child: MaterialApp.router(
+              showPerformanceOverlay: materialAppSwitchesState.showPerformanceOverlay,
+              checkerboardRasterCacheImages: materialAppSwitchesState.checkerboardRasterCacheImages,
+              showSemanticsDebugger: materialAppSwitchesState.showSemanticsDebugger,
+              debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+              title: constants.Config.applicationTitle,
+              theme: theme,
+              color: theme.colorScheme.primary,
+              supportedLocales: constants.Config.supportedLocales,
+              scrollBehavior: _ScrollBehavior(),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              routerDelegate: AppRouter.instance,
+              routeInformationParser: AppRouteInformationParser(),
+            ),
+          );
+        },
+      );
+    });
   }
 }
 

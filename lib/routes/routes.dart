@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide LicensePage;
 import 'package:equatable/equatable.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sweyer/routes/settings_route/general_settings.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 import 'package:sweyer/sweyer.dart';
@@ -365,63 +366,74 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
 
   @override
   Widget build(BuildContext context) {
-    return _AppRouterBuilder(
-      builder: (context) {
-        final pages = <Page<void>>[
-          StackFadePage(
-            key: AppRoutes.initial.uniqueKey,
-            child: const InitialRoute(),
-            transitionSettings: transitionSettings.initial,
-          ),
-        ];
-
-        for (int i = 0; i < _routes.length; i++) {
-          final route = _routes[i];
-          if (route.hasSameLocation(AppRoutes.settings)) {
-            pages.add(StackFadePage(
-              key: AppRoutes.settings.uniqueKey,
-              child: const SettingsRoute(),
-              transitionSettings: transitionSettings.dismissible,
-            ));
-          } else if (route.hasSameLocation(AppRoutes.generalSettings)) {
-            pages.add(StackFadePage(
-              key: AppRoutes.generalSettings.uniqueKey,
-              child: const GeneralSettingsRoute(),
-              transitionSettings: transitionSettings.theme,
-            ));
-          } else if (route.hasSameLocation(AppRoutes.themeSettings)) {
-            pages.add(StackFadePage(
-              key: AppRoutes.themeSettings.uniqueKey,
-              child: const ThemeSettingsRoute(),
-              transitionSettings: transitionSettings.theme,
-            ));
-          } else if (route.hasSameLocation(AppRoutes.licenses)) {
-            pages.add(StackFadePage(
-              key: AppRoutes.licenses.uniqueKey,
-              child: const LicensePage(),
-              transitionSettings: transitionSettings.dismissible,
-            ));
-          } else if (route.hasSameLocation(AppRoutes.dev)) {
-            pages.add(StackFadePage(
-              key: AppRoutes.dev.uniqueKey,
-              child: const DevRoute(),
-              transitionSettings: transitionSettings.dismissible,
-            ));
-          } else if (route.hasSameLocation(AppRoutes.selection)) {
-            pages.add(StackFadePage(
-              key: AppRoutes.selection.uniqueKey,
-              child: SelectionRoute(
-                selectionArguments: (route as AppRoutes<SelectionArguments>).arguments!,
-              ),
-              transitionSettings: transitionSettings.greyDismissible,
-            ));
-          }
+    return Consumer(
+      builder: (context, ref, child) {
+        final mediaQuery = MediaQuery.of(context);
+        final textScaleFactor = ref.watch(textScaleFactorStateNotifierProvider.select((value) => value));
+        if (mediaQuery.size.isEmpty) {
+          return const SizedBox.shrink(); // Don't render the app if we are started in the background.
         }
-        return Navigator(
-          key: navigatorKey,
-          observers: [routeObserver],
-          onPopPage: _handlePopPage,
-          pages: pages,
+        return MediaQuery(
+          data: mediaQuery.copyWith(textScaleFactor: textScaleFactor),
+          child: _AppRouterBuilder(
+            builder: (context) {
+              final pages = <Page<void>>[
+                StackFadePage(
+                  key: AppRoutes.initial.uniqueKey,
+                  child: const InitialRoute(),
+                  transitionSettings: transitionSettings.initial,
+                ),
+              ];
+              for (int i = 0; i < _routes.length; i++) {
+                final route = _routes[i];
+                if (route.hasSameLocation(AppRoutes.settings)) {
+                  pages.add(StackFadePage(
+                    key: AppRoutes.settings.uniqueKey,
+                    child: const SettingsRoute(),
+                    transitionSettings: transitionSettings.dismissible,
+                  ));
+                } else if (route.hasSameLocation(AppRoutes.generalSettings)) {
+                  pages.add(StackFadePage(
+                    key: AppRoutes.generalSettings.uniqueKey,
+                    child: const GeneralSettingsRoute(),
+                    transitionSettings: transitionSettings.theme,
+                  ));
+                } else if (route.hasSameLocation(AppRoutes.themeSettings)) {
+                  pages.add(StackFadePage(
+                    key: AppRoutes.themeSettings.uniqueKey,
+                    child: const ThemeSettingsRoute(),
+                    transitionSettings: transitionSettings.theme,
+                  ));
+                } else if (route.hasSameLocation(AppRoutes.licenses)) {
+                  pages.add(StackFadePage(
+                    key: AppRoutes.licenses.uniqueKey,
+                    child: const LicensePage(),
+                    transitionSettings: transitionSettings.dismissible,
+                  ));
+                } else if (route.hasSameLocation(AppRoutes.dev)) {
+                  pages.add(StackFadePage(
+                    key: AppRoutes.dev.uniqueKey,
+                    child: const DevRoute(),
+                    transitionSettings: transitionSettings.dismissible,
+                  ));
+                } else if (route.hasSameLocation(AppRoutes.selection)) {
+                  pages.add(StackFadePage(
+                    key: AppRoutes.selection.uniqueKey,
+                    child: SelectionRoute(
+                      selectionArguments: (route as AppRoutes<SelectionArguments>).arguments!,
+                    ),
+                    transitionSettings: transitionSettings.greyDismissible,
+                  ));
+                }
+              }
+              return Navigator(
+                key: navigatorKey,
+                observers: [routeObserver],
+                onPopPage: _handlePopPage,
+                pages: pages,
+              );
+            },
+          ),
         );
       },
     );
