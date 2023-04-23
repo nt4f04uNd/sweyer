@@ -15,19 +15,21 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.nt4f04und.sweyer.sweyer_plugin.Constants;
-import com.nt4f04und.sweyer.sweyer_plugin.DeletionItem;
 import com.nt4f04und.sweyer.sweyer_plugin.SweyerPlugin;
 import com.nt4f04und.sweyer.sweyer_plugin.handlers.FetchHandler;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import androidx.annotation.Nullable;
+
 public class DeletionService extends Service {
     /** The name of the argument where an array of DeletionItems is expected to be passed. */
     private final static String SONGS_ARGUMENT = "songs";
-    
+
    @Override
    public int onStartCommand(Intent intent, int flags, int startId) {
       ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -44,8 +46,7 @@ public class DeletionService extends Service {
             ArrayList<Uri> uris = new ArrayList<>();
             // Populate `songListSuccessful` with uris for the intent
             for (DeletionItem song : songs) {
-               uris.add(ContentUris.withAppendedId(
-                       MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.getId()));
+               uris.add(ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, song.id));
             }
             PendingIntent pendingIntent = MediaStore.createDeleteRequest(
                     getContentResolver(),
@@ -53,14 +54,13 @@ public class DeletionService extends Service {
             );
             handler.post(() -> {
                // On R it's required to request an OS permission for file deletions
-               
-               SweyerPlugin.Companion.getInstance().startIntentSenderForResult(pendingIntent, Constants.intents.PERMANENT_DELETION_REQUEST);
+               SweyerPlugin.instance.startIntentSenderForResult(pendingIntent, Constants.intents.PERMANENT_DELETION_REQUEST);
             });
          } else {
             ArrayList<String> songListSuccessful = new ArrayList<>();
             // Delete files and populate `songListSuccessful` with successful uris
             for (DeletionItem song : songs) {
-               String path = song.getPath();
+               String path = song.path;
                if (path == null) {
                   Log.e(Constants.LogTag, "File without path not deleted");
                   continue;
@@ -83,13 +83,14 @@ public class DeletionService extends Service {
             // Delete file from `MediaStore`
             resolver.delete(uri, where, selectionArgs);
             resolver.notifyChange(uri, null);
-            SweyerPlugin.Companion.getInstance().sendResultFromIntent(true);
+            SweyerPlugin.instance.sendResultFromIntent(true);
          }
          stopSelf();
       });
       return super.onStartCommand(intent, flags, startId);
    }
 
+   @Nullable
    @Override
    public IBinder onBind(Intent intent) {
       return null;
@@ -105,5 +106,26 @@ public class DeletionService extends Service {
       Intent serviceIntent = new Intent(context, DeletionService.class);
       serviceIntent.putExtra(SONGS_ARGUMENT, songs);
       context.startService(serviceIntent);
+   }
+
+   /**
+    * An item that is to be deleted.
+    */
+   public static class DeletionItem implements Serializable {
+       /**
+        * The id of the item.
+        */
+       final public Long id;
+
+       /**
+        * The absolute path to this item on the file system, if available.
+        */
+       @Nullable
+       final public String path;
+
+       public DeletionItem(Long id, @Nullable String path) {
+           this.id = id;
+           this.path = path;
+       }
    }
 }
