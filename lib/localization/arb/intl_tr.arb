@@ -1,0 +1,325 @@
+{
+  "playback": "Playback",
+  "@playback": {
+    "description": "Used as notification channel name"
+  },
+  "playbackControls": "Playback controls",
+  "@playbackControls": {
+    "description": "Used as notification channel description"
+  },
+  "play": "Play",
+  "pause": "Pause",
+  "stop": "Stop",
+  "next": "Next",
+  "previous": "Previous",
+  "loopOff": "Loop off",
+  "loopOn": "Loop on",
+  "search": "Search",
+  "shuffleAll": "Shuffle all",
+  "playRecent": "Play recent",
+  "artistUnknown": "Unknown artist",
+  "@artistUnknown": {
+    "description": "Label for unknown artist"
+  },
+  "track": "Track",
+  "tracks": "Tracks",
+  "tracksPlural": "{count, plural, =1{{count} track} other{{count} tracks}}",
+  "@tracksPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "album": "Album",
+  "albumQueue": "Album {name}",
+  "@albumQueue": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Album name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "albums": "Albums",
+  "albumsPlural": "{count, plural, =1{{count} album} other{{count} albums}}",
+  "@albumsPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "playlist": "Playlist",
+  "playlistQueue": "Playlist {name}",
+  "@playlistQueue": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Playlist name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "playlists": "Playlists",
+  "playlistsPlural": "{count, plural, =1{{count} playlist} other{{count} playlists}}",
+  "@playlistsPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "artist": "Artist",
+  "artistQueue": "Artist {name}",
+  "@artistQueue": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Artist name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "artists": "Artists",
+  "artistsPlural": "{count, plural, =1{{count} artist} other{{count} artists}}",
+  "@artistsPlural": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "albumNotFound": "Album not found",
+  "artistNotFound": "Artist not found",
+  "allTracks": "All tracks",
+  "allAlbums": "All albums",
+  "allPlaylists": "All playlists",
+  "allArtists": "All artists",
+  "arbitraryQueue": "Arbitrary queue",
+  "shuffled": "Shuffled",
+  "@shuffled": {
+    "description": "NOTE: currently unused"
+  },
+  "modified": "Modified",
+  "@modified": {
+    "description": "NOTE: currently unused"
+  },
+  "selectedPlural": "Selected",
+  "@selectedPlural": {
+    "description": "Should be in plural form"
+  },
+  "newPlaylist": "New playlist",
+  "trackAfterWhichToInsert": "Track after which to insert",
+  "insertAtTheBeginning": "Insert at the beginning",
+  "saveQueueAsPlaylist": "Save queue as playlist",
+  "playContentList": "Play",
+  "@playContentList": {
+    "description": "Displayed in list headers in button to play it"
+  },
+  "shuffleContentList": "Shuffle",
+  "@shuffleContentList": {
+    "description": "Displayed in list headers in button to shuffle it"
+  },
+  "debug": "Debug",
+  "areYouSure": "Are you sure?",
+  "reset": "Reset",
+  "save": "Save",
+  "saved": "Saved",
+  "view": "View",
+  "secondsShorthand": "s",
+  "@secondsShorthand": {
+    "description": "TODO: currently unused"
+  },
+  "minutesShorthand": "min",
+  "@minutesShorthand": {
+    "description": "TODO: currently unused"
+  },
+  "and": "And",
+  "@and": {
+    "description": "TODO: currently unused"
+  },
+  "more": "More",
+  "@more": {
+    "description": "TODO: currently unused"
+  },
+  "andNMore": "And {count} more",
+  "@andNMore": {
+    "placeholders": {
+      "count": {}
+    },
+    "description": "'And 3 more'"
+  },
+  "done": "Done",
+  "create": "Create",
+  "addTracks": "Add tracks",
+  "@addTracks": {
+    "description": "The title for the + button in the playlist screen"
+  },
+  "remove": "Remove",
+  "removeTracks": "{count, plural, =1{Remove track} other{Remove {count} tracks}}",
+  "@removeTracks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "removeTracksConfirmation": "{count, plural, =1{Are you sure you want to remove {title}?} other{Are you sure you want to remove selected tracks?}}",
+  "@removeTracksConfirmation": {
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+  },
+  "delete": "Delete",
+  "deleteTracks": "{count, plural, =1{Delete track} other{Delete {count} tracks}}",
+  "@deleteTracks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deleteTracksConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected tracks?}}",
+  "@deleteTracksConfirmation": {
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Track Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+  },
+  "deletePlaylists": "{count, plural, =1{Delete playlist} other{Delete {count} playlists}}",
+  "@deletePlaylists": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "deletePlaylistsConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected playlists?}}",
+  "@deletePlaylistsConfirmation": {
+    "placeholders": {
+      "count": {},
+      "title": {
+        "type": "String?",
+        "example": "Playlist Name"
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+  },
+  "deletion": "Deletion",
+  "editPlaylist": "Edit playlist",
+  "refresh": "Refresh",
+  "grant": "Grant",
+  "nothingHere": "There's nothing here",
+  "details": "Details",
+  "songInformation": "Track information",
+  "editMetadata": "Edit metadata",
+  "@editMetadata": {
+    "description": "TODO: currently unused"
+  },
+  "foundByQuery": "Found by query {query}",
+  "@foundByQuery": {
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "\"Search text\""
+      }
+    },
+    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+  },
+  "upNext": "Up next",
+  "pressOnceAgainToExit": "Press once again to exit",
+  "noMusic": "There's no music on your device :(",
+  "searchingForTracks": "Searching for tracks...",
+  "allowAccessToExternalStorage": "Please, allow access to storage",
+  "allowAccessToExternalStorageManually": "Allow access to storage manually",
+  "selected": "Selected {counter}",
+  "@selected": {
+    "placeholders": {
+      "counter": {
+        "type": "String",
+        "example": "1"
+      }
+    }
+  },
+  "actions": "Actions",
+  "@actions": {
+    "description": "TODO: currently unused"
+  },
+  "goToAlbum": "Go to album",
+  "goToArtist": "Go to artist",
+  "playNext": "Play next",
+  "addToPlaylist": "Add to playlist",
+  "removeFromPlaylist": "Remove from playlist",
+  "addToFavorites": "Add to favorites",
+  "addToQueue": "Add to queue",
+  "removeFromQueue": "Remove from queue",
+  "share": "Share",
+  "@share": {
+    "description": "TODO: currently unused"
+  },
+  "selectAll": "Select all",
+  "sort": "Sort",
+  "title": "Title",
+  "name": "Name",
+  "dateModified": "Date modified",
+  "dateAdded": "Date added",
+  "year": "Year",
+  "numberOfTracks": "Number of tracks",
+  "numberOfAlbums": "Number of albums",
+  "devModeGreet": "Done! You are now a developer",
+  "onThePathToDevMode": "Something should happen now...",
+  "@onThePathToDevMode": {
+    "description": "Shown when user tapped 4 times on app logo"
+  },
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{You're almost there, only 1 click remaining...} other{You're almost there, only {remainingClicks} clicks remaining...}}",
+  "@onThePathToDevModeClicksRemaining": {
+    "placeholders": {
+      "remainingClicks": {}
+    },
+    "description": "Shown when user is about to become a developer, part 2"
+  },
+  "devTestToast": "Test toast",
+  "devAnimationsSlowMo": "Slow down animations",
+  "quitDevMode": "Quit the developer mode",
+  "quitDevModeDescription": "Stop being a developer?",
+  "settings": "Settings",
+  "general": "General",
+  "theme": "Theme",
+  "settingLightMode": "Light mode",
+  "searchHistory": "Search history",
+  "searchHistoryPlaceholder": "Your search history will be displayed here",
+  "searchNothingFound": "Nothing found",
+  "searchHistoryRemoveEntryDescription": "Are you sure you want to remove {searchText} from your search history?",
+  "@searchHistoryRemoveEntryDescription": {
+    "placeholders": {
+      "searchText": {
+        "type": "String",
+        "example": "Query"
+      }
+    },
+    "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+  },
+  "searchClearHistory": "Clear search history?",
+  "oopsErrorOccurred": "😮 Oops! An error occurred",
+  "errorDetails": "Error details",
+  "deletionError": "Deletion error",
+  "playlistDoesNotExistError": "Can't find the playlist, perhaps it was deleted",
+  "playbackError": "An error occurred during the playback",
+  "openAppSettingsError": "Error opening the app settings",
+  "confirmExitingWithBackButtonSetting": "Confirm exiting with back button",
+  "useMediaStoreForFavoriteSongsSetting": "Use Android system for favorite tracks",
+  "warning": "Warning",
+  "close": "Close",
+  "accept": "Accept",
+  "cancel": "Cancel",
+  "copied": "Copied",
+  "gitHubRepo": "GitHub repo",
+  "defaultValue": "Default",
+  "playerInterfaceColorStyle": "Player color theme",
+  "playerInterfaceColorStyleArtColor": "Based on track art",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Theme background color",
+  "resolveConflict": "Resolve conflict",
+  "conflictExplanation": "The system has different favorites than Sweyer, please select which ones should remain marked as favorites. Only the conflicting tracks are shown.",
+  "debugTextScaleFactor": "Text scale factor",
+  "debugShowDebugOverlay": "Show debug overlay",
+  "debugShowPerformanceOverlay": "Show performance overlay",
+  "debugShowCheckerboardRasterCacheImages": "Show checkerboard raster cache images",
+  "debugShowSemanticsDebugger": "Show semantics debugger"
+}
