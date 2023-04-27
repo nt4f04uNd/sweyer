@@ -1,125 +1,125 @@
 {
-  "playback": "Playback",
+  "playback": "Geri çalma",
   "@playback": {
-    "description": "Used as notification channel name"
+    "description": "Bildirim kanalı adı olarak kullanılır"
   },
-  "playbackControls": "Playback controls",
+  "playbackControls": "Geri çalma kontrolleri",
   "@playbackControls": {
-    "description": "Used as notification channel description"
+    "description": "Bildirim kanalı açıklaması olarak kullanılır"
   },
-  "play": "Play",
-  "pause": "Pause",
-  "stop": "Stop",
-  "next": "Next",
-  "previous": "Previous",
-  "loopOff": "Loop off",
-  "loopOn": "Loop on",
-  "search": "Search",
-  "shuffleAll": "Shuffle all",
-  "playRecent": "Play recent",
-  "artistUnknown": "Unknown artist",
+  "play": "Oynat",
+  "pause": "Duraklat",
+  "stop": "Durdur",
+  "next": "İleri",
+  "previous": "Önceki",
+  "loopOff": "Döngüden çık",
+  "loopOn": "Döngüye gir",
+  "search": "Ara",
+  "shuffleAll": "Tümünü karıştır",
+  "playRecent": "En son oynatılanı çal",
+  "artistUnknown": "Bilinmeyen sanatçı",
   "@artistUnknown": {
-    "description": "Label for unknown artist"
+    "description": "Bilinmeyen sanatçı için etiket"
   },
-  "track": "Track",
-  "tracks": "Tracks",
+  "track": "Parça",
+  "tracks": "Parçalar",
   "tracksPlural": "{count, plural, =1{{count} track} other{{count} tracks}}",
   "@tracksPlural": {
     "placeholders": {
       "count": {}
     }
   },
-  "album": "Album",
-  "albumQueue": "Album {name}",
+  "album": "Albüm",
+  "albumQueue": "Albüm {name}",
   "@albumQueue": {
     "placeholders": {
       "name": {
         "type": "String",
-        "example": "Album name"
+        "example": "Albüm adı"
       }
     },
-    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+    "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "albums": "Albums",
+  "albums": "Albümler",
   "albumsPlural": "{count, plural, =1{{count} album} other{{count} albums}}",
   "@albumsPlural": {
     "placeholders": {
       "count": {}
     }
   },
-  "playlist": "Playlist",
-  "playlistQueue": "Playlist {name}",
+  "playlist": "Oynatma listesi",
+  "playlistQueue": "Oynatma listesi {name}",
   "@playlistQueue": {
     "placeholders": {
       "name": {
         "type": "String",
-        "example": "Playlist name"
+        "example": "Oynatma listesinin adı"
       }
     },
-    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+    "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "playlists": "Playlists",
+  "playlists": "Oynatma listeleri",
   "playlistsPlural": "{count, plural, =1{{count} playlist} other{{count} playlists}}",
   "@playlistsPlural": {
     "placeholders": {
       "count": {}
     }
   },
-  "artist": "Artist",
-  "artistQueue": "Artist {name}",
+  "artist": "Sanatçı",
+  "artistQueue": "Sanatçı {name}",
   "@artistQueue": {
     "placeholders": {
       "name": {
         "type": "String",
-        "example": "Artist name"
+        "example": "Sanatçı adı"
       }
     },
-    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+    "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "artists": "Artists",
+  "artists": "Sanatçılar",
   "artistsPlural": "{count, plural, =1{{count} artist} other{{count} artists}}",
   "@artistsPlural": {
     "placeholders": {
       "count": {}
     }
   },
-  "albumNotFound": "Album not found",
-  "artistNotFound": "Artist not found",
-  "allTracks": "All tracks",
-  "allAlbums": "All albums",
-  "allPlaylists": "All playlists",
-  "allArtists": "All artists",
-  "arbitraryQueue": "Arbitrary queue",
-  "shuffled": "Shuffled",
+  "albumNotFound": "Albüm bulunamadı",
+  "artistNotFound": "Sanatçı bulunamadı",
+  "allTracks": "Tüm parçalar",
+  "allAlbums": "Tüm albümler",
+  "allPlaylists": "Tüm oynatma listeleri",
+  "allArtists": "Tüm sanatçılar",
+  "arbitraryQueue": "Keyfi sıra",
+  "shuffled": "Karıştırmak",
   "@shuffled": {
-    "description": "NOTE: currently unused"
+    "description": "NOT: şu anda kullanılmamaktadır"
   },
-  "modified": "Modified",
+  "modified": "Değiştirilmiş",
   "@modified": {
-    "description": "NOTE: currently unused"
+    "description": "NOT: şu anda kullanılmamaktadır"
   },
-  "selectedPlural": "Selected",
+  "selectedPlural": "Seçildi",
   "@selectedPlural": {
-    "description": "Should be in plural form"
+    "description": "çoğul halde olmalıdır"
   },
-  "newPlaylist": "New playlist",
-  "trackAfterWhichToInsert": "Track after which to insert",
-  "insertAtTheBeginning": "Insert at the beginning",
-  "saveQueueAsPlaylist": "Save queue as playlist",
-  "playContentList": "Play",
+  "newPlaylist": "Yeni oynatma listesi",
+  "trackAfterWhichToInsert": "Hangisinden sonra ekleneceğini izle",
+  "insertAtTheBeginning": "Başa ekle",
+  "saveQueueAsPlaylist": "Sırayı oynatma listesi olarak kaydet",
+  "playContentList": "Oynat",
   "@playContentList": {
-    "description": "Displayed in list headers in button to play it"
+    "description": "Oynatmak için düğmedeki liste başlıklarında görüntülenir"
   },
-  "shuffleContentList": "Shuffle",
+  "shuffleContentList": "Karıştır",
   "@shuffleContentList": {
-    "description": "Displayed in list headers in button to shuffle it"
+    "description": "Karıştırmak için düğmedeki liste başlıklarında görüntülenir"
   },
-  "debug": "Debug",
-  "areYouSure": "Are you sure?",
-  "reset": "Reset",
-  "save": "Save",
-  "saved": "Saved",
-  "view": "View",
+  "debug": "Hata ayıklama",
+  "areYouSure": "Emin misiniz?",
+  "reset": "Sıfırla",
+  "save": "Kaydet",
+  "saved": "Kaydedildi",
+  "view": "Görüntüle",
   "secondsShorthand": "s",
   "@secondsShorthand": {
     "description": "TODO: currently unused"
@@ -128,62 +128,62 @@
   "@minutesShorthand": {
     "description": "TODO: currently unused"
   },
-  "and": "And",
+  "and": "Ve",
   "@and": {
     "description": "TODO: currently unused"
   },
-  "more": "More",
+  "more": "Daha fazlası",
   "@more": {
     "description": "TODO: currently unused"
   },
-  "andNMore": "And {count} more",
+  "andNMore": "Ve {count} tane daha",
   "@andNMore": {
     "placeholders": {
       "count": {}
     },
-    "description": "'And 3 more'"
+    "description": "'Ve 3 tane daha'"
   },
-  "done": "Done",
-  "create": "Create",
-  "addTracks": "Add tracks",
+  "done": "Tamamlandı",
+  "create": "Oluştur",
+  "addTracks": "Parçalar ekle",
   "@addTracks": {
-    "description": "The title for the + button in the playlist screen"
+    "description": "Çalma listesi ekranındaki + düğmesinin başlığı"
   },
-  "remove": "Remove",
+  "remove": "Kaldır",
   "removeTracks": "{count, plural, =1{Remove track} other{Remove {count} tracks}}",
   "@removeTracks": {
     "placeholders": {
       "count": {}
     }
   },
-  "removeTracksConfirmation": "{count, plural, =1{Are you sure you want to remove {title}?} other{Are you sure you want to remove selected tracks?}}",
+  "removeTracksConfirmation": "{count, plural, =1{{title}'ı Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
   "@removeTracksConfirmation": {
     "placeholders": {
       "count": {},
       "title": {
         "type": "String?",
-        "example": "Track Name"
+        "example": "Parça adı"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+    "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "delete": "Delete",
+  "delete": "Sil",
   "deleteTracks": "{count, plural, =1{Delete track} other{Delete {count} tracks}}",
   "@deleteTracks": {
     "placeholders": {
       "count": {}
     }
   },
-  "deleteTracksConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected tracks?}}",
+  "deleteTracksConfirmation": "{count, plural, =1{title}'ı Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
   "@deleteTracksConfirmation": {
     "placeholders": {
       "count": {},
       "title": {
         "type": "String?",
-        "example": "Track Name"
+        "example": "Parça adı"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+    "description": Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "deletePlaylists": "{count, plural, =1{Delete playlist} other{Delete {count} playlists}}",
   "@deletePlaylists": {
@@ -197,23 +197,23 @@
       "count": {},
       "title": {
         "type": "String?",
-        "example": "Playlist Name"
+        "example": "Oynatma listesi adı"
       }
     },
-    "description": "Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+    "description": "Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "deletion": "Deletion",
-  "editPlaylist": "Edit playlist",
-  "refresh": "Refresh",
-  "grant": "Grant",
-  "nothingHere": "There's nothing here",
-  "details": "Details",
-  "songInformation": "Track information",
-  "editMetadata": "Edit metadata",
+  "deletion": "Silme",
+  "editPlaylist": "Oynatma listesini düzenle",
+  "refresh": "Tazele",
+  "grant": "Bağış",
+  "nothingHere": "Burada hiçbir şey yok",
+  "details": "Detaylar",
+  "songInformation": "Parça bilgisi",
+  "editMetadata": "meta verileri düzenle",
   "@editMetadata": {
     "description": "TODO: currently unused"
   },
-  "foundByQuery": "Found by query {query}",
+  "foundByQuery": "Sorguya göre bulundu: {query}",
   "@foundByQuery": {
     "placeholders": {
       "query": {
@@ -221,14 +221,14 @@
         "example": "\"Search text\""
       }
     },
-    "description": "Warning: These characters need to be xml escaped: All quotes and &<>"
+    "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "upNext": "Up next",
-  "pressOnceAgainToExit": "Press once again to exit",
-  "noMusic": "There's no music on your device :(",
-  "searchingForTracks": "Searching for tracks...",
-  "allowAccessToExternalStorage": "Please, allow access to storage",
-  "allowAccessToExternalStorageManually": "Allow access to storage manually",
+  "upNext": "Bir sonraki",
+  "pressOnceAgainToExit": "Çıkmak için bir kez daha basın.",
+  "noMusic": "Cihazınızda müzik yok :(",
+  "searchingForTracks": "Parçalar aranıyor...",
+  "allowAccessToExternalStorage": "Lütfen depolama alanına erişime izin verin",
+  "allowAccessToExternalStorageManually": "Depolamaya manuel olarak erişime izin ver",
   "selected": "Selected {counter}",
   "@selected": {
     "placeholders": {
@@ -238,88 +238,88 @@
       }
     }
   },
-  "actions": "Actions",
+  "actions": "Eylemler",
   "@actions": {
-    "description": "TODO: currently unused"
+    "description": "YAPILACAKLAR: şu anda kullanılmıyor"
   },
-  "goToAlbum": "Go to album",
-  "goToArtist": "Go to artist",
-  "playNext": "Play next",
-  "addToPlaylist": "Add to playlist",
-  "removeFromPlaylist": "Remove from playlist",
-  "addToFavorites": "Add to favorites",
-  "addToQueue": "Add to queue",
-  "removeFromQueue": "Remove from queue",
-  "share": "Share",
+  "goToAlbum": "Albüme git",
+  "goToArtist": "Sanatçıya git",
+  "playNext": "Sonrakini çal",
+  "addToPlaylist": "Oynatma listesine ekle",
+  "removeFromPlaylist": "Oynatma listesinden kaldır",
+  "addToFavorites": "Favorilere ekle",
+  "addToQueue": "Kuyruğa ekle",
+  "removeFromQueue": "Kuyruktan kaldır",
+  "share": "Paylaş",
   "@share": {
-    "description": "TODO: currently unused"
+    "description": "YAPILACAKLAR: şu anda kullanılmıyor"
   },
-  "selectAll": "Select all",
-  "sort": "Sort",
-  "title": "Title",
-  "name": "Name",
-  "dateModified": "Date modified",
-  "dateAdded": "Date added",
-  "year": "Year",
-  "numberOfTracks": "Number of tracks",
-  "numberOfAlbums": "Number of albums",
-  "devModeGreet": "Done! You are now a developer",
-  "onThePathToDevMode": "Something should happen now...",
+  "selectAll": "Hepsini seç",
+  "sort": "Sırala",
+  "title": "Başlık",
+  "name": "Ad",
+  "dateModified": "Değiştirilme tarihi",
+  "dateAdded": "Eklenme tarihi",
+  "year": "Yıl",
+  "numberOfTracks": "Parça sayısı",
+  "numberOfAlbums": "Albüm sayısı",
+  "devModeGreet": "Bitti! Artık bir geliştiricisiniz!",
+  "onThePathToDevMode": "Şuan bir şeyler olması gerekiyor...",
   "@onThePathToDevMode": {
-    "description": "Shown when user tapped 4 times on app logo"
+    "description": "Kullanıcı uygulama logosuna 4 kez dokunduğunda gösterilir"
   },
-  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{You're almost there, only 1 click remaining...} other{You're almost there, only {remainingClicks} clicks remaining...}}",
+  "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Neredeyse ulaştın, sadece 1 tıklama kaldı...} other{Neredeyse ulaştın, sadece {remainingClicks} tıklama kaldı...}}",
   "@onThePathToDevModeClicksRemaining": {
     "placeholders": {
       "remainingClicks": {}
     },
-    "description": "Shown when user is about to become a developer, part 2"
+    "description": "Kullanıcı geliştirici olmak üzereyken gösterilir, 2. bölüm"
   },
   "devTestToast": "Test toast",
-  "devAnimationsSlowMo": "Slow down animations",
-  "quitDevMode": "Quit the developer mode",
-  "quitDevModeDescription": "Stop being a developer?",
-  "settings": "Settings",
-  "general": "General",
-  "theme": "Theme",
-  "settingLightMode": "Light mode",
-  "searchHistory": "Search history",
-  "searchHistoryPlaceholder": "Your search history will be displayed here",
-  "searchNothingFound": "Nothing found",
-  "searchHistoryRemoveEntryDescription": "Are you sure you want to remove {searchText} from your search history?",
+  "devAnimationsSlowMo": "Animasyonları yavaşlat",
+  "quitDevMode": "Geliştirici modundan çık",
+  "quitDevModeDescription": "Geliştirici olmayı bırak?",
+  "settings": "Ayarlar",
+  "general": "Genel",
+  "theme": "Tema",
+  "settingLightMode": "Açık mod",
+  "searchHistory": "Arama geçmişi",
+  "searchHistoryPlaceholder": "Arama geçmişiniz burada görüntülenecek",
+  "searchNothingFound": "Hiçbir şey bulunamadı",
+  "searchHistoryRemoveEntryDescription": "{searchText}'i arama geçmişinizden kaldırmak istediğinizden emin misiniz?",
   "@searchHistoryRemoveEntryDescription": {
     "placeholders": {
       "searchText": {
         "type": "String",
-        "example": "Query"
+        "example": "Sorgu"
       }
     },
     "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
   },
-  "searchClearHistory": "Clear search history?",
-  "oopsErrorOccurred": "😮 Oops! An error occurred",
-  "errorDetails": "Error details",
-  "deletionError": "Deletion error",
-  "playlistDoesNotExistError": "Can't find the playlist, perhaps it was deleted",
-  "playbackError": "An error occurred during the playback",
-  "openAppSettingsError": "Error opening the app settings",
-  "confirmExitingWithBackButtonSetting": "Confirm exiting with back button",
-  "useMediaStoreForFavoriteSongsSetting": "Use Android system for favorite tracks",
-  "warning": "Warning",
-  "close": "Close",
-  "accept": "Accept",
-  "cancel": "Cancel",
-  "copied": "Copied",
-  "gitHubRepo": "GitHub repo",
-  "defaultValue": "Default",
-  "playerInterfaceColorStyle": "Player color theme",
-  "playerInterfaceColorStyleArtColor": "Based on track art",
-  "playerInterfaceColorStyleThemeBackgroundColor": "Theme background color",
-  "resolveConflict": "Resolve conflict",
-  "conflictExplanation": "The system has different favorites than Sweyer, please select which ones should remain marked as favorites. Only the conflicting tracks are shown.",
-  "debugTextScaleFactor": "Text scale factor",
-  "debugShowDebugOverlay": "Show debug overlay",
-  "debugShowPerformanceOverlay": "Show performance overlay",
-  "debugShowCheckerboardRasterCacheImages": "Show checkerboard raster cache images",
-  "debugShowSemanticsDebugger": "Show semantics debugger"
+  "searchClearHistory": "Arama geçmişini temizle?",
+  "oopsErrorOccurred": "😮 Oops! Bir hata ortaya çıktı!",
+  "errorDetails": "Hata detayları",
+  "deletionError": "Silme hatası",
+  "playlistDoesNotExistError": "Oynatma listesi bulunamıyor, silinmiş olabilir",
+  "playbackError": "Oynatma sırasında bir hata oluştu",
+  "openAppSettingsError": "Uygulama ayarları açılırken hata oluştu",
+  "confirmExitingWithBackButtonSetting": "Çıkmayı geri düğmesiyle onaylayın",
+  "useMediaStoreForFavoriteSongsSetting": "Favori parçalar için Android sistemini kullan",
+  "warning": "Uyarı",
+  "close": "Kapat",
+  "accept": "Kabul et",
+  "cancel": "İptal et",
+  "copied": "Kopyalandı",
+  "gitHubRepo": "GitHub deposu",
+  "defaultValue": "Varsayılan",
+  "playerInterfaceColorStyle": "Oynatıcı renk teması",
+  "playerInterfaceColorStyleArtColor": "Parça sanatı temelli",
+  "playerInterfaceColorStyleThemeBackgroundColor": "Tema arka plan rengi",
+  "resolveConflict": "Çatışmayı çözmek",
+  "conflictExplanation": "Sistemin Sweyer'den farklı favorileri var, lütfen hangilerinin favori olarak işaretlenmesi gerektiğini seçin. Yalnızca çakışan izler gösterilir.",
+  "debugTextScaleFactor": "Metin ölçeği faktörü",
+  "debugShowDebugOverlay": "Hata ayıklama bölümünü göster",
+  "debugShowPerformanceOverlay": "Performans bölümünü göster",
+  "debugShowCheckerboardRasterCacheImages": "Dama tahtası tarama önbelleği fotoğraflarını göster",
+  "debugShowSemanticsDebugger": "Anlambilim hata ayıklayıcısını göster"
 }
