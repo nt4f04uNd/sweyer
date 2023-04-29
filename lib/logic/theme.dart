@@ -152,7 +152,6 @@ class ThemeControl {
           constants.Theme.app.light.systemUiThemeExtension,
         ],
         primaryColor: color,
-        toggleableActiveColor: color,
         colorScheme: constants.Theme.app.light.colorScheme.copyWith(
           primary: color,
           onSecondary: color,
@@ -171,6 +170,20 @@ class ThemeControl {
           selectionColor: color,
           selectionHandleColor: color,
         ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color : null),
+          trackColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color.withAlpha(0x80) : null),
+        ),
+        radioTheme: RadioThemeData(
+          fillColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color : null),
+        ),
+        checkboxTheme: CheckboxThemeData(
+          fillColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color : null),
+        ),
       ),
       dark: constants.Theme.app.dark.copyWith(
         extensions: [
@@ -183,7 +196,6 @@ class ThemeControl {
         // In dark mode I also have splashColor set to be primary
         splashColor: color,
         primaryColor: color,
-        toggleableActiveColor: color,
         colorScheme: constants.Theme.app.dark.colorScheme.copyWith(
           primary: color,
         ),
@@ -199,6 +211,20 @@ class ThemeControl {
           cursorColor: color,
           selectionColor: color,
           selectionHandleColor: color,
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color : null),
+          trackColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color.withAlpha(0x80) : null),
+        ),
+        radioTheme: RadioThemeData(
+          fillColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color : null),
+        ),
+        checkboxTheme: CheckboxThemeData(
+          fillColor: MaterialStateProperty.resolveWith(
+                  (states) => states.contains(MaterialState.selected) ? color : null),
         ),
       ),
     );

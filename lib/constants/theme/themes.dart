@@ -21,11 +21,9 @@ abstract class Theme {
       fontFamily: 'Manrope',
       brightness: Brightness.light,
       //****************** Colors **********************
-      backgroundColor: Colors.white,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade400,
       unselectedWidgetColor: Colors.grey.shade400,
-      toggleableActiveColor: defaultPrimaryColor,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: const ColorScheme(
@@ -90,33 +88,33 @@ abstract class Theme {
       ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        button: TextStyle(fontWeight: FontWeight.w600),
-        headline1: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline2: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline3: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline4: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
-        headline5: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600),
+        displayLarge: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        displayMedium: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        displaySmall: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headlineMedium: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headlineSmall: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // Title in song tiles
-        headline6: TextStyle(
+        titleLarge: TextStyle(
           fontWeight: FontWeight.w700,
           color: AppColors.greyText,
           fontSize: 15.0,
         ),
-        subtitle1: TextStyle(
+        titleMedium: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.grey,
         ),
         // Artist widget
-        subtitle2: TextStyle(
+        titleSmall: TextStyle(
           fontWeight: FontWeight.w600,
           color: Colors.black54,
           fontSize: 13.5,
           height: 1,
         ),
-        bodyText1: TextStyle(fontWeight: FontWeight.w700),
-        bodyText2: TextStyle(fontWeight: FontWeight.w600),
-        overline: TextStyle(fontWeight: FontWeight.w600),
-        caption: TextStyle(fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(fontWeight: FontWeight.w700),
+        bodyMedium: TextStyle(fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(fontWeight: FontWeight.w600),
+        bodySmall: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
         elevation: 2.0,
@@ -139,6 +137,20 @@ abstract class Theme {
         ),
         backgroundColor: Colors.white,
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith(
+            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+        trackColor: MaterialStateProperty.resolveWith(
+            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: MaterialStateProperty.resolveWith(
+            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: MaterialStateProperty.resolveWith(
+            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+      ),
     ),
     dark: ThemeData(
       extensions: [
@@ -149,11 +161,9 @@ abstract class Theme {
       fontFamily: 'Manrope',
       brightness: Brightness.dark,
       //****************** Colors **********************
-      backgroundColor: Colors.black,
       primaryColor: defaultPrimaryColor,
       disabledColor: Colors.grey.shade800,
       unselectedWidgetColor: Colors.grey.shade800,
-      toggleableActiveColor: defaultPrimaryColor,
 
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: const ColorScheme(
@@ -202,33 +212,33 @@ abstract class Theme {
       ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        button: TextStyle(fontWeight: FontWeight.w600),
-        headline1: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-        headline2: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-        headline3: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-        headline4: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-        headline5: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600),
+        displayLarge: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        displayMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        displaySmall: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headlineMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headlineSmall: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         // Title in song tiles
-        headline6: TextStyle(
+        titleLarge: TextStyle(
           fontWeight: FontWeight.w700,
           color: Colors.white,
           fontSize: 15.0,
         ),
-        subtitle1: TextStyle(
+        titleMedium: TextStyle(
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
         // Artist widget
-        subtitle2: TextStyle(
+        titleSmall: TextStyle(
           fontWeight: FontWeight.w600,
           color: Colors.white70,
           fontSize: 13.5,
           height: 1,
         ),
-        bodyText1: TextStyle(fontWeight: FontWeight.w700),
-        bodyText2: TextStyle(fontWeight: FontWeight.w600),
-        overline: TextStyle(fontWeight: FontWeight.w600),
-        caption: TextStyle(fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(fontWeight: FontWeight.w700),
+        bodyMedium: TextStyle(fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(fontWeight: FontWeight.w600),
+        bodySmall: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
         color: AppColors.grey,
@@ -251,6 +261,20 @@ abstract class Theme {
         ),
         backgroundColor: Color(0xff070707),
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith(
+                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+        trackColor: MaterialStateProperty.resolveWith(
+                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: MaterialStateProperty.resolveWith(
+                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: MaterialStateProperty.resolveWith(
+                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+      ),
     ),
   );
 }
@@ -258,6 +282,7 @@ abstract class Theme {
 /// Class to wrap some values, so they will have [light] and [dark] variants.
 class ThemeContainer<T> {
   const ThemeContainer({required this.light, required this.dark});
+
   final T light;
   final T dark;
 
