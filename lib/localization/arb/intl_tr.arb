@@ -168,7 +168,7 @@
     "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "delete": "Sil",
-  "deleteTracks": "{count, plural, =1{Delete track} other{Delete {count} tracks}}",
+  "deleteTracks": "{count, plural, =1{Parçayı sil} other{{count} parçayı sil}}",
   "@deleteTracks": {
     "placeholders": {
       "count": {}
@@ -185,13 +185,13 @@
     },
     "description": Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "deletePlaylists": "{count, plural, =1{Delete playlist} other{Delete {count} playlists}}",
+  "deletePlaylists": "{count, plural, =1{Oynatma listesini sil} other{{count} oynatma listesini silin}}",
   "@deletePlaylists": {
     "placeholders": {
       "count": {}
     }
   },
-  "deletePlaylistsConfirmation": "{count, plural, =1{Are you sure you want to delete {title}?} other{Are you sure you want to delete selected playlists?}}",
+  "deletePlaylistsConfirmation": "{count, plural, =1{{title}: silmek istediğinize emin misiniz?} other{Seçili oynatma listelerini silmek istediğinize emin misiniz?}}",
   "@deletePlaylistsConfirmation": {
     "placeholders": {
       "count": {},
