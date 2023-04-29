@@ -17,7 +17,6 @@ class _SelectionRouteState extends State<SelectionRoute> {
   late final HomeRouter nestedHomeRouter = HomeRouter.selection(widget.selectionArguments);
   late final ContentSelectionController controller;
   late ChildBackButtonDispatcher _backButtonDispatcher;
-  bool settingsOpened = false;
 
   @override
   void didChangeDependencies() {
@@ -29,6 +28,7 @@ class _SelectionRouteState extends State<SelectionRoute> {
   @override
   void initState() {
     super.initState();
+    var settingsOpened = false;
     controller = ContentSelectionController.createAlwaysInSelection(
       context: context,
       actionsBuilder: (context) {
@@ -36,31 +36,33 @@ class _SelectionRouteState extends State<SelectionRoute> {
         final settingsPageBuilder = widget.selectionArguments.settingsPageBuilder;
         return [
           if (settingsPageBuilder != null)
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 240),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: settingsOpened
-                  ? const SizedBox.shrink()
-                  : NFIconButton(
-                      icon: const Icon(Icons.settings_rounded),
-                      onPressed: () async {
-                        if (!settingsOpened) {
-                          setState(() {
-                            settingsOpened = true;
-                          });
-                          await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
-                            child: Builder(builder: (context) => settingsPageBuilder(context)),
-                            transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
-                          ));
-                          if (mounted) {
+            StatefulBuilder(
+              builder: (context, setState) => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 240),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: settingsOpened
+                    ? const SizedBox.shrink()
+                    : NFIconButton(
+                        icon: const Icon(Icons.settings_rounded),
+                        onPressed: () async {
+                          if (!settingsOpened) {
                             setState(() {
-                              settingsOpened = false;
+                              settingsOpened = true;
                             });
+                            await nestedHomeRouter.navigatorKey.currentState!.push(StackFadeRouteTransition(
+                              child: Builder(builder: (context) => settingsPageBuilder(context)),
+                              transitionSettings: AppRouter.instance.transitionSettings.greyDismissible,
+                            ));
+                            if (mounted) {
+                              setState(() {
+                                settingsOpened = false;
+                              });
+                            }
                           }
-                        }
-                      },
-                    ),
+                        },
+                      ),
+              ),
             ),
           const SizedBox(width: 6.0),
           AnimatedBuilder(
