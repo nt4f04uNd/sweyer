@@ -23,7 +23,7 @@
   },
   "track": "Parça",
   "tracks": "Parçalar",
-  "tracksPlural": "{count, plural, =1{{count} parça} other{{count} parçalar}}",
+  "tracksPlural": "{count, plural, =1{{count} parça} other{{count} adet parça}}",
   "@tracksPlural": {
     "placeholders": {
       "count": {}
@@ -41,7 +41,7 @@
     "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "albums": "Albümler",
-  "albumsPlural": "{count, plural, =1{{count} albüm} other{{count} albümler}}",
+  "albumsPlural": "{count, plural, =1{{count} albüm} other{{count} adet albüm}}",
   "@albumsPlural": {
     "placeholders": {
       "count": {}
@@ -59,7 +59,7 @@
     "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "playlists": "Oynatma listeleri",
-  "playlistsPlural": "{count, plural, =1{{count} oynatma listesj} other{{count} oynatma listeleri}}",
+  "playlistsPlural": "{count, plural, =1{{count} oynatma listesj} other{{count} adet oynatma listesi}}",
   "@playlistsPlural": {
     "placeholders": {
       "count": {}
@@ -77,7 +77,7 @@
     "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "artists": "Sanatçılar",
-  "artistsPlural": "{count, plural, =1{{count} sanatçı} other{{count} sanatçılar}}",
+  "artistsPlural": "{count, plural, =1{{count} sanatçı} other{{count} adet sanatçı}}",
   "@artistsPlural": {
     "placeholders": {
       "count": {}
@@ -150,13 +150,13 @@
     "description": "Çalma listesi ekranındaki + düğmesinin başlığı"
   },
   "remove": "Kaldır",
-  "removeTracks": "{count, plural, =1{Remove track} other{Remove {count} tracks}}",
+  "removeTracks": "{count, plural, =1{Parçayı kaldır} other{{count} adet parçayı kaldır}}",
   "@removeTracks": {
     "placeholders": {
       "count": {}
     }
   },
-  "removeTracksConfirmation": "{count, plural, =1{{title}'ı Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
+  "removeTracksConfirmation": "{count, plural, =1{{title}: Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
   "@removeTracksConfirmation": {
     "placeholders": {
       "count": {},
@@ -168,13 +168,13 @@
     "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "delete": "Sil",
-  "deleteTracks": "{count, plural, =1{Parçayı sil} other{{count} parçayı sil}}",
+  "deleteTracks": "{count, plural, =1{Parçayı sil} other{{count} adet parçayı sil}}",
   "@deleteTracks": {
     "placeholders": {
       "count": {}
     }
   },
-  "deleteTracksConfirmation": "{count, plural, =1{title}'ı Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
+  "deleteTracksConfirmation": "{count, plural, =1{title}: Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
   "@deleteTracksConfirmation": {
     "placeholders": {
       "count": {},
@@ -185,7 +185,7 @@
     },
     "description": Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
-  "deletePlaylists": "{count, plural, =1{Oynatma listesini sil} other{{count} oynatma listesini silin}}",
+  "deletePlaylists": "{count, plural, =1{Oynatma listesini sil} other{{count} adet oynatma listesini silin}}",
   "@deletePlaylists": {
     "placeholders": {
       "count": {}
