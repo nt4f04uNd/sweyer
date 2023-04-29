@@ -202,12 +202,12 @@ class _FooterState extends State<_Footer> {
                       appName,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: theme.textTheme.headline6!.color,
+                        color: theme.textTheme.titleLarge!.color,
                       ),
                     ),
                     Text(
                       'Copyright (c) 2019, nt4f04uNd',
-                      style: Theme.of(context).textTheme.caption!.copyWith(height: 1.0),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(height: 1.0),
                     ),
                   ],
                 ),

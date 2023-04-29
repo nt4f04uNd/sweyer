@@ -173,6 +173,7 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
             onSurface: Colors.white,
             secondary: _shadeForSecondaryColor(backgroundColor),
             onBackground: Colors.white,
+            background: backgroundColor,
           ),
           appBarTheme: theme.appBarTheme.copyWith(
             color: _shadeForSecondaryColor(backgroundColor),
@@ -193,7 +194,6 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
           iconTheme: const IconThemeData(
             color: Colors.white,
           ),
-          backgroundColor: backgroundColor,
           splashColor: constants.Theme.lightThemeSplashColor,
           disabledColor: Colors.grey.shade400,
           unselectedWidgetColor: Colors.grey.shade400,

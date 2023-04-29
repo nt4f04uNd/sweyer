@@ -24,6 +24,6 @@ class DeviceInfoControl extends Control {
   Future<void> init() async {
     super.init();
     final androidInfo = await DeviceInfoPlugin().androidInfo;
-    _sdkInt = androidInfo.version.sdkInt!;
+    _sdkInt = androidInfo.version.sdkInt;
   }
 }

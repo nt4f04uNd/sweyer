@@ -13,7 +13,7 @@ const _subtitleTopPadding = 4.0;
 const _subtitleBottomPadding = 3.0;
 
 /// The [TextStyle] used for the title text from the [theme].
-TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.titleLarge;
 TextStyle? _subtitleTheme(ThemeData theme) => ArtistWidget.defaultTextStyle(theme);
 
 double kSongTileHeight(BuildContext context) => _calculateSongTileHeight(context);

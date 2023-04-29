@@ -215,11 +215,11 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                             splashColor: selected ? selectedSplashColor : theme.splashColor,
                             textTheme: theme.textTheme.copyWith(
                               // Title
-                              headline6: theme.textTheme.headline6?.copyWith(
+                              titleLarge: theme.textTheme.titleLarge?.copyWith(
                                 color: selected ? theme.colorScheme.onPrimary : null,
                               ),
                               // Subtitle
-                              subtitle2: theme.textTheme.subtitle2?.copyWith(
+                              titleSmall: theme.textTheme.titleSmall?.copyWith(
                                 color: selected ? theme.colorScheme.onPrimary : null,
                               ),
                             )),
@@ -465,7 +465,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                   ContentUtils.bulkDuration(songs),
                                 ]),
                                 style: TextStyle(
-                                  color: theme.textTheme.subtitle2!.color,
+                                  color: theme.textTheme.titleSmall!.color,
                                   height: 1.2,
                                   fontWeight: FontWeight.w900,
                                   fontSize: 14.0,

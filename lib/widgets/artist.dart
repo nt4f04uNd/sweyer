@@ -19,7 +19,7 @@ class ArtistWidget extends StatelessWidget {
   final TextStyle? textStyle;
 
   /// The default [TextStyle] used for text in this widget from the [theme].
-  static TextStyle? defaultTextStyle(ThemeData theme) => theme.textTheme.subtitle2;
+  static TextStyle? defaultTextStyle(ThemeData theme) => theme.textTheme.titleSmall;
 
   @override
   Widget build(BuildContext context) {

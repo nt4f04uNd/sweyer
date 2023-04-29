@@ -310,7 +310,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
-              fontFamily: theme.textTheme.headline1!.fontFamily,
+              fontFamily: theme.textTheme.displayLarge!.fontFamily,
               fontWeight: widget.fontWeight,
               fontSize: widget.fontSize,
             )),
@@ -336,7 +336,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
             splashFactory: NFListTileInkRipple.splashFactory,
             shadowColor: MaterialStateProperty.all(Colors.transparent),
             textStyle: MaterialStateProperty.all(TextStyle(
-              fontFamily: theme.textTheme.headline1!.fontFamily,
+              fontFamily: theme.textTheme.displayLarge!.fontFamily,
               fontWeight: widget.fontWeight,
               fontSize: widget.fontSize,
             )),

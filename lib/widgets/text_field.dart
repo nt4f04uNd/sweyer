@@ -44,7 +44,7 @@ class _AppTextFieldState extends State<AppTextField> {
       selectionControls: NFTextSelectionControls(),
       controller: widget.controller,
       autofocus: widget.autofocus,
-      style: theme.textTheme.headline6?.merge(widget.textStyle) ?? widget.textStyle,
+      style: theme.textTheme.titleLarge?.merge(widget.textStyle) ?? widget.textStyle,
       minLines: 1,
       maxLines: widget.maxLines,
       onSubmitted: widget.onSubmit,

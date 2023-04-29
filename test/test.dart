@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 export 'package:sweyer/sweyer.dart';
 export 'package:flutter/foundation.dart';

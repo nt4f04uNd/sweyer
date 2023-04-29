@@ -5,7 +5,7 @@ TextStyle appBarTitleTextStyle(BuildContext context) {
   final theme = Theme.of(context);
   return TextStyle(
     fontWeight: FontWeight.w700,
-    color: theme.textTheme.headline6!.color,
+    color: theme.textTheme.titleLarge!.color,
     fontSize: 22.0,
     fontFamily: 'Roboto',
   );

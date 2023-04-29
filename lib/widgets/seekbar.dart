@@ -154,7 +154,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
         style: TextStyle(
           fontSize: 12.0,
           fontWeight: FontWeight.w700,
-          color: theme.textTheme.headline6!.color,
+          color: theme.textTheme.titleLarge!.color,
         ),
       ),
     );
@@ -167,7 +167,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
         style: TextStyle(
           fontSize: 12.0,
           fontWeight: FontWeight.w700,
-          color: theme.textTheme.headline6!.color,
+          color: theme.textTheme.titleLarge!.color,
         ),
       ),
     );

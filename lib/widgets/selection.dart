@@ -951,7 +951,7 @@ class SelectionActionsBar extends StatelessWidget {
                           child: HookBuilder(builder: (context) {
                             final scrollController = useScrollController();
                             return AppScrollbar(
-                              isAlwaysShown: true,
+                              thumbVisibility: true,
                               controller: scrollController,
                               child: ScrollConfiguration(
                                 behavior: const GlowlessScrollBehavior(),
