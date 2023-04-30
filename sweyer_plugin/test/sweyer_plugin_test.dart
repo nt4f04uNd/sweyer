@@ -117,7 +117,7 @@ void main() {
     expect(initialPlatform, isInstanceOf<MethodChannelSweyerPlugin>());
   });
 
-  test('getPlatformVersion', () async {
+  test('isIntentActionView', () async {
     MockSweyerPluginPlatform fakePlatform = MockSweyerPluginPlatform();
     SweyerPluginPlatform.instance = fakePlatform;
 

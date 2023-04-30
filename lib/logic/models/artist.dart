@@ -2,7 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Artist extends SongOrigin with MediaStoreArtist {
+class Artist extends SongOrigin with PlatformArtist {
   @override
   ContentType get type => ContentType.artist;
 

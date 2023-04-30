@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // MethodChannelSweyerPlugin platform = MethodChannelSweyerPlugin();
   const MethodChannel channel = MethodChannel('sweyer_plugin');
 
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +15,4 @@ void main() {
   tearDown(() {
     channel.setMockMethodCallHandler(null);
   });
-
-  // test('getPlatformVersion', () async {
-  //   expect(await platform.getPlatformVersion(), '42');
-  // });
 }
