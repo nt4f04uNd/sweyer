@@ -132,8 +132,10 @@ class _AppScrollbarState extends State<AppScrollbar> {
             setState(() {
               showScrollLabels = windowSize != null &&
                   dragPosition != null &&
-                  dragPosition.dx > windowSize.width - scrollLabelDragAreaWidth &&
-                  dragPosition.dx <= windowSize.width;
+                  (Directionality.of(context) == TextDirection.rtl
+                      ? (dragPosition.dx < scrollLabelDragAreaWidth && dragPosition.dx >= 0)
+                      : (dragPosition.dx > windowSize.width - scrollLabelDragAreaWidth &&
+                          dragPosition.dx <= windowSize.width));
             });
             return false;
           },
