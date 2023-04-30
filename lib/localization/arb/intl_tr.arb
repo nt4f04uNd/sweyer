@@ -156,7 +156,7 @@
       "count": {}
     }
   },
-  "removeTracksConfirmation": "{count, plural, =1{{title}: Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
+  "removeTracksConfirmation": "{count, plural, =1{Kaldırmak istediğine emin misin {title}?} other{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
   "@removeTracksConfirmation": {
     "placeholders": {
       "count": {},
@@ -174,7 +174,7 @@
       "count": {}
     }
   },
-  "deleteTracksConfirmation": "{count, plural, =1{title}: Kaldırmak istediğine emin misin?} diğeri{Seçili parçaları kaldırmak istediğinizden emin misiniz?}}",
+  "deleteTracksConfirmation": "{count, plural, =1{Silmek istediğine emin misin {title}?} other{Seçili parçaları silmek istediğinizden emin misiniz?}}",
   "@deleteTracksConfirmation": {
     "placeholders": {
       "count": {},
@@ -191,7 +191,7 @@
       "count": {}
     }
   },
-  "deletePlaylistsConfirmation": "{count, plural, =1{{title}: silmek istediğinize emin misiniz?} other{Seçili oynatma listelerini silmek istediğinize emin misiniz?}}",
+  "deletePlaylistsConfirmation": "{count, plural, =1{Silmek istediğinize emin misiniz {title}?} other{Seçili oynatma listelerini silmek istediğinize emin misiniz?}}",
   "@deletePlaylistsConfirmation": {
     "placeholders": {
       "count": {},
