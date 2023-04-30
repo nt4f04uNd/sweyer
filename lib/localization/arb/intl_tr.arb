@@ -30,11 +30,11 @@
     }
   },
   "album": "Albüm",
-  "albumQueue": "Albüm {name}",
+  "albumQueue": "Albüm: {name}",
   "@albumQueue": {
     "placeholders": {
       "name": {
-        "type": "String",
+        "type": "Dizi",
         "example": "Albüm adı"
       }
     },
@@ -48,11 +48,11 @@
     }
   },
   "playlist": "Oynatma listesi",
-  "playlistQueue": "Oynatma listesi {name}",
+  "playlistQueue": "Oynatma listesi: {name}",
   "@playlistQueue": {
     "placeholders": {
       "name": {
-        "type": "String",
+        "type": "Dizi",
         "example": "Oynatma listesinin adı"
       }
     },
@@ -66,11 +66,11 @@
     }
   },
   "artist": "Sanatçı",
-  "artistQueue": "Sanatçı {name}",
+  "artistQueue": "Sanatçı: {name}",
   "@artistQueue": {
     "placeholders": {
       "name": {
-        "type": "String",
+        "type": "Dizi",
         "example": "Sanatçı adı"
       }
     },
@@ -161,7 +161,7 @@
     "placeholders": {
       "count": {},
       "title": {
-        "type": "String?",
+        "type": "Dizi?",
         "example": "Parça adı"
       }
     },
@@ -179,7 +179,7 @@
     "placeholders": {
       "count": {},
       "title": {
-        "type": "String?",
+        "type": "Dizi?",
         "example": "Parça adı"
       }
     },
@@ -196,7 +196,7 @@
     "placeholders": {
       "count": {},
       "title": {
-        "type": "String?",
+        "type": "Dizi?",
         "example": "Oynatma listesi adı"
       }
     },
@@ -217,8 +217,8 @@
   "@foundByQuery": {
     "placeholders": {
       "query": {
-        "type": "String",
-        "example": "\"Search text\""
+        "type": "Dizi",
+        "example": "\"Metin ara\""
       }
     },
     "description": "Uyarı: Bu karakterlerin xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
@@ -229,11 +229,11 @@
   "searchingForTracks": "Parçalar aranıyor...",
   "allowAccessToExternalStorage": "Lütfen depolama alanına erişime izin verin",
   "allowAccessToExternalStorageManually": "Depolamaya manuel olarak erişime izin ver",
-  "selected": "Selected {counter}",
+  "selected": "Seçili {counter}",
   "@selected": {
     "placeholders": {
       "counter": {
-        "type": "String",
+        "type": "Dizi",
         "example": "1"
       }
     }
@@ -275,7 +275,7 @@
     },
     "description": "Kullanıcı geliştirici olmak üzereyken gösterilir, 2. bölüm"
   },
-  "devTestToast": "Test toast",
+  "devTestToast": "Test toastu",
   "devAnimationsSlowMo": "Animasyonları yavaşlat",
   "quitDevMode": "Geliştirici modundan çık",
   "quitDevModeDescription": "Geliştirici olmayı bırak?",
@@ -290,11 +290,11 @@
   "@searchHistoryRemoveEntryDescription": {
     "placeholders": {
       "searchText": {
-        "type": "String",
+        "type": "Dizi",
         "example": "Sorgu"
       }
     },
-    "description": "The searchText is the history entry to delete. Warning: These characters need to be xml escaped in the singular version: All quotes and &<>"
+    "description": "searchText, silinecek geçmiş girişidir. Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "searchClearHistory": "Arama geçmişini temizle?",
   "oopsErrorOccurred": "😮 Oops! Bir hata ortaya çıktı!",
