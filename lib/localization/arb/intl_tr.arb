@@ -30,11 +30,11 @@
     }
   },
   "album": "Albüm",
-  "albumQueue": "Albüm: {name}",
+  "albumQueue": "Albüm {name}",
   "@albumQueue": {
     "placeholders": {
       "name": {
-        "type": "Dizi",
+        "type": "String",
         "example": "Albüm adı"
       }
     },
@@ -48,11 +48,11 @@
     }
   },
   "playlist": "Oynatma listesi",
-  "playlistQueue": "Oynatma listesi: {name}",
+  "playlistQueue": "Oynatma listesi {name}",
   "@playlistQueue": {
     "placeholders": {
       "name": {
-        "type": "Dizi",
+        "type": "String",
         "example": "Oynatma listesinin adı"
       }
     },
@@ -66,11 +66,11 @@
     }
   },
   "artist": "Sanatçı",
-  "artistQueue": "Sanatçı: {name}",
+  "artistQueue": "Sanatçı {name}",
   "@artistQueue": {
     "placeholders": {
       "name": {
-        "type": "Dizi",
+        "type": "String",
         "example": "Sanatçı adı"
       }
     },
@@ -161,7 +161,7 @@
     "placeholders": {
       "count": {},
       "title": {
-        "type": "Dizi?",
+        "type": "String?",
         "example": "Parça adı"
       }
     },
@@ -179,7 +179,7 @@
     "placeholders": {
       "count": {},
       "title": {
-        "type": "Dizi?",
+        "type": "String?",
         "example": "Parça adı"
       }
     },
@@ -196,7 +196,7 @@
     "placeholders": {
       "count": {},
       "title": {
-        "type": "Dizi?",
+        "type": "String?",
         "example": "Oynatma listesi adı"
       }
     },
@@ -213,11 +213,11 @@
   "@editMetadata": {
     "description": "TODO: currently unused"
   },
-  "foundByQuery": "Sorguya göre bulundu: {query}",
+  "foundByQuery": "Sorguya göre bulundu {query}",
   "@foundByQuery": {
     "placeholders": {
       "query": {
-        "type": "Dizi",
+        "type": "String",
         "example": "\"Metin ara\""
       }
     },
@@ -233,7 +233,7 @@
   "@selected": {
     "placeholders": {
       "counter": {
-        "type": "Dizi",
+        "type": "String",
         "example": "1"
       }
     }
@@ -290,7 +290,7 @@
   "@searchHistoryRemoveEntryDescription": {
     "placeholders": {
       "searchText": {
-        "type": "Dizi",
+        "type": "String",
         "example": "Sorgu"
       }
     },
