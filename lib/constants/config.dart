@@ -7,6 +7,7 @@ abstract class Config {
     Locale('en', 'US'),
     Locale('ru', 'RU'),
     Locale('de', 'DE'),
+    Locale('tr', 'TR'),
   ];
   static const int searchHistoryLength = 30;
 

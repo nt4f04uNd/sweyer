@@ -1,4 +1,9 @@
 [@Abestanis]: https://github.com/Abestanis
+[@ernince]: https://github.com/ernince
+
+## 1.0.10
+
+- [Added Turkish language support](https://github.com/nt4f04uNd/sweyer/pull/86) **([@ernince])**
 
 ## 1.0.9
 
