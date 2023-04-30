@@ -183,7 +183,7 @@
         "example": "Parça adı"
       }
     },
-    "description": Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
+    "description": "Uyarı: Bu karakterlerin tekil sürümde xml çıkışlı olması gerekir: Tüm tırnak işaretleri ve &<>"
   },
   "deletePlaylists": "{count, plural, =1{Oynatma listesini sil} other{{count} adet oynatma listesini silin}}",
   "@deletePlaylists": {
