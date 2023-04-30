@@ -3,7 +3,7 @@ import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Album extends PersistentQueue with PlatformAlbum {
+class Album extends PersistentQueue implements PlatformAlbum {
   @override
   ContentType get type => ContentType.album;
   final String album;

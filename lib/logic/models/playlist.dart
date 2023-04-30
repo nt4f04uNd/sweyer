@@ -2,7 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Playlist extends PersistentQueue with DuplicatingSongOriginMixin, PlatformPlaylist {
+class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implements PlatformPlaylist {
   @override
   ContentType get type => ContentType.playlist;
   final String filesystemPath;

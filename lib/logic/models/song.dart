@@ -5,7 +5,7 @@ import 'package:sweyer_plugin/sweyer_plugin.dart';
 /// Represents a song.
 ///
 /// Songs are always playable, trashed or pending songs on Android Q are excluded.
-class Song extends Content with PlatformSong {
+class Song extends Content implements PlatformSong {
   @override
   ContentType get type => ContentType.song;
 
