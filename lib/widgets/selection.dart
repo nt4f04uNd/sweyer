@@ -1627,7 +1627,12 @@ class _GoToArtistSelectionAction extends StatelessWidget {
     if (content is Song) {
       HomeRouter.instance.goto(HomeRoutes.factory.content(content.getArtist()));
     } else if (content is Album) {
-      HomeRouter.instance.goto(HomeRoutes.factory.content(content.getArtist()));
+      final artist = content.getArtist();
+      if (artist != null) {
+        HomeRouter.instance.goto(HomeRoutes.factory.content(artist));
+      } else {
+        ShowFunctions.instance.showToast(msg: getl10n(controller.context).artistUnknown);
+      }
     } else {
       throw UnimplementedError();
     }
