@@ -383,7 +383,7 @@ class ContentControl extends Control {
     }
     switch (contentType) {
       case ContentType.song:
-        state.allSongs.setSongs((await SweyerPlugin.retrieveSongs(Song.fromMap)).toList());
+        state.allSongs.setSongs((await SweyerPlugin.instance.retrieveSongs(Song.fromMap)).toList());
         if (_empty) {
           dispose();
           return;
@@ -394,7 +394,7 @@ class ContentControl extends Control {
         }
         break;
       case ContentType.album:
-        state.albums = await SweyerPlugin.retrieveAlbums(Album.fromMap);
+        state.albums = await SweyerPlugin.instance.retrieveAlbums(Album.fromMap);
         if (disposed.value) {
           return;
         }
@@ -405,7 +405,7 @@ class ContentControl extends Control {
         sort(emitChangeEvent: false, contentType: contentType);
         break;
       case ContentType.playlist:
-        state.playlists = (await SweyerPlugin.retrievePlaylists(Playlist.fromMap)).toList();
+        state.playlists = (await SweyerPlugin.instance.retrievePlaylists(Playlist.fromMap)).toList();
         if (disposed.value) {
           return;
         }
@@ -416,7 +416,7 @@ class ContentControl extends Control {
         sort(emitChangeEvent: false, contentType: contentType);
         break;
       case ContentType.artist:
-        state.artists = (await SweyerPlugin.retrieveArtists(Artist.fromMap)).toList();
+        state.artists = (await SweyerPlugin.instance.retrieveArtists(Artist.fromMap)).toList();
         if (disposed.value) {
           return;
         }
@@ -605,7 +605,7 @@ class ContentControl extends Control {
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
     if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       try {
-        final result = await SweyerPlugin.setSongsFavorite(songs, value);
+        final result = await SweyerPlugin.instance.setSongsFavorite(songs, value);
         if (result) {
           await refetch(ContentType.song);
         }
@@ -646,7 +646,7 @@ class ContentControl extends Control {
     }
 
     try {
-      final result = await SweyerPlugin.deleteSongs(songs);
+      final result = await SweyerPlugin.instance.deleteSongs(songs);
       await refetchAll();
       if (DeviceInfoControl.instance.useScopedStorageForFileModifications && result) {
         _removeFromState();
@@ -726,7 +726,7 @@ class ContentControl extends Control {
   /// Creates a playlist with a given name and returns a corrected with [correctPlaylistName] name.
   Future<String> createPlaylist(String name) async {
     name = await correctPlaylistName(name);
-    await SweyerPlugin.createPlaylist(name);
+    await SweyerPlugin.instance.createPlaylist(name);
     await refetchSongsAndPlaylists();
     return name;
   }
@@ -737,7 +737,7 @@ class ContentControl extends Control {
   Future<String?> renamePlaylist(Playlist playlist, String name) async {
     try {
       name = await correctPlaylistName(name);
-      await SweyerPlugin.renamePlaylist(playlist, name);
+      await SweyerPlugin.instance.renamePlaylist(playlist, name);
       await refetchSongsAndPlaylists();
       return name;
     } on PlaylistNotExistException catch (_) {
@@ -751,7 +751,7 @@ class ContentControl extends Control {
     required List<Song> songs,
     required Playlist playlist,
   }) async {
-    await SweyerPlugin.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
+    await SweyerPlugin.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
@@ -763,7 +763,7 @@ class ContentControl extends Control {
     bool emitChangeEvent = true,
   }) async {
     if (from != to) {
-      await SweyerPlugin.moveSongInPlaylist(playlist: playlist, from: from, to: to);
+      await SweyerPlugin.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
       if (emitChangeEvent) {
         await refetchSongsAndPlaylists();
       }
@@ -775,14 +775,14 @@ class ContentControl extends Control {
     required List<int> indexes,
     required Playlist playlist,
   }) async {
-    await SweyerPlugin.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
+    await SweyerPlugin.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Deletes playlists.
   Future<void> deletePlaylists(List<Playlist> playlists) async {
     try {
-      await SweyerPlugin.removePlaylists(playlists);
+      await SweyerPlugin.instance.removePlaylists(playlists);
       await refetchSongsAndPlaylists();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(

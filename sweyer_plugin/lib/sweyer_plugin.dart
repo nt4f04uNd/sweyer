@@ -48,8 +48,12 @@ class CancellationSignal {
 /// A factory to load an implementation from the raw data describing a platform item.
 typedef DataFactory<T> = T Function(Map<String, dynamic> data);
 
-abstract class SweyerPlugin {
-  static Future<Uint8List?> loadAlbumArt({
+class SweyerPlugin {
+  static const instance = SweyerPlugin();
+
+  const SweyerPlugin();
+
+  Future<Uint8List?> loadAlbumArt({
     required String uri,
     required Size size,
     required CancellationSignal signal,
@@ -66,12 +70,12 @@ abstract class SweyerPlugin {
   /// detect it and does not recreate the thumb, so we do this instead.
   ///
   /// See https://stackoverflow.com/questions/18606007/android-image-files-deleted-from-com-android-providers-media-albumthumbs-on-rebo
-  static Future<void> fixAlbumArt(int albumId) async => await SweyerPluginPlatform.instance.fixAlbumArt(albumId);
+  Future<void> fixAlbumArt(int albumId) async => await SweyerPluginPlatform.instance.fixAlbumArt(albumId);
 
-  static Future<Iterable<T>> retrieveSongs<T extends PlatformSong>(DataFactory<T> factory) async =>
+  Future<Iterable<T>> retrieveSongs<T extends PlatformSong>(DataFactory<T> factory) async =>
       (await SweyerPluginPlatform.instance.retrieveSongs()).map(factory);
 
-  static Future<Map<int, T>> retrieveAlbums<T extends PlatformAlbum>(DataFactory<T> factory) async {
+  Future<Map<int, T>> retrieveAlbums<T extends PlatformAlbum>(DataFactory<T> factory) async {
     final maps = await SweyerPluginPlatform.instance.retrieveAlbums();
     final Map<int, T> albums = {};
     for (final map in maps) {
@@ -80,13 +84,13 @@ abstract class SweyerPlugin {
     return albums;
   }
 
-  static Future<Iterable<T>> retrievePlaylists<T extends PlatformPlaylist>(DataFactory<T> factory) async =>
+  Future<Iterable<T>> retrievePlaylists<T extends PlatformPlaylist>(DataFactory<T> factory) async =>
       (await SweyerPluginPlatform.instance.retrievePlaylists()).map(factory);
 
-  static Future<Iterable<T>> retrieveArtists<T extends PlatformArtist>(DataFactory<T> factory) async =>
+  Future<Iterable<T>> retrieveArtists<T extends PlatformArtist>(DataFactory<T> factory) async =>
       (await SweyerPluginPlatform.instance.retrieveArtists()).map(factory);
 
-  static Future<Iterable<T>> retrieveGenres<T extends PlatformGenre>(DataFactory<T> factory) async =>
+  Future<Iterable<T>> retrieveGenres<T extends PlatformGenre>(DataFactory<T> factory) async =>
       (await SweyerPluginPlatform.instance.retrieveGenres()).map(factory);
 
   /// Sets the songs favorite flag to [value].
@@ -96,7 +100,7 @@ abstract class SweyerPlugin {
   /// Throws:
   ///  * [SweyerPluginChannelException.sdk] when it's called below Android 30
   ///  * [SweyerPluginChannelException.intentSender]
-  static Future<bool> setSongsFavorite(Set<PlatformSong> songs, bool value) =>
+  Future<bool> setSongsFavorite(Set<PlatformSong> songs, bool value) =>
       SweyerPluginPlatform.instance.setSongsFavorite(songs.map((song) => song.sourceId).toList(), value);
 
   /// Deletes a set of songs.
@@ -105,22 +109,22 @@ abstract class SweyerPlugin {
   ///
   /// Throws:
   ///  * [SweyerPluginChannelException.intentSender]
-  static Future<bool> deleteSongs(Set<PlatformSong> songs) => SweyerPluginPlatform.instance.deleteSongs(
+  Future<bool> deleteSongs(Set<PlatformSong> songs) => SweyerPluginPlatform.instance.deleteSongs(
       songs.map((song) => {'id': song.sourceId, 'filesystemPath': song.filesystemPath}).toList(growable: false));
 
-  static Future<void> createPlaylist(String name) => SweyerPluginPlatform.instance.createPlaylist(name);
+  Future<void> createPlaylist(String name) => SweyerPluginPlatform.instance.createPlaylist(name);
 
   /// Throws:
   ///  * [SweyerPluginChannelException.playlistNotExists] when the playlist doesn't exist.
-  static Future<void> renamePlaylist(PlatformPlaylist playlist, String name) =>
+  Future<void> renamePlaylist(PlatformPlaylist playlist, String name) =>
       SweyerPluginPlatform.instance.renamePlaylist(playlist.id, name);
 
-  static Future<void> removePlaylists(List<PlatformPlaylist> playlists) =>
+  Future<void> removePlaylists(List<PlatformPlaylist> playlists) =>
       SweyerPluginPlatform.instance.removePlaylists(playlists.map((playlist) => playlist.id).toList());
 
   /// Throws:
   ///  * [SweyerPluginChannelException.playlistNotExists] when the playlist doesn't exist.
-  static Future<void> insertSongsInPlaylist({
+  Future<void> insertSongsInPlaylist({
     required int index,
     required List<PlatformSong> songs,
     required PlatformPlaylist playlist,
@@ -136,7 +140,7 @@ abstract class SweyerPlugin {
 
   /// Moves the song at the index [from] in the [playlist] to the index [to].
   /// The returned value indicates whether the operation was successful.
-  static Future<bool> moveSongInPlaylist({required PlatformPlaylist playlist, required int from, required int to}) {
+  Future<bool> moveSongInPlaylist({required PlatformPlaylist playlist, required int from, required int to}) {
     assert(from >= 0);
     assert(to >= 0);
     assert(from != to);
@@ -145,12 +149,12 @@ abstract class SweyerPlugin {
 
   /// Throws:
   ///  * [SweyerPluginChannelException.playlistNotExists] when the playlist doesn't exist.
-  static Future<void> removeFromPlaylistAt({required List<int> indexes, required PlatformPlaylist playlist}) {
+  Future<void> removeFromPlaylistAt({required List<int> indexes, required PlatformPlaylist playlist}) {
     assert(indexes.isNotEmpty);
     return SweyerPluginPlatform.instance.removeFromPlaylistAt(indexes: indexes, playlistId: playlist.id);
   }
 
   /// Checks if the intent that started the app is a view intent
   /// (indicating that the user tried to open a file with app).
-  static Future<bool> isIntentActionView() => SweyerPluginPlatform.instance.isIntentActionView();
+  Future<bool> isIntentActionView() => SweyerPluginPlatform.instance.isIntentActionView();
 }

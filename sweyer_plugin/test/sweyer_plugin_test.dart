@@ -4,7 +4,6 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
-import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 import 'package:sweyer_plugin/sweyer_plugin_method_channel.dart';
 
 class MockSweyerPluginPlatform extends SweyerPluginPlatform {
@@ -121,6 +120,6 @@ void main() {
     MockSweyerPluginPlatform fakePlatform = MockSweyerPluginPlatform();
     SweyerPluginPlatform.instance = fakePlatform;
 
-    expect(await SweyerPlugin.isIntentActionView(), true);
+    expect(await SweyerPlugin.instance.isIntentActionView(), true);
   });
 }

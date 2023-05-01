@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      isIntentActionView = await SweyerPlugin.isIntentActionView();
+      isIntentActionView = await SweyerPlugin.instance.isIntentActionView();
     } on SweyerPluginException {
       // `isIntentActionView` will be null.
     }

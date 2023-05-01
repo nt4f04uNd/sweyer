@@ -425,7 +425,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
       }
       _signal = CancellationSignal();
       try {
-        _bytes = await SweyerPlugin.loadAlbumArt(
+        _bytes = await SweyerPlugin.instance.loadAlbumArt(
           uri: uri,
           size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
@@ -534,7 +534,7 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   Future<void> _recreateArt() async {
     final albumId = song.albumId;
     if (albumId != null) {
-      await SweyerPlugin.fixAlbumArt(song.albumId!);
+      await SweyerPlugin.instance.fixAlbumArt(song.albumId!);
     }
     setLoading(_SourceLoading.loaded);
   }
