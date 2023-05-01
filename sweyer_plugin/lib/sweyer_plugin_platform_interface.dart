@@ -5,6 +5,44 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'sweyer_plugin_method_channel.dart';
 
+
+/// Base class for all exceptions from the Sweyer plugin.
+class SweyerPluginException implements Exception {
+  /// The exception reason.
+  final String message;
+  /// An optional cause of this exception.
+  final Exception? cause;
+
+  const SweyerPluginException(this.message, {this.cause});
+
+  @override
+  String toString() {
+    var representation = "$runtimeType: $message";
+    if (cause != null) {
+      representation += "\n\nCaused by:\n$cause";
+    }
+    return representation;
+  }
+}
+
+/// An IO operation failed.
+class SweyerPluginIoException extends SweyerPluginException {
+  const SweyerPluginIoException({super.cause}) : super('An IO operation failed');
+}
+
+/// An operation was performed on a playlist that doesn't exist.
+class PlaylistNotExistException extends SweyerPluginException {
+  /// The id of the playlist that does not exist.
+  final int playlistId;
+
+  const PlaylistNotExistException(this.playlistId, {super.cause}) : super('No playlist with id $playlistId found');
+}
+
+/// The functionality requested is unsupported on this platform or API level.
+class UnsupportedApiException extends SweyerPluginException {
+  const UnsupportedApiException({super.cause}) : super('The required API is not supported');
+}
+
 abstract class SweyerPluginPlatform extends PlatformInterface {
   /// Constructs a SweyerPluginPlatform.
   SweyerPluginPlatform() : super(token: _token);

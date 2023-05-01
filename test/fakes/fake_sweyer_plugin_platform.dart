@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'dart:collection';
 
 import 'package:flutter/services.dart';
-import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 import '../test.dart';
 
 /// An Entry in the [FakeContentChannel.favoriteRequestLog].

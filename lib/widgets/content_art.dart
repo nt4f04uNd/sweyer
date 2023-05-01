@@ -430,14 +430,12 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
           size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
         );
-      } on SweyerPluginException catch (ex, stack) {
-        if (ex != SweyerPluginException.io) {
-          FirebaseCrashlytics.instance.recordError(
-            ex,
-            stack,
-            reason: 'in _SongScopedStorageArtSourceLoader.load',
-          );
-        }
+      } on SweyerPluginIoException catch (ex, stack) {
+        FirebaseCrashlytics.instance.recordError(
+          ex,
+          stack,
+          reason: 'in _SongScopedStorageArtSourceLoader.load',
+        );
       } finally {
         setLoading(_SourceLoading.loaded);
       }

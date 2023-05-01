@@ -7,41 +7,25 @@ import 'package:flutter/services.dart';
 import 'sweyer_plugin_platform_interface.dart';
 import 'sweyer_plugin.dart';
 
-class SweyerMethodChannelException extends SweyerPluginException {
-  const SweyerMethodChannelException._(this.value, [this._exception]);
-
-  final PlatformException? _exception;
-  @override
-  final String value;
-
+enum SweyerMethodChannelExceptionCode {
   /// Generic error.
-  static const unexpected = SweyerMethodChannelException._('UNEXPECTED_ERROR');
+  unexpected('UNEXPECTED_ERROR'),
 
   /// On Android 30 requests like `MediaStore.createDeletionRequest` require
   /// calling `startIntentSenderForResult`, which might throw this exception.
-  static const intentSender = SweyerMethodChannelException._('INTENT_SENDER_ERROR');
+  intentSender('INTENT_SENDER_ERROR'),
 
-  static const io = SweyerMethodChannelException._('IO_ERROR');
+  io('IO_ERROR'),
 
   /// API is unavailable on current SDK level.
-  static const sdk = SweyerMethodChannelException._('SDK_ERROR');
+  sdk('SDK_ERROR'),
 
   /// Operation cannot be performed because there's no such playlist
-  static const playlistNotExists = SweyerMethodChannelException._('PLAYLIST_NOT_EXISTS_ERROR');
+  playlistNotExists('PLAYLIST_NOT_EXISTS_ERROR');
 
-  /// Create a new [SweyerMethodChannelException] form the platform [exception]
-  /// and assert that it is either [unexpected] or in the list of [expectedExceptions].
-  static SweyerMethodChannelException _throw(
-    PlatformException exception,
-    List<SweyerMethodChannelException> expectedExceptions,
-  ) {
-    final toThrow = SweyerMethodChannelException._(exception.code, exception);
-    assert(toThrow == unexpected || expectedExceptions.contains(toThrow));
-    return toThrow;
-  }
+  final String value;
 
-  @override
-  String toString() => _exception.toString();
+  const SweyerMethodChannelExceptionCode(this.value);
 }
 
 /// An implementation of [SweyerPluginPlatform] that uses method channels.
@@ -66,9 +50,8 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
           'height': size.height.toInt(),
         },
       );
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(
-          ex, const [SweyerMethodChannelException.io, SweyerMethodChannelException.sdk]);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('loadAlbumArt failed', error);
     }
   }
 
@@ -114,11 +97,8 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
           'value': value,
         },
       ))!;
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(
-        ex,
-        const [SweyerMethodChannelException.sdk, SweyerMethodChannelException.intentSender],
-      );
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('setSongsFavorite failed', error);
     }
   }
 
@@ -128,8 +108,8 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
       return (await methodChannel.invokeMethod<bool>('deleteSongs', {
         'songs': songs,
       }))!;
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(ex, const [SweyerMethodChannelException.intentSender]);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('deleteSongs failed', error);
     }
   }
 
@@ -137,8 +117,8 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   Future<void> createPlaylist(String name) async {
     try {
       return await methodChannel.invokeMethod<void>('createPlaylist', {'name': name});
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(ex, const []);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('createPlaylist failed', error);
     }
   }
 
@@ -152,8 +132,11 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
           'name': name,
         },
       );
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(ex, const [SweyerMethodChannelException.playlistNotExists]);
+    } on PlatformException catch (error) {
+      if (error.code == SweyerMethodChannelExceptionCode.playlistNotExists.value) {
+        throw PlaylistNotExistException(playlistId, cause: error);
+      }
+      throw _convertCommonExceptions('renamePlaylist failed', error);
     }
   }
 
@@ -176,8 +159,11 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
           'songIds': songIds,
         },
       );
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(ex, const [SweyerMethodChannelException.playlistNotExists]);
+    } on PlatformException catch (error) {
+      if (error.code == SweyerMethodChannelExceptionCode.playlistNotExists.value) {
+        throw PlaylistNotExistException(playlistId, cause: error);
+      }
+      throw _convertCommonExceptions('insertSongsInPlaylist failed', error);
     }
   }
 
@@ -202,11 +188,23 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
           'indexes': indexes,
         },
       );
-    } on PlatformException catch (ex) {
-      throw SweyerMethodChannelException._throw(ex, const [SweyerMethodChannelException.playlistNotExists]);
+    } on PlatformException catch (error) {
+      if (error.code == SweyerMethodChannelExceptionCode.playlistNotExists.value) {
+        throw PlaylistNotExistException(playlistId, cause: error);
+      }
+      throw _convertCommonExceptions('removeFromPlaylistAt failed', error);
     }
   }
 
   @override
   Future<bool> isIntentActionView() async => (await methodChannel.invokeMethod<bool>('isIntentActionView'))!;
+
+  SweyerPluginException _convertCommonExceptions(String message, PlatformException error) {
+    if (error.code == SweyerMethodChannelExceptionCode.sdk.value) {
+      return UnsupportedApiException(cause: error);
+    } else if (error.code == SweyerMethodChannelExceptionCode.io.value) {
+      return SweyerPluginIoException(cause: error);
+    }
+    return SweyerPluginException(message, cause: error);
+  }
 }

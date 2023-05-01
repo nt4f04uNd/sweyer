@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:equatable/equatable.dart';
-import 'package:sweyer_plugin/sweyer_plugin_method_channel.dart';
 import 'package:uuid/uuid.dart';
 
 import 'sweyer_plugin_platform_interface.dart';
+
+export 'sweyer_plugin_platform_interface.dart';
 
 /// A song from the native platform.
 abstract class PlatformSong {
@@ -33,30 +33,6 @@ abstract class PlatformPlaylist {
 
 /// A genre from the native platform.
 abstract class PlatformGenre {}
-
-abstract class SweyerPluginException with EquatableMixin {
-  const SweyerPluginException();
-
-  String get value;
-
-  @override
-  List<Object?> get props => [value];
-
-  /// Generic error.
-  static const unexpected = SweyerMethodChannelException.unexpected;
-
-  /// On Android 30 requests like `MediaStore.createDeletionRequest` require
-  /// calling `startIntentSenderForResult`, which might throw this exception.
-  static const intentSender = SweyerMethodChannelException.intentSender;
-
-  static const io = SweyerMethodChannelException.io;
-
-  /// API is unavailable on current SDK level.
-  static const sdk = SweyerMethodChannelException.sdk;
-
-  /// Operation cannot be performed because there's no such playlist.
-  static const playlistNotExists = SweyerMethodChannelException.playlistNotExists;
-}
 
 const _uuid = Uuid();
 
