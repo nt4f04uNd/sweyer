@@ -445,7 +445,7 @@ class ContentControl extends Control {
     // final year = int.tryParse(words[0]);
 
     /// Splits string by spaces, or dashes, or bar, or parenthesis
-    final abbreviationRegexp = RegExp(r'[\s\-\|\(\)]');
+    final abbreviationRegexp = RegExp(r'[\s\-|()]');
     final l10n = staticl10n;
 
     /// Checks whether a [string] is abbreviation for the [query].
@@ -629,7 +629,7 @@ class ContentControl extends Control {
   Future<void> deleteSongs(Set<Song> songs) async {
     songs = _ensureSongsAreSource(songs);
 
-    void _removeFromState() {
+    void removeFromState() {
       for (final song in songs) {
         state.allSongs.byId.remove(song.id);
       }
@@ -642,14 +642,14 @@ class ContentControl extends Control {
 
     // On Android R the deletion is performed with OS dialog.
     if (DeviceInfoControl.instance.sdkInt < 30) {
-      _removeFromState();
+      removeFromState();
     }
 
     try {
       final result = await SweyerPlugin.instance.deleteSongs(songs);
       await refetchAll();
       if (DeviceInfoControl.instance.useScopedStorageForFileModifications && result) {
-        _removeFromState();
+        removeFromState();
       }
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(
