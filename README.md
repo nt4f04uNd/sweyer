@@ -12,3 +12,7 @@ I don't mind accepting someone's PR tweaking this
 <img alt="" src="./static_assets/readme/feature_graphic.png"></div>
 
 <img alt="" src="./static_assets/readme/1.jpg" width="25%"><img alt="" src="./static_assets/readme/2.jpg" width="25%" /><img alt="" src="./static_assets/readme/3.jpg" width="25%" /><img alt="" src="./static_assets/readme/4.jpg" width="25%" />
+
+#### Additional links
+
+- [Privacy policy](https://docs.google.com/document/d/1M7Y8pvEXlRdc0e0cCfeIz9bFl4ePgXV2Uhs50mvyVZQ/edit?usp=share_link)
