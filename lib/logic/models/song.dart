@@ -1,10 +1,11 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
 /// Represents a song.
 ///
 /// Songs are always playable, trashed or pending songs on Android Q are excluded.
-class Song extends Content {
+class Song extends Content implements PlatformSong {
   @override
   ContentType get type => ContentType.song;
 
@@ -39,7 +40,8 @@ class Song extends Content {
   /// Duration in milliseconds
   final int duration;
   final int size;
-  final String? data;
+  @override
+  final String? filesystemPath;
 
   /// Whether the content was marked as favorite in MediaStore.
   ///
@@ -85,6 +87,7 @@ class Song extends Content {
   List<Object?> get props => [id];
 
   /// Returns source song ID.
+  @override
   int get sourceId => ContentUtils.getSourceId(
         id,
         origin: origin,
@@ -117,7 +120,7 @@ class Song extends Content {
     required this.dateModified,
     required this.duration,
     required this.size,
-    required this.data,
+    required this.filesystemPath,
     required this.isFavoriteInMediaStore,
     required this.generationAdded,
     required this.generationModified,
@@ -146,7 +149,7 @@ class Song extends Content {
     );
   }
 
-  factory Song.fromMap(Map map) {
+  factory Song.fromMap(Map<String, dynamic> map) {
     return Song(
       id: map['id'] as int,
       album: map['album'] as String?,
@@ -161,7 +164,7 @@ class Song extends Content {
       dateModified: map['dateModified'] as int,
       duration: map['duration'] as int,
       size: map['size'] as int,
-      data: map['data'] as String?,
+      filesystemPath: map['filesystemPath'] as String?,
       isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool?,
       generationAdded: map['generationAdded'] as int?,
       generationModified: map['generationModified'] as int?,
@@ -183,7 +186,7 @@ class Song extends Content {
         'dateModified': dateModified,
         'duration': duration,
         'size': size,
-        'data': data,
+        'filesystemPath': filesystemPath,
         'isFavoriteInMediaStore': isFavoriteInMediaStore,
         'generationAdded': generationAdded,
         'generationModified': generationModified,
@@ -218,7 +221,7 @@ abstract class SongCopyWith {
     int dateModified,
     int duration,
     int size,
-    String? data,
+    String? filesystemPath,
     bool? isFavoriteInMediaStore,
     int? generationAdded,
     int? generationModified,
@@ -252,7 +255,7 @@ class _SongCopyWith extends SongCopyWith {
     Object dateModified = _undefined,
     Object duration = _undefined,
     Object size = _undefined,
-    Object? data = _undefined,
+    Object? filesystemPath = _undefined,
     Object? isFavoriteInMediaStore = _undefined,
     Object? generationAdded = _undefined,
     Object? generationModified = _undefined,
@@ -273,7 +276,7 @@ class _SongCopyWith extends SongCopyWith {
       dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
       duration: duration == _undefined ? value.duration : duration as int,
       size: size == _undefined ? value.size : size as int,
-      data: data == _undefined ? value.data : data as String?,
+      filesystemPath: filesystemPath == _undefined ? value.filesystemPath : filesystemPath as String?,
       isFavoriteInMediaStore:
           isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool?,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,

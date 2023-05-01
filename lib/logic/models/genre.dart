@@ -1,7 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Genre extends Content {
+class Genre extends Content implements PlatformGenre {
   @override
   ContentType get type => ContentType.song; // FIXME: Add a real content type for genres.
 
@@ -25,7 +26,7 @@ class Genre extends Content {
   @override
   GenreCopyWith get copyWith => _GenreCopyWith(this);
 
-  factory Genre.fromMap(Map map) {
+  factory Genre.fromMap(Map<String, dynamic> map) {
     return Genre(
       id: map['id'] as int,
       name: map['name'] as String,

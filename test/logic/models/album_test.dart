@@ -15,7 +15,7 @@ void main() {
     final song4 = songWith(id: 1, track: '4', title: 'Fourth Song');
     final song10 = songWith(id: 3, track: '10', title: 'Tenth Song');
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = [nullSong1, nullSong2, song1, song2, song3, song4, song10];
+      FakeSweyerPluginPlatform.instance.songs = [nullSong1, nullSong2, song1, song2, song3, song4, song10];
     });
     expect(album.songs, [song1, song2, song3, song4, song10, nullSong1, nullSong2]);
   });
@@ -28,7 +28,7 @@ void main() {
     final song4 = songWith(id: 1, track: '4/0', title: 'Fourth Song');
     final song10 = songWith(id: 3, track: '10/10', title: 'Tenth Song');
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = [nullSong1, song1, song2, song3, song4, song10];
+      FakeSweyerPluginPlatform.instance.songs = [nullSong1, song1, song2, song3, song4, song10];
     });
     expect(album.songs, [song1, song2, song3, song4, song10, nullSong1]);
   });
@@ -41,7 +41,7 @@ void main() {
     final song4 = songWith(id: 1, track: ' 4 / 10 ', title: 'Fourth Song');
     final song10 = songWith(id: 3, track: ' 10 /10', title: 'Tenth Song');
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = [nullSong1, song1, song2, song3, song4, song10];
+      FakeSweyerPluginPlatform.instance.songs = [nullSong1, song1, song2, song3, song4, song10];
     });
     expect(album.songs, [song1, song2, song3, song4, song10, nullSong1]);
   });

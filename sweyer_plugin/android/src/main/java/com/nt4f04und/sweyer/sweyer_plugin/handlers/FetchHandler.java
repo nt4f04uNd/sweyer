@@ -1,4 +1,4 @@
-package com.nt4f04und.sweyer.handlers;
+package com.nt4f04und.sweyer.sweyer_plugin.handlers;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -35,8 +35,8 @@ public class FetchHandler {
       return builder.toString();
    }
 
-   public static ArrayList<HashMap<?, ?>> retrieveSongs() {
-      ArrayList<HashMap<?, ?>> maps = new ArrayList<>();
+   public static ArrayList<HashMap<String, ?>> retrieveSongs(ContentResolver resolver) {
+      ArrayList<HashMap<String, ?>> maps = new ArrayList<>();
 
       ArrayList<String> projection = new ArrayList<>(Arrays.asList(
               MediaStore.Audio.Media._ID,
@@ -112,7 +112,6 @@ public class FetchHandler {
          projection.add(MediaStore.Audio.Media.GENRE_ID);
       }
 
-      ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
       Cursor cursor = resolver.query(
               MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
               projection.toArray(new String[0]),
@@ -136,7 +135,7 @@ public class FetchHandler {
             map.put("dateModified", cursor.getInt(9));
             map.put("duration", cursor.getInt(10));
             map.put("size", cursor.getInt(11));
-            map.put("data", cursor.getString(12));
+            map.put("filesystemPath", cursor.getString(12));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                map.put("isFavoriteInMediaStore", cursor.getInt(13) == 1);
                map.put("generationAdded", cursor.getInt(14));
@@ -151,10 +150,9 @@ public class FetchHandler {
       return maps;
    }
 
-   public static ArrayList<HashMap<?, ?>> retrieveAlbums() {
-      ArrayList<HashMap<?, ?>> maps = new ArrayList<>();
+   public static ArrayList<HashMap<String, ?>> retrieveAlbums(ContentResolver resolver) {
+      ArrayList<HashMap<String, ?>> maps = new ArrayList<>();
 
-      ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
       Cursor cursor = resolver.query(
               MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
               new String[]{
@@ -190,10 +188,9 @@ public class FetchHandler {
       return maps;
    }
 
-   public static ArrayList<HashMap<?, ?>> retrievePlaylists() {
-      ArrayList<HashMap<?, ?>> maps = new ArrayList<>();
+   public static ArrayList<HashMap<String, ?>> retrievePlaylists(ContentResolver resolver) {
+      ArrayList<HashMap<String, ?>> maps = new ArrayList<>();
 
-      ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
       Cursor cursor = resolver.query(
               MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
               new String[]{
@@ -228,7 +225,7 @@ public class FetchHandler {
                }
                HashMap<String, Object> map = new HashMap<>();
                map.put("id", cursor.getInt(0));
-               map.put("data", cursor.getString(1));
+               map.put("filesystemPath", cursor.getString(1));
                map.put("dateAdded", cursor.getInt(2));
                map.put("dateModified", cursor.getInt(3));
                map.put("name", cursor.getString(4));
@@ -242,10 +239,9 @@ public class FetchHandler {
       return maps;
    }
 
-   public static ArrayList<HashMap<?, ?>> retrieveArtists() {
-      ArrayList<HashMap<?, ?>> maps = new ArrayList<>();
+   public static ArrayList<HashMap<String, ?>> retrieveArtists(ContentResolver resolver) {
+      ArrayList<HashMap<String, ?>> maps = new ArrayList<>();
 
-      ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
       Cursor cursor = resolver.query(
               MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
               new String[]{
@@ -273,10 +269,9 @@ public class FetchHandler {
       return maps;
    }
 
-   public static ArrayList<HashMap<?, ?>> retrieveGenres() {
-      ArrayList<HashMap<?, ?>> maps = new ArrayList<>();
+   public static ArrayList<HashMap<String, ?>> retrieveGenres(ContentResolver resolver) {
+      ArrayList<HashMap<String, ?>> maps = new ArrayList<>();
 
-      ContentResolver resolver = GeneralHandler.getAppContext().getContentResolver();
       Cursor cursor = resolver.query(
               MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
               new String[]{

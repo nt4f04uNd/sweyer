@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
 // See content logic overview here
 // https://docs.google.com/document/d/1QtF9koBcWuRE1lIYJ45cRMogAprb7xD83ImmI0cn3lQ/edit
@@ -382,7 +383,7 @@ class ContentControl extends Control {
     }
     switch (contentType) {
       case ContentType.song:
-        state.allSongs.setSongs(await ContentChannel.instance.retrieveSongs());
+        state.allSongs.setSongs((await SweyerPlugin.instance.retrieveSongs(Song.fromMap)).toList());
         if (_empty) {
           dispose();
           return;
@@ -393,7 +394,7 @@ class ContentControl extends Control {
         }
         break;
       case ContentType.album:
-        state.albums = await ContentChannel.instance.retrieveAlbums();
+        state.albums = await SweyerPlugin.instance.retrieveAlbums(Album.fromMap);
         if (disposed.value) {
           return;
         }
@@ -404,7 +405,7 @@ class ContentControl extends Control {
         sort(emitChangeEvent: false, contentType: contentType);
         break;
       case ContentType.playlist:
-        state.playlists = await ContentChannel.instance.retrievePlaylists();
+        state.playlists = (await SweyerPlugin.instance.retrievePlaylists(Playlist.fromMap)).toList();
         if (disposed.value) {
           return;
         }
@@ -415,7 +416,7 @@ class ContentControl extends Control {
         sort(emitChangeEvent: false, contentType: contentType);
         break;
       case ContentType.artist:
-        state.artists = await ContentChannel.instance.retrieveArtists();
+        state.artists = (await SweyerPlugin.instance.retrieveArtists(Artist.fromMap)).toList();
         if (disposed.value) {
           return;
         }
@@ -604,7 +605,7 @@ class ContentControl extends Control {
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
     if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       try {
-        final result = await ContentChannel.instance.setSongsFavorite(songs, value);
+        final result = await SweyerPlugin.instance.setSongsFavorite(songs, value);
         if (result) {
           await refetch(ContentType.song);
         }
@@ -645,7 +646,7 @@ class ContentControl extends Control {
     }
 
     try {
-      final result = await ContentChannel.instance.deleteSongs(songs);
+      final result = await SweyerPlugin.instance.deleteSongs(songs);
       await refetchAll();
       if (DeviceInfoControl.instance.useScopedStorageForFileModifications && result) {
         _removeFromState();
@@ -725,7 +726,7 @@ class ContentControl extends Control {
   /// Creates a playlist with a given name and returns a corrected with [correctPlaylistName] name.
   Future<String> createPlaylist(String name) async {
     name = await correctPlaylistName(name);
-    await ContentChannel.instance.createPlaylist(name);
+    await SweyerPlugin.instance.createPlaylist(name);
     await refetchSongsAndPlaylists();
     return name;
   }
@@ -736,14 +737,11 @@ class ContentControl extends Control {
   Future<String?> renamePlaylist(Playlist playlist, String name) async {
     try {
       name = await correctPlaylistName(name);
-      await ContentChannel.instance.renamePlaylist(playlist, name);
+      await SweyerPlugin.instance.renamePlaylist(playlist, name);
       await refetchSongsAndPlaylists();
       return name;
-    } on ContentChannelException catch (ex) {
-      if (ex == ContentChannelException.playlistNotExists) {
-        return null;
-      }
-      rethrow;
+    } on PlaylistNotExistException {
+      return null;
     }
   }
 
@@ -753,7 +751,7 @@ class ContentControl extends Control {
     required List<Song> songs,
     required Playlist playlist,
   }) async {
-    await ContentChannel.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
+    await SweyerPlugin.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
@@ -765,7 +763,7 @@ class ContentControl extends Control {
     bool emitChangeEvent = true,
   }) async {
     if (from != to) {
-      await ContentChannel.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
+      await SweyerPlugin.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
       if (emitChangeEvent) {
         await refetchSongsAndPlaylists();
       }
@@ -777,14 +775,14 @@ class ContentControl extends Control {
     required List<int> indexes,
     required Playlist playlist,
   }) async {
-    await ContentChannel.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
+    await SweyerPlugin.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Deletes playlists.
   Future<void> deletePlaylists(List<Playlist> playlists) async {
     try {
-      await ContentChannel.instance.removePlaylists(playlists);
+      await SweyerPlugin.instance.removePlaylists(playlists);
       await refetchSongsAndPlaylists();
     } catch (ex, stack) {
       FirebaseCrashlytics.instance.recordError(

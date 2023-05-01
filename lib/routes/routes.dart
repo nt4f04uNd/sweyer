@@ -365,6 +365,10 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    if (mediaQuery.size.isEmpty) {
+      return const SizedBox.shrink(); // Don't render the app if we are started in the background.
+    }
     return _AppRouterBuilder(
       builder: (context) {
         final pages = <Page<void>>[

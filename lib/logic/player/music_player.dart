@@ -1,5 +1,4 @@
 export 'backend.dart';
-export 'content_channel.dart';
 export 'content.dart';
 export 'favorites.dart';
 export 'media_store_content_observer.dart';

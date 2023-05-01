@@ -1,11 +1,11 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:clock/clock.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Album extends PersistentQueue {
+class Album extends PersistentQueue implements PlatformAlbum {
   @override
   ContentType get type => ContentType.album;
-
   final String album;
   final String? albumArt;
   final String artist;
@@ -91,7 +91,7 @@ class Album extends PersistentQueue {
     );
   }
 
-  factory Album.fromMap(Map map) {
+  factory Album.fromMap(Map<String, dynamic> map) {
     return Album(
       id: map['id'] as int,
       album: map['album'] as String,

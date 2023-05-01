@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sweyer/constants.dart' as constants;
+import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 
 export 'fakes/fakes.dart';
 
@@ -27,10 +28,10 @@ import 'test_description.dart';
 
 final _testSong = Song(
   id: 0,
-  album: 'album',
-  albumId: 0,
-  artist: 'artist',
-  artistId: 0,
+  album: _testAlbum.album,
+  albumId: _testAlbum.id,
+  artist: _testArtist.artist,
+  artistId: _testArtist.id,
   genre: 'genre',
   genreId: 0,
   title: 'title',
@@ -39,12 +40,10 @@ final _testSong = Song(
   dateModified: 0,
   duration: 0,
   size: 0,
-  data: 'data_data_data_data_data_data_data_data',
+  filesystemPath: '/path/to/song',
   isFavoriteInMediaStore: false,
   generationAdded: 0,
   generationModified: 0,
-  origin: _testAlbum,
-  duplicationIndex: 0,
 );
 
 const _testAlbum = Album(
@@ -60,7 +59,7 @@ const _testAlbum = Album(
 
 final _testPlaylist = Playlist(
   id: 0,
-  data: 'data_data_data_data_data_data_data_data',
+  filesystemPath: '/path/to/playlist',
   dateAdded: 0,
   dateModified: 0,
   name: 'name',
@@ -116,7 +115,7 @@ Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   DeviceInfoControl.instance = FakeDeviceInfoControl();
   FavoritesControl.instance = FakeFavoritesControl();
   PermissionsChannelObserver(binding); // Grant all permissions by default.
-  ContentChannel.instance = FakeContentChannel(binding);
+  SweyerPluginPlatform.instance = FakeSweyerPluginPlatform(binding);
   QueueControl.instance = FakeQueueControl();
   ThemeControl.instance = FakeThemeControl();
   JustAudioPlatform.instance = MockJustAudio(binding);

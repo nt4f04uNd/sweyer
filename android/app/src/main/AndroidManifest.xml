@@ -67,11 +67,5 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:enabled="true"
-            android:name="com.nt4f04und.sweyer.services.DeletionService"
-            android:exported="false">
-        </service>
     </application>
 </manifest>

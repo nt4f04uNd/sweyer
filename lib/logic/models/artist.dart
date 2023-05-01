@@ -1,7 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Artist extends SongOrigin {
+class Artist extends SongOrigin implements PlatformArtist {
   @override
   ContentType get type => ContentType.artist;
 
@@ -75,7 +76,7 @@ class Artist extends SongOrigin {
     );
   }
 
-  factory Artist.fromMap(Map map) {
+  factory Artist.fromMap(Map<String, dynamic> map) {
     return Artist(
       id: map['id'] as int,
       artist: map['artist'] as String,

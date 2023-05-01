@@ -78,7 +78,7 @@ void main() {
       songWith(id: 2, dateModified: 0),
     ]);
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = songs.toList();
+      FakeSweyerPluginPlatform.instance.songs = songs.toList();
     });
     await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
@@ -97,7 +97,7 @@ void main() {
       songWith(id: 2, dateModified: 0, title: 'a'),
     ]);
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = songs.toList();
+      FakeSweyerPluginPlatform.instance.songs = songs.toList();
     });
     await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
@@ -118,7 +118,7 @@ void main() {
       songWith(id: 2),
     ]);
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = songs.toList();
+      FakeSweyerPluginPlatform.instance.songs = songs.toList();
     });
     await tester.runAppTest(() async {
       tester.expectSongTiles(songs);

@@ -132,7 +132,7 @@ void main() {
       songWith(id: 2),
     ]);
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = songs.toList();
+      FakeSweyerPluginPlatform.instance.songs = songs.toList();
     });
     PlaybackControl.instance.changeSong(songs[1]);
     await tester.runAppTest(() async {
@@ -156,7 +156,7 @@ void main() {
       songWith(id: 2),
     ]);
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = songs.toList();
+      FakeSweyerPluginPlatform.instance.songs = songs.toList();
     });
     PlaybackControl.instance.changeSong(songs[1]);
     await tester.runAppTest(() async {

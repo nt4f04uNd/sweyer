@@ -147,14 +147,14 @@ void main() {
       (WidgetTester tester) async {
     // TODO: because of `MusicPlayer.instance.stop` at the end of `runAppTest`, this test will print an error in console, but not actually fail, because the exception is caught. Ideally I should somehow hide that
     await setUpAppTest(() {
-      FakeContentChannel.instance.songs = [];
+      FakeSweyerPluginPlatform.instance.songs = [];
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
       expect(find.text(l10n.noMusic), findsOneWidget);
 
       // Test refresh
-      FakeContentChannel.instance.songs = [songWith()];
+      FakeSweyerPluginPlatform.instance.songs = [songWith()];
       // Triggering refresh will cause a real async work
       await tester.runAsync(() {
         return tester.tap(find.text(l10n.refresh));

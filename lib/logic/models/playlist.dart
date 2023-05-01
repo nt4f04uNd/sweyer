@@ -1,14 +1,15 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:sweyer/sweyer.dart';
+import 'package:sweyer_plugin/sweyer_plugin.dart';
 
-class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
+class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implements PlatformPlaylist {
   @override
   ContentType get type => ContentType.playlist;
-
-  final String data;
+  final String filesystemPath;
   final int dateAdded;
   final int dateModified;
   final String name;
+  @override
   final List<int> songIds;
 
   @override
@@ -72,7 +73,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
 
   Playlist({
     required int id,
-    required this.data,
+    required this.filesystemPath,
     required this.dateAdded,
     required this.dateModified,
     required this.name,
@@ -106,10 +107,10 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
     );
   }
 
-  factory Playlist.fromMap(Map map) {
+  factory Playlist.fromMap(Map<String, dynamic> map) {
     return Playlist(
       id: map['id'] as int,
-      data: map['data'] as String,
+      filesystemPath: map['filesystemPath'] as String,
       dateAdded: map['dateAdded'] as int,
       dateModified: map['dateModified'] as int,
       name: map['name'] as String,
@@ -120,7 +121,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
   @override
   Map<String, dynamic> toMap() => {
         'id': id,
-        'data': data,
+        'filesystemPath': filesystemPath,
         'dateAdded': dateAdded,
         'dateModified': dateModified,
         'name': name,
@@ -132,7 +133,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin {
 abstract class PlaylistCopyWith {
   Playlist call({
     int id,
-    String data,
+    String fileSystemPath,
     int dateAdded,
     int dateModified,
     String name,
@@ -153,7 +154,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
   @override
   Playlist call({
     Object id = _undefined,
-    Object data = _undefined,
+    Object fileSystemPath = _undefined,
     Object dateAdded = _undefined,
     Object dateModified = _undefined,
     Object name = _undefined,
@@ -161,7 +162,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
   }) {
     return Playlist(
       id: id == _undefined ? value.id : id as int,
-      data: data == _undefined ? value.data : data as String,
+      filesystemPath: fileSystemPath == _undefined ? value.filesystemPath : fileSystemPath as String,
       dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
       dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
       name: name == _undefined ? value.name : name as String,

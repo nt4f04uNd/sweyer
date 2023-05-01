@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 export 'fake_player_interface_color_style/fake_player_interface_color_style.dart';
 export 'fake_backend.dart';
-export 'fake_content_channel.dart';
+export 'fake_sweyer_plugin_platform.dart';
 export 'fake_content.dart';
 export 'fake_device_info.dart';
 export 'fake_favorites.dart';

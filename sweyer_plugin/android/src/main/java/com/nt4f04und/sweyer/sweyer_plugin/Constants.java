@@ -1,4 +1,4 @@
-package com.nt4f04und.sweyer;
+package com.nt4f04und.sweyer.sweyer_plugin;
 
 public class Constants {
    public static final String LogTag = "com.nt4f04und.sweyer";
