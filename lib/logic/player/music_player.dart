@@ -757,8 +757,9 @@ class MusicPlayer extends AudioPlayer {
       if (e is PlayerInterruptedException || e is PlatformException && e.code == 'abort') {
         // Do nothing
       } else if (e is PlayerException) {
-        final message = getl10n(AppRouter.instance.navigatorKey.currentContext!).playbackError;
-        ShowFunctions.instance.showToast(msg: message);
+        final context = AppRouter.instance.navigatorKey.currentContext;
+        final l10n = context != null ? getl10n(context) : staticl10n;
+        ShowFunctions.instance.showToast(msg: l10n.playbackError);
         playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
         ContentControl.instance.refetch(ContentType.song);

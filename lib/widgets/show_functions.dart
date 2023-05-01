@@ -104,7 +104,11 @@ class ShowFunctions extends NFShowFunctions {
   /// From that snack bar will be possible to proceed to special alert to see the error details with the ability to copy them.
   /// [errorDetails] string to show in the alert
   void showError({required String errorDetails}) {
-    final context = AppRouter.instance.navigatorKey.currentContext!;
+    final context = AppRouter.instance.navigatorKey.currentContext;
+    if (context == null) {
+      debugPrint(errorDetails);
+      return;
+    }
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     final globalKey = GlobalKey<NFSnackbarEntryState>();
