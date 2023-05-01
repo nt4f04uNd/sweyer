@@ -740,7 +740,7 @@ class ContentControl extends Control {
       await SweyerPlugin.instance.renamePlaylist(playlist, name);
       await refetchSongsAndPlaylists();
       return name;
-    } on PlaylistNotExistException catch (_) {
+    } on PlaylistNotExistException {
       return null;
     }
   }

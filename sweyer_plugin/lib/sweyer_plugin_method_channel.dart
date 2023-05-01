@@ -204,6 +204,8 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
       return UnsupportedApiException(cause: error);
     } else if (error.code == SweyerMethodChannelExceptionCode.io.value) {
       return SweyerPluginIoException(cause: error);
+    } else if (error.code == SweyerMethodChannelExceptionCode.intentSender.value) {
+      return PlatformHandlerException(cause: error);
     }
     return SweyerPluginException(message, cause: error);
   }

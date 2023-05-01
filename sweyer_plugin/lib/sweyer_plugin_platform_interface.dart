@@ -43,6 +43,11 @@ class UnsupportedApiException extends SweyerPluginException {
   const UnsupportedApiException({super.cause}) : super('The required API is not supported');
 }
 
+/// The platform handler for this operation failed.
+class PlatformHandlerException extends SweyerPluginException {
+  const PlatformHandlerException({super.cause}) : super('Platform handler failed');
+}
+
 abstract class SweyerPluginPlatform extends PlatformInterface {
   /// Constructs a SweyerPluginPlatform.
   SweyerPluginPlatform() : super(token: _token);

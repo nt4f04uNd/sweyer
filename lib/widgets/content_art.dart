@@ -430,7 +430,9 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
           size: Size.square(size) * MediaQuery.of(state.context).devicePixelRatio,
           signal: _signal!,
         );
-      } on SweyerPluginIoException catch (ex, stack) {
+      } on SweyerPluginIoException {
+        // Ignore non-existing art and by canceled loads.
+      } on SweyerPluginException catch (ex, stack) {
         FirebaseCrashlytics.instance.recordError(
           ex,
           stack,
