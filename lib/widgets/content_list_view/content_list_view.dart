@@ -142,7 +142,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
       controller: localController,
       showLabel: showScrollbarLabel,
       interactive: interactiveScrollbar,
-      isAlwaysShown: alwaysShowScrollbar,
+      thumbVisibility: alwaysShowScrollbar,
       child: CustomScrollView(
         controller: localController,
         physics: physics,

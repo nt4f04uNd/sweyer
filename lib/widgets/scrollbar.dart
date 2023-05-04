@@ -54,7 +54,7 @@ class AppScrollbar extends StatefulWidget {
     required Widget child,
     required ScrollController controller,
     bool showLabel = true,
-    bool? isAlwaysShown,
+    bool? thumbVisibility,
     bool? showTrackOnHover,
     double? hoverThickness,
     double? thickness,
@@ -86,7 +86,7 @@ class AppScrollbar extends StatefulWidget {
               }());
             },
       controller: controller,
-      thumbVisibility: isAlwaysShown,
+      thumbVisibility: thumbVisibility,
       showTrackOnHover: showTrackOnHover,
       hoverThickness: hoverThickness,
       thickness: thickness,

@@ -88,10 +88,10 @@ abstract class Theme {
       ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        labelLarge: TextStyle(fontWeight: FontWeight.w600),
         displayLarge: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         displayMedium: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         displaySmall: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
+        headlineLarge: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headlineMedium: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         headlineSmall: TextStyle(fontWeight: FontWeight.w600, color: AppColors.grey),
         // Title in song tiles
@@ -113,8 +113,10 @@ abstract class Theme {
         ),
         bodyLarge: TextStyle(fontWeight: FontWeight.w700),
         bodyMedium: TextStyle(fontWeight: FontWeight.w600),
-        labelSmall: TextStyle(fontWeight: FontWeight.w600),
         bodySmall: TextStyle(fontWeight: FontWeight.w600),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600),
+        labelMedium: TextStyle(fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
         elevation: 2.0,
@@ -139,17 +141,21 @@ abstract class Theme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith(
-            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        ),
         trackColor: MaterialStateProperty.resolveWith(
-            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null,
+        ),
       ),
       radioTheme: RadioThemeData(
         fillColor: MaterialStateProperty.resolveWith(
-            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        ),
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: MaterialStateProperty.resolveWith(
-            (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        ),
       ),
     ),
     dark: ThemeData(
@@ -212,10 +218,10 @@ abstract class Theme {
       ),
       textTheme: const TextTheme(
         /// See https://material.io/design/typography/the-type-system.html#type-scale
-        labelLarge: TextStyle(fontWeight: FontWeight.w600),
         displayLarge: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         displayMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         displaySmall: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+        headlineLarge: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         headlineMedium: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         headlineSmall: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         // Title in song tiles
@@ -237,8 +243,10 @@ abstract class Theme {
         ),
         bodyLarge: TextStyle(fontWeight: FontWeight.w700),
         bodyMedium: TextStyle(fontWeight: FontWeight.w600),
-        labelSmall: TextStyle(fontWeight: FontWeight.w600),
         bodySmall: TextStyle(fontWeight: FontWeight.w600),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600),
+        labelMedium: TextStyle(fontWeight: FontWeight.w600),
+        labelSmall: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
         color: AppColors.grey,
@@ -263,17 +271,21 @@ abstract class Theme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith(
-                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        ),
         trackColor: MaterialStateProperty.resolveWith(
-                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null,
+        ),
       ),
       radioTheme: RadioThemeData(
         fillColor: MaterialStateProperty.resolveWith(
-                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        ),
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: MaterialStateProperty.resolveWith(
-                (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null),
+          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        ),
       ),
     ),
   );
