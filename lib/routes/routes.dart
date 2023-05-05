@@ -563,7 +563,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
     final pages = <Page<void>>[];
 
     for (int i = 0; i < _routes.length; i++) {
-      LocalKey _buildContentKey(_Routes route, Content content) {
+      LocalKey buildContentKey(_Routes route, Content content) {
         return ValueKey('${route.location}/${content.id}_$i');
       }
 
@@ -579,7 +579,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         final arguments = route.arguments! as PersistentQueueArguments<Album>;
         pages.add(_buildPage(
           context,
-          _buildContentKey(HomeRoutes.album, arguments.queue),
+          buildContentKey(HomeRoutes.album, arguments.queue),
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
         ));
@@ -587,7 +587,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         final arguments = route.arguments! as PersistentQueueArguments<Playlist>;
         pages.add(_buildPage(
           context,
-          _buildContentKey(route, arguments.queue),
+          buildContentKey(route, arguments.queue),
           transitionSettings.greyDismissible,
           PersistentQueueRoute(arguments: arguments),
         ));
@@ -595,7 +595,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
         final arguments = route.arguments! as Artist;
         pages.add(_buildPage(
           context,
-          _buildContentKey(route, arguments),
+          buildContentKey(route, arguments),
           transitionSettings.greyDismissible,
           ArtistRoute(artist: arguments),
         ));

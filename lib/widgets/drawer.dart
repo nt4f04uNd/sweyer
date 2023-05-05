@@ -256,7 +256,7 @@ class _LogoAndTitle extends StatelessWidget {
         style: TextStyle(
           fontSize: 30.0,
           fontWeight: FontWeight.w800,
-          color: theme.textTheme.headline6!.color,
+          color: theme.textTheme.titleLarge!.color,
         ),
       ),
     );

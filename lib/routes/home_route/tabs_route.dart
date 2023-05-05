@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
@@ -320,10 +319,10 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                                       ),
                                     ),
                                     labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                    labelColor: theme.textTheme.headline6!.color,
+                                    labelColor: theme.textTheme.titleLarge!.color,
                                     indicatorSize: TabBarIndicatorSize.label,
                                     unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
-                                    labelStyle: theme.textTheme.headline6!.copyWith(
+                                    labelStyle: theme.textTheme.titleLarge!.copyWith(
                                       fontSize: 15.0,
                                       fontWeight: FontWeight.w900,
                                     ),

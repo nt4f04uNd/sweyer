@@ -597,7 +597,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       localOverlay.insert(_overlayEntry!);
 
       // Animate system UI
-      Future<void> _animateSystemUi([SystemUiOverlayStyle? lastUi]) async {
+      Future<void> animateSystemUi([SystemUiOverlayStyle? lastUi]) async {
         lastUi ??= SystemUiStyleController.instance.lastUi;
         _lastUi = lastUi;
         _lastUiSub?.cancel();
@@ -617,11 +617,11 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         });
         if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor != to.systemNavigationBarColor) {
           // Restart if we were interrupted by other system UI update
-          _animateSystemUi(_lastUi);
+          animateSystemUi(_lastUi);
         }
       }
 
-      _animateSystemUi();
+      animateSystemUi();
     }
 
     _notifier.value = this;
@@ -951,7 +951,7 @@ class SelectionActionsBar extends StatelessWidget {
                           child: HookBuilder(builder: (context) {
                             final scrollController = useScrollController();
                             return AppScrollbar(
-                              isAlwaysShown: true,
+                              thumbVisibility: true,
                               controller: scrollController,
                               child: ScrollConfiguration(
                                 behavior: const GlowlessScrollBehavior(),

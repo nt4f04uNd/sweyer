@@ -240,11 +240,11 @@ class _PackageListTile extends StatelessWidget {
         title: Text(
           packageName,
           overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.headline6,
+          style: theme.textTheme.titleLarge,
         ),
         subtitle: Text(
           MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses),
-          style: theme.textTheme.subtitle2,
+          style: theme.textTheme.titleSmall,
         ),
         selected: isSelected,
         onTap: onTap,
@@ -467,8 +467,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             title: _PackageLicensePageTitle(
               title: title,
               subtitle: subtitle,
-              titleTextStyle: theme.textTheme.headline6,
-              subtitleTextStyle: theme.textTheme.subtitle2,
+              titleTextStyle: theme.textTheme.titleLarge,
+              subtitleTextStyle: theme.textTheme.titleSmall,
             ),
           ),
           SliverPadding(
@@ -484,7 +484,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       );
     }
     return DefaultTextStyle(
-      style: theme.textTheme.caption!,
+      style: theme.textTheme.bodySmall!,
       child: page,
     );
   }

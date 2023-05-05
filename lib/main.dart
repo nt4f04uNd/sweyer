@@ -202,10 +202,10 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
 class _ScrollBehavior extends ScrollBehavior {
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     final theme = Theme.of(context);
     return GlowingOverscrollIndicator(
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: theme.colorScheme.background,
       child: child,
     );

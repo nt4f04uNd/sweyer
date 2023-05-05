@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/physics.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -325,7 +324,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
   }
 
   /// The style that should be used for the queue description text in the app bar.
-  TextStyle get _queueDescriptionStyle => Theme.of(context).textTheme.subtitle2!.copyWith(
+  TextStyle get _queueDescriptionStyle => Theme.of(context).textTheme.titleSmall!.copyWith(
         fontSize: 14.0,
         height: 1.0,
         fontWeight: FontWeight.w700,
@@ -579,7 +578,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                 children: [
                                   Text(
                                     l10n.upNext,
-                                    style: theme.textTheme.headline6!.copyWith(
+                                    style: theme.textTheme.titleLarge!.copyWith(
                                       fontSize: 24,
                                       height: 1.2,
                                     ),
@@ -631,7 +630,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                                     Icon(
                                       Icons.chevron_right_rounded,
                                       size: 18.0,
-                                      color: theme.textTheme.subtitle2!.color,
+                                      color: theme.textTheme.titleSmall!.color,
                                     ),
                                 ],
                               ),

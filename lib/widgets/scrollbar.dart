@@ -32,7 +32,7 @@ class AppScrollbar extends StatefulWidget {
     this.labelBuilder,
     required this.child,
     this.controller,
-    this.isAlwaysShown,
+    this.thumbVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
     this.thickness,
@@ -54,7 +54,7 @@ class AppScrollbar extends StatefulWidget {
     required Widget child,
     required ScrollController controller,
     bool showLabel = true,
-    bool? isAlwaysShown,
+    bool? thumbVisibility,
     bool? showTrackOnHover,
     double? hoverThickness,
     double? thickness,
@@ -86,7 +86,7 @@ class AppScrollbar extends StatefulWidget {
               }());
             },
       controller: controller,
-      isAlwaysShown: isAlwaysShown,
+      thumbVisibility: thumbVisibility,
       showTrackOnHover: showTrackOnHover,
       hoverThickness: hoverThickness,
       thickness: thickness,
@@ -100,7 +100,7 @@ class AppScrollbar extends StatefulWidget {
   final WidgetBuilder? labelBuilder;
   final Widget child;
   final ScrollController? controller;
-  final bool? isAlwaysShown;
+  final bool? thumbVisibility;
   final bool? showTrackOnHover;
   final double? hoverThickness;
   final double? thickness;
@@ -117,7 +117,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller ?? PrimaryScrollController.of(context)!;
+    final controller = widget.controller ?? PrimaryScrollController.of(context);
     final theme = Theme.of(context);
     final highlightColor = theme.highlightColor;
     return Theme(
@@ -131,7 +131,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
           children: [
             _Scrollbar(
               controller: controller,
-              isAlwaysShown: widget.isAlwaysShown,
+              thumbVisibility: widget.thumbVisibility,
               showTrackOnHover: widget.showTrackOnHover,
               hoverThickness: widget.hoverThickness,
               thickness: widget.thickness,
@@ -262,7 +262,7 @@ class _Scrollbar extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
-    this.isAlwaysShown,
+    this.thumbVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
     this.thickness,
@@ -279,12 +279,12 @@ class _Scrollbar extends StatefulWidget {
   /// {@macro flutter.widgets.Scrollbar.controller}
   final ScrollController? controller;
 
-  /// {@macro flutter.widgets.Scrollbar.isAlwaysShown}
-  final bool? isAlwaysShown;
+  /// {@macro flutter.widgets.Scrollbar.thumbVisibility}
+  final bool? thumbVisibility;
 
   /// Controls if the track will show on hover and remain, including during drag.
   ///
-  /// If this property is null, then [ScrollbarThemeData.showTrackOnHover] of
+  /// If this property is null, then [ScrollbarThemeData.trackVisibility] of
   /// [ThemeData.scrollbarTheme] is used. If that is also null, the default value
   /// is false.
   final bool? showTrackOnHover;
@@ -334,7 +334,7 @@ class _ScrollbarState extends State<_Scrollbar> {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
-        isAlwaysShown: widget.isAlwaysShown ?? false,
+        thumbVisibility: widget.thumbVisibility ?? false,
         thickness: widget.thickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging: widget.thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
         radius: widget.radius ?? CupertinoScrollbar.defaultRadius,
@@ -346,7 +346,7 @@ class _ScrollbarState extends State<_Scrollbar> {
     return _MaterialScrollbar(
       child: widget.child,
       controller: widget.controller,
-      isAlwaysShown: widget.isAlwaysShown,
+      thumbVisibility: widget.thumbVisibility,
       showTrackOnHover: widget.showTrackOnHover,
       hoverThickness: widget.hoverThickness,
       thickness: widget.thickness,
@@ -364,7 +364,7 @@ class _MaterialScrollbar extends RawScrollbar {
     Key? key,
     required Widget child,
     ScrollController? controller,
-    bool? isAlwaysShown,
+    bool? thumbVisibility,
     this.showTrackOnHover,
     this.hoverThickness,
     double? thickness,
@@ -377,7 +377,7 @@ class _MaterialScrollbar extends RawScrollbar {
           key: key,
           child: child,
           controller: controller,
-          isAlwaysShown: isAlwaysShown,
+          thumbVisibility: thumbVisibility,
           thickness: thickness,
           radius: radius,
           fadeDuration: _kScrollbarFadeDuration,
@@ -406,12 +406,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late bool _useAndroidScrollbar;
 
   @override
-  bool get showScrollbar => widget.isAlwaysShown ?? _scrollbarTheme.isAlwaysShown ?? false;
+  bool get showScrollbar => widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? false;
 
   @override
   bool get enableGestures => widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
 
-  bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.showTrackOnHover ?? false;
+  bool get _showTrackOnHover => widget.showTrackOnHover ?? _scrollbarTheme.trackVisibility?.resolve(_states) ?? false;
 
   Set<MaterialState> get _states => <MaterialState>{
         if (_dragIsActive) MaterialState.dragged,

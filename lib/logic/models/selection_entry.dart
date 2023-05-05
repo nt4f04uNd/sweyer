@@ -65,7 +65,7 @@ class SelectionEntry<T extends Content> {
   final SongOrigin? origin;
 
   @override
-  int get hashCode => hashValues(data, index, origin);
+  int get hashCode => Object.hash(data, index, origin);
 
   @override
   bool operator ==(Object other) {

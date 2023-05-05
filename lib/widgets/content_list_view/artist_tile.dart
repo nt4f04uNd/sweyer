@@ -6,7 +6,7 @@ import 'package:sweyer/sweyer.dart';
 const double _tileVerticalPadding = 8.0;
 const double _horizontalPadding = 16.0;
 
-TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.titleLarge;
 
 /// Needed for scrollbar computations.
 double kArtistTileHeight(BuildContext context) => _calculateArtistTileHeight(context);

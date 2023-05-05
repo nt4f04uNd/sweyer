@@ -172,7 +172,7 @@ class SongOriginEntry {
       };
 
   @override
-  int get hashCode => hashValues(type, id);
+  int get hashCode => Object.hash(type, id);
 
   @override
   bool operator ==(Object other) {
@@ -226,7 +226,7 @@ class IdMapKey {
       };
 
   @override
-  int get hashCode => hashValues(id, originEntry);
+  int get hashCode => Object.hash(id, originEntry);
 
   @override
   bool operator ==(Object other) {

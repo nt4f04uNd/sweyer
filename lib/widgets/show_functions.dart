@@ -266,7 +266,7 @@ class ShowFunctions extends NFShowFunctions {
           builder: (context) => AppRadioListTile<T>(
             title: Text(
               itemTitleBuilder(item),
-              style: theme.textTheme.subtitle1,
+              style: theme.textTheme.titleMedium,
             ),
             value: item,
             groupValue: groupValueGetter(),
@@ -287,7 +287,7 @@ class ShowFunctions extends NFShowFunctions {
       contentPadding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
       closeButton: const SizedBox.shrink(),
       content: AppScrollbar(
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

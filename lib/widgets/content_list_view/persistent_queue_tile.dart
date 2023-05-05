@@ -11,10 +11,10 @@ const double _gridArtSize = 220.0;
 const double _gridArtAssetScale = 1.2;
 const double _gridCurrentIndicatorScale = 1.7;
 
-TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.headline6;
+TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.titleLarge;
 TextStyle? _subtitleTheme(ContentType contentType, ThemeData theme) => contentType == ContentType.album
     ? ArtistWidget.defaultTextStyle(theme)?.merge(const TextStyle(fontSize: 14.0, height: 1.0))
-    : theme.textTheme.subtitle2?.merge(const TextStyle(fontSize: 14.0, height: 1.0));
+    : theme.textTheme.titleSmall?.merge(const TextStyle(fontSize: 14.0, height: 1.0));
 
 /// Needed for scrollbar computations.
 double kPersistentQueueTileHeight(ContentType contentType, BuildContext context) {

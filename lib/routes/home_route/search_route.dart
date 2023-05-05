@@ -250,7 +250,7 @@ class _SearchStateDelegate {
     RenderObject? targetRenderObject,
   }) {
     assert(object.attached);
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object)!;
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
 
     Rect? targetRect;
     if (targetRenderObject != null && targetRenderObject != object) {
@@ -483,10 +483,10 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   ThemeData buildAppBarTheme() {
     final theme = Theme.of(context);
     return theme.copyWith(
-      primaryColor: theme.backgroundColor,
+      primaryColor: theme.colorScheme.background,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
       textTheme: const TextTheme(
-        headline6: TextStyle(
+        titleLarge: TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.w900,
         ),
@@ -593,7 +593,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
       selectionControls: NFTextSelectionControls(),
       controller: widget.delegate._queryTextController,
       focusNode: focusNode,
-      style: theme.textTheme.headline6,
+      style: theme.textTheme.titleLarge,
       textInputAction: TextInputAction.search,
       onSubmitted: (String _) => stateDelegate.onSubmit(),
       decoration: InputDecoration(
