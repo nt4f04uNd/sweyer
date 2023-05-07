@@ -61,7 +61,7 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
     required int playlistId,
   }) async {
     final playlist = playlists!.firstWhere((playlist) => playlist.id == playlistId);
-    playlist.songIds.insertAll(index - 1, songIds);
+    playlist.songIds.insertAll(index, songIds);
   }
 
   @override
