@@ -110,22 +110,51 @@ object FetchHandler {
     }
 
     fun retrieveAlbums(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
-        return executeQuery(resolver,
-            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-            MediaStore.Audio.Albums.ALBUM + " IS NOT NULL",
-            buildMap {
-                put(MediaStore.Audio.Albums._ID, "id" to { cursor, index -> cursor.getInt(index) })
-                put(MediaStore.Audio.Albums.ALBUM, "album" to { cursor, index -> cursor.getString(index) })
-                put(MediaStore.Audio.Albums.ALBUM_ART, "albumArt" to { cursor, index -> cursor.getString(index) })
-                put(MediaStore.Audio.Albums.ARTIST, "artist" to { cursor, index -> cursor.getString(index) })
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    put(MediaStore.Audio.Albums.ARTIST_ID, "artistId" to { cursor, index -> cursor.getInt(index) })
-                }
-                put(MediaStore.Audio.Albums.FIRST_YEAR, "firstYear" to { cursor, index -> cursor.getInt(index) })
-                put(MediaStore.Audio.Albums.LAST_YEAR, "lastYear" to { cursor, index -> cursor.getInt(index) })
-                put(MediaStore.Audio.Albums.NUMBER_OF_SONGS,
-                    "numberOfSongs" to { cursor, index -> cursor.getInt(index) })
-            })
+        val artistId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Albums.ARTIST_ID
+        } else {
+            "artist_id"
+        }
+        try {
+            return executeQuery(
+                resolver,
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                MediaStore.Audio.Albums.ALBUM + " IS NOT NULL",
+                mapOf(
+                    MediaStore.Audio.Albums._ID to Pair("id") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.ALBUM to Pair("album") { cursor, index -> cursor.getString(index) },
+                    MediaStore.Audio.Albums.ALBUM_ART to Pair("albumArt") { cursor, index -> cursor.getString(index) },
+                    MediaStore.Audio.Albums.ARTIST to Pair("artist") { cursor, index -> cursor.getString(index) },
+                    artistId to Pair("artistId") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.FIRST_YEAR to Pair("firstYear") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.LAST_YEAR to Pair("lastYear") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.NUMBER_OF_SONGS to Pair("numberOfSongs") { cursor, index ->
+                        cursor.getInt(
+                            index
+                        )
+                    },
+                )
+            )
+        } catch (ignored: Throwable) {
+            return executeQuery(
+                resolver,
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                MediaStore.Audio.Albums.ALBUM + " IS NOT NULL",
+                mapOf(
+                    MediaStore.Audio.Albums._ID to Pair("id") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.ALBUM to Pair("album") { cursor, index -> cursor.getString(index) },
+                    MediaStore.Audio.Albums.ALBUM_ART to Pair("albumArt") { cursor, index -> cursor.getString(index) },
+                    MediaStore.Audio.Albums.ARTIST to Pair("artist") { cursor, index -> cursor.getString(index) },
+                    MediaStore.Audio.Albums.FIRST_YEAR to Pair("firstYear") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.LAST_YEAR to Pair("lastYear") { cursor, index -> cursor.getInt(index) },
+                    MediaStore.Audio.Albums.NUMBER_OF_SONGS to Pair("numberOfSongs") { cursor, index ->
+                        cursor.getInt(
+                            index
+                        )
+                    },
+                )
+            )
+        }
     }
 
     fun retrievePlaylists(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
