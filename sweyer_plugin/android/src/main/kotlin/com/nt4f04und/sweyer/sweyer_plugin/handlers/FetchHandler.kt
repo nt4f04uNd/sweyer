@@ -218,10 +218,10 @@ object FetchHandler {
     ): ArrayList<MutableMap<String, Any?>> {
         val maps = ArrayList<MutableMap<String, Any?>>()
         resolver.query(uri, fields.keys.toTypedArray(), query, null, null)?.use { cursor ->
-            val columns = fields.keys.map { cursor.getColumnIndexOrThrow(it) }
+            val columnInfo = fields.values.zip(fields.keys.map { cursor.getColumnIndexOrThrow(it) })
             while (cursor.moveToNext()) {
                 val itemInfo = mutableMapOf<String, Any?>()
-                fields.values.zip(columns).associateTo(itemInfo) { (fieldInfo, index) ->
+                columnInfo.associateTo(itemInfo) { (fieldInfo, index) ->
                     val (name, accessor) = fieldInfo
                     name to if (cursor.isNull(index)) null else accessor(cursor, index)
                 }
