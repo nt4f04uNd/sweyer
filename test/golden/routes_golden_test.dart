@@ -128,6 +128,27 @@ void main() {
         await tester.pumpAndSettle();
       }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.selection_deletion_dialog_songs_tab'));
     });
+
+    testAppGoldens('scroll_labels', (WidgetTester tester) async {
+      await setUpAppTest(() {
+        FakeSweyerPluginPlatform.instance.songs =
+            List.generate(26, (index) => songWith(id: index, title: String.fromCharCode('A'.codeUnitAt(0) + index)));
+      });
+      await tester.runAppTest(() async {
+        ContentControl.instance.sort(
+            contentType: ContentType.song, sort: const SongSort(feature: SongSortFeature.title));
+        await tester.pumpAndSettle();
+
+        final listRect = tester.getRect(find.byType(ContentListView).hitTestable());
+        final gesture = await tester.startGesture(Offset(listRect.right - 20, listRect.bottom - 20));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+          await gesture.moveBy(const Offset(0, -20));
+        }
+        await tester.pumpAndSettle();
+        // Do not end the gesture, otherwise the labels will disappear
+      }, goldenCaptureCallback: () => tester.screenMatchesGolden('tabs_route.scroll_labels'));
+    });
   });
 
   group('persistent_queue_route', () {
