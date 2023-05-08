@@ -413,7 +413,8 @@ public class SweyerPlugin implements FlutterPlugin, MethodCallHandler, ActivityA
                                 );
                                 values.put(
                                         MediaStore.Audio.Playlists.Members.PLAY_ORDER,
-                                        i + index
+                                        // Play order is one based, so add 1 to the zero based index.
+                                        i + index + 1
                                 );
                                 valuesList.add(values);
                             }

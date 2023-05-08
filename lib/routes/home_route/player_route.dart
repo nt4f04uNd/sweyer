@@ -1102,7 +1102,7 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
       bool success = false;
       try {
         await ContentControl.instance.insertSongsInPlaylist(
-          index: 1,
+          index: 0,
           songs: songs,
           playlist: playlist,
         );

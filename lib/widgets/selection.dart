@@ -1741,7 +1741,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
                 onItemTap: (index) {
                   final playlist = playlists[index];
                   ContentControl.instance.insertSongsInPlaylist(
-                    index: playlist.length + 1,
+                    index: playlist.length,
                     songs: ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged),
                     playlist: playlist,
                   );

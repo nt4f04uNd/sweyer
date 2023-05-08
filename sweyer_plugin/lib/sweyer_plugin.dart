@@ -130,7 +130,7 @@ class SweyerPlugin {
     required PlatformPlaylist playlist,
   }) {
     assert(songs.isNotEmpty);
-    assert(index >= 0 && index <= playlist.songIds.length + 1);
+    assert(index >= 0 && index <= playlist.songIds.length);
     return SweyerPluginPlatform.instance.insertSongsInPlaylist(
       index: index,
       songIds: songs.map((song) => song.sourceId).toList(),

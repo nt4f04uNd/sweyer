@@ -59,7 +59,10 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
     required int index,
     required List<int> songIds,
     required int playlistId,
-  }) async {}
+  }) async {
+    final playlist = playlists!.firstWhere((playlist) => playlist.id == playlistId);
+    playlist.songIds.insertAll(index, songIds);
+  }
 
   @override
   Future<bool> isIntentActionView() async {

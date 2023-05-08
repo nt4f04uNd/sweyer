@@ -242,12 +242,9 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
       onSubmit: (entries) {
         int index;
         if (selectedSong == null) {
-          index = 1;
+          index = 0;
         } else {
-          index = songs.indexOf(selectedSong!) + 2;
-          if (index <= 0) {
-            index = 1;
-          }
+          index = songs.indexOf(selectedSong!) + 1;
         }
         ContentControl.instance.insertSongsInPlaylist(
           index: index,
