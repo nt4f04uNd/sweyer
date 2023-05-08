@@ -381,54 +381,63 @@ class ContentControl extends Control {
     if (disposed.value) {
       return;
     }
-    switch (contentType) {
-      case ContentType.song:
-        state.allSongs.setSongs((await SweyerPlugin.instance.retrieveSongs(Song.fromMap)).toList());
-        if (_empty) {
-          dispose();
-          return;
-        }
-        sort(emitChangeEvent: false, contentType: contentType);
-        if (updateQueues) {
-          QueueControl.instance.removeObsolete(emitChangeEvent: false);
-        }
-        break;
-      case ContentType.album:
-        state.albums = await SweyerPlugin.instance.retrieveAlbums(Album.fromMap);
-        if (disposed.value) {
-          return;
-        }
-        final origin = QueueControl.instance.state.origin;
-        if (origin is Album && state.albums[origin.id] == null) {
-          QueueControl.instance.resetQueueAsFallback();
-        }
-        sort(emitChangeEvent: false, contentType: contentType);
-        break;
-      case ContentType.playlist:
-        state.playlists = (await SweyerPlugin.instance.retrievePlaylists(Playlist.fromMap)).toList();
-        if (disposed.value) {
-          return;
-        }
-        final origin = QueueControl.instance.state.origin;
-        if (origin is Playlist && state.playlists.firstWhereOrNull((el) => el == origin) == null) {
-          QueueControl.instance.resetQueueAsFallback();
-        }
-        sort(emitChangeEvent: false, contentType: contentType);
-        break;
-      case ContentType.artist:
-        state.artists = (await SweyerPlugin.instance.retrieveArtists(Artist.fromMap)).toList();
-        if (disposed.value) {
-          return;
-        }
-        final origin = QueueControl.instance.state.origin;
-        if (origin is Artist && state.artists.firstWhereOrNull((el) => el == origin) == null) {
-          QueueControl.instance.resetQueueAsFallback();
-        }
-        sort(emitChangeEvent: false, contentType: contentType);
-        break;
-    }
-    if (emitChangeEvent) {
-      emitContentChange();
+    try {
+      switch (contentType) {
+        case ContentType.song:
+          state.allSongs.setSongs((await SweyerPlugin.instance.retrieveSongs(Song.fromMap)).toList());
+          if (_empty) {
+            dispose();
+            return;
+          }
+          sort(emitChangeEvent: false, contentType: contentType);
+          if (updateQueues) {
+            QueueControl.instance.removeObsolete(emitChangeEvent: false);
+          }
+          break;
+        case ContentType.album:
+          state.albums = await SweyerPlugin.instance.retrieveAlbums(Album.fromMap);
+          if (disposed.value) {
+            return;
+          }
+          final origin = QueueControl.instance.state.origin;
+          if (origin is Album && state.albums[origin.id] == null) {
+            QueueControl.instance.resetQueueAsFallback();
+          }
+          sort(emitChangeEvent: false, contentType: contentType);
+          break;
+        case ContentType.playlist:
+          state.playlists = (await SweyerPlugin.instance.retrievePlaylists(Playlist.fromMap)).toList();
+          if (disposed.value) {
+            return;
+          }
+          final origin = QueueControl.instance.state.origin;
+          if (origin is Playlist && state.playlists.firstWhereOrNull((el) => el == origin) == null) {
+            QueueControl.instance.resetQueueAsFallback();
+          }
+          sort(emitChangeEvent: false, contentType: contentType);
+          break;
+        case ContentType.artist:
+          state.artists = (await SweyerPlugin.instance.retrieveArtists(Artist.fromMap)).toList();
+          if (disposed.value) {
+            return;
+          }
+          final origin = QueueControl.instance.state.origin;
+          if (origin is Artist && state.artists.firstWhereOrNull((el) => el == origin) == null) {
+            QueueControl.instance.resetQueueAsFallback();
+          }
+          sort(emitChangeEvent: false, contentType: contentType);
+          break;
+      }
+      if (emitChangeEvent) {
+        emitContentChange();
+      }
+    } on SweyerPluginException catch (ex, stack) {
+      FirebaseCrashlytics.instance.recordError(
+        ex,
+        stack,
+        reason: 'in re-fetch ${contentType.name}',
+      );
+      ShowFunctions.instance.showToast(msg: staticl10n.oopsErrorOccurred);
     }
   }
 

@@ -11,7 +11,6 @@ enum SweyerMethodChannelExceptionCode {
   /// On Android 30 requests like `MediaStore.createDeletionRequest` require
   /// calling `startIntentSenderForResult`, which might throw this exception.
   intentSender('INTENT_SENDER_ERROR'),
-
   io('IO_ERROR'),
 
   /// API is unavailable on current SDK level.
@@ -53,36 +52,67 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   }
 
   @override
-  Future<void> cancelAlbumArtLoad({required String id}) async => methodChannel.invokeMethod<void>(
-        'cancelAlbumArtLoading',
-        {'id': id},
-      );
+  Future<void> cancelAlbumArtLoad({required String id}) async {
+    try {
+      return await methodChannel.invokeMethod<void>('cancelAlbumArtLoading', {'id': id});
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('cancelAlbumArtLoading failed', error);
+    }
+  }
 
   @override
-  Future<void> fixAlbumArt(int albumId) async => methodChannel.invokeMethod<void>(
-        'fixAlbumArt',
-        {'id': albumId},
-      );
+  Future<void> fixAlbumArt(int albumId) async {
+    try {
+      return await methodChannel.invokeMethod<void>('fixAlbumArt', {'id': albumId});
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('fixAlbumArt failed', error);
+    }
+  }
 
   @override
-  Future<Iterable<Map<String, dynamic>>> retrieveSongs() async =>
-      (await methodChannel.invokeListMethod<Map>('retrieveSongs'))!.map(Map.castFrom);
+  Future<Iterable<Map<String, dynamic>>> retrieveSongs() async {
+    try {
+      return (await methodChannel.invokeListMethod<Map>('retrieveSongs'))!.map(Map.castFrom);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('retrieveSongs failed', error);
+    }
+  }
 
   @override
-  Future<Iterable<Map<String, dynamic>>> retrieveAlbums() async =>
-      (await methodChannel.invokeListMethod<Map>('retrieveAlbums'))!.map(Map.castFrom);
+  Future<Iterable<Map<String, dynamic>>> retrieveAlbums() async {
+    try {
+      return (await methodChannel.invokeListMethod<Map>('retrieveAlbums'))!.map(Map.castFrom);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('retrieveAlbums failed', error);
+    }
+  }
 
   @override
-  Future<Iterable<Map<String, dynamic>>> retrievePlaylists() async =>
-      (await methodChannel.invokeListMethod<Map>('retrievePlaylists'))!.map(Map.castFrom);
+  Future<Iterable<Map<String, dynamic>>> retrievePlaylists() async {
+    try {
+      return (await methodChannel.invokeListMethod<Map>('retrievePlaylists'))!.map(Map.castFrom);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('retrievePlaylists failed', error);
+    }
+  }
 
   @override
-  Future<Iterable<Map<String, dynamic>>> retrieveArtists() async =>
-      (await methodChannel.invokeListMethod<Map>('retrieveArtists'))!.map(Map.castFrom);
+  Future<Iterable<Map<String, dynamic>>> retrieveArtists() async {
+    try {
+      return (await methodChannel.invokeListMethod<Map>('retrieveArtists'))!.map(Map.castFrom);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('retrieveArtists failed', error);
+    }
+  }
 
   @override
-  Future<Iterable<Map<String, dynamic>>> retrieveGenres() async =>
-      (await methodChannel.invokeListMethod<Map>('retrieveGenres'))!.map(Map.castFrom);
+  Future<Iterable<Map<String, dynamic>>> retrieveGenres() async {
+    try {
+      return (await methodChannel.invokeListMethod<Map>('retrieveGenres'))!.map(Map.castFrom);
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('retrieveGenres failed', error);
+    }
+  }
 
   @override
   Future<bool> setSongsFavorite(List<int> songsIds, bool value) async {
@@ -138,8 +168,13 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   }
 
   @override
-  Future<void> removePlaylists(List<int> playlistIds) async =>
-      methodChannel.invokeMethod<void>('removePlaylists', {'ids': playlistIds});
+  Future<void> removePlaylists(List<int> playlistIds) async {
+    try {
+      return await methodChannel.invokeMethod<void>('removePlaylists', {'ids': playlistIds});
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('removePlaylists failed', error);
+    }
+  }
 
   @override
   Future<void> insertSongsInPlaylist({
@@ -165,26 +200,21 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   }
 
   @override
-  Future<bool> moveSongInPlaylist({required int playlistId, required int from, required int to}) async =>
-      (await methodChannel.invokeMethod<bool>(
+  Future<bool> moveSongInPlaylist({required int playlistId, required int from, required int to}) async {
+    try {
+      return (await methodChannel.invokeMethod<bool>(
         'moveSongInPlaylist',
-        {
-          'id': playlistId,
-          'from': from,
-          'to': to,
-        },
+        {'id': playlistId, 'from': from, 'to': to},
       ))!;
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('moveSongInPlaylist failed', error);
+    }
+  }
 
   @override
   Future<void> removeFromPlaylistAt({required List<int> indexes, required int playlistId}) async {
     try {
-      return await methodChannel.invokeMethod<void>(
-        'removeFromPlaylistAt',
-        {
-          'id': playlistId,
-          'indexes': indexes,
-        },
-      );
+      return await methodChannel.invokeMethod<void>('removeFromPlaylistAt', {'id': playlistId, 'indexes': indexes});
     } on PlatformException catch (error) {
       if (error.code == SweyerMethodChannelExceptionCode.playlistNotExists.value) {
         throw PlaylistNotExistException(playlistId, cause: error);
@@ -194,7 +224,13 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   }
 
   @override
-  Future<bool> isIntentActionView() async => (await methodChannel.invokeMethod<bool>('isIntentActionView'))!;
+  Future<bool> isIntentActionView() async {
+    try {
+      return (await methodChannel.invokeMethod<bool>('isIntentActionView'))!;
+    } on PlatformException catch (error) {
+      throw _convertCommonExceptions('isIntentActionView failed', error);
+    }
+  }
 
   SweyerPluginException _convertCommonExceptions(String message, PlatformException error) {
     if (error.code == SweyerMethodChannelExceptionCode.sdk.value) {
