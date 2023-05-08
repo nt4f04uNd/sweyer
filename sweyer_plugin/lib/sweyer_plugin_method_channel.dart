@@ -54,7 +54,7 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   @override
   Future<void> cancelAlbumArtLoad({required String id}) async {
     try {
-      return methodChannel.invokeMethod<void>('cancelAlbumArtLoading', {'id': id});
+      return await methodChannel.invokeMethod<void>('cancelAlbumArtLoading', {'id': id});
     } on PlatformException catch (error) {
       throw _convertCommonExceptions('cancelAlbumArtLoading failed', error);
     }
@@ -63,7 +63,7 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   @override
   Future<void> fixAlbumArt(int albumId) async {
     try {
-      return methodChannel.invokeMethod<void>('fixAlbumArt', {'id': albumId});
+      return await methodChannel.invokeMethod<void>('fixAlbumArt', {'id': albumId});
     } on PlatformException catch (error) {
       throw _convertCommonExceptions('fixAlbumArt failed', error);
     }
@@ -170,7 +170,7 @@ class MethodChannelSweyerPlugin extends SweyerPluginPlatform {
   @override
   Future<void> removePlaylists(List<int> playlistIds) async {
     try {
-      return methodChannel.invokeMethod<void>('removePlaylists', {'ids': playlistIds});
+      return await methodChannel.invokeMethod<void>('removePlaylists', {'ids': playlistIds});
     } on PlatformException catch (error) {
       throw _convertCommonExceptions('removePlaylists failed', error);
     }
