@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
-*  Copyright (c) nt4f04und. All rights reserved.
-*  Licensed under the BSD-style license. See LICENSE in the project root for license information.
-*--------------------------------------------------------------------------------------------*/
-
 import 'package:flutter/material.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -118,6 +113,9 @@ class _AppScrollbarState extends State<AppScrollbar> {
         removeTop: true,
         child: NotificationListener<ScrollNotification>(
           onNotification: (notification) {
+            if (widget.labelBuilder == null) {
+              return false;
+            }
             final Offset? dragPosition;
             if (notification is ScrollStartNotification) {
               dragPosition = notification.dragDetails?.localPosition;
@@ -129,14 +127,17 @@ class _AppScrollbarState extends State<AppScrollbar> {
               dragPosition = null;
             }
             final windowSize = context.size;
-            setState(() {
-              showScrollLabels = windowSize != null &&
-                  dragPosition != null &&
-                  (Directionality.of(context) == TextDirection.rtl
-                      ? (dragPosition.dx < scrollLabelDragAreaWidth && dragPosition.dx >= 0)
-                      : (dragPosition.dx > windowSize.width - scrollLabelDragAreaWidth &&
-                          dragPosition.dx <= windowSize.width));
-            });
+            final shouldShowScrollLabels = windowSize != null &&
+                dragPosition != null &&
+                (Directionality.of(context) == TextDirection.rtl
+                    ? (dragPosition.dx < scrollLabelDragAreaWidth && dragPosition.dx >= 0)
+                    : (dragPosition.dx > windowSize.width - scrollLabelDragAreaWidth &&
+                        dragPosition.dx <= windowSize.width));
+            if (shouldShowScrollLabels != showScrollLabels) {
+              setState(() {
+                showScrollLabels = shouldShowScrollLabels;
+              });
+            }
             return false;
           },
           child: Stack(
