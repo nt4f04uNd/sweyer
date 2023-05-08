@@ -437,6 +437,7 @@ class ContentControl extends Control {
         stack,
         reason: 'in re-fetch ${contentType.name}',
       );
+      ShowFunctions.instance.showToast(msg: staticl10n.oopsErrorOccurred);
     }
   }
 
