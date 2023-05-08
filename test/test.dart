@@ -23,6 +23,7 @@ import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 
 export 'fakes/fakes.dart';
 
+import 'observer/app_widget.dart';
 import 'observer/observer.dart';
 import 'test.dart';
 import 'test_description.dart';
@@ -145,6 +146,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     DeviceInfoControl.instance = FakeDeviceInfoControl();
     FavoritesControl.instance = FakeFavoritesControl();
     PermissionsChannelObserver(this); // Grant all permissions by default.
+    AppWidgetChannelObserver(this); // Ignore app widget updates by default.
     SweyerPluginPlatform.instance = FakeSweyerPluginPlatform(this);
     QueueControl.instance = FakeQueueControl();
     ThemeControl.instance = FakeThemeControl();

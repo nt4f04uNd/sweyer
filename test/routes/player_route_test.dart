@@ -1,6 +1,9 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
+import 'package:sweyer/logic/app_widget.dart';
+import 'package:tuple/tuple.dart';
 
+import '../observer/app_widget.dart';
 import '../test.dart';
 
 void main() {
@@ -132,16 +135,30 @@ void main() {
     });
     await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
+      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
       // Expand the route
       await tester.expandPlayerRoute();
 
       expect(PlaybackControl.instance.currentSong, songs[1]);
+      expect(appWidgetChannelObserver.saveWidgetDataLog, []);
+      expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
-      await tester.tap(find.byIcon(Icons.skip_previous_rounded));
+      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_previous_rounded)));
       expect(PlaybackControl.instance.currentSong, songs.first);
+      expect(appWidgetChannelObserver.saveWidgetDataLog,
+          [Tuple2("song", songs.first.contentUri), const Tuple2("playing", false)]);
+      expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
-      await tester.tap(find.byIcon(Icons.skip_previous_rounded));
+      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_previous_rounded)));
       expect(PlaybackControl.instance.currentSong, songs.last);
+      expect(appWidgetChannelObserver.saveWidgetDataLog, [
+        Tuple2("song", songs.first.contentUri),
+        const Tuple2("playing", false),
+        Tuple2("song", songs.last.contentUri),
+        const Tuple2("playing", false)
+      ]);
+      expect(appWidgetChannelObserver.updateWidgetRequests,
+          [AppWidgetControl.appWidgetName, AppWidgetControl.appWidgetName]);
     });
   });
 
@@ -156,21 +173,37 @@ void main() {
     });
     await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
+      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
       // Expand the route
       await tester.expandPlayerRoute();
 
       expect(PlaybackControl.instance.currentSong, songs[1]);
+      expect(appWidgetChannelObserver.saveWidgetDataLog, []);
+      expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
-      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_next_rounded)));
       expect(PlaybackControl.instance.currentSong, songs.last);
+      expect(appWidgetChannelObserver.saveWidgetDataLog,
+          [Tuple2("song", songs.last.contentUri), const Tuple2("playing", false)]);
+      expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
-      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_next_rounded)));
       expect(PlaybackControl.instance.currentSong, songs.first);
+      expect(appWidgetChannelObserver.saveWidgetDataLog, [
+        Tuple2("song", songs.last.contentUri),
+        const Tuple2("playing", false),
+        Tuple2("song", songs.first.contentUri),
+        const Tuple2("playing", false)
+      ]);
+      expect(appWidgetChannelObserver.updateWidgetRequests,
+          [AppWidgetControl.appWidgetName, AppWidgetControl.appWidgetName]);
     });
   });
 
   testWidgets('play/pause button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
+      await tester.runAsync(() => tester.pump()); // Wait for widget events from start to process.
+      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
       // Expand the route
       await tester.expandPlayerRoute();
 
@@ -181,14 +214,27 @@ void main() {
 
       expect(MusicPlayer.instance.playing, false);
       expect(MusicPlayer.handler!.running, false);
+      expect(appWidgetChannelObserver.saveWidgetDataLog, []);
+      expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
-      await tester.tap(button);
+      await tester.runAsync(() => tester.tap(button));
       expect(MusicPlayer.instance.playing, true);
       expect(MusicPlayer.handler!.running, true);
+      expect(appWidgetChannelObserver.saveWidgetDataLog,
+          [Tuple2("song", songWith().contentUri), const Tuple2("playing", true)]);
+      expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
-      await tester.tap(button);
+      await tester.runAsync(() => tester.tap(button));
       expect(MusicPlayer.instance.playing, false);
       expect(MusicPlayer.handler!.running, true, reason: 'Handler should only stop when stopped, not when paused');
+      expect(appWidgetChannelObserver.saveWidgetDataLog, [
+        Tuple2("song", songWith().contentUri),
+        const Tuple2("playing", true),
+        Tuple2("song", songWith().contentUri),
+        const Tuple2("playing", false)
+      ]);
+      expect(appWidgetChannelObserver.updateWidgetRequests,
+          [AppWidgetControl.appWidgetName, AppWidgetControl.appWidgetName]);
 
       await tester.pumpAndSettle();
     });
