@@ -1627,7 +1627,12 @@ class _GoToArtistSelectionAction extends StatelessWidget {
     if (content is Song) {
       HomeRouter.instance.goto(HomeRoutes.factory.content(content.getArtist()));
     } else if (content is Album) {
-      HomeRouter.instance.goto(HomeRoutes.factory.content(content.getArtist()));
+      final artist = content.getArtist();
+      if (artist != null) {
+        HomeRouter.instance.goto(HomeRoutes.factory.content(artist));
+      } else {
+        ShowFunctions.instance.showToast(msg: getl10n(controller.context).artistUnknown);
+      }
     } else {
       throw UnimplementedError();
     }
@@ -1646,8 +1651,17 @@ class _GoToArtistSelectionAction extends StatelessWidget {
     return _ActionBuilder(
       controller: controller,
       shown: () {
-        return data.length == 1 &&
-            (data.first.data is Song || data.first.data is Album) &&
+        if (data.length != 1) {
+          return false;
+        }
+        final content = data.first.data;
+        Artist? artist;
+        if (content is Song) {
+          artist = content.getArtist();
+        } else if (content is Album) {
+          artist = content.getArtist();
+        }
+        return artist != null &&
             // disable action in artist route
             (HomeRouter.instance.currentRoute.hasDifferentLocation(HomeRoutes.artist) || playerRouteController.opened);
       },

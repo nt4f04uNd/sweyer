@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:clock/clock.dart';
+import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
@@ -9,7 +10,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
   final String album;
   final String? albumArt;
   final String artist;
-  final int artistId;
+  final int? artistId;
   final int firstYear;
   final int? lastYear;
   final int numberOfSongs;
@@ -51,7 +52,8 @@ class Album extends PersistentQueue implements PlatformAlbum {
   }
 
   /// Returns the album artist.
-  Artist getArtist() => ContentControl.instance.state.artists.firstWhere((el) => el.id == artistId);
+  Artist? getArtist() =>
+      artistId == null ? null : ContentControl.instance.state.artists.firstWhereOrNull((el) => el.id == artistId);
 
   const Album({
     required int id,
@@ -97,7 +99,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
       album: map['album'] as String,
       albumArt: map['albumArt'] as String?,
       artist: map['artist'] as String,
-      artistId: map['artistId'] as int,
+      artistId: map['artistId'] as int?,
       firstYear: map['firstYear'] as int,
       lastYear: map['lastYear'] as int,
       numberOfSongs: map['numberOfSongs'] as int,
@@ -131,7 +133,7 @@ abstract class AlbumCopyWith {
     String album,
     String albumArt,
     String artist,
-    int artistId,
+    int? artistId,
     int firstYear,
     int? lastYear,
     int numberOfSongs,
@@ -154,7 +156,7 @@ class _AlbumCopyWith extends AlbumCopyWith {
     Object album = _undefined,
     Object albumArt = _undefined,
     Object artist = _undefined,
-    Object artistId = _undefined,
+    Object? artistId = _undefined,
     Object firstYear = _undefined,
     Object? lastYear = _undefined,
     Object numberOfSongs = _undefined,
@@ -164,7 +166,7 @@ class _AlbumCopyWith extends AlbumCopyWith {
       album: album == _undefined ? value.album : album as String,
       albumArt: albumArt == _undefined ? value.albumArt : albumArt as String,
       artist: artist == _undefined ? value.artist : artist as String,
-      artistId: artistId == _undefined ? value.artistId : artistId as int,
+      artistId: artistId == _undefined ? value.artistId : artistId as int?,
       firstYear: firstYear == _undefined ? value.firstYear : firstYear as int,
       lastYear: lastYear == _undefined ? value.lastYear : lastYear as int?,
       numberOfSongs: numberOfSongs == _undefined ? value.numberOfSongs : numberOfSongs as int,
