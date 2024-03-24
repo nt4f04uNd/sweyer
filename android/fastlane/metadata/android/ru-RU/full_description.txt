@@ -1,0 +1,3 @@
+An open-source non-commercial music player.
+
+Source code https://github.com/nt4f04uNd/sweyer/tree/master
