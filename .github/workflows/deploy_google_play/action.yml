@@ -1,0 +1,131 @@
+name: 🚀🤖 Bundle and deploy Sweyer to Google Play
+description: Bundles and deploys Sweyer to Google Play
+
+inputs:
+  flutter_channel:
+    required: false
+    default: "stable"
+    description: The channel of the Flutter used to build Sweyer with. 
+  flutter_version:
+    required: false
+    default: "3.7.12"
+    description: The version of Flutter used to build Sweyer with.
+  testing_arguments:
+    required: false
+    default: ""
+    description: Optional additional arguments to the flutter test command.\\
+  ruby_version:
+    required: false
+    default: 3.3.0
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🐦 Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{inputs.flutter_version}}
+        channel: ${{inputs.flutter_channel}}
+        cache: true
+
+    - name: 💎 Set up ruby env
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{inputs.ruby_version}}
+        bundler-cache: true
+
+    - name: ⚙️ Decode Keystore File
+      uses: timheuer/base64-to-file@v1
+      id: android_keystore
+      with:
+        fileName: "keystore.jks"
+        encodedString: ${{ secrets.ANDROID_KEYSTORE_FILE }}
+
+    - name: Generate keystore.properties
+      run: |
+        cat <<EOF > keystore.properties
+        storePassword:${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword:${{ secrets.ANDROID_KEY_PASSWORD }}
+        keyAlias:${{ secrets.ANDROID_KEY_ALIAS }}
+        storeFile:${{ steps.android_keystore.outputs.filePath }}
+        EOF
+
+    - name: 📖 Read app version
+      uses: NiklasLehnfeld/flutter-version-number-action@main
+      id: read-version
+      with:
+        file-path: pubspec.yaml
+
+    - name: 🪓 Split app version
+      uses: winterjung/split@v2
+      id: splitted-version
+      with:
+        msg: ${{ steps.read-version.outputs.version-number }}
+        separator: '+'
+
+    - name: 🏗️ Build AAB
+      run: |
+        tools/build_android_bundle.sh
+
+    - name: ✍ Rename APK
+      run: |
+        mv ${{ github.workspace }}/build/app/outputs/bundle/release/app-release.aab ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab
+        
+    - name: 🏗️ Build APK
+      run: |
+        tools/build_android_apk.sh
+
+    - name: ✍ Rename APK
+      run: |
+        mv ${{ github.workspace }}/build/app/outputs/bundle/release/app-release.apk ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.apk
+
+    - name: ⚙️ Decode Service Account Key JSON File
+      uses: timheuer/base64-to-file@v1
+      id: android_service_account_json_file
+      with:
+        fileName: "androidServiceAccount.json"
+        encodedString: ${{ secrets.GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON }}
+
+    - name: 🚀🤖 Build & deploy Android release
+      run: bundle exec fastlane android beta
+      env:
+        FASTLANE_ANDROID_JSON_KEY_FILE: ${{ steps.android_service_account_json_file.outputs.filePath }}
+
+    - name: 📁 Zip symbols
+      id: zip-symbols
+      run: |
+        zip -r symbols.zip build/app/outputs/symbols/
+
+    - name: 📁 Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: assets
+        path: |
+          symbols.zip
+          ${{ github.workspace }}/build/app/outputs/bundle/release
+          ${{ github.workspace }}/build/app/outputs/flutter-apk
+
+    - name: 📝 Draft a GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.splitted-version.outputs._0 }}
+          tag_name: ${{ steps.splitted-version.outputs._0 }}
+          draft: true
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          files: |
+            symbols.zip
+            ${{ github.workspace }}/build/app/outputs/bundle/release
+            ${{ github.workspace }}/build/app/outputs/flutter-apk
+
+    # - name: 🧪 Run Tests
+    #   shell: bash
+    #   run: flutter test --no-pub --test-randomize-ordering-seed random ${{inputs.testing_arguments}}
+
+    # - name: 📁 Save golden test failures artifacts
+    #   if: always()
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: golden-test-failures
+    #     path: test/golden/failures
+    #     if-no-files-found: ignore
