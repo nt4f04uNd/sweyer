@@ -106,10 +106,10 @@ runs:
       shell: bash
       run: |
         cd android
-        bundle exec fastlane install_plugins
         gem install bundler:2.5.3
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
+        bundle exec fastlane install_plugins
 
     - name: 🚀🤖 Build & deploy Android release
       shell: bash
