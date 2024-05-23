@@ -7,45 +7,38 @@ import '../colors.dart';
 
 part 'app_theme.tailor.dart';
 
-@tailor
-class _$AppTheme {
+@TailorMixin()
+class AppTheme extends ThemeExtension<AppTheme> with _$AppThemeTailorMixin {
+  const AppTheme({
+    required this.artColorForBlend,
+    required this.currentIndicatorBackgroundColorWithDefaultArt,
+    required this.sliderInactiveColor,
+    required this.appBarBorderColor,
+    required this.drawerMenuItemColor,
+    required this.contrast,
+    required this.contrastInverse,
+    required this.glowSplashColor,
+    required this.glowSplashColorOnContrast,
+  });
+
   /// Primary application color adjusted for blending into album arts.
-  static final artColorForBlend = [
-    ContentArt.getColorToBlendInDefaultArt(constants.Theme.defaultPrimaryColor),
-    ContentArt.getColorToBlendInDefaultArt(constants.Theme.defaultPrimaryColor),
-  ];
+  @override
+  final Color artColorForBlend;
+  @override
+  final Color currentIndicatorBackgroundColorWithDefaultArt;
+  @override
+  final Color sliderInactiveColor;
+  @override
+  final Color appBarBorderColor;
+  @override
+  final Color drawerMenuItemColor;
 
-  static final currentIndicatorBackgroundColorWithDefaultArt = [
-    constants.Theme.defaultPrimaryColor,
-    constants.Theme.defaultPrimaryColor,
-  ];
-
-  static final sliderInactiveColor = [
-    Colors.black.withOpacity(0.2),
-    Colors.white.withOpacity(0.2),
-  ];
-
-  static const appBarBorderColor = [
-    AppColors.eee,
-    Color(0xff191b1a),
-  ];
-
-  static const drawerMenuItemColor = [
-    Color(0xff3d3e42),
-    Colors.white,
-  ];
-
-  /// Color that contrasts with the [ColorScheme.background].
+  /// Color that contrasts with the [ColorScheme.surface].
   /// Black and white.
-  static const contrast = [
-    Colors.black,
-    Colors.white,
-  ];
-
-  static const contrastInverse = [
-    Colors.white,
-    Colors.black,
-  ];
+  @override
+  final Color contrast;
+  @override
+  final Color contrastInverse;
 
   /// Additional "glow" splash color aside of the one I put into the [ThemeData.splashColor],
   /// that is the primary splash of the application (see [app]).
@@ -57,14 +50,34 @@ class _$AppTheme {
   /// it's drawn over).
   ///
   /// For example, it can be used for better look of splashes over the primary color in dark mode.
-  static final glowSplashColor = [
-    constants.Theme.lightThemeSplashColor,
-    Colors.white.withOpacity(0.1),
-  ];
+  @override
+  final Color glowSplashColor;
 
   /// A [glowSplashColor] to draw over contrasting colors, like primary or [contrast].
-  static final glowSplashColorOnContrast = [
-    Colors.white.withOpacity(0.13),
-    Colors.black.withOpacity(0.13),
-  ];
+  @override
+  final Color glowSplashColorOnContrast;
+
+  static final AppTheme light = AppTheme(
+    appBarBorderColor: AppColors.eee,
+    artColorForBlend: ContentArt.getColorToBlendInDefaultArt(constants.Theme.defaultPrimaryColor),
+    contrast: Colors.black,
+    contrastInverse: Colors.white,
+    currentIndicatorBackgroundColorWithDefaultArt: constants.Theme.defaultPrimaryColor,
+    drawerMenuItemColor: const Color(0xff3d3e42),
+    glowSplashColor: constants.Theme.lightThemeSplashColor,
+    glowSplashColorOnContrast: Colors.white.withOpacity(0.13),
+    sliderInactiveColor: Colors.black.withOpacity(0.2),
+  );
+
+  static final AppTheme dark = AppTheme(
+    appBarBorderColor: const Color(0xff191b1a),
+    artColorForBlend: ContentArt.getColorToBlendInDefaultArt(constants.Theme.defaultPrimaryColor),
+    contrast: Colors.white,
+    contrastInverse: Colors.black,
+    currentIndicatorBackgroundColorWithDefaultArt: constants.Theme.defaultPrimaryColor,
+    drawerMenuItemColor: Colors.white,
+    glowSplashColor: Colors.white.withOpacity(0.1),
+    glowSplashColorOnContrast: Colors.white.withOpacity(0.13),
+    sliderInactiveColor: Colors.white.withOpacity(0.2),
+  );
 }
