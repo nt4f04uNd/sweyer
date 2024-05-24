@@ -92,7 +92,7 @@ Future<void> main() async {
   }).sendPort);
   FlutterError.onError = reportFlutterError;
 
-  runZonedGuarded<Future<void>>(() async {
+  try {
     WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
     await DeviceInfoControl.instance.init();
@@ -101,7 +101,9 @@ Future<void> main() async {
     await Permissions.instance.init();
     await ContentControl.instance.init();
     runApp(const ProviderScope(child: App()));
-  }, reportError);
+  } catch (error, stacktrace) {
+    await reportError(error, stacktrace);
+  }
 }
 
 class App extends StatefulWidget {
