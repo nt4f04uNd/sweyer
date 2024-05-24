@@ -66,30 +66,29 @@ class _WidgetsBindingObserver extends WidgetsBindingObserver {
 }
 
 Future<void> main() async {
-  // Disabling automatic system UI adjustment, which causes system nav bar
-  // color to be reverted to black when the bottom player route is being expanded.
-  //
-  // Related to https://github.com/flutter/flutter/issues/40590
-  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  binding.renderView.automaticSystemUiAdjustment = false;
-  await NFPrefs.initialize();
+  runZonedGuarded(() async {
+    // Disabling automatic system UI adjustment, which causes system nav bar
+    // color to be reverted to black when the bottom player route is being expanded.
+    //
+    // Related to https://github.com/flutter/flutter/issues/40590
+    final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    binding.renderView.automaticSystemUiAdjustment = false;
+    await NFPrefs.initialize();
 
-  await Firebase.initializeApp();
-  if (kDebugMode) {
-    FirebaseFunctions.instance.useFunctionsEmulator('http://localhost/', 5001);
+    await Firebase.initializeApp();
+    if (kDebugMode) {
+      FirebaseFunctions.instance.useFunctionsEmulator('http://localhost/', 5001);
 
-    // Force disable Crashlytics collection while doing every day development.
-    // Temporarily toggle this to true if you want to test crash reporting in your app.
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-  }
+      // Force disable Crashlytics collection while doing every day development.
+      // Temporarily toggle this to true if you want to test crash reporting in your app.
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+    }
 
-  Isolate.current.addErrorListener(RawReceivePort((pair) async {
-    final List<dynamic> errorAndStacktrace = pair;
-    await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
-  }).sendPort);
-  FlutterError.onError = reportFlutterError;
-
-  try {
+    Isolate.current.addErrorListener(RawReceivePort((pair) async {
+      final List<dynamic> errorAndStacktrace = pair;
+      await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
+    }).sendPort);
+    FlutterError.onError = reportFlutterError;
     WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
     await DeviceInfoControl.instance.init();
@@ -98,9 +97,7 @@ Future<void> main() async {
     await Permissions.instance.init();
     await ContentControl.instance.init();
     runApp(const ProviderScope(child: App()));
-  } catch (error, stacktrace) {
-    await reportError(error, stacktrace);
-  }
+  }, reportError);
 }
 
 class App extends StatefulWidget {
