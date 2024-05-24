@@ -20,15 +20,12 @@ $stack''';
 }
 
 Future<void> reportError(dynamic ex, StackTrace stack) async {
-  if (Prefs.devMode.get()) {
-    ShowFunctions.instance.showError(
-      errorDetails: buildErrorReport(ex, stack),
-    );
+  if (Prefs.isInitialized && Prefs.devMode.get()) {
+    ShowFunctions.instance.showError(errorDetails: buildErrorReport(ex, stack));
   }
-  await FirebaseCrashlytics.instance.recordError(
-    ex,
-    stack,
-  );
+  if (Firebase.apps.isNotEmpty) {
+    await FirebaseCrashlytics.instance.recordError(ex, stack);
+  }
 }
 
 Future<void> reportFlutterError(FlutterErrorDetails details) async {

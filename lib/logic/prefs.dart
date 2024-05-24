@@ -87,6 +87,9 @@ abstract class Prefs {
   static final devMode = PrefNotifier(
     const BoolPref('dev_mode', false),
   );
+
+  /// Whether the preferences have been initialized.
+  static bool get isInitialized => NFPrefs.prefs != null;
 }
 
 class SearchHistory {
