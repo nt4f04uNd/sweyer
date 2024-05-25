@@ -10,6 +10,7 @@ import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
@@ -19,12 +20,14 @@ $ex
 $stack''';
 }
 
-Future<void> reportError(dynamic ex, StackTrace stack) async {
+Future<void> reportError(dynamic error, StackTrace stack) async {
   if (Prefs.isInitialized && Prefs.devMode.get()) {
-    ShowFunctions.instance.showError(errorDetails: buildErrorReport(ex, stack));
+    ShowFunctions.instance.showError(
+      errorDetails: buildErrorReport(error, stack),
+    );
   }
   if (Firebase.apps.isNotEmpty) {
-    await FirebaseCrashlytics.instance.recordError(ex, stack);
+    await FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   }
 }
 
@@ -66,38 +69,40 @@ class _WidgetsBindingObserver extends WidgetsBindingObserver {
 }
 
 Future<void> main() async {
-  runZonedGuarded(() async {
-    // Disabling automatic system UI adjustment, which causes system nav bar
-    // color to be reverted to black when the bottom player route is being expanded.
-    //
-    // Related to https://github.com/flutter/flutter/issues/40590
-    final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-    binding.renderView.automaticSystemUiAdjustment = false;
-    await NFPrefs.initialize();
+  // Disabling automatic system UI adjustment, which causes system nav bar
+  // color to be reverted to black when the bottom player route is being expanded.
+  //
+  // Related to https://github.com/flutter/flutter/issues/40590
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  binding.renderView.automaticSystemUiAdjustment = false;
+  await NFPrefs.initialize();
 
-    await Firebase.initializeApp();
-    if (kDebugMode) {
-      FirebaseFunctions.instance.useFunctionsEmulator('http://localhost/', 5001);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (kDebugMode) {
+    FirebaseFunctions.instance.useFunctionsEmulator('http://localhost/', 5001);
 
-      // Force disable Crashlytics collection while doing every day development.
-      // Temporarily toggle this to true if you want to test crash reporting in your app.
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-    }
+    // Force disable Crashlytics collection while doing every day development.
+    // Temporarily toggle this to true if you want to test crash reporting in your app.
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+  }
 
-    Isolate.current.addErrorListener(RawReceivePort((pair) async {
-      final List<dynamic> errorAndStacktrace = pair;
-      await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
-    }).sendPort);
-    FlutterError.onError = reportFlutterError;
-    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
+  Isolate.current.addErrorListener(RawReceivePort((pair) async {
+    final List<dynamic> errorAndStacktrace = pair;
+    await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
+  }).sendPort);
+  FlutterError.onError = reportFlutterError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    reportError(error, stack);
+    return true;
+  };
+  WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
-    await DeviceInfoControl.instance.init();
-    ThemeControl.instance.init();
-    ThemeControl.instance.initSystemUi();
-    await Permissions.instance.init();
-    await ContentControl.instance.init();
-    runApp(const ProviderScope(child: App()));
-  }, reportError);
+  await DeviceInfoControl.instance.init();
+  ThemeControl.instance.init();
+  ThemeControl.instance.initSystemUi();
+  await Permissions.instance.init();
+  await ContentControl.instance.init();
+  runApp(const ProviderScope(child: App()));
 }
 
 class App extends StatefulWidget {

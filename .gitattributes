@@ -4,3 +4,5 @@ pubspec.lock linguist-generated=true
 .metadata linguist-generated=true
 # Generated files by the theme_tailor library
 *.tailor.dart linguist-generated=true
+# Generated files by the firebase library
+lib/firebase_options.dart linguist-generated=true
