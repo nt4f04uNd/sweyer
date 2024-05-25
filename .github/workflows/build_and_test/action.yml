@@ -35,6 +35,10 @@ runs:
         very_good --analytics false
         very_good packages get --recursive
 
+    - name: 🔨 Build Apk
+      shell: bash
+      run: flutter build apk --debug
+
     - name: 🧪 Run Tests
       shell: bash
       run: flutter test --no-pub --test-randomize-ordering-seed random ${{inputs.testing_arguments}}
