@@ -55,6 +55,7 @@ runs:
         path: |
           /usr/local/lib/android/adk
           ~/.android
+          /home/runner/.gradle
 
     - name: 🔨 Build Apk
       shell: bash
