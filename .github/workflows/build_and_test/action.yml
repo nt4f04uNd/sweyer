@@ -47,14 +47,13 @@ runs:
         path: test/golden/failures
         if-no-files-found: ignore
 
-    - name: 💾 Cache android SDK
+    - name: 💾 Cache Android SDK
       uses: actions/cache@v4
-      id: android-sdk
       with:
-        key: android-sdk
+        key: android-sdk-${{inputs.flutter_version}}-${{inputs.flutter_channel}}
         path: |
-          /usr/local/lib/android/adk
-          ~/.android
+          /usr/local/lib/android/sdk
+          /home/runner/.android
           /home/runner/.gradle
 
     - name: 🔨 Build Apk
