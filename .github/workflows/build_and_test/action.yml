@@ -47,19 +47,6 @@ runs:
         path: test/golden/failures
         if-no-files-found: ignore
 
-    - name: 💾 Cache Android SDK
-      uses: actions/cache@v4
-      with:
-        key: android-sdk-${{inputs.flutter_version}}-${{inputs.flutter_channel}}
-        path: |
-          /home/runner/.android
-          /usr/local/lib/android/sdk/emulator
-          /usr/local/lib/android/sdk/platform-tools
-          /usr/local/lib/android/sdk/tools
-          /usr/local/lib/android/sdk/build-tools/30.0.3
-          /usr/local/lib/android/sdk/platforms/android-30
-          /usr/local/lib/android/sdk/platforms/android-28
-
     - name: 💾 Cache Gradle
       uses: actions/cache@v4
       with:
@@ -68,7 +55,4 @@ runs:
 
     - name: 🔨 Build Apk
       shell: bash
-      run: |
-        ls /usr/local/lib/android/sdk/licenses
-        flutter build apk --debug
-        ls /usr/local/lib/android/sdk/licenses
+      run: flutter build apk --debug
