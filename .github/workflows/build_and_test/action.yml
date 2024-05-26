@@ -47,6 +47,15 @@ runs:
         path: test/golden/failures
         if-no-files-found: ignore
 
+    - name: 💾 Cache android SDK
+      uses: actions/cache@v2
+      id: android-sdk
+      with:
+        key: android-sdk
+        path: |
+          /usr/local/lib/android/adk
+          ~/.android
+
     - name: 🔨 Build Apk
       shell: bash
       run: flutter build apk --debug
