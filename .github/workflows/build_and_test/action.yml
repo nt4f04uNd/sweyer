@@ -71,3 +71,4 @@ runs:
       run: |
         ls /usr/local/lib/android/sdk/licenses
         flutter build apk --debug
+        ls /usr/local/lib/android/sdk/licenses
