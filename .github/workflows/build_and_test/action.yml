@@ -52,9 +52,20 @@ runs:
       with:
         key: android-sdk-${{inputs.flutter_version}}-${{inputs.flutter_channel}}
         path: |
-          /usr/local/lib/android/sdk
           /home/runner/.android
-          /home/runner/.gradle
+          /usr/local/lib/android/sdk/emulator
+          /usr/local/lib/android/sdk/licenses
+          /usr/local/lib/android/sdk/platform-tools
+          /usr/local/lib/android/sdk/tools
+          /usr/local/lib/android/sdk/build-tools/30.0.3
+          /usr/local/lib/android/sdk/platforms/android-30
+          /usr/local/lib/android/sdk/platforms/android-28
+
+    - name: 💾 Cache Gradle
+      uses: actions/cache@v4
+      with:
+        key: gradle
+        path: /home/runner/.gradle
 
     - name: 🔨 Build Apk
       shell: bash
