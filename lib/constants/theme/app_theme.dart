@@ -77,7 +77,7 @@ class AppTheme extends ThemeExtension<AppTheme> with _$AppThemeTailorMixin {
     currentIndicatorBackgroundColorWithDefaultArt: constants.Theme.defaultPrimaryColor,
     drawerMenuItemColor: Colors.white,
     glowSplashColor: Colors.white.withOpacity(0.1),
-    glowSplashColorOnContrast: Colors.white.withOpacity(0.13),
+    glowSplashColorOnContrast: Colors.black.withOpacity(0.13),
     sliderInactiveColor: Colors.white.withOpacity(0.2),
   );
 }
