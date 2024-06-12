@@ -51,7 +51,7 @@ class SystemUiTheme extends ThemeExtension<SystemUiTheme> with _$SystemUiThemeTa
   /// Theme for the modal dialog that is displayed over [grey].
   @override
   SystemUiOverlayStyle get modalOverGrey => modal.copyWith(
-    systemNavigationBarColor: const Color(0xff0d0d0d),
+    systemNavigationBarColor: modalOverGreySystemNavigationBarColor,
   );
 
   static final SystemUiOverlayStyle _lightBaseStyle = SystemUiOverlayStyle(
