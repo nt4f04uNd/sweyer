@@ -1,6 +1,11 @@
 name: Make new Sweyer release
 on: 
   workflow_dispatch:
+    inputs:
+      skip-tests:
+        description: Skip tests (not recommended)
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -10,11 +15,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: 🏗 Build and test Sweyer
+        if: ${{ github.event.inputs.skip-tests == 'false' }}
         uses: ./.github/workflows/build_and_test
         with:
           testing_arguments: --coverage
 
       - name: ☂ Upload Code Coverage
+        if: ${{ github.event.inputs.skip-tests == 'false' }}
         uses: codecov/codecov-action@v3
 
       - name: 🚀🤖 Bundle and deploy to Google Play
