@@ -1,4 +1,4 @@
-name: Create a new Sweyer release
+name: Make new Sweyer release
 on: 
   workflow_dispatch:
 
@@ -19,3 +19,9 @@ jobs:
 
       - name: 🚀🤖 Bundle and deploy to Google Play
         uses: ./.github/workflows/deploy_google_play
+        with:
+          secrets_ANDROID_KEYSTORE_FILE: ${{ secrets.ANDROID_KEYSTORE_FILE }}
+          secrets_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          secrets_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          secrets_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          secrets_GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON }}

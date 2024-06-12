@@ -1,4 +1,4 @@
-name: Sweyer
+name: Sweyer PR workflow
 on: [push, pull_request]
 
 jobs:
