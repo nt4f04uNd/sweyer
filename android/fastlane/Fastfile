@@ -22,8 +22,8 @@ platform :android do
   end
 
   desc "Submit a new Beta Build to Google Play Beta"
-  lane :beta do
-    Dir.chdir "../.." do
+  lane :beta do |options|
+    Dir.chdir ".." do
       v_flutter_version = flutter_version()
       version_code = v_flutter_version["version_code"]
       version_name = v_flutter_version["version_name"]
@@ -31,30 +31,12 @@ platform :android do
       upload_to_play_store(
         track: 'beta',
         version_code: version_code,
-        aab: 'build/app/outputs/bundle/release/app-release.aab',
+        package_name: options[:package_name],
+        aab: options[:aab_path] || 'build/app/outputs/bundle/release/app-release.aab',
         skip_upload_screenshots: true,
         skip_upload_images: true,
         json_key: ENV["FASTLANE_ANDROID_JSON_KEY_FILE"]
       )
-
-      # sh("zip -r symbols.zip build/app/outputs/symbols/")
-      # sh("tools/build_android_apk.sh")
-
-      # github_release = set_github_release(
-      #   repository_name: "nt4f04und/sweyer",
-      #   api_token: ENV["GITHUB_TOKEN"],
-      #   name: version_name,
-      #   tag_name: version_name,
-      #   description: "",
-      #   is_draft: true,
-      #   is_generate_release_notes: true,
-      #   commitish: "master",
-      #   upload_assets: [
-      #     "symbols.zip",
-      #     "build/app/outputs/bundle/release/app-release.aab",
-      #     "build/app/outputs/flutter-apk/app-release.apk"
-      #   ]
-      # )
     end
   end
 

@@ -10,13 +10,23 @@ inputs:
     required: false
     default: "3.7.12"
     description: The version of Flutter used to build Sweyer with.
-  testing_arguments:
-    required: false
-    default: ""
-    description: Optional additional arguments to the flutter test command.\\
   ruby_version:
     required: false
     default: 3.3.0
+  testing_arguments:
+    required: false
+    default: ""
+    description: Optional additional arguments to the flutter test command.
+  secrets_ANDROID_KEYSTORE_FILE:
+    required: true
+  secrets_ANDROID_KEYSTORE_PASSWORD:
+    required: true
+  secrets_ANDROID_KEY_PASSWORD:
+    required: true
+  secrets_ANDROID_KEY_ALIAS:
+    required: true
+  secrets_GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON:
+    required: true
 
 runs:
   using: "composite"
@@ -39,16 +49,18 @@ runs:
       id: android_keystore
       with:
         fileName: "keystore.jks"
-        encodedString: ${{ secrets.ANDROID_KEYSTORE_FILE }}
+        encodedString: ${{ inputs.secrets_ANDROID_KEYSTORE_FILE }}
 
-    - name: Generate keystore.properties
+    - name: ⚙️ Generate key.properties
+      shell: bash
       run: |
-        cat <<EOF > keystore.properties
-        storePassword:${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        keyPassword:${{ secrets.ANDROID_KEY_PASSWORD }}
-        keyAlias:${{ secrets.ANDROID_KEY_ALIAS }}
-        storeFile:${{ steps.android_keystore.outputs.filePath }}
+        cat <<EOF > key.properties
+        storePassword=${{ inputs.secrets_ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword=${{ inputs.secrets_ANDROID_KEY_PASSWORD }}
+        keyAlias=${{ inputs.secrets_ANDROID_KEY_ALIAS }}
+        storeFile=${{ steps.android_keystore.outputs.filePath }}
         EOF
+        mv key.properties ${{ github.workspace }}/android/key.properties
 
     - name: 📖 Read app version
       uses: NiklasLehnfeld/flutter-version-number-action@main
@@ -64,68 +76,84 @@ runs:
         separator: '+'
 
     - name: 🏗️ Build AAB
+      shell: bash
       run: |
-        tools/build_android_bundle.sh
+        flutter build appbundle --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
 
-    - name: ✍ Rename APK
+    - name: ✍ Rename AAB
+      shell: bash
       run: |
         mv ${{ github.workspace }}/build/app/outputs/bundle/release/app-release.aab ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab
         
     - name: 🏗️ Build APK
+      shell: bash
       run: |
-        tools/build_android_apk.sh
+        flutter build apk --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
 
     - name: ✍ Rename APK
+      shell: bash
       run: |
-        mv ${{ github.workspace }}/build/app/outputs/bundle/release/app-release.apk ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.apk
+        mv ${{ github.workspace }}/build/app/outputs/flutter-apk/app-release.apk ${{ github.workspace }}/build/app/outputs/flutter-apk/sweyer@${{ steps.read-version.outputs.version-number }}.apk
+
+    - name: 📁 Zip symbols
+      shell: bash
+      id: zip-symbols
+      run: |
+        zip -r ${{ github.workspace }}/symbols.zip ${{ github.workspace }}/build/app/outputs/symbols/
+
+    - name: 📁 Upload build artifacts (symbols)
+      uses: actions/upload-artifact@v3
+      with:
+        name: symbols
+        path: |
+          ${{ github.workspace }}/symbols.zip
+
+    - name: 📁 Upload build artifacts (aab)
+      uses: actions/upload-artifact@v3
+      with:
+        name: sweyer@${{ steps.read-version.outputs.version-number }}.aab
+        path: |
+          ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab
+
+    - name: 📁 Upload build artifacts (apk)
+      uses: actions/upload-artifact@v3
+      with:
+        name: sweyer@${{ steps.read-version.outputs.version-number }}.apk
+        path: |
+          ${{ github.workspace }}/build/app/outputs/flutter-apk/sweyer@${{ steps.read-version.outputs.version-number }}.apk
 
     - name: ⚙️ Decode Service Account Key JSON File
       uses: timheuer/base64-to-file@v1
       id: android_service_account_json_file
       with:
         fileName: "androidServiceAccount.json"
-        encodedString: ${{ secrets.GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON }}
+        encodedString: ${{ inputs.secrets_GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON }}
+
+    - name: 🚀🤖 Prepare Fastlane
+      shell: bash
+      run: |
+        cd android
+        bundle install --jobs 4 --retry 3
+        bundle exec fastlane install_plugins
 
     - name: 🚀🤖 Build & deploy Android release
-      run: bundle exec fastlane android beta
+      shell: bash
+      run: |
+        cd android
+        bundle exec fastlane android beta package_name:"com.nt4f04und.sweyer" aab_path:"${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab"
       env:
+        PUBSPEC_LOCATION: ${{ github.workspace }}/pubspec.yaml
         FASTLANE_ANDROID_JSON_KEY_FILE: ${{ steps.android_service_account_json_file.outputs.filePath }}
 
-    - name: 📁 Zip symbols
-      id: zip-symbols
-      run: |
-        zip -r symbols.zip build/app/outputs/symbols/
-
-    - name: 📁 Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: assets
-        path: |
-          symbols.zip
-          ${{ github.workspace }}/build/app/outputs/bundle/release
-          ${{ github.workspace }}/build/app/outputs/flutter-apk
-
     - name: 📝 Draft a GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ steps.splitted-version.outputs._0 }}
-          tag_name: ${{ steps.splitted-version.outputs._0 }}
-          draft: true
-          fail_on_unmatched_files: true
-          generate_release_notes: true
-          files: |
-            symbols.zip
-            ${{ github.workspace }}/build/app/outputs/bundle/release
-            ${{ github.workspace }}/build/app/outputs/flutter-apk
-
-    # - name: 🧪 Run Tests
-    #   shell: bash
-    #   run: flutter test --no-pub --test-randomize-ordering-seed random ${{inputs.testing_arguments}}
-
-    # - name: 📁 Save golden test failures artifacts
-    #   if: always()
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: golden-test-failures
-    #     path: test/golden/failures
-    #     if-no-files-found: ignore
+      uses: softprops/action-gh-release@v2
+      with:
+        name: ${{ steps.splitted-version.outputs._0 }}
+        tag_name: ${{ steps.splitted-version.outputs._0 }}
+        draft: true
+        fail_on_unmatched_files: true
+        generate_release_notes: true
+        files: |
+          ${{ github.workspace }}/symbols.zip
+          ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab
+          ${{ github.workspace }}/build/app/outputs/flutter-apk/sweyer@${{ steps.read-version.outputs.version-number }}.apk
