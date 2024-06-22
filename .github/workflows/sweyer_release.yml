@@ -8,8 +8,9 @@ on:
         default: false
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v3
@@ -32,3 +33,5 @@ jobs:
           secrets_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           secrets_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           secrets_GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON }}
+          secrets_FIREBASE_CLI_TOKEN: ${{ secrets.FIREBASE_CLI_TOKEN }}
+          vars_FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
