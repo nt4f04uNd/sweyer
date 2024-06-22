@@ -11,7 +11,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
   final String? albumArt;
   final String artist;
   final int? artistId;
-  final int firstYear;
+  final int? firstYear;
   final int? lastYear;
   final int numberOfSongs;
 
@@ -100,8 +100,8 @@ class Album extends PersistentQueue implements PlatformAlbum {
       albumArt: map['albumArt'] as String?,
       artist: map['artist'] as String,
       artistId: map['artistId'] as int?,
-      firstYear: map['firstYear'] as int,
-      lastYear: map['lastYear'] as int,
+      firstYear: map['firstYear'] as int?,
+      lastYear: map['lastYear'] as int?,
       numberOfSongs: map['numberOfSongs'] as int,
     );
   }
