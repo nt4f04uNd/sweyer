@@ -1,5 +1,5 @@
 name: 🚀🤖 Bundle and deploy Sweyer to Google Play
-description: Bundles and deploys Sweyer to Google Play
+description: Bundles and deploys Sweyer to Google Play beta track
 
 inputs:
   flutter_channel:
@@ -26,6 +26,10 @@ inputs:
   secrets_ANDROID_KEY_ALIAS:
     required: true
   secrets_GPLAY_FASTLANE_SERVICE_ACCOUNT_KEY_JSON:
+    required: true
+  secrets_FIREBASE_CLI_TOKEN:
+    required: true
+  vars_FIREBASE_ANDROID_APP_ID:
     required: true
 
 runs:
@@ -136,7 +140,21 @@ runs:
         bundle install --jobs 4 --retry 3
         bundle exec fastlane install_plugins
 
-    - name: 🚀🤖 Build & deploy Android release
+    # Install the Firebase CLI in order to perform crashlytics operations
+    # Kudos to https://github.com/fastlane/fastlane/discussions/20230#discussioncomment-7899888
+    - name: 🔥 Install Firebase CLI
+      shell: bash
+      run: |
+        curl -sL https://firebase.tools | bash
+
+    # Firebase CLI token from login CLI command
+    # Retrieve Firebase Android app ID from Firebase GUI console
+    - name: 🚀🔥 Deploy symbols to Firebase Crashlytics
+      shell: bash
+      run: |
+        firebase --token="${{ inputs.secrets_FIREBASE_CLI_TOKEN }}" crashlytics:symbols:upload --app="${{ inputs.vars_FIREBASE_ANDROID_APP_ID }}" ${{ github.workspace }}/symbols.zip
+
+    - name: 🚀🤖 Deploy Android release to Google Play beta track
       shell: bash
       run: |
         cd android
