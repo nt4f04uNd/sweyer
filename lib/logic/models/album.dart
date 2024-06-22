@@ -134,7 +134,7 @@ abstract class AlbumCopyWith {
     String albumArt,
     String artist,
     int? artistId,
-    int firstYear,
+    int? firstYear,
     int? lastYear,
     int numberOfSongs,
   });
@@ -157,7 +157,7 @@ class _AlbumCopyWith extends AlbumCopyWith {
     Object albumArt = _undefined,
     Object artist = _undefined,
     Object? artistId = _undefined,
-    Object firstYear = _undefined,
+    Object? firstYear = _undefined,
     Object? lastYear = _undefined,
     Object numberOfSongs = _undefined,
   }) {
@@ -167,7 +167,7 @@ class _AlbumCopyWith extends AlbumCopyWith {
       albumArt: albumArt == _undefined ? value.albumArt : albumArt as String,
       artist: artist == _undefined ? value.artist : artist as String,
       artistId: artistId == _undefined ? value.artistId : artistId as int?,
-      firstYear: firstYear == _undefined ? value.firstYear : firstYear as int,
+      firstYear: firstYear == _undefined ? value.firstYear : firstYear as int?,
       lastYear: lastYear == _undefined ? value.lastYear : lastYear as int?,
       numberOfSongs: numberOfSongs == _undefined ? value.numberOfSongs : numberOfSongs as int,
     );
