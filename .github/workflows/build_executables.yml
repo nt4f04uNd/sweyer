@@ -31,10 +31,10 @@ jobs:
 
       - name: 🔨 Build Apk
         shell: bash
-        run: flutter build apk --debug
+        run: flutter build apk --profile
 
       - name: 📁 Save executables
         uses: actions/upload-artifact@v4
         with:
           name: Android Apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/app-profile.apk
