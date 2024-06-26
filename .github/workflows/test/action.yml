@@ -1,8 +1,8 @@
 # Modified very_good_workflows workflow, see ThirdPartyNotices.txt for license
 # https://github.com/VeryGoodOpenSource/very_good_workflows/blob/c66b5434b3428fb5c3d5101492f173b206821850/.github/workflows/flutter_package.yml
 
-name: 🏗 Build and test Sweyer
-description: Build Sweyer and then test it.
+name: 🧪 Test Sweyer
+description: Run the Sweyer tests.
 
 inputs:
   flutter_channel:
