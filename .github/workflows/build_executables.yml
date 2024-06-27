@@ -1,0 +1,40 @@
+name: Build Sweyer executables
+on:
+  pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.7.12
+          channel: stable
+          cache: true
+
+      - name: 📦 Install Dependencies
+        shell: bash
+        run: |
+          flutter pub global activate very_good_cli
+          very_good --analytics false
+          very_good packages get --recursive
+
+      - name: 💾 Cache Gradle
+        uses: actions/cache@v4
+        with:
+          key: gradle
+          path: /home/runner/.gradle
+
+      - name: 🔨 Build Apk
+        shell: bash
+        run: flutter build apk --profile
+
+      - name: 📁 Save executables
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android Apk
+          path: build/app/outputs/flutter-apk/app-profile.apk
