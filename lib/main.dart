@@ -10,6 +10,7 @@ import 'package:sweyer/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
@@ -19,16 +20,15 @@ $ex
 $stack''';
 }
 
-Future<void> reportError(dynamic ex, StackTrace stack) async {
-  if (Prefs.devMode.get()) {
+Future<void> reportError(dynamic error, StackTrace stack) async {
+  if (Prefs.isInitialized && Prefs.devMode.get()) {
     ShowFunctions.instance.showError(
-      errorDetails: buildErrorReport(ex, stack),
+      errorDetails: buildErrorReport(error, stack),
     );
   }
-  await FirebaseCrashlytics.instance.recordError(
-    ex,
-    stack,
-  );
+  if (Firebase.apps.isNotEmpty) {
+    await FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  }
 }
 
 Future<void> reportFlutterError(FlutterErrorDetails details) async {
@@ -77,7 +77,7 @@ Future<void> main() async {
   binding.renderView.automaticSystemUiAdjustment = false;
   await NFPrefs.initialize();
 
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   if (kDebugMode) {
     FirebaseFunctions.instance.useFunctionsEmulator('http://localhost/', 5001);
 
@@ -91,17 +91,18 @@ Future<void> main() async {
     await reportError(errorAndStacktrace.first, errorAndStacktrace.last);
   }).sendPort);
   FlutterError.onError = reportFlutterError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    reportError(error, stack);
+    return true;
+  };
+  WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
 
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsBinding.instance.addObserver(_WidgetsBindingObserver());
-
-    await DeviceInfoControl.instance.init();
-    ThemeControl.instance.init();
-    ThemeControl.instance.initSystemUi();
-    await Permissions.instance.init();
-    await ContentControl.instance.init();
-    runApp(const ProviderScope(child: App()));
-  }, reportError);
+  await DeviceInfoControl.instance.init();
+  ThemeControl.instance.init();
+  ThemeControl.instance.initSystemUi();
+  await Permissions.instance.init();
+  await ContentControl.instance.init();
+  runApp(const ProviderScope(child: App()));
 }
 
 class App extends StatefulWidget {
