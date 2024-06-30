@@ -35,7 +35,9 @@ jobs:
 
       - name: 🔨 Build Apk
         shell: bash
-        run: flutter build apk --profile
+        run: |
+          flutter doctor -v
+          flutter build apk --profile
 
       - name: 📁 Save executables
         uses: actions/upload-artifact@v4
