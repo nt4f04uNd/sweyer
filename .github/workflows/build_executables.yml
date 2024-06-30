@@ -31,7 +31,7 @@ jobs:
       - name: 🔨 Build Apk
         shell: bash
         run: |
-          flutter doctor -v
+          export JAVA_HOME="$JAVA_HOME_17_X64"
           flutter build apk --profile
 
       - name: 📁 Save executables
