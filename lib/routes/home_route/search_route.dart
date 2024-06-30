@@ -209,7 +209,7 @@ class _SearchStateDelegate {
     // the `targetRenderObject` invisible.
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
-    ScrollableState? scrollable = Scrollable.of(context);
+    ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
       futures.add(_ensureVisible(
         scrollable.position,
@@ -223,7 +223,7 @@ class _SearchStateDelegate {
 
       targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
-      scrollable = Scrollable.of(context);
+      scrollable = Scrollable.maybeOf(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
