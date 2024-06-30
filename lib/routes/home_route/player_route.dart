@@ -871,9 +871,7 @@ class _InfoButton extends StatelessWidget {
                     child: SelectableText(
                       songInfo,
                       style: const TextStyle(fontSize: 13.0),
-                      selectionControls: NFTextSelectionControls(
-                        backgroundColor: theme.colorScheme.background,
-                      ),
+                      selectionControls: MaterialTextSelectionControls(),
                     ),
                   ),
                 );

@@ -5,8 +5,11 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 import 'package:sweyer_plugin/sweyer_plugin_method_channel.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockSweyerPluginPlatform extends SweyerPluginPlatform {
+class MockSweyerPluginPlatform
+    with MockPlatformInterfaceMixin
+    implements SweyerPluginPlatform {
   @override
   Future<void> cancelAlbumArtLoad({required String id}) {
     // TODO: implement cancelAlbumArtLoad
