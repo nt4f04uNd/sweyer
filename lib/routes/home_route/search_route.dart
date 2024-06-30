@@ -485,8 +485,8 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
     return theme.copyWith(
       primaryColor: theme.colorScheme.background,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(
+      textTheme: TextTheme(
+        titleLarge: theme.textTheme.titleLarge?.copyWith(
           fontSize: 20.0,
           fontWeight: FontWeight.w900,
         ),
@@ -590,7 +590,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
         routeName = searchFieldLabel;
     }
     final title = TextField(
-      selectionControls: NFTextSelectionControls(),
+      selectionControls: MaterialTextSelectionControls(),
       controller: widget.delegate._queryTextController,
       focusNode: focusNode,
       style: theme.textTheme.titleLarge,
