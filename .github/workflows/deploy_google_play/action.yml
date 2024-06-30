@@ -82,6 +82,7 @@ runs:
     - name: 🏗️ Build AAB
       shell: bash
       run: |
+        export JAVA_HOME="$JAVA_HOME_17_X64"
         flutter build appbundle --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
 
     - name: ✍ Rename AAB
@@ -92,6 +93,7 @@ runs:
     - name: 🏗️ Build APK
       shell: bash
       run: |
+        export JAVA_HOME="$JAVA_HOME_17_X64"
         flutter build apk --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
 
     - name: ✍ Rename APK
