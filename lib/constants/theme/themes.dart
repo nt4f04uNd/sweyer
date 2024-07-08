@@ -13,6 +13,7 @@ abstract class Theme {
 
   static ThemeContainer<ThemeData> app = ThemeContainer(
     light: ThemeData(
+      useMaterial3: false,
       extensions: [
         AppTheme.light,
         SystemUiTheme.light,
@@ -159,6 +160,7 @@ abstract class Theme {
       ),
     ),
     dark: ThemeData(
+      useMaterial3: false,
       extensions: [
         AppTheme.dark,
         SystemUiTheme.dark,
