@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 /// Component to show artist, or automatically show 'Unknown artist' instead of '<unknown>'
 class ArtistWidget extends StatelessWidget {
   const ArtistWidget({
-    Key? key,
+    super.key,
     required this.artist,
     this.trailingText,
     this.overflow = TextOverflow.ellipsis,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   final String artist;
 

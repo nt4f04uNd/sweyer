@@ -15,7 +15,7 @@ class PaletteSwatches extends StatelessWidget {
   ///
   /// The [generator] is optional. If it is null, then the display will
   /// just be an empty container.
-  const PaletteSwatches({Key? key, this.generator}) : super(key: key);
+  const PaletteSwatches({super.key, this.generator});
 
   /// The [PaletteGenerator] that contains all of the swatches that we're going
   /// to display.
@@ -64,19 +64,17 @@ class PaletteSwatch extends StatelessWidget {
   /// then the swatch will show a placeholder instead, to indicate
   /// that there is no color.
   const PaletteSwatch({
-    Key? key,
+    super.key,
     this.color,
     this.label,
-  })  : paletteColor = null,
-        super(key: key);
+  })  : paletteColor = null;
 
   const PaletteSwatch.forPalette({
-    Key? key,
+    super.key,
     PaletteColor? color,
     this.label,
   })  : paletteColor = color,
-        color = null,
-        super(key: key);
+        color = null;
 
   /// The color of the swatch.
   final Color? color;

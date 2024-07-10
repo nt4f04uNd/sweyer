@@ -7,7 +7,7 @@ const double _colorItemSize = 36.0;
 const double _colorItemActiveBorderWidth = 2.5;
 
 class ThemeSettingsRoute extends StatefulWidget {
-  const ThemeSettingsRoute({Key? key}) : super(key: key);
+  const ThemeSettingsRoute({super.key});
   @override
   _ThemeSettingsRouteState createState() => _ThemeSettingsRouteState();
 }
@@ -75,10 +75,6 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
     }
   }
 
-  Future<bool> _handlePop() {
-    return Future.value(canPop);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
@@ -87,8 +83,8 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
       begin: prevPrimaryColor,
       end: primaryColor,
     ).animate(controller);
-    return WillPopScope(
-      onWillPop: _handlePop,
+    return PopScope(
+      canPop: canPop,
       child: Scaffold(
         appBar: AppBar(
           title: AppBarTitleMarquee(text: l10n.theme),
@@ -152,11 +148,10 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
 @visibleForTesting
 class ColorItem extends StatefulWidget {
   const ColorItem({
-    Key? key,
     required this.color,
     required this.onTap,
     this.active = false,
-  }) : super(key: key);
+  });
 
   final Color color;
   final bool active;

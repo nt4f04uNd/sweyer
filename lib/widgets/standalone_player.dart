@@ -9,7 +9,7 @@ import 'package:sweyer/sweyer.dart';
 // Currently it's not used anywhere.
 
 class _StandalonePlayer extends StatefulWidget {
-  const _StandalonePlayer({Key? key}) : super(key: key);
+  const _StandalonePlayer();
 
   @override
   _StandalonePlayerState createState() => _StandalonePlayerState();

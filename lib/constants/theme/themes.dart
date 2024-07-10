@@ -29,14 +29,13 @@ abstract class Theme {
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
-        background: Colors.white,
-        onBackground: AppColors.greyText,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
         primaryContainer: Color(0xff936bff),
         onPrimary: Colors.white,
         secondary: AppColors.eee,
         secondaryContainer: Colors.white,
+        onSecondaryContainer: AppColors.greyText,
         // todo: temporarily used for text in [AppButton], remove when ThemeExtensions are in place
         onSecondary: defaultPrimaryColor,
         error: Color(0xffed3b3b),
@@ -75,7 +74,7 @@ abstract class Theme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
-          textStyle: MaterialStateProperty.all(
+          textStyle: WidgetStateProperty.all(
             const TextStyle(
               color: defaultPrimaryColor,
               fontFamily: 'Manrope',
@@ -141,21 +140,21 @@ abstract class Theme {
         backgroundColor: Colors.white,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor : null,
         ),
-        trackColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null,
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null,
         ),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor : null,
         ),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor : null,
         ),
       ),
     ),
@@ -176,14 +175,13 @@ abstract class Theme {
       //****************** Color scheme (preferable to colors) *********************
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
-        background: Colors.black,
-        onBackground: Colors.white,
         primary: defaultPrimaryColor,
         // This is not darker, though lighter version
         primaryContainer: Color(0xff936bff),
         onPrimary: Colors.white,
         secondary: AppColors.grey,
         secondaryContainer: Colors.black,
+        onSecondaryContainer: Colors.white,
         // todo: temporarily used for text in [AppButton], remove when ThemeExtensions are in place
         onSecondary: Colors.white,
         error: Color(0xffed3b3b),
@@ -272,21 +270,21 @@ abstract class Theme {
         backgroundColor: Color(0xff070707),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor : null,
         ),
-        trackColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null,
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor.withAlpha(0x80) : null,
         ),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor : null,
         ),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (states) => states.contains(MaterialState.selected) ? defaultPrimaryColor : null,
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? defaultPrimaryColor : null,
         ),
       ),
     ),

@@ -12,12 +12,12 @@ const double _kButtonSize = 66.0;
 
 class AnimatedPlayPauseButton extends StatefulWidget {
   const AnimatedPlayPauseButton({
-    Key? key,
+    super.key,
     this.player,
     this.iconSize,
     this.size,
     this.iconColor,
-  }) : super(key: key);
+  });
 
   final AudioPlayer? player;
   final double? iconSize;

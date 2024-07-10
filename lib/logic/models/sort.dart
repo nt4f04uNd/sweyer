@@ -169,7 +169,7 @@ class SongSort extends Sort<Song> {
     required super.feature,
     super.order = SortOrder.ascending,
   });
-  SongSort.defaultOrder(feature) : super.defaultOrder(feature);
+  SongSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory SongSort.fromMap(Map map) => SongSort(
         feature: SongSortFeature.values.byName(map['feature']),
@@ -259,7 +259,7 @@ class AlbumSort extends Sort<Album> {
     required super.feature,
     super.order = SortOrder.ascending,
   });
-  AlbumSort.defaultOrder(feature) : super.defaultOrder(feature);
+  AlbumSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory AlbumSort.fromMap(Map map) => AlbumSort(
         feature: AlbumSortFeature.values.byName(map['feature']),
@@ -340,7 +340,7 @@ class PlaylistSort extends Sort<Playlist> {
     required super.feature,
     super.order = SortOrder.ascending,
   });
-  PlaylistSort.defaultOrder(feature) : super.defaultOrder(feature);
+  PlaylistSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory PlaylistSort.fromMap(Map map) => PlaylistSort(
         feature: PlaylistSortFeature.values.byName(map['feature']),
@@ -412,7 +412,7 @@ class ArtistSort extends Sort<Artist> {
     required super.feature,
     super.order = SortOrder.ascending,
   });
-  ArtistSort.defaultOrder(feature) : super.defaultOrder(feature);
+  ArtistSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory ArtistSort.fromMap(Map map) => ArtistSort(
         feature: ArtistSortFeature.values.byName(map['feature']),

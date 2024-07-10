@@ -76,7 +76,7 @@ class ContentArtSource with EquatableMixin {
 ///
 class ContentArt extends StatefulWidget {
   const ContentArt({
-    Key? key,
+    super.key,
     required this.source,
     this.color,
     this.size,
@@ -89,11 +89,11 @@ class ContentArt extends StatefulWidget {
     this.currentIndicatorScale,
     this.onLoad,
     this.loadAnimationDuration = kArtLoadAnimationDuration,
-  }) : super(key: key);
+  });
 
   /// Creates an art for the [SongTile] or [SelectableSongTile].
   const ContentArt.songTile({
-    Key? key,
+    super.key,
     required this.source,
     this.color,
     this.defaultArtIcon,
@@ -105,13 +105,12 @@ class ContentArt extends StatefulWidget {
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   })  : size = kSongTileArtSize,
         assetHighRes = false,
-        currentIndicatorScale = null,
-        super(key: key);
+        currentIndicatorScale = null;
 
   /// Creates an art for the [PersistentQueueTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
   const ContentArt.persistentQueueTile({
-    Key? key,
+    super.key,
     required this.source,
     this.color,
     this.defaultArtIcon,
@@ -123,13 +122,12 @@ class ContentArt extends StatefulWidget {
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   })  : size = kPersistentQueueTileArtSize,
         assetHighRes = false,
-        currentIndicatorScale = 1.17,
-        super(key: key);
+        currentIndicatorScale = 1.17;
 
   /// Creates an art for the [ArtistTile].
   /// It has the same image contents scale as [AlbumArt.songTile].
   const ContentArt.artistTile({
-    Key? key,
+    super.key,
     required this.source,
     this.color,
     this.defaultArtIcon,
@@ -141,13 +139,12 @@ class ContentArt extends StatefulWidget {
     this.loadAnimationDuration = kArtListLoadAnimationDuration,
   })  : size = kPersistentQueueTileArtSize,
         assetHighRes = false,
-        currentIndicatorScale = 1.1,
-        super(key: key);
+        currentIndicatorScale = 1.1;
 
   /// Creates an art for the [PlayerRoute].
   /// Its image contents scale differs from the [AlbumArt.songTile] and [AlbumArt.PersistentQueueTile].
   const ContentArt.playerRoute({
-    Key? key,
+    super.key,
     required this.source,
     this.size,
     this.color,
@@ -159,8 +156,7 @@ class ContentArt extends StatefulWidget {
     this.loadAnimationDuration = const Duration(milliseconds: 500),
   })  : assetHighRes = true,
         current = false,
-        currentIndicatorScale = null,
-        super(key: key);
+        currentIndicatorScale = null;
 
   final ContentArtSource? source;
 
@@ -395,9 +391,9 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
   _SongScopedStorageArtSourceLoader({
     required this.song,
     required this.size,
-    required _ContentArtState state,
-    required OnLoadingChangeCallback onLoadingChange,
-  }) : super(state: state, onLoadingChange: onLoadingChange);
+    required super.state,
+    required OnLoadingChangeCallback super.onLoadingChange,
+  });
 
   final Song song;
   final double size;
@@ -480,9 +476,9 @@ class _SongFileArtSourceLoader extends _ArtSourceLoader {
   _SongFileArtSourceLoader({
     required this.song,
     required this.size,
-    required _ContentArtState state,
-    required OnLoadingChangeCallback onLoadingChange,
-  }) : super(state: state, onLoadingChange: onLoadingChange);
+    required super.state,
+    required OnLoadingChangeCallback super.onLoadingChange,
+  });
 
   final Song song;
   final double? size;
@@ -565,8 +561,8 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
   _ArtistGeniusArtSourceLoader({
     required this.artist,
     required this.size,
-    required _ContentArtState state,
-  }) : super(state: state);
+    required super.state,
+  });
 
   final Artist artist;
   final double? size;
@@ -1082,12 +1078,11 @@ class _ContentArtState extends State<ContentArt> {
 /// Used in bottom track panel and starts rotating when track starts playing.
 class AlbumArtRotating extends StatefulWidget {
   const AlbumArtRotating({
-    Key? key,
+    super.key,
     required this.source,
     required this.initRotating,
     this.initRotation = 0.0,
-  })  : assert(initRotation >= 0 && initRotation <= 1.0),
-        super(key: key);
+  })  : assert(initRotation >= 0 && initRotation <= 1.0);
 
   final ContentArtSource source;
 

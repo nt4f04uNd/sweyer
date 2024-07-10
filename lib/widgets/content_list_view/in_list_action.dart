@@ -5,7 +5,7 @@ import 'package:sweyer/sweyer.dart';
 class InListContentAction extends StatefulWidget {
   /// Create action with paddings for song list.
   const InListContentAction.song({
-    Key? key,
+    super.key,
     required this.icon,
     required this.text,
     required this.onTap,
@@ -13,12 +13,11 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  })  : horizontalPadding = kSongTileHorizontalPadding,
-        super(key: key);
+  })  : horizontalPadding = kSongTileHorizontalPadding;
 
   /// Create action with paddings for persistent queue list.
   const InListContentAction.persistentQueue({
-    Key? key,
+    super.key,
     required this.icon,
     required this.text,
     required this.onTap,
@@ -26,8 +25,7 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  })  : horizontalPadding = kPersistentQueueTileHorizontalPadding,
-        super(key: key);
+  })  : horizontalPadding = kPersistentQueueTileHorizontalPadding;
 
   final IconData icon;
   final String text;
@@ -146,9 +144,9 @@ class _InListContentActionState extends State<InListContentAction> with SingleTi
 
 class CreatePlaylistInListAction extends StatefulWidget {
   const CreatePlaylistInListAction({
-    Key? key,
+    super.key,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   final bool enabled;
 

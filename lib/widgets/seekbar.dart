@@ -8,11 +8,11 @@ import 'package:sweyer/sweyer.dart';
 
 class Seekbar extends StatefulWidget {
   const Seekbar({
-    Key? key,
+    super.key,
     this.color,
     this.player,
     this.duration,
-  }) : super(key: key);
+  });
 
   /// Color of the active slider part.
   ///

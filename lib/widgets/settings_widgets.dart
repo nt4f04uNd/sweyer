@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 /// Creates a setting item with [title], [description] and [content] sections
 class SettingItem extends StatelessWidget {
   const SettingItem({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     this.description,
     this.trailing,
-  }) : super(key: key);
+  });
 
   /// Text displayed as main title of the settings
   final String title;
@@ -71,10 +71,10 @@ class SettingItem extends StatelessWidget {
 /// The [child] is untouchable in the animation.
 class ChangedSwitcher extends StatefulWidget {
   const ChangedSwitcher({
-    Key? key,
+    super.key,
     this.child,
     this.changed = false,
-  }) : super(key: key);
+  });
 
   final Widget? child;
 

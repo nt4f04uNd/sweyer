@@ -10,7 +10,7 @@ import 'package:sweyer/sweyer.dart';
 /// For example the search results are split into such sections.
 class ContentSection<T extends Content> extends StatelessWidget {
   const ContentSection({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.list,
     this.onHeaderTap,
@@ -19,11 +19,10 @@ class ContentSection<T extends Content> extends StatelessWidget {
     this.contentTileTapHandler,
     this.selectedTest,
     this.selectionIndexMapper,
-  })  : child = null,
-        super(key: key);
+  })  : child = null;
 
   const ContentSection.custom({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.list,
     required this.child,
@@ -32,8 +31,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
         contentTileTapHandler = null,
         selectedTest = null,
         selectionIndexMapper = null,
-        maxPreviewCount = 0,
-        super(key: key);
+        maxPreviewCount = 0;
 
   final ContentType<T> contentType;
   final List<T> list;

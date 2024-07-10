@@ -5,7 +5,7 @@ import 'package:sweyer/sweyer.dart';
 /// common properties of all tiles.
 class ContentTile<T extends Content> extends StatelessWidget {
   const ContentTile({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.content,
     this.trailing,
@@ -21,7 +21,7 @@ class ContentTile<T extends Content> extends StatelessWidget {
     this.longPressSelectionGestureEnabled = true,
     this.handleTapInSelection = true,
     this.selectionController,
-  }) : super(key: key);
+  });
 
   final ContentType<T> contentType;
   final T content;
@@ -84,8 +84,6 @@ class ContentTile<T extends Content> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(!selectable || selectable && selectionIndex != null, 'If tile is selectable, an `index` must be provided');
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (contentType as ContentType) {
       case ContentType.song:
         return !selectable

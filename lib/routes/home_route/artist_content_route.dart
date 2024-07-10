@@ -5,10 +5,10 @@ import 'package:sweyer/sweyer.dart';
 
 class ArtistContentRoute<T extends Content> extends StatefulWidget {
   const ArtistContentRoute({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.arguments,
-  }) : super(key: key);
+  });
 
   final ContentType<T> contentType;
   final ArtistContentArguments<T> arguments;
@@ -28,8 +28,6 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
     _contentChangeSubscription = ContentControl.instance.onContentChange.listen((event) {
       setState(() {
         // Update contents
-        // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-        // ignore: unnecessary_cast
         switch (widget.contentType as ContentType) {
           case ContentType.song:
             list = widget.arguments.artist.songs as List<T>;
@@ -117,8 +115,6 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           ContentListHeaderAction(
                             icon: const Icon(Icons.shuffle_rounded),
                             onPressed: () {
-                              // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-                              // ignore: unnecessary_cast
                               switch (widget.contentType as ContentType) {
                                 case ContentType.song:
                                   QueueControl.instance.setOriginQueue(
@@ -148,8 +144,6 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                           ContentListHeaderAction(
                             icon: const Icon(Icons.play_arrow_rounded),
                             onPressed: () {
-                              // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-                              // ignore: unnecessary_cast
                               switch (widget.contentType as ContentType) {
                                 case ContentType.song:
                                   QueueControl.instance.setOriginQueue(

@@ -9,9 +9,9 @@ import 'package:sweyer/sweyer.dart';
 /// Consists of three equalizer bars.
 class CurrentIndicator extends StatelessWidget {
   const CurrentIndicator({
-    Key? key,
+    super.key,
     this.color = Colors.white,
-  }) : super(key: key);
+  });
 
   /// Color of the bars.
   final Color color;
@@ -97,10 +97,9 @@ class _Value {
 
 class _Bar extends StatefulWidget {
   const _Bar({
-    Key? key,
     required this.values,
     this.color,
-  }) : super(key: key);
+  });
 
   final List<_Value> values;
   final Color? color;

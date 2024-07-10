@@ -3,9 +3,9 @@ import 'package:sweyer/sweyer.dart';
 
 class SelectionRoute extends StatefulWidget {
   const SelectionRoute({
-    Key? key,
+    super.key,
     required this.selectionArguments,
-  }) : super(key: key);
+  });
 
   final SelectionArguments selectionArguments;
 

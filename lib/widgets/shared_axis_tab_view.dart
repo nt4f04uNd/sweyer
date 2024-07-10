@@ -44,11 +44,11 @@ class SharedAxisTabController extends ChangeNotifier {
 /// * [SharedAxisTabController] that controls this view
 class SharedAxisTabView extends StatefulWidget {
   const SharedAxisTabView({
-    Key? key,
+    super.key,
     required this.children,
     required this.controller,
     this.tabBuilder = _defaultTabBuilder,
-  }) : super(key: key);
+  });
 
   static Widget _defaultTabBuilder(
     BuildContext context,

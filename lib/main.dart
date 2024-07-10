@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sweyer/media_query_wrapper.dart';
 import 'package:sweyer/sweyer.dart';
@@ -74,7 +75,9 @@ Future<void> main() async {
   //
   // Related to https://github.com/flutter/flutter/issues/40590
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  binding.renderView.automaticSystemUiAdjustment = false;
+  for (RenderView renderView in binding.renderViews) {
+    renderView.automaticSystemUiAdjustment = false;
+  }
   await NFPrefs.initialize();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -107,9 +110,9 @@ Future<void> main() async {
 
 class App extends StatefulWidget {
   const App({
-    Key? key,
+    super.key,
     this.debugShowCheckedModeBanner = true,
-  }) : super(key: key);
+  });
 
   final bool debugShowCheckedModeBanner;
 
@@ -140,7 +143,7 @@ late SlidableController _drawerController;
 ///
 /// [playerRouteController] is used inside [PlayerInterfaceColorStyleControl], which
 /// is faked and initialized before the app actually runs, meaning that
-/// at some poing it could use unitialized [playerRouteController].
+/// at some point it could use uninitialized [playerRouteController].
 ///
 /// This happens in [testAppGoldens] with playerInterfaceColorStylesToTest: {PlayerInterfaceColorStyle.themeBackgroundColor},
 /// `player_route.player_route` can be used as an example of this.
@@ -182,7 +185,6 @@ class _AppState extends State<App> with TickerProviderStateMixin {
                 showPerformanceOverlay: materialAppSwitchesState.showPerformanceOverlay,
                 checkerboardRasterCacheImages: materialAppSwitchesState.checkerboardRasterCacheImages,
                 showSemanticsDebugger: materialAppSwitchesState.showSemanticsDebugger,
-                useInheritedMediaQuery: true,
                 debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
                 title: constants.Config.applicationTitle,
                 theme: theme,
@@ -207,7 +209,7 @@ class _ScrollBehavior extends ScrollBehavior {
     final theme = Theme.of(context);
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
-      color: theme.colorScheme.background,
+      color: theme.colorScheme.secondaryContainer,
       child: child,
     );
   }

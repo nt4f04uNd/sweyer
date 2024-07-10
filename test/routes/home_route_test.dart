@@ -206,7 +206,7 @@ void main() {
     });
     testWidgets('for large text scale', (WidgetTester tester) async {
       // TODO: Increase the scale factor once the other unrelated overflows are handled.
-      tester.binding.window.platformDispatcher.textScaleFactorTestValue = 1.2; // 2.5;
+      tester.binding.platformDispatcher.textScaleFactorTestValue = 1.2; // 2.5;
       await tester.runAppTest(() async {
         final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
         final trackPanelTop =
@@ -215,7 +215,7 @@ void main() {
       });
     });
     testWidgets('for small text scale', (WidgetTester tester) async {
-      tester.binding.window.platformDispatcher.textScaleFactorTestValue = 0.5;
+      tester.binding.platformDispatcher.textScaleFactorTestValue = 0.5;
       await tester.runAppTest(() async {
         final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
         final trackPanelTop =
