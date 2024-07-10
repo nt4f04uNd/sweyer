@@ -1,6 +1,7 @@
 /// This is general module of a whole app.
 ///
 /// It exports everything except constants, see `constants.dart`.
+library;
 
 export 'package:sweyer/features/features.dart';
 export 'package:sweyer/localization/localization.dart';

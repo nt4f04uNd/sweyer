@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class FavoriteIndicator extends StatelessWidget {
   const FavoriteIndicator({
-    Key? key,
+    super.key,
     required this.shown,
     this.size,
-  }) : super(key: key);
+  });
 
   final bool shown;
   final double? size;

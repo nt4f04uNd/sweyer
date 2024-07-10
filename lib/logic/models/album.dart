@@ -56,7 +56,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
       artistId == null ? null : ContentControl.instance.state.artists.firstWhereOrNull((el) => el.id == artistId);
 
   const Album({
-    required int id,
+    required super.id,
     required this.album,
     required this.albumArt,
     required this.artist,
@@ -64,7 +64,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
     required this.firstYear,
     required this.lastYear,
     required this.numberOfSongs,
-  }) : super(id: id);
+  });
 
   @override
   AlbumCopyWith get copyWith => _AlbumCopyWith(this);

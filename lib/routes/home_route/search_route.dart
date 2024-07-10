@@ -307,11 +307,11 @@ class _SearchStateDelegate {
 
 class SearchPage extends Page<void> {
   const SearchPage({
-    LocalKey? key,
+    super.key,
     required this.child,
     this.transitionSettings,
-    String? name,
-  }) : super(key: key, name: name);
+    super.name,
+  });
 
   final Widget child;
   final RouteTransitionSettings? transitionSettings;
@@ -329,12 +329,9 @@ class SearchPage extends Page<void> {
 class SearchPageRoute extends RouteTransition<SearchPage> {
   SearchPageRoute({
     required this.child,
-    RouteSettings? settings,
-    RouteTransitionSettings? transitionSettings,
-  }) : super(
-          settings: settings,
-          transitionSettings: transitionSettings,
-        );
+    super.settings,
+    super.transitionSettings,
+  });
 
   final Widget child;
 
@@ -362,9 +359,9 @@ class SearchPageRoute extends RouteTransition<SearchPage> {
 
 class SearchRoute extends StatefulWidget {
   const SearchRoute({
-    Key? key,
+    super.key,
     required this.delegate,
-  }) : super(key: key);
+  });
 
   final ContentSearchDelegate delegate;
 
@@ -483,7 +480,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
   ThemeData buildAppBarTheme() {
     final theme = Theme.of(context);
     return theme.copyWith(
-      primaryColor: theme.colorScheme.background,
+      primaryColor: theme.colorScheme.secondaryContainer,
       appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0),
       textTheme: const TextTheme(
         titleLarge: TextStyle(
@@ -697,10 +694,9 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
 
 class _DelegateProvider extends InheritedWidget {
   const _DelegateProvider({
-    Key? key,
     required this.delegate,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final _SearchStateDelegate? delegate;
 
@@ -713,7 +709,7 @@ class _DelegateProvider extends InheritedWidget {
 }
 
 class _DelegateBuilder extends StatefulWidget {
-  _DelegateBuilder({Key? key}) : super(key: key);
+  _DelegateBuilder();
 
   @override
   _DelegateBuilderState createState() => _DelegateBuilderState();
@@ -888,7 +884,7 @@ class _DelegateBuilderState extends State<_DelegateBuilder> {
 }
 
 class _ClearButton extends StatelessWidget {
-  const _ClearButton({Key? key}) : super(key: key);
+  const _ClearButton();
 
   @override
   Widget build(BuildContext context) {
@@ -907,18 +903,14 @@ class _ClearButton extends StatelessWidget {
 
 class _ContentChip extends StatefulWidget {
   const _ContentChip({
-    Key? key,
     required this.delegate,
     required this.contentType,
-  })  : favoritesChip = false,
-        super(key: key);
+  })  : favoritesChip = false;
 
   const _ContentChip.favorites({
-    Key? key,
     required this.delegate,
   })  : favoritesChip = true,
-        contentType = null,
-        super(key: key);
+        contentType = null;
 
   final _SearchStateDelegate delegate;
   final ContentType? contentType;
@@ -1017,7 +1009,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
     );
     final colorAnimation = colorTween.animate(baseAnimation);
     final textColorAnimation = ColorTween(
-      begin: colorScheme.onBackground,
+      begin: colorScheme.onSecondaryContainer,
       end: favoritesChip ? Colors.redAccent : theme.appThemeExtension.contrastInverse,
     ).animate(baseAnimation);
     final splashColorAnimation = ColorTween(
@@ -1086,7 +1078,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
 
 /// Displays a message that there's nothing found.
 class _NothingFound extends StatelessWidget {
-  const _NothingFound({Key? key}) : super(key: key);
+  const _NothingFound();
 
   @override
   Widget build(BuildContext context) {
@@ -1114,7 +1106,7 @@ class _NothingFound extends StatelessWidget {
 }
 
 class _Suggestions extends StatefulWidget {
-  const _Suggestions({Key? key}) : super(key: key);
+  const _Suggestions();
 
   @override
   _SuggestionsState createState() => _SuggestionsState();
@@ -1187,7 +1179,7 @@ class _SuggestionsState extends State<_Suggestions> {
 }
 
 class _SuggestionsHeader extends StatelessWidget {
-  const _SuggestionsHeader({Key? key}) : super(key: key);
+  const _SuggestionsHeader();
 
   void clearHistory(BuildContext context) {
     SearchHistory.instance.clear();
@@ -1229,9 +1221,8 @@ class _SuggestionsHeader extends StatelessWidget {
 
 class _SuggestionTile extends StatelessWidget {
   const _SuggestionTile({
-    Key? key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 

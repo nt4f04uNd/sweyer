@@ -4,7 +4,7 @@ import 'package:sweyer/sweyer.dart';
 /// Creates slider with labels of min and max values
 class LabelledSlider extends StatelessWidget {
   const LabelledSlider({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.onChangeStart,
@@ -21,8 +21,7 @@ class LabelledSlider extends StatelessWidget {
     this.themeData = const SliderThemeData(),
   })  : assert(min <= max),
         assert(value >= min && value <= max),
-        assert(divisions == null || divisions > 0),
-        super(key: key);
+        assert(divisions == null || divisions > 0);
 
   /// See [Slider.value]
   final double value;

@@ -7,7 +7,7 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'package:sweyer/sweyer.dart';
 
 class ArtistRoute extends StatefulWidget {
-  const ArtistRoute({Key? key, required this.artist}) : super(key: key);
+  const ArtistRoute({super.key, required this.artist});
 
   final Artist artist;
 
@@ -155,7 +155,10 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [theme.colorScheme.background.withOpacity(0.0), theme.colorScheme.background],
+                            colors: [
+                              theme.colorScheme.secondaryContainer.withOpacity(0.0),
+                              theme.colorScheme.secondaryContainer
+                            ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                           ),
@@ -389,8 +392,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           automaticallyImplyLeading: false,
                           titleSpacing: 0.0,
                           backgroundColor: appBarController.isDismissed
-                              ? theme.colorScheme.background
-                              : theme.colorScheme.background.withOpacity(0.0),
+                              ? theme.colorScheme.secondaryContainer
+                              : theme.colorScheme.secondaryContainer.withOpacity(0.0),
                           title: AnimationSwitcher(
                             animation: CurvedAnimation(
                               curve: Curves.easeOutCubic,

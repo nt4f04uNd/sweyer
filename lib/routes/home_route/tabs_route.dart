@@ -7,7 +7,7 @@ import 'package:sweyer/constants.dart' as constants;
 
 /// Needed to change physics of the [TabBarView].
 class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const _TabsScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  const _TabsScrollPhysics({super.parent});
 
   @override
   _TabsScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -23,7 +23,7 @@ class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
 }
 
 class TabsRoute extends StatefulWidget {
-  const TabsRoute({Key? key}) : super(key: key);
+  const TabsRoute({super.key});
 
   @override
   TabsRouteState createState() => TabsRouteState();
@@ -250,7 +250,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
     return BackButtonListener(
       onBackButtonPressed: _handlePop,
       child: Material(
-        color: theme.colorScheme.background,
+        color: theme.colorScheme.secondaryContainer,
         child: Stack(
           children: [
             SafeArea(
@@ -295,7 +295,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                             width: screenWidth,
                             child: Material(
                               elevation: 4.0,
-                              color: theme.colorScheme.background,
+                              color: theme.colorScheme.secondaryContainer,
                               child: GestureDetector(
                                 onPanDown: (_) {
                                   tabBarDragged = true;
@@ -353,7 +353,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
 }
 
 class _ShowOnlyFavoritesButton extends StatelessWidget {
-  const _ShowOnlyFavoritesButton({Key? key}) : super(key: key);
+  const _ShowOnlyFavoritesButton();
 
   @override
   Widget build(BuildContext context) {
@@ -369,10 +369,9 @@ class _ShowOnlyFavoritesButton extends StatelessWidget {
 
 class _ContentTab extends StatefulWidget {
   const _ContentTab({
-    Key? key,
     required this.contentType,
     required this.selectionController,
-  }) : super(key: key);
+  });
 
   final ContentType contentType;
   final ContentSelectionController selectionController;
@@ -581,12 +580,12 @@ class _ContentTabState extends State<_ContentTab>
 
 class TabCollapse extends StatelessWidget {
   const TabCollapse({
-    Key? key,
+    super.key,
     required this.index,
     required this.tabController,
     required this.label,
     required this.icon,
-  }) : super(key: key);
+  });
 
   final int index;
   final TabController tabController;

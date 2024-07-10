@@ -90,8 +90,10 @@ const kScreenSize = Size(kScreenWidth, kScreenHeight);
 /// before the controls will load it.
 Future<void> setUpAppTest([VoidCallback? configureFakes]) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
-  binding.window.physicalSizeTestValue = kScreenSize * kScreenPixelRatio;
-  binding.window.devicePixelRatioTestValue = kScreenPixelRatio;
+  for (TestFlutterView view in binding.platformDispatcher.views) {
+    view.physicalSize = kScreenSize * kScreenPixelRatio;
+    view.devicePixelRatio = kScreenPixelRatio;
+  }
 
   // Fake prefs values.
   //

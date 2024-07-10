@@ -35,7 +35,7 @@ typedef _ItemBuilder = Widget Function(BuildContext context, int index, Widget i
 class ContentListView<T extends Content> extends StatelessWidget {
   /// Creates a content list with automatically applied draggable scrollbar.
   const ContentListView({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.list,
     this.itemBuilder,
@@ -58,7 +58,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
     this.interactiveScrollbar = true,
     this.alwaysShowScrollbar = false,
     this.showScrollbarLabel = false,
-  }) : super(key: key);
+  });
 
   /// An explicit content type.
   final ContentType<T> contentType;
@@ -309,7 +309,7 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableDefaultOnTap: enableDefaultOnTap,
                 backgroundColor:
-                    backgroundColorBuilder == null ? theme.colorScheme.background : backgroundColorBuilder(index),
+                    backgroundColorBuilder == null ? theme.colorScheme.secondaryContainer : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
                 trailing: AnimatedSwitcher(

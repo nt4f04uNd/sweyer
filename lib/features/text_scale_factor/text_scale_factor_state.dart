@@ -6,7 +6,7 @@ final textScaleFactorStateNotifierProvider = StateNotifierProvider<TextScaleFact
 );
 
 class TextScaleFactorStateNotifier extends StateNotifier<double> {
-  TextScaleFactorStateNotifier() : super(WidgetsBinding.instance.window.platformDispatcher.textScaleFactor);
+  TextScaleFactorStateNotifier() : super(WidgetsBinding.instance.platformDispatcher.textScaleFactor);
 
   void setValue(double value) => state = value;
   double get() => state;

@@ -33,14 +33,14 @@ final _calculateArtistTileHeightMemo = imemo3plus1(
 
 /// The height of the title part of the [ArtistTile].
 double _kArtistTileTextHeight(BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaler = MediaQuery.textScalerOf(context);
   final theme = Theme.of(context);
-  return calculateLineHeight(_titleTheme(theme), textScaleFactor);
+  return calculateLineHeight(_titleTheme(theme), textScaler);
 }
 
 class ArtistTile extends SelectableWidget<SelectionEntry> {
   const ArtistTile({
-    Key? key,
+    super.key,
     required this.artist,
     this.trailing,
     this.current,
@@ -48,17 +48,16 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.enableDefaultOnTap = true,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  })  : horizontalPadding = horizontalPadding ?? _horizontalPadding,
-        super(key: key);
+  })  : horizontalPadding = horizontalPadding ?? _horizontalPadding;
 
   const ArtistTile.selectable({
-    Key? key,
+    super.key,
     required this.artist,
-    required int selectionIndex,
-    required SelectionController<SelectionEntry>? selectionController,
-    bool selected = false,
-    bool longPressSelectionGestureEnabled = true,
-    bool handleTapInSelection = true,
+    required super.selectionIndex,
+    required super.selectionController,
+    super.selected = false,
+    super.longPressSelectionGestureEnabled = true,
+    super.handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -68,14 +67,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
   })  : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
             selectionController is SelectionController<SelectionEntry<Artist>>),
         horizontalPadding = horizontalPadding ?? _horizontalPadding,
-        super.selectable(
-          key: key,
-          selectionIndex: selectionIndex,
-          selected: selected,
-          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-          handleTapInSelection: handleTapInSelection,
-          selectionController: selectionController,
-        );
+        super.selectable();
 
   final Artist artist;
 

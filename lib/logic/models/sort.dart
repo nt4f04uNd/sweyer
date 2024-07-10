@@ -4,12 +4,10 @@ import 'package:sweyer/sweyer.dart';
 
 /// Interface for other sort feature enums.
 abstract class SortFeature<T extends Content> extends Enum<String> {
-  const SortFeature._(String value) : super(value);
+  const SortFeature._(super.value);
 
   /// Returns sort feature values for a given content.
   static List<SortFeature<T>> getValuesForContent<T extends Content>(ContentType<T> contentType) {
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (contentType as ContentType) {
       case ContentType.song:
         return SongSortFeature.values as List<SortFeature<T>>;
@@ -31,7 +29,7 @@ abstract class SortFeature<T extends Content> extends Enum<String> {
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [SongSortFeature] the new default sort order is applied.
 class SongSortFeature extends SortFeature<Song> {
-  const SongSortFeature._(String value) : super._(value);
+  const SongSortFeature._(super.value) : super._();
 
   @override
   bool get defaultOrderAscending => this != dateModified && this != dateAdded;
@@ -64,7 +62,7 @@ class SongSortFeature extends SortFeature<Song> {
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [AlbumSortFeature] the new default sort order is applied.
 class AlbumSortFeature extends SortFeature<Album> {
-  const AlbumSortFeature._(String value) : super._(value);
+  const AlbumSortFeature._(super.value) : super._();
 
   @override
   bool get defaultOrderAscending => this != year;
@@ -93,7 +91,7 @@ class AlbumSortFeature extends SortFeature<Album> {
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [PlaylistSortFeature] the new default sort order is applied.
 class PlaylistSortFeature extends SortFeature<Playlist> {
-  const PlaylistSortFeature._(String value) : super._(value);
+  const PlaylistSortFeature._(super.value) : super._();
 
   @override
   bool get defaultOrderAscending => this != dateModified && this != dateAdded;
@@ -118,7 +116,7 @@ class PlaylistSortFeature extends SortFeature<Playlist> {
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [ArtistSortFeature] the new default sort order is applied.
 class ArtistSortFeature extends SortFeature<Artist> {
-  const ArtistSortFeature._(String value) : super._(value);
+  const ArtistSortFeature._(super.value) : super._();
 
   @override
   bool get defaultOrderAscending => true;
@@ -164,10 +162,10 @@ abstract class Sort<T extends Content> extends Equatable {
 
 class SongSort extends Sort<Song> {
   const SongSort({
-    required SongSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
-  SongSort.defaultOrder(feature) : super.defaultOrder(feature);
+    required SongSortFeature super.feature,
+    super.orderAscending = true,
+  });
+  SongSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory SongSort.fromMap(Map map) => SongSort(
         feature: EnumToString.fromString(
@@ -262,10 +260,10 @@ class SongSort extends Sort<Song> {
 
 class AlbumSort extends Sort<Album> {
   const AlbumSort({
-    required AlbumSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
-  AlbumSort.defaultOrder(feature) : super.defaultOrder(feature);
+    required AlbumSortFeature super.feature,
+    super.orderAscending = true,
+  });
+  AlbumSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory AlbumSort.fromMap(Map map) => AlbumSort(
         feature: EnumToString.fromString(
@@ -357,10 +355,10 @@ class AlbumSort extends Sort<Album> {
 
 class PlaylistSort extends Sort<Playlist> {
   const PlaylistSort({
-    required PlaylistSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
-  PlaylistSort.defaultOrder(feature) : super.defaultOrder(feature);
+    required PlaylistSortFeature super.feature,
+    super.orderAscending = true,
+  });
+  PlaylistSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory PlaylistSort.fromMap(Map map) => PlaylistSort(
         feature: EnumToString.fromString(
@@ -443,10 +441,10 @@ class PlaylistSort extends Sort<Playlist> {
 
 class ArtistSort extends Sort<Artist> {
   const ArtistSort({
-    required ArtistSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
-  ArtistSort.defaultOrder(feature) : super.defaultOrder(feature);
+    required ArtistSortFeature super.feature,
+    super.orderAscending = true,
+  });
+  ArtistSort.defaultOrder(super.feature) : super.defaultOrder();
 
   factory ArtistSort.fromMap(Map map) => ArtistSort(
         feature: EnumToString.fromString(
