@@ -1022,6 +1022,8 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
           padding: EdgeInsets.only(
             top: 2.0,
             bottom: 30.0 / textScaleFactor,
+            right: 20,
+            left: 20,
           ),
           child: ArtistWidget(
             artist: currentSong.artist,
