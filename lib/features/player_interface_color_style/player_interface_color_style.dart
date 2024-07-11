@@ -172,8 +172,6 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
             primary: Colors.white,
             onSurface: Colors.white,
             secondary: _shadeForSecondaryColor(backgroundColor),
-            onSecondaryContainer: Colors.white,
-            secondaryContainer: backgroundColor,
           ),
           appBarTheme: theme.appBarTheme.copyWith(
             color: _shadeForSecondaryColor(backgroundColor),
