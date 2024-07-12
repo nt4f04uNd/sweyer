@@ -221,7 +221,7 @@ class SweyerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, ActivityRe
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         this.result = result
                         val value = call.argument<Boolean>("value")!!
-                        val songIds = call.argument<ArrayList<ArrayList<Any>>>("songIds")!!
+                        val songIds = call.argument<ArrayList<Any>>("songIds")!!
                         val uris = ArrayList<Uri>()
                         for (songId in songIds) {
                             val id = getLong(songId)
