@@ -357,7 +357,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
           child: StyledText(
             overflow: TextOverflow.ellipsis,
             style: _queueDescriptionStyle,
-            // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+            // TODO: otherwise this scales twice as much https://github.com/andyduke/styled_text_package/issues/83
             textScaleFactor: 1.0,
             text: l10n.foundByQuery('<query>${l10n.escapeStyled('"$query"')}</query>'),
             tags: {
@@ -380,7 +380,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              // TODO: otherwise this scales twice as much https://github.com/andyduke/styled_text_package/issues/83
               textScaleFactor: 1.0,
               text: l10n.albumQueue('<name>${l10n.escapeStyled(origin.nameDotYear)}</name>'),
               tags: {
@@ -400,7 +400,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              // TODO: otherwise this scales twice as much https://github.com/andyduke/styled_text_package/issues/83
               textScaleFactor: 1.0,
               text: l10n.playlistQueue('<name>${l10n.escapeStyled(origin.name)}</name>'),
               tags: {
@@ -421,7 +421,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
             child: StyledText(
               overflow: TextOverflow.ellipsis,
               style: _queueDescriptionStyle,
-              // TODO: otherwise this scales twice as much, report this to the package owner https://github.com/nt4f04uNd/sweyer/issues/66#issuecomment-1493420826
+              // TODO: otherwise this scales twice as much https://github.com/andyduke/styled_text_package/issues/83
               textScaleFactor: 1.0,
               text: l10n.artistQueue('<name>${l10n.escapeStyled(artist)}</name>'),
               tags: {
