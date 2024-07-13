@@ -158,7 +158,7 @@ object FetchHandler {
     }
 
     fun retrievePlaylists(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
-        val memberProjection = arrayOf(MediaStore.Audio.Playlists.Members._ID)
+        val memberProjection = arrayOf(MediaStore.Audio.Playlists.Members.AUDIO_ID)
         return executeQuery(
             resolver,
             MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
