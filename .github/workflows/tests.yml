@@ -1,5 +1,10 @@
-name: Sweyer PR workflow
-on: [push, pull_request]
+name: Run Sweyer tests
+on:
+  pull_request:
+  push:
+    branches:    
+      - main
+      - 'releases/**'
 
 jobs:
   build:
