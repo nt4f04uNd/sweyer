@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:boxy/boxy.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
-import 'package:tuple/tuple.dart';
 
 const double _tileVerticalPadding = 8.0;
 const double kPersistentQueueTileHorizontalPadding = 16.0;
@@ -46,7 +45,7 @@ double _calculatePersistentQueueTileHeight(ContentType contentType, BuildContext
     textScaleFactor,
     _titleTheme(theme)?.fontSize,
     _subtitleTheme(contentType, theme)?.fontSize,
-    Tuple2(contentType, context),
+    (contentType, context),
   );
 }
 
@@ -55,11 +54,11 @@ final _calculatePersistentQueueTileHeightMemo = imemo3plus1(
     double a1,
     double? a2,
     double? a3,
-    Tuple2<ContentType, BuildContext> a4,
+    (ContentType, BuildContext) a4,
   ) =>
       math.max(
         kPersistentQueueTileArtSize,
-        _kPresisentQueueTileTextHeight(a4.item1, a4.item2),
+        _kPresisentQueueTileTextHeight(a4.$1, a4.$2),
       ) +
       _tileVerticalPadding * 2,
 );
@@ -76,7 +75,7 @@ double _calculatePersistentQueueGridTileHeight(
     gridArtSize,
     _titleTheme(theme)?.fontSize,
     _subtitleTheme(contentType, theme)?.fontSize,
-    Tuple2(contentType, context),
+    (contentType, context),
   );
 }
 
@@ -86,9 +85,9 @@ final _calculatePersistentQueueGridTileHeightMemo = imemo4plus1(
     double gridArtSize,
     double? a3,
     double? a4,
-    Tuple2<ContentType, BuildContext> a5,
+    (ContentType, BuildContext) a5,
   ) =>
-      gridArtSize + _kPresisentQueueTileTextHeight(a5.item1, a5.item2) + _tileVerticalPadding * 2,
+      gridArtSize + _kPresisentQueueTileTextHeight(a5.$1, a5.$2) + _tileVerticalPadding * 2,
 );
 
 /// The height of the title and subtitle part of the [PersistentQueueTile].
