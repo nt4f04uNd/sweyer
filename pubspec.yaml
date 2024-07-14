@@ -91,8 +91,8 @@ dependencies:
     # path: /Users/nt4f04und/dev/prj/nt4f04unds_widgets
 
     git:
-      url: https://github.com/Abestanis/nt4f04unds_widgets
-      ref: feature/update_flutter
+      url: https://github.com/nt4f04uNd/nt4f04unds_widgets
+      ref: 4.0.0
 
   sweyer_plugin:
     path: sweyer_plugin

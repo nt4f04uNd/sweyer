@@ -805,11 +805,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "feature/update_flutter"
-      resolved-ref: "0d78622890a787e7b03ad08d2e63057235f82631"
-      url: "https://github.com/Abestanis/nt4f04unds_widgets"
+      ref: "4.0.0"
+      resolved-ref: f6cc09477e7c7ba40054b0b2bf18523063ea5619
+      url: "https://github.com/nt4f04uNd/nt4f04unds_widgets"
     source: git
-    version: "3.0.0"
+    version: "4.0.0"
   octo_image:
     dependency: transitive
     description:
@@ -846,10 +846,10 @@ packages:
     dependency: "direct main"
     description:
       name: palette_generator
-      sha256: eb7082b4b97487ebc65b3ad3f6f0b7489b96e76840381ed0e06a46fe7ffd4068
+      sha256: d50fbcd69abb80c5baec66d700033b1a320108b1aa17a5961866a12c0abb7c0c
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3+3"
+    version: "0.3.3+4"
   path:
     dependency: "direct main"
     description:
@@ -1346,10 +1346,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_ios
-      sha256: "7068716403343f6ba4969b4173cbf3b84fc768042124bc2c011e5d782b24fe89"
+      sha256: e43b677296fadce447e987a2f519dcf5f6d1e527dc35d01ffab4fff5b8a7063e
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.3.1"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -1394,10 +1394,10 @@ packages:
     dependency: "direct main"
     description:
       name: uuid
-      sha256: "814e9e88f21a176ae1359149021870e87f7cddaf633ab678a5d2b0bff7fd1ba8"
+      sha256: "83d37c7ad7aaf9aa8e275490669535c8080377cfa7a7004c24dfac53afffaa90"
       url: "https://pub.dev"
     source: hosted
-    version: "4.4.0"
+    version: "4.4.2"
   value_layout_builder:
     dependency: transitive
     description:
