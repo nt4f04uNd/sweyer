@@ -108,11 +108,12 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
   }
 
   factory Playlist.fromMap(Map<String, dynamic> map) {
+    int dateAdded = map['dateAdded'] as int;
     return Playlist(
       id: map['id'] as int,
       filesystemPath: map['filesystemPath'] as String,
-      dateAdded: map['dateAdded'] as int,
-      dateModified: map['dateModified'] as int,
+      dateAdded: dateAdded,
+      dateModified: map['dateModified'] as int? ?? dateAdded,
       name: map['name'] as String,
       songIds: (map['songIds'] as List).cast<int>().toList(),
     );
