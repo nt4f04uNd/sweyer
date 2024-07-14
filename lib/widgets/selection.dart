@@ -2340,7 +2340,7 @@ class SelectAllSelectionAction<T extends Content> extends StatelessWidget {
     if (all.isNotEmpty) {
       // TODO: selectAll method for the selection controller maybe? (not this "all", but a list of items)
       final first = all.first;
-      assert(all.every((el) => el.runtimeType == first.runtimeType));
+      assert(all.every((el) => el.type == first.type));
 
       final selectedOfThisType = controller.data.where((el) => el.data.type == entryFactory(first, 0).data.type);
       bool allSelected = true;
