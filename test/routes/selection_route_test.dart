@@ -284,8 +284,8 @@ void main() {
       const Tuple2('playlists', ContentType.playlist),
       const Tuple2('artists', ContentType.artist),
     ]) {
-      var tabName = tabAndContentType.item1;
-      var contentType = tabAndContentType.item2;
+      final tabName = tabAndContentType.item1;
+      final contentType = tabAndContentType.item2;
       testWidgets('allows selecting all and deselecting all on the $tabName tab', (WidgetTester tester) async {
         await setUpAppTest(() {
           FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
@@ -304,7 +304,7 @@ void main() {
           await tester.longPress(find.byType(ContentTile).first);
           await tester.pumpAndSettle();
 
-          var selectionController = ContentControl.instance.selectionNotifier.value!;
+          final selectionController = ContentControl.instance.selectionNotifier.value!;
           expect(selectionController.inSelection, true);
           expect(selectionController.data.length, 1);
           expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('1')).hitTestable(),
@@ -314,7 +314,7 @@ void main() {
           await tester.tap(find.byType(SelectAllSelectionAction).last);
           await tester.pumpAndSettle();
 
-          int numElements = ContentControl.instance.getContent(contentType).length;
+          final numElements = ContentControl.instance.getContent(contentType).length;
           expect(selectionController.inSelection, true);
           expect(selectionController.data.length, numElements);
           expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('$numElements')).hitTestable(),
