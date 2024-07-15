@@ -2342,7 +2342,7 @@ class SelectAllSelectionAction<T extends Content> extends StatelessWidget {
       final first = all.first;
       assert(all.every((el) => el.runtimeType == first.runtimeType));
 
-      final selectedOfThisType = controller.data.where((el) => el.runtimeType == entryFactory(first, 0).runtimeType);
+      final selectedOfThisType = controller.data.where((el) => el.data.type == entryFactory(first, 0).data.type);
       bool allSelected = true;
       for (int i = 0; i < all.length; i++) {
         if (!selectedOfThisType.contains(entryFactory(all[i], i))) {

@@ -988,16 +988,19 @@ class ContentUtils {
     final List<SelectionEntry<Playlist>> playlists = [];
     final List<SelectionEntry<Artist>> artists = [];
     for (final entry in data) {
-      if (entry is SelectionEntry<Song>) {
-        songs.add(entry);
-      } else if (entry is SelectionEntry<Album>) {
-        albums.add(entry);
-      } else if (entry is SelectionEntry<Playlist>) {
-        playlists.add(entry);
-      } else if (entry is SelectionEntry<Artist>) {
-        artists.add(entry);
-      } else {
-        throw UnimplementedError();
+      switch (entry.data.type) {
+        case ContentType.song:
+          songs.add(entry as SelectionEntry<Song>);
+          break;
+        case ContentType.album:
+          albums.add(entry as SelectionEntry<Album>);
+          break;
+        case ContentType.playlist:
+          playlists.add(entry as SelectionEntry<Playlist>);
+          break;
+        case ContentType.artist:
+          artists.add(entry as SelectionEntry<Artist>);
+          break;
       }
     }
     if (sort) {

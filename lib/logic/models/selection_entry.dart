@@ -27,13 +27,23 @@ class SelectionEntry<T extends Content> {
           origin: selectionRouteOf(context) && song.origin is DuplicatingSongOriginMixin ? song.origin : null,
         ) as SelectionEntry<T>;
       case ContentType.album:
-      case ContentType.playlist:
-      case ContentType.artist:
-        return SelectionEntry<T>(
+        return SelectionEntry<Album>(
           index: index,
-          data: content,
+          data: content as Album,
           origin: null,
-        );
+        ) as SelectionEntry<T>;
+      case ContentType.playlist:
+        return SelectionEntry<Playlist>(
+          index: index,
+          data: content as Playlist,
+          origin: null,
+        ) as SelectionEntry<T>;
+      case ContentType.artist:
+        return SelectionEntry<Artist>(
+          index: index,
+          data: content as Artist,
+          origin: null,
+        ) as SelectionEntry<T>;
     }
   }
 
