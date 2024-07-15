@@ -295,10 +295,8 @@ void main() {
         });
         await tester.runAppTest(() async {
           // Select tab
-          if (contentType != ContentType.song) {
-            await tester.tap(find.byIcon(contentType.icon).first);
-            await tester.pumpAndSettle();
-          }
+          await tester.tap(find.ancestor(of: find.byIcon(contentType.icon).first, matching: find.byType(TabCollapse)));
+          await tester.pumpAndSettle();
 
           // Select first content
           await tester.longPress(find.byType(ContentTile).first);
