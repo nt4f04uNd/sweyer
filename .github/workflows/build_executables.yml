@@ -17,7 +17,7 @@ jobs:
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.7.12
+          flutter-version: 3.22.2
           channel: stable
           cache: true
 
@@ -25,7 +25,6 @@ jobs:
         shell: bash
         run: |
           flutter pub global activate very_good_cli
-          very_good --analytics false
           very_good packages get --recursive
 
       - name: 💾 Cache Gradle
@@ -36,7 +35,9 @@ jobs:
 
       - name: 🔨 Build Apk
         shell: bash
-        run: flutter build apk --profile
+        run: |
+          export JAVA_HOME="$JAVA_HOME_17_X64"
+          flutter build apk --profile
 
       - name: 📁 Save executables
         uses: actions/upload-artifact@v4

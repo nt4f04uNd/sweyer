@@ -393,12 +393,12 @@ class ShuffleQueueButton extends StatelessWidget {
 class CopyButton extends StatelessWidget {
   const CopyButton({
     Key? key,
-    this.text,
+    required this.text,
     this.size = 44.0,
   }) : super(key: key);
 
   /// Text that will be copied when button is pressed.
-  final String? text;
+  final String text;
 
   /// Button size.
   final double size;
@@ -410,9 +410,7 @@ class CopyButton extends StatelessWidget {
     return NFIconButton(
       icon: const Icon(Icons.content_copy_rounded),
       size: size,
-      onPressed: text == null
-          ? null
-          : () {
+      onPressed: () {
               Clipboard.setData(
                 ClipboardData(text: text),
               );
