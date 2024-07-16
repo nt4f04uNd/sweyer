@@ -307,41 +307,37 @@ void testAppGoldens(
   Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
 }) {
   assert(playerInterfaceColorStylesToTest.isNotEmpty);
-  final previousDeterministicCursor = EditableText.debugDeterministicCursor;
-  try {
-    EditableText.debugDeterministicCursor = true;
-    for (final lightTheme in [false, true]) {
-      final nonDefaultPlayerInterfaceColorStyle = playerInterfaceColorStylesToTest.length > 1 ||
-          !playerInterfaceColorStylesToTest.contains(_defaultPlayerInterfaceColorStyle);
+  for (final lightTheme in [false, true]) {
+    final nonDefaultPlayerInterfaceColorStyle = playerInterfaceColorStylesToTest.length > 1 ||
+        !playerInterfaceColorStylesToTest.contains(_defaultPlayerInterfaceColorStyle);
 
-      for (final playerInterfaceColorStyle in playerInterfaceColorStylesToTest) {
-        final testDescription = getTestDescription(
-          lightTheme: lightTheme,
-          playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
-        );
+    for (final playerInterfaceColorStyle in playerInterfaceColorStylesToTest) {
+      final testDescription = getTestDescription(
+        lightTheme: lightTheme,
+        playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
+      );
 
-        testGoldens(
-          testDescription.buildDescription(description),
-          (tester) async {
-            try {
-              ThemeControl.instance.setThemeLightMode(lightTheme);
-              Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
-              _testersLightTheme[tester] = lightTheme;
-              if (nonDefaultPlayerInterfaceColorStyle) {
-                _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
-              }
-              return await test(tester);
-            } finally {
-              _testersLightTheme.remove(tester);
-              _testersPlayerInterfaceColorStyle.remove(tester);
-            }
-          },
-          tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
-        );
-      }
+      testGoldens(
+        testDescription.buildDescription(description),
+        (tester) async {
+          final previousDeterministicCursor = EditableText.debugDeterministicCursor;
+          addTearDown(() {
+            EditableText.debugDeterministicCursor = previousDeterministicCursor;
+            _testersLightTheme.remove(tester);
+            _testersPlayerInterfaceColorStyle.remove(tester);
+          });
+          EditableText.debugDeterministicCursor = true;
+          ThemeControl.instance.setThemeLightMode(lightTheme);
+          Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
+          _testersLightTheme[tester] = lightTheme;
+          if (nonDefaultPlayerInterfaceColorStyle) {
+            _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
+          }
+          return await test(tester);
+        },
+        tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
+      );
     }
-  } finally {
-    EditableText.debugDeterministicCursor = previousDeterministicCursor;
   }
 }
 
