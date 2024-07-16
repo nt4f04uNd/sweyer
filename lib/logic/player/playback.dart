@@ -14,7 +14,9 @@ class PlaybackControl extends Control {
   @override
   void init() {
     super.init();
-    _songSubject = BehaviorSubject();
+    if (_songSubject.isClosed) {
+      _songSubject = BehaviorSubject();
+    }
   }
 
   @override
@@ -30,7 +32,7 @@ class PlaybackControl extends Control {
 
   /// A stream of changes on [currentSong].
   Stream<Song> get onSongChange => _songSubject.stream;
-  late BehaviorSubject<Song> _songSubject;
+  BehaviorSubject<Song> _songSubject = BehaviorSubject();
 
   /// The current playing song.
   Song get currentSong {
