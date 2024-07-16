@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tuple/tuple.dart';
 
 import '../test.dart';
 
@@ -261,5 +262,72 @@ void main() {
         });
       });
     });
+  });
+
+  group('common selection actions on all tabs', () {
+    final album0 = albumWith(id: 0);
+    final album1 = albumWith(id: 1);
+    final album2 = albumWith(id: 2);
+    final artist0 = artistWith(id: 0);
+    final artist1 = artistWith(id: 1);
+    final artist2 = artistWith(id: 2);
+    final song0 = songWith(id: 0, title: 'Song 0', albumId: album0.id, artistId: artist0.id);
+    final song1 = songWith(id: 1, title: 'Song 1', albumId: album1.id, artistId: artist1.id);
+    final song2 = songWith(id: 2, title: 'Song 2', albumId: album2.id, artistId: artist2.id);
+    final playlist0 = playlistWith(id: 0, songIds: [song0.id]);
+    final playlist1 = playlistWith(id: 1, songIds: [song1.id]);
+    final playlist2 = playlistWith(id: 2, songIds: [song2.id]);
+
+    for (var tabAndContentType in [
+      const Tuple2('tracks', ContentType.song),
+      const Tuple2('album', ContentType.album),
+      const Tuple2('playlists', ContentType.playlist),
+      const Tuple2('artists', ContentType.artist),
+    ]) {
+      final tabName = tabAndContentType.item1;
+      final contentType = tabAndContentType.item2;
+      testWidgets('allows selecting all and deselecting all on the $tabName tab', (WidgetTester tester) async {
+        await setUpAppTest(() {
+          FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
+          FakeSweyerPluginPlatform.instance.albums = [album0, album1, album2];
+          FakeSweyerPluginPlatform.instance.playlists = [playlist0, playlist1, playlist2];
+          FakeSweyerPluginPlatform.instance.artists = [artist0, artist1, artist2];
+        });
+        await tester.runAppTest(() async {
+          // Select tab
+          await tester.tap(find.ancestor(of: find.byIcon(contentType.icon).first, matching: find.byType(TabCollapse)));
+          await tester.pumpAndSettle();
+
+          // Select first content
+          await tester.longPress(find.byType(ContentTile).first);
+          await tester.pumpAndSettle();
+
+          final selectionController = ContentControl.instance.selectionNotifier.value!;
+          expect(selectionController.inSelection, true);
+          expect(selectionController.data.length, 1);
+          expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('1')).hitTestable(),
+              findsOneWidget);
+
+          // Select all
+          await tester.tap(find.byType(SelectAllSelectionAction).last);
+          await tester.pumpAndSettle();
+
+          final numElements = ContentControl.instance.getContent(contentType).length;
+          expect(selectionController.inSelection, true);
+          expect(selectionController.data.length, numElements);
+          expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('$numElements')).hitTestable(),
+              findsOneWidget);
+
+          // Deselect all
+          await tester.tap(find.byType(SelectAllSelectionAction).last);
+          await tester.pumpAndSettle();
+
+          expect(selectionController.inSelection, false);
+          expect(selectionController.data.length, 0);
+          expect(find.byType(SelectAllSelectionAction).hitTestable(), findsNothing);
+          expect(find.byType(SelectionCounter).hitTestable(), findsNothing);
+        });
+      });
+    }
   });
 }
