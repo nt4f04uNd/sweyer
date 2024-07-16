@@ -12,6 +12,14 @@ class PlaybackControl extends Control {
   static PlaybackControl instance = PlaybackControl();
 
   @override
+  void init() {
+    super.init();
+    if (_songSubject.isClosed) {
+      _songSubject = BehaviorSubject();
+    }
+  }
+
+  @override
   void dispose() {
     if (!disposed.value) {
       _songSubject.close();
@@ -24,7 +32,7 @@ class PlaybackControl extends Control {
 
   /// A stream of changes on [currentSong].
   Stream<Song> get onSongChange => _songSubject.stream;
-  final BehaviorSubject<Song> _songSubject = BehaviorSubject();
+  BehaviorSubject<Song> _songSubject = BehaviorSubject();
 
   /// The current playing song.
   Song get currentSong {
