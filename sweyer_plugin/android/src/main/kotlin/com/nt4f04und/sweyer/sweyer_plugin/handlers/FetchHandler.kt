@@ -32,7 +32,12 @@ object FetchHandler {
     }
 
     fun retrieveSongs(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
-        return executeQuery(resolver, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songsSelection, buildMap {
+        val contentUrl = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
+        return executeQuery(resolver, contentUrl, songsSelection, buildMap {
             put(MediaStore.Audio.Media._ID, "id" to { cursor, index -> cursor.getInt(index) })
             put(MediaStore.Audio.Media.ALBUM, "album" to { cursor, index -> cursor.getString(index) })
             put(MediaStore.Audio.Media.ALBUM_ID, "albumId" to { cursor, index -> cursor.getInt(index) })
@@ -115,10 +120,15 @@ object FetchHandler {
         } else {
             "artist_id"
         }
+        val contentUrl = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Albums.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+        }
         try {
             return executeQuery(
                 resolver,
-                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                contentUrl,
                 MediaStore.Audio.Albums.ALBUM + " IS NOT NULL",
                 mapOf(
                     MediaStore.Audio.Albums._ID to Pair("id") { cursor, index -> cursor.getInt(index) },
@@ -138,7 +148,7 @@ object FetchHandler {
         } catch (ignored: Throwable) {
             return executeQuery(
                 resolver,
-                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                contentUrl,
                 MediaStore.Audio.Albums.ALBUM + " IS NOT NULL",
                 mapOf(
                     MediaStore.Audio.Albums._ID to Pair("id") { cursor, index -> cursor.getInt(index) },
@@ -159,9 +169,14 @@ object FetchHandler {
 
     fun retrievePlaylists(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
         val memberProjection = arrayOf(MediaStore.Audio.Playlists.Members.AUDIO_ID)
+        val contentUrl = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Playlists.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI
+        }
         return executeQuery(
             resolver,
-            MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+            contentUrl,
             MediaStore.Audio.Playlists.NAME + " IS NOT NULL",
             mapOf(
                 MediaStore.Audio.Playlists._ID to Pair("id") { cursor, index -> cursor.getLong(index) },
@@ -191,9 +206,14 @@ object FetchHandler {
     }
 
     fun retrieveArtists(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
+        val contentUrl = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Artists.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
+        }
         return executeQuery(
             resolver,
-            MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+            contentUrl,
             MediaStore.Audio.Artists.ARTIST + " IS NOT NULL",
             mapOf(
                 MediaStore.Audio.Artists._ID to Pair("id") { cursor, index -> cursor.getInt(index) },
@@ -210,9 +230,14 @@ object FetchHandler {
 
     fun retrieveGenres(resolver: ContentResolver): ArrayList<MutableMap<String, Any?>> {
         val memberProjection = arrayOf(MediaStore.Audio.Genres.Members._ID)
+        val contentUrl = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Genres.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
+        }
         return executeQuery(
             resolver,
-            MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+            contentUrl,
             MediaStore.Audio.Genres.NAME + " IS NOT NULL",
             mapOf(
                 MediaStore.Audio.Genres._ID to Pair("id") { cursor, index -> cursor.getInt(index) },
