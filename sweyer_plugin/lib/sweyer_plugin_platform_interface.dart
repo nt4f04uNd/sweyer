@@ -65,7 +65,7 @@ abstract class SweyerPluginPlatform extends PlatformInterface {
   /// platform-specific class that extends [SweyerPluginPlatform] when
   /// they register themselves.
   static set instance(SweyerPluginPlatform instance) {
-    PlatformInterface.verify(instance, _token);
+    PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }
 
