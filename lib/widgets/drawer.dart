@@ -7,7 +7,7 @@ import 'package:sweyer/constants.dart' as constants;
 
 /// Widget that builds drawer.
 class DrawerWidget extends StatefulWidget {
-  const DrawerWidget({Key? key}) : super(key: key);
+  const DrawerWidget({super.key});
 
   @override
   _DrawerWidgetState createState() => _DrawerWidgetState();
@@ -98,9 +98,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
 class _DrawerWidgetContent extends StatefulWidget {
   const _DrawerWidgetContent({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final SlidableController? controller;
 
@@ -199,13 +198,13 @@ class _DrawerWidgetContentState extends State<_DrawerWidgetContent> {
 class DrawerMenuItem extends StatelessWidget {
   const DrawerMenuItem(
     this.title, {
-    Key? key,
+    super.key,
     this.icon,
     this.onTap,
     this.onLongPress,
     this.iconSize = 22.0,
     this.fontSize = 15.0,
-  }) : super(key: key);
+  });
 
   final IconData? icon;
   final String title;
@@ -243,7 +242,7 @@ class DrawerMenuItem extends StatelessWidget {
 }
 
 class _LogoAndTitle extends StatelessWidget {
-  const _LogoAndTitle({Key? key}) : super(key: key);
+  const _LogoAndTitle();
 
   @override
   Widget build(BuildContext context) {

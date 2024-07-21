@@ -50,7 +50,7 @@ class ThemeControl {
       return primary;
     } else {
       if (primary == constants.AppColors.deepPurpleAccent) {
-        return theme.colorScheme.onBackground;
+        return theme.colorScheme.onSecondaryContainer;
       }
       return primary;
     }
@@ -171,18 +171,18 @@ class ThemeControl {
           selectionHandleColor: color,
         ),
         switchTheme: SwitchThemeData(
-          thumbColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color : null),
-          trackColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color.withAlpha(0x80) : null),
+          thumbColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color : null),
+          trackColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color.withAlpha(0x80) : null),
         ),
         radioTheme: RadioThemeData(
-          fillColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color : null),
         ),
         checkboxTheme: CheckboxThemeData(
-          fillColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color : null),
         ),
       ),
       dark: constants.Theme.app.dark.copyWith(
@@ -213,18 +213,18 @@ class ThemeControl {
           selectionHandleColor: color,
         ),
         switchTheme: SwitchThemeData(
-          thumbColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color : null),
-          trackColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color.withAlpha(0x80) : null),
+          thumbColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color : null),
+          trackColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color.withAlpha(0x80) : null),
         ),
         radioTheme: RadioThemeData(
-          fillColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color : null),
         ),
         checkboxTheme: CheckboxThemeData(
-          fillColor: MaterialStateProperty.resolveWith(
-                  (states) => states.contains(MaterialState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected) ? color : null),
         ),
       ),
     );

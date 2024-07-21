@@ -13,7 +13,7 @@ export 'search_route.dart';
 export 'tabs_route.dart';
 
 class InitialRoute extends StatefulWidget {
-  const InitialRoute({Key? key}) : super(key: key);
+  const InitialRoute({super.key});
 
   @override
   _InitialRouteState createState() => _InitialRouteState();
@@ -92,7 +92,7 @@ class _InitialRouteState extends State<InitialRoute> {
 /// Main app's content screen.
 /// Displayed only there's some content.
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   HomeState createState() => HomeState();
@@ -156,7 +156,7 @@ class HomeState extends State<Home> {
 
 /// Screen displayed when songs array is empty and searching is being performed
 class _SearchingSongsScreen extends StatelessWidget {
-  const _SearchingSongsScreen({Key? key}) : super(key: key);
+  const _SearchingSongsScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +170,7 @@ class _SearchingSongsScreen extends StatelessWidget {
 
 /// Screen displayed when no songs had been found
 class _SongsEmptyScreen extends StatefulWidget {
-  const _SongsEmptyScreen({Key? key}) : super(key: key);
+  const _SongsEmptyScreen();
 
   @override
   _SongsEmptyScreenState createState() => _SongsEmptyScreenState();
@@ -213,7 +213,7 @@ class _SongsEmptyScreenState extends State<_SongsEmptyScreen> {
 
 /// Screen displayed when there are not permissions
 class _NoPermissionsScreen extends StatefulWidget {
-  const _NoPermissionsScreen({Key? key}) : super(key: key);
+  const _NoPermissionsScreen();
 
   @override
   _NoPermissionsScreenState createState() => _NoPermissionsScreenState();

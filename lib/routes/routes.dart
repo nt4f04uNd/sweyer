@@ -21,6 +21,7 @@ abstract class _Routes<T> extends Equatable {
 
   final String location;
   final T? arguments;
+  get uri => Uri(path: location);
 
   _Routes withArguments(T arguments);
 
@@ -49,7 +50,7 @@ abstract class _Routes<T> extends Equatable {
 }
 
 class AppRoutes<T> extends _Routes<T> {
-  const AppRoutes._(String location, [T? arguments]) : super(location, arguments);
+  const AppRoutes._(super.location, [super.arguments]);
 
   @override
   AppRoutes<T> withArguments(T arguments) {
@@ -66,7 +67,7 @@ class AppRoutes<T> extends _Routes<T> {
 }
 
 class HomeRoutes<T> extends _Routes<T> {
-  const HomeRoutes._(String location, [T? arguments]) : super(location, arguments);
+  const HomeRoutes._(super.location, [super.arguments]);
 
   @override
   HomeRoutes<T> withArguments(T arguments) {
@@ -199,24 +200,24 @@ class SearchArguments {
 class AppRouteInformationParser extends RouteInformationParser<AppRoutes> {
   @override
   Future<AppRoutes> parseRouteInformation(RouteInformation routeInformation) async {
-    return AppRoutes._(routeInformation.location!);
+    return AppRoutes._(routeInformation.uri.path);
   }
 
   @override
   RouteInformation restoreRouteInformation(AppRoutes configuration) {
-    return RouteInformation(location: configuration.location);
+    return RouteInformation(uri: configuration.uri);
   }
 }
 
 class HomeRouteInformationParser extends RouteInformationParser<HomeRoutes> {
   @override
   Future<HomeRoutes> parseRouteInformation(RouteInformation routeInformation) async {
-    return HomeRoutes._(routeInformation.location!);
+    return HomeRoutes._(routeInformation.uri.path);
   }
 
   @override
   RouteInformation restoreRouteInformation(HomeRoutes configuration) {
-    return RouteInformation(location: configuration.location);
+    return RouteInformation(uri: configuration.uri);
   }
 }
 
@@ -433,7 +434,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
 }
 
 class _AppRouterBuilder extends StatefulWidget {
-  const _AppRouterBuilder({Key? key, required this.builder}) : super(key: key);
+  const _AppRouterBuilder({required this.builder});
 
   final WidgetBuilder builder;
 
@@ -640,15 +641,15 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
 
 class HomeRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   @override
-  RouteInformation value = RouteInformation(location: HomeRoutes.tabs.location);
+  RouteInformation value = RouteInformation(uri: HomeRoutes.tabs.uri);
 }
 
 class RouterDelegateProvider<T extends RouterDelegate> extends InheritedWidget {
   const RouterDelegateProvider({
-    Key? key,
+    super.key,
     required this.delegate,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final T delegate;
 

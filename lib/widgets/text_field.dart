@@ -3,7 +3,7 @@ import 'package:sweyer/sweyer.dart';
 
 class AppTextField extends StatefulWidget {
   const AppTextField({
-    Key? key,
+    super.key,
     this.onSubmit,
     this.autofocus = false,
     this.isDense = false,
@@ -13,7 +13,7 @@ class AppTextField extends StatefulWidget {
     this.contentPadding,
     this.controller,
     this.onDispose,
-  }) : super(key: key);
+  });
 
   final ValueSetter<String>? onSubmit;
   final bool autofocus;
@@ -41,7 +41,7 @@ class _AppTextFieldState extends State<AppTextField> {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     return TextField(
-      selectionControls: NFTextSelectionControls(),
+      selectionControls: MaterialTextSelectionControls(),
       controller: widget.controller,
       autofocus: widget.autofocus,
       style: theme.textTheme.titleLarge?.merge(widget.textStyle) ?? widget.textStyle,

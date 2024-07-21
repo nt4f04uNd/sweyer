@@ -121,23 +121,22 @@ mixin SelectionHandlerMixin<T extends StatefulWidget> on State<T> {
 abstract class SelectableWidget<T> extends StatefulWidget {
   /// Creates a widget, not selectable.
   const SelectableWidget({
-    Key? key,
+    super.key,
   })  : selectionIndex = null,
         selected = null,
         longPressSelectionGestureEnabled = null,
         handleTapInSelection = null,
-        selectionController = null,
-        super(key: key);
+        selectionController = null;
 
   /// Creates a selectable widget.
   const SelectableWidget.selectable({
-    Key? key,
+    super.key,
     required int this.selectionIndex,
     required bool this.selected,
     required bool this.longPressSelectionGestureEnabled,
     required bool this.handleTapInSelection,
     required this.selectionController,
-  }) : super(key: key);
+  });
 
   /// The index to pass to [SelectionEntry] in [SelectableState.toSelectionEntry].
   final int? selectionIndex;
@@ -333,26 +332,23 @@ abstract class SelectableState<E, W extends SelectableWidget> extends State<W> w
 
 class ContentSelectionController<T extends SelectionEntry> extends SelectionController<T> with RouteAware {
   ContentSelectionController._({
-    required AnimationController animationController,
+    required super.animationController,
     required this.context,
     required this.actionsBuilder,
     this.systemUiOverlayStyle,
     this.overlay,
     this.ignoreWhen,
-    Set<T>? data,
-  }) : super(
-          animationController: animationController,
-          data: data,
-        );
+    super.data,
+  });
 
   ContentSelectionController._alwaysInSelection({
     required this.context,
     required this.actionsBuilder,
     this.systemUiOverlayStyle,
     this.overlay,
-    Set<T>? data,
+    super.data,
   })  : ignoreWhen = null,
-        super.alwaysInSelection(data: data);
+        super.alwaysInSelection();
 
   /// Needed to listen listen to a [DismissibleRoute], and as soon as it's
   /// dismissed, the selection will be closed.
@@ -710,9 +706,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
 
 class _ContentSelectionControllerProvider extends InheritedWidget {
   const _ContentSelectionControllerProvider({
-    required Widget child,
+    required super.child,
     required this.controller,
-  }) : super(child: child);
+  });
 
   final ContentSelectionController controller;
 
@@ -723,11 +719,11 @@ class _ContentSelectionControllerProvider extends InheritedWidget {
 /// Creates a selection controller and automatically rebuilds, when it updates.
 class ContentSelectionControllerCreator<T extends Content> extends StatefulWidget {
   const ContentSelectionControllerCreator({
-    Key? key,
+    super.key,
     required this.builder,
     required this.contentType,
     this.child,
-  }) : super(key: key);
+  });
 
   final Widget Function(BuildContext context, ContentSelectionController selectionController, Widget? child) builder;
   final ContentType<T> contentType;
@@ -766,12 +762,12 @@ class _SelectionControllerCreatorState<T extends Content> extends State<ContentS
 
 class SelectionCheckmark extends StatefulWidget {
   const SelectionCheckmark({
-    Key? key,
+    super.key,
     required this.animation,
     this.ignorePointer = true,
     this.scaleAnimation = true,
     this.size = 21.0,
-  }) : super(key: key);
+  });
 
   final Animation<double> animation;
   final bool ignorePointer;
@@ -864,10 +860,10 @@ class _SelectionCheckmarkState extends State<SelectionCheckmark> with SingleTick
 /// Ignores its subtree when selection controller is in selection.
 class IgnoreInSelection extends StatelessWidget {
   const IgnoreInSelection({
-    Key? key,
+    super.key,
     required this.controller,
     this.child,
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final SelectionController controller;
@@ -889,10 +885,10 @@ class IgnoreInSelection extends StatelessWidget {
 @visibleForTesting
 class SelectionActionsBar extends StatelessWidget {
   const SelectionActionsBar({
-    Key? key,
+    super.key,
     this.left = const [],
     this.right = const [],
-  }) : super(key: key);
+  });
 
   final List<Widget> left;
   final List<Widget> right;
@@ -982,12 +978,12 @@ class SelectionActionsBar extends StatelessWidget {
 /// Animation that emerges the item, by default from right to left.
 class EmergeAnimation extends AnimatedWidget {
   const EmergeAnimation({
-    Key? key,
+    super.key,
     required Animation<double> animation,
     required this.child,
     this.begin = const Offset(1.0, 0.0),
     this.end = Offset.zero,
-  }) : super(key: key, listenable: animation);
+  }) : super(listenable: animation);
 
   final Widget child;
   final Offset begin;
@@ -1034,12 +1030,11 @@ class EmergeAnimation extends AnimatedWidget {
 /// selection closing.
 class _ActionBuilder extends StatefulWidget {
   const _ActionBuilder({
-    Key? key,
     required this.controller,
     required this.builder,
     required this.shown,
     this.child,
-  }) : super(key: key);
+  });
 
   final ContentSelectionController controller;
 
@@ -1112,11 +1107,10 @@ class _ActionBuilderState extends State<_ActionBuilder> with SelectionHandlerMix
 /// Creates a selection title.
 class _ActionsSelectionTitle extends StatelessWidget {
   const _ActionsSelectionTitle({
-    Key? key,
     this.counter = false,
     this.selectedTitle = true,
     this.closeButton = false,
-  }) : super(key: key);
+  });
 
   /// If true, will show a selection close button.
   final bool closeButton;
@@ -1197,10 +1191,10 @@ class _ActionsSelectionTitle extends StatelessWidget {
 /// Creates a counter that shows how many items are selected.
 class SelectionCounter extends StatefulWidget {
   const SelectionCounter({
-    Key? key,
+    super.key,
     this.textStyle,
     this.controller,
-  }) : super(key: key);
+  });
 
   /// Text style of the counter.
   ///
@@ -1279,7 +1273,7 @@ class _SelectionCounterState extends State<SelectionCounter> with SelectionHandl
 
 /// Action that queues a [Song] or a [SongOrigin] to be played next.
 class _PlayNextSelectionAction extends StatelessWidget {
-  const _PlayNextSelectionAction({this.contentType, Key? key}) : super(key: key);
+  const _PlayNextSelectionAction({this.contentType});
 
   /// The type of content to be played next.
   final ContentType? contentType;
@@ -1373,7 +1367,7 @@ class _PlayNextSelectionAction extends StatelessWidget {
 
 /// Action that adds a [Song] or a [SongOrigin] to the end of the queue.
 class _AddToQueueSelectionAction extends StatelessWidget {
-  const _AddToQueueSelectionAction({this.contentType, Key? key}) : super(key: key);
+  const _AddToQueueSelectionAction({this.contentType});
 
   /// The type of content to be added to the queue.
   final ContentType? contentType;
@@ -1466,7 +1460,7 @@ class _AddToQueueSelectionAction extends StatelessWidget {
 
 /// Action that plays selected content as queue.
 class _PlayAsQueueSelectionAction extends StatelessWidget {
-  const _PlayAsQueueSelectionAction({Key? key}) : super(key: key);
+  const _PlayAsQueueSelectionAction();
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
@@ -1504,7 +1498,7 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
 
 /// Action that shuffles and plays selected content as queue.
 class _ShuffleAsQueueSelectionAction extends StatelessWidget {
-  const _ShuffleAsQueueSelectionAction({Key? key}) : super(key: key);
+  const _ShuffleAsQueueSelectionAction();
 
   void _handleTap(ContentSelectionController controller) {
     final songs = ContentUtils.flatten(ContentUtils.selectionPackAndSort(controller.data).merged);
@@ -1542,7 +1536,7 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
 
 /// Action that removes a song from the queue.
 class RemoveFromQueueSelectionAction extends StatelessWidget {
-  const RemoveFromQueueSelectionAction({Key? key}) : super(key: key);
+  const RemoveFromQueueSelectionAction({super.key});
 
   void _handleTap(ContentSelectionController<SelectionEntry<Song>> controller) {
     for (final entry in controller.data) {
@@ -1576,7 +1570,7 @@ class RemoveFromQueueSelectionAction extends StatelessWidget {
 
 /// Action that leads to the song album.
 class _GoToAlbumSelectionAction extends StatelessWidget {
-  const _GoToAlbumSelectionAction({Key? key}) : super(key: key);
+  const _GoToAlbumSelectionAction();
 
   void _handleTap(ContentSelectionController controller) {
     final song = controller.data.first.data as Song;
@@ -1620,7 +1614,7 @@ class _GoToAlbumSelectionAction extends StatelessWidget {
 
 /// Action that leads to the song or album artist.
 class _GoToArtistSelectionAction extends StatelessWidget {
-  const _GoToArtistSelectionAction({Key? key}) : super(key: key);
+  const _GoToArtistSelectionAction();
 
   void _handleTap(ContentSelectionController controller) {
     final content = controller.data.first.data;
@@ -1681,7 +1675,7 @@ class _GoToArtistSelectionAction extends StatelessWidget {
 
 /// Action that opens a playlist edit mode.
 class _EditPlaylistSelectionAction extends StatelessWidget {
-  const _EditPlaylistSelectionAction({Key? key}) : super(key: key);
+  const _EditPlaylistSelectionAction();
 
   void _handleTap(ContentSelectionController controller) {
     final playlist = controller.data.first.data as Playlist;
@@ -1722,7 +1716,7 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
 /// Action that adds songs to playlist(s).
 /// All types of contents are supported.
 class _AddToPlaylistSelectionAction extends StatelessWidget {
-  const _AddToPlaylistSelectionAction({Key? key}) : super(key: key);
+  const _AddToPlaylistSelectionAction();
 
   void _handleTap(BuildContext context, ContentSelectionController controller) {
     final theme = Theme.of(context);
@@ -1803,7 +1797,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
 
 /// Action that removes a song from playlist.
 class _FavoriteSelectionAction extends StatefulWidget {
-  const _FavoriteSelectionAction({Key? key}) : super(key: key);
+  const _FavoriteSelectionAction();
 
   @override
   State<_FavoriteSelectionAction> createState() => _FavoriteSelectionActionState();
@@ -1851,10 +1845,10 @@ class _FavoriteSelectionActionState extends State<_FavoriteSelectionAction> {
 /// Action that removes a song from playlist.
 class RemoveFromPlaylistSelectionAction extends StatelessWidget {
   const RemoveFromPlaylistSelectionAction({
-    Key? key,
+    super.key,
     required this.controller,
     required this.playlist,
-  }) : super(key: key);
+  });
 
   final ContentSelectionController controller;
   final Playlist playlist;
@@ -1904,9 +1898,9 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
 /// With the latter, will automatically check if selection contains only songs and hide the button, if not.
 class DeleteSongsAppBarAction<T extends Content> extends StatefulWidget {
   const DeleteSongsAppBarAction({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final ContentSelectionController<SelectionEntry<T>> controller;
 
@@ -2082,7 +2076,7 @@ void _showActionConfirmationDialog<E extends Content>({
 ///
 /// Supports only songs and playlists.
 class _DeletionArtsPreview<T extends Content> extends StatefulWidget {
-  const _DeletionArtsPreview({Key? key, required this.list}) : super(key: key);
+  const _DeletionArtsPreview({super.key, required this.list});
 
   final List<T> list;
 
@@ -2232,7 +2226,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                                       horizontal: 10.0,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.onBackground,
+                                      color: theme.colorScheme.onSecondaryContainer,
                                       borderRadius: const BorderRadius.all(Radius.circular(100.0)),
                                     ),
                                     child: Text(
@@ -2242,7 +2236,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
                                         fontSize: 14.0,
                                         height: 1,
                                         fontWeight: FontWeight.w800,
-                                        color: theme.colorScheme.background,
+                                        color: theme.colorScheme.secondaryContainer,
                                       ),
                                     ),
                                   ),
@@ -2320,11 +2314,11 @@ class _BoxyArtsPreviewDelegate extends BoxyDelegate {
 /// [ContentSelectionController.primaryContentType].
 class SelectAllSelectionAction<T extends Content> extends StatelessWidget {
   const SelectAllSelectionAction({
-    Key? key,
+    super.key,
     required this.controller,
     required this.entryFactory,
     required this.getAll,
-  }) : super(key: key);
+  });
 
   final ContentSelectionController controller;
 

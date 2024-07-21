@@ -5,10 +5,10 @@ import 'package:sweyer/sweyer.dart';
 /// Creates a Sweyer logo.
 class SweyerLogo extends StatelessWidget {
   const SweyerLogo({
-    Key? key,
+    super.key,
     this.size = kSongTileArtSize,
     this.color,
-  }) : super(key: key);
+  });
 
   final double size;
 

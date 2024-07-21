@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsRoute extends StatefulWidget {
-  const SettingsRoute({Key? key}) : super(key: key);
+  const SettingsRoute({super.key});
   @override
   _SettingsRouteState createState() => _SettingsRouteState();
 }
@@ -64,7 +64,7 @@ class _SettingsRouteState extends State<SettingsRoute> {
 }
 
 class _Footer extends StatefulWidget {
-  const _Footer({Key? key}) : super(key: key);
+  const _Footer();
 
   @override
   _FooterState createState() => _FooterState();

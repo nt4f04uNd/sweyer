@@ -368,12 +368,24 @@ class MockAudioPlayer implements AudioPlayerPlatform {
       AndroidEqualizerBandSetGainRequest request) async {
     return AndroidEqualizerBandSetGainResponse();
   }
+
+  @override
+  Future<SetAllowsExternalPlaybackResponse> setAllowsExternalPlayback(SetAllowsExternalPlaybackRequest request) {
+    // TODO: implement setAllowsExternalPlayback
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<SetWebCrossOriginResponse> setWebCrossOrigin(SetWebCrossOriginRequest request) {
+    // TODO: implement setWebCrossOrigin
+    throw UnimplementedError();
+  }
 }
 
 final byteRangeData = List.generate(200, (i) => i);
 
 class TestStreamAudioSource extends StreamAudioSource {
-  TestStreamAudioSource({dynamic tag}) : super(tag: tag);
+  TestStreamAudioSource({super.tag});
 
   @override
   Future<StreamAudioResponse> request([int? start, int? end]) async {

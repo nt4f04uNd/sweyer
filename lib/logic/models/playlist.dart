@@ -72,13 +72,13 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
   }
 
   Playlist({
-    required int id,
+    required super.id,
     required this.filesystemPath,
     required this.dateAdded,
     required this.dateModified,
     required this.name,
     required this.songIds,
-  }) : super(id: id);
+  });
 
   @override
   PlaylistCopyWith get copyWith => _PlaylistCopyWith(this);

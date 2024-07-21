@@ -4,7 +4,7 @@ import 'package:sweyer/sweyer.dart';
 
 class ListHeader extends StatelessWidget {
   const ListHeader({
-    Key? key,
+    super.key,
     this.leading,
     this.trailing,
     this.color,
@@ -15,7 +15,7 @@ class ListHeader extends StatelessWidget {
       left: 13.0,
       right: 7.0,
     ),
-  }) : super(key: key);
+  });
 
   final Widget? leading;
   final Widget? trailing;
@@ -66,25 +66,23 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   /// Create a default header with sort controls, count and slots widgets
   /// for other widgets.
   const ContentListHeader({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.count,
     this.selectionController,
     this.leading,
     this.trailing,
-  })  : _onlyCount = false,
-        super(key: key);
+  })  : _onlyCount = false;
 
   /// Creates a header that shows only count.
   const ContentListHeader.onlyCount({
-    Key? key,
+    super.key,
     required this.contentType,
     required this.count,
   })  : _onlyCount = true,
         selectionController = null,
         leading = null,
-        trailing = null,
-        super(key: key);
+        trailing = null;
 
   final ContentType<T> contentType;
 
@@ -138,7 +136,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     final textStyle = TextStyle(
-      color: theme.colorScheme.onBackground,
+      color: theme.colorScheme.onSecondaryContainer,
       fontSize: 14.0,
       fontWeight: FontWeight.w800,
     );
@@ -217,10 +215,10 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
 /// A small button to be placed into [ContentListSortHeader].
 class ContentListHeaderAction extends StatelessWidget {
   const ContentListHeaderAction({
-    Key? key,
+    super.key,
     required this.icon,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final Widget icon;
   final VoidCallback? onPressed;
@@ -241,10 +239,10 @@ class ContentListHeaderAction extends StatelessWidget {
 /// A small button to be placed into [ContentListSortHeader] with animation.
 class AnimatedContentListHeaderAction extends StatelessWidget {
   const AnimatedContentListHeaderAction({
-    Key? key,
+    super.key,
     required this.icon,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final Widget icon;
   final VoidCallback? onPressed;

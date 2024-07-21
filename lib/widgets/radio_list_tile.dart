@@ -3,12 +3,12 @@ import 'package:sweyer/sweyer.dart';
 
 class AppRadioListTile<T> extends StatelessWidget {
   const AppRadioListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
     this.title,
-  }) : super(key: key);
+  });
 
   final T value;
   final T groupValue;
@@ -27,7 +27,7 @@ class AppRadioListTile<T> extends StatelessWidget {
         child: Row(
           children: [
             Radio<T>(
-              activeColor: ThemeControl.instance.isDark ? theme.colorScheme.onBackground : theme.colorScheme.primary,
+              activeColor: ThemeControl.instance.isDark ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.primary,
               value: value,
               splashRadius: 0.0,
               groupValue: groupValue,

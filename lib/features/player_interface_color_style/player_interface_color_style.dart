@@ -79,7 +79,7 @@ class PlayerInterfaceColorStyleControl extends Control {
     _currentPalette.value = value;
     _currentBackgroundColor.value = shadeColor(
       -0.5,
-      value?.vibrantColor?.color ?? value?.dominantColor?.color ?? theme.colorScheme.background,
+      value?.vibrantColor?.color ?? value?.dominantColor?.color ?? theme.colorScheme.secondaryContainer,
     );
   }
 
@@ -110,7 +110,7 @@ class PlayerInterfaceColorStyleControl extends Control {
 
 /// Allows to choose the [PlayerInterfaceColorStyle].
 class PlayerInterfaceColorStyleSettingWidget extends StatelessWidget {
-  const PlayerInterfaceColorStyleSettingWidget({Key? key}) : super(key: key);
+  const PlayerInterfaceColorStyleSettingWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -137,10 +137,10 @@ class PlayerInterfaceColorStyleSettingWidget extends StatelessWidget {
 /// A shorthand builder for [Settings.playerInterfaceColorStyle].
 class PlayerInterfaceColorStyleSettingBuilder extends StatelessWidget {
   const PlayerInterfaceColorStyleSettingBuilder({
-    Key? key,
+    super.key,
     required this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
   final ValueWidgetBuilder<PlayerInterfaceColorStyle> builder;
   final Widget? child;
@@ -157,9 +157,9 @@ class PlayerInterfaceColorStyleSettingBuilder extends StatelessWidget {
 
 class PlayerInterfaceThemeOverride extends StatelessWidget {
   const PlayerInterfaceThemeOverride({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -172,8 +172,6 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
             primary: Colors.white,
             onSurface: Colors.white,
             secondary: _shadeForSecondaryColor(backgroundColor),
-            onBackground: Colors.white,
-            background: backgroundColor,
           ),
           appBarTheme: theme.appBarTheme.copyWith(
             color: _shadeForSecondaryColor(backgroundColor),
@@ -231,10 +229,10 @@ class PlayerInterfaceThemeOverride extends StatelessWidget {
 /// A background to be used by [PlayerRoute].
 class PlayerInterfaceColorWidget extends StatelessWidget {
   const PlayerInterfaceColorWidget({
-    Key? key,
+    super.key,
     this.child,
     this.color,
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final ValueGetter<Color?>? color;
@@ -253,7 +251,7 @@ class PlayerInterfaceColorWidget extends StatelessWidget {
             );
           case PlayerInterfaceColorStyle.themeBackgroundColor:
             return Container(
-              color: color?.call() ?? theme.colorScheme.background,
+              color: color?.call() ?? theme.colorScheme.secondaryContainer,
               child: child,
             );
         }
@@ -264,10 +262,9 @@ class PlayerInterfaceColorWidget extends StatelessWidget {
 
 class _ArtColorWidget extends StatelessWidget {
   const _ArtColorWidget({
-    Key? key,
     required this.child,
     required this.color,
-  }) : super(key: key);
+  });
 
   final Widget? child;
   final ValueGetter<Color?>? color;
@@ -295,9 +292,9 @@ class _ArtColorWidget extends StatelessWidget {
 /// Provides a [ContentArt.onLoad] function.
 class ContentArtLoadBuilder extends StatelessWidget {
   const ContentArtLoadBuilder({
-    Key? key,
+    super.key,
     required this.builder,
-  }) : super(key: key);
+  });
 
   final Widget Function(ContentArtOnLoadCallback? onLoad) builder;
 

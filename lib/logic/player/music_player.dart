@@ -21,7 +21,7 @@ import 'package:sweyer/sweyer.dart';
 /// * nested paths, like [albums] - which can have an [id]
 /// * and not nested paths - like [songs], which just displays all songs
 class _BrowseParent extends Enum {
-  const _BrowseParent(String value, {this.id, required this.nested}) : super(value);
+  const _BrowseParent(String super.value, {this.id, required this.nested});
 
   final bool nested;
 
@@ -260,7 +260,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> prepareFromUri(Uri uri, [Map<String, dynamic>? extras]) {
     // TODO: implement prepareFromUri
     throw UnimplementedError();
-    return super.prepareFromUri(uri, extras);
+    // return super.prepareFromUri(uri, extras);
   }
 
   @override
@@ -292,7 +292,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) {
     // TODO: implement playFromUri
     throw UnimplementedError();
-    return super.playFromUri(uri, extras);
+    // return super.playFromUri(uri, extras);
   }
 
   @override
@@ -395,7 +395,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> updateMediaItem(MediaItem mediaItem) {
     // TODO: implement updateMediaItem
     throw UnimplementedError();
-    return super.updateMediaItem(mediaItem);
+    // return super.updateMediaItem(mediaItem);
   }
 
   @override
@@ -439,14 +439,14 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> setRating(Rating rating, Map? extras) {
     // TODO: implement setRating
     throw UnimplementedError();
-    return super.setRating(rating, extras);
+    // return super.setRating(rating, extras);
   }
 
   @override
   Future<void> setCaptioningEnabled(bool enabled) {
     // TODO: implement setCaptioningEnabled
     throw UnimplementedError();
-    return super.setCaptioningEnabled(enabled);
+    // return super.setCaptioningEnabled(enabled);
   }
 
   @override
@@ -758,6 +758,7 @@ class MusicPlayer extends AudioPlayer {
         // Do nothing
       } else if (e is PlayerException) {
         final context = AppRouter.instance.navigatorKey.currentContext;
+        // ignore: use_build_context_synchronously
         final l10n = context != null ? getl10n(context) : staticl10n;
         ShowFunctions.instance.showToast(msg: l10n.playbackError);
         playNext(song: song);

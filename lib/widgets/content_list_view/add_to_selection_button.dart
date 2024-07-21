@@ -4,9 +4,9 @@ import 'package:sweyer/sweyer.dart';
 /// Creates an icon button that adds a content entry to selection.
 class AddToSelectionButton<T extends SelectionEntry> extends StatelessWidget {
   const AddToSelectionButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   final VoidCallback onPressed;
 

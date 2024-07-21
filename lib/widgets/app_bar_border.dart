@@ -6,7 +6,7 @@ import 'package:sweyer/sweyer.dart';
 /// Used in list views when they are scrolled and displayed below the [AppBar],
 /// instead of elevation.
 class AppBarBorder extends StatelessWidget {
-  const AppBarBorder({Key? key, this.shown = true}) : super(key: key);
+  const AppBarBorder({super.key, this.shown = true});
 
   final bool shown;
 
