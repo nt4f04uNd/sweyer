@@ -129,6 +129,20 @@ void main() {
     });
   });
 
+  testWidgets('error screen - shows when searching for tracks fails', (WidgetTester tester) async {
+    late CrashlyticsObserver crashlyticsObserver;
+    registerAppSetup(() {
+      crashlyticsObserver = CrashlyticsObserver(tester.binding, throwFatalErrors: false);
+      FakeSweyerPluginPlatform.instance.songsFactory = () => throw TypeError();
+    });
+    await tester.runAppTest(() async {
+      // Expect appropriate ui
+      expect(find.text(l10n.failedToInitialize), findsOneWidget);
+      expect(find.ancestor(of: find.text(l10n.retry), matching: find.byType(AppButton)), findsOneWidget);
+      expect(crashlyticsObserver.fatalErrorCount, 1);
+    });
+  });
+
   testWidgets('home screen - shows when permissions are granted and not searching for tracks',
       (WidgetTester tester) async {
     late AppWidgetChannelObserver appWidgetChannelObserver;

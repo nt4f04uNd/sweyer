@@ -113,7 +113,8 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawAlbums = validAlbums.map((element) => element.$1).toList();
+        FakeSweyerPluginPlatform.instance.albumsFactory =
+            () => validAlbums.map((element) => element.$1).toList();
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -142,7 +143,8 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawArtists = validArtists.map((element) => element.$1).toList();
+        FakeSweyerPluginPlatform.instance.artistsFactory =
+            () => validArtists.map((element) => element.$1).toList();
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -182,7 +184,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawPlaylists = validPlaylists.map((element) => element.$1).toList();
+        FakeSweyerPluginPlatform.instance.playlistsFactory = () => validPlaylists.map((element) => element.$1).toList();
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -253,7 +255,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawSongs = validSongs.map((element) => element.$1).toList();
+        FakeSweyerPluginPlatform.instance.songsFactory = () => validSongs.map((element) => element.$1).toList();
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -279,7 +281,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawAlbums = invalidAlbums;
+        FakeSweyerPluginPlatform.instance.albumsFactory = () => invalidAlbums;
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -307,7 +309,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawArtists = invalidArtists;
+        FakeSweyerPluginPlatform.instance.artistsFactory = () => invalidArtists;
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -337,7 +339,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawPlaylists = invalidPlaylists;
+        FakeSweyerPluginPlatform.instance.playlistsFactory = () => invalidPlaylists;
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -377,7 +379,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.rawSongs = invalidSongs;
+        FakeSweyerPluginPlatform.instance.songsFactory = () => invalidSongs;
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
