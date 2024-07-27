@@ -30,7 +30,7 @@ class Genre extends Content implements PlatformGenre {
     return Genre(
       id: map['id'] as int,
       name: map['name'] as String,
-      songIds: map['songIds'].cast<int>(),
+      songIds: (map['songIds'] as List?)?.cast<int>() ?? [],
     );
   }
 
