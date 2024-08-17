@@ -59,22 +59,8 @@ dependencies:
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 
-  # fluttertoast: ^8.0.3
-  fluttertoast:
-    # path: C:/dev/projects/native/FlutterToast
-
-    # Using this branch for changing font family
-    git: 
-      url: https://github.com/Abestanis/fluttertoast/
-      ref: feature/font_asset
+  fluttertoast: ^8.2.8
   just_audio: ^0.9.18
-  
-    # path: C:/dev/projects/native/just_audio/just_audio
-  
-    # git: 
-    #   url: C:/dev/projects/native/just_audio
-    #   ref: master
-    #   path: just_audio
   audio_service:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
     # See https://github.com/ryanheise/audio_service/issues/633
