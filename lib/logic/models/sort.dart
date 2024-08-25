@@ -1,15 +1,19 @@
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sweyer/sweyer.dart';
 
-/// Interface for other sort feature enums.
-abstract class SortFeature<T extends Content> extends Enum<String> {
-  const SortFeature._(String value) : super(value);
+/// The order of a sort operation.
+enum SortOrder {
+  /// Ascending sort order ("lower" values first, "higher" values last).
+  ascending,
 
+  /// Descending sort order ("higher" values first, "lower" values last).
+  descending,
+}
+
+/// Interface for other sort feature enums.
+abstract class SortFeature<T extends Content> {
   /// Returns sort feature values for a given content.
   static List<SortFeature<T>> getValuesForContent<T extends Content>(ContentType<T> contentType) {
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (contentType as ContentType) {
       case ContentType.song:
         return SongSortFeature.values as List<SortFeature<T>>;
@@ -22,120 +26,112 @@ abstract class SortFeature<T extends Content> extends Enum<String> {
     }
   }
 
-  /// Whether the default order is ASC.
-  bool get defaultOrderAscending;
+  /// An identifier for this feature.
+  String get id;
+
+  /// The default sorting order of the feature.
+  SortOrder get defaultSortingOrder;
 }
 
 /// Features to sort by a [Song] list.
 ///
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [SongSortFeature] the new default sort order is applied.
-class SongSortFeature extends SortFeature<Song> {
-  const SongSortFeature._(String value) : super._(value);
-
-  @override
-  bool get defaultOrderAscending => this != dateModified && this != dateAdded;
-
-  static List<SongSortFeature> get values => const [dateModified, dateAdded, title, artist, album];
-
+enum SongSortFeature implements SortFeature<Song> {
   /// Sort by the [Song.dateModified].
-  /// Default sort order is DESC.
-  static const dateModified = SongSortFeature._('dateModified');
+  dateModified(SortOrder.descending),
 
   /// Sort by the [Song.dateAdded].
-  /// Default sort order is DESC.
-  static const dateAdded = SongSortFeature._('dateAdded');
+  dateAdded(SortOrder.descending),
 
   /// Sort by the [Song.title].
-  /// Default sort order is ASC.
-  static const title = SongSortFeature._('title');
+  title(SortOrder.ascending),
 
   /// Sort by the [Song.artist].
-  /// Default sort order is ASC.
-  static const artist = SongSortFeature._('artist');
+  artist(SortOrder.ascending),
 
   /// Sort by the [Song.album].
-  /// Default sort order is ASC.
-  static const album = SongSortFeature._('album');
+  album(SortOrder.ascending);
+
+  const SongSortFeature(this.defaultSortingOrder);
+
+  @override
+  String get id => name;
+
+  @override
+  final SortOrder defaultSortingOrder;
 }
 
 /// Features to sort by a [Album] list.
 ///
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [AlbumSortFeature] the new default sort order is applied.
-class AlbumSortFeature extends SortFeature<Album> {
-  const AlbumSortFeature._(String value) : super._(value);
-
-  @override
-  bool get defaultOrderAscending => this != year;
-
-  static List<AlbumSortFeature> get values => const [title, artist, year, numberOfSongs];
-
+enum AlbumSortFeature implements SortFeature<Album> {
   /// Sort by the [Album.album].
-  /// Default sort order is ASC.
-  static const title = AlbumSortFeature._('title');
+  title(SortOrder.ascending),
 
   /// Sort by the [Album.artist].
-  /// Default sort order is ASC.
-  static const artist = AlbumSortFeature._('artist');
+  artist(SortOrder.ascending),
 
   /// Sort by the [Album.lastYear].
-  /// Default sort order is DESC.
-  static const year = AlbumSortFeature._('year');
+  year(SortOrder.descending),
 
   /// Sort by the [Album.numberOfSongs].
-  /// Default sort order is ASC.
-  static const numberOfSongs = AlbumSortFeature._('numberOfSongs');
+  numberOfSongs(SortOrder.ascending);
+
+  const AlbumSortFeature(this.defaultSortingOrder);
+
+  @override
+  String get id => name;
+
+  @override
+  final SortOrder defaultSortingOrder;
 }
 
 /// Features to sort by a [Playlist] list.
 ///
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [PlaylistSortFeature] the new default sort order is applied.
-class PlaylistSortFeature extends SortFeature<Playlist> {
-  const PlaylistSortFeature._(String value) : super._(value);
-
-  @override
-  bool get defaultOrderAscending => this != dateModified && this != dateAdded;
-
-  static List<PlaylistSortFeature> get values => const [dateAdded, dateModified, name];
-
+enum PlaylistSortFeature implements SortFeature<Playlist> {
   /// Sort by the [Playlist.dateModified].
-  /// Default sort order is DESC.
-  static const dateModified = PlaylistSortFeature._('dateModified');
+  dateModified(SortOrder.descending),
 
   /// Sort by the [Playlist.dateAdded].
-  /// Default sort order is DESC.
-  static const dateAdded = PlaylistSortFeature._('dateAdded');
+  dateAdded(SortOrder.descending),
 
   /// Sort by the [Playlist.name].
-  /// Default sort order is ASC.
-  static const name = PlaylistSortFeature._('name');
+  name(SortOrder.ascending);
+
+  const PlaylistSortFeature(this.defaultSortingOrder);
+
+  @override
+  String get id => this.name;
+
+  @override
+  final SortOrder defaultSortingOrder;
 }
 
 /// Features to sort by a [Artist] list.
 ///
 /// Each feature also has the default sort order - ASC or DESC.
 /// When user changes the [ArtistSortFeature] the new default sort order is applied.
-class ArtistSortFeature extends SortFeature<Artist> {
-  const ArtistSortFeature._(String value) : super._(value);
-
-  @override
-  bool get defaultOrderAscending => true;
-
-  static List<ArtistSortFeature> get values => const [name, numberOfAlbums, numberOfTracks];
-
+enum ArtistSortFeature implements SortFeature<Artist> {
   /// Sort by the [Artist.artist].
-  /// Default sort order is ASC.
-  static const name = ArtistSortFeature._('name');
+  name(SortOrder.ascending),
 
   /// Sort by the [Artist.numberOfAlbums].
-  /// Default sort order is ASC.
-  static const numberOfAlbums = ArtistSortFeature._('numberOfAlbums');
+  numberOfAlbums(SortOrder.ascending),
 
   /// Sort by the [Artist.numberOfTracks].
-  /// Default sort order is ASC.
-  static const numberOfTracks = ArtistSortFeature._('numberOfTracks');
+  numberOfTracks(SortOrder.ascending);
+
+  const ArtistSortFeature(this.defaultSortingOrder);
+
+  @override
+  String get id => this.name;
+
+  @override
+  final SortOrder defaultSortingOrder;
 }
 
 abstract class Sort<T extends Content> extends Equatable {
@@ -143,7 +139,7 @@ abstract class Sort<T extends Content> extends Equatable {
     required this.feature,
     required this.orderAscending,
   });
-  Sort.defaultOrder(this.feature) : orderAscending = feature.defaultOrderAscending;
+  Sort.defaultOrder(this.feature) : orderAscending = feature.defaultSortingOrder == SortOrder.ascending;
 
   final SortFeature<T> feature;
   final bool orderAscending;
@@ -151,29 +147,26 @@ abstract class Sort<T extends Content> extends Equatable {
   @override
   List<Object> get props => [feature, orderAscending];
 
-  Sort<T> copyWith({SortFeature? feature, bool? orderAscending});
-  Sort<T> get withDefaultOrder;
+  Sort<T> copyWith({SortFeature<T>? feature, bool? orderAscending});
+  Sort<T> get withDefaultOrder => copyWith(orderAscending: feature.defaultSortingOrder == SortOrder.ascending);
 
   Comparator<T> get comparator;
 
   Map<String, dynamic> toMap() => {
-        'feature': feature.value,
+        'feature': feature.id,
         'orderAscending': orderAscending,
       };
 }
 
 class SongSort extends Sort<Song> {
   const SongSort({
-    required SongSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
+    required SongSortFeature super.feature,
+    super.orderAscending = true,
+  });
   SongSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory SongSort.fromMap(Map map) => SongSort(
-        feature: EnumToString.fromString(
-          SongSortFeature.values,
-          map['feature'],
-        )!,
+        feature: SongSortFeature.values.byName(map['feature']),
         orderAscending: map['orderAscending'],
       );
 
@@ -186,11 +179,6 @@ class SongSort extends Sort<Song> {
       feature: feature ?? this.feature as SongSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
-  }
-
-  @override
-  SongSort get withDefaultOrder {
-    return copyWith(orderAscending: feature.defaultOrderAscending);
   }
 
   int _fallbackTitle(Song a, Song b) {
@@ -268,18 +256,9 @@ class AlbumSort extends Sort<Album> {
   AlbumSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory AlbumSort.fromMap(Map map) => AlbumSort(
-        feature: EnumToString.fromString(
-          AlbumSortFeature.values,
-          map['feature'],
-        )!,
+        feature: AlbumSortFeature.values.byName(map['feature']),
         orderAscending: map['orderAscending'],
       );
-
-  @override
-  Map<String, dynamic> toMap() => {
-        'feature': feature.value,
-        'orderAscending': orderAscending,
-      };
 
   @override
   AlbumSort copyWith({
@@ -292,13 +271,8 @@ class AlbumSort extends Sort<Album> {
     );
   }
 
-  @override
-  AlbumSort get withDefaultOrder {
-    return copyWith(orderAscending: feature.defaultOrderAscending);
-  }
-
   int _fallbackYear(Album a, Album b) {
-    return a.year.compareTo(b.year);
+    return (a.year ?? 0).compareTo((b.year ?? 0)); // TODO: Decide how to sort null values
   }
 
   int _fallbackTitle(Album a, Album b) {
@@ -329,7 +303,7 @@ class AlbumSort extends Sort<Album> {
         break;
       case AlbumSortFeature.year:
         c = (a, b) {
-          final compare = a.year.compareTo(b.year);
+          final compare = (a.year ?? 0).compareTo(b.year ?? 0); // TODO: Decide how to sort null values
           if (compare == 0) {
             return _fallbackTitle(a, b);
           }
@@ -363,18 +337,9 @@ class PlaylistSort extends Sort<Playlist> {
   PlaylistSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory PlaylistSort.fromMap(Map map) => PlaylistSort(
-        feature: EnumToString.fromString(
-          PlaylistSortFeature.values,
-          map['feature'],
-        )!,
+        feature: PlaylistSortFeature.values.byName(map['feature']),
         orderAscending: map['orderAscending'],
       );
-
-  @override
-  Map<String, dynamic> toMap() => {
-        'feature': feature.value,
-        'orderAscending': orderAscending,
-      };
 
   @override
   PlaylistSort copyWith({
@@ -385,11 +350,6 @@ class PlaylistSort extends Sort<Playlist> {
       feature: feature ?? this.feature as PlaylistSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
-  }
-
-  @override
-  PlaylistSort get withDefaultOrder {
-    return copyWith(orderAscending: feature.defaultOrderAscending);
   }
 
   int _fallbackName(Playlist a, Playlist b) {
@@ -449,18 +409,9 @@ class ArtistSort extends Sort<Artist> {
   ArtistSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory ArtistSort.fromMap(Map map) => ArtistSort(
-        feature: EnumToString.fromString(
-          ArtistSortFeature.values,
-          map['feature'],
-        )!,
+        feature: ArtistSortFeature.values.byName(map['feature']),
         orderAscending: map['orderAscending'],
       );
-
-  @override
-  Map<String, dynamic> toMap() => {
-        'feature': feature.value,
-        'orderAscending': orderAscending,
-      };
 
   @override
   ArtistSort copyWith({
@@ -471,11 +422,6 @@ class ArtistSort extends Sort<Artist> {
       feature: feature ?? this.feature as ArtistSortFeature,
       orderAscending: orderAscending ?? this.orderAscending,
     );
-  }
-
-  @override
-  ArtistSort get withDefaultOrder {
-    return copyWith(orderAscending: feature.defaultOrderAscending);
   }
 
   int _fallbackName(Artist a, Artist b) {

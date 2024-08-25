@@ -37,18 +37,13 @@ class Album extends PersistentQueue implements PlatformAlbum {
   bool get playable => true;
 
   /// Gets album normalized year.
-  int get year {
-    return lastYear == null || lastYear! < 1000 ? clock.now().year : lastYear!;
+  int? get year {
+    return lastYear ?? firstYear;
   }
 
   /// Returns string in format `album name • year`.
   String get nameDotYear {
     return ContentUtils.appendYearWithDot(album, year);
-  }
-
-  /// Returns string in format `Album • year`.
-  String albumDotName(AppLocalizations l10n) {
-    return ContentUtils.appendYearWithDot(l10n.album, year);
   }
 
   /// Returns the album artist.
