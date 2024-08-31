@@ -822,18 +822,8 @@ class ContentUtils {
   static const String dot = '•';
 
   /// Joins list with the [dot].
-  static String joinDot(List list) {
-    if (list.isEmpty) {
-      return '';
-    }
-    var result = list.first;
-    for (int i = 1; i < list.length; i++) {
-      final string = list[i].toString();
-      if (string.isNotEmpty) {
-        result += ' $dot $string';
-      }
-    }
-    return result;
+  static String joinDot(List<Object?> list) {
+    return list.where((item) => item != null && item.toString().isNotEmpty).join(' $dot ');
   }
 
   /// Returns a default icon for the playlist art.
@@ -855,7 +845,10 @@ class ContentUtils {
   }
 
   /// Appends dot and year to [string].
-  static String appendYearWithDot(String string, int year) {
+  static String appendYearWithDot(String string, int? year) {
+    if (year == null) {
+      return string;
+    }
     return '$string $dot $year';
   }
 

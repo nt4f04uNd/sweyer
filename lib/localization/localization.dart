@@ -65,8 +65,6 @@ extension AppLocalizationsExtension on AppLocalizations {
             return artist;
           case SongSortFeature.album:
             return album;
-          default:
-            throw UnimplementedError();
         }
       case ContentType.album:
         switch (feature as AlbumSortFeature) {
@@ -78,8 +76,6 @@ extension AppLocalizationsExtension on AppLocalizations {
             return year;
           case AlbumSortFeature.numberOfSongs:
             return numberOfTracks;
-          default:
-            throw UnimplementedError();
         }
       case ContentType.playlist:
         switch (feature as PlaylistSortFeature) {
@@ -89,8 +85,6 @@ extension AppLocalizationsExtension on AppLocalizations {
             return dateAdded;
           case PlaylistSortFeature.name:
             return title;
-          default:
-            throw UnimplementedError();
         }
       case ContentType.artist:
         switch (feature as ArtistSortFeature) {
@@ -100,8 +94,6 @@ extension AppLocalizationsExtension on AppLocalizations {
             return numberOfAlbums;
           case ArtistSortFeature.numberOfTracks:
             return numberOfTracks;
-          default:
-            throw UnimplementedError();
         }
     }
   }

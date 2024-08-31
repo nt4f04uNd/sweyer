@@ -108,7 +108,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
     final sort = getSort();
-    ShowFunctions.instance.showRadio<SortFeature>(
+    ShowFunctions.instance.showRadio<SortFeature<T>>(
       context: context,
       title: l10n.sort,
       items: SortFeature.getValuesForContent(contentType),
