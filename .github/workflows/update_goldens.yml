@@ -15,7 +15,7 @@ jobs:
       contents: write
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🧪 Test Sweyer
         uses: ./.github/workflows/test
@@ -23,13 +23,13 @@ jobs:
           testing_arguments: --update-goldens
 
       - name: 📁 Save updated Golden test artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: golden-test-updated
           path: test/golden/goldens
 
       - name: 💾 Commit updated Golden test artifacts
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         if: github.event.inputs.commit == 'true'
         with:
           commit_message: 🤖 Update Golden test artifacts 🤖
