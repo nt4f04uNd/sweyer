@@ -67,7 +67,7 @@ runs:
         mv key.properties ${{ github.workspace }}/android/key.properties
 
     - name: 📖 Read app version
-      uses: NiklasLehnfeld/flutter-version-number-action@main
+      uses: NiklasLehnfeld/flutter-version-number-action@v1
       id: read-version
       with:
         file-path: pubspec.yaml
@@ -106,21 +106,21 @@ runs:
         zip -r ${{ github.workspace }}/symbols.zip ${{ github.workspace }}/build/app/outputs/symbols/
 
     - name: 📁 Upload build artifacts (symbols)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: symbols
         path: |
           ${{ github.workspace }}/symbols.zip
 
     - name: 📁 Upload build artifacts (aab)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: sweyer@${{ steps.read-version.outputs.version-number }}.aab
         path: |
           ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab
 
     - name: 📁 Upload build artifacts (apk)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: sweyer@${{ steps.read-version.outputs.version-number }}.apk
         path: |
