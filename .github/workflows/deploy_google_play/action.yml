@@ -67,7 +67,7 @@ runs:
         mv key.properties ${{ github.workspace }}/android/key.properties
 
     - name: 📖 Read app version
-      uses: NiklasLehnfeld/flutter-version-number-action@main
+      uses: NiklasLehnfeld/flutter-version-number-action@v1
       id: read-version
       with:
         file-path: pubspec.yaml
