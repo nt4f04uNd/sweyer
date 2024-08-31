@@ -21,3 +21,5 @@ jobs:
 
       - name: ☂ Upload Code Coverage
         uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

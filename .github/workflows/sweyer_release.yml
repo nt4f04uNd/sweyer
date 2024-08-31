@@ -24,6 +24,8 @@ jobs:
       - name: ☂ Upload Code Coverage
         if: ${{ github.event.inputs.skip-tests == 'false' }}
         uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: 🚀🤖 Bundle and deploy to Google Play
         uses: ./.github/workflows/deploy_google_play
