@@ -52,7 +52,7 @@ android {
     defaultConfig {
         applicationId "com.nt4f04und.sweyer"
         minSdkVersion Math.max(21, flutter.minSdkVersion)
-        targetSdkVersion 33 // flutter.targetSdkVersion
+        targetSdkVersion 35 // flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
