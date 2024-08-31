@@ -4,7 +4,7 @@ homepage: https://github.com/nt4f04uNd/sweyer
 repository: https://github.com/nt4f04uNd/sweyer
 issue_tracker: https://github.com/nt4f04uNd/sweyer/issues
 publish_to: none
-version: 1.0.11+14
+version: 1.0.12+15
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
