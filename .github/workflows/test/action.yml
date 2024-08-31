@@ -40,7 +40,7 @@ runs:
 
     - name: 📁 Save golden test failures artifacts
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: golden-test-failures
         path: test/golden/failures
