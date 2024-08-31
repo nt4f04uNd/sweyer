@@ -34,7 +34,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 33 // flutter.compileSdkVersion
+    compileSdkVersion 34 // flutter.compileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -52,7 +52,7 @@ android {
     defaultConfig {
         applicationId "com.nt4f04und.sweyer"
         minSdkVersion Math.max(21, flutter.minSdkVersion)
-        targetSdkVersion 35 // flutter.targetSdkVersion
+        targetSdkVersion 34 // flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

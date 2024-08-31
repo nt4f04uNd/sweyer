@@ -70,7 +70,7 @@ packages:
     description:
       path: audio_service
       ref: sweyer
-      resolved-ref: "8b8b6e66a2e24bbab610bd02ce02ecaca0ddbdc4"
+      resolved-ref: "1e92412fcd76c43fc88c9b1157b855d097b7c9b3"
       url: "https://github.com/nt4f04uNd/audio_service"
     source: git
     version: "0.16.2"
@@ -79,7 +79,7 @@ packages:
     description:
       path: audio_service_platform_interface
       ref: sweyer
-      resolved-ref: "8b8b6e66a2e24bbab610bd02ce02ecaca0ddbdc4"
+      resolved-ref: "1e92412fcd76c43fc88c9b1157b855d097b7c9b3"
       url: "https://github.com/nt4f04und/audio_service.git"
     source: git
     version: "1.0.0"
@@ -88,7 +88,7 @@ packages:
     description:
       path: audio_service_web
       ref: sweyer
-      resolved-ref: "8b8b6e66a2e24bbab610bd02ce02ecaca0ddbdc4"
+      resolved-ref: "1e92412fcd76c43fc88c9b1157b855d097b7c9b3"
       url: "https://github.com/nt4f04und/audio_service.git"
     source: git
     version: "0.16.2"
