@@ -3,7 +3,7 @@
 
 ## 1.0.12
 
-* Update targetSdkVersion to 35 to match new [Google Play store API level requirements](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en) @nt4f04und
+* Update targetSdkVersion to 34 to match new [Google Play store API level requirements](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en) @nt4f04und
 
 ## 1.0.11
 
