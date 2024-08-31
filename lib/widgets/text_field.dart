@@ -41,7 +41,7 @@ class _AppTextFieldState extends State<AppTextField> {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
     return TextField(
-      selectionControls: NFTextSelectionControls(),
+      selectionControls: MaterialTextSelectionControls(),
       controller: widget.controller,
       autofocus: widget.autofocus,
       style: theme.textTheme.titleLarge?.merge(widget.textStyle) ?? widget.textStyle,

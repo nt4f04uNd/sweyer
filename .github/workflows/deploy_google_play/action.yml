@@ -8,7 +8,7 @@ inputs:
     description: The channel of the Flutter used to build Sweyer with. 
   flutter_version:
     required: false
-    default: "3.7.12"
+    default: "3.22.2"
     description: The version of Flutter used to build Sweyer with.
   ruby_version:
     required: false
@@ -82,6 +82,7 @@ runs:
     - name: 🏗️ Build AAB
       shell: bash
       run: |
+        export JAVA_HOME="$JAVA_HOME_17_X64"
         flutter build appbundle --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
 
     - name: ✍ Rename AAB
@@ -92,6 +93,7 @@ runs:
     - name: 🏗️ Build APK
       shell: bash
       run: |
+        export JAVA_HOME="$JAVA_HOME_17_X64"
         flutter build apk --obfuscate --tree-shake-icons --split-debug-info=./build/app/outputs/symbols
 
     - name: ✍ Rename APK
