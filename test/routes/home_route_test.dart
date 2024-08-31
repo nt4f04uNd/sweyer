@@ -4,6 +4,7 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sweyer/constants.dart';
+import 'package:sweyer/routes/settings_route/theme_settings.dart';
 
 import '../observer/observer.dart';
 import '../test.dart';
@@ -221,6 +222,73 @@ void main() {
             tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
         expect(tabBarTop, trackPanelTop);
       });
+    });
+  });
+
+  testWidgets('Allows changing settings when uninitialized and no permissions were granted',
+      (WidgetTester tester) async {
+    await setUpAppTest(() {
+      PermissionsChannelObserver permissionsObserver = PermissionsChannelObserver(tester.binding);
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+      permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
+    });
+    await tester.runAppTest(() async {
+      // Go to the settings
+      await tester.tap(find.byType(SettingsButton));
+      await tester.pumpAndSettle();
+
+      // Go to the general settings page
+      await tester.tap(find.text(staticl10n.general));
+      await tester.pumpAndSettle();
+
+      // Toggle all switch settings
+      for (var setting in [
+        staticl10n.confirmExitingWithBackButtonSetting,
+        staticl10n.useMediaStoreForFavoriteSongsSetting,
+      ]) {
+        // Toggle switch
+        await tester.tap(find.text(setting));
+        await tester.pumpAndSettle();
+
+        // Toggle switch back
+        await tester.tap(find.text(setting));
+        await tester.pumpAndSettle();
+      }
+
+      // Go to the theme settings page
+      await BackButtonInterceptor.popRoute();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(staticl10n.theme));
+      await tester.pumpAndSettle();
+
+      // Open the player theme setting dialog and toggle the setting
+      await tester.tap(find.text(staticl10n.playerInterfaceColorStyle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(staticl10n.playerInterfaceColorStyleThemeBackgroundColor));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(staticl10n.playerInterfaceColorStyle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(staticl10n.playerInterfaceColorStyleArtColor));
+      await tester.pumpAndSettle();
+
+      // Toggle all switch settings
+      for (var setting in [
+        staticl10n.settingLightMode,
+      ]) {
+        // Toggle switch
+        await tester.tap(find.text(setting));
+        await tester.pumpAndSettle();
+
+        // Toggle switch back
+        await tester.tap(find.text(setting));
+        await tester.pumpAndSettle();
+      }
+
+      // Toggle color choices
+      await tester.tap(find.byType(ColorItem).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ColorItem).first);
+      await tester.pumpAndSettle();
     });
   });
 }

@@ -108,7 +108,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 scrollDirection: Axis.horizontal,
                 itemCount: colors.length,
-                itemBuilder: (context, idx) => _ColorItem(
+                itemBuilder: (context, idx) => ColorItem(
                     color: colors[idx],
                     active: colors[idx] == primaryColor,
                     onTap: () {
@@ -149,8 +149,9 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
   }
 }
 
-class _ColorItem extends StatefulWidget {
-  const _ColorItem({
+@visibleForTesting
+class ColorItem extends StatefulWidget {
+  const ColorItem({
     Key? key,
     required this.color,
     required this.onTap,
@@ -165,7 +166,7 @@ class _ColorItem extends StatefulWidget {
   _ColorItemState createState() => _ColorItemState();
 }
 
-class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMixin {
+class _ColorItemState extends State<ColorItem> with SingleTickerProviderStateMixin {
   late AnimationController controller;
 
   @override
@@ -181,7 +182,7 @@ class _ColorItemState extends State<_ColorItem> with SingleTickerProviderStateMi
   }
 
   @override
-  void didUpdateWidget(covariant _ColorItem oldWidget) {
+  void didUpdateWidget(covariant ColorItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.active != widget.active) {
       if (widget.active) {
