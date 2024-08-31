@@ -102,7 +102,7 @@ flutter:
   assets:
    - assets/
    - assets/images/
-    # don't include a whole folder here because of README
+    # Don't include a whole folder here because of the README file
    - assets/animations/play_pause.json
    - assets/animations/checkmark.json
 
