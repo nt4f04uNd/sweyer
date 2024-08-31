@@ -1,6 +1,10 @@
 [@Abestanis]: https://github.com/Abestanis
 [@ernince]: https://github.com/ernince
 
+## Unreleased
+
+* Update to Flutter 3.22.2 by @Abestanis in https://github.com/nt4f04uNd/sweyer/pull/130 
+
 ## 1.0.12
 
 * Update targetSdkVersion to 34 to match new [Google Play store API level requirements](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en) @nt4f04und
