@@ -11,7 +11,7 @@ inputs:
     description: The channel of the Flutter used to build Sweyer with. 
   flutter_version:
     required: false
-    default: "3.7.12"
+    default: "3.22.2"
     description: The version of Flutter used to build Sweyer with.
   testing_arguments:
     required: false
@@ -32,7 +32,6 @@ runs:
       shell: bash
       run: |
         flutter pub global activate very_good_cli
-        very_good --analytics false
         very_good packages get --recursive
 
     - name: 🧪 Run Tests
@@ -41,7 +40,7 @@ runs:
 
     - name: 📁 Save golden test failures artifacts
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: golden-test-failures
         path: test/golden/failures

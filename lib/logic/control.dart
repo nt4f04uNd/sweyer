@@ -35,7 +35,7 @@ import 'package:sweyer/sweyer.dart';
 ///   * [QueueControl]
 ///   * [PlaybackControl]
 ///   * [DeviceInfoControl]
-abstract class Control {
+mixin class Control {
   /// Initializes the control.
   ///
   /// Must be called when the control needs to be initialized.

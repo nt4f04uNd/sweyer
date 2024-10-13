@@ -590,7 +590,7 @@ class _SearchRouteState extends State<SearchRoute> with SelectionHandlerMixin {
         routeName = searchFieldLabel;
     }
     final title = TextField(
-      selectionControls: NFTextSelectionControls(),
+      selectionControls: MaterialTextSelectionControls(),
       controller: widget.delegate._queryTextController,
       focusNode: focusNode,
       style: theme.textTheme.titleLarge,
