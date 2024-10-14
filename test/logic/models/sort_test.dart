@@ -40,12 +40,8 @@ void main() {
         SongSortFeature.album: [16, 14, 13, 15, 8, 6, 5, 7, 0, 1, 2, 3, 4, 9, 10, 11, 12],
       },
     };
-    for (final entry in testCases.entries) {
-      final sortOrder = entry.key;
-      final featureTestCases = entry.value;
-      for (final entry in featureTestCases.entries) {
-        final feature = entry.key;
-        final expectedContentList = entry.value;
+    for (final MapEntry(key: sortOrder, value: featureTestCases) in testCases.entries) {
+      for (final MapEntry(key: feature, value: expectedContentList) in featureTestCases.entries) {
         test('Sorts songs by ${feature.name} ${sortOrder.name}', () async {
           expect(
             songs.toList()..sort(SongSort(feature: feature, order: sortOrder).comparator),
@@ -93,12 +89,8 @@ void main() {
         AlbumSortFeature.numberOfSongs: [15, 9, 12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 14, 10, 13, 16],
       },
     };
-    for (final entry in testCases.entries) {
-      final sortOrder = entry.key;
-      final featureTestCases = entry.value;
-      for (final entry in featureTestCases.entries) {
-        final feature = entry.key;
-        final expectedContentList = entry.value;
+    for (final MapEntry(key: sortOrder, value: featureTestCases) in testCases.entries) {
+      for (final MapEntry(key: feature, value: expectedContentList) in featureTestCases.entries) {
         test('Sorts albums by ${feature.name} ${sortOrder.name}', () async {
           expect(
             albums.toList()..sort(AlbumSort(feature: feature, order: sortOrder).comparator),
@@ -136,12 +128,8 @@ void main() {
         PlaylistSortFeature.name: [4, 2, 1, 3, 5, 0, 7, 8, 6],
       },
     };
-    for (final entry in testCases.entries) {
-      final sortOrder = entry.key;
-      final featureTestCases = entry.value;
-      for (final entry in featureTestCases.entries) {
-        final feature = entry.key;
-        final expectedContentList = entry.value;
+    for (final MapEntry(key: sortOrder, value: featureTestCases) in testCases.entries) {
+      for (final MapEntry(key: feature, value: expectedContentList) in featureTestCases.entries) {
         test('Sorts playlists by ${feature.name} ${sortOrder.name}', () async {
           expect(
             playlists.toList()..sort(PlaylistSort(feature: feature, order: sortOrder).comparator),
@@ -179,12 +167,8 @@ void main() {
         ArtistSortFeature.numberOfTracks: [7, 4, 2, 1, 3, 0, 5, 6, 8],
       },
     };
-    for (final entry in testCases.entries) {
-      final sortOrder = entry.key;
-      final featureTestCases = entry.value;
-      for (final entry in featureTestCases.entries) {
-        final feature = entry.key;
-        final expectedContentList = entry.value;
+    for (final MapEntry(key: sortOrder, value: featureTestCases) in testCases.entries) {
+      for (final MapEntry(key: feature, value: expectedContentList) in featureTestCases.entries) {
         test('Sorts artists by ${feature.name} ${sortOrder.name}', () async {
           expect(
             artists.toList()..sort(ArtistSort(feature: feature, order: sortOrder).comparator),
