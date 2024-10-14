@@ -102,7 +102,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
       artistId: map['artistId'] as int?,
       firstYear: map['firstYear'] as int?,
       lastYear: map['lastYear'] as int?,
-      numberOfSongs: map['numberOfSongs'] as int,
+      numberOfSongs: map['numberOfSongs'] as int? ?? 0,
     );
   }
 

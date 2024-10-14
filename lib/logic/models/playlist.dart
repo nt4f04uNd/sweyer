@@ -5,7 +5,7 @@ import 'package:sweyer_plugin/sweyer_plugin.dart';
 class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implements PlatformPlaylist {
   @override
   ContentType get type => ContentType.playlist;
-  final String filesystemPath;
+  final String? filesystemPath;
   final int dateAdded;
   final int dateModified;
   final String name;
@@ -111,11 +111,11 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
     int dateAdded = map['dateAdded'] as int;
     return Playlist(
       id: map['id'] as int,
-      filesystemPath: map['filesystemPath'] as String,
+      filesystemPath: map['filesystemPath'] as String?,
       dateAdded: dateAdded,
       dateModified: map['dateModified'] as int? ?? dateAdded,
       name: map['name'] as String,
-      songIds: (map['songIds'] as List).cast<int>().toList(),
+      songIds: (map['songIds'] as List?)?.cast<int>().toList() ?? [],
     );
   }
 
@@ -134,7 +134,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
 abstract class PlaylistCopyWith {
   Playlist call({
     int id,
-    String fileSystemPath,
+    String? fileSystemPath,
     int dateAdded,
     int dateModified,
     String name,
@@ -155,7 +155,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
   @override
   Playlist call({
     Object id = _undefined,
-    Object fileSystemPath = _undefined,
+    Object? fileSystemPath = _undefined,
     Object dateAdded = _undefined,
     Object dateModified = _undefined,
     Object name = _undefined,
@@ -163,7 +163,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
   }) {
     return Playlist(
       id: id == _undefined ? value.id : id as int,
-      filesystemPath: fileSystemPath == _undefined ? value.filesystemPath : fileSystemPath as String,
+      filesystemPath: fileSystemPath == _undefined ? value.filesystemPath : fileSystemPath as String?,
       dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
       dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
       name: name == _undefined ? value.name : name as String,

@@ -39,7 +39,7 @@ class Song extends Content implements PlatformSong {
 
   /// Duration in milliseconds
   final int duration;
-  final int size;
+  final int? size;
   @override
   final String? filesystemPath;
 
@@ -150,6 +150,7 @@ class Song extends Content implements PlatformSong {
   }
 
   factory Song.fromMap(Map<String, dynamic> map) {
+    final dateAdded = map['dateAdded'] as int;
     return Song(
       id: map['id'] as int,
       album: map['album'] as String?,
@@ -160,10 +161,10 @@ class Song extends Content implements PlatformSong {
       genreId: map['genreId'] as int?,
       title: map['title'] as String,
       track: map['track'] as String?,
-      dateAdded: map['dateAdded'] as int,
-      dateModified: map['dateModified'] as int,
+      dateAdded: dateAdded,
+      dateModified: map['dateModified'] as int? ?? dateAdded,
       duration: map['duration'] as int,
-      size: map['size'] as int,
+      size: map['size'] as int?,
       filesystemPath: map['filesystemPath'] as String?,
       isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool?,
       generationAdded: map['generationAdded'] as int?,
@@ -220,7 +221,7 @@ abstract class SongCopyWith {
     int dateAdded,
     int dateModified,
     int duration,
-    int size,
+    int? size,
     String? filesystemPath,
     bool? isFavoriteInMediaStore,
     int? generationAdded,
@@ -254,7 +255,7 @@ class _SongCopyWith extends SongCopyWith {
     Object dateAdded = _undefined,
     Object dateModified = _undefined,
     Object duration = _undefined,
-    Object size = _undefined,
+    Object? size = _undefined,
     Object? filesystemPath = _undefined,
     Object? isFavoriteInMediaStore = _undefined,
     Object? generationAdded = _undefined,
@@ -275,7 +276,7 @@ class _SongCopyWith extends SongCopyWith {
       dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
       dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
       duration: duration == _undefined ? value.duration : duration as int,
-      size: size == _undefined ? value.size : size as int,
+      size: size == _undefined ? value.size : size as int?,
       filesystemPath: filesystemPath == _undefined ? value.filesystemPath : filesystemPath as String?,
       isFavoriteInMediaStore:
           isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool?,
