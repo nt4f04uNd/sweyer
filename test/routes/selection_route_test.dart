@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tuple/tuple.dart';
 
 import '../test.dart';
 
@@ -278,14 +277,12 @@ void main() {
     final playlist1 = playlistWith(id: 1, songIds: [song1.id]);
     final playlist2 = playlistWith(id: 2, songIds: [song2.id]);
 
-    for (var tabAndContentType in [
-      const Tuple2('tracks', ContentType.song),
-      const Tuple2('album', ContentType.album),
-      const Tuple2('playlists', ContentType.playlist),
-      const Tuple2('artists', ContentType.artist),
+    for (final (tabName, contentType) in [
+      ('tracks', ContentType.song),
+      ('album', ContentType.album),
+      ('playlists', ContentType.playlist),
+      ('artists', ContentType.artist),
     ]) {
-      final tabName = tabAndContentType.item1;
-      final contentType = tabAndContentType.item2;
       testWidgets('allows selecting all and deselecting all on the $tabName tab', (WidgetTester tester) async {
         await setUpAppTest(() {
           FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
