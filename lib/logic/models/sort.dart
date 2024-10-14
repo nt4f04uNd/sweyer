@@ -160,7 +160,7 @@ abstract class Sort<T extends Content> extends Equatable {
 
   Map<String, dynamic> toMap() => {
         'feature': feature.id,
-        'order': order,
+        'order': order.name,
       };
 }
 
