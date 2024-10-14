@@ -108,7 +108,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
   void _handleTap(BuildContext context) {
     final l10n = getl10n(context);
     final sort = getSort();
-    ShowFunctions.instance.showRadio<SortFeature>(
+    ShowFunctions.instance.showRadio<SortFeature<T>>(
       context: context,
       title: l10n.sort,
       items: SortFeature.getValuesForContent(contentType),
@@ -174,11 +174,11 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   ContentListHeaderAction(
-                    icon: Icon(sort.orderAscending ? Icons.north_rounded : Icons.south_rounded),
+                    icon: Icon(sort.order == SortOrder.ascending ? Icons.north_rounded : Icons.south_rounded),
                     onPressed: () {
                       ContentControl.instance.sort(
                         contentType: contentType,
-                        sort: sort.copyWith(orderAscending: !sort.orderAscending),
+                        sort: sort.copyWith(order: sort.order.inverted),
                       );
                     },
                   ),

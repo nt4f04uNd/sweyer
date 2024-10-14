@@ -230,7 +230,7 @@ class _PersistentQueueTileState<T extends PersistentQueue>
     if (queue is Album) {
       children.add(ArtistWidget(
         artist: queue.artist,
-        trailingText: queue.year.toString(),
+        trailingText: queue.year?.toString(),
         textStyle: _subtitleTheme(widget.queue.type, theme),
       ));
     } else if (queue is Playlist) {
