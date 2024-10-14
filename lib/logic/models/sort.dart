@@ -11,7 +11,7 @@ enum SortOrder {
 }
 
 /// Interface for other sort feature enums.
-abstract class SortFeature<T extends Content> {
+abstract interface class SortFeature<T extends Content> {
   /// Returns sort feature values for a given content.
   static List<SortFeature<T>> getValuesForContent<T extends Content>(ContentType<T> contentType) {
     switch (contentType as ContentType) {
