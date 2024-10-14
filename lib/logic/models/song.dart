@@ -45,11 +45,11 @@ class Song extends Content implements PlatformSong {
 
   /// Whether the content was marked as favorite in MediaStore.
   ///
-  /// Only available starting from Android R (30), below this is always `null`.
+  /// Only available starting from Android R (30), below this is always `false`.
   ///
   /// See also:
   ///  * [isFavorite] getter
-  final bool? isFavoriteInMediaStore;
+  final bool isFavoriteInMediaStore;
 
   /// Generation number at which metadata for this media item was first inserted.
   ///
@@ -166,7 +166,7 @@ class Song extends Content implements PlatformSong {
       duration: map['duration'] as int,
       size: map['size'] as int?,
       filesystemPath: map['filesystemPath'] as String?,
-      isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool?,
+      isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool? ?? false,
       generationAdded: map['generationAdded'] as int?,
       generationModified: map['generationModified'] as int?,
     );
@@ -223,7 +223,7 @@ abstract class SongCopyWith {
     int duration,
     int? size,
     String? filesystemPath,
-    bool? isFavoriteInMediaStore,
+    bool isFavoriteInMediaStore,
     int? generationAdded,
     int? generationModified,
     int? duplicationIndex,
@@ -279,7 +279,7 @@ class _SongCopyWith extends SongCopyWith {
       size: size == _undefined ? value.size : size as int?,
       filesystemPath: filesystemPath == _undefined ? value.filesystemPath : filesystemPath as String?,
       isFavoriteInMediaStore:
-          isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool?,
+          isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool,
       generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
       generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
       duplicationIndex: duplicationIndex == _undefined ? value.duplicationIndex : duplicationIndex as int?,
