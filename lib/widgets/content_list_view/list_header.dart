@@ -174,11 +174,11 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   ContentListHeaderAction(
-                    icon: Icon(sort.orderAscending ? Icons.north_rounded : Icons.south_rounded),
+                    icon: Icon(sort.order == SortOrder.ascending ? Icons.north_rounded : Icons.south_rounded),
                     onPressed: () {
                       ContentControl.instance.sort(
                         contentType: contentType,
-                        sort: sort.copyWith(orderAscending: !sort.orderAscending),
+                        sort: sort.copyWith(order: sort.order.inverted),
                       );
                     },
                   ),

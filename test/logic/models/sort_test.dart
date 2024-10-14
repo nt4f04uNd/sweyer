@@ -48,8 +48,7 @@ void main() {
         final expectedContentList = entry.value;
         test('Sorts songs by ${feature.name} ${sortOrder.name}', () async {
           expect(
-            songs.toList()
-              ..sort(SongSort(feature: feature, orderAscending: sortOrder == SortOrder.ascending).comparator),
+            songs.toList()..sort(SongSort(feature: feature, order: sortOrder).comparator),
             expectedContentList.map((i) => songs[i]).toList(),
           );
         });
@@ -102,8 +101,7 @@ void main() {
         final expectedContentList = entry.value;
         test('Sorts albums by ${feature.name} ${sortOrder.name}', () async {
           expect(
-            albums.toList()
-              ..sort(AlbumSort(feature: feature, orderAscending: sortOrder == SortOrder.ascending).comparator),
+            albums.toList()..sort(AlbumSort(feature: feature, order: sortOrder).comparator),
             expectedContentList.map((i) => albums[i]).toList(),
           );
         });
@@ -146,8 +144,7 @@ void main() {
         final expectedContentList = entry.value;
         test('Sorts playlists by ${feature.name} ${sortOrder.name}', () async {
           expect(
-            playlists.toList()
-              ..sort(PlaylistSort(feature: feature, orderAscending: sortOrder == SortOrder.ascending).comparator),
+            playlists.toList()..sort(PlaylistSort(feature: feature, order: sortOrder).comparator),
             expectedContentList.map((i) => playlists[i]).toList(),
           );
         });
@@ -190,8 +187,7 @@ void main() {
         final expectedContentList = entry.value;
         test('Sorts artists by ${feature.name} ${sortOrder.name}', () async {
           expect(
-            artists.toList()
-              ..sort(ArtistSort(feature: feature, orderAscending: sortOrder == SortOrder.ascending).comparator),
+            artists.toList()..sort(ArtistSort(feature: feature, order: sortOrder).comparator),
             expectedContentList.map((i) => artists[i]).toList(),
           );
         });

@@ -7,7 +7,13 @@ enum SortOrder {
   ascending,
 
   /// Descending sort order ("higher" values first, "lower" values last).
-  descending,
+  descending;
+
+  /// The inversion of the sort order.
+  SortOrder get inverted => switch (this) {
+        SortOrder.ascending => SortOrder.descending,
+        SortOrder.descending => SortOrder.ascending,
+      };
 }
 
 /// Interface for other sort feature enums.
@@ -137,47 +143,47 @@ enum ArtistSortFeature implements SortFeature<Artist> {
 abstract class Sort<T extends Content> extends Equatable {
   const Sort({
     required this.feature,
-    required this.orderAscending,
+    required this.order,
   });
-  Sort.defaultOrder(this.feature) : orderAscending = feature.defaultSortingOrder == SortOrder.ascending;
+  Sort.defaultOrder(this.feature) : order = feature.defaultSortingOrder;
 
   final SortFeature<T> feature;
-  final bool orderAscending;
+  final SortOrder order;
 
   @override
-  List<Object> get props => [feature, orderAscending];
+  List<Object> get props => [feature, order];
 
-  Sort<T> copyWith({SortFeature<T>? feature, bool? orderAscending});
-  Sort<T> get withDefaultOrder => copyWith(orderAscending: feature.defaultSortingOrder == SortOrder.ascending);
+  Sort<T> copyWith({SortFeature<T>? feature, SortOrder? order});
+  Sort<T> get withDefaultOrder => copyWith(order: feature.defaultSortingOrder);
 
   Comparator<T> get comparator;
 
   Map<String, dynamic> toMap() => {
         'feature': feature.id,
-        'orderAscending': orderAscending,
+        'order': order,
       };
 }
 
 class SongSort extends Sort<Song> {
   const SongSort({
-    required SongSortFeature super.feature,
-    super.orderAscending = true,
+    required super.feature,
+    super.order = SortOrder.ascending,
   });
   SongSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory SongSort.fromMap(Map map) => SongSort(
         feature: SongSortFeature.values.byName(map['feature']),
-        orderAscending: map['orderAscending'],
+        order: SortOrder.values.byName(map['order'] ?? 'ascending'),
       );
 
   @override
   SongSort copyWith({
     covariant SongSortFeature? feature,
-    bool? orderAscending,
+    SortOrder? order,
   }) {
     return SongSort(
       feature: feature ?? this.feature as SongSortFeature,
-      orderAscending: orderAscending ?? this.orderAscending,
+      order: order ?? this.order,
     );
   }
 
@@ -241,7 +247,7 @@ class SongSort extends Sort<Song> {
       default:
         throw UnimplementedError();
     }
-    if (!orderAscending) {
+    if (order == SortOrder.descending) {
       return (a, b) => c(b, a);
     }
     return c;
@@ -250,24 +256,24 @@ class SongSort extends Sort<Song> {
 
 class AlbumSort extends Sort<Album> {
   const AlbumSort({
-    required AlbumSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
+    required super.feature,
+    super.order = SortOrder.ascending,
+  });
   AlbumSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory AlbumSort.fromMap(Map map) => AlbumSort(
         feature: AlbumSortFeature.values.byName(map['feature']),
-        orderAscending: map['orderAscending'],
+        order: SortOrder.values.byName(map['order'] ?? 'ascending'),
       );
 
   @override
   AlbumSort copyWith({
     covariant AlbumSortFeature? feature,
-    bool? orderAscending,
+    SortOrder? order,
   }) {
     return AlbumSort(
       feature: feature ?? this.feature as AlbumSortFeature,
-      orderAscending: orderAscending ?? this.orderAscending,
+      order: order ?? this.order,
     );
   }
 
@@ -322,7 +328,7 @@ class AlbumSort extends Sort<Album> {
       default:
         throw UnimplementedError();
     }
-    if (!orderAscending) {
+    if (order == SortOrder.descending) {
       return (a, b) => c(b, a);
     }
     return c;
@@ -331,24 +337,24 @@ class AlbumSort extends Sort<Album> {
 
 class PlaylistSort extends Sort<Playlist> {
   const PlaylistSort({
-    required PlaylistSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
+    required super.feature,
+    super.order = SortOrder.ascending,
+  });
   PlaylistSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory PlaylistSort.fromMap(Map map) => PlaylistSort(
         feature: PlaylistSortFeature.values.byName(map['feature']),
-        orderAscending: map['orderAscending'],
+        order: SortOrder.values.byName(map['order'] ?? 'ascending'),
       );
 
   @override
   PlaylistSort copyWith({
     covariant PlaylistSortFeature? feature,
-    bool? orderAscending,
+    SortOrder? order,
   }) {
     return PlaylistSort(
       feature: feature ?? this.feature as PlaylistSortFeature,
-      orderAscending: orderAscending ?? this.orderAscending,
+      order: order ?? this.order,
     );
   }
 
@@ -394,7 +400,7 @@ class PlaylistSort extends Sort<Playlist> {
       default:
         throw UnimplementedError();
     }
-    if (!orderAscending) {
+    if (order == SortOrder.descending) {
       return (a, b) => c(b, a);
     }
     return c;
@@ -403,24 +409,24 @@ class PlaylistSort extends Sort<Playlist> {
 
 class ArtistSort extends Sort<Artist> {
   const ArtistSort({
-    required ArtistSortFeature feature,
-    bool orderAscending = true,
-  }) : super(feature: feature, orderAscending: orderAscending);
+    required super.feature,
+    super.order = SortOrder.ascending,
+  });
   ArtistSort.defaultOrder(feature) : super.defaultOrder(feature);
 
   factory ArtistSort.fromMap(Map map) => ArtistSort(
         feature: ArtistSortFeature.values.byName(map['feature']),
-        orderAscending: map['orderAscending'],
+        order: SortOrder.values.byName(map['order'] ?? 'ascending'),
       );
 
   @override
   ArtistSort copyWith({
     covariant ArtistSortFeature? feature,
-    bool? orderAscending,
+    SortOrder? order,
   }) {
     return ArtistSort(
       feature: feature ?? this.feature as ArtistSortFeature,
-      orderAscending: orderAscending ?? this.orderAscending,
+      order: order ?? this.order,
     );
   }
 
@@ -466,7 +472,7 @@ class ArtistSort extends Sort<Artist> {
       default:
         throw UnimplementedError();
     }
-    if (!orderAscending) {
+    if (order == SortOrder.descending) {
       return (a, b) => c(b, a);
     }
     return c;
