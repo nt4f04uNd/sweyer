@@ -35,7 +35,6 @@ dependencies:
   marquee: ^2.1.0
   equatable: ^2.0.0
   device_info_plus: ^10.1.0
-  enum_to_string: ^2.0.1
   sqflite: ^2.0.0+3
   boxy: ^2.0.0
   back_button_interceptor: ^7.0.3

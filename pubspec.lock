@@ -349,7 +349,7 @@ packages:
     source: hosted
     version: "7.0.1"
   enum_to_string:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: enum_to_string
       sha256: bd9e83a33b754cb43a75b36a9af2a0b92a757bfd9847d2621ca0b1bed45f8e7a
