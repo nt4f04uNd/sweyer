@@ -14,7 +14,7 @@ final SpringDescription playerRouteSpringDescription = SpringDescription.withDam
 );
 
 class PlayerRoute extends StatefulWidget {
-  const PlayerRoute({Key? key}) : super(key: key);
+  const PlayerRoute({super.key});
 
   @override
   _PlayerRouteState createState() => _PlayerRouteState();
@@ -116,7 +116,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor = theme.colorScheme.background;
+    final backgroundColor = theme.colorScheme.secondaryContainer;
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     return Slidable(
@@ -175,9 +175,9 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
 
 class _QueueTab extends StatefulWidget {
   const _QueueTab({
-    Key? key,
+    super.key,
     required this.selectionController,
-  }) : super(key: key);
+  });
 
   final ContentSelectionController selectionController;
 
@@ -364,7 +364,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
               'query': StyledTextTag(
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.onBackground,
+                  color: theme.colorScheme.onSecondaryContainer,
                 ),
               ),
             },
@@ -387,7 +387,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 'name': StyledTextTag(
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
               },
@@ -407,7 +407,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 'name': StyledTextTag(
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
               },
@@ -428,7 +428,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                 'name': StyledTextTag(
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
               },
@@ -637,8 +637,8 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
                             ],
                           ),
                         ),
-                        Column(
-                          children: const [
+                        const Column(
+                          children: [
                             _SaveQueueAsPlaylistAction(),
                           ],
                         )
@@ -694,7 +694,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
 }
 
 class _MainTab extends StatefulWidget {
-  const _MainTab({Key? key}) : super(key: key);
+  const _MainTab();
 
   @override
   _MainTabState createState() => _MainTabState();
@@ -780,7 +780,7 @@ class _MainTabState extends State<_MainTab> {
 }
 
 class _PlaybackButtons extends StatelessWidget {
-  const _PlaybackButtons({Key? key}) : super(key: key);
+  const _PlaybackButtons();
   static const buttonMargin = 18.0;
 
   @override
@@ -842,12 +842,11 @@ class _PlaybackButtons extends StatelessWidget {
 }
 
 class _InfoButton extends StatelessWidget {
-  const _InfoButton({Key? key}) : super(key: key);
+  const _InfoButton();
 
   @override
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
-    final theme = Theme.of(context);
     return NFIconButton(
       icon: const Icon(Icons.info_outline_rounded),
       size: 40.0,
@@ -890,7 +889,7 @@ class _InfoButton extends StatelessWidget {
 /// A widget that displays all information about current song
 @visibleForTesting
 class TrackShowcase extends StatefulWidget {
-  const TrackShowcase({Key? key}) : super(key: key);
+  const TrackShowcase({super.key});
 
   @override
   _TrackShowcaseState createState() => _TrackShowcaseState();
@@ -1085,7 +1084,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
 }
 
 class _SaveQueueAsPlaylistAction extends StatefulWidget {
-  const _SaveQueueAsPlaylistAction({Key? key}) : super(key: key);
+  const _SaveQueueAsPlaylistAction();
 
   @override
   State<_SaveQueueAsPlaylistAction> createState() => _SaveQueueAsPlaylistActionState();

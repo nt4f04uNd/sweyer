@@ -7,7 +7,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
 class DevRoute extends ConsumerStatefulWidget {
-  const DevRoute({Key? key}) : super(key: key);
+  const DevRoute({super.key});
 
   @override
   ConsumerState<DevRoute> createState() => _DevRouteState();
@@ -87,7 +87,7 @@ class _DevRouteState extends ConsumerState<DevRoute> {
 }
 
 class _TimeDilationSlider extends StatefulWidget {
-  const _TimeDilationSlider({Key? key}) : super(key: key);
+  const _TimeDilationSlider();
 
   @override
   _TimeDilationSliderState createState() => _TimeDilationSliderState();

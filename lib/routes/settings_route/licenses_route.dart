@@ -6,9 +6,9 @@
 *  See ThirdPartyNotices.txt in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 
-/// ###########################################################################################
-/// copied this from flutter https://github.com/flutter/flutter/commit/183f0e797a3bf8aa1b35b650150f7522d5d10377
-/// ###########################################################################################
+// ###########################################################################################
+// copied this from flutter https://github.com/flutter/flutter/commit/183f0e797a3bf8aa1b35b650150f7522d5d10377
+// ###########################################################################################
 
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
@@ -39,12 +39,12 @@ class LicensePage extends StatefulWidget {
   /// The licenses shown on the [LicensePage] are those returned by the
   /// [LicenseRegistry] API, which can be used to add more licenses to the list.
   const LicensePage({
-    Key? key,
+    super.key,
     this.applicationName,
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
-  }) : super(key: key);
+  });
 
   /// The name of the application.
   ///
@@ -114,10 +114,9 @@ class _LicensePageState extends State<LicensePage> {
 
 class _PackagesView extends StatefulWidget {
   const _PackagesView({
-    Key? key,
     required this.isLateral,
     required this.selectedId,
-  }) : super(key: key);
+  });
 
   final bool isLateral;
   final ValueNotifier<int?> selectedId;
@@ -217,13 +216,12 @@ class _PackagesViewState extends State<_PackagesView> {
 
 class _PackageListTile extends StatelessWidget {
   const _PackageListTile({
-    Key? key,
     required this.packageName,
     this.index,
     required this.isSelected,
     required this.numberLicenses,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final String packageName;
   final int? index;
@@ -317,7 +315,7 @@ class _DetailArguments {
   final List<LicenseEntry> licenseEntries;
 
   @override
-  bool operator ==(final dynamic other) {
+  bool operator ==(final Object other) {
     if (other is _DetailArguments) {
       return other.packageName == packageName;
     }
@@ -330,11 +328,10 @@ class _DetailArguments {
 
 class _PackageLicensePage extends StatefulWidget {
   const _PackageLicensePage({
-    Key? key,
     required this.packageName,
     required this.licenseEntries,
     required this.scrollController,
-  }) : super(key: key);
+  });
 
   final String packageName;
   final List<LicenseEntry> licenseEntries;
@@ -492,12 +489,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
 
 class _PackageLicensePageTitle extends StatelessWidget {
   const _PackageLicensePageTitle({
-    Key? key,
     required this.title,
     required this.subtitle,
     required this.titleTextStyle,
     required this.subtitleTextStyle,
-  }) : super(key: key);
+  });
 
   final String title;
   final String subtitle;
@@ -586,25 +582,12 @@ class _MasterDetailFlow extends StatefulWidget {
   /// Creates a master detail navigation flow which is either nested or
   /// lateral depending on screen width.
   const _MasterDetailFlow({
-    Key? key,
     required this.detailPageBuilder,
     required this.masterViewBuilder,
-    this.actionBuilder,
-    this.automaticallyImplyLeading = true,
-    this.breakpoint,
-    this.centerTitle,
-    this.detailPageFABGutterWidth,
     this.detailPageFABlessGutterWidth,
-    this.displayMode = _LayoutMode.auto,
-    this.flexibleSpace,
-    this.floatingActionButton,
-    this.floatingActionButtonLocation,
-    this.floatingActionButtonMasterPageLocation,
     this.leading,
-    this.masterPageBuilder,
-    this.masterViewWidth,
     this.title,
-  }) : super(key: key);
+  });
 
   /// Builder for the master view for lateral navigation.
   ///
@@ -616,8 +599,8 @@ class _MasterDetailFlow extends StatefulWidget {
   ///
   /// This builder is usually a wrapper around the [masterViewBuilder] builder to provide the
   /// extra UI required to make a page. However, this builder is optional, and the master page
-  /// can be built using the master view builder and the configuration for the lateral UI's app bar.
-  final _MasterViewBuilder? masterPageBuilder;
+  /// can be built using the master view builder and the configuration for the lateral UIs app bar.
+  final _MasterViewBuilder? masterPageBuilder = null;
 
   /// Builder for the detail page.
   ///
@@ -628,10 +611,10 @@ class _MasterDetailFlow extends StatefulWidget {
   final _DetailPageBuilder detailPageBuilder;
 
   /// Override the width of the master view in the lateral UI.
-  final double? masterViewWidth;
+  final double? masterViewWidth = null;
 
   /// Override the width of the floating action button gutter in the lateral UI.
-  final double? detailPageFABGutterWidth;
+  final double? detailPageFABGutterWidth = null;
 
   /// Override the width of the gutter when there is no floating action button.
   final double? detailPageFABlessGutterWidth;
@@ -640,7 +623,7 @@ class _MasterDetailFlow extends StatefulWidget {
   /// floating action button is also used on the nested master page.
   ///
   /// See [Scaffold.floatingActionButton].
-  final FloatingActionButton? floatingActionButton;
+  final FloatingActionButton? floatingActionButton = null;
 
   /// The title for the lateral UI [AppBar].
   ///
@@ -655,16 +638,16 @@ class _MasterDetailFlow extends StatefulWidget {
   /// Override the framework from determining whether to show a leading widget or not.
   ///
   /// See [AppBar.automaticallyImplyLeading].
-  final bool automaticallyImplyLeading;
+  final bool automaticallyImplyLeading = true;
 
   /// Override the framework from determining whether to display the title in the center of the
   /// app bar or not.
   ///
   /// See [AppBar.centerTitle].
-  final bool? centerTitle;
+  final bool? centerTitle = null;
 
   /// See [AppBar.flexibleSpace].
-  final Widget? flexibleSpace;
+  final Widget? flexibleSpace = null;
 
   /// Build actions for the lateral UI, and potentially the master page in the nested UI.
   ///
@@ -675,25 +658,25 @@ class _MasterDetailFlow extends StatefulWidget {
   /// by [_MasterDetailFlow], then [_ActionLevel.composite] indicates the
   /// actions are for the
   /// nested master page.
-  final _ActionBuilder? actionBuilder;
+  final _ActionBuilder? actionBuilder = null;
 
   /// Determine where the floating action button will go.
   ///
   /// If null, [FloatingActionButtonLocation.endTop] is used.
   ///
   /// Also see [Scaffold.floatingActionButtonLocation].
-  final FloatingActionButtonLocation? floatingActionButtonLocation;
+  final FloatingActionButtonLocation? floatingActionButtonLocation = null;
 
   /// Determine where the floating action button will go on the master page.
   ///
   /// See [Scaffold.floatingActionButtonLocation].
-  final FloatingActionButtonLocation? floatingActionButtonMasterPageLocation;
+  final FloatingActionButtonLocation? floatingActionButtonMasterPageLocation = null;
 
   /// Forces display mode and style.
-  final _LayoutMode displayMode;
+  final _LayoutMode displayMode = _LayoutMode.auto;
 
   /// Width at which layout changes from nested to lateral.
-  final double? breakpoint;
+  final double? breakpoint = null;
 
   @override
   _MasterDetailFlowState createState() => _MasterDetailFlowState();
@@ -800,9 +783,10 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final masterPageRoute = _masterPageRoute(context);
 
-    return WillPopScope(
-      // Push pop check into nested navigator.
-      onWillPop: () async => !(await _navigatorKey.currentState!.maybePop()),
+    return NavigatorPopHandler(
+      onPop: () {
+        _navigatorKey.currentState!.maybePop();
+      },
       child: Navigator(
         key: _navigatorKey,
         initialRoute: 'initial',
@@ -904,7 +888,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
 class _MasterPage extends StatelessWidget {
   const _MasterPage({
-    Key? key,
     this.leading,
     this.title,
     this.actionBuilder,
@@ -914,7 +897,7 @@ class _MasterPage extends StatelessWidget {
     this.floatingActionButtonLocation,
     this.masterViewBuilder,
     required this.automaticallyImplyLeading,
-  }) : super(key: key);
+  });
 
   final _MasterViewBuilder? masterViewBuilder;
   final Widget? title;
@@ -951,7 +934,6 @@ const double _kDetailPageFABGutterWidth = 84.0;
 
 class _MasterDetailScaffold extends StatefulWidget {
   const _MasterDetailScaffold({
-    Key? key,
     required this.detailPageBuilder,
     required this.masterViewBuilder,
     this.actionBuilder,
@@ -965,7 +947,7 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.detailPageFABlessGutterWidth,
     this.detailPageFABGutterWidth,
     this.masterViewWidth,
-  }) : super(key: key);
+  });
 
   final _MasterViewBuilder masterViewBuilder;
 
@@ -1128,12 +1110,10 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
 
 class _DetailView extends StatelessWidget {
   const _DetailView({
-    Key? key,
     required _DetailPageBuilder builder,
     Object? arguments,
   })  : _builder = builder,
-        _arguments = arguments,
-        super(key: key);
+        _arguments = arguments;
 
   final _DetailPageBuilder _builder;
   final Object? _arguments;

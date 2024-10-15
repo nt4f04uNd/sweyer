@@ -58,7 +58,7 @@ final _calculatePersistentQueueTileHeightMemo = imemo3plus1(
   ) =>
       math.max(
         kPersistentQueueTileArtSize,
-        _kPresisentQueueTileTextHeight(a4.$1, a4.$2),
+        _kPersistentQueueTileTextHeight(a4.$1, a4.$2),
       ) +
       _tileVerticalPadding * 2,
 );
@@ -87,20 +87,20 @@ final _calculatePersistentQueueGridTileHeightMemo = imemo4plus1(
     double? a4,
     (ContentType, BuildContext) a5,
   ) =>
-      gridArtSize + _kPresisentQueueTileTextHeight(a5.$1, a5.$2) + _tileVerticalPadding * 2,
+      gridArtSize + _kPersistentQueueTileTextHeight(a5.$1, a5.$2) + _tileVerticalPadding * 2,
 );
 
 /// The height of the title and subtitle part of the [PersistentQueueTile].
-double _kPresisentQueueTileTextHeight(ContentType contentType, BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+double _kPersistentQueueTileTextHeight(ContentType contentType, BuildContext context) {
+  final textScaler = MediaQuery.textScalerOf(context);
   final theme = Theme.of(context);
-  return calculateLineHeight(_titleTheme(theme), textScaleFactor) +
-      calculateLineHeight(_subtitleTheme(contentType, theme), textScaleFactor);
+  return calculateLineHeight(_titleTheme(theme), textScaler) +
+      calculateLineHeight(_subtitleTheme(contentType, theme), textScaler);
 }
 
 class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<SelectionEntry> {
   const PersistentQueueTile({
-    Key? key,
+    super.key,
     required this.queue,
     this.trailing,
     this.current,
@@ -115,17 +115,16 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
     this.backgroundColor = Colors.transparent,
   })  : assert(!grid || !small),
         horizontalPadding =
-            horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-        super(key: key);
+            horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding);
 
   const PersistentQueueTile.selectable({
-    Key? key,
+    super.key,
     required this.queue,
-    required int selectionIndex,
-    required SelectionController<SelectionEntry>? selectionController,
-    bool selected = false,
-    bool longPressSelectionGestureEnabled = true,
-    bool handleTapInSelection = true,
+    required super.selectionIndex,
+    required super.selectionController,
+    super.selected = false,
+    super.longPressSelectionGestureEnabled = true,
+    super.handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -142,14 +141,7 @@ class PersistentQueueTile<T extends PersistentQueue> extends SelectableWidget<Se
         assert(!grid || !small),
         horizontalPadding =
             horizontalPadding ?? (small ? kSongTileHorizontalPadding : kPersistentQueueTileHorizontalPadding),
-        super.selectable(
-          key: key,
-          selectionIndex: selectionIndex,
-          selected: selected,
-          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-          handleTapInSelection: handleTapInSelection,
-          selectionController: selectionController,
-        );
+        super.selectable();
 
   final T queue;
 

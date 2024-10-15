@@ -113,8 +113,6 @@ class ContentTuple {
 
   /// Get the list corresponding to the [type].
   List<T> get<T extends Content>(ContentType<T> type) {
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (type as ContentType) {
       case ContentType.song:
         return songs as List<T>;
@@ -329,8 +327,6 @@ class ContentControl extends Control {
     bool filterFavorite = false,
   }) {
     final List<T> contentList;
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (contentType as ContentType) {
       case ContentType.song:
         contentList = state.allSongs.songs as List<T>;
@@ -468,8 +464,6 @@ class ContentControl extends Control {
           .contains(query);
     }
 
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (contentType as ContentType) {
       case ContentType.song:
         return state.allSongs.songs
@@ -552,8 +546,6 @@ class ContentControl extends Control {
   }) {
     final sorts = state.sorts;
     sort ??= sorts.get(contentType) as Sort<T>;
-    // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-    // ignore: unnecessary_cast
     switch (contentType as ContentType) {
       case ContentType.song:
         final castedSort = sort as SongSort;

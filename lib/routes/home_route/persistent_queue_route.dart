@@ -14,9 +14,9 @@ class _ReorderOperation {
 
 class PersistentQueueRoute extends StatefulWidget {
   const PersistentQueueRoute({
-    Key? key,
+    super.key,
     required this.arguments,
-  }) : super(key: key);
+  });
 
   final PersistentQueueArguments arguments;
 
@@ -448,7 +448,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                     textStyle: TextStyle(
                                       fontWeight: FontWeight.w900,
                                       fontSize: 15.0,
-                                      color: theme.colorScheme.onBackground,
+                                      color: theme.colorScheme.onSecondaryContainer,
                                     ),
                                   ),
                                 ),
@@ -614,8 +614,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                         leading: child,
                         titleSpacing: 0.0,
                         backgroundColor: appBarController.isDismissed
-                            ? theme.colorScheme.background
-                            : theme.colorScheme.background.withOpacity(0.0),
+                            ? theme.colorScheme.secondaryContainer
+                            : theme.colorScheme.secondaryContainer.withOpacity(0.0),
                         title: AnimationSwitcher(
                           animation: CurvedAnimation(
                             curve: Curves.easeOutCubic,
@@ -740,11 +740,10 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
 
 class _ActionIconButton extends StatefulWidget {
   const _ActionIconButton({
-    Key? key,
     required this.icon,
     required this.onPressed,
     this.iconSize = 21.0,
-  }) : super(key: key);
+  });
 
   final Widget icon;
   final VoidCallback? onPressed;

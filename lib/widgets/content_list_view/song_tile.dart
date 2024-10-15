@@ -40,10 +40,10 @@ final _calculateSongTileHeightMemo = imemo3plus1(
 
 /// The height of the title and subtitle part of the [SongTile].
 double _kSongTileTextHeight(BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaler = MediaQuery.textScalerOf(context);
   final theme = Theme.of(context);
-  return calculateLineHeight(_titleTheme(theme), textScaleFactor) +
-      calculateLineHeight(_subtitleTheme(theme), textScaleFactor) +
+  return calculateLineHeight(_titleTheme(theme), textScaler) +
+      calculateLineHeight(_subtitleTheme(theme), textScaler) +
       _subtitleTopPadding +
       _subtitleBottomPadding;
 }
@@ -78,11 +78,10 @@ enum SongTileVariant {
 /// Supposed to draw a [Song.track] number, or '-' symbol if it's null.
 class SongNumber extends StatelessWidget {
   SongNumber({
-    Key? key,
+    super.key,
     String? number,
     this.current = false,
-  })  : number = int.tryParse(number ?? ''),
-        super(key: key);
+  }) : number = int.tryParse(number ?? '');
 
   final int? number;
   final bool current;
@@ -95,7 +94,7 @@ class SongNumber extends StatelessWidget {
       child = Padding(
         padding: const EdgeInsets.only(top: 2.0),
         child: CurrentIndicator(
-          color: theme.colorScheme.onBackground,
+          color: theme.colorScheme.onSecondaryContainer,
         ),
       );
     } else if (number != null && number! > 0 && number! < 999) {
@@ -113,7 +112,7 @@ class SongNumber extends StatelessWidget {
         width: 7.0,
         height: 7.0,
         decoration: BoxDecoration(
-          color: theme.colorScheme.onBackground,
+          color: theme.colorScheme.onSecondaryContainer,
           borderRadius: const BorderRadius.all(
             Radius.circular(100.0),
           ),
@@ -133,7 +132,7 @@ class SongNumber extends StatelessWidget {
 /// A [SongTile] that can be selected.
 class SongTile extends SelectableWidget<SelectionEntry> {
   const SongTile({
-    Key? key,
+    super.key,
     required this.song,
     this.trailing,
     this.current,
@@ -144,16 +143,16 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.clickBehavior = kSongTileClickBehavior,
     this.horizontalPadding = kSongTileHorizontalPadding,
     this.backgroundColor = Colors.transparent,
-  }) : super(key: key);
+  });
 
   const SongTile.selectable({
-    Key? key,
+    super.key,
     required this.song,
-    required int selectionIndex,
-    required SelectionController<SelectionEntry>? selectionController,
-    bool selected = false,
-    bool longPressSelectionGestureEnabled = true,
-    bool handleTapInSelection = true,
+    required super.selectionIndex,
+    required super.selectionController,
+    super.selected = false,
+    super.longPressSelectionGestureEnabled = true,
+    super.handleTapInSelection = true,
     this.trailing,
     this.current,
     this.onTap,
@@ -165,14 +164,7 @@ class SongTile extends SelectableWidget<SelectionEntry> {
     this.backgroundColor = Colors.transparent,
   })  : assert(selectionController is SelectionController<SelectionEntry<Content>> ||
             selectionController is SelectionController<SelectionEntry<Song>>),
-        super.selectable(
-          key: key,
-          selectionIndex: selectionIndex,
-          selected: selected,
-          longPressSelectionGestureEnabled: longPressSelectionGestureEnabled,
-          handleTapInSelection: handleTapInSelection,
-          selectionController: selectionController,
-        );
+        super.selectable();
 
   final Song song;
 

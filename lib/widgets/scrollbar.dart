@@ -6,7 +6,7 @@ import 'package:sweyer/sweyer.dart';
 class AppScrollbar extends StatefulWidget {
   /// Creates a scrollbar, draggable by default.
   const AppScrollbar({
-    Key? key,
+    super.key,
     this.labelBuilder,
     required this.child,
     this.controller,
@@ -17,7 +17,7 @@ class AppScrollbar extends StatefulWidget {
     this.radius,
     this.notificationPredicate,
     this.interactive = true,
-  }) : super(key: key);
+  });
 
   /// Creates a scrollbar, draggable by default.
   /// Automatically passes [labelBuilder] dependent on content type `T` and
@@ -49,8 +49,6 @@ class AppScrollbar extends StatefulWidget {
               final item =
                   list[(controller.position.pixels / kSongTileHeight(context) - 1).clamp(0.0, list.length - 1).round()];
               return NFScrollLabel(text: () {
-                // TODO: Remove ContentType cast, see https://github.com/dart-lang/language/issues/2315
-                // ignore: unnecessary_cast
                 switch (contentType as ContentType) {
                   case ContentType.song:
                     return (item as Song).title[0].toUpperCase();
@@ -107,7 +105,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
           highlightColor: ThemeControl.instance.isDark ? const Color(0x40CCCCCC) : const Color(0x66BCBCBC),
           scrollbarTheme: widget.hoverThickness == null
               ? theme.scrollbarTheme
-              : theme.scrollbarTheme.copyWith(thickness: MaterialStateProperty.all(widget.hoverThickness))),
+              : theme.scrollbarTheme.copyWith(thickness: WidgetStateProperty.all(widget.hoverThickness))),
       child: MediaQuery.removePadding(
         context: context,
         removeTop: true,

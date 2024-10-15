@@ -12,7 +12,8 @@ class MediaQueryWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MediaQuery.fromWindow(
+    return MediaQuery.fromView(
+      view: View.of(context),
       child: Builder(
         builder: (context) => MediaQuery(
           data: MediaQuery.of(context).copyWith(

@@ -5,7 +5,7 @@ import 'package:sweyer/sweyer.dart';
 
 /// Button to switch loop mode
 class LoopButton extends StatelessWidget {
-  const LoopButton({Key? key}) : super(key: key);
+  const LoopButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class LoopButton extends StatelessWidget {
 }
 
 class ShuffleButton extends StatelessWidget {
-  const ShuffleButton({Key? key}) : super(key: key);
+  const ShuffleButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class ShuffleButton extends StatelessWidget {
 
 /// Icon button that opens settings page.
 class SettingsButton extends StatelessWidget {
-  const SettingsButton({Key? key}) : super(key: key);
+  const SettingsButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +81,7 @@ enum AppButtonType {
 ///  * [ShuffleQueueButton]
 class AppButton extends StatefulWidget {
   const AppButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.icon,
@@ -95,11 +95,10 @@ class AppButton extends StatefulWidget {
     this.verticalPadding = 0.0,
     this.horizontalPadding = kHorizontalPadding,
   })  : type = AppButtonType.elevated,
-        popResult = _emptyPopResult,
-        super(key: key);
+        popResult = _emptyPopResult;
 
   const AppButton.flat({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.icon,
@@ -113,12 +112,11 @@ class AppButton extends StatefulWidget {
     this.verticalPadding = 0.0,
     this.horizontalPadding = kHorizontalPadding,
   })  : type = AppButtonType.flat,
-        popResult = _emptyPopResult,
-        super(key: key);
+        popResult = _emptyPopResult;
 
   /// Will automatically pop using its context, [onPressed] still will be called.
   const AppButton.pop({
-    Key? key,
+    super.key,
     required this.text,
     required this.popResult,
     this.type = AppButtonType.flat,
@@ -133,7 +131,7 @@ class AppButton extends StatefulWidget {
     this.loading = false,
     this.verticalPadding = 0.0,
     this.horizontalPadding = kHorizontalPadding,
-  }) : super(key: key);
+  });
 
   final AppButtonType type;
   final Object? popResult;
@@ -298,18 +296,18 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       onPressed: onPressed,
       style: const ElevatedButton(child: null, onPressed: null).defaultStyleOf(context).copyWith(
             animationDuration: Duration.zero,
-            backgroundColor: MaterialStateProperty.all(colorAnimation.value),
-            padding: MaterialStateProperty.all(padding),
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            backgroundColor: WidgetStateProperty.all(colorAnimation.value),
+            padding: WidgetStateProperty.all(padding),
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(widget.borderRadius),
             )),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
+            foregroundColor: WidgetStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
+                WidgetStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
             splashFactory: NFListTileInkRipple.splashFactory,
-            shadowColor: MaterialStateProperty.all(Colors.transparent),
-            textStyle: MaterialStateProperty.all(TextStyle(
+            shadowColor: WidgetStateProperty.all(Colors.transparent),
+            textStyle: WidgetStateProperty.all(TextStyle(
               fontFamily: theme.textTheme.displayLarge!.fontFamily,
               fontWeight: widget.fontWeight,
               fontSize: widget.fontSize,
@@ -325,17 +323,17 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       onPressed: onPressed,
       style: const TextButton(child: SizedBox.shrink(), onPressed: null).defaultStyleOf(context).copyWith(
             animationDuration: Duration.zero,
-            padding: MaterialStateProperty.all(padding),
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            padding: WidgetStateProperty.all(padding),
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(widget.borderRadius),
             )),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            foregroundColor: MaterialStateProperty.all(textColorAnimation.value),
+            foregroundColor: WidgetStateProperty.all(textColorAnimation.value),
             overlayColor:
-                MaterialStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
+                WidgetStateProperty.all(widget.splashColor ?? theme.appThemeExtension.glowSplashColorOnContrast),
             splashFactory: NFListTileInkRipple.splashFactory,
-            shadowColor: MaterialStateProperty.all(Colors.transparent),
-            textStyle: MaterialStateProperty.all(TextStyle(
+            shadowColor: WidgetStateProperty.all(Colors.transparent),
+            textStyle: WidgetStateProperty.all(TextStyle(
               fontFamily: theme.textTheme.displayLarge!.fontFamily,
               fontWeight: widget.fontWeight,
               fontSize: widget.fontSize,
@@ -347,7 +345,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
 
 /// Used to start queue playback.
 class PlayQueueButton extends StatelessWidget {
-  const PlayQueueButton({Key? key, required this.onPressed}) : super(key: key);
+  const PlayQueueButton({super.key, required this.onPressed});
 
   final VoidCallback? onPressed;
 
@@ -367,7 +365,7 @@ class PlayQueueButton extends StatelessWidget {
 
 /// Used to start shuffled queue playback.
 class ShuffleQueueButton extends StatelessWidget {
-  const ShuffleQueueButton({Key? key, required this.onPressed}) : super(key: key);
+  const ShuffleQueueButton({super.key, required this.onPressed});
 
   final VoidCallback? onPressed;
 
@@ -379,7 +377,7 @@ class ShuffleQueueButton extends StatelessWidget {
       text: l10n.shuffleContentList,
       icon: const Icon(Icons.shuffle_rounded, size: 22.0),
       color: theme.appThemeExtension.contrast,
-      textColor: theme.colorScheme.background,
+      textColor: theme.colorScheme.secondaryContainer,
       borderRadius: 4.0,
       fontSize: 15.0,
       fontWeight: FontWeight.w700,
@@ -392,10 +390,10 @@ class ShuffleQueueButton extends StatelessWidget {
 /// will copy [text] to clipboard.
 class CopyButton extends StatelessWidget {
   const CopyButton({
-    Key? key,
+    super.key,
     required this.text,
     this.size = 44.0,
-  }) : super(key: key);
+  });
 
   /// Text that will be copied when button is pressed.
   final String text;
@@ -435,7 +433,7 @@ class CopyButton extends StatelessWidget {
 }
 
 class FavoriteButton extends StatelessWidget {
-  const FavoriteButton({Key? key}) : super(key: key);
+  const FavoriteButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -457,13 +455,13 @@ class FavoriteButton extends StatelessWidget {
 
 class HeartButton extends StatelessWidget {
   const HeartButton({
-    Key? key,
+    super.key,
     this.active = true,
     this.tooltip,
     this.color,
     this.inactiveColor,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final bool active;
   final String? tooltip;

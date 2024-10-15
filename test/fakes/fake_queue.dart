@@ -3,7 +3,7 @@
 import '../test.dart';
 
 class _QueuesRepository extends QueuesRepository {
-  _QueuesRepository(QueuesState state) : super(state);
+  _QueuesRepository(super.state);
 
   @override
   QueueSerializerType queue = FakeJsonSerializer([]);

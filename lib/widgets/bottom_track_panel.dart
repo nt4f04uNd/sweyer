@@ -12,9 +12,9 @@ const double progressLineHeight = 3.0;
 /// Renders current playing track
 class TrackPanel extends StatelessWidget {
   const TrackPanel({
-    Key? key,
+    super.key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onTap;
 
@@ -123,7 +123,7 @@ class TrackPanel extends StatelessWidget {
 }
 
 class RotatingAlbumArtWithProgress extends StatefulWidget {
-  const RotatingAlbumArtWithProgress({Key? key}) : super(key: key);
+  const RotatingAlbumArtWithProgress({super.key});
 
   @override
   _RotatingAlbumArtWithProgressState createState() => _RotatingAlbumArtWithProgressState();

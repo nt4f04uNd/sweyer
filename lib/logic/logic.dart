@@ -1,4 +1,5 @@
 /// This module contains all app logic classes.
+library;
 
 export 'models/models.dart';
 export 'player/music_player.dart';

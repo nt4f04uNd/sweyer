@@ -3,10 +3,10 @@ import 'package:sweyer/sweyer.dart';
 
 class AppBarTitleMarquee extends StatelessWidget {
   const AppBarTitleMarquee({
-    Key? key,
+    super.key,
     required this.text,
     this.fontSize,
-  }) : super(key: key);
+  });
 
   final String text;
   final double? fontSize;

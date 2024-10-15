@@ -2,7 +2,7 @@ import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSettingsRoute extends StatefulWidget {
-  const GeneralSettingsRoute({Key? key}) : super(key: key);
+  const GeneralSettingsRoute({super.key});
   @override
   _GeneralSettingsRouteState createState() => _GeneralSettingsRouteState();
 }

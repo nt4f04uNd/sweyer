@@ -26,7 +26,7 @@ class DebugOverlayWidget extends ConsumerWidget {
             padding: const EdgeInsets.all(20.0),
             color: Colors.purpleAccent,
             child: Container(
-              color: theme.colorScheme.background,
+              color: theme.colorScheme.secondaryContainer,
               child: Stack(
                 children: [
                   Material(
