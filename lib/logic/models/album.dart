@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
