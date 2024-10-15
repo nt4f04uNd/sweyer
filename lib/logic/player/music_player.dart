@@ -260,7 +260,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> prepareFromUri(Uri uri, [Map<String, dynamic>? extras]) {
     // TODO: implement prepareFromUri
     throw UnimplementedError();
-    // return super.prepareFromUri(uri, extras);
   }
 
   @override
@@ -292,7 +291,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) {
     // TODO: implement playFromUri
     throw UnimplementedError();
-    // return super.playFromUri(uri, extras);
   }
 
   @override
@@ -395,7 +393,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> updateMediaItem(MediaItem mediaItem) {
     // TODO: implement updateMediaItem
     throw UnimplementedError();
-    // return super.updateMediaItem(mediaItem);
   }
 
   @override
@@ -439,14 +436,12 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   Future<void> setRating(Rating rating, Map? extras) {
     // TODO: implement setRating
     throw UnimplementedError();
-    // return super.setRating(rating, extras);
   }
 
   @override
   Future<void> setCaptioningEnabled(bool enabled) {
     // TODO: implement setCaptioningEnabled
     throw UnimplementedError();
-    // return super.setCaptioningEnabled(enabled);
   }
 
   @override
