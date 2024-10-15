@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 // import 'package:quick_actions/quick_actions.dart';
@@ -17,10 +16,6 @@ enum QuickAction {
   search,
   shuffleAll,
   playRecent,
-}
-
-extension QuickActionSerialization on QuickAction {
-  String get value => EnumToString.convertToString(this);
 }
 
 /// A [Map] container for the [ContentType] as key, and [V] as value entry.
