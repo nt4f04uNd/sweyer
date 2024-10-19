@@ -49,7 +49,7 @@ dependencies:
   android_content_provider: 0.4.1  # TODO: Switch back to caret syntax after updating to Flutter 3.24
   collection: ^1.16.0
   theme_tailor_annotation: ^3.0.1
-  riverpod: ^2.1.1
+  riverpod: ^2.5.3
   flutter_riverpod: ^2.1.1
   hooks_riverpod: ^2.3.2
   flutter_hooks: ^0.20.5
