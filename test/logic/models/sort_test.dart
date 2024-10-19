@@ -356,10 +356,8 @@ void main() {
       for (final MapEntry(key: feature, value: expectedContentList) in featureTestCases.entries) {
         test('Sorts songs by ${feature.name} ${sortOrder.name}', () async {
           expect(
-            (songs.toList()..sort(SongSort(feature: feature, order: sortOrder).comparator))
-                .map((song) => song.toMap())
-                .toList(),
-            expectedContentList.map((song) => song.toMap()).toList(),
+            (songs.toList()..sort(SongSort(feature: feature, order: sortOrder).comparator)).map((song) => song.toMap()),
+            expectedContentList.map((song) => song.toMap()),
           );
         });
       }
@@ -624,9 +622,8 @@ void main() {
         test('Sorts albums by ${feature.name} ${sortOrder.name}', () async {
           expect(
             (albums.toList()..sort(AlbumSort(feature: feature, order: sortOrder).comparator))
-                .map((album) => album.toMap())
-                .toList(),
-            expectedContentList.map((album) => album.toMap()).toList(),
+                .map((album) => album.toMap()),
+            expectedContentList.map((album) => album.toMap()),
           );
         });
       }
@@ -648,8 +645,9 @@ void main() {
         playlistWith(id: 8, name: 'я (кириллица)', dateModified: 0, dateAdded: 0),
         playlistWith(id: 9, name: '', dateModified: 1, dateAdded: 0),
         playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
-        playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
-        playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+        playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
+        playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
+        playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
       ];
     });
     final Map<SortOrder, Map<PlaylistSortFeature, List<Playlist>>> testCases = {
@@ -657,8 +655,8 @@ void main() {
         PlaylistSortFeature.dateModified: [
           playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
           playlistWith(id: 0, name: '', dateModified: 0, dateAdded: 0),
-          playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
-          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
+          playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
           playlistWith(id: 1, name: 'A', dateModified: 0, dateAdded: 0),
           playlistWith(id: 3, name: 'a', dateModified: 0, dateAdded: 0),
           playlistWith(id: 2, name: 'AA', dateModified: 0, dateAdded: 0),
@@ -668,12 +666,14 @@ void main() {
           playlistWith(id: 6, name: 'АА (кириллица)', dateModified: 0, dateAdded: 0),
           playlistWith(id: 8, name: 'я (кириллица)', dateModified: 0, dateAdded: 0),
           playlistWith(id: 9, name: '', dateModified: 1, dateAdded: 0),
+          playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
         ],
         PlaylistSortFeature.dateAdded: [
-          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+          playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
           playlistWith(id: 0, name: '', dateModified: 0, dateAdded: 0),
           playlistWith(id: 9, name: '', dateModified: 1, dateAdded: 0),
           playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
+          playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
           playlistWith(id: 1, name: 'A', dateModified: 0, dateAdded: 0),
           playlistWith(id: 3, name: 'a', dateModified: 0, dateAdded: 0),
           playlistWith(id: 2, name: 'AA', dateModified: 0, dateAdded: 0),
@@ -682,14 +682,15 @@ void main() {
           playlistWith(id: 7, name: 'а (кириллица)', dateModified: 0, dateAdded: 0),
           playlistWith(id: 6, name: 'АА (кириллица)', dateModified: 0, dateAdded: 0),
           playlistWith(id: 8, name: 'я (кириллица)', dateModified: 0, dateAdded: 0),
-          playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
+          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
         ],
         PlaylistSortFeature.name: [
           playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
           playlistWith(id: 0, name: '', dateModified: 0, dateAdded: 0),
-          playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
-          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
+          playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
           playlistWith(id: 9, name: '', dateModified: 1, dateAdded: 0),
+          playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
           playlistWith(id: 1, name: 'A', dateModified: 0, dateAdded: 0),
           playlistWith(id: 3, name: 'a', dateModified: 0, dateAdded: 0),
           playlistWith(id: 2, name: 'AA', dateModified: 0, dateAdded: 0),
@@ -712,12 +713,13 @@ void main() {
           playlistWith(id: 1, name: 'A', dateModified: 0, dateAdded: 0),
           playlistWith(id: 3, name: 'a', dateModified: 0, dateAdded: 0),
           playlistWith(id: 0, name: '', dateModified: 0, dateAdded: 0),
-          playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
-          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
+          playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
           playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
+          playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
         ],
         PlaylistSortFeature.dateAdded: [
-          playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
+          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
           playlistWith(id: 8, name: 'я (кириллица)', dateModified: 0, dateAdded: 0),
           playlistWith(id: 6, name: 'АА (кириллица)', dateModified: 0, dateAdded: 0),
           playlistWith(id: 5, name: 'А (кириллица)', dateModified: 0, dateAdded: 0),
@@ -729,7 +731,8 @@ void main() {
           playlistWith(id: 0, name: '', dateModified: 0, dateAdded: 0),
           playlistWith(id: 9, name: '', dateModified: 1, dateAdded: 0),
           playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
-          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+          playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
+          playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
         ],
         PlaylistSortFeature.name: [
           playlistWith(id: 8, name: 'я (кириллица)', dateModified: 0, dateAdded: 0),
@@ -742,9 +745,10 @@ void main() {
           playlistWith(id: 3, name: 'a', dateModified: 0, dateAdded: 0),
           playlistWith(id: 9, name: '', dateModified: 1, dateAdded: 0),
           playlistWith(id: 0, name: '', dateModified: 0, dateAdded: 0),
-          playlistWith(id: 11, name: '', dateModified: 0, dateAdded: 1),
-          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: -1),
+          playlistWith(id: 12, name: '', dateModified: 0, dateAdded: 1),
+          playlistWith(id: 13, name: '', dateModified: 0, dateAdded: -1),
           playlistWith(id: 10, name: '', dateModified: -1, dateAdded: 0),
+          playlistWith(id: 11, name: '', dateModified: null, dateAdded: 0),
         ],
       },
     };
@@ -753,9 +757,8 @@ void main() {
         test('Sorts playlists by ${feature.name} ${sortOrder.name}', () async {
           expect(
             (playlists.toList()..sort(PlaylistSort(feature: feature, order: sortOrder).comparator))
-                .map((playlist) => playlist.toMap())
-                .toList(),
-            expectedContentList.map((playlist) => playlist.toMap()).toList(),
+                .map((playlist) => playlist.toMap()),
+            expectedContentList.map((playlist) => playlist.toMap()),
           );
         });
       }
@@ -882,9 +885,8 @@ void main() {
         test('Sorts artists by ${feature.name} ${sortOrder.name}', () async {
           expect(
             (artists.toList()..sort(ArtistSort(feature: feature, order: sortOrder).comparator))
-                .map((artist) => artist.toMap())
-                .toList(),
-            expectedContentList.map((artist) => artist.toMap()).toList(),
+                .map((artist) => artist.toMap()),
+            expectedContentList.map((artist) => artist.toMap()),
           );
         });
       }

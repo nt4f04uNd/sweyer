@@ -7,7 +7,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
   ContentType get type => ContentType.playlist;
   final String? filesystemPath;
   final int dateAdded;
-  final int dateModified;
+  final int? dateModified;
   final String name;
   @override
   final List<int> songIds;
@@ -108,12 +108,11 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
   }
 
   factory Playlist.fromMap(Map<String, dynamic> map) {
-    int dateAdded = map['dateAdded'] as int;
     return Playlist(
       id: map['id'] as int,
       filesystemPath: map['filesystemPath'] as String?,
-      dateAdded: dateAdded,
-      dateModified: map['dateModified'] as int? ?? dateAdded,
+      dateAdded: map['dateAdded'] as int,
+      dateModified: map['dateModified'] as int?,
       name: map['name'] as String,
       songIds: (map['songIds'] as List?)?.cast<int>().toList() ?? [],
     );
@@ -136,7 +135,7 @@ abstract class PlaylistCopyWith {
     int id,
     String? fileSystemPath,
     int dateAdded,
-    int dateModified,
+    int? dateModified,
     String name,
     List<int> songIds,
   });
@@ -157,7 +156,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
     Object id = _undefined,
     Object? fileSystemPath = _undefined,
     Object dateAdded = _undefined,
-    Object dateModified = _undefined,
+    Object? dateModified = _undefined,
     Object name = _undefined,
     Object songIds = _undefined,
   }) {
@@ -165,7 +164,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
       id: id == _undefined ? value.id : id as int,
       filesystemPath: fileSystemPath == _undefined ? value.filesystemPath : fileSystemPath as String?,
       dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
-      dateModified: dateModified == _undefined ? value.dateModified : dateModified as int,
+      dateModified: dateModified == _undefined ? value.dateModified : dateModified as int?,
       name: name == _undefined ? value.name : name as String,
       songIds: songIds == _undefined ? value.songIds : songIds as List<int>,
     );

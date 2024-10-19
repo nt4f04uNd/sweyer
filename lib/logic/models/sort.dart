@@ -363,7 +363,7 @@ class PlaylistSort extends Sort<Playlist> {
   }
 
   int _fallbackDateModified(Playlist a, Playlist b) {
-    return a.dateModified.compareTo(b.dateModified);
+    return a.dateModified.compareToNullable(b.dateModified, nullCompareResult: order == SortOrder.descending ? 1 : -1);
   }
 
   @override
@@ -372,7 +372,8 @@ class PlaylistSort extends Sort<Playlist> {
     switch (feature) {
       case PlaylistSortFeature.dateModified:
         c = (a, b) {
-          final compare = a.dateModified.compareTo(b.dateModified);
+          final compare = a.dateModified
+              .compareToNullable(b.dateModified, nullCompareResult: order == SortOrder.descending ? 1 : -1);
           if (compare == 0) {
             return _fallbackName(a, b);
           }
