@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  uuid: ^4.4.0
+  uuid: ^4.5.1
   path: ^1.8.0
   async: ^2.5.0
   rxdart: ^0.26.0
