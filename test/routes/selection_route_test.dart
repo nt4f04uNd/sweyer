@@ -10,7 +10,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync
+          // The marquee widget starts a future, we must use runAsync (TODO: Try to get rid of this)
           await tester.pumpAndSettle();
           expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
@@ -41,44 +41,42 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync
-          await tester.pumpAndSettle();
-          expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isFalse);
+        // The marquee widget starts a future, we must use runAsync
+        await tester.pumpAndSettle();
+        expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isFalse);
 
-          // Open insertion settings
-          await tester.tap(find.descendant(
-            of: find.byType(SelectionActionsBar),
-            matching: find.byIcon(Icons.settings_rounded).hitTestable(),
-          ));
-          await tester.pumpAndSettle();
-          expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isFalse);
+        // Open insertion settings
+        await tester.tap(find.descendant(
+          of: find.byType(SelectionActionsBar),
+          matching: find.byIcon(Icons.settings_rounded).hitTestable(),
+        ));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isFalse);
 
-          // Close insertion settings
-          await tester.tap(find.byIcon(Icons.arrow_back_rounded).hitTestable());
-          await tester.pumpAndSettle();
+        // Close insertion settings
+        await tester.tap(find.byIcon(Icons.arrow_back_rounded).hitTestable());
+        await tester.pumpAndSettle();
 
-          // Select Song 1
-          await tester.tap(find.descendant(
-              of: find.ancestor(of: find.text(song1.title), matching: find.byType(SongTile)),
-              matching: find.byIcon(Icons.add_rounded)));
-          await tester.pumpAndSettle();
-          expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
+        // Select Song 1
+        await tester.tap(find.descendant(
+            of: find.ancestor(of: find.text(song1.title), matching: find.byType(SongTile)),
+            matching: find.byIcon(Icons.add_rounded)));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
 
-          // Open insertion settings
-          await tester.tap(find.descendant(
-            of: find.byType(SelectionActionsBar),
-            matching: find.byIcon(Icons.settings_rounded).hitTestable(),
-          ));
-          await tester.pumpAndSettle();
-          expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
+        // Open insertion settings
+        await tester.tap(find.descendant(
+          of: find.byType(SelectionActionsBar),
+          matching: find.byIcon(Icons.settings_rounded).hitTestable(),
+        ));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
 
-          // Finish insertion
-          await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
-          await tester.pumpAndSettle();
-          expect(find.widgetWithText(SongTile, song1.title).hitTestable(), findsOneWidget);
-          expect(playlist.songs, orderedEquals([song0, song1]));
-        });
+        // Finish insertion
+        await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
+        await tester.pumpAndSettle();
+        expect(find.widgetWithText(SongTile, song1.title).hitTestable(), findsOneWidget);
+        expect(playlist.songs, orderedEquals([song0, song1]));
       });
     });
 
@@ -95,7 +93,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync
+          // The marquee widget starts a future, we must use runAsync (TODO: Try to get rid of this)
           await tester.pumpAndSettle();
           expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('0')), findsOneWidget);
           expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
@@ -134,7 +132,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
         await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync
+          // The marquee widget starts a future, we must use runAsync (TODO: Try to get rid of this)
           await tester.pumpAndSettle();
           expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
@@ -165,44 +163,42 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync
-          await tester.pumpAndSettle();
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
+        // The marquee widget starts a future, we must use runAsync
+        await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
-          // Select Song 2
-          await tester.tap(find.descendant(
-              of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
-              matching: find.byIcon(Icons.add_rounded)));
-          await tester.pumpAndSettle();
+        // Select Song 2
+        await tester.tap(find.descendant(
+            of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
+            matching: find.byIcon(Icons.add_rounded)));
+        await tester.pumpAndSettle();
 
-          // Open insertion settings
-          await tester.tap(find.descendant(
-            of: find.byType(SelectionActionsBar),
-            matching: find.byIcon(Icons.settings_rounded).hitTestable(),
-          ));
-          await tester.pumpAndSettle();
-          expect(
-              tester
-                  .widget<InListContentAction>(find.widgetWithText(InListContentAction, l10n.insertAtTheBeginning))
-                  .color,
-              isNot(FakeThemeControl.instance.theme.colorScheme.primary));
+        // Open insertion settings
+        await tester.tap(find.descendant(
+          of: find.byType(SelectionActionsBar),
+          matching: find.byIcon(Icons.settings_rounded).hitTestable(),
+        ));
+        await tester.pumpAndSettle();
+        expect(
+            tester
+                .widget<InListContentAction>(find.widgetWithText(InListContentAction, l10n.insertAtTheBeginning))
+                .color,
+            isNot(FakeThemeControl.instance.theme.colorScheme.primary));
 
-          // Select insert at beginning
-          await tester.tap(find.widgetWithText(InListContentAction, l10n.insertAtTheBeginning));
-          await tester.pumpAndSettle();
-          expect(
-              tester
-                  .widget<InListContentAction>(find.widgetWithText(InListContentAction, l10n.insertAtTheBeginning))
-                  .color,
-              FakeThemeControl.instance.theme.colorScheme.primary);
+        // Select insert at beginning
+        await tester.tap(find.widgetWithText(InListContentAction, l10n.insertAtTheBeginning));
+        await tester.pumpAndSettle();
+        expect(
+            tester
+                .widget<InListContentAction>(find.widgetWithText(InListContentAction, l10n.insertAtTheBeginning))
+                .color,
+            FakeThemeControl.instance.theme.colorScheme.primary);
 
-          // Add selected Song 2 to playlist
-          await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
-          await tester.pumpAndSettle();
-          expect(find.widgetWithText(SongTile, song2.title).hitTestable(), findsOneWidget);
-          expect(playlist.songs, orderedEquals([song2, song0, song1]));
-        });
+        // Add selected Song 2 to playlist
+        await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
+        await tester.pumpAndSettle();
+        expect(find.widgetWithText(SongTile, song2.title).hitTestable(), findsOneWidget);
+        expect(playlist.songs, orderedEquals([song2, song0, song1]));
       });
     });
 
@@ -218,38 +214,36 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync
-          await tester.pumpAndSettle();
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
+        // The marquee widget starts a future, we must use runAsync
+        await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
-          // Select Song 2
-          await tester.tap(find.descendant(
-              of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
-              matching: find.byIcon(Icons.add_rounded)));
-          await tester.pumpAndSettle();
+        // Select Song 2
+        await tester.tap(find.descendant(
+            of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
+            matching: find.byIcon(Icons.add_rounded)));
+        await tester.pumpAndSettle();
 
-          // Open insertion settings
-          await tester.tap(find.descendant(
-            of: find.byType(SelectionActionsBar),
-            matching: find.byIcon(Icons.settings_rounded).hitTestable(),
-          ));
-          await tester.pumpAndSettle();
-          expect(tester.widget<SongTile>(find.widgetWithText(SongTile, song0.title).hitTestable()).backgroundColor,
-              isNot(FakeThemeControl.instance.theme.colorScheme.primary));
+        // Open insertion settings
+        await tester.tap(find.descendant(
+          of: find.byType(SelectionActionsBar),
+          matching: find.byIcon(Icons.settings_rounded).hitTestable(),
+        ));
+        await tester.pumpAndSettle();
+        expect(tester.widget<SongTile>(find.widgetWithText(SongTile, song0.title).hitTestable()).backgroundColor,
+            isNot(FakeThemeControl.instance.theme.colorScheme.primary));
 
-          // Select Song 0
-          await tester.tap(find.widgetWithText(SongTile, song0.title).hitTestable());
-          await tester.pumpAndSettle();
-          expect(tester.widget<SongTile>(find.widgetWithText(SongTile, song0.title).hitTestable()).backgroundColor,
-              FakeThemeControl.instance.theme.colorScheme.primary);
+        // Select Song 0
+        await tester.tap(find.widgetWithText(SongTile, song0.title).hitTestable());
+        await tester.pumpAndSettle();
+        expect(tester.widget<SongTile>(find.widgetWithText(SongTile, song0.title).hitTestable()).backgroundColor,
+            FakeThemeControl.instance.theme.colorScheme.primary);
 
-          // Add selected Song 2 to playlist
-          await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
-          await tester.pumpAndSettle();
-          expect(find.widgetWithText(SongTile, song2.title).hitTestable(), findsOneWidget);
-          expect(playlist.songs, orderedEquals([song0, song2, song1]));
-        });
+        // Add selected Song 2 to playlist
+        await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
+        await tester.pumpAndSettle();
+        expect(find.widgetWithText(SongTile, song2.title).hitTestable(), findsOneWidget);
+        expect(playlist.songs, orderedEquals([song0, song2, song1]));
       });
     });
   });
