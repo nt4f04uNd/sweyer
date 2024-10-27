@@ -7,8 +7,8 @@ import '../test.dart';
 void main() {
   group('home_route', () {
     late PermissionsChannelObserver permissionsObserver;
-    testAppGoldens('permissions_screen', initialization: (tester) {
-      permissionsObserver = PermissionsChannelObserver(tester.binding);
+    testAppGoldens('permissions_screen', initialization: () {
+      permissionsObserver = PermissionsChannelObserver(TestWidgetsFlutterBinding.ensureInitialized());
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
       permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
     }, (WidgetTester tester) async {
@@ -16,21 +16,24 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testAppGoldens('searching_screen', initialization: (_) {
-      ContentControl.instance.dispose();
-      final fake = FakeContentControl();
-      fake.init();
-      // Fake ContentControl.init in a way to trigger the home screen rebuild
-      fake.initializing = true;
-      fake.stateNullable = ContentState();
-      fake.disposed.value = false;
-    }, (WidgetTester tester) async {
-      expect(find.byType(Spinner), findsOneWidget);
-    }, customGoldenPump: (WidgetTester tester) async {
-      await tester.pump(const Duration(milliseconds: 400));
-    });
+    testAppGoldens(
+      'searching_screen',
+      postInitialization: () {
+        ContentControl.instance.dispose();
+        final fake = FakeContentControl();
+        fake.init();
+        // Fake ContentControl.init in a way to trigger the home screen rebuild
+        fake.initializing = true;
+        fake.stateNullable = ContentState();
+        fake.disposed.value = false;
+      },
+      (WidgetTester tester) async {
+        expect(find.byType(Spinner), findsOneWidget);
+      },
+      customGoldenPump: (WidgetTester tester) => tester.pump(const Duration(milliseconds: 400)),
+    );
 
-    testAppGoldens('no_songs_screen', initialization: (_) {
+    testAppGoldens('no_songs_screen', initialization: () {
       FakeSweyerPluginPlatform.instance.songs = [];
     }, (WidgetTester tester) async {
       await tester.pumpAndSettle();
@@ -82,7 +85,7 @@ void main() {
     });
 
     final List<Song> songs = List.unmodifiable(List.generate(10, (index) => songWith(id: index)));
-    testAppGoldens('selection_deletion_dialog_songs_tab', initialization: (_) {
+    testAppGoldens('selection_deletion_dialog_songs_tab', initialization: () {
       final fake = FakeDeviceInfoControl();
       DeviceInfoControl.instance = fake;
       fake.sdkInt = 29;
@@ -96,7 +99,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testAppGoldens('scroll_labels', initialization: (_) {
+    testAppGoldens('scroll_labels', initialization: () {
       FakeSweyerPluginPlatform.instance.songs =
           List.generate(26, (index) => songWith(id: index, title: String.fromCharCode('A'.codeUnitAt(0) + index)));
     }, (WidgetTester tester) async {
@@ -115,7 +118,7 @@ void main() {
   });
 
   group('persistent_queue_route', () {
-    testAppGoldens('album_route', initialization: (_) {
+    testAppGoldens('album_route', initialization: () {
       FakeSweyerPluginPlatform.instance.songs = [
         songWith(id: 0, track: null, title: 'Null Song 1'),
         songWith(id: 5, track: null, title: 'Null Song 2'),
@@ -171,11 +174,18 @@ void main() {
   });
 
   group('player_route', () {
-    testAppGoldens('player_route', (WidgetTester tester) async {
-      await tester.tap(find.byType(SongTile));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(playerRouteController.value, 1.0);
-    }, playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet());
+    testAppGoldens(
+      'player_route',
+      (WidgetTester tester) async {
+        await tester.tap(find.byType(SongTile));
+        await tester.pump(); // Flush micro-tasks so to flush handling of the tap.
+        // Don't use `pumpAndSettle` because we have animations because we are playing a song.
+        await tester.pump(const Duration(seconds: 1));
+        expect(playerRouteController.value, 1.0);
+      },
+      customGoldenPump: (WidgetTester tester) => tester.pump(Duration.zero),
+      playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet(),
+    );
 
     testAppGoldens('queue_route', (WidgetTester tester) async {
       await tester.openPlayerQueueScreen();
@@ -250,7 +260,7 @@ void main() {
     final localFavoriteButNotInMediaStoreSong = songWith(id: 2, title: 'Local only favorite');
     final mediaStoreFavoriteButNotLocalSong =
         songWith(id: 3, isFavoriteInMediaStore: true, title: 'MediaStore only favorite');
-    testAppGoldens('general_settings_favorite_conflict_dialog', initialization: (_) {
+    testAppGoldens('general_settings_favorite_conflict_dialog', initialization: () {
       FakeSweyerPluginPlatform.instance.songs = [
         songWith(),
         localFavoriteAndMediaStoreSong,

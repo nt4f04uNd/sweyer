@@ -344,7 +344,8 @@ void testAppGoldens(
   bool? skip,
   Object? tags = _defaultTagObject,
   Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
-  void Function(WidgetTester)? initialization,
+  VoidCallback? initialization,
+  VoidCallback? postInitialization,
   CustomPump? customGoldenPump,
 }) {
   assert(playerInterfaceColorStylesToTest.isNotEmpty);
@@ -373,10 +374,11 @@ void testAppGoldens(
             _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
           }
           return tester.runAppTest(
-            initialization: () => initialization?.call(tester),
+            initialization: () => initialization?.call(),
             postInitialization: () {
               ThemeControl.instance.setThemeLightMode(lightTheme);
               Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
+              postInitialization?.call();
             },
             () => test(tester),
             goldenCaptureCallback: () => tester.screenMatchesGolden(
