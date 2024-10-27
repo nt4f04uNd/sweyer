@@ -174,8 +174,8 @@ void main() {
   });
 
   testWidgets('app does not ask for exit confirmation if disabled in the preferences', (WidgetTester tester) async {
-    await Settings.confirmExitingWithBackButton.set(false);
     await tester.runAppTest(() async {
+      await Settings.confirmExitingWithBackButton.set(false);
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
       await BackButtonInterceptor.popRoute();
