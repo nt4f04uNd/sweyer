@@ -9,24 +9,25 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlistWith()));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync (TODO: Try to get rid of this)
-          await tester.pumpAndSettle();
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
-          // Open insertion settings
-          await tester.tap(find.descendant(
-            of: find.byType(SelectionActionsBar),
-            matching: find.byIcon(Icons.settings_rounded).hitTestable(),
-          ));
-          await tester.pumpAndSettle();
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsNothing);
+        // Open insertion settings
+        await tester.tap(find.descendant(
+          of: find.byType(SelectionActionsBar),
+          matching: find.byIcon(Icons.settings_rounded).hitTestable(),
+        ));
+        await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsNothing);
 
-          // Close insertion settings
-          await tester.tap(find.byIcon(Icons.arrow_back_rounded).hitTestable());
-          await tester.pumpAndSettle();
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
-        });
+        // Close insertion settings
+        await tester.tap(find.byIcon(Icons.arrow_back_rounded).hitTestable());
+        await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
+
+        // The `NFMarquee` widget starts a timer for 2 seconds before it starts it's animation,
+        // at which point it can be disposed. Let that time pass.
+        await tester.pump(const Duration(seconds: 2));
       });
     });
 
@@ -41,7 +42,6 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        // The marquee widget starts a future, we must use runAsync
         await tester.pumpAndSettle();
         expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isFalse);
 
@@ -92,30 +92,31 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync (TODO: Try to get rid of this)
-          await tester.pumpAndSettle();
-          expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('0')), findsOneWidget);
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('0')), findsOneWidget);
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
-          // Select Song 1
-          await tester.tap(find.descendant(
-              of: find.ancestor(of: find.text(song1.title), matching: find.byType(SongTile)),
-              matching: find.byIcon(Icons.add_rounded)));
-          await tester.pumpAndSettle();
-          expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('1')).hitTestable(),
-              findsOneWidget);
-          expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
+        // Select Song 1
+        await tester.tap(find.descendant(
+            of: find.ancestor(of: find.text(song1.title), matching: find.byType(SongTile)),
+            matching: find.byIcon(Icons.add_rounded)));
+        await tester.pumpAndSettle();
+        expect(
+            find.descendant(of: find.byType(SelectionCounter), matching: find.text('1')).hitTestable(), findsOneWidget);
+        expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
 
-          // Select Song 2
-          await tester.tap(find.descendant(
-              of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
-              matching: find.byIcon(Icons.add_rounded)));
-          await tester.pumpAndSettle();
-          expect(find.descendant(of: find.byType(SelectionCounter), matching: find.text('2')).hitTestable(),
-              findsOneWidget);
-          expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
-        });
+        // Select Song 2
+        await tester.tap(find.descendant(
+            of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
+            matching: find.byIcon(Icons.add_rounded)));
+        await tester.pumpAndSettle();
+        expect(
+            find.descendant(of: find.byType(SelectionCounter), matching: find.text('2')).hitTestable(), findsOneWidget);
+        expect(tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, l10n.done)).enabled, isTrue);
+
+        // The `NFMarquee` widget starts a timer for 2 seconds before it starts it's animation,
+        // at which point it can be disposed. Let that time pass.
+        await tester.pump(const Duration(seconds: 2));
       });
     });
 
@@ -131,23 +132,24 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        await tester.runAsync(() async {
-          // The marquee widget starts a future, we must use runAsync (TODO: Try to get rid of this)
-          await tester.pumpAndSettle();
-          expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
-          // Select Song 2
-          await tester.tap(find.descendant(
-              of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
-              matching: find.byIcon(Icons.add_rounded)));
-          await tester.pumpAndSettle();
+        // Select Song 2
+        await tester.tap(find.descendant(
+            of: find.ancestor(of: find.text(song2.title), matching: find.byType(SongTile)),
+            matching: find.byIcon(Icons.add_rounded)));
+        await tester.pumpAndSettle();
 
-          // Add selected Song 2 to playlist
-          await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
-          await tester.pumpAndSettle();
-          expect(find.widgetWithText(SongTile, song2.title).hitTestable(), findsOneWidget);
-          expect(playlist.songs, orderedEquals([song0, song1, song2]));
-        });
+        // Add selected Song 2 to playlist
+        await tester.tap(find.ancestor(of: find.text(l10n.done), matching: find.byType(ElevatedButton)));
+        await tester.pumpAndSettle();
+        expect(find.widgetWithText(SongTile, song2.title).hitTestable(), findsOneWidget);
+        expect(playlist.songs, orderedEquals([song0, song1, song2]));
+
+        // The `NFMarquee` widget starts a timer for 2 seconds before it starts it's animation,
+        // at which point it can be disposed. Let that time pass.
+        await tester.pump(const Duration(seconds: 2));
       });
     });
 
@@ -163,7 +165,6 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        // The marquee widget starts a future, we must use runAsync
         await tester.pumpAndSettle();
         expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
@@ -214,7 +215,6 @@ void main() {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
-        // The marquee widget starts a future, we must use runAsync
         await tester.pumpAndSettle();
         expect(find.byIcon(Icons.settings_rounded).hitTestable(), findsOneWidget);
 
