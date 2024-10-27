@@ -154,8 +154,8 @@ void main() {
   });
 
   testWidgets('app shows exit confirmation toast if enabled in the preferences', (WidgetTester tester) async {
-    await Settings.confirmExitingWithBackButton.set(true);
     await tester.runAppTest(() async {
+      await Settings.confirmExitingWithBackButton.set(true);
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
       await BackButtonInterceptor.popRoute();
