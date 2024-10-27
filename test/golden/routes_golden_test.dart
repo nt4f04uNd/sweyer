@@ -179,11 +179,11 @@ void main() {
       (WidgetTester tester) async {
         await tester.tap(find.byType(SongTile));
         await tester.pump(); // Flush micro-tasks so to flush handling of the tap.
-        // Don't use `pumpAndSettle` because we have animations because we are playing a song.
-        await tester.pump(const Duration(seconds: 1));
+        // Stop the playback to avoid animations when taking the golden screenshot.
+        await MusicPlayer.handler!.stop();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(playerRouteController.value, 1.0);
       },
-      customGoldenPump: (WidgetTester tester) => tester.pump(Duration.zero),
       playerInterfaceColorStylesToTest: PlayerInterfaceColorStyle.values.toSet(),
     );
 
