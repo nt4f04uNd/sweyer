@@ -22,7 +22,7 @@ dependencies:
   sliver_tools: ^0.2.1
   animations: ^2.0.2
   permission_handler: ^11.3.1
-  shared_preferences: ^2.0.5
+  shared_preferences: ^2.3.3
   path_provider: ^2.1.5
   percent_indicator: ^4.2.2
   firebase_core: ^3.6.0
