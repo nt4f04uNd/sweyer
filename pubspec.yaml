@@ -24,7 +24,7 @@ dependencies:
   permission_handler: ^11.3.1
   shared_preferences: ^2.3.3
   path_provider: ^2.1.5
-  percent_indicator: ^4.2.2
+  percent_indicator: ^4.2.4
   firebase_core: ^3.6.0
   firebase_crashlytics: ^4.1.5
   firebase_analytics: ^11.3.5
