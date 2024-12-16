@@ -128,10 +128,10 @@ packages:
     dependency: "direct main"
     description:
       name: boxy
-      sha256: eaa774ff591191b86f2eb8e8eae878aec50604404b74388a27e655cf3aadf758
+      sha256: "71af0cd1bf7889c09787f26219a345aa4f38ccb98384c8ec24189e4d8e746005"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.1"
   build:
     dependency: transitive
     description:
