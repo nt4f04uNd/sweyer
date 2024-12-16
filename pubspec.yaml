@@ -37,7 +37,7 @@ dependencies:
   equatable: ^2.0.0
   device_info_plus: ^11.2.0
   sqflite: ^2.0.0+3
-  boxy: ^2.0.0
+  boxy: ^2.2.1
   back_button_interceptor: ^8.0.0
   flutter_sticky_header: ^0.7.0
   palette_generator: ^0.3.3+2
