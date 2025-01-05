@@ -272,7 +272,7 @@ extension WidgetTesterExtension on WidgetTester {
         await MusicPlayer.instance.stop();
         await MusicPlayer.instance.dispose();
         // Un-pump, in case we have any real animations running,
-        // so the pumpAndSettle on the next line doesn't hang on.
+        // so the pumpAndSettle at the end doesn't hang forever.
         await pumpWidget(const SizedBox());
         // Wait for any asynchronous events and stream callbacks to finish.
         await pump(const Duration(seconds: 1));
