@@ -276,7 +276,8 @@ extension WidgetTesterExtension on WidgetTester {
         await pumpWidget(const SizedBox());
         // Wait for any asynchronous events and stream callbacks to finish.
         await pump(const Duration(seconds: 1));
-        // Wait for ui animations.
+        // Wait for any remaining system UI animations to settle.
+        // App animations should have already stopped after un-pumping above.
         await pumpAndSettle();
       }
     });
