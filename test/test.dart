@@ -93,6 +93,10 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
   ///  2. Runs the test from the [callback].
   ///  3. Stops and disposes the player.
   ///  4. Flushes all micro-tasks and stream events.
+  ///
+  /// This method is preferred for tests that don't interact with the user interface layer.
+  /// See also [WidgetTesterExtension.runAppTest] for running a test which initializes the app
+  /// and in addition loads the user interface for tests that want to test the user interface.
   Future<void> runAppTestWithoutUi(FutureOr<void> Function() callback, {VoidCallback? initialization}) async {
     addTearDown(postTest);
     return runTest(
@@ -238,6 +242,9 @@ extension WidgetTesterExtension on WidgetTester {
   ///  5. Optionally, runs [goldenCaptureCallback].
   ///  6. Stops and disposes the player.
   ///  7. Un-pumps the screen and flushes all micro-tasks and stream events.
+  ///
+  /// See also [AppInitExtension.runAppTestWithoutUi] for running a test that requires the app to be initialized
+  /// but doesn't need to interact with the user interface.
   Future<void> runAppTest(
     AsyncCallback callback, {
     AsyncCallback? goldenCaptureCallback,
