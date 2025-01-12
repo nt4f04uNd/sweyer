@@ -365,10 +365,9 @@ void testAppGoldens(
       final testDescription = getTestDescription(
         lightTheme: lightTheme,
         playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
-      );
-
+      ).buildDescription(description);
       testGoldens(
-        testDescription.buildDescription(description),
+        testDescription,
         (tester) async {
           final previousDeterministicCursor = EditableText.debugDeterministicCursor;
           addTearDown(() {
@@ -389,10 +388,13 @@ void testAppGoldens(
               postInitialization?.call();
             },
             () => test(tester),
-            goldenCaptureCallback: () => tester.screenMatchesGolden(
-              Invoker.current!.liveTest.test.name.split(' | theme')[0].replaceAll(' ', '.'),
-              customPump: customGoldenPump,
-            ),
+            goldenCaptureCallback: () {
+              final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
+              return tester.screenMatchesGolden(
+                "$group.${description.replaceAll(' ', '.')}",
+                customPump: customGoldenPump,
+              );
+            },
           );
         },
         tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
