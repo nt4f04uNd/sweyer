@@ -91,7 +91,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
   ///  1. Initializes the application, optionally running [initialization] when all fakes are set up
   ///     before the [ContentControl] is initialized.
   ///  2. Runs the test from the [callback].
-  ///  3. Stops and disposes the player.
+  ///  3. Stops and disposes the player and app state.
   ///  4. Flushes all micro-tasks and stream events.
   Future<void> runAppTestWithoutUi(FutureOr<void> Function() callback, {VoidCallback? initialization}) async {
     addTearDown(postTest);
@@ -102,7 +102,8 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
           await callback();
         } finally {
           await MusicPlayer.instance.stop();
-          await MusicPlayer.instance.dispose();
+          DeviceInfoControl.instance.dispose();
+          ContentControl.instance.dispose();
           // Wait for any asynchronous events and stream callbacks to finish.
           await pump(const Duration(seconds: 1));
         }
@@ -236,7 +237,7 @@ extension WidgetTesterExtension on WidgetTester {
   ///  3. Pumps the app.
   ///  4. Runs the test from the [callback].
   ///  5. Optionally, runs [goldenCaptureCallback].
-  ///  6. Stops and disposes the player.
+  ///  6. Stops and disposes the player and app state.
   ///  7. Un-pumps the screen and flushes all micro-tasks and stream events.
   Future<void> runAppTest(
     AsyncCallback callback, {
@@ -261,9 +262,10 @@ extension WidgetTesterExtension on WidgetTester {
         await callback();
         await goldenCaptureCallback?.call();
       } finally {
-        // Don't leak player state between tests.
+        // Don't leak app state between tests.
         await MusicPlayer.instance.stop();
-        await MusicPlayer.instance.dispose();
+        DeviceInfoControl.instance.dispose();
+        ContentControl.instance.dispose();
         // Un-pump, in case we have any real animations running,
         // so the pumpAndSettle on the next line doesn't hang on.
         await pumpWidget(const SizedBox());
