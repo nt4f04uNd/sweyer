@@ -134,8 +134,6 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     SharedPreferences.setMockInitialValues({});
 
     // Reset any state
-    DeviceInfoControl.instance.dispose();
-    ContentControl.instance.dispose();
     AppRouter.instance = AppRouter();
 
     // Set up fakes
