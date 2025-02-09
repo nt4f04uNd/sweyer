@@ -106,6 +106,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
           ContentControl.instance.dispose();
           // Wait for any asynchronous events and stream callbacks to finish.
           await pump(const Duration(seconds: 1));
+          await idle();
         }
       }),
       () {},
@@ -218,6 +219,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     final contentInitFuture = ContentControl.instance.init();
     // Flush micro-tasks to allow all stream events to propagate to their listeners.
     await pump(const Duration(seconds: 1));
+    await idle();
     await contentInitFuture;
     // Called in the [App] widget
     NFWidgets.init(
@@ -269,6 +271,7 @@ extension WidgetTesterExtension on WidgetTester {
         await pumpWidget(const SizedBox());
         // Wait for any asynchronous events and stream callbacks to finish.
         await pump(const Duration(seconds: 1));
+        await idle();
         // Wait for ui animations.
         await pumpAndSettle();
       }
