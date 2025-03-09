@@ -3,7 +3,12 @@
 
 ## Unreleased
 
-* Update to Flutter 3.22.2 by @Abestanis in https://github.com/nt4f04uNd/sweyer/pull/130 
+...
+
+## 1.0.13
+
+* Update to Flutter 3.22.2 by @Abestanis in https://github.com/nt4f04uNd/sweyer/pull/130
+* Fix a bunch of bugs by @Abestanis
 
 ## 1.0.12
 
