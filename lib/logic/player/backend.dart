@@ -22,14 +22,13 @@ class GetArtistInfoResponse {
 class Backend {
   static Backend instance = Backend();
 
-  static const _version = 1;
   static const _cacheKey = 'backend';
 
   final _cacheManager = CacheManager(
     Config(
       _cacheKey,
       maxNrOfCacheObjects: 500,
-      fileService: _ArtistInfoFileService(version: _version),
+      fileService: _ArtistInfoFileService(),
     ),
   );
 
@@ -44,15 +43,11 @@ class Backend {
 }
 
 class _ArtistInfoFileService extends FileService {
-  _ArtistInfoFileService({required this.version});
-  final int version;
-
   @override
   Future<FileServiceResponse> get(String url, {Map<String, String>? headers}) async {
-    final function = FirebaseFunctions.instance.httpsCallable('getArtistInfo');
+    final function = FirebaseFunctions.instance.httpsCallable('getArtistInfoV2');
     try {
       final result = await function.call({
-        'version': version,
         'name': url,
       });
       return _ArtistInfoServiceResponse(result.data);
