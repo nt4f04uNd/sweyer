@@ -107,6 +107,46 @@ void main() {
     });
   });
 
+  testWidgets('displays label scrollbar when sorted by title', (WidgetTester tester) async {
+    final List<Song> songs = List.unmodifiable(
+      List.generate(
+        100,
+        (index) => songWith(
+          id: index,
+          dateModified: 100 - 1 - index,
+          title: String.fromCharCode(65 + index % 26),
+        ),
+      ),
+    );
+
+    await setUpAppTest(() {
+      FakeSweyerPluginPlatform.instance.songs = songs.toList();
+    });
+    await tester.runAppTest(() async {
+      // Change sort feature
+      await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.dateModified)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.title)));
+      await tester.pumpAndSettle();
+
+      // Drag at the center of the screen
+      await tester.timedDrag(
+        find.byType(ContentListView),
+        const Offset(0, -100),
+        Durations.medium2,
+      );
+      expect(find.byType(NFScrollLabel), findsNothing);
+
+      // Drag in the scrollbar area
+      await tester.timedDragFrom(
+        tester.getTopRight(find.byType(ContentListView)) - const Offset(10, 0) + const Offset(0, 10),
+        const Offset(0, -100),
+        Durations.medium2,
+      );
+      expect(find.byType(NFScrollLabel), findsOneWidget);
+    });
+  });
+
   testWidgets('displays correct songs length', (WidgetTester tester) async {
     final List<Song> songs = List.unmodifiable([
       songWith(id: 0),
