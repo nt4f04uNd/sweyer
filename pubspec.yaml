@@ -27,7 +27,7 @@ dependencies:
   percent_indicator: ^4.2.4
   firebase_core: ^3.10.0
   firebase_crashlytics: ^4.3.4
-  firebase_analytics: ^11.4.3
+  firebase_analytics: ^11.4.4
   cloud_functions: ^5.3.4
   package_info_plus: ^8.3.0
   url_launcher: ^6.3.1
