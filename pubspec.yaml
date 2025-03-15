@@ -93,6 +93,7 @@ dev_dependencies:
   theme_tailor: ^3.0.1
   freezed: ^2.3.2
   json_serializable: ^6.5.4
+  sqflite_common_ffi: ^2.3.3
 
 flutter:
   generate: true
