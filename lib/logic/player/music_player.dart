@@ -626,6 +626,10 @@ class MusicPlayer extends AudioPlayer {
     return _instance ??= MusicPlayer._();
   }
 
+  static MusicPlayer? get instanceIfInitialized {
+    return _instance;
+  }
+
   @visibleForTesting
   static AudioHandler? handler;
 
