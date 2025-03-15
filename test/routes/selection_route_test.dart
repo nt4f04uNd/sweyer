@@ -35,10 +35,11 @@ void main() {
       final song0 = songWith(id: 0, title: 'Song 0');
       final song1 = songWith(id: 1, title: 'Song 1');
       final playlist = playlistWith(songIds: [song0.id]);
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeSweyerPluginPlatform.instance.songs = [song0, song1];
         FakeSweyerPluginPlatform.instance.playlists = [playlist];
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
@@ -85,10 +86,11 @@ void main() {
       final song1 = songWith(id: 1, title: 'Song 1');
       final song2 = songWith(id: 2, title: 'Song 2');
       final playlist = playlistWith(songIds: [song0.id]);
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
         FakeSweyerPluginPlatform.instance.playlists = [playlist];
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
@@ -125,10 +127,11 @@ void main() {
       final song1 = songWith(id: 1, title: 'Song 1');
       final song2 = songWith(id: 2, title: 'Song 2');
       final playlist = playlistWith(songIds: [song0.id, song1.id]);
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
         FakeSweyerPluginPlatform.instance.playlists = [playlist];
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
@@ -158,10 +161,11 @@ void main() {
       final song1 = songWith(id: 1, title: 'Song 1');
       final song2 = songWith(id: 2, title: 'Song 2');
       final playlist = playlistWith(songIds: [song0.id, song1.id]);
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
         FakeSweyerPluginPlatform.instance.playlists = [playlist];
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
@@ -208,10 +212,11 @@ void main() {
       final song1 = songWith(id: 1, title: 'Song 1');
       final song2 = songWith(id: 2, title: 'Song 2');
       final playlist = playlistWith(songIds: [song0.id, song1.id]);
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
         FakeSweyerPluginPlatform.instance.playlists = [playlist];
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         HomeRouter.instance.goto(HomeRoutes.factory.content(playlist));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.add_rounded).first);
@@ -269,12 +274,13 @@ void main() {
       ('artists', ContentType.artist),
     ]) {
       testWidgets('allows selecting all and deselecting all on the $tabName tab', (WidgetTester tester) async {
-        await tester.runAppTest(initialization: () {
+        registerAppSetup(() {
           FakeSweyerPluginPlatform.instance.songs = [song0, song1, song2];
           FakeSweyerPluginPlatform.instance.albums = [album0, album1, album2];
           FakeSweyerPluginPlatform.instance.playlists = [playlist0, playlist1, playlist2];
           FakeSweyerPluginPlatform.instance.artists = [artist0, artist1, artist2];
-        }, () async {
+        });
+        await tester.runAppTest(() async {
           // Select tab
           await tester.tap(find.ancestor(of: find.byIcon(contentType.icon).first, matching: find.byType(TabCollapse)));
           await tester.pumpAndSettle();

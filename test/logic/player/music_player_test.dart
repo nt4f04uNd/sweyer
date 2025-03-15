@@ -4,6 +4,12 @@ import 'package:rxdart/rxdart.dart';
 import '../../test.dart';
 
 void main() {
+  setUp(() {
+    registerAppSetup(() {
+      MusicPlayer.handler?.playbackState.add(PlaybackState());
+    });
+  });
+
   test('Player can pause', () async {
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     await binding.runAppTestWithoutUi(() async {

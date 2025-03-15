@@ -7,10 +7,12 @@ import '../test.dart';
 void main() {
   group('home_route', () {
     late PermissionsChannelObserver permissionsObserver;
-    testAppGoldens('permissions_screen', initialization: () {
-      permissionsObserver = PermissionsChannelObserver(TestWidgetsFlutterBinding.ensureInitialized());
-      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
-      permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
+    testAppGoldens('permissions_screen', setUp: () {
+      registerAppSetup(() {
+        permissionsObserver = PermissionsChannelObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
+        permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
+      });
     }, (WidgetTester tester) async {
       await tester.tap(find.text(l10n.grant));
       await tester.pumpAndSettle();
@@ -18,14 +20,16 @@ void main() {
 
     testAppGoldens(
       'searching_screen',
-      postInitialization: () {
-        ContentControl.instance.dispose();
-        final fake = FakeContentControl();
-        fake.init();
-        // Fake ContentControl.init in a way to trigger the home screen rebuild
-        fake.initializing = true;
-        fake.stateNullable = ContentState();
-        fake.disposed.value = false;
+      setUp: () {
+        registerPostAppSetup((_) {
+          ContentControl.instance.dispose();
+          final fake = FakeContentControl();
+          fake.init();
+          // Fake ContentControl.init in a way to trigger the home screen rebuild
+          fake.initializing = true;
+          fake.stateNullable = ContentState();
+          fake.disposed.value = false;
+        });
       },
       (WidgetTester tester) async {
         expect(find.byType(Spinner), findsOneWidget);
@@ -33,8 +37,10 @@ void main() {
       customGoldenPump: (WidgetTester tester) => tester.pump(const Duration(milliseconds: 400)),
     );
 
-    testAppGoldens('no_songs_screen', initialization: () {
-      FakeSweyerPluginPlatform.instance.songs = [];
+    testAppGoldens('no_songs_screen', setUp: () {
+      registerAppSetup(() {
+        FakeSweyerPluginPlatform.instance.songs = [];
+      });
     }, (WidgetTester tester) async {
       await tester.pumpAndSettle();
     });
@@ -85,11 +91,13 @@ void main() {
     });
 
     final List<Song> songs = List.unmodifiable(List.generate(10, (index) => songWith(id: index)));
-    testAppGoldens('selection_deletion_dialog_songs_tab', initialization: () {
-      final fake = FakeDeviceInfoControl();
-      DeviceInfoControl.instance = fake;
-      fake.sdkInt = 29;
-      FakeSweyerPluginPlatform.instance.songs = songs.toList();
+    testAppGoldens('selection_deletion_dialog_songs_tab', setUp: () {
+      registerAppSetup(() {
+        final fake = FakeDeviceInfoControl();
+        DeviceInfoControl.instance = fake;
+        fake.sdkInt = 29;
+        FakeSweyerPluginPlatform.instance.songs = songs.toList();
+      });
     }, (WidgetTester tester) async {
       await tester.pumpAndSettle();
       await tester.longPress(find.byType(SongTile).first);
@@ -99,9 +107,11 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testAppGoldens('scroll_labels', initialization: () {
-      FakeSweyerPluginPlatform.instance.songs =
-          List.generate(26, (index) => songWith(id: index, title: String.fromCharCode('A'.codeUnitAt(0) + index)));
+    testAppGoldens('scroll_labels', setUp: () {
+      registerAppSetup(() {
+        FakeSweyerPluginPlatform.instance.songs =
+            List.generate(26, (index) => songWith(id: index, title: String.fromCharCode('A'.codeUnitAt(0) + index)));
+      });
     }, (WidgetTester tester) async {
       ContentControl.instance.sort(contentType: ContentType.song, sort: const SongSort(feature: SongSortFeature.title));
       await tester.pumpAndSettle();
@@ -118,15 +128,17 @@ void main() {
   });
 
   group('persistent_queue_route', () {
-    testAppGoldens('album_route', initialization: () {
-      FakeSweyerPluginPlatform.instance.songs = [
-        songWith(id: 0, track: null, title: 'Null Song 1'),
-        songWith(id: 5, track: null, title: 'Null Song 2'),
-        songWith(id: 3, track: '1', title: 'First Song'),
-        songWith(id: 2, track: '2', title: 'Second Song'),
-        songWith(id: 4, track: '3', title: 'Third Song'),
-        songWith(id: 1, track: '4', title: 'Fourth Song'),
-      ];
+    testAppGoldens('album_route', setUp: () {
+      registerAppSetup(() {
+        FakeSweyerPluginPlatform.instance.songs = [
+          songWith(id: 0, track: null, title: 'Null Song 1'),
+          songWith(id: 5, track: null, title: 'Null Song 2'),
+          songWith(id: 3, track: '1', title: 'First Song'),
+          songWith(id: 2, track: '2', title: 'Second Song'),
+          songWith(id: 4, track: '3', title: 'Third Song'),
+          songWith(id: 1, track: '4', title: 'Fourth Song'),
+        ];
+      });
     }, (WidgetTester tester) async {
       HomeRouter.instance.goto(HomeRoutes.factory.content(albumWith()));
       await tester.pumpAndSettle();
@@ -260,13 +272,15 @@ void main() {
     final localFavoriteButNotInMediaStoreSong = songWith(id: 2, title: 'Local only favorite');
     final mediaStoreFavoriteButNotLocalSong =
         songWith(id: 3, isFavoriteInMediaStore: true, title: 'MediaStore only favorite');
-    testAppGoldens('general_settings_favorite_conflict_dialog', initialization: () {
-      FakeSweyerPluginPlatform.instance.songs = [
-        songWith(),
-        localFavoriteAndMediaStoreSong,
-        localFavoriteButNotInMediaStoreSong,
-        mediaStoreFavoriteButNotLocalSong,
-      ];
+    testAppGoldens('general_settings_favorite_conflict_dialog', setUp: () {
+      registerAppSetup(() {
+        FakeSweyerPluginPlatform.instance.songs = [
+          songWith(),
+          localFavoriteAndMediaStoreSong,
+          localFavoriteButNotInMediaStoreSong,
+          mediaStoreFavoriteButNotLocalSong,
+        ];
+      });
     }, (WidgetTester tester) async {
       await Settings.useMediaStoreForFavoriteSongs.set(false);
       await tester.pumpAndSettle(); // Wait for the listener in FavoriteControl to execute

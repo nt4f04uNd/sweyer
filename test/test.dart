@@ -88,8 +88,7 @@ const kScreenSize = Size(kScreenWidth, kScreenHeight);
 
 extension AppInitExtension on TestWidgetsFlutterBinding {
   /// Run a test that doesn't need the App UI using the following procedure:
-  ///  1. Initializes the application, optionally running [initialization] when all fakes are set up
-  ///     before the [ContentControl] is initialized.
+  ///  1. Initializes the application, optionally running callbacks registered with [registerException].
   ///  2. Runs the test from the [callback].
   ///  3. Stops and disposes the player and app state.
   ///  4. Flushes all micro-tasks and stream events.
@@ -97,11 +96,11 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
   /// This method is preferred for tests that don't interact with the user interface layer.
   /// See also [WidgetTesterExtension.runAppTest] for running a test which initializes the app
   /// and in addition loads the user interface for tests that want to test the user interface.
-  Future<void> runAppTestWithoutUi(FutureOr<void> Function() callback, {VoidCallback? initialization}) async {
+  Future<void> runAppTestWithoutUi(FutureOr<void> Function() callback) async {
     addTearDown(postTest);
     return runTest(
       () => withClock(clock, () async {
-        await _setUpAppTest(initialization);
+        await _setUpAppTest();
         try {
           await callback();
         } finally {
@@ -118,9 +117,10 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
 
   /// Sets the fake data providers and initializes the app state.
   ///
-  /// The [configureFakes] callback can be used to modify the fake data providers
+  /// Calls and clears all callbacks in [_setupRegistry] which can be used to modify the fake data providers
   /// before the controls will load it.
-  Future<void> _setUpAppTest([VoidCallback? configureFakes]) async {
+  /// Also calls and clears all callbacks in [_postSetupRegistry] after everything is set up.
+  Future<void> _setUpAppTest() async {
     assert(inTest, "setUpAppTest must be called in a test, otherwise it doesn't use the correct AsyncZone");
     for (TestFlutterView view in platformDispatcher.views) {
       view.physicalSize = kScreenSize * kScreenPixelRatio;
@@ -205,7 +205,9 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     LicenseRegistry.reset();
     LicenseRegistry.addLicense(() => Stream.value(const FakeLicenseEntry()));
 
-    configureFakes?.call();
+    for (final callback in _setupRegistry) {
+      await callback.call();
+    }
 
     // Set up regular classes
     PlaybackControl.instance = PlaybackControl();
@@ -228,14 +230,31 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
       navigatorKey: AppRouter.instance.navigatorKey,
       routeObservers: [routeObserver, homeRouteObserver],
     );
+    for (final callback in _postSetupRegistry) {
+      await callback.call(this);
+    }
+    _setupRegistry.clear();
+    _postSetupRegistry.clear();
   }
+}
+
+final List<FutureOr<void> Function()> _setupRegistry = [];
+final List<FutureOr<void> Function(TestWidgetsFlutterBinding)> _postSetupRegistry = [];
+
+/// Register [setup] to run when it's possible to modify the fake data providers before the controls will load it.
+void registerAppSetup(FutureOr<void> Function() setup) {
+  _setupRegistry.add(setup);
+}
+
+/// Register [postInitialization] which is run after the initialization is complete
+/// but (for tests run with [WidgetTesterExtension.runAppTest]) before the UI is loaded.
+void registerPostAppSetup(FutureOr<void> Function(TestWidgetsFlutterBinding) postInitialization) {
+  _postSetupRegistry.add(postInitialization);
 }
 
 extension WidgetTesterExtension on WidgetTester {
   /// Run a test that uses the App UI using the following procedure:
-  ///  1. Initializes the application, optionally running [initialization] when all fakes are set up
-  ///     before the [ContentControl] is initialized.
-  ///  2. Optionally, runs [postInitialization] after [ContentControl] is initialized.
+  ///  1. Initializes the application, optionally running callbacks registered with [registerException].
   ///  3. Pumps the app.
   ///  4. Runs the test from the [callback].
   ///  5. Optionally, runs [goldenCaptureCallback].
@@ -247,13 +266,10 @@ extension WidgetTesterExtension on WidgetTester {
   Future<void> runAppTest(
     AsyncCallback callback, {
     AsyncCallback? goldenCaptureCallback,
-    VoidCallback? initialization,
-    VoidCallback? postInitialization,
   }) async {
     await withClock(binding.clock, () async {
-      await binding._setUpAppTest(initialization);
+      await binding._setUpAppTest();
       try {
-        postInitialization?.call();
         // App only supports vertical orientation, so switch tests to use it.
         await binding.setSurfaceSize(kScreenSize);
         await pumpWidget(ProviderScope(
@@ -352,8 +368,7 @@ void testAppGoldens(
   bool? skip,
   Object? tags = _defaultTagObject,
   Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
-  VoidCallback? initialization,
-  VoidCallback? postInitialization,
+  VoidCallback? setUp,
   CustomPump? customGoldenPump,
 }) {
   assert(playerInterfaceColorStylesToTest.isNotEmpty);
@@ -380,13 +395,12 @@ void testAppGoldens(
           if (nonDefaultPlayerInterfaceColorStyle) {
             _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
           }
+          registerPostAppSetup((_) {
+            ThemeControl.instance.setThemeLightMode(lightTheme);
+            Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
+          });
+          setUp?.call();
           return tester.runAppTest(
-            initialization: () => initialization?.call(),
-            postInitialization: () {
-              ThemeControl.instance.setThemeLightMode(lightTheme);
-              Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
-              postInitialization?.call();
-            },
             () => test(tester),
             goldenCaptureCallback: () {
               final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');

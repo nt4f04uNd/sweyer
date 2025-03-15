@@ -14,11 +14,12 @@ void main() {
     testWidgets('shows if no permissions were granted and pressing the button requests permissions',
         (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         expect(permissionsObserver.checkedPermissions, [Permission.storage],
             reason: 'Should always check the storage and audio permission on startup');
         expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
@@ -40,12 +41,13 @@ void main() {
     /// and don't want to show the permission request screen.
     testWidgets('does not show when removed storage permission is permanently denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeDeviceInfoControl.instance.sdkInt = 33;
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.granted);
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         expect(Permissions.instance.granted, true);
         expect(permissionsObserver.checkedPermissions, [Permission.audio]);
         expect(find.byType(Home), findsOneWidget, reason: 'Audio permissions was already granted');
@@ -57,12 +59,13 @@ void main() {
     /// and don't want to show the permission request screen.
     testWidgets('does not show when non-existent audio permission is permanently denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         FakeDeviceInfoControl.instance.sdkInt = 32;
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         expect(Permissions.instance.granted, true);
         expect(permissionsObserver.checkedPermissions, [Permission.storage]);
         expect(find.byType(Home), findsOneWidget, reason: 'Storage permissions was already granted');
@@ -71,11 +74,12 @@ void main() {
 
     testWidgets('shows toast and opens settings when permissions are denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
-      await tester.runAppTest(initialization: () {
+      registerAppSetup(() {
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
-      }, () async {
+      });
+      await tester.runAppTest(() async {
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
         permissionsObserver.isOpeningSettingsSuccessful = false;
@@ -99,7 +103,7 @@ void main() {
 
   testWidgets('searching screen - shows when permissions are granted and searching for tracks',
       (WidgetTester tester) async {
-    await tester.runAppTest(postInitialization: () {
+    registerPostAppSetup((_) {
       // Use fake
       ContentControl.instance.dispose();
       final fake = FakeContentControl();
@@ -116,7 +120,8 @@ void main() {
       fake.disposed.value = false;
 
       expect(ContentControl.instance.initializing, true);
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       // Expect appropriate ui
       expect(find.text(l10n.searchingForTracks), findsOneWidget);
       expect(find.byType(Spinner), findsOneWidget);
@@ -138,9 +143,10 @@ void main() {
 
   testWidgets('no songs screen - shows when the library is empty and pressing the button performs refetching',
       (WidgetTester tester) async {
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = [];
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
       expect(find.text(l10n.noMusic), findsOneWidget);
 
@@ -216,11 +222,12 @@ void main() {
 
   testWidgets('Allows changing settings when uninitialized and no permissions were granted',
       (WidgetTester tester) async {
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       PermissionsChannelObserver permissionsObserver = PermissionsChannelObserver(tester.binding);
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
       permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       // Go to the settings
       await tester.tap(find.byType(SettingsButton));
       await tester.pumpAndSettle();

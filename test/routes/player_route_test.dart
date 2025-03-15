@@ -127,9 +127,10 @@ void main() {
       songWith(id: 1),
       songWith(id: 2),
     ]);
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = songs.toList();
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
       // Expand the route
       await tester.expandPlayerRoute();
@@ -150,9 +151,10 @@ void main() {
       songWith(id: 1),
       songWith(id: 2),
     ]);
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = songs.toList();
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
       // Expand the route
       await tester.expandPlayerRoute();

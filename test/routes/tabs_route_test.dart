@@ -73,9 +73,10 @@ void main() {
       songWith(id: 1, dateModified: 1),
       songWith(id: 2, dateModified: 0),
     ]);
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = songs.toList();
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
 
       // Change sort order
@@ -91,9 +92,10 @@ void main() {
       songWith(id: 1, dateModified: 1, title: 'b'),
       songWith(id: 2, dateModified: 0, title: 'a'),
     ]);
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = songs.toList();
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
 
       // Change sort feature
@@ -111,9 +113,10 @@ void main() {
       songWith(id: 1),
       songWith(id: 2),
     ]);
-    await tester.runAppTest(initialization: () {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = songs.toList();
-    }, () async {
+    });
+    await tester.runAppTest(() async {
       tester.expectSongTiles(songs);
       expect(find.text(l10n.tracksPlural(3)), findsOneWidget);
 
