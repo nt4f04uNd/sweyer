@@ -105,7 +105,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
         try {
           await callback();
         } finally {
-          await MusicPlayer.instance.stop();
+          await MusicPlayer.instanceIfInitialized?.stop();
           DeviceInfoControl.instance.dispose();
           ContentControl.instance.dispose();
           // Wait for any asynchronous events and stream callbacks to finish.
@@ -268,7 +268,7 @@ extension WidgetTesterExtension on WidgetTester {
         await goldenCaptureCallback?.call();
       } finally {
         // Don't leak app state between tests.
-        await MusicPlayer.instance.stop();
+        await MusicPlayer.instanceIfInitialized?.stop();
         DeviceInfoControl.instance.dispose();
         ContentControl.instance.dispose();
         // Un-pump, in case we have any real animations running,
