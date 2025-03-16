@@ -190,7 +190,7 @@ void main() {
       'player_route',
       (WidgetTester tester) async {
         await tester.tap(find.byType(SongTile));
-        await tester.pump(); // Flush micro-tasks so to flush handling of the tap.
+        await tester.pump(); // Flush micro-tasks to flush the handling of the tap.
         // Stop the playback to avoid animations when taking the golden screenshot.
         await MusicPlayer.handler!.stop();
         await tester.pumpAndSettle(const Duration(seconds: 1));

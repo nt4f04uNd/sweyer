@@ -105,9 +105,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
         try {
           await callback();
         } finally {
-          await MusicPlayer.instanceIfInitialized?.stop();
-          DeviceInfoControl.instance.dispose();
-          ContentControl.instance.dispose();
+          await _teardownAppTest();
           // Wait for any asynchronous events and stream callbacks to finish.
           await pump(const Duration(seconds: 1));
         }
@@ -237,6 +235,13 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     _setupRegistry.clear();
     _postSetupRegistry.clear();
   }
+
+  /// Cleans up and disposes all relevant app state after an app test.
+  Future<void> _teardownAppTest() async {
+    await MusicPlayer.instanceIfInitialized?.stop();
+    DeviceInfoControl.instance.dispose();
+    ContentControl.instance.dispose();
+  }
 }
 
 final List<FutureOr<void> Function()> _setupRegistry = [];
@@ -285,10 +290,7 @@ extension WidgetTesterExtension on WidgetTester {
         await callback();
         await goldenCaptureCallback?.call();
       } finally {
-        // Don't leak app state between tests.
-        await MusicPlayer.instanceIfInitialized?.stop();
-        DeviceInfoControl.instance.dispose();
-        ContentControl.instance.dispose();
+        await binding._teardownAppTest();
         // Un-pump, in case we have any real animations running,
         // so the pumpAndSettle at the end doesn't hang forever.
         await pumpWidget(const SizedBox());
