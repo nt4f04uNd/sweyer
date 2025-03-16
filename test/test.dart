@@ -88,7 +88,8 @@ const kScreenSize = Size(kScreenWidth, kScreenHeight);
 
 extension AppInitExtension on TestWidgetsFlutterBinding {
   /// Run a test that doesn't need the App UI using the following procedure:
-  ///  1. Initializes the application, optionally running callbacks registered with [registerException].
+  ///  1. Initializes the application, optionally running callbacks
+  ///     registered with [registerAppSetup] and [registerPostAppSetup].
   ///  2. Runs the test from the [callback].
   ///  3. Stops and disposes the player and app state.
   ///  4. Flushes all micro-tasks and stream events.
@@ -254,7 +255,8 @@ void registerPostAppSetup(FutureOr<void> Function(TestWidgetsFlutterBinding) pos
 
 extension WidgetTesterExtension on WidgetTester {
   /// Run a test that uses the App UI using the following procedure:
-  ///  1. Initializes the application, optionally running callbacks registered with [registerException].
+  ///  1. Initializes the application, optionally running callbacks
+  ///     registered with [registerAppSetup] and [registerPostAppSetup].
   ///  3. Pumps the app.
   ///  4. Runs the test from the [callback].
   ///  5. Optionally, runs [goldenCaptureCallback].
