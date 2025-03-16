@@ -134,7 +134,7 @@ void main() {
     late AppWidgetChannelObserver appWidgetChannelObserver;
     // Wait for and discard widget events from previous tests, since we don't wait for all async actions to complete.
     await tester.runAsync(() => tester.pump());
-    await setUpAppTest(() {
+    registerAppSetup(() {
       appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
     });
     await tester.runAppTest(() async {
