@@ -90,13 +90,12 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    final List<Song> songs = List.unmodifiable(List.generate(10, (index) => songWith(id: index)));
     testAppGoldens('selection_deletion_dialog_songs_tab', setUp: () {
       registerAppSetup(() {
         final fake = FakeDeviceInfoControl();
         DeviceInfoControl.instance = fake;
         fake.sdkInt = 29;
-        FakeSweyerPluginPlatform.instance.songs = songs.toList();
+        FakeSweyerPluginPlatform.instance.songs = List.unmodifiable(List.generate(10, (index) => songWith(id: index)));
       });
     }, (WidgetTester tester) async {
       await tester.pumpAndSettle();
