@@ -129,21 +129,44 @@ void main() {
       await tester.tap(find.text(l10n.sortFeature(ContentType.song, SongSortFeature.title)));
       await tester.pumpAndSettle();
 
-      // Drag at the center of the screen
-      await tester.timedDrag(
-        find.byType(ContentListView),
-        const Offset(0, -100),
-        Durations.medium2,
-      );
+      // Drag at the center of the screen should show no labels
+      await tester.timedDrag(find.byType(ContentListView), const Offset(0, -100), Durations.medium2);
       expect(find.byType(NFScrollLabel), findsNothing);
 
-      // Drag in the scrollbar area
+      // Drag in the scrollbar area should show a label until the drag is finished
       await tester.timedDragFrom(
-        tester.getTopRight(find.byType(ContentListView)) - const Offset(10, 0) + const Offset(0, 10),
+        tester.getTopRight(find.byType(ContentListView)) + const Offset(-47, 10),
         const Offset(0, -100),
         Durations.medium2,
       );
       expect(find.byType(NFScrollLabel), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.byType(NFScrollLabel), findsNothing);
+
+      // Drag on the scrollbar should show a label until the drag is finished
+      await tester.fling(
+          find.byType(ContentListView), const Offset(0, -100), 1.0); // Fling to make the scrollbar visible
+      await tester.timedDragFrom(tester.getTopRight(find.byType(ContentListView)) + const Offset(-2, 10),
+          const Offset(-100, -100), Durations.medium2);
+      expect(find.byType(NFScrollLabel), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.byType(NFScrollLabel), findsNothing);
+
+      // Drag in the scrollbar area should show a label until the drag is finished,
+      // but label should disappear when the drag goes out of the scrollbar area nd reappear if it goes back in.
+      final drag = await tester.startGesture(tester.getTopRight(find.byType(ContentListView)) + const Offset(-47, 10));
+      await drag.moveBy(const Offset(0, -100));
+      await tester.pumpAndSettle();
+      expect(find.byType(NFScrollLabel), findsOneWidget);
+      await drag.moveBy(const Offset(-100, 0));
+      await tester.pumpAndSettle();
+      expect(find.byType(NFScrollLabel), findsNothing);
+      await drag.moveBy(const Offset(100, 0));
+      await tester.pumpAndSettle();
+      expect(find.byType(NFScrollLabel), findsOneWidget);
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(find.byType(NFScrollLabel), findsNothing);
     });
   });
 
