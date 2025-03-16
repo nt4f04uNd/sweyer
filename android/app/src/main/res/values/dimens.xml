@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- The width and height of a button in the music player home-screen widget. -->
     <dimen name="musicPlayerWidgetButtonSize">48dp</dimen>
+    <!--
+    The rounded corner radius of the image in the background of the home-screen widget.
+    This value is overridden on API 31 and higher by the launcher.
+    -->
     <dimen name="appWidgetBackgroundRadius">16dp</dimen>
+    <!--
+    The rounded corner radius of the button area in the home-screen widget.
+    This value is overridden on API 31 and higher by the launcher.
+    -->
     <dimen name="appWidgetInnerRadius">8dp</dimen>
 </resources>
