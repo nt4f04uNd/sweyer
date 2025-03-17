@@ -119,7 +119,7 @@ void main() {
       ),
     );
 
-    await setUpAppTest(() {
+    registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = songs.toList();
     });
     await tester.runAppTest(() async {
