@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sweyer/constants.dart';
 import 'package:sweyer/routes/settings_route/theme_settings.dart';
 
+import '../observer/app_widget.dart';
 import '../observer/observer.dart';
 import '../test.dart';
 
@@ -130,6 +131,10 @@ void main() {
 
   testWidgets('home screen - shows when permissions are granted and not searching for tracks',
       (WidgetTester tester) async {
+    late AppWidgetChannelObserver appWidgetChannelObserver;
+    registerAppSetup(() {
+      appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
+    });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
       expect(find.byType(Home), findsOneWidget);
@@ -138,6 +143,10 @@ void main() {
         tester.getRect(find.byType(App)).height,
         reason: 'Player route must be offscreen',
       );
+      // Wait for widget events from the app startup of this event to reach the app widget channel observer.
+      await tester.idle();
+      expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songWith().contentUri), ("playing", false)]);
+      expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
     });
   });
 
