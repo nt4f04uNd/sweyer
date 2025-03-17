@@ -111,18 +111,20 @@ void main() {
         ),
       ];
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawAlbums = validAlbums.map((element) => element.$1).toList();
       });
-      expect(
-        ContentControl.instance.state.albums.values
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((album) => album.toMap()),
-        validAlbums.map((element) => element.$2.toMap()),
-        reason: "Should be able to correctly parse all valid albums",
-      );
-      expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any valid albums");
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.albums.values
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((album) => album.toMap()),
+          validAlbums.map((element) => element.$2.toMap()),
+          reason: "Should be able to correctly parse all valid albums",
+        );
+        expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any valid albums");
+      });
     });
 
     test('Handles valid artists', () async {
@@ -138,18 +140,20 @@ void main() {
         ),
       ];
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawArtists = validArtists.map((element) => element.$1).toList();
       });
-      expect(
-        ContentControl.instance.state.artists
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((artist) => artist.toMap()),
-        validArtists.map((element) => element.$2.toMap()),
-        reason: "Should be able to correctly parse all valid artists",
-      );
-      expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any valid artists");
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.artists
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((artist) => artist.toMap()),
+          validArtists.map((element) => element.$2.toMap()),
+          reason: "Should be able to correctly parse all valid artists",
+        );
+        expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any valid artists");
+      });
     });
 
     test('Handles valid playlists', () async {
@@ -176,18 +180,20 @@ void main() {
         ),
       ];
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawPlaylists = validPlaylists.map((element) => element.$1).toList();
       });
-      expect(
-        ContentControl.instance.state.playlists
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((playlist) => playlist.toMap()),
-        validPlaylists.map((element) => element.$2.toMap()),
-        reason: "Should be able to correctly parse all valid playlists",
-      );
-      expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any playlists");
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.playlists
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((playlist) => playlist.toMap()),
+          validPlaylists.map((element) => element.$2.toMap()),
+          reason: "Should be able to correctly parse all valid playlists",
+        );
+        expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any playlists");
+      });
     });
 
     test('Handles valid songs', () async {
@@ -245,18 +251,20 @@ void main() {
         ),
       ];
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawSongs = validSongs.map((element) => element.$1).toList();
       });
-      expect(
-        ContentControl.instance.state.allSongs.songs
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((song) => song.toMap()),
-        validSongs.map((element) => element.$2.toMap()),
-        reason: "Should be able to correctly parse all valid songs",
-      );
-      expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any valid songs");
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.allSongs.songs
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((song) => song.toMap()),
+          validSongs.map((element) => element.$2.toMap()),
+          reason: "Should be able to correctly parse all valid songs",
+        );
+        expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any valid songs");
+      });
     });
   });
 
@@ -269,22 +277,24 @@ void main() {
         ...validAlbum.createVariantsWhereElementsHaveInvalidTypes(propertiesThatCanBeMissing),
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawAlbums = invalidAlbums;
       });
-      expect(
-        ContentControl.instance.state.albums.values
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((album) => album.toMap()),
-        [],
-        reason: "Should not accept any invalid albums",
-      );
-      expect(
-        crashlyticsObserver.nonFatalErrorCount,
-        invalidAlbums.length,
-        reason: "Should reject invalid albums and report non-fatal errors",
-      );
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.albums.values
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((album) => album.toMap()),
+          [],
+          reason: "Should not accept any invalid albums",
+        );
+        expect(
+          crashlyticsObserver.nonFatalErrorCount,
+          invalidAlbums.length,
+          reason: "Should reject invalid albums and report non-fatal errors",
+        );
+      });
     });
 
     test('Handles invalid or incomplete artists', () async {
@@ -295,22 +305,24 @@ void main() {
         ...validArtist.createVariantsWhereElementsHaveInvalidTypes(propertiesThatCanBeMissing),
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawArtists = invalidArtists;
       });
-      expect(
-        ContentControl.instance.state.artists
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((artist) => artist.toMap()),
-        [],
-        reason: "Should not accept any invalid artists",
-      );
-      expect(
-        crashlyticsObserver.nonFatalErrorCount,
-        invalidArtists.length,
-        reason: "Should reject invalid artists and report non-fatal errors",
-      );
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.artists
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((artist) => artist.toMap()),
+          [],
+          reason: "Should not accept any invalid artists",
+        );
+        expect(
+          crashlyticsObserver.nonFatalErrorCount,
+          invalidArtists.length,
+          reason: "Should reject invalid artists and report non-fatal errors",
+        );
+      });
     });
 
     test('Handles invalid or incomplete playlists', () async {
@@ -323,22 +335,24 @@ void main() {
             .whereNot((map) => map['songIds'] == []),
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawPlaylists = invalidPlaylists;
       });
-      expect(
-        ContentControl.instance.state.playlists
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((playlist) => playlist.toMap()),
-        [],
-        reason: "Should not accept any invalid playlists",
-      );
-      expect(
-        crashlyticsObserver.nonFatalErrorCount,
-        invalidPlaylists.length,
-        reason: "Should reject invalid playlists and report non-fatal errors",
-      );
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          ContentControl.instance.state.playlists
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((playlist) => playlist.toMap()),
+          [],
+          reason: "Should not accept any invalid playlists",
+        );
+        expect(
+          crashlyticsObserver.nonFatalErrorCount,
+          invalidPlaylists.length,
+          reason: "Should reject invalid playlists and report non-fatal errors",
+        );
+      });
     });
 
     test('Handles invalid or incomplete songs', () async {
@@ -361,23 +375,25 @@ void main() {
         ...validSong.createVariantsWhereElementsHaveInvalidTypes(propertiesThatCanBeMissing),
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
-      await setUpAppTest(() {
+      registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.rawSongs = invalidSongs;
       });
-      expect(
-        // The state is disposed if there is not songs, so use an empty list in that case.
-        (ContentControl.instance.stateNullable?.allSongs.songs ?? [])
-            .sorted((item1, item2) => item1.id.compareTo(item2.id))
-            .map((song) => song.toMap()),
-        [],
-        reason: "Should not accept any invalid songs",
-      );
-      expect(
-        crashlyticsObserver.nonFatalErrorCount,
-        invalidSongs.length,
-        reason: "Should reject invalid songs and report non-fatal errors",
-      );
+      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+        expect(
+          // The state is disposed if there is not songs, so use an empty list in that case.
+          (ContentControl.instance.stateNullable?.allSongs.songs ?? [])
+              .sorted((item1, item2) => item1.id.compareTo(item2.id))
+              .map((song) => song.toMap()),
+          [],
+          reason: "Should not accept any invalid songs",
+        );
+        expect(
+          crashlyticsObserver.nonFatalErrorCount,
+          invalidSongs.length,
+          reason: "Should reject invalid songs and report non-fatal errors",
+        );
+      });
     });
   });
 }
