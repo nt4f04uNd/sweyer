@@ -151,6 +151,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     JustAudioPlatform.instance = MockJustAudio(this);
     PackageInfoPlatform.instance = MethodChannelPackageInfo();
     PlayerInterfaceColorStyleControl.instance = PlayerInterfaceColorStyleControl();
+    await FakeFirebaseApp.install(this);
     defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'),
         (MethodCall methodCall) async {
       return {
