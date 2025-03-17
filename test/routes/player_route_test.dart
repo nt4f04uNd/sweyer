@@ -133,6 +133,7 @@ void main() {
     });
     await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
+      await tester.idle();
       final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
       // Expand the route
       await tester.expandPlayerRoute();
@@ -141,12 +142,14 @@ void main() {
       expect(appWidgetChannelObserver.saveWidgetDataLog, []);
       expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
-      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_previous_rounded)));
+      await tester.tap(find.byIcon(Icons.skip_previous_rounded));
+      await tester.idle();
       expect(PlaybackControl.instance.currentSong, songs.first);
       expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songs.first.contentUri), ("playing", false)]);
       expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
-      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_previous_rounded)));
+      await tester.tap(find.byIcon(Icons.skip_previous_rounded));
+      await tester.idle();
       expect(PlaybackControl.instance.currentSong, songs.last);
       expect(appWidgetChannelObserver.saveWidgetDataLog,
           [("song", songs.first.contentUri), ("playing", false), ("song", songs.last.contentUri), ("playing", false)]);
@@ -166,6 +169,7 @@ void main() {
     });
     await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
+      await tester.idle();
       final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
       // Expand the route
       await tester.expandPlayerRoute();
@@ -174,12 +178,14 @@ void main() {
       expect(appWidgetChannelObserver.saveWidgetDataLog, []);
       expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
-      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_next_rounded)));
+      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.idle();
       expect(PlaybackControl.instance.currentSong, songs.last);
       expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songs.last.contentUri), ("playing", false)]);
       expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
-      await tester.runAsync(() => tester.tap(find.byIcon(Icons.skip_next_rounded)));
+      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.idle();
       expect(PlaybackControl.instance.currentSong, songs.first);
       expect(appWidgetChannelObserver.saveWidgetDataLog,
           [("song", songs.last.contentUri), ("playing", false), ("song", songs.first.contentUri), ("playing", false)]);
@@ -190,7 +196,7 @@ void main() {
 
   testWidgets('play/pause button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
-      await tester.runAsync(() => tester.pump()); // Wait for widget events from start to process.
+      await tester.idle(); // Wait for widget events from start to process.
       final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
       // Expand the route
       await tester.expandPlayerRoute();
@@ -205,13 +211,15 @@ void main() {
       expect(appWidgetChannelObserver.saveWidgetDataLog, []);
       expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
-      await tester.runAsync(() => tester.tap(button));
+      await tester.tap(button);
+      await tester.idle();
       expect(MusicPlayer.instance.playing, true);
       expect(MusicPlayer.handler!.running, true);
       expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songWith().contentUri), ("playing", true)]);
       expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
-      await tester.runAsync(() => tester.tap(button));
+      await tester.tap(button);
+      await tester.idle();
       expect(MusicPlayer.instance.playing, false);
       expect(MusicPlayer.handler!.running, true, reason: 'Handler should only stop when stopped, not when paused');
       expect(appWidgetChannelObserver.saveWidgetDataLog,

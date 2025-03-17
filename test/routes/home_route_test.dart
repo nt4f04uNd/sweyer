@@ -132,8 +132,6 @@ void main() {
   testWidgets('home screen - shows when permissions are granted and not searching for tracks',
       (WidgetTester tester) async {
     late AppWidgetChannelObserver appWidgetChannelObserver;
-    // Wait for and discard widget events from previous tests, since we don't wait for all async actions to complete.
-    await tester.runAsync(() => tester.pump());
     registerAppSetup(() {
       appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
     });
@@ -146,7 +144,7 @@ void main() {
         reason: 'Player route must be offscreen',
       );
       // Wait for widget events from the app startup of this event to reach the app widget channel observer.
-      await tester.runAsync(() => tester.pump());
+      await tester.idle();
       expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songWith().contentUri), ("playing", false)]);
       expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
     });
