@@ -91,7 +91,6 @@ class AppScrollbar extends StatefulWidget {
 class _AppScrollbarState extends State<AppScrollbar> {
   /// Whether to show content label indicators while scrolling.
   bool showScrollLabels = false;
-  Offset? currentDragPosition;
 
   /// Fixes Flutter assertion about duplicate key in the tree when touching
   /// the scrollbar too fast.
@@ -137,6 +136,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
         removeTop: true,
         child: Listener(
           onPointerDown: (event) => maybeShowLabels(event.position),
+          onPointerMove: (event) => maybeShowLabels(event.position),
           onPointerUp: (event) => hideLabels(),
           child: Stack(
             children: [
