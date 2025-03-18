@@ -18,6 +18,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 
@@ -187,6 +188,8 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
       }
       return null;
     });
+    sqfliteFfiInit();
+    databaseFactoryOrNull = databaseFactoryFfiNoIsolate;
     defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('com.tekartik.sqflite'),
         (MethodCall methodCall) async {
       if (methodCall.method == 'getDatabasesPath') {

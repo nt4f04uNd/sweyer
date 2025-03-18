@@ -92,8 +92,33 @@ class _AppScrollbarState extends State<AppScrollbar> {
   /// Whether to show content label indicators while scrolling.
   bool showScrollLabels = false;
 
+  /// Fixes Flutter assertion about duplicate key in the tree when touching
+  /// the scrollbar too fast.
+  var animationChildKey = UniqueKey();
+
   /// The horizontal offset from the scrollbar side of the window in which a drag should show content labels.
   static const scrollLabelDragAreaWidth = 48;
+
+  void maybeShowLabels(Offset? dragPosition) {
+    final windowSize = context.size;
+    final shouldShowScrollLabels = windowSize != null &&
+        dragPosition != null &&
+        (Directionality.of(context) == TextDirection.rtl
+            ? (dragPosition.dx < scrollLabelDragAreaWidth && dragPosition.dx >= 0)
+            : (dragPosition.dx > windowSize.width - scrollLabelDragAreaWidth && dragPosition.dx <= windowSize.width));
+    if (shouldShowScrollLabels != showScrollLabels) {
+      setState(() {
+        showScrollLabels = shouldShowScrollLabels;
+        animationChildKey = UniqueKey();
+      });
+    }
+  }
+
+  void hideLabels() {
+    setState(() {
+      showScrollLabels = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,35 +134,10 @@ class _AppScrollbarState extends State<AppScrollbar> {
       child: MediaQuery.removePadding(
         context: context,
         removeTop: true,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (widget.labelBuilder == null) {
-              return false;
-            }
-            final Offset? dragPosition;
-            if (notification is ScrollStartNotification) {
-              dragPosition = notification.dragDetails?.localPosition;
-            } else if (notification is ScrollUpdateNotification) {
-              dragPosition = notification.dragDetails?.localPosition;
-            } else if (notification is OverscrollNotification) {
-              dragPosition = notification.dragDetails?.localPosition;
-            } else {
-              dragPosition = null;
-            }
-            final windowSize = context.size;
-            final shouldShowScrollLabels = windowSize != null &&
-                dragPosition != null &&
-                (Directionality.of(context) == TextDirection.rtl
-                    ? (dragPosition.dx < scrollLabelDragAreaWidth && dragPosition.dx >= 0)
-                    : (dragPosition.dx > windowSize.width - scrollLabelDragAreaWidth &&
-                        dragPosition.dx <= windowSize.width));
-            if (shouldShowScrollLabels != showScrollLabels) {
-              setState(() {
-                showScrollLabels = shouldShowScrollLabels;
-              });
-            }
-            return false;
-          },
+        child: Listener(
+          onPointerDown: (event) => maybeShowLabels(event.position),
+          onPointerMove: (event) => maybeShowLabels(event.position),
+          onPointerUp: (event) => hideLabels(),
           child: Stack(
             children: [
               Scrollbar(
@@ -161,6 +161,7 @@ class _AppScrollbarState extends State<AppScrollbar> {
                   child: !showScrollLabels
                       ? null
                       : Center(
+                          key: animationChildKey,
                           child: AnimatedBuilder(
                             animation: controller,
                             builder: (context, child) => widget.labelBuilder!(context),
