@@ -44,6 +44,15 @@ void main() {
     }, (WidgetTester tester) async {
       await tester.pumpAndSettle();
     });
+
+    testAppGoldens('init_error_screen', setUp: () {
+      registerAppSetup(() {
+        CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized(), throwFatalErrors: false);
+        FakeSweyerPluginPlatform.instance.songsFactory = () => throw TypeError();
+      });
+    }, (WidgetTester tester) async {
+      await tester.pumpAndSettle();
+    });
   });
 
   group('tabs_route', () {
