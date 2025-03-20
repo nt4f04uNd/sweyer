@@ -259,6 +259,7 @@ class ContentControl extends Control {
       } catch (error, stack) {
         _failedToInitialize = true;
         FirebaseCrashlytics.instance.recordError(error, stack, reason: 'initializing ContentControl', fatal: true);
+        dispose();
       }
       _initializeCompleter = null;
     }

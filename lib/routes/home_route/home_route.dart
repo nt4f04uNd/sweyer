@@ -47,6 +47,9 @@ class _InitialRouteState extends State<InitialRoute> {
             builder: (context, value, child) {
               if (ContentControl.instance.stateNullable == null) {
                 _animateNotMainUi();
+                if (ContentControl.instance.failedToInitialize) {
+                  return const _InitializationFailedScreen();
+                }
                 return const _SongsEmptyScreen();
               } else {
                 return StreamBuilder(
@@ -59,10 +62,6 @@ class _InitialRouteState extends State<InitialRoute> {
                     if (ContentControl.instance.initializing) {
                       _animateNotMainUi();
                       return const _SearchingSongsScreen();
-                    }
-                    if (ContentControl.instance.failedToInitialize) {
-                      _animateNotMainUi();
-                      return const _InitializationFailedScreen();
                     }
                     if (ContentControl.instance.state.allSongs.isEmpty) {
                       _animateNotMainUi();
