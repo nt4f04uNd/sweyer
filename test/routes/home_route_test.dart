@@ -131,15 +131,28 @@ void main() {
 
   testWidgets('error screen - shows when searching for tracks fails', (WidgetTester tester) async {
     late CrashlyticsObserver crashlyticsObserver;
+    var songsFactoryCallCount = 0;
     registerAppSetup(() {
       crashlyticsObserver = CrashlyticsObserver(tester.binding, throwFatalErrors: false);
-      FakeSweyerPluginPlatform.instance.songsFactory = () => throw TypeError();
+      FakeSweyerPluginPlatform.instance.songsFactory = () {
+        songsFactoryCallCount += 1;
+        throw TypeError();
+      };
     });
     await tester.runAppTest(() async {
-      // Expect appropriate ui
+      // Expect to find the error screen
+      await tester.pumpAndSettle();
       expect(find.text(l10n.failedToInitialize), findsOneWidget);
-      expect(find.ancestor(of: find.text(l10n.retry), matching: find.byType(AppButton)), findsOneWidget);
+      expect(songsFactoryCallCount, 1);
       expect(crashlyticsObserver.fatalErrorCount, 1);
+      expect(find.ancestor(of: find.text(l10n.retry), matching: find.byType(AppButton)), findsOneWidget);
+
+      // Expect to find the error screen again after a retry
+      await tester.tap(find.text(l10n.retry));
+      await tester.pumpAndSettle();
+      expect(songsFactoryCallCount, 2);
+      expect(crashlyticsObserver.fatalErrorCount, 2);
+      expect(find.ancestor(of: find.text(l10n.retry), matching: find.byType(AppButton)), findsOneWidget);
     });
   });
 
