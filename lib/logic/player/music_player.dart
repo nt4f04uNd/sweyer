@@ -347,7 +347,9 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @override
   Future<void> stop() async {
     running = false;
-    await player.stop();
+    if (!_disposed) {
+      await player.stop();
+    }
     await super.stop();
   }
 
