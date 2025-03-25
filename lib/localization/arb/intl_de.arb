@@ -26,7 +26,9 @@
   "tracksPlural": "{count, plural, =1{{count} Lied} other{{count} Lieder}}",
   "@tracksPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "album": "Album",
@@ -44,7 +46,9 @@
   "albumsPlural": "{count, plural, =1{{count} Album} other{{count} Alben}}",
   "@albumsPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "playlist": "Wiedergabeliste",
@@ -62,7 +66,9 @@
   "playlistsPlural": "{count, plural, =1{{count} Wiedergabeliste} other{{count} Wiedergabelisten}}",
   "@playlistsPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "artist": "Künstler",
@@ -80,7 +86,9 @@
   "artistsPlural": "{count, plural, other{{count} Künstler}}",
   "@artistsPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "albumNotFound": "Album nicht gefunden",
@@ -139,7 +147,9 @@
   "andNMore": "Und {count} weitere",
   "@andNMore": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     },
     "description": "Beispiel: 'Und 3 weitere'"
   },
@@ -153,13 +163,17 @@
   "removeTracks": "{count, plural, =1{Lied entfernen} other{{count} Lieder entfernen}}",
   "@removeTracks": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "removeTracksConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} entfernen möchtest?} other{Bist du sicher, dass du die ausgewählten Lieder entfernen möchtest?}}",
   "@removeTracksConfirmation": {
     "placeholders": {
-      "count": {},
+      "count": {
+        "type": "num"
+      },
       "title": {
         "type": "String?",
         "example": "Lied Name"
@@ -171,13 +185,17 @@
   "deleteTracks": "{count, plural, =1{Lied löschen} other{{count} Lieder löschen}}",
   "@deleteTracks": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "deleteTracksConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} löschen möchtest?} other{Bist du sicher, dass du die ausgewählten Lieder löschen möchtest?}}",
   "@deleteTracksConfirmation": {
     "placeholders": {
-      "count": {},
+      "count": {
+        "type": "num"
+      },
       "title": {
         "type": "String?",
         "example": "Liedname"
@@ -188,13 +206,17 @@
   "deletePlaylists": "{count, plural, =1{Wiedergabeliste löschen} other{{count} Wiedergabelisten löschen}}",
   "@deletePlaylists": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "deletePlaylistsConfirmation": "{count, plural, =1{Bist du sicher, dass du {title} löschen möchtest?} other{Bist du sicher, dass du die ausgewählten Wiedergabelisten löschen möchtest?}}",
   "@deletePlaylistsConfirmation": {
     "placeholders": {
-      "count": {},
+      "count": {
+        "type": "num"
+      },
       "title": {
         "type": "String?",
         "example": "Wiedergabelistenname"
@@ -271,7 +293,9 @@
   "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Du bist fast da, nur noch 1 Klick verbleibend...} other{Du bist fast da, nur noch {remainingClicks} Klicks verbleibend...}}",
   "@onThePathToDevModeClicksRemaining": {
     "placeholders": {
-      "remainingClicks": {}
+      "remainingClicks": {
+        "type": "num"
+      }
     },
     "description": "Wird angezeigt, wenn der Nutzer dabei ist, ein Entwickler zu werden, Part 2"
   },
