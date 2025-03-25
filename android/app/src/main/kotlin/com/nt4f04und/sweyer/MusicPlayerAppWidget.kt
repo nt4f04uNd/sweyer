@@ -160,7 +160,7 @@ class MusicPlayerAppWidget : HomeWidgetProvider() {
             matrix,
             true
         )
-        val imageRounded = Bitmap.createBitmap(size.width, size.height, bitmap.config)
+        val imageRounded = Bitmap.createBitmap(size.width, size.height, bitmap.config!!)
         val canvas = Canvas(imageRounded)
         val paint = Paint()
         paint.isAntiAlias = true
