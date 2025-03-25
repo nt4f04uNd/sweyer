@@ -89,8 +89,7 @@ extension on Completer {
   }
 }
 
-class MockAudioPlayer implements AudioPlayerPlatform {
-  final String _id;
+class MockAudioPlayer extends AudioPlayerPlatform {
   final eventController = StreamController<PlaybackEventMessage>();
   final AudioLoadConfigurationMessage? audioLoadConfiguration;
   AudioSourceMessage? _audioSource;
@@ -107,14 +106,11 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   final TestWidgetsFlutterBinding binding;
 
   MockAudioPlayer(InitRequest request, this.binding)
-      : _id = request.id,
-        audioLoadConfiguration = request.audioLoadConfiguration;
+      : audioLoadConfiguration = request.audioLoadConfiguration,
+        super(request.id);
 
   @override
   Stream<PlayerDataMessage> get playerDataMessageStream => StreamController<PlayerDataMessage>().stream;
-
-  @override
-  String get id => _id;
 
   @override
   Stream<PlaybackEventMessage> get playbackEventMessageStream => eventController.stream;
@@ -371,15 +367,8 @@ class MockAudioPlayer implements AudioPlayerPlatform {
   }
 
   @override
-  Future<SetAllowsExternalPlaybackResponse> setAllowsExternalPlayback(SetAllowsExternalPlaybackRequest request) {
-    // TODO: implement setAllowsExternalPlayback
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<SetWebCrossOriginResponse> setWebCrossOrigin(SetWebCrossOriginRequest request) {
-    // TODO: implement setWebCrossOrigin
-    throw UnimplementedError();
+  Future<SetAllowsExternalPlaybackResponse> setAllowsExternalPlayback(SetAllowsExternalPlaybackRequest request) async {
+    return SetAllowsExternalPlaybackResponse();
   }
 }
 
