@@ -72,6 +72,7 @@ dependencies:
       url: https://github.com/nt4f04uNd/audio_service
       ref: sweyer
       path: audio_service
+    version: 0.18.18
   nt4f04unds_widgets:
     # path: c:/dev/projects/native/nt4f04unds_widgets/
     # path: /Users/nt4f04und/dev/prj/nt4f04unds_widgets

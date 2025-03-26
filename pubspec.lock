@@ -70,10 +70,10 @@ packages:
     description:
       path: audio_service
       ref: sweyer
-      resolved-ref: "1e92412fcd76c43fc88c9b1157b855d097b7c9b3"
+      resolved-ref: "469a0ba9bd7d1722af18f0e40cca74a728d6532d"
       url: "https://github.com/nt4f04uNd/audio_service"
     source: git
-    version: "0.16.2"
+    version: "0.18.18"
   audio_service_platform_interface:
     dependency: transitive
     description:
