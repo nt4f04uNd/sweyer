@@ -25,6 +25,9 @@ class FavoriteLogEntry {
   int get hashCode => Object.hash(Object.hashAllUnordered(songs), setFavorite);
 }
 
+/// A function that produces raw content data.
+typedef RawContentFactory = Iterable<Map<String, dynamic>> Function();
+
 class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
   FakeSweyerPluginPlatform(TestWidgetsFlutterBinding binding) {
     instance = this;
@@ -39,13 +42,13 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
   static late FakeSweyerPluginPlatform instance;
 
   set songs(List<Song> value) => songsFactory = () => value.map((song) => song.toMap());
-  Iterable<Map<String, dynamic>> Function() songsFactory = () => [songWith().toMap()];
+  RawContentFactory songsFactory = () => [songWith().toMap()];
   set albums(List<Album> value) => albumsFactory = () => value.map((album) => album.toMap());
-  Iterable<Map<String, dynamic>> Function() albumsFactory = () => [albumWith().toMap()];
+  RawContentFactory albumsFactory = () => [albumWith().toMap()];
   set playlists(List<Playlist> value) => playlistsFactory = () => value.map((playlist) => playlist.toMap());
-  Iterable<Map<String, dynamic>> Function() playlistsFactory = () => [playlistWith().toMap()];
+  RawContentFactory playlistsFactory = () => [playlistWith().toMap()];
   set artists(List<Artist> value) => artistsFactory = () => value.map((artist) => artist.toMap());
-  Iterable<Map<String, dynamic>> Function() artistsFactory = () => [artistWith().toMap()];
+  RawContentFactory artistsFactory = () => [artistWith().toMap()];
 
   @override
   Future<void> createPlaylist(String name) async {}
