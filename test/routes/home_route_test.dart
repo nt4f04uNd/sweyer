@@ -136,7 +136,10 @@ void main() {
       crashlyticsObserver = CrashlyticsObserver(tester.binding, throwFatalErrors: false);
       FakeSweyerPluginPlatform.instance.songsFactory = () {
         songsFactoryCallCount += 1;
-        throw TypeError();
+        if (songsFactoryCallCount <= 2) {
+          throw TypeError();
+        }
+        return [songWith().toMap()];
       };
     });
     await tester.runAppTest(() async {
@@ -153,6 +156,15 @@ void main() {
       expect(songsFactoryCallCount, 2);
       expect(crashlyticsObserver.fatalErrorCount, 2);
       expect(find.ancestor(of: find.text(l10n.retry), matching: find.byType(AppButton)), findsOneWidget);
+
+      // Expect to correctly load the content on the third try
+      await tester.tap(find.text(l10n.retry));
+      await tester.pumpAndSettle();
+      expect(songsFactoryCallCount, 3);
+      expect(crashlyticsObserver.fatalErrorCount, 2);
+      expect(find.text(l10n.retry), findsNothing);
+      expect(find.byType(Home), findsOneWidget);
+      expect(ContentControl.instance.state.allSongs.songs, [songWith()]);
     });
   });
 
