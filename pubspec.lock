@@ -813,7 +813,7 @@ packages:
     description:
       path: "."
       ref: "update/flutter"
-      resolved-ref: d6d94415e31b5db1ade23f8f7ead2ef9c71f66e6
+      resolved-ref: "694631de694fabe64d1795ae3b61bae4febcaea3"
       url: "https://github.com/Abestanis/nt4f04unds_widgets"
     source: git
     version: "4.0.1"
