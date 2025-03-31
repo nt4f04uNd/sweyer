@@ -47,6 +47,9 @@ class _InitialRouteState extends State<InitialRoute> {
             builder: (context, value, child) {
               if (ContentControl.instance.stateNullable == null) {
                 _animateNotMainUi();
+                if (ContentControl.instance.failedToInitialize) {
+                  return const _InitializationFailedScreen();
+                }
                 return const _SongsEmptyScreen();
               } else {
                 return StreamBuilder(
@@ -165,6 +168,33 @@ class _SearchingSongsScreen extends StatelessWidget {
       text: l10n.searchingForTracks,
       widget: const Spinner(),
     );
+  }
+}
+
+/// Screen displayed when initialization of the ContentControl failed.
+class _InitializationFailedScreen extends StatelessWidget {
+  const _InitializationFailedScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = getl10n(context);
+    return CenterContentScreen(
+      text: l10n.failedToInitialize,
+      widget: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 40.0,
+          minWidth: 130.0,
+        ),
+        child: AppButton(
+          text: l10n.retry,
+          onPressed: _handleRetryRequest,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleRetryRequest() async {
+    await ContentControl.instance.init();
   }
 }
 

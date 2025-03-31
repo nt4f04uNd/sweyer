@@ -321,5 +321,7 @@
   "debugShowDebugOverlay": "Hata ayıklama bölümünü göster",
   "debugShowPerformanceOverlay": "Performans bölümünü göster",
   "debugShowCheckerboardRasterCacheImages": "Dama tahtası tarama önbelleği fotoğraflarını göster",
-  "debugShowSemanticsDebugger": "Anlambilim hata ayıklayıcısını göster"
+  "debugShowSemanticsDebugger": "Anlambilim hata ayıklayıcısını göster",
+  "failedToInitialize": "Müzik araması başarısız oldu",
+  "retry": "Tekrar dene"
 }
