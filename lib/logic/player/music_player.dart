@@ -598,10 +598,9 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
       androidCompactActionIndices: const [1, 2, 3],
       repeatMode: player.looping ? AudioServiceRepeatMode.one : AudioServiceRepeatMode.all,
       shuffleMode: QueueControl.instance.state.shuffled ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
-      processingState: switch (
-          player.processingState == ProcessingState.idle ? ProcessingState.loading : player.processingState) {
-        ProcessingState.idle => AudioProcessingState.idle,
-        ProcessingState.loading => AudioProcessingState.loading,
+      processingState: switch (player.processingState) {
+        // Treat `idle` like `loading` state to avoid making the notification reappear.
+        ProcessingState.idle || ProcessingState.loading => AudioProcessingState.loading,
         ProcessingState.buffering => AudioProcessingState.buffering,
         ProcessingState.ready => AudioProcessingState.ready,
         ProcessingState.completed => AudioProcessingState.completed,
