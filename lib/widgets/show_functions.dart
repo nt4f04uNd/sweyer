@@ -171,7 +171,7 @@ class ShowFunctions extends NFShowFunctions {
                   ),
                 ),
                 additionalActions: [
-                  CopyButton(text: errorDetails),
+                  IntrinsicWidth(child: CopyButton(text: errorDetails)),
                 ],
               );
             },

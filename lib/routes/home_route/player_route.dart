@@ -878,7 +878,7 @@ class _InfoButton extends StatelessWidget {
             ),
           ),
           additionalActions: [
-            CopyButton(text: songInfo),
+            IntrinsicWidth(child: CopyButton(text: songInfo)),
           ],
         );
       },

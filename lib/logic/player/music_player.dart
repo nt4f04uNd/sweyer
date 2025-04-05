@@ -181,6 +181,11 @@ class _BrowserParentProvider {
 
 @visibleForTesting
 class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
+  @visibleForTesting
+  static const loopOn = 'loop_on';
+  @visibleForTesting
+  static const loopOff = 'loop_off';
+
   AudioHandler(MusicPlayer player) {
     _init(player);
   }
@@ -342,7 +347,9 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @override
   Future<void> stop() async {
     running = false;
-    await player.stop();
+    if (!_disposed) {
+      await player.stop();
+    }
     await super.stop();
   }
 
@@ -433,7 +440,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   }
 
   @override
-  Future<void> setRating(Rating rating, Map? extras) {
+  Future<void> setRating(Rating rating, [Map<String, dynamic>? extras]) async {
     // TODO: implement setRating
     throw UnimplementedError();
   }
@@ -497,20 +504,11 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   }
 
   @override
-  Future<void> onNotificationAction(String action) async {
-    switch (action) {
-      case 'loop_on':
-      case 'loop_off':
+  Future<dynamic> customAction(String name, [Map<String, dynamic>? extras]) {
+    switch (name) {
+      case loopOn:
+      case loopOff:
         return player.switchLooping();
-      case 'play_prev':
-        return player.playPrev();
-      case 'pause':
-      case 'play':
-        return player.playPause();
-      case 'play_next':
-        return player.playNext();
-      case 'stop':
-        return stop();
       default:
         throw UnimplementedError();
     }
@@ -531,45 +529,44 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     final l10n = staticl10n;
     playbackState.add(playbackState.value!.copyWith(
       controls: [
-        // TODO: currently using custom API from my fork, see https://github.com/ryanheise/audio_service/issues/633
         if (player.looping)
-          MediaControl(
+          MediaControl.custom(
             androidIcon: 'drawable/round_loop_one',
             label: l10n.loopOn,
-            action: 'loop_on',
+            name: loopOn,
           )
         else
-          MediaControl(
+          MediaControl.custom(
             androidIcon: 'drawable/round_loop',
             label: l10n.loopOff,
-            action: 'loop_off',
+            name: loopOff,
           ),
         MediaControl(
           androidIcon: 'drawable/round_skip_previous',
           label: l10n.previous,
-          action: 'play_prev',
+          action: MediaAction.skipToPrevious,
         ),
         if (playing)
           MediaControl(
             androidIcon: 'drawable/round_pause',
             label: l10n.pause,
-            action: 'pause',
+            action: MediaAction.pause,
           )
         else
           MediaControl(
             androidIcon: 'drawable/round_play_arrow',
             label: l10n.play,
-            action: 'play',
+            action: MediaAction.play,
           ),
         MediaControl(
           androidIcon: 'drawable/round_skip_next',
           label: l10n.next,
-          action: 'play_next',
+          action: MediaAction.skipToNext,
         ),
         MediaControl(
           androidIcon: 'drawable/round_stop',
           label: l10n.stop,
-          action: 'stop',
+          action: MediaAction.stop,
         ),
       ],
       systemActions: const {
@@ -601,14 +598,13 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
       androidCompactActionIndices: const [1, 2, 3],
       repeatMode: player.looping ? AudioServiceRepeatMode.one : AudioServiceRepeatMode.all,
       shuffleMode: QueueControl.instance.state.shuffled ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
-      processingState: const {
-        ProcessingState.idle: AudioProcessingState.idle,
-        ProcessingState.loading: AudioProcessingState.loading,
-        ProcessingState.buffering: AudioProcessingState.buffering,
-        ProcessingState.ready: AudioProcessingState.ready,
-        ProcessingState.completed: AudioProcessingState.completed,
-        // Excluding idle state because it makes notification to reappear.
-      }[player.processingState == ProcessingState.idle ? ProcessingState.loading : player.processingState],
+      processingState: switch (player.processingState) {
+        // Treat `idle` like `loading` state to avoid making the notification reappear.
+        ProcessingState.idle || ProcessingState.loading => AudioProcessingState.loading,
+        ProcessingState.buffering => AudioProcessingState.buffering,
+        ProcessingState.ready => AudioProcessingState.ready,
+        ProcessingState.completed => AudioProcessingState.completed,
+      },
       playing: playing,
       updatePosition: player.position,
       bufferedPosition: player.bufferedPosition,
@@ -667,7 +663,6 @@ class MusicPlayer extends AudioPlayer {
         // artDownscaleHeight,
         fastForwardInterval: const Duration(seconds: 5),
         rewindInterval: const Duration(seconds: 5),
-        androidEnableQueue: true,
         preloadArtwork: false,
         // androidBrowsableRootExtras,
       ),
