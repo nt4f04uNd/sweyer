@@ -13,7 +13,7 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  })  : horizontalPadding = kSongTileHorizontalPadding;
+  }) : horizontalPadding = kSongTileHorizontalPadding;
 
   /// Create action with paddings for persistent queue list.
   const InListContentAction.persistentQueue({
@@ -25,7 +25,7 @@ class InListContentAction extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.splashColor,
-  })  : horizontalPadding = kPersistentQueueTileHorizontalPadding;
+  }) : horizontalPadding = kPersistentQueueTileHorizontalPadding;
 
   final IconData icon;
   final String text;
@@ -161,6 +161,11 @@ class _CreatePlaylistInListActionState extends State<CreatePlaylistInListAction>
 
   @override
   Widget build(BuildContext context) {
+    // Don't show create playlist button on platforms that don't support creating playlists
+    if (!PlatformFeatures.supportsCreatePlaylists) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = getl10n(context);
     return InListContentAction.persistentQueue(
       onTap: widget.enabled ? _handleTap : null,

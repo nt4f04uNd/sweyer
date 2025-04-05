@@ -245,7 +245,7 @@ class ContentControl extends Control {
         // _initQuickActions();
         await QueueControl.instance.init();
         PlaybackControl.instance.init();
-        await MusicPlayer.instance.init();
+        await PlayerManager.instance.init();
         await FavoritesControl.instance.init();
         PlayerInterfaceColorStyleControl.instance.init();
         AppWidgetControl.instance.init();
@@ -273,7 +273,7 @@ class ContentControl extends Control {
       _state = null;
       QueueControl.instance.dispose();
       PlaybackControl.instance.dispose();
-      MusicPlayer.instance.dispose();
+      PlayerManager.instance.dispose();
       FavoritesControl.instance.dispose();
       PlayerInterfaceColorStyleControl.instance.dispose();
       AppWidgetControl.instance.dispose();
@@ -358,7 +358,7 @@ class ContentControl extends Control {
       for (final contentType in ContentType.values) refetch(contentType),
     ]);
     if (!disposed.value) {
-      await MusicPlayer.instance.restoreLastSong();
+      await PlayerManager.instance.restoreLastSong();
     }
   }
 
@@ -600,6 +600,8 @@ class ContentControl extends Control {
   /// Sets songs' favorite flag to [value].
   ///
   /// The songs must have a source ID (non-negative).
+  ///
+  /// This operation is only supported on Android.
   Future<void> setSongsFavorite(Set<Song> songs, bool value) async {
     if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       try {
@@ -624,7 +626,17 @@ class ContentControl extends Control {
   /// Deletes a set of songs.
   ///
   /// The songs must have a source ID (non-negative).
+  ///
+  /// This operation is only supported on Android.
   Future<void> deleteSongs(Set<Song> songs) async {
+    // TODO: Consider how to handle song deletion on iOS - possibly show a message directing users to use the native Music app
+    if (!PlatformFeatures.supportsDeleteSongs) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.deletionError,
+      );
+      return;
+    }
+
     songs = _ensureSongsAreSource(songs);
 
     void removeFromState() {
@@ -722,7 +734,17 @@ class ContentControl extends Control {
   }
 
   /// Creates a playlist with a given name and returns a corrected with [correctPlaylistName] name.
+  ///
+  /// This operation is only supported on Android.
   Future<String> createPlaylist(String name) async {
+    // TODO: Consider how to handle playlist creation on iOS - possibly use a local database
+    if (!PlatformFeatures.supportsCreatePlaylists) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.oopsErrorOccurred,
+      );
+      return name;
+    }
+
     name = await correctPlaylistName(name);
     await SweyerPlugin.instance.createPlaylist(name);
     await refetchSongsAndPlaylists();
@@ -732,7 +754,17 @@ class ContentControl extends Control {
   /// Renames a playlist and:
   /// * if operation was successful returns a corrected with [correctPlaylistName] name
   /// * else returns null
+  ///
+  /// This operation is only supported on Android.
   Future<String?> renamePlaylist(Playlist playlist, String name) async {
+    // TODO: Consider how to handle playlist renaming on iOS - possibly use a local database
+    if (!PlatformFeatures.supportsRenamePlaylist) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.oopsErrorOccurred,
+      );
+      return null;
+    }
+
     try {
       name = await correctPlaylistName(name);
       await SweyerPlugin.instance.renamePlaylist(playlist, name);
@@ -744,22 +776,42 @@ class ContentControl extends Control {
   }
 
   /// Inserts songs in the playlist at the given [index].
+  ///
+  /// This operation is only supported on Android.
   Future<void> insertSongsInPlaylist({
     required int index,
     required List<Song> songs,
     required Playlist playlist,
   }) async {
+    // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
+    if (!PlatformFeatures.supportsModifyPlaylistContents) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.oopsErrorOccurred,
+      );
+      return;
+    }
+
     await SweyerPlugin.instance.insertSongsInPlaylist(index: index, songs: songs, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Moves song in playlist, returned value indicates whether the operation was successful.
+  ///
+  /// This operation is only supported on Android.
   Future<void> moveSongInPlaylist({
     required Playlist playlist,
     required int from,
     required int to,
     bool emitChangeEvent = true,
   }) async {
+    // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
+    if (!PlatformFeatures.supportsModifyPlaylistContents) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.oopsErrorOccurred,
+      );
+      return;
+    }
+
     if (from != to) {
       await SweyerPlugin.instance.moveSongInPlaylist(playlist: playlist, from: from, to: to);
       if (emitChangeEvent) {
@@ -769,16 +821,36 @@ class ContentControl extends Control {
   }
 
   /// Removes songs from playlist at given [indexes].
+  ///
+  /// This operation is only supported on Android.
   Future<void> removeFromPlaylistAt({
     required List<int> indexes,
     required Playlist playlist,
   }) async {
+    // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
+    if (!PlatformFeatures.supportsModifyPlaylistContents) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.oopsErrorOccurred,
+      );
+      return;
+    }
+
     await SweyerPlugin.instance.removeFromPlaylistAt(indexes: indexes, playlist: playlist);
     await refetchSongsAndPlaylists();
   }
 
   /// Deletes playlists.
+  ///
+  /// This operation is only supported on Android.
   Future<void> deletePlaylists(List<Playlist> playlists) async {
+    // TODO: Consider how to handle playlist deletion on iOS - possibly use a local database
+    if (!PlatformFeatures.supportsRemovePlaylists) {
+      ShowFunctions.instance.showToast(
+        msg: staticl10n.deletionError,
+      );
+      return;
+    }
+
     try {
       await SweyerPlugin.instance.removePlaylists(playlists);
       await refetchSongsAndPlaylists();

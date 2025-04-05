@@ -121,52 +121,57 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
     final screenHeight = mediaQuery.size.height;
     return Slidable(
       controller: controller,
-      start: 1.0 - TrackPanel.height(context) / screenHeight,
+      start: 1.0 - (TrackPanel.height(context) + MediaQuery.paddingOf(context).bottom) / screenHeight,
       end: 0.0,
       direction: slideDirection,
       barrier: Container(
         color: ThemeControl.instance.isDark ? Colors.black : Colors.black26,
       ),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: backgroundColor,
-        body: Stack(
-          children: <Widget>[
-            AnimatedBuilder(
-              animation: playerRouteController,
-              builder: (context, child) => AnimationSwitcher(
+      child: Theme(
+        // This is needed to disable iOS scroll to top gesture handler, that
+        // would otherwise prevent TrackPanel clicks
+        data: theme.copyWith(platform: TargetPlatform.android),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: backgroundColor,
+          body: Stack(
+            children: <Widget>[
+              AnimatedBuilder(
                 animation: playerRouteController,
-                child1: Container(
-                  color: theme.colorScheme.secondary,
+                builder: (context, child) => AnimationSwitcher(
+                  animation: playerRouteController,
+                  child1: Container(
+                    color: theme.colorScheme.secondary,
+                  ),
+                  child2: const PlayerInterfaceColorWidget(),
                 ),
-                child2: const PlayerInterfaceColorWidget(),
               ),
-            ),
-            PlayerInterfaceThemeOverride(
-              child: SharedAxisTabView(
-                children: _tabs,
-                controller: tabController,
-                tabBuilder: (context, animation, secondaryAnimation, child) {
-                  if (child is _QueueTab) {
-                    if (animation != _queueTabAnimation) {
-                      if (_queueTabAnimation != null) {
-                        _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
+              PlayerInterfaceThemeOverride(
+                child: SharedAxisTabView(
+                  children: _tabs,
+                  controller: tabController,
+                  tabBuilder: (context, animation, secondaryAnimation, child) {
+                    if (child is _QueueTab) {
+                      if (animation != _queueTabAnimation) {
+                        if (_queueTabAnimation != null) {
+                          _queueTabAnimation!.removeStatusListener(_handleQueueTabAnimationStatus);
+                        }
+                        _queueTabAnimation = animation;
+                        animation.addStatusListener(
+                          _handleQueueTabAnimationStatus,
+                        );
                       }
-                      _queueTabAnimation = animation;
-                      animation.addStatusListener(
-                        _handleQueueTabAnimationStatus,
-                      );
                     }
-                  }
-                  return IgnorePointer(
-                    ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
-                    child: child,
-                  );
-                },
+                    return IgnorePointer(
+                      ignoring: child is _QueueTab && animation.status == AnimationStatus.reverse,
+                      child: child,
+                    );
+                  },
+                ),
               ),
-            ),
-            TrackPanel(onTap: controller.open),
-          ],
+              TrackPanel(onTap: controller.open),
+            ],
+          ),
         ),
       ),
     );
@@ -712,42 +717,44 @@ class _MainTabState extends State<_MainTab> {
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return AnimatedBuilder(
       animation: playerRouteController,
-      builder: (context, child) => Scaffold(
-        body: child,
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          elevation: 0.0,
+      builder: (context, child) => SafeArea(
+        child: Scaffold(
+          body: child,
+          resizeToAvoidBottomInset: false,
           backgroundColor: Colors.transparent,
-          toolbarHeight: math.max(
-            TrackPanel.height(context) - mediaQuery.padding.top,
-            theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
-          ),
-          leading: FadeTransition(
-            opacity: fadeAnimation,
-            child: RepaintBoundary(
-              child: NFIconButton(
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                size: 40.0,
-                onPressed: playerRouteController.close,
-              ),
+          appBar: AppBar(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            toolbarHeight: math.max(
+              TrackPanel.height(context) - mediaQuery.padding.top,
+              theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
             ),
-          ),
-          actions: <Widget>[
-            FadeTransition(
+            leading: FadeTransition(
               opacity: fadeAnimation,
-              child: Row(
-                children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: Prefs.devMode,
-                    builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
-                  ),
-                  const FavoriteButton(),
-                  const SizedBox(width: 5.0),
-                ],
+              child: RepaintBoundary(
+                child: NFIconButton(
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                  size: 40.0,
+                  onPressed: playerRouteController.close,
+                ),
               ),
             ),
-          ],
+            actions: <Widget>[
+              FadeTransition(
+                opacity: fadeAnimation,
+                child: Row(
+                  children: [
+                    ValueListenableBuilder<bool>(
+                      valueListenable: Prefs.devMode,
+                      builder: (context, value, child) => value ? const _InfoButton() : const SizedBox.shrink(),
+                    ),
+                    const FavoriteButton(),
+                    const SizedBox(width: 5.0),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       child: Center(
@@ -804,7 +811,7 @@ class _PlaybackButtons extends StatelessWidget {
                 size: textScaleFactor * 50.0,
                 iconSize: textScaleFactor * 30.0,
                 icon: const Icon(Icons.skip_previous_rounded),
-                onPressed: MusicPlayer.instance.playPrev,
+                onPressed: PlayerManager.instance.playPrev,
               ),
             ),
             Container(
@@ -829,7 +836,7 @@ class _PlaybackButtons extends StatelessWidget {
                 size: textScaleFactor * 50.0,
                 iconSize: textScaleFactor * 30.0,
                 icon: const Icon(Icons.skip_next_rounded),
-                onPressed: MusicPlayer.instance.playNext,
+                onPressed: PlayerManager.instance.playNext,
               ),
             ),
             const SizedBox(width: buttonMargin),

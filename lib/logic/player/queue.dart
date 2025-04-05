@@ -590,8 +590,8 @@ class QueueControl extends Control {
       }
       removed = queues.current.remove(song);
       if (removed && current) {
-        MusicPlayer.instance.pause();
-        MusicPlayer.instance.setSong(nextSong);
+        PlayerManager.instance.pause();
+        PlayerManager.instance.setSong(nextSong);
       }
       setQueue(modified: true);
     }
@@ -612,8 +612,8 @@ class QueueControl extends Control {
       resetQueueAsFallback();
     } else {
       if (index == PlaybackControl.instance.currentSongIndex) {
-        MusicPlayer.instance.pause();
-        MusicPlayer.instance.setSong(state.current.getNextAt(index));
+        PlayerManager.instance.pause();
+        PlayerManager.instance.setSong(state.current.getNextAt(index));
       }
       song = queues.current.removeAt(index);
       setQueue(modified: true);
@@ -637,7 +637,7 @@ class QueueControl extends Control {
     } else {
       final containsCurrent = indexes.contains(PlaybackControl.instance.currentSongIndex);
       if (containsCurrent) {
-        MusicPlayer.instance.pause();
+        PlayerManager.instance.pause();
       }
       for (int i = indexes.length - 1; i >= 0; i--) {
         queues.current.removeAt(indexes[i]);
@@ -645,7 +645,7 @@ class QueueControl extends Control {
       if (containsCurrent) {
         /// TODO: add to [Queue] something like relative indexing, that allows negative indexes
         /// and improve this
-        MusicPlayer.instance.setSong(state.current.songs[0]);
+        PlayerManager.instance.setSong(state.current.songs[0]);
       }
       setQueue(modified: true);
     }
@@ -702,8 +702,8 @@ class QueueControl extends Control {
       modified: false,
       shuffled: false,
     );
-    MusicPlayer.instance.pause();
-    MusicPlayer.instance.setSong(state.current.songs[0]);
+    PlayerManager.instance.pause();
+    PlayerManager.instance.setSong(state.current.songs[0]);
   }
 
   /// Sets the queue with specified [type] and other parameters.
@@ -873,7 +873,7 @@ class QueueControl extends Control {
 
     // Update current song.
     if (state.current.get(PlaybackControl.instance.currentSong) == null) {
-      final player = MusicPlayer.instance;
+      final player = PlayerManager.instance;
       if (player.playing) {
         player.pause();
         player.setSong(state.current.songs[0]);

@@ -32,9 +32,13 @@ const Duration kArtLoadAnimationDuration = Duration(milliseconds: 240);
 /// Used for loading arts in lists.
 const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
-/// Whether running on scoped storage, and should use bytes to load album
+/// Whether should load arts from bytes.
+///
+/// This is true:
+/// 1. When running on scoped storage, and should use bytes to load album
 /// arts from `MediaStore`.
-bool get _useScopedStorage => DeviceInfoControl.instance.sdkInt >= 29;
+/// 2. When on iOS.
+bool get _useBytesLoader => DeviceInfoControl.instance.sdkInt >= 29 || Platform.isIOS;
 
 typedef ContentArtOnLoadCallback = FutureOr Function(ui.Image);
 
@@ -319,7 +323,7 @@ class _NoSourceLoader extends _ArtSourceLoader {
 
 /// Loads song art for [Song]s.
 ///
-/// This class automatically chooses between [_SongScopedStorageArtSourceLoader] and [_SongFileArtSourceLoader],
+/// This class automatically chooses between [_SongBytesArtSourceLoader] and [_SongFileArtSourceLoader],
 /// depended on Android version.
 class _SongArtSourceLoader extends _ArtSourceLoader {
   _SongArtSourceLoader({
@@ -329,8 +333,8 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
   }) : super(state: state) {
     if (song == null) {
       loader = _NoSourceLoader(state);
-    } else if (_useScopedStorage) {
-      loader = _SongScopedStorageArtSourceLoader(
+    } else if (_useBytesLoader) {
+      loader = _SongBytesArtSourceLoader(
         song: song!,
         size: size!,
         onLoadingChange: (value) => setLoading(value),
@@ -372,6 +376,11 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
   }
 }
 
+/// Loads arts from bytes with [SweyerPlugin.loadAlbumArt].
+///
+/// On iOS loads arts from Apple Music.
+///
+/// On Android:
 /// Loads local song art with `MediaStore` API, used above Android Q.
 ///
 /// Lower Android Q album arts are displayed directly from the file path
@@ -380,15 +389,15 @@ class _SongArtSourceLoader extends _ArtSourceLoader {
 /// Above Q though, this path was deprecated due to  scoped storage, and now
 /// album arts should be fetched with special method in `MediaStore.loadThumbnail`.
 ///
-/// The [_useScopedStorage] indicates that we are on scoped storage and should use this
+/// The [_useBytesLoader] indicates that we are on scoped storage and should use this
 /// new method.
 ///
 /// See also:
 ///  * [_SongFileArtSourceLoader], which loads arts from files
 ///  * [_SongArtSourceLoader], which automatically chooses between this loader and [_SongFileArtSourceLoader],
 ///    dependent on Android version
-class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
-  _SongScopedStorageArtSourceLoader({
+class _SongBytesArtSourceLoader extends _ArtSourceLoader {
+  _SongBytesArtSourceLoader({
     required this.song,
     required this.size,
     required super.state,
@@ -431,9 +440,10 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
         FirebaseCrashlytics.instance.recordError(
           ex,
           stack,
-          reason: 'in _SongScopedStorageArtSourceLoader.load',
+          reason: 'in _SongBytesArtSourceLoader.load',
         );
       } finally {
+        print(_bytes?.length);
         setLoading(_SourceLoading.loaded);
       }
     });
@@ -469,8 +479,8 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
 /// and [ContentChannel.fixAlbumArt].
 ///
 /// See also:
-///  * [_SongScopedStorageArtSourceLoader], which loads arts in scoped storage
-///  * [_SongArtSourceLoader], which automatically chooses between this loader and [_SongScopedStorageArtSourceLoader],
+///  * [_SongBytesArtSourceLoader], which loads arts in scoped storage
+///  * [_SongArtSourceLoader], which automatically chooses between this loader and [_SongBytesArtSourceLoader],
 ///    dependent on Android version
 class _SongFileArtSourceLoader extends _ArtSourceLoader {
   _SongFileArtSourceLoader({
@@ -662,7 +672,7 @@ class _ContentArtState extends State<ContentArt> {
   bool get showDefault => _loaders.isEmpty || _loaders.every((el) => el.showDefault);
 
   /// Min duration for [loadAnimationDuration].
-  static Duration get _minDuration => _useScopedStorage ? const Duration(milliseconds: 100) : Duration.zero;
+  static Duration get _minDuration => _useBytesLoader ? const Duration(milliseconds: 100) : Duration.zero;
 
   Duration get loadAnimationDuration =>
       widget.loadAnimationDuration < _minDuration ? _minDuration : widget.loadAnimationDuration;
@@ -849,7 +859,7 @@ class _ContentArtState extends State<ContentArt> {
     final newPixelRatio = MediaQuery.of(context).devicePixelRatio;
     // Reload arts when on scoped storage, as they are using the pixel ratio size at the stage
     // of loading.
-    if (_useScopedStorage && _devicePixelRatio != null && _devicePixelRatio != newPixelRatio) {
+    if (_useBytesLoader && _devicePixelRatio != null && _devicePixelRatio != newPixelRatio) {
       _update();
     }
     _devicePixelRatio = newPixelRatio;
@@ -1082,7 +1092,7 @@ class AlbumArtRotating extends StatefulWidget {
     required this.source,
     required this.initRotating,
     this.initRotation = 0.0,
-  })  : assert(initRotation >= 0 && initRotation <= 1.0);
+  }) : assert(initRotation >= 0 && initRotation <= 1.0);
 
   final ContentArtSource source;
 

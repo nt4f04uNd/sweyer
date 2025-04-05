@@ -53,5 +53,18 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.nt4f04und.sweyer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sweyer</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

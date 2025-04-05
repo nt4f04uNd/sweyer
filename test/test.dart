@@ -244,7 +244,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
 
   /// Cleans up and disposes all relevant app state after an app test.
   Future<void> _teardownAppTest() async {
-    await MusicPlayer.instanceIfInitialized?.stop();
+    await PlayerManager.instanceIfInitialized?.stop();
     DeviceInfoControl.instance.dispose();
     ContentControl.instance.dispose();
   }

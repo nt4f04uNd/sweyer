@@ -130,7 +130,7 @@ class ThemeControl {
     _applyPrimaryColor(color);
     Settings.primaryColorInt.set(color.value);
     themeChanging.add(true);
-    MusicPlayer.instance.updateServiceMediaItem();
+    PlayerManager.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation<void>.fromFuture(
       Future.delayed(dilate(primaryColorChangeDuration)),
     ).then((value) async {

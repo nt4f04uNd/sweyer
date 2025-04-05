@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
 import 'package:lottie/lottie.dart';
@@ -19,7 +18,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
     this.iconColor,
   });
 
-  final AudioPlayer? player;
+  final PlayerManager? player;
   final double? iconSize;
   final double? size;
   final Color? iconColor;
@@ -31,7 +30,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   StreamSubscription<bool>? _playingSubscription;
-  AudioPlayer get player => widget.player ?? MusicPlayer.instance;
+  PlayerManager get player => widget.player ?? PlayerManager.instance;
 
   @override
   void initState() {

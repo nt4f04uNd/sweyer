@@ -6,7 +6,7 @@ import '../../test.dart';
 void main() {
   setUp(() {
     registerAppSetup(() {
-      MusicPlayer.handler?.playbackState.add(PlaybackState());
+      PlayerManager.handler?.playbackState.add(PlaybackState());
     });
   });
 
@@ -14,13 +14,13 @@ void main() {
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     await binding.runAppTestWithoutUi(() async {
       var playFutureCompleted = false;
-      MusicPlayer.instance.play().whenComplete(() => playFutureCompleted = true);
+      PlayerManager.instance.play().whenComplete(() => playFutureCompleted = true);
       await binding.pump();
-      expect(MusicPlayer.instance.playing, true);
-      await MusicPlayer.instance.pause();
+      expect(PlayerManager.instance.playing, true);
+      await PlayerManager.instance.pause();
       await binding.pump();
       expect(playFutureCompleted, true);
-      expect(MusicPlayer.instance.playing, false);
+      expect(PlayerManager.instance.playing, false);
     });
   });
 
@@ -28,9 +28,9 @@ void main() {
     test('Is updated when playing', () async {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runAppTestWithoutUi(() async {
-        MusicPlayer.instance.play();
+        PlayerManager.instance.play();
         await binding.pump();
-        final playbackState = MusicPlayer.handler!.playbackState.value!;
+        final playbackState = PlayerManager.handler!.playbackState.value!;
         expect(playbackState.playing, true);
         expect(playbackState.processingState, AudioProcessingState.ready);
         expect(
@@ -49,12 +49,12 @@ void main() {
     test('Is updated when paused', () async {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runAppTestWithoutUi(() async {
-        MusicPlayer.instance.play();
+        PlayerManager.instance.play();
         await binding.pump();
-        await MusicPlayer.instance.pause();
+        await PlayerManager.instance.pause();
         await binding.pump();
-        final playbackState = MusicPlayer.handler!.playbackState.value!;
-        expect(MusicPlayer.instance.playing, false);
+        final playbackState = PlayerManager.handler!.playbackState.value!;
+        expect(PlayerManager.instance.playing, false);
         expect(playbackState.playing, false);
         expect(playbackState.processingState, AudioProcessingState.ready);
         expect(
@@ -73,11 +73,11 @@ void main() {
     test('Is updated when stopped', () async {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runAppTestWithoutUi(() async {
-        MusicPlayer.instance.play();
+        PlayerManager.instance.play();
         await binding.pump();
-        await MusicPlayer.handler!.onNotificationAction('stop');
+        await PlayerManager.handler!.onNotificationAction('stop');
         await binding.pump();
-        final playbackState = MusicPlayer.handler!.playbackState.value!;
+        final playbackState = PlayerManager.handler!.playbackState.value!;
         expect(playbackState.playing, false);
         expect(playbackState.processingState, AudioProcessingState.ready);
         expect(

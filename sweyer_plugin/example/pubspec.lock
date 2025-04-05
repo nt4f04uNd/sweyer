@@ -186,6 +186,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.4"
+  playify:
+    dependency: transitive
+    description:
+      name: playify
+      sha256: c48e4315a985992619a83550744891a6b56f11a349875626d7e6ffb23a8d08f4
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   plugin_platform_interface:
     dependency: transitive
     description:
