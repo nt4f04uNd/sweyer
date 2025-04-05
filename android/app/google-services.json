@@ -3,7 +3,7 @@
     "project_number": "574502524315",
     "firebase_url": "https://sweyer-def42.firebaseio.com",
     "project_id": "sweyer-def42",
-    "storage_bucket": "sweyer-def42.appspot.com"
+    "storage_bucket": "sweyer-def42.firebasestorage.app"
   },
   "client": [
     {
@@ -21,10 +21,6 @@
             "package_name": "com.nt4f04und.sweyer",
             "certificate_hash": "ad8a2bee01750409fcab3c0ea344592ed9cd2ae3"
           }
-        },
-        {
-          "client_id": "574502524315-ghn04g86o781nl77kcrbbmul6cno0q9a.apps.googleusercontent.com",
-          "client_type": 3
         }
       ],
       "api_key": [
@@ -34,12 +30,7 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "574502524315-ghn04g86o781nl77kcrbbmul6cno0q9a.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
