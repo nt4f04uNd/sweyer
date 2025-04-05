@@ -1,4 +1,5 @@
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:sweyer/sweyer.dart';
 
 /// Provides an information about the device.
@@ -7,7 +8,7 @@ class DeviceInfoControl extends Control {
 
   /// Android SDK integer.
   int get sdkInt => _sdkInt;
-  late int _sdkInt;
+  late int _sdkInt = 0; // Default to 0 for non-Android platforms
 
   /// Whether to use scoped storage to modify system files.
   ///
@@ -23,7 +24,14 @@ class DeviceInfoControl extends Control {
   @override
   Future<void> init() async {
     super.init();
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    _sdkInt = androidInfo.version.sdkInt;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        _sdkInt = androidInfo.version.sdkInt;
+      } catch (e) {
+        _sdkInt = 0;
+      }
+    }
   }
 }
