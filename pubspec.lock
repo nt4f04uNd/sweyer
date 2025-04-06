@@ -772,11 +772,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "update/flutter"
-      resolved-ref: "694631de694fabe64d1795ae3b61bae4febcaea3"
-      url: "https://github.com/Abestanis/nt4f04unds_widgets"
+      ref: "5.0.0"
+      resolved-ref: c70e75a6ffbb69f8c2594ecd88b8f22c98906450
+      url: "https://github.com/nt4f04uNd/nt4f04unds_widgets"
     source: git
-    version: "4.0.1"
+    version: "5.0.0"
   octo_image:
     dependency: transitive
     description:
