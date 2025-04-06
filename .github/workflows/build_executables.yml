@@ -8,7 +8,7 @@ on:
       - 'releases/**'
 
 jobs:
-  build:
+  build_executables:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
