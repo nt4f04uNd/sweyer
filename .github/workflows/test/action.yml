@@ -34,7 +34,7 @@ runs:
         flutter pub global activate very_good_cli
         very_good packages get --recursive
 
-    - name: 🧪 Run Tests
+    - name: 🧪 Run Tests!
       shell: bash
       run: flutter test --no-pub --test-randomize-ordering-seed random ${{inputs.testing_arguments}}
 
