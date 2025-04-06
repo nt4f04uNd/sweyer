@@ -2,10 +2,6 @@ name: Build Sweyer executables
 on:
   pull_request:
   push:
-    branches:    
-      - main
-      - master
-      - 'releases/**'
 
 jobs:
   build:
