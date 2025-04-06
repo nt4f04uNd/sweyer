@@ -29,6 +29,21 @@ runs:
       shell: bash
       run: flutter pub get
 
+    - name: 📄 Check Dart formatting
+      shell: bash
+      run: |
+        echo "::add-matcher::${{ github.workspace }}/.github/problem-matchers/dart-format.json"
+        dart format --set-exit-if-changed .
+        echo "::remove-matcher owner=dart-format::"
+
+    - name: 📝 Run Dart Linter
+      shell: bash
+      run: |
+        echo "::add-matcher::${{ github.workspace }}/.github/problem-matchers/flutter-analyze.json"
+        flutter analyze --fatal-infos
+        echo "::remove-matcher owner=flutter-analyze::"
+        echo "::remove-matcher owner=flutter-analyze-info::"
+
     - name: 🧪 Run Tests
       shell: bash
       run: flutter test --no-pub --test-randomize-ordering-seed random ${{inputs.testing_arguments}}
