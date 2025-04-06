@@ -171,18 +171,15 @@ class ThemeControl {
           selectionHandleColor: color,
         ),
         switchTheme: SwitchThemeData(
-          thumbColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color : null),
+          thumbColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? color : null),
           trackColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color.withAlpha(0x80) : null),
+              (states) => states.contains(WidgetState.selected) ? color.withAlpha(0x80) : null),
         ),
         radioTheme: RadioThemeData(
-          fillColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? color : null),
         ),
         checkboxTheme: CheckboxThemeData(
-          fillColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? color : null),
         ),
       ),
       dark: constants.Theme.app.dark.copyWith(
@@ -213,18 +210,15 @@ class ThemeControl {
           selectionHandleColor: color,
         ),
         switchTheme: SwitchThemeData(
-          thumbColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color : null),
+          thumbColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? color : null),
           trackColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color.withAlpha(0x80) : null),
+              (states) => states.contains(WidgetState.selected) ? color.withAlpha(0x80) : null),
         ),
         radioTheme: RadioThemeData(
-          fillColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? color : null),
         ),
         checkboxTheme: CheckboxThemeData(
-          fillColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected) ? color : null),
+          fillColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? color : null),
         ),
       ),
     );

@@ -1082,7 +1082,7 @@ class AlbumArtRotating extends StatefulWidget {
     required this.source,
     required this.initRotating,
     this.initRotation = 0.0,
-  })  : assert(initRotation >= 0 && initRotation <= 1.0);
+  }) : assert(initRotation >= 0 && initRotation <= 1.0);
 
   final ContentArtSource source;
 

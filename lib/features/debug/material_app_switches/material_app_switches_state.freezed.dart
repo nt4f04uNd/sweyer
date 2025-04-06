@@ -21,25 +21,20 @@ mixin _$MaterialAppSwitchesState {
   bool get showSemanticsDebugger => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $MaterialAppSwitchesStateCopyWith<MaterialAppSwitchesState> get copyWith =>
-      throw _privateConstructorUsedError;
+  $MaterialAppSwitchesStateCopyWith<MaterialAppSwitchesState> get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $MaterialAppSwitchesStateCopyWith<$Res> {
-  factory $MaterialAppSwitchesStateCopyWith(MaterialAppSwitchesState value,
-          $Res Function(MaterialAppSwitchesState) then) =
+  factory $MaterialAppSwitchesStateCopyWith(
+          MaterialAppSwitchesState value, $Res Function(MaterialAppSwitchesState) then) =
       _$MaterialAppSwitchesStateCopyWithImpl<$Res, MaterialAppSwitchesState>;
   @useResult
-  $Res call(
-      {bool showPerformanceOverlay,
-      bool checkerboardRasterCacheImages,
-      bool showSemanticsDebugger});
+  $Res call({bool showPerformanceOverlay, bool checkerboardRasterCacheImages, bool showSemanticsDebugger});
 }
 
 /// @nodoc
-class _$MaterialAppSwitchesStateCopyWithImpl<$Res,
-        $Val extends MaterialAppSwitchesState>
+class _$MaterialAppSwitchesStateCopyWithImpl<$Res, $Val extends MaterialAppSwitchesState>
     implements $MaterialAppSwitchesStateCopyWith<$Res> {
   _$MaterialAppSwitchesStateCopyWithImpl(this._value, this._then);
 
@@ -73,28 +68,21 @@ class _$MaterialAppSwitchesStateCopyWithImpl<$Res,
 }
 
 /// @nodoc
-abstract class _$$MaterialAppSwitchesStateImplCopyWith<$Res>
-    implements $MaterialAppSwitchesStateCopyWith<$Res> {
+abstract class _$$MaterialAppSwitchesStateImplCopyWith<$Res> implements $MaterialAppSwitchesStateCopyWith<$Res> {
   factory _$$MaterialAppSwitchesStateImplCopyWith(
-          _$MaterialAppSwitchesStateImpl value,
-          $Res Function(_$MaterialAppSwitchesStateImpl) then) =
+          _$MaterialAppSwitchesStateImpl value, $Res Function(_$MaterialAppSwitchesStateImpl) then) =
       __$$MaterialAppSwitchesStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {bool showPerformanceOverlay,
-      bool checkerboardRasterCacheImages,
-      bool showSemanticsDebugger});
+  $Res call({bool showPerformanceOverlay, bool checkerboardRasterCacheImages, bool showSemanticsDebugger});
 }
 
 /// @nodoc
 class __$$MaterialAppSwitchesStateImplCopyWithImpl<$Res>
-    extends _$MaterialAppSwitchesStateCopyWithImpl<$Res,
-        _$MaterialAppSwitchesStateImpl>
+    extends _$MaterialAppSwitchesStateCopyWithImpl<$Res, _$MaterialAppSwitchesStateImpl>
     implements _$$MaterialAppSwitchesStateImplCopyWith<$Res> {
   __$$MaterialAppSwitchesStateImplCopyWithImpl(
-      _$MaterialAppSwitchesStateImpl _value,
-      $Res Function(_$MaterialAppSwitchesStateImpl) _then)
+      _$MaterialAppSwitchesStateImpl _value, $Res Function(_$MaterialAppSwitchesStateImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -151,24 +139,21 @@ class _$MaterialAppSwitchesStateImpl implements _MaterialAppSwitchesState {
             other is _$MaterialAppSwitchesStateImpl &&
             (identical(other.showPerformanceOverlay, showPerformanceOverlay) ||
                 other.showPerformanceOverlay == showPerformanceOverlay) &&
-            (identical(other.checkerboardRasterCacheImages,
-                    checkerboardRasterCacheImages) ||
-                other.checkerboardRasterCacheImages ==
-                    checkerboardRasterCacheImages) &&
+            (identical(other.checkerboardRasterCacheImages, checkerboardRasterCacheImages) ||
+                other.checkerboardRasterCacheImages == checkerboardRasterCacheImages) &&
             (identical(other.showSemanticsDebugger, showSemanticsDebugger) ||
                 other.showSemanticsDebugger == showSemanticsDebugger));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, showPerformanceOverlay,
-      checkerboardRasterCacheImages, showSemanticsDebugger);
+  int get hashCode =>
+      Object.hash(runtimeType, showPerformanceOverlay, checkerboardRasterCacheImages, showSemanticsDebugger);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$MaterialAppSwitchesStateImplCopyWith<_$MaterialAppSwitchesStateImpl>
-      get copyWith => __$$MaterialAppSwitchesStateImplCopyWithImpl<
-          _$MaterialAppSwitchesStateImpl>(this, _$identity);
+  _$$MaterialAppSwitchesStateImplCopyWith<_$MaterialAppSwitchesStateImpl> get copyWith =>
+      __$$MaterialAppSwitchesStateImplCopyWithImpl<_$MaterialAppSwitchesStateImpl>(this, _$identity);
 }
 
 abstract class _MaterialAppSwitchesState implements MaterialAppSwitchesState {
@@ -185,6 +170,6 @@ abstract class _MaterialAppSwitchesState implements MaterialAppSwitchesState {
   bool get showSemanticsDebugger;
   @override
   @JsonKey(ignore: true)
-  _$$MaterialAppSwitchesStateImplCopyWith<_$MaterialAppSwitchesStateImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  _$$MaterialAppSwitchesStateImplCopyWith<_$MaterialAppSwitchesStateImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }

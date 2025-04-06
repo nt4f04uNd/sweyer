@@ -34,16 +34,14 @@ mixin _$AppThemeTailorMixin on ThemeExtension<AppTheme> {
     return AppTheme(
       artColorForBlend: artColorForBlend ?? this.artColorForBlend,
       currentIndicatorBackgroundColorWithDefaultArt:
-          currentIndicatorBackgroundColorWithDefaultArt ??
-              this.currentIndicatorBackgroundColorWithDefaultArt,
+          currentIndicatorBackgroundColorWithDefaultArt ?? this.currentIndicatorBackgroundColorWithDefaultArt,
       sliderInactiveColor: sliderInactiveColor ?? this.sliderInactiveColor,
       appBarBorderColor: appBarBorderColor ?? this.appBarBorderColor,
       drawerMenuItemColor: drawerMenuItemColor ?? this.drawerMenuItemColor,
       contrast: contrast ?? this.contrast,
       contrastInverse: contrastInverse ?? this.contrastInverse,
       glowSplashColor: glowSplashColor ?? this.glowSplashColor,
-      glowSplashColorOnContrast:
-          glowSplashColorOnContrast ?? this.glowSplashColorOnContrast,
+      glowSplashColorOnContrast: glowSplashColorOnContrast ?? this.glowSplashColorOnContrast,
     );
   }
 
@@ -51,23 +49,16 @@ mixin _$AppThemeTailorMixin on ThemeExtension<AppTheme> {
   AppTheme lerp(covariant ThemeExtension<AppTheme>? other, double t) {
     if (other is! AppTheme) return this as AppTheme;
     return AppTheme(
-      artColorForBlend:
-          Color.lerp(artColorForBlend, other.artColorForBlend, t)!,
+      artColorForBlend: Color.lerp(artColorForBlend, other.artColorForBlend, t)!,
       currentIndicatorBackgroundColorWithDefaultArt: Color.lerp(
-          currentIndicatorBackgroundColorWithDefaultArt,
-          other.currentIndicatorBackgroundColorWithDefaultArt,
-          t)!,
-      sliderInactiveColor:
-          Color.lerp(sliderInactiveColor, other.sliderInactiveColor, t)!,
-      appBarBorderColor:
-          Color.lerp(appBarBorderColor, other.appBarBorderColor, t)!,
-      drawerMenuItemColor:
-          Color.lerp(drawerMenuItemColor, other.drawerMenuItemColor, t)!,
+          currentIndicatorBackgroundColorWithDefaultArt, other.currentIndicatorBackgroundColorWithDefaultArt, t)!,
+      sliderInactiveColor: Color.lerp(sliderInactiveColor, other.sliderInactiveColor, t)!,
+      appBarBorderColor: Color.lerp(appBarBorderColor, other.appBarBorderColor, t)!,
+      drawerMenuItemColor: Color.lerp(drawerMenuItemColor, other.drawerMenuItemColor, t)!,
       contrast: Color.lerp(contrast, other.contrast, t)!,
       contrastInverse: Color.lerp(contrastInverse, other.contrastInverse, t)!,
       glowSplashColor: Color.lerp(glowSplashColor, other.glowSplashColor, t)!,
-      glowSplashColorOnContrast: Color.lerp(
-          glowSplashColorOnContrast, other.glowSplashColorOnContrast, t)!,
+      glowSplashColorOnContrast: Color.lerp(glowSplashColorOnContrast, other.glowSplashColorOnContrast, t)!,
     );
   }
 
@@ -76,24 +67,16 @@ mixin _$AppThemeTailorMixin on ThemeExtension<AppTheme> {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AppTheme &&
-            const DeepCollectionEquality()
-                .equals(artColorForBlend, other.artColorForBlend) &&
+            const DeepCollectionEquality().equals(artColorForBlend, other.artColorForBlend) &&
             const DeepCollectionEquality().equals(
-                currentIndicatorBackgroundColorWithDefaultArt,
-                other.currentIndicatorBackgroundColorWithDefaultArt) &&
-            const DeepCollectionEquality()
-                .equals(sliderInactiveColor, other.sliderInactiveColor) &&
-            const DeepCollectionEquality()
-                .equals(appBarBorderColor, other.appBarBorderColor) &&
-            const DeepCollectionEquality()
-                .equals(drawerMenuItemColor, other.drawerMenuItemColor) &&
+                currentIndicatorBackgroundColorWithDefaultArt, other.currentIndicatorBackgroundColorWithDefaultArt) &&
+            const DeepCollectionEquality().equals(sliderInactiveColor, other.sliderInactiveColor) &&
+            const DeepCollectionEquality().equals(appBarBorderColor, other.appBarBorderColor) &&
+            const DeepCollectionEquality().equals(drawerMenuItemColor, other.drawerMenuItemColor) &&
             const DeepCollectionEquality().equals(contrast, other.contrast) &&
-            const DeepCollectionEquality()
-                .equals(contrastInverse, other.contrastInverse) &&
-            const DeepCollectionEquality()
-                .equals(glowSplashColor, other.glowSplashColor) &&
-            const DeepCollectionEquality().equals(
-                glowSplashColorOnContrast, other.glowSplashColorOnContrast));
+            const DeepCollectionEquality().equals(contrastInverse, other.contrastInverse) &&
+            const DeepCollectionEquality().equals(glowSplashColor, other.glowSplashColor) &&
+            const DeepCollectionEquality().equals(glowSplashColorOnContrast, other.glowSplashColorOnContrast));
   }
 
   @override
@@ -101,8 +84,7 @@ mixin _$AppThemeTailorMixin on ThemeExtension<AppTheme> {
     return Object.hash(
       runtimeType.hashCode,
       const DeepCollectionEquality().hash(artColorForBlend),
-      const DeepCollectionEquality()
-          .hash(currentIndicatorBackgroundColorWithDefaultArt),
+      const DeepCollectionEquality().hash(currentIndicatorBackgroundColorWithDefaultArt),
       const DeepCollectionEquality().hash(sliderInactiveColor),
       const DeepCollectionEquality().hash(appBarBorderColor),
       const DeepCollectionEquality().hash(drawerMenuItemColor),
@@ -119,8 +101,7 @@ extension AppThemeBuildContextProps on BuildContext {
 
   /// Primary application color adjusted for blending into album arts.
   Color get artColorForBlend => appTheme.artColorForBlend;
-  Color get currentIndicatorBackgroundColorWithDefaultArt =>
-      appTheme.currentIndicatorBackgroundColorWithDefaultArt;
+  Color get currentIndicatorBackgroundColorWithDefaultArt => appTheme.currentIndicatorBackgroundColorWithDefaultArt;
   Color get sliderInactiveColor => appTheme.sliderInactiveColor;
   Color get appBarBorderColor => appTheme.appBarBorderColor;
   Color get drawerMenuItemColor => appTheme.drawerMenuItemColor;

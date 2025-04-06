@@ -905,7 +905,7 @@ class _ContentChip extends StatefulWidget {
   const _ContentChip({
     required this.delegate,
     required this.contentType,
-  })  : favoritesChip = false;
+  }) : favoritesChip = false;
 
   const _ContentChip.favorites({
     required this.delegate,

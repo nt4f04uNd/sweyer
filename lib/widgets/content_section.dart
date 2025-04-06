@@ -19,7 +19,7 @@ class ContentSection<T extends Content> extends StatelessWidget {
     this.contentTileTapHandler,
     this.selectedTest,
     this.selectionIndexMapper,
-  })  : child = null;
+  }) : child = null;
 
   const ContentSection.custom({
     super.key,

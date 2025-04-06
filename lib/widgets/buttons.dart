@@ -409,25 +409,25 @@ class CopyButton extends StatelessWidget {
       icon: const Icon(Icons.content_copy_rounded),
       size: size,
       onPressed: () {
-              Clipboard.setData(
-                ClipboardData(text: text),
-              );
-              NFSnackbarController.showSnackbar(
-                NFSnackbarEntry(
-                  child: NFSnackbar(
-                    title: Text(
-                      l10n.copied,
-                      style: TextStyle(color: color),
-                    ),
-                    titlePadding: const EdgeInsets.only(left: 8.0),
-                    leading: Icon(
-                      Icons.content_copy_rounded,
-                      color: color,
-                    ),
-                  ),
-                ),
-              );
-            },
+        Clipboard.setData(
+          ClipboardData(text: text),
+        );
+        NFSnackbarController.showSnackbar(
+          NFSnackbarEntry(
+            child: NFSnackbar(
+              title: Text(
+                l10n.copied,
+                style: TextStyle(color: color),
+              ),
+              titlePadding: const EdgeInsets.only(left: 8.0),
+              leading: Icon(
+                Icons.content_copy_rounded,
+                color: color,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
