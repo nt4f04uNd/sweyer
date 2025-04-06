@@ -17,7 +17,9 @@
   "tracksPlural": "{count, plural, =0{{count} треков} =1{{count} трек} few{{count} трека} many{{count} треков} other{{count} трека}}",
   "@tracksPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "album": "Альбом",
@@ -35,7 +37,9 @@
   "albumsPlural": "{count, plural, =0{{count} альбомов} =1{{count} альбом} few{{count} альбома} many{{count} альбомов} other{{count} альбома}}",
   "@albumsPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "playlist": "Плейлист",
@@ -53,7 +57,9 @@
   "playlistsPlural": "{count, plural, =0{{count} плейлистов} =1{{count} плейлист} few{{count} плейлиста} many{{count} плейлистов} other{{count} плейлиста}}",
   "@playlistsPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "artist": "Исполнитель",
@@ -71,7 +77,9 @@
   "artistsPlural": "{count, plural, =0{{count} исполнителей} =1{{count} исполнитель} few{{count} исполнителя} many{{count} исполнителей} other{{count} исполнителя}}",
   "@artistsPlural": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "albumNotFound": "Альбом не найден",
@@ -103,7 +111,9 @@
   "andNMore": "И еще {count}",
   "@andNMore": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "done": "Готово",
@@ -116,13 +126,17 @@
   "removeTracks": "{count, plural, =1{Убрать трек} few{Убрать {count} трека} many{Убрать {count} треков} other{Убрать {count} трека}}",
   "@removeTracks": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "removeTracksConfirmation": "{count, plural, =1{Вы точно хотите убрать {title}?} other{Вы точно хотите убрать выбранные треки?}}",
   "@removeTracksConfirmation": {
     "placeholders": {
-      "count": {},
+      "count": {
+        "type": "num"
+      },
       "title": {
         "type": "String?",
         "example": "Track Name"
@@ -134,13 +148,17 @@
   "deleteTracks": "{count, plural, =1{Удалить трек} few{Удалить {count} трека} many{Удалить {count} треков} other{Удалить {count} трека}}",
   "@deleteTracks": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "deleteTracksConfirmation": "{count, plural, =1{Вы точно хотите удалить {title}?} other{Вы точно хотите удалить выбранные треки?}}",
   "@deleteTracksConfirmation": {
     "placeholders": {
-      "count": {},
+      "count": {
+        "type": "num"
+      },
       "title": {
         "type": "String?",
         "example": "Track Name"
@@ -151,13 +169,17 @@
   "deletePlaylists": "{count, plural, =1{Удалить плейлист} few{Удалить {count} плейлиста} many{Удалить {count} плейлистов} other{Удалить {count} плейлиста}}",
   "@deletePlaylists": {
     "placeholders": {
-      "count": {}
+      "count": {
+        "type": "num"
+      }
     }
   },
   "deletePlaylistsConfirmation": "{count, plural, =1{Вы точно хотите удалить {title}?} other{Вы точно хотите удалить выбранные плейлисты?}}",
   "@deletePlaylistsConfirmation": {
     "placeholders": {
-      "count": {},
+      "count": {
+        "type": "num"
+      },
       "title": {
         "type": "String?",
         "example": "Playlist Name"
@@ -222,7 +244,9 @@
   "onThePathToDevModeClicksRemaining": "{remainingClicks, plural, =1{Вы почти у цели, остался всего 1 клик...} few{Вы почти у цели, осталось всего {remainingClicks} клика...} many{Вы почти у цели, осталось всего {remainingClicks} кликов...} other{Вы почти у цели, осталось всего {remainingClicks} клика...}}",
   "@onThePathToDevModeClicksRemaining": {
     "placeholders": {
-      "remainingClicks": {}
+      "remainingClicks": {
+        "type": "num"
+      }
     }
   },
   "devTestToast": "Тестовый тост",

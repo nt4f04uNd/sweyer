@@ -96,7 +96,6 @@ class MockAudioPlayer extends AudioPlayerPlatform {
   ProcessingStateMessage _processingState = ProcessingStateMessage.idle;
   Duration _updatePosition = Duration.zero;
   DateTime _updateTime = DateTime.now();
-  // ignore: prefer_final_fields
   Duration? _duration;
   int? _index;
   var _playing = false;
