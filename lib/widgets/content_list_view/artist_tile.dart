@@ -48,7 +48,7 @@ class ArtistTile extends SelectableWidget<SelectionEntry> {
     this.enableDefaultOnTap = true,
     double? horizontalPadding,
     this.backgroundColor = Colors.transparent,
-  })  : horizontalPadding = horizontalPadding ?? _horizontalPadding;
+  }) : horizontalPadding = horizontalPadding ?? _horizontalPadding;
 
   const ArtistTile.selectable({
     super.key,

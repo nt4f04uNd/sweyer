@@ -34,8 +34,7 @@ mixin _$SystemUiThemeTailorMixin on ThemeExtension<SystemUiTheme> {
       bottomSheet: bottomSheet ?? this.bottomSheet,
       modal: modal ?? this.modal,
       modalOverGreySystemNavigationBarColor:
-          modalOverGreySystemNavigationBarColor ??
-              this.modalOverGreySystemNavigationBarColor,
+          modalOverGreySystemNavigationBarColor ?? this.modalOverGreySystemNavigationBarColor,
     );
   }
 
@@ -48,10 +47,8 @@ mixin _$SystemUiThemeTailorMixin on ThemeExtension<SystemUiTheme> {
       drawerScreen: t < 0.5 ? drawerScreen : other.drawerScreen,
       bottomSheet: t < 0.5 ? bottomSheet : other.bottomSheet,
       modal: t < 0.5 ? modal : other.modal,
-      modalOverGreySystemNavigationBarColor: Color.lerp(
-          modalOverGreySystemNavigationBarColor,
-          other.modalOverGreySystemNavigationBarColor,
-          t)!,
+      modalOverGreySystemNavigationBarColor:
+          Color.lerp(modalOverGreySystemNavigationBarColor, other.modalOverGreySystemNavigationBarColor, t)!,
     );
   }
 
@@ -62,16 +59,12 @@ mixin _$SystemUiThemeTailorMixin on ThemeExtension<SystemUiTheme> {
             other is SystemUiTheme &&
             const DeepCollectionEquality().equals(grey, other.grey) &&
             const DeepCollectionEquality().equals(black, other.black) &&
-            const DeepCollectionEquality()
-                .equals(drawerScreen, other.drawerScreen) &&
-            const DeepCollectionEquality()
-                .equals(bottomSheet, other.bottomSheet) &&
+            const DeepCollectionEquality().equals(drawerScreen, other.drawerScreen) &&
+            const DeepCollectionEquality().equals(bottomSheet, other.bottomSheet) &&
             const DeepCollectionEquality().equals(modal, other.modal) &&
-            const DeepCollectionEquality().equals(
-                modalOverGreySystemNavigationBarColor,
-                other.modalOverGreySystemNavigationBarColor) &&
             const DeepCollectionEquality()
-                .equals(modalOverGrey, other.modalOverGrey));
+                .equals(modalOverGreySystemNavigationBarColor, other.modalOverGreySystemNavigationBarColor) &&
+            const DeepCollectionEquality().equals(modalOverGrey, other.modalOverGrey));
   }
 
   @override
@@ -83,8 +76,7 @@ mixin _$SystemUiThemeTailorMixin on ThemeExtension<SystemUiTheme> {
       const DeepCollectionEquality().hash(drawerScreen),
       const DeepCollectionEquality().hash(bottomSheet),
       const DeepCollectionEquality().hash(modal),
-      const DeepCollectionEquality()
-          .hash(modalOverGreySystemNavigationBarColor),
+      const DeepCollectionEquality().hash(modalOverGreySystemNavigationBarColor),
       const DeepCollectionEquality().hash(modalOverGrey),
     );
   }
@@ -115,7 +107,6 @@ extension SystemUiThemeBuildContextProps on BuildContext {
 
   /// Theme for the modal dialog.
   SystemUiOverlayStyle get modal => systemUiTheme.modal;
-  Color get modalOverGreySystemNavigationBarColor =>
-      systemUiTheme.modalOverGreySystemNavigationBarColor;
+  Color get modalOverGreySystemNavigationBarColor => systemUiTheme.modalOverGreySystemNavigationBarColor;
   SystemUiOverlayStyle get modalOverGrey => systemUiTheme.modalOverGrey;
 }

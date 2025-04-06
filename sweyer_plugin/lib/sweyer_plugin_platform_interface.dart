@@ -5,11 +5,11 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'sweyer_plugin_method_channel.dart';
 
-
 /// Base class for all exceptions from the Sweyer plugin.
 class SweyerPluginException implements Exception {
   /// The exception reason.
   final String message;
+
   /// An optional cause of this exception.
   final Exception? cause;
 

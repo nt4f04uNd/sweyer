@@ -113,8 +113,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.albumsFactory =
-            () => validAlbums.map((element) => element.$1).toList();
+        FakeSweyerPluginPlatform.instance.albumsFactory = () => validAlbums.map((element) => element.$1).toList();
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
@@ -143,8 +142,7 @@ void main() {
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
-        FakeSweyerPluginPlatform.instance.artistsFactory =
-            () => validArtists.map((element) => element.$1).toList();
+        FakeSweyerPluginPlatform.instance.artistsFactory = () => validArtists.map((element) => element.$1).toList();
       });
       TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(

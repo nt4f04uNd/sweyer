@@ -72,7 +72,7 @@ class ContentListHeader<T extends Content> extends StatelessWidget {
     this.selectionController,
     this.leading,
     this.trailing,
-  })  : _onlyCount = false;
+  }) : _onlyCount = false;
 
   /// Creates a header that shows only count.
   const ContentListHeader.onlyCount({

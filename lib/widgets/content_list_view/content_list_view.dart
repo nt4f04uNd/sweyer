@@ -308,8 +308,9 @@ class ContentListView<T extends Content> extends StatelessWidget {
                 current: currentTest?.call(index),
                 onTap: onItemTap == null ? null : () => onItemTap(index),
                 enableDefaultOnTap: enableDefaultOnTap,
-                backgroundColor:
-                    backgroundColorBuilder == null ? theme.colorScheme.secondaryContainer : backgroundColorBuilder(index),
+                backgroundColor: backgroundColorBuilder == null
+                    ? theme.colorScheme.secondaryContainer
+                    : backgroundColorBuilder(index),
                 songTileVariant: songTileVariant,
                 songTileClickBehavior: songTileClickBehavior,
                 trailing: AnimatedSwitcher(

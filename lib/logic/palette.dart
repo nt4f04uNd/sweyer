@@ -67,7 +67,7 @@ class PaletteSwatch extends StatelessWidget {
     super.key,
     this.color,
     this.label,
-  })  : paletteColor = null;
+  }) : paletteColor = null;
 
   const PaletteSwatch.forPalette({
     super.key,
