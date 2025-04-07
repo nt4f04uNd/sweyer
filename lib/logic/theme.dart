@@ -62,7 +62,7 @@ class ThemeControl {
   void init() {
     final lightTheme = Settings.lightThemeBool.get();
     _brightness = lightTheme ? Brightness.light : Brightness.dark;
-    final primaryColor = Color(Settings.primaryColorInt.get());
+    final primaryColor = Settings.primaryColorInt.get();
     _applyPrimaryColor(primaryColor);
   }
 
@@ -128,7 +128,7 @@ class ThemeControl {
   void changePrimaryColor(Color color) {
     _rebuildOperation?.cancel();
     _applyPrimaryColor(color);
-    Settings.primaryColorInt.set(color.value);
+    Settings.primaryColorInt.set(color);
     themeChanging.add(true);
     MusicPlayer.instance.updateServiceMediaItem();
     _rebuildOperation = CancelableOperation<void>.fromFuture(

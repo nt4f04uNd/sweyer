@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer/constants.dart' as constants;
 
@@ -138,6 +140,24 @@ class SearchHistory {
   }
 }
 
+class ColorPref extends Pref<Color> {
+  const ColorPref(super.key, super.defaultValue);
+
+  @override
+  Color get() {
+    final value = NFPrefs.prefs!.getInt(key);
+    if (value == null) {
+      return defaultValue;
+    }
+    return Color(value);
+  }
+
+  @override
+  Future<bool> set(Color value) async {
+    return NFPrefs.prefs!.setInt(key, value.toARGB32());
+  }
+}
+
 /// Prefs specially for settings route.
 abstract class Settings {
   /// Stores theme brightness.
@@ -150,7 +170,7 @@ abstract class Settings {
 
   /// Stores primary color int value.
   static final primaryColorInt = PrefNotifier(
-    IntPref('setting_primary_color', constants.Theme.defaultPrimaryColor.value),
+    const ColorPref('setting_primary_color', constants.Theme.defaultPrimaryColor),
   );
 
   /// Whether a confirmation toast should be displayed when exiting
