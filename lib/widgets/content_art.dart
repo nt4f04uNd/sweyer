@@ -1026,7 +1026,7 @@ class _ContentArtState extends State<ContentArt> {
             arts,
             Container(
               alignment: Alignment.center,
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               width: widget.size,
               height: widget.size,
             ),

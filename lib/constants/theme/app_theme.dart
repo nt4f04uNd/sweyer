@@ -65,8 +65,8 @@ class AppTheme extends ThemeExtension<AppTheme> with _$AppThemeTailorMixin {
     currentIndicatorBackgroundColorWithDefaultArt: constants.Theme.defaultPrimaryColor,
     drawerMenuItemColor: const Color(0xff3d3e42),
     glowSplashColor: constants.Theme.lightThemeSplashColor,
-    glowSplashColorOnContrast: Colors.white.withOpacity(0.13),
-    sliderInactiveColor: Colors.black.withOpacity(0.2),
+    glowSplashColorOnContrast: Colors.white.withValues(alpha: 0.13),
+    sliderInactiveColor: Colors.black.withValues(alpha: 0.2),
   );
 
   static final AppTheme dark = AppTheme(
@@ -76,8 +76,8 @@ class AppTheme extends ThemeExtension<AppTheme> with _$AppThemeTailorMixin {
     contrastInverse: Colors.black,
     currentIndicatorBackgroundColorWithDefaultArt: constants.Theme.defaultPrimaryColor,
     drawerMenuItemColor: Colors.white,
-    glowSplashColor: Colors.white.withOpacity(0.1),
-    glowSplashColorOnContrast: Colors.black.withOpacity(0.13),
-    sliderInactiveColor: Colors.white.withOpacity(0.2),
+    glowSplashColor: Colors.white.withValues(alpha: 0.1),
+    glowSplashColorOnContrast: Colors.black.withValues(alpha: 0.13),
+    sliderInactiveColor: Colors.white.withValues(alpha: 0.2),
   );
 }

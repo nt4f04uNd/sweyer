@@ -58,7 +58,7 @@ class Artist extends SongOrigin implements PlatformArtist {
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.toARGB32(),
       artUri: null,
       title: title,
       artist: null,

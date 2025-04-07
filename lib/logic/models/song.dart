@@ -138,7 +138,7 @@ class Song extends Content implements PlatformSong {
     return MediaItem(
       id: sourceId.toString(),
       uri: contentUri,
-      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.toARGB32(),
       artUri: null,
       album: getAlbum()?.album,
       title: title,

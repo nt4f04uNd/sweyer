@@ -148,6 +148,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
 @visibleForTesting
 class ColorItem extends StatefulWidget {
   const ColorItem({
+    super.key,
     required this.color,
     required this.onTap,
     this.active = false,

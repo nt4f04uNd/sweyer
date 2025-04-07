@@ -58,7 +58,7 @@ class SystemUiTheme extends ThemeExtension<SystemUiTheme> with _$SystemUiThemeTa
     systemNavigationBarColor: Colors.white,
     systemNavigationBarDividerColor: Colors.transparent,
     systemNavigationBarIconBrightness: Brightness.dark,
-    statusBarColor: Colors.white.withOpacity(0.0),
+    statusBarColor: Colors.white.withValues(alpha: 0.0),
     statusBarBrightness: Brightness.dark,
     statusBarIconBrightness: Brightness.dark,
   );
@@ -67,7 +67,7 @@ class SystemUiTheme extends ThemeExtension<SystemUiTheme> with _$SystemUiThemeTa
     systemNavigationBarColor: Colors.black,
     systemNavigationBarDividerColor: Colors.transparent,
     systemNavigationBarIconBrightness: Brightness.light,
-    statusBarColor: AppColors.grey.withOpacity(0.0),
+    statusBarColor: AppColors.grey.withValues(alpha: 0.0),
     statusBarBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
   );
