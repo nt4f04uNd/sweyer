@@ -27,7 +27,9 @@ runs:
 
     - name: 📦 Install Dependencies
       shell: bash
-      run: flutter pub get
+      run: |
+        flutter pub get
+        flutter pub get -C sweyer_plugin
 
     - name: 📄 Check Dart formatting
       shell: bash
