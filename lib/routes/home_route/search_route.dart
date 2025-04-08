@@ -1027,7 +1027,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
               ? null
               : StadiumBorder(
                   side: BorderSide(
-                    color: theme.appThemeExtension.contrast.withOpacity(0.05),
+                    color: theme.appThemeExtension.contrast.withValues(alpha: 0.05),
                     width: 1.0,
                   ),
                 ),
@@ -1054,7 +1054,7 @@ class _ContentChipState extends State<_ContentChip> with SingleTickerProviderSta
                         ),
                         shape: StadiumBorder(
                           side: BorderSide(
-                            color: theme.appThemeExtension.contrast.withOpacity(0.05),
+                            color: theme.appThemeExtension.contrast.withValues(alpha: 0.05),
                             width: 1.0,
                           ),
                         ),

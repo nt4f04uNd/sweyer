@@ -173,7 +173,7 @@ void _openStandalonePlayerRoute(BuildContext context) {
                     }
                   },
                   child: Container(
-                    color: theme.colorScheme.primary.withOpacity(0.4 * fadeAnimation.value),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.4 * fadeAnimation.value),
                   ),
                 ),
                 BackdropFilter(

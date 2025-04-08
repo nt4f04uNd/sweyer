@@ -18,7 +18,7 @@ class AppBarBorder extends StatelessWidget {
     return AnimatedContainer(
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 400),
-      color: shown ? theme.appThemeExtension.appBarBorderColor : theme.colorScheme.secondary.withOpacity(0.0),
+      color: shown ? theme.appThemeExtension.appBarBorderColor : theme.colorScheme.secondary.withValues(alpha: 0.0),
       height: height,
     );
   }

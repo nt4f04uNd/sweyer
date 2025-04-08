@@ -615,7 +615,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                         titleSpacing: 0.0,
                         backgroundColor: appBarController.isDismissed
                             ? theme.colorScheme.secondaryContainer
-                            : theme.colorScheme.secondaryContainer.withOpacity(0.0),
+                            : theme.colorScheme.secondaryContainer.withValues(alpha: 0.0),
                         title: AnimationSwitcher(
                           animation: CurvedAnimation(
                             curve: Curves.easeOutCubic,
@@ -775,7 +775,7 @@ class _ActionIconButtonState extends State<_ActionIconButton> with SingleTickerP
     super.didChangeDependencies();
     final theme = Theme.of(context);
     colorAnimation = ColorTween(
-      begin: theme.colorScheme.onSurface.withOpacity(0.12),
+      begin: theme.colorScheme.onSurface.withValues(alpha: 0.12),
       end: theme.iconTheme.color,
     ).animate(CurvedAnimation(
       parent: controller,

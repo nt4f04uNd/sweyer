@@ -178,7 +178,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
         data: SliderThemeData(
           trackHeight: 2.0,
           thumbColor: color,
-          overlayColor: color.withOpacity(ThemeControl.instance.isLight ? 0.12 : 0.24),
+          overlayColor: color.withValues(alpha: ThemeControl.instance.isLight ? 0.12 : 0.24),
           activeTrackColor: color,
           inactiveTrackColor: theme.appThemeExtension.sliderInactiveColor,
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 17.0),

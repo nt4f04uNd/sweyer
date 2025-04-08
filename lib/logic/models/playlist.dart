@@ -89,7 +89,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
     return MediaItem(
       id: id.toString(),
       album: null,
-      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.value,
+      defaultArtBlendColor: staticTheme.appThemeExtension.artColorForBlend.toARGB32(),
       artUri: null,
       title: title,
       artist: null,

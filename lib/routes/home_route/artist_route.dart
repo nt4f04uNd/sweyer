@@ -156,7 +156,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              theme.colorScheme.secondaryContainer.withOpacity(0.0),
+                              theme.colorScheme.secondaryContainer.withValues(alpha: 0.0),
                               theme.colorScheme.secondaryContainer
                             ],
                             begin: Alignment.topCenter,
@@ -393,7 +393,7 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                           titleSpacing: 0.0,
                           backgroundColor: appBarController.isDismissed
                               ? theme.colorScheme.secondaryContainer
-                              : theme.colorScheme.secondaryContainer.withOpacity(0.0),
+                              : theme.colorScheme.secondaryContainer.withValues(alpha: 0.0),
                           title: AnimationSwitcher(
                             animation: CurvedAnimation(
                               curve: Curves.easeOutCubic,

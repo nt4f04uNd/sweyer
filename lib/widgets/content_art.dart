@@ -215,10 +215,11 @@ class ContentArt extends StatefulWidget {
   /// The default art asset is a grey-toned mask, so we subtract that mask
   /// to get the color we need to blend to get that original [color].
   static Color getColorToBlendInDefaultArt(Color color) {
-    final int r = (((color.value >> 16) & 0xff) - _defaultArtMask).clamp(0, 0xff);
-    final int g = (((color.value >> 8) & 0xff) - _defaultArtMask).clamp(0, 0xff);
-    final int b = ((color.value & 0xff) - _defaultArtMask).clamp(0, 0xff);
-    return Color((0xff << 24) + (r << 16) + (g << 8) + b);
+    const mask = _defaultArtMask / 255.0;
+    final r = (color.r - mask).clamp(0.0, 1.0);
+    final g = (color.g - mask).clamp(0.0, 1.0);
+    final b = (color.b - mask).clamp(0.0, 1.0);
+    return Color.from(alpha: 1.0, red: r, green: g, blue: b);
   }
 
   @override
@@ -1026,7 +1027,7 @@ class _ContentArtState extends State<ContentArt> {
             arts,
             Container(
               alignment: Alignment.center,
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               width: widget.size,
               height: widget.size,
             ),

@@ -218,7 +218,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
     super.didChangeDependencies();
     final theme = Theme.of(context);
     colorAnimation = ColorTween(
-      begin: theme.colorScheme.onSurface.withOpacity(0.12),
+      begin: theme.colorScheme.onSurface.withValues(alpha: 0.12),
       end: widget.color ?? defaultColor,
     ).animate(CurvedAnimation(
       parent: controller,
@@ -226,7 +226,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       reverseCurve: Curves.easeIn,
     ));
     textColorAnimation = ColorTween(
-      begin: theme.colorScheme.onSurface.withOpacity(0.38),
+      begin: theme.colorScheme.onSurface.withValues(alpha: 0.38),
       end: widget.textColor ?? defaultTextColor,
     ).animate(CurvedAnimation(
       parent: controller,

@@ -321,7 +321,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                                     labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
                                     labelColor: theme.textTheme.titleLarge!.color,
                                     indicatorSize: TabBarIndicatorSize.label,
-                                    unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
+                                    unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                     labelStyle: theme.textTheme.titleLarge!.copyWith(
                                       fontSize: 15.0,
                                       fontWeight: FontWeight.w900,
