@@ -1,0 +1,14 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "dart-format",
+      "pattern": [
+        {
+          "regexp": "^(Format)ted (\\D.+)$",
+          "message": 1,
+          "file": 2
+        }
+      ]
+    }
+  ]
+}

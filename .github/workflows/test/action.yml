@@ -1,6 +1,3 @@
-# Modified very_good_workflows workflow, see ThirdPartyNotices.txt for license
-# https://github.com/VeryGoodOpenSource/very_good_workflows/blob/c66b5434b3428fb5c3d5101492f173b206821850/.github/workflows/flutter_package.yml
-
 name: 🧪 Test Sweyer
 description: Run the Sweyer tests.
 
@@ -31,8 +28,23 @@ runs:
     - name: 📦 Install Dependencies
       shell: bash
       run: |
-        flutter pub global activate very_good_cli
-        very_good packages get --recursive
+        flutter pub get
+        flutter pub get -C sweyer_plugin
+
+    - name: 📄 Check Dart formatting
+      shell: bash
+      run: |
+        echo "::add-matcher::${{ github.workspace }}/.github/problem-matchers/dart-format.json"
+        dart format --set-exit-if-changed .
+        echo "::remove-matcher owner=dart-format::"
+
+    - name: 📝 Run Dart Linter
+      shell: bash
+      run: |
+        echo "::add-matcher::${{ github.workspace }}/.github/problem-matchers/flutter-analyze.json"
+        flutter analyze --fatal-infos || echo "Ignoring analyze problems for now" # TODO: Remove the `|| ...`
+        echo "::remove-matcher owner=flutter-analyze::"
+        echo "::remove-matcher owner=flutter-analyze-info::"
 
     - name: 🧪 Run Tests
       shell: bash
