@@ -45,7 +45,7 @@ dependencies:
   flutter_cache_manager: ^3.1.1
   clock: ^1.1.0
   styled_text: ^8.1.0
-  android_content_provider: ^0.5.1
+  android_content_provider: ^0.5.2
   collection: ^1.16.0
   theme_tailor_annotation: ^3.0.2
   riverpod: ^2.6.1
