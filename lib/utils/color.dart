@@ -8,9 +8,12 @@ import 'package:flutter/material.dart';
 /// Inspired by https://stackoverflow.com/a/13532993
 Color shadeColor(double factor, Color color, {int minBit = 0, int maxBit = 0xff}) {
   assert(factor >= -1 && factor <= 1);
+  final minBound = minBit / 255.0;
+  final maxBound = maxBit / 255.0;
   factor = (1 + factor);
-  final r = (color.r * 255.0 * factor).toInt().clamp(minBit, maxBit);
-  final g = (color.g * 255.0 * factor).toInt().clamp(minBit, maxBit);
-  final b = (color.b * 255.0 * factor).toInt().clamp(minBit, maxBit);
-  return Color.fromARGB(0xFF, r, g, b);
+  return color.withValues(
+    red: (color.r * factor).clamp(minBound, maxBound),
+    green: (color.g * factor).clamp(minBound, maxBound),
+    blue: (color.b * factor).clamp(minBound, maxBound),
+  );
 }
