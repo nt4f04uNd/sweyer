@@ -15,6 +15,11 @@ updates:
     schedule:
       interval: "daily"
 
+  - package-ecosystem: "pub"
+    directory: "/sweyer_plugin/example"
+    schedule:
+      interval: "daily"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
