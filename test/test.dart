@@ -17,7 +17,6 @@ import 'package:just_audio_platform_interface/just_audio_platform_interface.dart
 import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
@@ -317,7 +316,7 @@ extension WidgetTesterExtension on WidgetTester {
   /// has non-default player interface style.
   PlayerInterfaceColorStyle? get nonDefaultPlayerInterfaceColorStyle => _testersPlayerInterfaceColorStyle[this];
 
-  Future<void> screenMatchesGolden(
+  Future<void> _screenMatchesGolden(
     String name, {
     bool? autoHeight,
     Finder? finder,
@@ -328,7 +327,7 @@ extension WidgetTesterExtension on WidgetTester {
       playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle,
     );
     name = testDescription.buildFileName(name);
-    return _screenMatchesGoldenWithTolerance(
+    return screenMatchesGolden(
       this,
       name,
       autoHeight: autoHeight,
@@ -414,7 +413,7 @@ void testAppGoldens(
             () => test(tester),
             goldenCaptureCallback: () {
               final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
-              return tester.screenMatchesGolden(
+              return tester._screenMatchesGolden(
                 "$group.${description.replaceAll(' ', '.')}",
                 customPump: customGoldenPump,
               );
@@ -429,49 +428,6 @@ void testAppGoldens(
 
 /// Signature used in [runGoldenAppTest].
 typedef GoldenCaptureCallback = Future<void> Function(bool lightTheme);
-
-Future<void> _screenMatchesGoldenWithTolerance(
-  WidgetTester tester,
-  String name, {
-  bool? autoHeight,
-  Finder? finder,
-  CustomPump? customPump,
-}) {
-  goldenFileComparator = _TolerableFileComparator(path.join(
-    (goldenFileComparator as LocalFileComparator).basedir.toString(),
-    name,
-  ));
-  return screenMatchesGolden(
-    tester,
-    name,
-    autoHeight: autoHeight,
-    finder: finder,
-    customPump: customPump,
-  );
-}
-
-class _TolerableFileComparator extends LocalFileComparator {
-  _TolerableFileComparator(String testFile) : super(Uri.parse(testFile));
-
-  static const double _kGoldenDiffTolerance = 0.005;
-
-  @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final ComparisonResult result = await GoldenFileComparator.compareLists(
-      imageBytes,
-      await getGoldenBytes(golden),
-    );
-    if (!result.passed && result.diffPercent > _kGoldenDiffTolerance) {
-      final String error = await generateFailureOutput(result, golden, basedir);
-      throw FlutterError(error);
-    }
-    if (!result.passed) {
-      print('A tolerable difference of ${result.diffPercent * 100}% was found when '
-          'comparing $golden.');
-    }
-    return result.passed || result.diffPercent <= _kGoldenDiffTolerance;
-  }
-}
 
 class FakeLicenseEntry extends LicenseEntry {
   const FakeLicenseEntry();
