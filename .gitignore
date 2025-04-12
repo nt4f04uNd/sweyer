@@ -45,6 +45,7 @@ app.*.map.json
 
 # gen_l10n untranslated messages output, see l10n.yaml
 untranslated-messages.txt
+lib/localization/generated
 
 # Ignore golden failure outputs
 **/failures/*.png

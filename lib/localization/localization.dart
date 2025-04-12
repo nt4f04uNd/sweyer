@@ -1,4 +1,4 @@
-export 'package:flutter_gen/gen_l10n/app_localizations.dart';
+export 'package:sweyer/localization/generated/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
