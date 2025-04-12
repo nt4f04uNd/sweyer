@@ -1,4 +1,6 @@
+synthetic-package: false
 arb-dir: lib/localization/arb
+output-dir: lib/localization/generated
 #  Do not supply country code, gen_l10n currently doesn't handle it well
 #  https://github.com/flutter/flutter/issues/92731
 template-arb-file: intl_en.arb

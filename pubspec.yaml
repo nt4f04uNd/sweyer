@@ -96,7 +96,6 @@ dev_dependencies:
   sqflite_common_ffi: ^2.3.3
 
 flutter:
-  generate: true
   uses-material-design: true
 
   assets:

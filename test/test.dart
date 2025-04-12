@@ -14,11 +14,11 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:package_info_plus_platform_interface/package_info_platform_interface.dart';
 import 'package:package_info_plus_platform_interface/method_channel_package_info.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sweyer/constants.dart' as constants;
+import 'package:sweyer/localization/generated/app_localizations_en.dart';
 import 'package:sweyer_plugin/sweyer_plugin_platform_interface.dart';
 
 export 'fakes/fakes.dart';
