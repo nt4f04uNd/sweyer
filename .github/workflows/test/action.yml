@@ -31,6 +31,10 @@ runs:
         flutter pub get
         flutter pub get -C sweyer_plugin
 
+    - name: 🌐 Generate localizations
+      shell: bash
+      run: flutter gen-l10n
+
     - name: 📄 Check Dart formatting
       shell: bash
       run: |
