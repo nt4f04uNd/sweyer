@@ -88,7 +88,7 @@ dev_dependencies:
     sdk: flutter
 
   build_runner: ^2.4.10
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
   golden_toolkit: ^0.15.0
   theme_tailor: ^3.0.1
   freezed: ^2.3.2
