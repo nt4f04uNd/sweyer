@@ -324,6 +324,7 @@ extension WidgetTesterExtension on WidgetTester {
       playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle,
     );
     name = testDescription.buildFileName(name);
+    await _waitForAssets();
     if (customPump != null) {
       await customPump(this);
     } else {
@@ -333,6 +334,28 @@ extension WidgetTesterExtension on WidgetTester {
       find.byWidgetPredicate((widget) => true).first, // The whole screen
       matchesGoldenFile('goldens/$name.png'),
     );
+  }
+
+  Future<void> _waitForAssets() async {
+    final imageElements = find.byType(Image, skipOffstage: false).evaluate();
+    final containerElements = find.byType(DecoratedBox, skipOffstage: false).evaluate();
+    await runAsync(() async {
+      for (final imageElement in imageElements) {
+        final widget = imageElement.widget;
+        if (widget is Image) {
+          await precacheImage(widget.image, imageElement);
+        }
+      }
+      for (final container in containerElements) {
+        final widget = container.widget as DecoratedBox;
+        final decoration = widget.decoration;
+        if (decoration is BoxDecoration) {
+          if (decoration.image != null) {
+            await precacheImage(decoration.image!.image, container);
+          }
+        }
+      }
+    });
   }
 
   /// Expect the app to render a list of songs in [SongTile]s.
