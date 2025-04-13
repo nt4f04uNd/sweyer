@@ -31,6 +31,10 @@ runs:
         flutter pub get
         flutter pub get -C sweyer_plugin
 
+    - name: 🌐 Format generated localizations
+      shell: bash
+      run: dart format lib/localization/generated # TODO: Check if this is still necessary on the next Flutter update, maybe https://github.com/flutter/flutter/pull/167029 removes the need for this.
+
     - name: 📄 Check Dart formatting
       shell: bash
       run: |
