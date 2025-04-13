@@ -415,32 +415,38 @@ void testAppGoldens(
       testWidgets(
         testDescription,
         (tester) async {
-          final previousDeterministicCursor = EditableText.debugDeterministicCursor;
-          addTearDown(() {
-            EditableText.debugDeterministicCursor = previousDeterministicCursor;
-            _testersLightTheme.remove(tester);
-            _testersPlayerInterfaceColorStyle.remove(tester);
-          });
-          EditableText.debugDeterministicCursor = true;
-          _testersLightTheme[tester] = lightTheme;
-          if (nonDefaultPlayerInterfaceColorStyle) {
-            _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
+          final previousDebugDisableShadowsValue = debugDisableShadows;
+          try {
+            debugDisableShadows = false;
+            final previousDeterministicCursor = EditableText.debugDeterministicCursor;
+            addTearDown(() {
+              EditableText.debugDeterministicCursor = previousDeterministicCursor;
+              _testersLightTheme.remove(tester);
+              _testersPlayerInterfaceColorStyle.remove(tester);
+            });
+            EditableText.debugDeterministicCursor = true;
+            _testersLightTheme[tester] = lightTheme;
+            if (nonDefaultPlayerInterfaceColorStyle) {
+              _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
+            }
+            registerPostAppSetup((_) {
+              ThemeControl.instance.setThemeLightMode(lightTheme);
+              Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
+            });
+            setUp?.call();
+            return await tester.runAppTest(
+              () => test(tester),
+              goldenCaptureCallback: () {
+                final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
+                return tester._screenMatchesGolden(
+                  "$group.${description.replaceAll(' ', '.')}",
+                  customPump: customGoldenPump,
+                );
+              },
+            );
+          } finally {
+            debugDisableShadows = previousDebugDisableShadowsValue;
           }
-          registerPostAppSetup((_) {
-            ThemeControl.instance.setThemeLightMode(lightTheme);
-            Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
-          });
-          setUp?.call();
-          return tester.runAppTest(
-            () => test(tester),
-            goldenCaptureCallback: () {
-              final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
-              return tester._screenMatchesGolden(
-                "$group.${description.replaceAll(' ', '.')}",
-                customPump: customGoldenPump,
-              );
-            },
-          );
         },
         tags: tags != _defaultTagObject ? tags : const ['golden'],
       );
