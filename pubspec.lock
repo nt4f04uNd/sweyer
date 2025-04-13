@@ -341,7 +341,7 @@ packages:
     source: hosted
     version: "2.0.7"
   fading_edge_scrollview:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: fading_edge_scrollview
       sha256: "1f84fe3ea8e251d00d5735e27502a6a250e4aa3d3b330d3fdcb475af741464ef"

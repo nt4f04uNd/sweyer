@@ -117,6 +117,3 @@ flutter:
     - family:  SweyerIcons
       fonts:
        - asset: assets/fonts/SweyerIcons/SweyerIcons.ttf
-
-dependency_overrides:
-  fading_edge_scrollview: ^4.1.1  # TODO: Remove once https://github.com/MarcelGarus/marquee/issues/95 has been published
