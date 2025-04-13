@@ -6,3 +6,5 @@ pubspec.lock linguist-generated=true
 *.tailor.dart linguist-generated=true
 # Generated files by the firebase library
 lib/firebase_options.dart linguist-generated=true
+# Fonts
+*.ttf binary
