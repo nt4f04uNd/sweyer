@@ -27,7 +27,6 @@ Future<void> loadAppFonts() async {
 }
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  await loadAppFonts();
   setUpAll(loadAppFonts);
   await testMain();
 }
