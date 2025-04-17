@@ -51,7 +51,7 @@ dependencies:
   riverpod: ^2.6.1
   flutter_riverpod: ^2.1.1
   hooks_riverpod: ^2.6.0
-  flutter_hooks: ^0.20.5
+  flutter_hooks: ^0.21.2
   freezed_annotation: ^3.0.0
   json_annotation: ^4.7.0
   memoize: ^3.0.0
@@ -118,6 +118,3 @@ flutter:
     - family:  SweyerIcons
       fonts:
        - asset: assets/fonts/SweyerIcons/SweyerIcons.ttf
-
-dependency_overrides:
-  fading_edge_scrollview: ^4.1.1  # TODO: Remove once https://github.com/MarcelGarus/marquee/issues/95 has been published
