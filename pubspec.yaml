@@ -92,7 +92,7 @@ dev_dependencies:
   golden_toolkit: ^0.15.0
   theme_tailor: ^3.0.1
   freezed: ^3.0.6
-  json_serializable: ^6.5.4
+  json_serializable: ^6.9.5
   sqflite_common_ffi: ^2.3.3
 
 flutter:
