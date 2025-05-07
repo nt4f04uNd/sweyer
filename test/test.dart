@@ -10,7 +10,6 @@ import 'package:test_api/src/backend/invoker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:package_info_plus_platform_interface/package_info_platform_interface.dart';
 import 'package:package_info_plus_platform_interface/method_channel_package_info.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
@@ -318,22 +317,45 @@ extension WidgetTesterExtension on WidgetTester {
 
   Future<void> _screenMatchesGolden(
     String name, {
-    bool? autoHeight,
-    Finder? finder,
-    CustomPump? customPump,
-  }) {
+    Future<void> Function(WidgetTester)? customPump,
+  }) async {
     final testDescription = getTestDescription(
       lightTheme: lightThemeGolden,
       playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle,
     );
     name = testDescription.buildFileName(name);
-    return screenMatchesGolden(
-      this,
-      name,
-      autoHeight: autoHeight,
-      finder: finder,
-      customPump: customPump,
+    await _waitForAssets();
+    if (customPump != null) {
+      await customPump(this);
+    } else {
+      await pumpAndSettle();
+    }
+    await expectLater(
+      find.byWidgetPredicate((widget) => true).first, // The whole screen
+      matchesGoldenFile('goldens/$name.png'),
     );
+  }
+
+  Future<void> _waitForAssets() async {
+    final imageElements = find.byType(Image, skipOffstage: false).evaluate();
+    final containerElements = find.byType(DecoratedBox, skipOffstage: false).evaluate();
+    await runAsync(() async {
+      for (final imageElement in imageElements) {
+        final widget = imageElement.widget;
+        if (widget is Image) {
+          await precacheImage(widget.image, imageElement);
+        }
+      }
+      for (final container in containerElements) {
+        final widget = container.widget as DecoratedBox;
+        final decoration = widget.decoration;
+        if (decoration is BoxDecoration) {
+          if (decoration.image != null) {
+            await precacheImage(decoration.image!.image, container);
+          }
+        }
+      }
+    });
   }
 
   /// Expect the app to render a list of songs in [SongTile]s.
@@ -378,7 +400,7 @@ void testAppGoldens(
   Object? tags = _defaultTagObject,
   Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
   VoidCallback? setUp,
-  CustomPump? customGoldenPump,
+  Future<void> Function(WidgetTester)? customGoldenPump,
 }) {
   assert(playerInterfaceColorStylesToTest.isNotEmpty);
   for (final lightTheme in [false, true]) {
@@ -390,37 +412,43 @@ void testAppGoldens(
         lightTheme: lightTheme,
         playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
       ).buildDescription(description);
-      testGoldens(
+      testWidgets(
         testDescription,
         (tester) async {
-          final previousDeterministicCursor = EditableText.debugDeterministicCursor;
-          addTearDown(() {
-            EditableText.debugDeterministicCursor = previousDeterministicCursor;
-            _testersLightTheme.remove(tester);
-            _testersPlayerInterfaceColorStyle.remove(tester);
-          });
-          EditableText.debugDeterministicCursor = true;
-          _testersLightTheme[tester] = lightTheme;
-          if (nonDefaultPlayerInterfaceColorStyle) {
-            _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
+          final previousDebugDisableShadowsValue = debugDisableShadows;
+          try {
+            debugDisableShadows = false;
+            final previousDeterministicCursor = EditableText.debugDeterministicCursor;
+            addTearDown(() {
+              EditableText.debugDeterministicCursor = previousDeterministicCursor;
+              _testersLightTheme.remove(tester);
+              _testersPlayerInterfaceColorStyle.remove(tester);
+            });
+            EditableText.debugDeterministicCursor = true;
+            _testersLightTheme[tester] = lightTheme;
+            if (nonDefaultPlayerInterfaceColorStyle) {
+              _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
+            }
+            registerPostAppSetup((_) {
+              ThemeControl.instance.setThemeLightMode(lightTheme);
+              Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
+            });
+            setUp?.call();
+            return await tester.runAppTest(
+              () => test(tester),
+              goldenCaptureCallback: () {
+                final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
+                return tester._screenMatchesGolden(
+                  "$group.${description.replaceAll(' ', '.')}",
+                  customPump: customGoldenPump,
+                );
+              },
+            );
+          } finally {
+            debugDisableShadows = previousDebugDisableShadowsValue;
           }
-          registerPostAppSetup((_) {
-            ThemeControl.instance.setThemeLightMode(lightTheme);
-            Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
-          });
-          setUp?.call();
-          return tester.runAppTest(
-            () => test(tester),
-            goldenCaptureCallback: () {
-              final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
-              return tester._screenMatchesGolden(
-                "$group.${description.replaceAll(' ', '.')}",
-                customPump: customGoldenPump,
-              );
-            },
-          );
         },
-        tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
+        tags: tags != _defaultTagObject ? tags : const ['golden'],
       );
     }
   }
