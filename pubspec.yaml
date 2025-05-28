@@ -18,7 +18,7 @@ dependencies:
   uuid: ^4.5.1
   path: ^1.8.0
   async: ^2.5.0
-  rxdart: ^0.26.0
+  rxdart: ^0.28.0
   sliver_tools: ^0.2.1
   animations: ^2.0.2
   permission_handler: ^12.0.0+1
