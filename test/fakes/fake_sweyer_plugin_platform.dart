@@ -30,9 +30,9 @@ class FavoriteLogEntry {
 typedef RawContentFactory = FutureOr<Iterable<Map<String, dynamic>>> Function();
 
 class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
-  FakeSweyerPluginPlatform(TestWidgetsFlutterBinding binding) {
+  FakeSweyerPluginPlatform(TestDefaultBinaryMessenger messenger) {
     instance = this;
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('content_channel'), (call) {
+    messenger.setMockMethodCallHandler(const MethodChannel('content_channel'), (call) {
       /// Ignore [CancellationSignal] calls
       if (call.method == 'cancelAlbumArtLoading') {
         return null;

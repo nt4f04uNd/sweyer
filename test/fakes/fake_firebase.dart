@@ -6,9 +6,9 @@ import '../observer/crashlytics.dart';
 import '../test.dart';
 
 class FakeFirebaseApp extends MockFirebaseApp {
-  static Future<void> install(TestWidgetsFlutterBinding binding) async {
+  static Future<void> install(TestDefaultBinaryMessenger messenger) async {
     TestFirebaseCoreHostApi.setup(FakeFirebaseApp());
-    CrashlyticsObserver(binding, throwFatalErrors: true); // Register throwing crashlytics observer.
+    CrashlyticsObserver(messenger, throwFatalErrors: true); // Register throwing crashlytics observer.
     await Firebase.initializeApp();
   }
 
