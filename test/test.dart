@@ -6,7 +6,6 @@ export 'package:flutter/foundation.dart';
 export 'package:flutter_test/flutter_test.dart';
 import 'package:android_content_provider/android_content_provider.dart';
 import 'package:clock/clock.dart';
-import 'package:test_api/src/backend/invoker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +13,6 @@ import 'package:package_info_plus_platform_interface/package_info_platform_inter
 import 'package:package_info_plus_platform_interface/method_channel_package_info.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:meta/meta.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/localization/generated/app_localizations_en.dart';
@@ -25,7 +23,6 @@ export 'fakes/fakes.dart';
 import 'observer/app_widget.dart';
 import 'observer/observer.dart';
 import 'test.dart';
-import 'test_description.dart';
 
 final _testSong = Song(
   id: 0,
@@ -307,57 +304,6 @@ extension WidgetTesterExtension on WidgetTester {
     });
   }
 
-  /// Whether the current tester is running in [testAppGoldens] and
-  /// in light mode.
-  bool get lightThemeGolden => _testersLightTheme[this] ?? false;
-
-  /// Whether the current tester is running in [testAppGoldens] and
-  /// has non-default player interface style.
-  PlayerInterfaceColorStyle? get nonDefaultPlayerInterfaceColorStyle => _testersPlayerInterfaceColorStyle[this];
-
-  Future<void> _screenMatchesGolden(
-    String name, {
-    Future<void> Function(WidgetTester)? customPump,
-  }) async {
-    final testDescription = getTestDescription(
-      lightTheme: lightThemeGolden,
-      playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle,
-    );
-    name = testDescription.buildFileName(name);
-    await _waitForAssets();
-    if (customPump != null) {
-      await customPump(this);
-    } else {
-      await pumpAndSettle();
-    }
-    await expectLater(
-      find.byWidgetPredicate((widget) => true).first, // The whole screen
-      matchesGoldenFile('goldens/$name.png'),
-    );
-  }
-
-  Future<void> _waitForAssets() async {
-    final imageElements = find.byType(Image, skipOffstage: false).evaluate();
-    final containerElements = find.byType(DecoratedBox, skipOffstage: false).evaluate();
-    await runAsync(() async {
-      for (final imageElement in imageElements) {
-        final widget = imageElement.widget;
-        if (widget is Image) {
-          await precacheImage(widget.image, imageElement);
-        }
-      }
-      for (final container in containerElements) {
-        final widget = container.widget as DecoratedBox;
-        final decoration = widget.decoration;
-        if (decoration is BoxDecoration) {
-          if (decoration.image != null) {
-            await precacheImage(decoration.image!.image, container);
-          }
-        }
-      }
-    });
-  }
-
   /// Expect the app to render a list of songs in [SongTile]s.
   void expectSongTiles(Iterable<Song> songs) {
     final songTiles = widgetList<SongTile>(find.byType(SongTile));
@@ -379,83 +325,6 @@ extension WidgetTesterExtension on WidgetTester {
     await pumpAndSettle();
   }
 }
-
-final _testersLightTheme = <WidgetTester, bool>{};
-final _testersPlayerInterfaceColorStyle = <WidgetTester, PlayerInterfaceColorStyle?>{};
-const _defaultPlayerInterfaceColorStyle = PlayerInterfaceColorStyle.artColor;
-const Object _defaultTagObject = Object();
-
-/// Creates a golden test in two variants - in dark and light mode.
-//
-// TODO: weird, when run individually from IDE for some reason Dart extension throws
-// "No tests match regular expression "^tabs_route idle_drawer( \(variant: .*\))?$"."
-// report it here https://github.com/Dart-Code/Dart-Code/issues/new/choose
-//
-// More weird, just `testGoldens` itself works ok
-@isTest
-void testAppGoldens(
-  String description,
-  Future<void> Function(WidgetTester) test, {
-  bool? skip,
-  Object? tags = _defaultTagObject,
-  Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
-  VoidCallback? setUp,
-  Future<void> Function(WidgetTester)? customGoldenPump,
-}) {
-  assert(playerInterfaceColorStylesToTest.isNotEmpty);
-  for (final lightTheme in [false, true]) {
-    final nonDefaultPlayerInterfaceColorStyle = playerInterfaceColorStylesToTest.length > 1 ||
-        !playerInterfaceColorStylesToTest.contains(_defaultPlayerInterfaceColorStyle);
-
-    for (final playerInterfaceColorStyle in playerInterfaceColorStylesToTest) {
-      final testDescription = getTestDescription(
-        lightTheme: lightTheme,
-        playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
-      ).buildDescription(description);
-      testWidgets(
-        testDescription,
-        (tester) async {
-          final previousDebugDisableShadowsValue = debugDisableShadows;
-          try {
-            debugDisableShadows = false;
-            final previousDeterministicCursor = EditableText.debugDeterministicCursor;
-            addTearDown(() {
-              EditableText.debugDeterministicCursor = previousDeterministicCursor;
-              _testersLightTheme.remove(tester);
-              _testersPlayerInterfaceColorStyle.remove(tester);
-            });
-            EditableText.debugDeterministicCursor = true;
-            _testersLightTheme[tester] = lightTheme;
-            if (nonDefaultPlayerInterfaceColorStyle) {
-              _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
-            }
-            registerPostAppSetup((_) {
-              ThemeControl.instance.setThemeLightMode(lightTheme);
-              Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
-            });
-            setUp?.call();
-            return await tester.runAppTest(
-              () => test(tester),
-              goldenCaptureCallback: () {
-                final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
-                return tester._screenMatchesGolden(
-                  "$group.${description.replaceAll(' ', '.')}",
-                  customPump: customGoldenPump,
-                );
-              },
-            );
-          } finally {
-            debugDisableShadows = previousDebugDisableShadowsValue;
-          }
-        },
-        tags: tags != _defaultTagObject ? tags : const ['golden'],
-      );
-    }
-  }
-}
-
-/// Signature used in [runGoldenAppTest].
-typedef GoldenCaptureCallback = Future<void> Function(bool lightTheme);
 
 class FakeLicenseEntry extends LicenseEntry {
   const FakeLicenseEntry();
