@@ -1,17 +1,10 @@
-import 'dart:async';
+import 'dart:async' show FutureOr;
 
-import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:flutter_test/flutter_test.dart' show setUpAll;
 
-// Load fonts for goldens, taken from https://pub.dev/packages/golden_toolkit#loading-fonts
-// Also enable real shadows
+import 'framework/golden.dart' show loadAppFonts;
+
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  return GoldenToolkit.runWithConfiguration(
-    () async {
-      await loadAppFonts();
-      return testMain();
-    },
-    config: GoldenToolkitConfiguration(
-      enableRealShadows: true,
-    ),
-  );
+  setUpAll(loadAppFonts);
+  await testMain();
 }
