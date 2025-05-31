@@ -16,7 +16,7 @@ void main() {
         (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
       registerAppSetup(() {
-        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver = PermissionsChannelObserver(tester.binding.defaultBinaryMessenger);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
       });
@@ -44,7 +44,7 @@ void main() {
       late PermissionsChannelObserver permissionsObserver;
       registerAppSetup(() {
         FakeDeviceInfoControl.instance.sdkInt = 33;
-        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver = PermissionsChannelObserver(tester.binding.defaultBinaryMessenger);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.granted);
       });
@@ -62,7 +62,7 @@ void main() {
       late PermissionsChannelObserver permissionsObserver;
       registerAppSetup(() {
         FakeDeviceInfoControl.instance.sdkInt = 32;
-        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver = PermissionsChannelObserver(tester.binding.defaultBinaryMessenger);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
       });
@@ -76,7 +76,7 @@ void main() {
     testWidgets('shows toast and opens settings when permissions are denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
       registerAppSetup(() {
-        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver = PermissionsChannelObserver(tester.binding.defaultBinaryMessenger);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
       });
@@ -133,7 +133,7 @@ void main() {
     late CrashlyticsObserver crashlyticsObserver;
     var songsFactoryCallCount = 0;
     registerAppSetup(() {
-      crashlyticsObserver = CrashlyticsObserver(tester.binding, throwFatalErrors: false);
+      crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger, throwFatalErrors: false);
       FakeSweyerPluginPlatform.instance.songsFactory = () {
         songsFactoryCallCount += 1;
         if (songsFactoryCallCount <= 2) {
@@ -172,7 +172,7 @@ void main() {
       (WidgetTester tester) async {
     late AppWidgetChannelObserver appWidgetChannelObserver;
     registerAppSetup(() {
-      appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
+      appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding.defaultBinaryMessenger);
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
@@ -271,7 +271,8 @@ void main() {
   testWidgets('Allows changing settings when uninitialized and no permissions were granted',
       (WidgetTester tester) async {
     registerAppSetup(() {
-      PermissionsChannelObserver permissionsObserver = PermissionsChannelObserver(tester.binding);
+      PermissionsChannelObserver permissionsObserver =
+          PermissionsChannelObserver(tester.binding.defaultBinaryMessenger);
       permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
       permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
     });
