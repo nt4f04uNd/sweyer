@@ -241,7 +241,7 @@ void main() {
   group('app does not overlap the track panel and the tab bar', () {
     testWidgets('for the normal text scale', (WidgetTester tester) async {
       await tester.runAppTest(() async {
-        final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
+        final tabBarTop = tester.getBottomLeft(find.byType(TabBar)).dy;
         final trackPanelTop =
             tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
         expect(tabBarTop, trackPanelTop);
@@ -251,7 +251,7 @@ void main() {
       // TODO: Increase the scale factor once the other unrelated overflows are handled.
       tester.binding.platformDispatcher.textScaleFactorTestValue = 1.2; // 2.5;
       await tester.runAppTest(() async {
-        final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
+        final tabBarTop = tester.getBottomLeft(find.byType(TabBar)).dy;
         final trackPanelTop =
             tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
         expect(tabBarTop, trackPanelTop);
@@ -260,7 +260,7 @@ void main() {
     testWidgets('for small text scale', (WidgetTester tester) async {
       tester.binding.platformDispatcher.textScaleFactorTestValue = 0.5;
       await tester.runAppTest(() async {
-        final tabBarTop = tester.getBottomLeft(find.byType(NFTabBar)).dy;
+        final tabBarTop = tester.getBottomLeft(find.byType(TabBar)).dy;
         final trackPanelTop =
             tester.getTopLeft(find.descendant(of: find.byType(PlayerRoute), matching: find.byType(TrackPanel))).dy;
         expect(tabBarTop, trackPanelTop);
