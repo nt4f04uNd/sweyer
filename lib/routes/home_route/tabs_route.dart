@@ -254,6 +254,7 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
         child: Stack(
           children: [
             SafeArea(
+              bottom: false,
               child: Padding(
                 padding: const EdgeInsets.only(top: kToolbarHeight),
                 child: Stack(
