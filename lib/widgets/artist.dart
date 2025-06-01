@@ -1,7 +1,7 @@
 import 'package:sweyer/sweyer.dart';
 import 'package:flutter/material.dart';
 
-/// Component to show artist, or automatically show 'Unknown artist' instead of '<unknown>'
+/// Component to show artist, or automatically show `Unknown artist` instead of `<unknown>`
 class ArtistWidget extends StatelessWidget {
   const ArtistWidget({
     super.key,
