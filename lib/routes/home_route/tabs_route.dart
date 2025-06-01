@@ -308,26 +308,31 @@ class TabsRouteState extends State<TabsRoute> with TickerProviderStateMixin, Sel
                                   tabBarDragged = false;
                                 },
                                 child: Center(
-                                  child: NFTabBar(
-                                    isScrollable: true,
-                                    controller: tabController,
-                                    indicatorWeight: 5.0,
-                                    indicator: BoxDecoration(
-                                      color: theme.colorScheme.primary,
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(3.0),
-                                        topRight: Radius.circular(3.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                                    child: TabBar(
+                                      isScrollable: true,
+                                      controller: tabController,
+                                      indicatorWeight: 5.0,
+                                      indicatorPadding: EdgeInsetsGeometry.only(top: 40.0),
+                                      splashBorderRadius: const BorderRadius.all(Radius.circular(8.0)),
+                                      indicator: BoxDecoration(
+                                        color: theme.colorScheme.primary,
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(3.0),
+                                          topRight: Radius.circular(3.0),
+                                        ),
                                       ),
+                                      labelPadding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 5.0),
+                                      labelColor: theme.textTheme.titleLarge!.color,
+                                      indicatorSize: TabBarIndicatorSize.label,
+                                      unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                      labelStyle: theme.textTheme.titleLarge!.copyWith(
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                      tabs: _buildTabs(),
                                     ),
-                                    labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                    labelColor: theme.textTheme.titleLarge!.color,
-                                    indicatorSize: TabBarIndicatorSize.label,
-                                    unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                    labelStyle: theme.textTheme.titleLarge!.copyWith(
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                    tabs: _buildTabs(),
                                   ),
                                 ),
                               ),
@@ -596,67 +601,70 @@ class TabCollapse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: some weird stuff happening if value is 1.6090780263766646e-7, this suggests some issue in the rendering that would needed to be investigated, reproduced and filed to flutter as issue
-    return NFTab(
-      child: AnimatedBuilder(
-        animation: tabController.animation!,
-        child: Text(label),
-        builder: (context, child) {
-          final tabValue = tabController.animation!.value;
-          final indexIsChanging = tabController.indexIsChanging;
-          double value = 0.0;
-          if (tabValue > index - 1 && tabValue <= index) {
-            if (!indexIsChanging ||
-                indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
-              // Animation for next tab.
-              value = 1 + (tabController.animation!.value - index);
+    return Padding(
+      padding: const EdgeInsets.only(left: 2.0, right: 2.0, top: 2.0),
+      child: Tab(
+        child: AnimatedBuilder(
+          animation: tabController.animation!,
+          child: Text(label),
+          builder: (context, child) {
+            final tabValue = tabController.animation!.value;
+            final indexIsChanging = tabController.indexIsChanging;
+            double value = 0.0;
+            if (tabValue > index - 1 && tabValue <= index) {
+              if (!indexIsChanging ||
+                  indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+                // Animation for next tab.
+                value = 1 + (tabController.animation!.value - index);
+              }
+            } else if (tabValue <= index + 1 && tabValue > index) {
+              if (!indexIsChanging ||
+                  indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
+                // Animation for previous tab.
+                value = 1 - (tabController.animation!.value - index);
+              }
             }
-          } else if (tabValue <= index + 1 && tabValue > index) {
-            if (!indexIsChanging ||
-                indexIsChanging && (tabController.index == index || tabController.previousIndex == index)) {
-              // Animation for previous tab.
-              value = 1 - (tabController.animation!.value - index);
-            }
-          }
-          value = value.clamp(0.0, 1.0);
-          return Row(
-            children: [
-              ClipRect(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  heightFactor: 1.0 - value,
-                  widthFactor: 1.0 - value,
-                  child: icon,
+            value = value.clamp(0.0, 1.0);
+            return Row(
+              children: [
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    heightFactor: 1.0 - value,
+                    widthFactor: 1.0 - value,
+                    child: icon,
+                  ),
                 ),
-              ),
-              // Create a space while animating in-between icon and label, but don't keep it,
-              // otherwise symmetry is ruined.
-              SizedBox(
-                width: 4 *
-                    TweenSequence([
-                      TweenSequenceItem(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        weight: 1,
-                      ),
-                      TweenSequenceItem(
-                        tween: ConstantTween(1.0),
-                        weight: 2,
-                      ),
-                      TweenSequenceItem(
-                        tween: Tween(begin: 1.0, end: 0.0),
-                        weight: 1,
-                      ),
-                    ]).transform(value),
-              ),
-              ClipRect(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: value,
-                  child: child,
+                // Create a space while animating in-between icon and label, but don't keep it,
+                // otherwise symmetry is ruined.
+                SizedBox(
+                  width: 4 *
+                      TweenSequence([
+                        TweenSequenceItem(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          weight: 1,
+                        ),
+                        TweenSequenceItem(
+                          tween: ConstantTween(1.0),
+                          weight: 2,
+                        ),
+                        TweenSequenceItem(
+                          tween: Tween(begin: 1.0, end: 0.0),
+                          weight: 1,
+                        ),
+                      ]).transform(value),
                 ),
-              ),
-            ],
-          );
-        },
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: value,
+                    child: child,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
