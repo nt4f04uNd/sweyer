@@ -744,9 +744,7 @@ class MusicPlayer extends AudioPlayer {
       return;
     }
     try {
-      await setAudioSource(
-        ProgressiveAudioSource(Uri.parse(song.contentUri)),
-      );
+      await setAudioSource(ProgressiveAudioSource(Uri.parse(song.contentUri)));
     } catch (e) {
       if (e is PlayerInterruptedException || e is PlatformException && e.code == 'abort') {
         // Do nothing
