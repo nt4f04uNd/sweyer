@@ -29,7 +29,7 @@ jobs:
           path: test/golden/goldens
 
       - name: 💾 Commit updated Golden test artifacts
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         if: github.event.inputs.commit == 'true'
         with:
           commit_message: 🤖 Update Golden test artifacts 🤖
