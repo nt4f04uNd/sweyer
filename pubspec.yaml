@@ -93,7 +93,7 @@ dev_dependencies:
   theme_tailor: ^3.0.1
   freezed: ^3.0.6
   json_serializable: ^6.9.5
-  sqflite_common_ffi: ^2.3.3
+  sqflite_common_ffi: ^2.3.6
 
 flutter:
   uses-material-design: true
