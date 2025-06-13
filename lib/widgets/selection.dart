@@ -23,7 +23,7 @@ const Duration kSelectionDuration = Duration(milliseconds: 350);
 ///
 /// See [SelectableState.selectionRoute] for discussion of how selection works
 /// when this is `true`.
-bool selectionRouteOf(context) {
+bool selectionRouteOf(BuildContext context) {
   return HomeRouter.maybeOf(context)?.selectionArguments != null;
 }
 
