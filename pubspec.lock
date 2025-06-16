@@ -1249,10 +1249,10 @@ packages:
     dependency: "direct dev"
     description:
       name: theme_tailor
-      sha256: "8f2444f3833e6730ef308d5e3d97c258a780b897483e509d722a5a1a6c591932"
+      sha256: ba98be1d04856deef932757a3ca8fa7a5e2a6f96c30466a59c48924eeb608b97
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "3.0.3"
   theme_tailor_annotation:
     dependency: "direct main"
     description:
