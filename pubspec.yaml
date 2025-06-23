@@ -87,7 +87,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  build_runner: ^2.5.3
+  build_runner: ^2.5.4
   flutter_lints: ^5.0.0
   golden_toolkit: ^0.15.0
   theme_tailor: ^3.0.3
