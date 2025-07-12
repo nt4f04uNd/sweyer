@@ -84,7 +84,7 @@ void main() {
       await binding.runAppTestWithoutUi(() async {
         MusicPlayer.instance.play();
         await binding.pump();
-        await MusicPlayer.handler!.stop();
+        await binding.runAsync(MusicPlayer.handler!.stop);
         await binding.pump();
         final playbackState = MusicPlayer.handler!.playbackState.value!;
         expect(playbackState.playing, false);
