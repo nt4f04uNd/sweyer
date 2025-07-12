@@ -8,7 +8,7 @@ version: 1.0.13+16
 
 environment:
   sdk: ^3.6.0
-  flutter: 3.29.2
+  flutter: 3.32.1
 
 dependencies:
   flutter:
@@ -39,7 +39,7 @@ dependencies:
   sqflite: ^2.0.0+3
   boxy: ^2.2.1
   back_button_interceptor: ^8.0.4
-  flutter_sticky_header: ^0.7.0
+  flutter_sticky_header: ^0.8.0
   palette_generator: ^0.3.3+2
   cached_network_image: ^3.0.0
   flutter_cache_manager: ^3.1.1
@@ -60,7 +60,7 @@ dependencies:
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 
   fluttertoast: ^8.2.12
-  just_audio: ^0.9.46
+  just_audio: ^0.10.3
   audio_service:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
     # See https://github.com/ryanheise/audio_service/issues/633
@@ -77,8 +77,8 @@ dependencies:
     # path: /Users/nt4f04und/dev/prj/nt4f04unds_widgets
 
     git:
-      url: https://github.com/nt4f04uNd/nt4f04unds_widgets
-      ref: 5.0.0
+      url: https://github.com/Abestanis/nt4f04unds_widgets
+      ref: update/flutter
 
   sweyer_plugin:
     path: sweyer_plugin
@@ -88,7 +88,7 @@ dev_dependencies:
     sdk: flutter
 
   build_runner: ^2.5.4
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   golden_toolkit: ^0.15.0
   theme_tailor: ^3.0.3
   freezed: ^3.1.0

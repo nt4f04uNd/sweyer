@@ -243,7 +243,10 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
 
   /// Cleans up and disposes all relevant app state after an app test.
   Future<void> _teardownAppTest() async {
-    await MusicPlayer.instanceIfInitialized?.stop();
+    final player = MusicPlayer.instanceIfInitialized;
+    if (player != null) {
+      await runAsync(player.stop);
+    }
     DeviceInfoControl.instance.dispose();
     ContentControl.instance.dispose();
   }
@@ -409,7 +412,7 @@ void testAppGoldens(
             Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
           });
           setUp?.call();
-          return tester.runAppTest(
+          await tester.runAppTest(
             () => test(tester),
             goldenCaptureCallback: () {
               final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
