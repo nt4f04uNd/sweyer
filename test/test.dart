@@ -409,7 +409,7 @@ void testAppGoldens(
             Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
           });
           setUp?.call();
-          return tester.runAppTest(
+          await tester.runAppTest(
             () => test(tester),
             goldenCaptureCallback: () {
               final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
