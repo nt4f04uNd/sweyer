@@ -84,7 +84,7 @@ void main() {
       await binding.runAppTestWithoutUi(() async {
         PlayerManager.instance.play();
         await binding.pump();
-        await PlayerManager.handler!.stop();
+        await binding.runAsync(PlayerManager.handler!.stop);
         await binding.pump();
         final playbackState = PlayerManager.handler!.playbackState.value!;
         expect(playbackState.playing, false);
