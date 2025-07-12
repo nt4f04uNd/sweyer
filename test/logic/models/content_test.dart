@@ -115,7 +115,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.albumsFactory = () => validAlbums.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.albums.values
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -144,7 +144,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.artistsFactory = () => validArtists.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.artists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -186,7 +186,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.playlistsFactory = () => validPlaylists.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.playlists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -250,7 +250,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.songsFactory = () => validSongs.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.allSongs.songs
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -276,7 +276,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.albumsFactory = () => invalidAlbums;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.albums.values
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -304,7 +304,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.artistsFactory = () => invalidArtists;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.artists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -334,7 +334,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.playlistsFactory = () => invalidPlaylists;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.playlists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -372,7 +372,7 @@ void main() {
         crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
         FakeSweyerPluginPlatform.instance.songsFactory = () => invalidSongs;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
         expect(
           // The state is disposed if there is not songs, so use an empty list in that case.
           (ContentControl.instance.stateNullable?.allSongs.songs ?? [])
