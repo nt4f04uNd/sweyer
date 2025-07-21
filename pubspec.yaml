@@ -28,7 +28,7 @@ dependencies:
   firebase_core: ^3.15.0
   firebase_crashlytics: ^4.3.9
   firebase_analytics: ^11.5.1
-  cloud_functions: ^5.6.0
+  cloud_functions: ^5.6.2
   package_info_plus: ^8.3.0
   url_launcher: ^6.3.2
   lottie: ^3.1.3
