@@ -13,7 +13,7 @@ jobs:
     environment: prod
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🧪 Test Sweyer
         if: ${{ github.event.inputs.skip-tests == 'false' }}
