@@ -28,8 +28,8 @@ migrate_working_dir/
 /pubspec.lock
 **/doc/api/
 .dart_tool/
-.flutter-plugins
 .flutter-plugins-dependencies
-build/
+/build/
+/coverage/
 .fvm
 .cxx
