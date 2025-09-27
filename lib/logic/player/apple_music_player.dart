@@ -40,7 +40,7 @@ class AppleMusicPlayer implements SweyerPlayer {
     unawaited(_updateLoopMode());
     final wasPlaying = playing;
     final isPlaying = _mapStatusToPlaying(status);
-    if (!_playingSubject.isClosed && _playingSubject.requireValue != isPlaying) {
+    if (!_playingSubject.isClosed && _playingSubject.value != isPlaying) {
       _playingSubject.add(isPlaying);
     }
 
@@ -59,7 +59,7 @@ class AppleMusicPlayer implements SweyerPlayer {
         ProcessingState.ready,
       playify.PlayifyStatus.unknown => ProcessingState.loading,
     };
-    if (!_processingStateSubject.isClosed && _processingStateSubject.requireValue != processingState) {
+    if (!_processingStateSubject.isClosed && _processingStateSubject.value != processingState) {
       _processingStateSubject.add(processingState);
     }
 
@@ -122,7 +122,7 @@ class AppleMusicPlayer implements SweyerPlayer {
       if (request == _loopModeRequest &&
           revision == _loopModeRevision &&
           !_loopModeSubject.isClosed &&
-          _loopModeSubject.requireValue != mode) {
+          _loopModeSubject.value != mode) {
         _loopModeSubject.add(mode);
       }
     } catch (error) {
@@ -218,19 +218,19 @@ class AppleMusicPlayer implements SweyerPlayer {
   Stream<bool> get loopingStream => _loopingStream;
 
   @override
-  bool get playing => _playingSubject.requireValue;
+  bool get playing => _playingSubject.value;
 
   @override
-  Duration get position => _positionSubject.requireValue;
+  Duration get position => _positionSubject.value;
 
   @override
-  Duration get bufferedPosition => _positionSubject.requireValue;
+  Duration get bufferedPosition => _positionSubject.value;
 
   @override
-  ProcessingState get processingState => _processingStateSubject.requireValue;
+  ProcessingState get processingState => _processingStateSubject.value;
 
   @override
-  bool get looping => _loopModeSubject.requireValue == LoopMode.one;
+  bool get looping => _loopModeSubject.value == LoopMode.one;
 
   @override
   double get speed => 1;

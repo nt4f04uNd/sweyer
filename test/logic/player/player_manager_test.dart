@@ -58,7 +58,7 @@ void main() {
         await binding.pump();
         await PlayerManager.instance.pause();
         await binding.pump();
-        final playbackState = PlayerManager.handler!.playbackState.value!;
+        final playbackState = PlayerManager.handler!.playbackState.value;
         expect(PlayerManager.instance.playing, false);
         expect(playbackState.playing, false);
         expect(playbackState.processingState, AudioProcessingState.ready);
@@ -86,7 +86,7 @@ void main() {
         await binding.pump();
         await binding.runAsync(PlayerManager.handler!.stop);
         await binding.pump();
-        final playbackState = PlayerManager.handler!.playbackState.value!;
+        final playbackState = PlayerManager.handler!.playbackState.value;
         expect(playbackState.playing, false);
         expect(playbackState.processingState, AudioProcessingState.idle);
         expect(

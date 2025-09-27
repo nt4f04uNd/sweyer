@@ -271,11 +271,6 @@ class ShowFunctions extends NFShowFunctions {
               style: theme.textTheme.titleMedium,
             ),
             value: item,
-            groupValue: groupValueGetter(),
-            onChanged: (value) {
-              onItemSelected(value);
-              Navigator.pop(context);
-            },
           ),
         ),
       );
@@ -291,9 +286,18 @@ class ShowFunctions extends NFShowFunctions {
       content: AppScrollbar(
         thumbVisibility: true,
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: items.map((el) => buildItem(el)).toList(),
+          child: RadioGroup<T>(
+            groupValue: groupValueGetter(),
+            onChanged: (value) {
+              if (value != null) {
+                onItemSelected(value);
+                Navigator.pop(context);
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: items.map((el) => buildItem(el)).toList(),
+            ),
           ),
         ),
       ),
