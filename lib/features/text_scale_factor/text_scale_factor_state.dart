@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart'; // TODO: Switch from StateNotifierProvider to Notifier
 
 final textScaleFactorStateNotifierProvider = StateNotifierProvider<TextScaleFactorStateNotifier, double>(
   (ref) => TextScaleFactorStateNotifier(),
