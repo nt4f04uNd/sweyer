@@ -527,7 +527,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     }
     final playing = player.playing;
     final l10n = staticl10n;
-    playbackState.add(playbackState.value!.copyWith(
+    playbackState.add(playbackState.value.copyWith(
       controls: [
         if (player.looping)
           MediaControl.custom(
