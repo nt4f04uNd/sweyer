@@ -16,9 +16,9 @@ class _TabsScrollPhysics extends AlwaysScrollableScrollPhysics {
 
   @override
   SpringDescription get spring => const SpringDescription(
-        mass: 80,
-        stiffness: 100,
-        damping: 1,
+        mass: 1,
+        stiffness: 1601.2499609375,
+        damping: 80,
       );
 }
 
