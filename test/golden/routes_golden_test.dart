@@ -197,8 +197,8 @@ void main() {
     testAppGoldens(
       'player_route',
       (WidgetTester tester) async {
-        await tester.tap(find.byType(SongTile));
-        await tester.pump(); // Flush micro-tasks to flush the handling of the tap.
+        // Use `runAsync` to Flush micro-tasks to flush the handling of the tap.
+        await tester.runAsync(() => tester.tap(find.byType(SongTile)));
         // Stop the playback to avoid animations when taking the golden screenshot.
         await tester.runAsync(MusicPlayer.handler!.stop);
         await tester.pumpAndSettle(const Duration(seconds: 1));

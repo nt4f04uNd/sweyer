@@ -15,9 +15,7 @@ class AppRadioListTile<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      onTap: () {
-        RadioGroup.maybeOf(context)?.onChanged(value);
-      },
+      onTap: () => RadioGroup.maybeOf<T>(context)?.onChanged(value),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 14.0),
         child: Row(
