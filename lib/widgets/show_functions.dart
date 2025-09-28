@@ -291,7 +291,7 @@ class ShowFunctions extends NFShowFunctions {
             onChanged: (value) {
               if (value != null) {
                 onItemSelected(value);
-                Navigator.pop(context);
+                Navigator.of(context, rootNavigator: true).pop(value);
               }
             },
             child: Column(
