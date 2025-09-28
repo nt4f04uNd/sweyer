@@ -32,7 +32,9 @@ void main() {
         expect(find.byType(CircularProgressIndicator), findsOneWidget,
             reason: 'Indicate while waiting for the permission to be granted');
         permissionGrantCompleter.complete(PermissionStatus.granted);
-        await tester.pumpAndSettle();
+        // Granting permissions calls `ContentControl.init`, which triggers a bunch of stream callbacks.
+        // To make sure all callbacks get executed, `runAsync` is used.
+        await tester.runAsync(tester.pumpAndSettle);
         expect(find.byType(Home), findsOneWidget);
       });
     });
@@ -85,13 +87,13 @@ void main() {
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
         permissionsObserver.isOpeningSettingsSuccessful = false;
         final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
-        await tester.tap(find.text(l10n.grant));
+        await tester.binding.runAsync(() => tester.tap(find.text(l10n.grant)));
         await tester.pumpAndSettle();
         expect(permissionsObserver.openSettingsRequests, 1);
         expect(toastObserver.toastMessagesLog, [l10n.allowAccessToExternalStorageManually, l10n.openAppSettingsError]);
 
         permissionsObserver.isOpeningSettingsSuccessful = true;
-        await tester.tap(find.text(l10n.grant));
+        await tester.binding.runAsync(() => tester.tap(find.text(l10n.grant)));
         expect(permissionsObserver.openSettingsRequests, 2);
         expect(toastObserver.toastMessagesLog, [
           l10n.allowAccessToExternalStorageManually,
@@ -151,7 +153,7 @@ void main() {
       expect(find.ancestor(of: find.text(l10n.retry), matching: find.byType(AppButton)), findsOneWidget);
 
       // Expect to find the error screen again after a retry
-      await tester.tap(find.text(l10n.retry));
+      await tester.runAsync(() => tester.tap(find.text(l10n.retry)));
       await tester.pumpAndSettle();
       expect(songsFactoryCallCount, 2);
       expect(crashlyticsObserver.fatalErrorCount, 2);
@@ -159,7 +161,9 @@ void main() {
 
       // Expect to correctly load the content on the third try
       await tester.tap(find.text(l10n.retry));
-      await tester.pumpAndSettle();
+      // Retrying content loading calls `ContentControl.init`, which triggers a bunch of stream callbacks.
+      // To make sure all callbacks get executed, `runAsync` is used.
+      await tester.runAsync(tester.pumpAndSettle);
       expect(songsFactoryCallCount, 3);
       expect(crashlyticsObserver.fatalErrorCount, 2);
       expect(find.text(l10n.retry), findsNothing);
@@ -183,7 +187,7 @@ void main() {
         reason: 'Player route must be offscreen',
       );
       // Wait for widget events from the app startup of this event to reach the app widget channel observer.
-      await tester.idle();
+      await tester.binding.runAsync(tester.idle);
       expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songWith().contentUri), ("playing", false)]);
       expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
     });
@@ -201,8 +205,9 @@ void main() {
       // Test refresh
       FakeSweyerPluginPlatform.instance.songs = [songWith()];
       await tester.tap(find.text(l10n.refresh));
-      // Wait for the refresh to be executed
-      await tester.pump(const Duration(seconds: 1));
+      // Refreshing calls `ContentControl.init`, which triggers a bunch of stream callbacks.
+      // To make sure all callbacks get executed, `runAsync` is used.
+      await tester.runAsync(tester.pumpAndSettle);
       expect(ContentControl.instance.state.allSongs.songs, [songWith()]);
     });
   });
@@ -212,11 +217,11 @@ void main() {
       await Settings.confirmExitingWithBackButton.set(true);
       final SystemChannelObserver systemObserver = SystemChannelObserver(tester);
       final ToastChannelObserver toastObserver = ToastChannelObserver(tester);
-      await BackButtonInterceptor.popRoute();
+      await tester.binding.runAsync(BackButtonInterceptor.popRoute);
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit]);
       expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
       await tester.binding.delayed(Config.backPressCloseTimeout + const Duration(milliseconds: 1));
-      await BackButtonInterceptor.popRoute();
+      await tester.binding.runAsync(BackButtonInterceptor.popRoute);
       expect(toastObserver.toastMessagesLog, [l10n.pressOnceAgainToExit, l10n.pressOnceAgainToExit],
           reason: 'The previous message timed out');
       expect(systemObserver.closeRequests, 0, reason: 'The app must not close after showing the toast');
