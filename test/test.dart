@@ -225,9 +225,9 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     ThemeControl.instance.init();
     ThemeControl.instance.initSystemUi();
     await Permissions.instance.init();
-    final contentInitFuture = ContentControl.instance.init();
+    final contentInitFuture = runAsync(ContentControl.instance.init);
     // Flush micro-tasks to allow all stream events to propagate to their listeners.
-    await pump(const Duration(seconds: 1));
+    asyncBarrier();
     await contentInitFuture;
     // Called in the [App] widget
     NFWidgets.init(
@@ -247,8 +247,10 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     if (player != null) {
       await runAsync(player.stop);
     }
-    DeviceInfoControl.instance.dispose();
-    ContentControl.instance.dispose();
+    await runAsync(() async {
+      DeviceInfoControl.instance.dispose();
+      ContentControl.instance.dispose();
+    });
   }
 }
 
