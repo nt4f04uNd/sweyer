@@ -12,16 +12,16 @@ void main() {
 
   test('Player can pause', () async {
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
-    await binding.runAppTestWithoutUi(() => binding.runAsync(() async {
-          var playFutureCompleted = false;
-          MusicPlayer.instance.play().whenComplete(() => playFutureCompleted = true);
-          await binding.pump();
-          expect(MusicPlayer.instance.playing, true);
-          MusicPlayer.instance.pause();
-          await binding.pump();
-          expect(playFutureCompleted, true);
-          expect(MusicPlayer.instance.playing, false);
-        }));
+    await binding.runAppTestWithoutUi(() async {
+      var playFutureCompleted = false;
+      MusicPlayer.instance.play().whenComplete(() => playFutureCompleted = true);
+      await binding.flushStreamEvents();
+      expect(MusicPlayer.instance.playing, true);
+      MusicPlayer.instance.pause();
+      await binding.flushStreamEvents();
+      expect(playFutureCompleted, true);
+      expect(MusicPlayer.instance.playing, false);
+    });
   });
 
   group('Player notification', () {

@@ -252,6 +252,13 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
       ContentControl.instance.dispose();
     });
   }
+
+  /// Flush events from streams and other sources that schedule futures outside of the current face async zone.
+  Future<void> flushStreamEvents() async {
+    do {
+      await runAsync(idle);
+    } while (microtaskCount != 0);
+  }
 }
 
 final List<FutureOr<void> Function()> _setupRegistry = [];
