@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
 
 import 'package:flutter/material.dart';
@@ -62,11 +61,7 @@ class IntListSerializer extends JsonSerializer<List<int>, List<int>> {
       final jsonContent = await file.readAsString();
       return jsonDecode(jsonContent).cast<int>();
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in IntListSerializer.read, fileName: $fileName',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in IntListSerializer.read, fileName: $fileName');
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
@@ -145,11 +140,7 @@ class QueueSerializer extends QueueSerializerType {
       }
       return list.map((el) => SerializedQueueItem.fromMap(el)).toList();
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in QueueSerializer.read, fileName: $fileName',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in QueueSerializer.read, fileName: $fileName');
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
@@ -215,11 +206,7 @@ class IdMapSerializer extends IdMapSerializerType {
       }
       return idMap;
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in IdMapSerializer.read, fileName: $fileName',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in IdMapSerializer.read, fileName: $fileName');
       ShowFunctions.instance.showError(
         errorDetails: buildErrorReport(ex, stack),
       );
