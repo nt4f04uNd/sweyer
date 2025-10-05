@@ -391,7 +391,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
         songs: songs,
       );
       if (!songs.contains(PlaybackControl.instance.currentSong)) {
-        MusicPlayer.instance.setSong(songs[0]);
+        await MusicPlayer.instance.setSong(songs[0]);
       }
     }
   }
@@ -720,7 +720,7 @@ class MusicPlayer extends AudioPlayer {
       mode = LoopMode.off;
     }
     await super.setLoopMode(mode);
-    Prefs.loopMode.set(looping);
+    await Prefs.loopMode.set(looping);
   }
 
   /// Switches the [looping].
@@ -752,10 +752,10 @@ class MusicPlayer extends AudioPlayer {
         final context = AppRouter.instance.navigatorKey.currentContext;
         // ignore: use_build_context_synchronously
         final l10n = context != null ? getl10n(context) : staticl10n;
-        ShowFunctions.instance.showToast(msg: l10n.playbackError);
-        playNext(song: song);
+        await ShowFunctions.instance.showToast(msg: l10n.playbackError);
+        await playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
-        ContentControl.instance.refetch(ContentType.song);
+        await ContentControl.instance.refetch(ContentType.song);
       } else {
         // Other exceptions are not expected, rethrow.
         rethrow;
@@ -773,7 +773,7 @@ class MusicPlayer extends AudioPlayer {
     if (playing) {
       return pause();
     } else {
-      return play();
+      unawaited(play());
     }
   }
 
@@ -784,13 +784,13 @@ class MusicPlayer extends AudioPlayer {
     );
     if (song != null) {
       await setSong(song);
-      await play();
+      unawaited(play());
     } else {
       final songs = ContentControl.instance.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
         await setSong(song);
-        await play();
+        unawaited(play());
       }
     }
   }
@@ -802,13 +802,13 @@ class MusicPlayer extends AudioPlayer {
     );
     if (song != null) {
       await setSong(song);
-      await play();
+      unawaited(play());
     } else {
       final songs = ContentControl.instance.state.allSongs.songs;
       if (songs.isNotEmpty) {
         song = songs[0];
         await setSong(song);
-        await play();
+        unawaited(play());
       }
     }
   }

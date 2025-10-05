@@ -357,9 +357,9 @@ class QueueControl extends Control {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (!disposed.value) {
-      _onQueueChangeSubject.close();
+      await _onQueueChangeSubject.close();
     }
     super.dispose();
   }
@@ -913,7 +913,7 @@ class QueueControl extends Control {
         }
       }
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
+      await FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
         reason: 'in rawQueue restoration',
@@ -937,7 +937,7 @@ class QueueControl extends Control {
         }
       }
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
+      await FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
         reason: 'in rawShuffledQueue restoration',

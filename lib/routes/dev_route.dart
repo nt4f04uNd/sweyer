@@ -41,7 +41,7 @@ class _DevRouteState extends ConsumerState<DevRoute> {
       ),
     );
     if (res != null && res as bool) {
-      Prefs.devMode.set(false);
+      await Prefs.devMode.set(false);
       if (mounted) {
         Navigator.of(context).pop();
       }

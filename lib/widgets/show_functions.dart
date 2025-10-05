@@ -62,7 +62,7 @@ class ShowFunctions extends NFShowFunctions {
         submitted = true;
         final navigator = Navigator.of(context);
         name = await ContentControl.instance.createPlaylist(controller.text);
-        navigator.maybePop(name);
+        await navigator.maybePop(name);
       }
     }
 
@@ -91,7 +91,7 @@ class ShowFunctions extends NFShowFunctions {
           onPressed: !value
               ? null
               : () async {
-                  submit(context);
+                  await submit(context);
                 },
         ),
       ),

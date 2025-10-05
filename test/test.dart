@@ -225,10 +225,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     ThemeControl.instance.init();
     ThemeControl.instance.initSystemUi();
     await Permissions.instance.init();
-    final contentInitFuture = runAsync(ContentControl.instance.init);
-    // Flush micro-tasks to allow all stream events to propagate to their listeners.
-    asyncBarrier();
-    await contentInitFuture;
+    await runAsync(ContentControl.instance.init);
     // Called in the [App] widget
     NFWidgets.init(
       navigatorKey: AppRouter.instance.navigatorKey,
@@ -239,22 +236,39 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     }
     _setupRegistry.clear();
     _postSetupRegistry.clear();
+    await flushAsyncEvents();
   }
 
   /// Cleans up and disposes all relevant app state after an app test.
   Future<void> _teardownAppTest() async {
-    final player = MusicPlayer.instanceIfInitialized;
-    if (player != null) {
-      await runAsync(player.stop);
-    }
-    await runAsync(() async {
-      DeviceInfoControl.instance.dispose();
-      ContentControl.instance.dispose();
-    });
+    DeviceInfoControl.instance.dispose();
+    // StreamSubscription.cancel somehow still hangs even with `runAsync`, so pump the fake async event queue.
+    await _runWithRealAndFakeEventLoops(ContentControl.instance.dispose);
+    await flushAsyncEvents();
   }
 
-  /// Flush events from streams and other sources that schedule futures outside of the current face async zone.
-  Future<void> flushStreamEvents() async {
+  Future<void> _runWithRealAndFakeEventLoops(Future<void> Function() body) async {
+    var completed = false;
+    await runAsync(() => Future.wait([
+          Future(() async {
+            try {
+              await body();
+            } finally {
+              completed = true;
+            }
+          }),
+          Future(() async {
+            do {
+              // Pump the fake async event queue.
+              await pump(Duration.zero);
+            } while (!completed);
+          }),
+        ]));
+  }
+
+  /// Flush real async events from streams and other sources
+  /// that schedule futures outside of the current face async zone.
+  Future<void> flushAsyncEvents() async {
     do {
       await runAsync(idle);
     } while (microtaskCount != 0);
@@ -307,10 +321,10 @@ extension WidgetTesterExtension on WidgetTester {
         await callback();
         await goldenCaptureCallback?.call();
       } finally {
-        await binding._teardownAppTest();
         // Un-pump, in case we have any real animations running,
         // so the pumpAndSettle at the end doesn't hang forever.
         await pumpWidget(const SizedBox());
+        await binding._teardownAppTest();
         // Wait for any asynchronous events and stream callbacks to finish.
         await pump(const Duration(seconds: 1));
         // Wait for any remaining system UI animations to settle.

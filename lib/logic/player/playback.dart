@@ -20,9 +20,9 @@ class PlaybackControl extends Control {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (!disposed.value) {
-      _songSubject.close();
+      await _songSubject.close();
     }
     super.dispose();
   }
