@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 
 import 'package:sweyer/logic/player/player_manager.dart' as sweyer_player_manager;
@@ -14,11 +16,9 @@ void main() {
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     await binding.runAppTestWithoutUi(() async {
       var playFutureCompleted = false;
-      PlayerManager.instance.play().whenComplete(() => playFutureCompleted = true);
-      await binding.flushStreamEvents();
+      unawaited(binding.runAsync(PlayerManager.instance.play).whenComplete(() => playFutureCompleted = true));
       expect(PlayerManager.instance.playing, true);
       await PlayerManager.instance.pause();
-      await binding.flushStreamEvents();
       expect(playFutureCompleted, true);
       expect(PlayerManager.instance.playing, false);
     });
@@ -27,35 +27,33 @@ void main() {
   group('Player notification', () {
     test('Is updated when playing', () async {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
-      await binding.runAppTestWithoutUi(() => binding.runAsync(() async {
-            PlayerManager.instance.play();
-            await binding.pump();
-            final playbackState = PlayerManager.handler!.playbackState.value;
-            expect(playbackState.playing, true);
-            expect(playbackState.processingState, AudioProcessingState.ready);
-            expect(
-              playbackState.controls.map((control) => control.toString()),
-              [
-                MediaControl.custom(
-                    androidIcon: 'drawable/round_loop',
-                    label: l10n.loopOff,
-                    name: sweyer_player_manager.AudioHandler.loopOff),
-                MediaControl(
-                    androidIcon: 'drawable/round_skip_previous',
-                    label: l10n.previous,
-                    action: MediaAction.skipToPrevious),
-                MediaControl(androidIcon: 'drawable/round_pause', label: l10n.pause, action: MediaAction.pause),
-                MediaControl(androidIcon: 'drawable/round_skip_next', label: l10n.next, action: MediaAction.skipToNext),
-                MediaControl(androidIcon: 'drawable/round_stop', label: l10n.stop, action: MediaAction.stop),
-              ].map((control) => control.toString()),
-            );
-          }));
+      await binding.runAppTestWithoutUi(() async {
+        unawaited(PlayerManager.instance.play());
+        await binding.runAsync(binding.idle);
+        final playbackState = PlayerManager.handler!.playbackState.value;
+        expect(playbackState.playing, true);
+        expect(playbackState.processingState, AudioProcessingState.ready);
+        expect(
+          playbackState.controls.map((control) => control.toString()),
+          [
+            MediaControl.custom(
+                androidIcon: 'drawable/round_loop',
+                label: l10n.loopOff,
+                name: sweyer_player_manager.AudioHandler.loopOff),
+            MediaControl(
+                androidIcon: 'drawable/round_skip_previous', label: l10n.previous, action: MediaAction.skipToPrevious),
+            MediaControl(androidIcon: 'drawable/round_pause', label: l10n.pause, action: MediaAction.pause),
+            MediaControl(androidIcon: 'drawable/round_skip_next', label: l10n.next, action: MediaAction.skipToNext),
+            MediaControl(androidIcon: 'drawable/round_stop', label: l10n.stop, action: MediaAction.stop),
+          ].map((control) => control.toString()),
+        );
+      });
     });
 
     test('Is updated when paused', () async {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runAppTestWithoutUi(() async {
-        PlayerManager.instance.play();
+        unawaited(PlayerManager.instance.play());
         await binding.pump();
         await binding.runAsync(PlayerManager.instance.pause);
         await binding.pump();
@@ -83,7 +81,7 @@ void main() {
     test('Is updated when stopped', () async {
       final binding = TestWidgetsFlutterBinding.ensureInitialized();
       await binding.runAppTestWithoutUi(() async {
-        PlayerManager.instance.play();
+        unawaited(PlayerManager.instance.play());
         await binding.pump();
         await binding.runAsync(PlayerManager.handler!.stop);
         await binding.pump();

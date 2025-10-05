@@ -149,7 +149,7 @@ class HomeState extends State<Home> {
       // asks from user to press again to confirm that he wants to quit the app
       if (_lastBackPressTime == null || now.difference(_lastBackPressTime!) > constants.Config.backPressCloseTimeout) {
         _lastBackPressTime = now;
-        ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
+        await ShowFunctions.instance.showToast(msg: getl10n(context).pressOnceAgainToExit);
         return true;
       }
     }

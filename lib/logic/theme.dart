@@ -67,7 +67,7 @@ class ThemeControl {
   }
 
   /// This is needed to show start up application animation.
-  Future<void> initSystemUi() async {
+  void initSystemUi() {
     // Show purple ui firstly.
     SystemUiStyleController.instance.setSystemUiOverlay(const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.deepPurpleAccent,
@@ -77,17 +77,18 @@ class ThemeControl {
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.light,
     ));
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor !=
-        theme.systemUiThemeExtension.black.systemNavigationBarColor) {
-      final ui = theme.systemUiThemeExtension.grey;
-      await SystemUiStyleController.instance.animateSystemUiOverlay(
-        to: ui,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 550),
-      );
-    }
-    _ready = true;
+    unawaited(Future.delayed(const Duration(milliseconds: 500), () async {
+      if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor !=
+          theme.systemUiThemeExtension.black.systemNavigationBarColor) {
+        final ui = theme.systemUiThemeExtension.grey;
+        await SystemUiStyleController.instance.animateSystemUiOverlay(
+          to: ui,
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 550),
+        );
+      }
+      _ready = true;
+    }));
   }
 
   @visibleForTesting
@@ -98,7 +99,7 @@ class ThemeControl {
 
   /// Changes theme to opposite and saves new value to pref.
   Future<void> switchTheme() async {
-    _rebuildOperation?.cancel();
+    await _rebuildOperation?.cancel();
     setThemeLightMode(_brightness == Brightness.dark);
     App.nfThemeData = App.nfThemeData.copyWith(
       systemUiStyle: theme.systemUiThemeExtension.black,
