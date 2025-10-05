@@ -17,6 +17,7 @@ linter:
     sort_child_properties_last: false
     prefer_const_constructors_in_immutables: false
     exhaustive_cases: true
+    unawaited_futures: true
 
 analyzer:
   errors:

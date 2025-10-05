@@ -21,10 +21,10 @@ void main() {
     testAppGoldens(
       'searching_screen',
       setUp: () {
-        registerPostAppSetup((_) {
-          ContentControl.instance.dispose();
+        registerPostAppSetup((binding) async {
+          await binding.runAsync(ContentControl.instance.dispose);
           final fake = FakeContentControl();
-          fake.init();
+          await fake.init();
           // Fake ContentControl.init in a way to trigger the home screen rebuild
           fake.initializing = true;
           fake.stateNullable = ContentState();
@@ -198,9 +198,12 @@ void main() {
       'player_route',
       (WidgetTester tester) async {
         // Use `runAsync` to Flush micro-tasks to flush the handling of the tap.
-        await tester.runAsync(() => tester.tap(find.byType(SongTile)));
-        // Stop the playback to avoid animations when taking the golden screenshot.
+        await tester.tap(find.byType(SongTile));
+        await tester.binding.flushAsyncEvents();
+        // Stop the playback and seek to a known position to avoid animations when taking the golden screenshot.
         await tester.runAsync(MusicPlayer.handler!.stop);
+        await tester.runAsync(() => MusicPlayer.handler!.seek(Duration.zero));
+        await tester.binding.flushAsyncEvents();
         await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(playerRouteController.value, 1.0);
       },
@@ -227,17 +230,17 @@ void main() {
     });
 
     testAppGoldens('search_suggestions', (WidgetTester tester) async {
-      SearchHistory.instance.add('entry_1');
-      SearchHistory.instance.add('entry_2');
-      SearchHistory.instance.add('entry_3');
+      await SearchHistory.instance.add('entry_1');
+      await SearchHistory.instance.add('entry_2');
+      await SearchHistory.instance.add('entry_3');
       await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pumpAndSettle();
     });
 
     testAppGoldens('search_suggestions_delete', (WidgetTester tester) async {
-      SearchHistory.instance.add('entry_1');
-      SearchHistory.instance.add('entry_2');
-      SearchHistory.instance.add('entry_3');
+      await SearchHistory.instance.add('entry_1');
+      await SearchHistory.instance.add('entry_2');
+      await SearchHistory.instance.add('entry_3');
       await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.delete_sweep_rounded));

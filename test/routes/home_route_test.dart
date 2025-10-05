@@ -106,11 +106,11 @@ void main() {
 
   testWidgets('searching screen - shows when permissions are granted and searching for tracks',
       (WidgetTester tester) async {
-    registerPostAppSetup((_) {
+    registerPostAppSetup((binding) async {
+      await binding.runAsync(ContentControl.instance.dispose);
       // Use fake
-      ContentControl.instance.dispose();
       final fake = FakeContentControl();
-      fake.init();
+      await fake.init();
 
       expect(Permissions.instance.granted, true);
       expect(ContentControl.instance.disposed.value, true);
