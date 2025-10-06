@@ -20,7 +20,7 @@ TextStyle? _subtitleTheme(ThemeData theme) => ArtistWidget.defaultTextStyle(them
 double kSongTileHeight(BuildContext context) => _calculateSongTileHeight(context);
 
 double _calculateSongTileHeight(BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
   final theme = Theme.of(context);
   return _calculateSongTileHeightMemo(
     textScaleFactor,
