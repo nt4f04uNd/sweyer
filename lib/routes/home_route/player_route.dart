@@ -491,7 +491,7 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
     final theme = Theme.of(context);
     final origin = QueueControl.instance.state.origin;
     final mediaQuery = MediaQuery.of(context);
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final appBarHeight =
         textScaleFactor <= 1.0 ? baseAppBarHeight : baseAppBarHeight / 2 + baseAppBarHeight / 2 * textScaleFactor;
     final topScreenPadding = mediaQuery.padding.top;
@@ -708,8 +708,8 @@ class _MainTabState extends State<_MainTab> {
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
-    final mediaQuery = MediaQuery.of(context);
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final padding = MediaQuery.paddingOf(context);
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     return AnimatedBuilder(
       animation: playerRouteController,
       builder: (context, child) => Scaffold(
@@ -720,7 +720,7 @@ class _MainTabState extends State<_MainTab> {
           elevation: 0.0,
           backgroundColor: Colors.transparent,
           toolbarHeight: math.max(
-            TrackPanel.height(context) - mediaQuery.padding.top,
+            TrackPanel.height(context) - padding.top,
             theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
           ),
           leading: FadeTransition(
@@ -786,7 +786,7 @@ class _PlaybackButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: buttonMargin),
       child: FittedBox(
@@ -1003,7 +1003,7 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
       parent: controller,
     ));
     final currentSong = PlaybackControl.instance.currentSong;
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

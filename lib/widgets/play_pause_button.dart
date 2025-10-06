@@ -101,7 +101,7 @@ class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with S
       end: const Offset(0.05, 0.0),
     ).animate(baseAnimation);
     final scaleAnimation = Tween(begin: 1.05, end: 0.89).animate(baseAnimation);
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final color = widget.iconColor ?? theme.iconTheme.color!;
     return NFIconButton(
       size: textScaleFactor * (widget.size ?? _kButtonSize),

@@ -1125,7 +1125,7 @@ class _ActionsSelectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final controller = ContentSelectionController._of(context);
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
@@ -2148,8 +2148,9 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
 
     final l10n = getl10n(context);
     final theme = Theme.of(context);
-    final mediaQuery = MediaQuery.of(context);
-    final correctedMoreTextWidth = moreTextWidth * mediaQuery.textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
+    final mediaQuerySize = MediaQuery.sizeOf(context);
+    final correctedMoreTextWidth = moreTextWidth * textScaleFactor;
 
     return CustomBoxy(
       delegate: _BoxyArtsPreviewDelegate(
@@ -2181,7 +2182,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
 
             final animation = Tween(
               begin: itemSize,
-              end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
+              end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuerySize.height / 2),
             ).animate(CurvedAnimation(
               curve: Curves.easeOut,
               reverseCurve: Curves.easeInCubic,
