@@ -917,12 +917,13 @@ class _ContentChip extends StatefulWidget {
   final bool favoritesChip;
 
   static const double _baseHeight = 34.0;
-  static double height(BuildContext context) => _baseHeight * math.max(1.0, MediaQuery.textScaleFactorOf(context));
+  static double height(BuildContext context) => _baseHeight * math.max(1.0, MediaQuery.textScalerOf(context).scale(1));
 
   /// Unfortunately, chips have a hardcoded height computation inside them,
   /// here heuristically trying to add some padding to label to
   /// make the border look right.
-  static double additionalPadding(BuildContext context) => 5.0 * math.max(1.0, MediaQuery.textScaleFactorOf(context));
+  static double additionalPadding(BuildContext context) =>
+      5.0 * math.max(1.0, MediaQuery.textScalerOf(context).scale(1));
 
   @override
   _ContentChipState createState() => _ContentChipState();

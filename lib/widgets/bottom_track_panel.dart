@@ -24,7 +24,7 @@ class TrackPanel extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final fadeAnimation = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         curve: const Interval(0.0, 0.5),
