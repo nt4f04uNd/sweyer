@@ -20,13 +20,13 @@ class DebugTextScaleFactorSlider extends ConsumerWidget {
     return SettingItem(
       title: l10n.debugTextScaleFactor,
       trailing: ChangedSwitcher(
-        changed: textScaleFactor != 1.0,
+        changed: textScaleFactor != null,
         child: ButtonTheme(
           height: 36.0,
           child: AppButton(
             text: l10n.reset,
             onPressed: () {
-              textScaleFactorStateNotifier.setValue(1.0);
+              textScaleFactorStateNotifier.setValue(null);
             },
           ),
         ),
@@ -36,10 +36,10 @@ class DebugTextScaleFactorSlider extends ConsumerWidget {
         min: min,
         max: max,
         divisions: (max - min) ~/ divisionStep,
-        value: textScaleFactor,
+        value: textScaleFactor ?? 1.0,
         onChanged: textScaleFactorStateNotifier.setValue,
         onChangeEnd: textScaleFactorStateNotifier.setValue,
-        label: textScaleFactor.toStringAsFixed(2),
+        label: textScaleFactor?.toStringAsFixed(2) ?? l10n.defaultValue,
         minLabel: '$min',
         maxLabel: '$max',
         themeData: SliderThemeData(

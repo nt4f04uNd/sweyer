@@ -12,16 +12,19 @@ class MediaQueryWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MediaQuery.fromView(
-      view: View.of(context),
-      child: Builder(
-        builder: (context) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: ref.watch(textScaleFactorStateNotifierProvider.select((value) => value)),
-          ),
-          child: child,
-        ),
-      ),
-    );
+    final textScaleFactorOverwrite = ref.watch(textScaleFactorStateNotifierProvider);
+    return textScaleFactorOverwrite == null
+        ? child
+        : MediaQuery.fromView(
+            view: View.of(context),
+            child: Builder(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(textScaleFactorOverwrite),
+                ),
+                child: child,
+              ),
+            ),
+          );
   }
 }
