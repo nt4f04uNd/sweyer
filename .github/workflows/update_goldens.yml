@@ -23,7 +23,7 @@ jobs:
           testing_arguments: --update-goldens
 
       - name: 📁 Save updated Golden test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: golden-test-updated
           path: test/golden/goldens

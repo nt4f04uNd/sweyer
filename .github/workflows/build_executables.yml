@@ -38,7 +38,7 @@ jobs:
           flutter build apk --profile
 
       - name: 📁 Save executables
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Android Apk
           path: build/app/outputs/flutter-apk/app-profile.apk
