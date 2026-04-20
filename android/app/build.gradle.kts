@@ -21,7 +21,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.nt4f04und.sweyer"
     compileSdk = Math.max(35, flutter.compileSdkVersion)
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -34,7 +34,7 @@ android {
 
     defaultConfig {
         applicationId = "com.nt4f04und.sweyer"
-        minSdk = Math.max(21, flutter.minSdkVersion)
+        minSdk = Math.max(23, flutter.minSdkVersion)
         targetSdk = Math.max(34, flutter.targetSdkVersion)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
