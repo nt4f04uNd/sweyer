@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
@@ -19,7 +20,7 @@ TextStyle? _subtitleTheme(ThemeData theme) => ArtistWidget.defaultTextStyle(them
 double kSongTileHeight(BuildContext context) => _calculateSongTileHeight(context);
 
 double _calculateSongTileHeight(BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
   final theme = Theme.of(context);
   return _calculateSongTileHeightMemo(
     textScaleFactor,
@@ -229,7 +230,8 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
       final song = widget.song;
       final player = MusicPlayer.instance;
       if (!selectionRoute && widget.clickBehavior == SongTileClickBehavior.play) {
-        playerRouteController.open();
+        // Don't wait for the animation to complete to start playing
+        unawaited(playerRouteController.open());
         await player.setSong(song);
         await player.play();
       } else {

@@ -62,7 +62,7 @@ class IntListSerializer extends JsonSerializer<List<int>, List<int>> {
       final jsonContent = await file.readAsString();
       return jsonDecode(jsonContent).cast<int>();
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
+      await FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
         reason: 'in IntListSerializer.read, fileName: $fileName',
@@ -145,7 +145,7 @@ class QueueSerializer extends QueueSerializerType {
       }
       return list.map((el) => SerializedQueueItem.fromMap(el)).toList();
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
+      await FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
         reason: 'in QueueSerializer.read, fileName: $fileName',
@@ -215,7 +215,7 @@ class IdMapSerializer extends IdMapSerializerType {
       }
       return idMap;
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
+      await FirebaseCrashlytics.instance.recordError(
         ex,
         stack,
         reason: 'in IdMapSerializer.read, fileName: $fileName',

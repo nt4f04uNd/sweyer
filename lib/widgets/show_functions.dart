@@ -62,7 +62,7 @@ class ShowFunctions extends NFShowFunctions {
         submitted = true;
         final navigator = Navigator.of(context);
         name = await ContentControl.instance.createPlaylist(controller.text);
-        navigator.maybePop(name);
+        await navigator.maybePop(name);
       }
     }
 
@@ -91,7 +91,7 @@ class ShowFunctions extends NFShowFunctions {
           onPressed: !value
               ? null
               : () async {
-                  submit(context);
+                  await submit(context);
                 },
         ),
       ),
@@ -271,11 +271,6 @@ class ShowFunctions extends NFShowFunctions {
               style: theme.textTheme.titleMedium,
             ),
             value: item,
-            groupValue: groupValueGetter(),
-            onChanged: (value) {
-              onItemSelected(value);
-              Navigator.pop(context);
-            },
           ),
         ),
       );
@@ -291,9 +286,18 @@ class ShowFunctions extends NFShowFunctions {
       content: AppScrollbar(
         thumbVisibility: true,
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: items.map((el) => buildItem(el)).toList(),
+          child: RadioGroup<T>(
+            groupValue: groupValueGetter(),
+            onChanged: (value) {
+              if (value != null) {
+                onItemSelected(value);
+                Navigator.of(context, rootNavigator: true).pop(value);
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: items.map((el) => buildItem(el)).toList(),
+            ),
           ),
         ),
       ),

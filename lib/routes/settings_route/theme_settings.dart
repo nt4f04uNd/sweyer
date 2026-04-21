@@ -17,7 +17,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
   late Color primaryColor;
   bool firstRender = true;
   bool get switched => ThemeControl.instance.isLight;
-  bool get canPop => !ThemeControl.instance.themeChanging.valueWrapper!.value;
+  bool get canPop => !(ThemeControl.instance.themeChanging.valueOrNull ?? false);
   late AnimationController controller;
 
   static const List<Color> colors = [
@@ -124,7 +124,7 @@ class _ThemeSettingsRouteState extends State<ThemeSettingsRoute> with SingleTick
                   ),
                   child: SwitchListTile(
                     title: Text(l10n.settingLightMode),
-                    activeColor: animation.value,
+                    activeThumbColor: animation.value,
                     value: switched,
                     onChanged: _handleThemeSwitch,
                   ),

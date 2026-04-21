@@ -268,18 +268,18 @@ class FavoritesControl with Control {
           final songs = (contentList as List<Song>).toSet();
           await ContentControl.instance.setSongsFavorite(songs, value);
         } else {
-          _saveRepository(contentType, newFavorites: newFavoriteSet.toList());
+          await _saveRepository(contentType, newFavorites: newFavoriteSet.toList());
         }
         _favoriteSetsMap.set(newFavoriteSet, key: contentType);
         ContentControl.instance.emitContentChange();
         QueueControl.instance.emitQueueChange();
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
+        await FirebaseCrashlytics.instance.recordError(
           ex,
           stack,
           reason: 'in setFavorite',
         );
-        ShowFunctions.instance.showToast(
+        await ShowFunctions.instance.showToast(
           msg: staticl10n.oopsErrorOccurred,
         );
         debugPrint('setFavorite error: $ex');

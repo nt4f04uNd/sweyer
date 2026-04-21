@@ -429,7 +429,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
       } on SweyerPluginIoException {
         // Ignore non-existing art and by canceled loads.
       } on SweyerPluginException catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
+        await FirebaseCrashlytics.instance.recordError(
           ex,
           stack,
           reason: 'in _SongScopedStorageArtSourceLoader.load',
@@ -594,7 +594,7 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
         final info = await artist.fetchInfo();
         _url = info.imageUrl;
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
+        await FirebaseCrashlytics.instance.recordError(
           ex,
           stack,
           reason: 'in _ArtistGeniusArtSourceLoader.load',

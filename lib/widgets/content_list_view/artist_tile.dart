@@ -12,7 +12,7 @@ TextStyle? _titleTheme(ThemeData theme) => theme.textTheme.titleLarge;
 double kArtistTileHeight(BuildContext context) => _calculateArtistTileHeight(context);
 
 double _calculateArtistTileHeight(BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
   final theme = Theme.of(context);
   return _calculateArtistTileHeightMemo(
     textScaleFactor,
