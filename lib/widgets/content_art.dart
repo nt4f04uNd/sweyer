@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -429,11 +428,7 @@ class _SongScopedStorageArtSourceLoader extends _ArtSourceLoader {
       } on SweyerPluginIoException {
         // Ignore non-existing art and by canceled loads.
       } on SweyerPluginException catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
-          ex,
-          stack,
-          reason: 'in _SongScopedStorageArtSourceLoader.load',
-        );
+        await reportErrorToFirebase(ex, stack, reason: 'in _SongScopedStorageArtSourceLoader.load');
       } finally {
         setLoading(_SourceLoading.loaded);
       }
@@ -594,11 +589,7 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
         final info = await artist.fetchInfo();
         _url = info.imageUrl;
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
-          ex,
-          stack,
-          reason: 'in _ArtistGeniusArtSourceLoader.load',
-        );
+        await reportErrorToFirebase(ex, stack, reason: 'in _ArtistGeniusArtSourceLoader.load');
       } finally {
         setLoading(_SourceLoading.loaded);
       }
@@ -619,11 +610,7 @@ class _ArtistGeniusArtSourceLoader extends _ArtSourceLoader {
       height: size,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stacktrace) {
-        FirebaseCrashlytics.instance.recordError(
-          error,
-          stacktrace,
-          reason: 'in _ArtistGeniusArtSourceLoader.getImage',
-        );
+        reportErrorToFirebase(error, stacktrace, reason: 'in _ArtistGeniusArtSourceLoader.getImage');
         return state._buildDefault();
       },
       frameBuilder: state.frameBuilder,

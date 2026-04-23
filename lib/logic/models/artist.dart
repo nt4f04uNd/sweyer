@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
@@ -86,12 +85,7 @@ class Artist extends SongOrigin implements PlatformArtist {
         numberOfTracks: map['numberOfTracks'] as int,
       );
     } on TypeError catch (error, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        error,
-        stack,
-        reason: 'trying to parse an artist',
-        fatal: false,
-      );
+      reportErrorToFirebase(error, stack, reason: 'trying to parse an artist');
       return null;
     }
   }

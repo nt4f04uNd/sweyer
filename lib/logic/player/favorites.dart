@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:android_content_provider/android_content_provider.dart';
 import 'package:collection/collection.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
@@ -274,15 +273,10 @@ class FavoritesControl with Control {
         ContentControl.instance.emitContentChange();
         QueueControl.instance.emitQueueChange();
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
-          ex,
-          stack,
-          reason: 'in setFavorite',
-        );
+        await reportErrorToFirebase(ex, stack, reason: 'in setFavorite');
         ShowFunctions.instance.showToast(
           msg: staticl10n.oopsErrorOccurred,
         );
-        debugPrint('setFavorite error: $ex');
       }
     }
   }

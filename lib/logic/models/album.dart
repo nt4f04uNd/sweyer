@@ -1,6 +1,5 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:collection/collection.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
@@ -101,12 +100,7 @@ class Album extends PersistentQueue implements PlatformAlbum {
         numberOfSongs: map['numberOfSongs'] as int? ?? 0,
       );
     } on TypeError catch (error, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        error,
-        stack,
-        reason: 'trying to parse an album',
-        fatal: false,
-      );
+      reportErrorToFirebase(error, stack, reason: 'trying to parse an album');
       return null;
     }
   }

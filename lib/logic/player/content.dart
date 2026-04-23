@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 // import 'package:quick_actions/quick_actions.dart';
 import 'package:rxdart/rxdart.dart';
@@ -258,7 +257,7 @@ class ContentControl extends Control {
         }
       } catch (error, stack) {
         _failedToInitialize = true;
-        FirebaseCrashlytics.instance.recordError(error, stack, reason: 'initializing ContentControl', fatal: true);
+        await reportFatalErrorToFirebase(error, stack, reason: 'initializing ContentControl');
         dispose();
       }
       _initializeCompleter = null;
@@ -436,11 +435,7 @@ class ContentControl extends Control {
         emitContentChange();
       }
     } on SweyerPluginException catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in re-fetch ${contentType.name}',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in re-fetch ${contentType.name}');
       ShowFunctions.instance.showToast(msg: staticl10n.oopsErrorOccurred);
     }
   }
@@ -619,11 +614,7 @@ class ContentControl extends Control {
           await refetch(ContentType.song);
         }
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
-          ex,
-          stack,
-          reason: 'in setSongsFavorite',
-        );
+        await reportErrorToFirebase(ex, stack, reason: 'in setSongsFavorite');
         ShowFunctions.instance.showToast(
           msg: staticl10n.oopsErrorOccurred,
         );
@@ -661,11 +652,7 @@ class ContentControl extends Control {
         removeFromState();
       }
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in deleteSongs',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in deleteSongs');
       ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
@@ -794,11 +781,7 @@ class ContentControl extends Control {
       await SweyerPlugin.instance.removePlaylists(playlists);
       await refetchSongsAndPlaylists();
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in deletePlaylists',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in deletePlaylists');
       ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );

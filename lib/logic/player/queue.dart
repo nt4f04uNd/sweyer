@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
@@ -913,11 +912,7 @@ class QueueControl extends Control {
         }
       }
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in rawQueue restoration',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in rawQueue restoration');
     }
 
     final List<Song> shuffledSongs = [];
@@ -937,11 +932,7 @@ class QueueControl extends Control {
         }
       }
     } catch (ex, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        ex,
-        stack,
-        reason: 'in rawShuffledQueue restoration',
-      );
+      await reportErrorToFirebase(ex, stack, reason: 'in rawShuffledQueue restoration');
     }
 
     final songs = shuffled && shuffledSongs.isNotEmpty ? shuffledSongs : queueSongs;
