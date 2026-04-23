@@ -8,7 +8,7 @@ version: 1.0.14+17
 
 environment:
   sdk: ^3.6.0
-  flutter: 3.29.2
+  flutter: 3.35.5
 
 dependencies:
   flutter:
@@ -18,29 +18,29 @@ dependencies:
   uuid: ^4.5.1
   path: ^1.8.0
   async: ^2.5.0
-  rxdart: ^0.26.0
+  rxdart: ^0.28.0
   sliver_tools: ^0.2.1
   animations: ^2.0.2
   permission_handler: ^12.0.1
   shared_preferences: ^2.3.3
   path_provider: ^2.1.5
   percent_indicator: ^4.2.5
-  firebase_core: ^3.15.2
-  firebase_crashlytics: ^4.3.10
-  firebase_analytics: ^11.6.0
-  cloud_functions: ^5.6.2
-  package_info_plus: ^8.3.1
+  firebase_core: ^4.1.1
+  firebase_crashlytics: ^5.0.2
+  firebase_analytics: ^12.0.2
+  cloud_functions: ^6.0.2
+  package_info_plus: ^9.0.0
   url_launcher: ^6.3.2
   lottie: ^3.1.3
   auto_size_text: ^3.0.0
   marquee: ^2.1.0
   equatable: ^2.0.7
-  device_info_plus: ^11.5.0
+  device_info_plus: ^12.1.0
   sqflite: ^2.0.0+3
   boxy: ^2.2.1
   back_button_interceptor: ^8.0.4
-  flutter_sticky_header: ^0.7.0
-  palette_generator: ^0.3.3+2
+  flutter_sticky_header: ^0.8.0
+  palette_generator: ^0.3.3+2  # TODO: Discontinued, replace
   cached_network_image: ^3.0.0
   flutter_cache_manager: ^3.1.1
   clock: ^1.1.0
@@ -48,9 +48,9 @@ dependencies:
   android_content_provider: ^0.5.2
   collection: ^1.16.0
   theme_tailor_annotation: ^3.0.2
-  riverpod: ^2.6.1
-  flutter_riverpod: ^2.1.1
-  hooks_riverpod: ^2.6.0
+  riverpod: ^3.0.0
+  flutter_riverpod: ^3.0.0
+  hooks_riverpod: ^3.0.0
   flutter_hooks: ^0.21.2
   freezed_annotation: ^3.0.0
   json_annotation: ^4.7.0
@@ -59,8 +59,8 @@ dependencies:
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 
-  fluttertoast: ^8.2.12
-  just_audio: ^0.9.46
+  fluttertoast: ^9.0.0
+  just_audio: ^0.10.3
   audio_service:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
     # See https://github.com/ryanheise/audio_service/issues/633
@@ -77,8 +77,8 @@ dependencies:
     # path: /Users/nt4f04und/dev/prj/nt4f04unds_widgets
 
     git:
-      url: https://github.com/nt4f04uNd/nt4f04unds_widgets
-      ref: 5.0.0
+      url: https://github.com/Abestanis/nt4f04unds_widgets
+      ref: update/flutter
 
   sweyer_plugin:
     path: sweyer_plugin
@@ -88,8 +88,8 @@ dev_dependencies:
     sdk: flutter
 
   build_runner: ^2.5.4
-  flutter_lints: ^5.0.0
-  golden_toolkit: ^0.15.0
+  flutter_lints: ^6.0.0
+  golden_toolkit: ^0.15.0  # TODO: Discontinued, replace
   theme_tailor: ^3.0.3
   freezed: ^3.1.0
   json_serializable: ^6.9.5
