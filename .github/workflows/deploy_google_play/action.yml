@@ -58,13 +58,18 @@ runs:
     - name: ⚙️ Generate key.properties
       shell: bash
       run: |
-        cat <<EOF > key.properties
+        cat <<EOF > "${{ github.workspace }}/android/key.properties"
         storePassword=${{ inputs.secrets_ANDROID_KEYSTORE_PASSWORD }}
         keyPassword=${{ inputs.secrets_ANDROID_KEY_PASSWORD }}
         keyAlias=${{ inputs.secrets_ANDROID_KEY_ALIAS }}
         storeFile=${{ steps.android_keystore.outputs.filePath }}
         EOF
-        mv key.properties ${{ github.workspace }}/android/key.properties
+
+    - name: ⚙️ Verify signing files exist
+      shell: bash
+      run: |
+        test -f "${{ github.workspace }}/android/key.properties"
+        test -f "${{ steps.android_keystore.outputs.filePath }}"
 
     - name: 📖 Read app version
       uses: NiklasLehnfeld/flutter-version-number-action@v1
