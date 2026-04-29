@@ -21,6 +21,7 @@ class CrashlyticsObserver {
   /// Create a new crashlytics observer, which automatically
   /// unregisters any previously created observer.
   CrashlyticsObserver(TestWidgetsFlutterBinding binding, {this.throwFatalErrors = true}) {
+    printFirebaseErrors = false;
     binding.defaultBinaryMessenger.setMockMethodCallHandler(MethodChannelFirebaseCrashlytics.channel, (call) {
       if (call.method == 'Crashlytics#recordError') {
         if (call.arguments['fatal']) {

@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
@@ -35,12 +34,7 @@ class Genre extends Content implements PlatformGenre {
         songIds: (map['songIds'] as List?)?.cast<int>() ?? [],
       );
     } on TypeError catch (error, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        error,
-        stack,
-        reason: 'trying to parse a genre',
-        fatal: false,
-      );
+      reportErrorToFirebase(error, stack, reason: 'trying to parse a genre');
       return null;
     }
   }

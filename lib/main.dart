@@ -28,7 +28,7 @@ Future<void> reportError(dynamic error, StackTrace stack) async {
     );
   }
   if (Firebase.apps.isNotEmpty) {
-    await FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    await reportFatalErrorToFirebase(error, stack);
   }
 }
 

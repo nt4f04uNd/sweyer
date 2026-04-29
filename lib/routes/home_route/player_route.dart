@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:styled_text/styled_text.dart';
 
 import 'package:sweyer/sweyer.dart';
@@ -1107,11 +1106,7 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
         );
         success = true;
       } catch (ex, stack) {
-        FirebaseCrashlytics.instance.recordError(
-          ex,
-          stack,
-          reason: 'in _SaveQueueAsPlaylistActionState',
-        );
+        await reportErrorToFirebase(ex, stack, reason: 'in _SaveQueueAsPlaylistActionState');
       } finally {
         if (success) {
           final key = GlobalKey<NFSnackbarEntryState>();

@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sweyer/sweyer.dart';
 import 'package:sweyer_plugin/sweyer_plugin.dart';
 
@@ -119,12 +118,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
         songIds: (map['songIds'] as List?)?.cast<int>().toList() ?? [],
       );
     } on TypeError catch (error, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        error,
-        stack,
-        reason: 'trying to parse a playlist',
-        fatal: false,
-      );
+      reportErrorToFirebase(error, stack, reason: 'trying to parse a playlist');
       return null;
     }
   }
