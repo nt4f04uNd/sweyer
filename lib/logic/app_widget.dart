@@ -7,6 +7,19 @@ import 'package:home_widget/home_widget.dart';
 import '../sweyer.dart';
 
 /// Controller for native app widgets.
+///
+/// The Flutter side only publishes widget state (`song` and `playing`) through
+/// the `home_widget` shared storage and asks the native widget to refresh.
+///
+/// Rendering is platform-native: Android builds `RemoteViews`, while iOS builds
+/// a WidgetKit/SwiftUI view that reads the same values from the App Group.
+///
+/// Button handling is platform-specific as well.
+/// - Android buttons are wired directly to `audio_service`
+/// media-button intents in the native widget.
+/// - iOS interactive widgets use `AppIntent` + `HomeWidgetBackgroundWorker`, so
+/// `registerInteractivityCallback` is registered here to give that worker a
+/// Dart entry point for play/pause/next/previous actions.
 class AppWidgetControl extends Control {
   static AppWidgetControl instance = AppWidgetControl();
   @visibleForTesting
@@ -32,7 +45,7 @@ class AppWidgetControl extends Control {
         PlaybackControl.instance.onSongChange.listen((song) => update(song, PlayerManager.instance.playing));
     _playingStateListener =
         PlayerManager.instance.playingStream.listen((playing) => update(PlaybackControl.instance.currentSong, playing));
-    
+
     // Register the interactivity callback for widget interactions
     HomeWidget.registerInteractivityCallback(_backgroundCallback);
   }
@@ -40,12 +53,12 @@ class AppWidgetControl extends Control {
   // Background callback function that will be called when the widget is interacted with
   static Future<void> _backgroundCallback(Uri? uri) async {
     if (uri == null) return;
-    
+
     // The uri will be in the format: "sweyer://widget/action"
     // For example: "sweyer://widget/playPause"
     if (uri.host == 'widget') {
       final action = uri.pathSegments.last;
-      
+
       // Perform the action directly
       switch (action) {
         case 'playPause':
@@ -58,10 +71,10 @@ class AppWidgetControl extends Control {
           await PlayerManager.instance.playPrev();
           break;
       }
-      
+
       // Update the widget to reflect the new state
-      if (PlaybackControl.instance.currentSong != null) {
-        await HomeWidget.saveWidgetData(_songUriKey, PlaybackControl.instance.currentSong!.contentUri);
+      if (PlaybackControl.instance.currentSongNullable != null) {
+        await HomeWidget.saveWidgetData(_songUriKey, PlaybackControl.instance.currentSong.contentUri);
         await HomeWidget.saveWidgetData(_playingKey, PlayerManager.instance.playing);
         await HomeWidget.updateWidget(
           name: appWidgetName,
