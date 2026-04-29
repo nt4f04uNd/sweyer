@@ -3,7 +3,13 @@
 
 ## Unreleased
 
-...
+## 1.0.14
+
+* Update to Flutter 3.29.2
+* Fix a bug with scrollbar labels
+* Add a homescreen widget
+* Other technical improvements
+* Min SDK is now API level 23 = Android 6.0 Marshmallow
 
 ## 1.0.13
 
