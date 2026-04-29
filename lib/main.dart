@@ -106,10 +106,10 @@ Future<void> main() async {
   ThemeControl.instance.initSystemUi();
   await Permissions.instance.init();
   await ContentControl.instance.init();
-  
+
   // Initialize widget controls handler
   WidgetControlsHandler.instance.init();
-  
+
   runApp(const ProviderScope(child: App()));
 }
 

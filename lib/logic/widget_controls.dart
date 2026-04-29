@@ -4,15 +4,15 @@ import 'package:sweyer/sweyer.dart';
 /// Controller for handling widget control actions.
 class WidgetControlsHandler {
   static WidgetControlsHandler instance = WidgetControlsHandler();
-  
+
   /// Method channel for communication with the widget.
   final MethodChannel _playerControlsChannel = const MethodChannel('com.nt4f04und.sweyer/player_controls');
-  
+
   /// Initialize the widget controls handler.
   void init() {
     _playerControlsChannel.setMethodCallHandler(_handleMethodCall);
   }
-  
+
   /// Handle method calls from the widget.
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
