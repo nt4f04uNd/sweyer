@@ -1,4 +1,5 @@
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:sweyer/sweyer.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -15,16 +16,19 @@ class Permissions {
   bool get notGranted => !granted;
 
   /// The permission to use when requesting access to the audio files on the device
-  Permission get _audioPermission =>
-      DeviceInfoControl.instance.useAudioPermission ? Permission.audio : Permission.storage;
+  Permission get _audioPermission {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return Permission.mediaLibrary;
+    }
+    return DeviceInfoControl.instance.useAudioPermission ? Permission.audio : Permission.storage;
+  }
 
   Future<void> init() async {
     _permissionAudioStatus = await _audioPermission.status;
   }
 
   Future<void> requestClick() async {
-    final responses = await [Permission.storage, Permission.audio].request();
-    _permissionAudioStatus = responses[_audioPermission] ?? PermissionStatus.denied;
+    _permissionAudioStatus = await _audioPermission.request();
     if (granted) {
       await ContentControl.instance.init();
     } else if (_permissionAudioStatus == PermissionStatus.permanentlyDenied) {

@@ -23,14 +23,14 @@ PODS:
   - Firebase/Functions (11.8.0):
     - Firebase/CoreOnly
     - FirebaseFunctions (~> 11.8.0)
-  - firebase_analytics (11.4.4):
+  - firebase_analytics (11.5.0):
     - Firebase/Analytics (= 11.8.0)
     - firebase_core
     - Flutter
-  - firebase_core (3.12.1):
+  - firebase_core (3.14.0):
     - Firebase/CoreOnly (= 11.8.0)
     - Flutter
-  - firebase_crashlytics (4.3.4):
+  - firebase_crashlytics (4.3.7):
     - Firebase/Crashlytics (= 11.8.0)
     - firebase_core
     - Flutter
@@ -280,9 +280,9 @@ SPEC CHECKSUMS:
   cloud_functions: b49e005ef7349170a7391533877d785c84024fae
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
-  firebase_analytics: 4e93dbe66872104d28ae9750fec1800e1fd66858
-  firebase_core: 8d552814f6c01ccde5d88939fced4ec26f2f5510
-  firebase_crashlytics: 05519be6b623981a77fe54fb52e6061956cb6047
+  firebase_analytics: 80826cd3477dbba65ed4e4d61588db706436f050
+  firebase_core: 6e78be0faaf87ffef0073c93b75658e3a99e2756
+  firebase_crashlytics: 62a0064dde0d032b2441b7ede11b3fa225ddbbf9
   FirebaseAnalytics: 4fd42def128146e24e480e89f310e3d8534ea42b
   FirebaseAppCheckInterop: 06fe5a3799278ae4667e6c432edd86b1030fa3df
   FirebaseAuthInterop: 7087d7a4ee4bc4de019b2d0c240974ed5d89e2fd
@@ -317,6 +317,6 @@ SPEC CHECKSUMS:
   sweyer_plugin: 2adf6dbaccc91b2cb573bc8caec5f437bbf57e68
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
-PODFILE CHECKSUM: 61a81efa373cc9a747c846b765982a7996c862d8
+PODFILE CHECKSUM: a5833d3b5bf65f4d9b516ac273a8c23ac741a90a
 
 COCOAPODS: 1.16.2
