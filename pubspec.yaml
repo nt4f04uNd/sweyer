@@ -94,8 +94,18 @@ dev_dependencies:
   freezed: ^3.1.0
   json_serializable: ^6.9.5
   sqflite_common_ffi: ^2.3.6
+  flutter_native_splash: ^2.4.6
+
+flutter_native_splash:
+  android: false
+  ios: true
+  web: false
+  color: "#7C4DFF"
+  image: static_assets/edit/logo/logo_foreground.png
+  ios_content_mode: scaleAspectFit
 
 flutter:
+  disable-swift-package-manager: true
   uses-material-design: true
   generate: true
 
