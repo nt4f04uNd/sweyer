@@ -5,9 +5,9 @@
 	<key>AppGroupIdentifier</key>
 	<string>group.com.nt4f04und.sweyer</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.13</string>
+	<string>1.0.14</string>
 	<key>CFBundleVersion</key>
-	<string>16</string>
+	<string>17</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
