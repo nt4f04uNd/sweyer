@@ -203,11 +203,10 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
         };
       }
 
-      return processedArtists.values.where((artist) => 
-        artist['artist'] != null && // Ensure required fields are present
-        artist['numberOfAlbums'] != null &&
-        artist['numberOfTracks'] != null
-      );
+      return processedArtists.values.where((artist) =>
+          artist['artist'] != null && // Ensure required fields are present
+          artist['numberOfAlbums'] != null &&
+          artist['numberOfTracks'] != null);
     } catch (e) {
       throw PlatformHandlerException(cause: e as Exception?);
     }
