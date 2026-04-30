@@ -986,12 +986,11 @@ packages:
     source: hosted
     version: "3.1.6"
   playify:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: playify
-      sha256: c48e4315a985992619a83550744891a6b56f11a349875626d7e6ffb23a8d08f4
-      url: "https://pub.dev"
-    source: hosted
+      path: "forks/playify"
+      relative: true
+    source: path
     version: "2.2.1"
   plugin_platform_interface:
     dependency: transitive
