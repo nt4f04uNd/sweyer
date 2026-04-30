@@ -8,11 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
-		1C1AD47A2DB076429701244C /* Pods_MusicPlayerAppWidgetExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AE876672E8FD1227047A818 /* Pods_MusicPlayerAppWidgetExtension.framework */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		33D795048AC5D83CD138C75E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8EF1892902F6D8F7EA148785 /* GoogleService-Info.plist */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
-		5727E814E0618CC8376AE71D /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71E8DB5FF03E125DC8786C91 /* Pods_RunnerTests.framework */; };
+		55882FD8E078DAB75A697C6B /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37E166819E7DAC6ABA0BA2FC /* Pods_Runner.framework */; };
 		66F42E192DA0C79D00774BD9 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66F42E182DA0C79D00774BD9 /* WidgetKit.framework */; };
 		66F42E1B2DA0C79D00774BD9 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66F42E1A2DA0C79D00774BD9 /* SwiftUI.framework */; };
 		66F42E1E2DA0C79D00774BD9 /* MusicPlayerAppWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F42E1D2DA0C79D00774BD9 /* MusicPlayerAppWidgetBundle.swift */; };
@@ -20,10 +19,11 @@
 		66F42E262DA0C79D00774BD9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66F42E252DA0C79D00774BD9 /* Assets.xcassets */; };
 		66F42E2A2DA0C79D00774BD9 /* MusicPlayerAppWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 66F42E172DA0C79D00774BD9 /* MusicPlayerAppWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		8E795E18BBEF1F0F5391CD01 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 305EBC1A81D8B43F8433B691 /* Pods_Runner.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		B08449CEDB597E0A6AE0995B /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD5C51AB69396AF6948D08CF /* Pods_RunnerTests.framework */; };
+		F779C42C000EBCB7FD9C80C6 /* Pods_MusicPlayerAppWidgetExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 310E96CA10D16371800AD773 /* Pods_MusicPlayerAppWidgetExtension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,9 +72,10 @@
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		1E17E984B33EF23338A23787 /* Pods-MusicPlayerAppWidgetExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MusicPlayerAppWidgetExtension.release.xcconfig"; path = "Target Support Files/Pods-MusicPlayerAppWidgetExtension/Pods-MusicPlayerAppWidgetExtension.release.xcconfig"; sourceTree = "<group>"; };
-		305EBC1A81D8B43F8433B691 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		310E96CA10D16371800AD773 /* Pods_MusicPlayerAppWidgetExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MusicPlayerAppWidgetExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		37E166819E7DAC6ABA0BA2FC /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		4496783B51EFDD0FF60F8C57 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		5634D4C75DAE3D61FC6ACCAA /* Pods-MusicPlayerAppWidgetExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MusicPlayerAppWidgetExtension.profile.xcconfig"; path = "Target Support Files/Pods-MusicPlayerAppWidgetExtension/Pods-MusicPlayerAppWidgetExtension.profile.xcconfig"; sourceTree = "<group>"; };
@@ -87,9 +88,7 @@
 		66F42E252DA0C79D00774BD9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		66F42E272DA0C79D00774BD9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		66F42E302DA0C81700774BD9 /* MusicPlayerAppWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MusicPlayerAppWidgetExtension.entitlements; sourceTree = "<group>"; };
-		6AE876672E8FD1227047A818 /* Pods_MusicPlayerAppWidgetExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MusicPlayerAppWidgetExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		70FA7F885B2E50F60A51EC54 /* Pods-MusicPlayerAppWidgetExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MusicPlayerAppWidgetExtension.debug.xcconfig"; path = "Target Support Files/Pods-MusicPlayerAppWidgetExtension/Pods-MusicPlayerAppWidgetExtension.debug.xcconfig"; sourceTree = "<group>"; };
-		71E8DB5FF03E125DC8786C91 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		76BAD9F14BA2E4FBEEBBD564 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -104,6 +103,7 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BF4C3C940B657FE2C2776693 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		CD5C51AB69396AF6948D08CF /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D05063B598A99AEC52DD6A8D /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -114,7 +114,7 @@
 			files = (
 				66F42E1B2DA0C79D00774BD9 /* SwiftUI.framework in Frameworks */,
 				66F42E192DA0C79D00774BD9 /* WidgetKit.framework in Frameworks */,
-				1C1AD47A2DB076429701244C /* Pods_MusicPlayerAppWidgetExtension.framework in Frameworks */,
+				F779C42C000EBCB7FD9C80C6 /* Pods_MusicPlayerAppWidgetExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,7 +122,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E795E18BBEF1F0F5391CD01 /* Pods_Runner.framework in Frameworks */,
+				55882FD8E078DAB75A697C6B /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,7 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5727E814E0618CC8376AE71D /* Pods_RunnerTests.framework in Frameworks */,
+				B08449CEDB597E0A6AE0995B /* Pods_RunnerTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,11 +227,11 @@
 		E799C1D19BFE94227E8D08A8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				305EBC1A81D8B43F8433B691 /* Pods_Runner.framework */,
-				71E8DB5FF03E125DC8786C91 /* Pods_RunnerTests.framework */,
 				66F42E182DA0C79D00774BD9 /* WidgetKit.framework */,
 				66F42E1A2DA0C79D00774BD9 /* SwiftUI.framework */,
-				6AE876672E8FD1227047A818 /* Pods_MusicPlayerAppWidgetExtension.framework */,
+				310E96CA10D16371800AD773 /* Pods_MusicPlayerAppWidgetExtension.framework */,
+				37E166819E7DAC6ABA0BA2FC /* Pods_Runner.framework */,
+				CD5C51AB69396AF6948D08CF /* Pods_RunnerTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -288,10 +288,10 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				66F42E2F2DA0C79D00774BD9 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				FA1EDA1A56B9EADF867FD418 /* [CP] Embed Pods Frameworks */,
 				F3D9D907D772D9FEBBE8C838 /* [CP] Copy Pods Resources */,
 				C4211BEEEF499622A3A82992 /* FlutterFire: "flutterfire upload-crashlytics-symbols" */,
 				66F42E312DA0C84D00774BD9 /* ShellScript */,
+				E6CAC3A696CAF311C6AA545E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -510,6 +510,23 @@
 			shellPath = /bin/sh;
 			shellScript = "\n#!/bin/bash\nPATH=\"${PATH}:$FLUTTER_ROOT/bin:$HOME/.pub-cache/bin\"\n\nif ! command -v flutterfire >/dev/null 2>&1; then\n  echo \"warning: flutterfire CLI not found; skipping Crashlytics symbols upload\"\n  exit 0\nfi\n\nif [ -z \"$PODS_ROOT\" ]; then\n  # Cannot use \"BUILD_DIR%/Build/*\" as per Firebase documentation, it points to \"flutter-project/build/ios/*\" path which doesn't have run script\n  DERIVED_DATA_PATH=$(echo \"$BUILD_ROOT\" | sed -E 's|(.*DerivedData/[^/]+).*|\\1|')\n  PATH_TO_CRASHLYTICS_UPLOAD_SCRIPT=\"${DERIVED_DATA_PATH}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\nelse\n  PATH_TO_CRASHLYTICS_UPLOAD_SCRIPT=\"$PODS_ROOT/FirebaseCrashlytics/run\"\nfi\n\n# Command to upload symbols script used to upload symbols to Firebase server\nflutterfire upload-crashlytics-symbols --upload-symbols-script-path=\"$PATH_TO_CRASHLYTICS_UPLOAD_SCRIPT\" --platform=ios --apple-project-path=\"${SRCROOT}\" --env-platform-name=\"${PLATFORM_NAME}\" --env-configuration=\"${CONFIGURATION}\" --env-project-dir=\"${PROJECT_DIR}\" --env-built-products-dir=\"${BUILT_PRODUCTS_DIR}\" --env-dwarf-dsym-folder-path=\"${DWARF_DSYM_FOLDER_PATH}\" --env-dwarf-dsym-file-name=\"${DWARF_DSYM_FILE_NAME}\" --env-infoplist-path=\"${INFOPLIST_PATH}\" --default-config=default\n";
 		};
+		E6CAC3A696CAF311C6AA545E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		F3D9D907D772D9FEBBE8C838 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -525,23 +542,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FA1EDA1A56B9EADF867FD418 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -651,7 +651,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -906,7 +906,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -957,7 +957,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
