@@ -439,7 +439,6 @@ class _SongBytesArtSourceLoader extends _ArtSourceLoader {
       } on SweyerPluginException catch (ex, stack) {
         await reportErrorToFirebase(ex, stack, reason: 'in _SongBytesArtSourceLoader.load');
       } finally {
-        print(_bytes?.length);
         setLoading(_SourceLoading.loaded);
       }
     });

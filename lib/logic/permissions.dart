@@ -28,7 +28,12 @@ class Permissions {
   }
 
   Future<void> requestClick() async {
-    _permissionAudioStatus = await _audioPermission.request();
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      _permissionAudioStatus = await Permission.mediaLibrary.request();
+    } else {
+      final responses = await [Permission.storage, Permission.audio].request();
+      _permissionAudioStatus = responses[_audioPermission] ?? PermissionStatus.denied;
+    }
     if (granted) {
       await ContentControl.instance.init();
     } else if (_permissionAudioStatus == PermissionStatus.permanentlyDenied) {
