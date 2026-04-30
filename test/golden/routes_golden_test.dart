@@ -21,6 +21,9 @@ void main() {
     testAppGoldens(
       'searching_screen',
       setUp: () {
+        registerAppSetup(() {
+          FakeSweyerPluginPlatform.instance.songs = [];
+        });
         registerPostAppSetup((_) {
           ContentControl.instance.dispose();
           final fake = FakeContentControl();
