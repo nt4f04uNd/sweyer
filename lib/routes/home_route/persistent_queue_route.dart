@@ -538,8 +538,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                 songs: songs,
                                 shuffled: true,
                               );
-                              MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                              MusicPlayer.instance.play();
+                              PlayerManager.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                              PlayerManager.instance.play();
                               if (!selectionController.inSelection) {
                                 playerRouteController.open();
                               }
@@ -553,8 +553,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                           ? null
                           : () {
                               QueueControl.instance.setOriginQueue(origin: queue, songs: songs);
-                              MusicPlayer.instance.setSong(songs[0]);
-                              MusicPlayer.instance.play();
+                              PlayerManager.instance.setSong(songs[0]);
+                              PlayerManager.instance.play();
                               if (!selectionController.inSelection) {
                                 playerRouteController.open();
                               }

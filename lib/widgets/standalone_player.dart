@@ -16,7 +16,7 @@ class _StandalonePlayer extends StatefulWidget {
 }
 
 class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerProviderStateMixin {
-  late AudioPlayer player;
+  late PlayerManager player;
   late AnimationController controller;
   Timer? timer;
 
@@ -26,11 +26,10 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   void initState() {
     super.initState();
     controller = AnimationController(vsync: this, duration: fadeDuration);
-    MusicPlayer.instance.pause();
-    player = AudioPlayer();
+    player = PlayerManager();
     // player.setAsset();
     // player.play();
-    player.processingStateStream.listen((state) {
+    player.playingStream.listen((state) {
       if (player.processingState == ProcessingState.completed && player.playing) {
         _show();
         player.pause();

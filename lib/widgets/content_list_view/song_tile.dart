@@ -227,7 +227,7 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
     super.handleTap(() async {
       widget.onTap?.call();
       final song = widget.song;
-      final player = MusicPlayer.instance;
+      final player = PlayerManager.instance;
       if (!selectionRoute && widget.clickBehavior == SongTileClickBehavior.play) {
         playerRouteController.open();
         await player.setSong(song);

@@ -148,22 +148,22 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
   @override
   void initState() {
     super.initState();
-    _value = MusicPlayer.instance.position;
-    _duration = MusicPlayer.instance.duration;
-    _playingSubscription = MusicPlayer.instance.playingStream.listen((playing) {
+    _value = PlayerManager.instance.position;
+    _duration = PlayerManager.instance.duration;
+    _playingSubscription = PlayerManager.instance.playingStream.listen((playing) {
       if (playing) {
         _rotatingArtGlobalKey.currentState!.rotate();
       } else {
         _rotatingArtGlobalKey.currentState!.stopRotating();
       }
     });
-    _positionSubscription = MusicPlayer.instance.positionStream.listen((position) {
+    _positionSubscription = PlayerManager.instance.positionStream.listen((position) {
       setState(() {
         _value = position;
       });
     });
     _songChangeSubscription = PlaybackControl.instance.onSongChange.listen((event) async {
-      _value = MusicPlayer.instance.position;
+      _value = PlayerManager.instance.position;
       setState(() {
         _duration = Duration(milliseconds: event.duration);
       });
@@ -201,7 +201,7 @@ class _RotatingAlbumArtWithProgressState extends State<RotatingAlbumArtWithProgr
         key: _rotatingArtGlobalKey,
         source: ContentArtSource.song(song),
         initRotation: initRotation,
-        initRotating: MusicPlayer.instance.playing,
+        initRotating: PlayerManager.instance.playing,
       ),
     );
   }

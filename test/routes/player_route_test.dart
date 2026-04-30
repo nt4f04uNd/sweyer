@@ -114,11 +114,11 @@ void main() {
       // Expand the route
       await tester.expandPlayerRoute();
 
-      expect(MusicPlayer.instance.looping, false);
+      expect(PlayerManager.instance.looping, false);
       await tester.tap(find.byType(LoopButton));
-      expect(MusicPlayer.instance.looping, true);
+      expect(PlayerManager.instance.looping, true);
       await tester.tap(find.byType(LoopButton));
-      expect(MusicPlayer.instance.looping, false);
+      expect(PlayerManager.instance.looping, false);
     });
   });
 
@@ -206,22 +206,22 @@ void main() {
         matching: find.byType(AnimatedPlayPauseButton),
       );
 
-      expect(MusicPlayer.instance.playing, false);
-      expect(MusicPlayer.handler!.running, false);
+      expect(PlayerManager.instance.playing, false);
+      expect(PlayerManager.handler!.running, false);
       expect(appWidgetChannelObserver.saveWidgetDataLog, []);
       expect(appWidgetChannelObserver.updateWidgetRequests, []);
 
       await tester.tap(button);
       await tester.idle();
-      expect(MusicPlayer.instance.playing, true);
-      expect(MusicPlayer.handler!.running, true);
+      expect(PlayerManager.instance.playing, true);
+      expect(PlayerManager.handler!.running, true);
       expect(appWidgetChannelObserver.saveWidgetDataLog, [("song", songWith().contentUri), ("playing", true)]);
       expect(appWidgetChannelObserver.updateWidgetRequests, [AppWidgetControl.appWidgetName]);
 
       await tester.tap(button);
       await tester.idle();
-      expect(MusicPlayer.instance.playing, false);
-      expect(MusicPlayer.handler!.running, true, reason: 'Handler should only stop when stopped, not when paused');
+      expect(PlayerManager.instance.playing, false);
+      expect(PlayerManager.handler!.running, true, reason: 'Handler should only stop when stopped, not when paused');
       expect(appWidgetChannelObserver.saveWidgetDataLog,
           [("song", songWith().contentUri), ("playing", true), ("song", songWith().contentUri), ("playing", false)]);
       expect(appWidgetChannelObserver.updateWidgetRequests,
@@ -229,7 +229,7 @@ void main() {
 
       await tester.pumpAndSettle();
     });
-    expect(MusicPlayer.handler!.running, false);
+    expect(PlayerManager.handler!.running, false);
   });
 
   testWidgets('handles back presses correctly', (WidgetTester tester) async {

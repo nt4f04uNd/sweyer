@@ -10,7 +10,7 @@ class LoopButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final player = MusicPlayer.instance;
+    final player = PlayerManager.instance;
     return StreamBuilder<bool>(
       stream: player.loopingStream,
       initialData: player.looping,

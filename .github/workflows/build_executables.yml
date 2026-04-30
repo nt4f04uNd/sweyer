@@ -7,38 +7,71 @@ on:
       - master
       - 'releases/**'
 
+env:
+  flutter_channel: stable
+  flutter_version: 3.29.2
+  cocoapods_version: 1.16.2
+
 jobs:
-  build_executables:
-    runs-on: ubuntu-latest
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Android APK
+            os: ubuntu-latest
+            artifact_name: Android Apk
+            artifact_path: build/app/outputs/flutter-apk/app-profile.apk
+            build_command: |
+              export JAVA_HOME="$JAVA_HOME_17_X64"
+              flutter build apk --profile
+          - name: iOS simulator app
+            os: macos-latest
+            artifact_name: iOS Simulator App
+            artifact_path: build/ios/iphonesimulator/Runner.app
+            build_command: flutter build ios --simulator --debug
+
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v6
 
+      - name: 🧰 Select Xcode
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.29.2
-          channel: stable
+          flutter-version: ${{ env.flutter_version }}
+          channel: ${{ env.flutter_channel }}
           cache: true
+
+      - name: 🧱 Install CocoaPods
+        if: runner.os == 'macOS'
+        shell: bash
+        run: sudo gem install cocoapods -v ${{ env.cocoapods_version }} --no-document
 
       - name: 📦 Install Dependencies
         shell: bash
         run: flutter pub get
 
       - name: 💾 Cache Gradle
+        if: runner.os == 'Linux'
         uses: actions/cache@v5
         with:
           key: gradle
           path: /home/runner/.gradle
 
-      - name: 🔨 Build Apk
+      - name: 🔨 Build ${{ matrix.name }}
         shell: bash
-        run: |
-          export JAVA_HOME="$JAVA_HOME_17_X64"
-          flutter build apk --profile
+        run: ${{ matrix.build_command }}
 
       - name: 📁 Save executables
         uses: actions/upload-artifact@v7
         with:
-          name: Android Apk
-          path: build/app/outputs/flutter-apk/app-profile.apk
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
