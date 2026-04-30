@@ -100,29 +100,59 @@ void main() {
         ]);
       });
     });
+
+    testWidgets('on iOS checks and requests media library permission', (WidgetTester tester) async {
+      late PermissionsChannelObserver permissionsObserver;
+      registerAppSetup(() {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        permissionsObserver = PermissionsChannelObserver(tester.binding);
+        permissionsObserver.setPermission(Permission.mediaLibrary, PermissionStatus.denied);
+      });
+      try {
+        await tester.runAppTest(() async {
+          expect(permissionsObserver.checkedPermissions, [Permission.mediaLibrary]);
+          expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
+          final permissionGrantCompleter = Completer<PermissionStatus>();
+          permissionsObserver.setPermissionResolvable(Permission.mediaLibrary, () => permissionGrantCompleter.future);
+          await tester.tap(find.text(l10n.grant));
+          expect(permissionsObserver.requestedPermissions, [Permission.mediaLibrary]);
+          await tester.pump();
+          expect(find.byType(CircularProgressIndicator), findsOneWidget,
+              reason: 'Indicate while waiting for the permission to be granted');
+          permissionGrantCompleter.complete(PermissionStatus.granted);
+          await tester.pumpAndSettle();
+          expect(find.byType(Home), findsOneWidget);
+        });
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    });
   });
 
   testWidgets('searching screen - shows when permissions are granted and searching for tracks',
       (WidgetTester tester) async {
+    late FakeContentControl fake;
+    registerAppSetup(() {
+      FakeSweyerPluginPlatform.instance.songs = [];
+    });
     registerPostAppSetup((_) {
       // Use fake
       ContentControl.instance.dispose();
-      final fake = FakeContentControl();
+      fake = FakeContentControl();
       fake.init();
 
-      expect(Permissions.instance.granted, true);
-      expect(ContentControl.instance.disposed.value, true);
-      expect(ContentControl.instance.initializing, false);
-      expect(ContentControl.instance.stateNullable, null);
-
-      // Fake ContentControl.init in a way to trigger the home screen rebuild
+      // Fake ContentControl.init in a way to trigger the home screen rebuild.
       fake.initializing = true;
       fake.stateNullable = ContentState();
       fake.disposed.value = false;
-
-      expect(ContentControl.instance.initializing, true);
     });
     await tester.runAppTest(() async {
+      expect(Permissions.instance.granted, true);
+      expect(ContentControl.instance, same(fake));
+      expect(ContentControl.instance.initializing, true);
+      expect(ContentControl.instance.stateNullable, isNotNull);
+      expect(ContentControl.instance.disposed.value, false);
+
       // Expect appropriate ui
       expect(find.text(l10n.searchingForTracks), findsOneWidget);
       expect(find.byType(Spinner), findsOneWidget);
