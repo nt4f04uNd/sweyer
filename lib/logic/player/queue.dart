@@ -356,9 +356,9 @@ class QueueControl extends Control {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (!disposed.value) {
-      _onQueueChangeSubject.close();
+      await _onQueueChangeSubject.close();
     }
     super.dispose();
   }

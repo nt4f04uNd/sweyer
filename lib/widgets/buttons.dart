@@ -9,7 +9,7 @@ class LoopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final player = MusicPlayer.instance;
     return StreamBuilder<bool>(
       stream: player.loopingStream,
@@ -32,7 +32,7 @@ class ShuffleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final theme = Theme.of(context);
     return StreamBuilder(
       stream: QueueControl.instance.onQueueChanged,

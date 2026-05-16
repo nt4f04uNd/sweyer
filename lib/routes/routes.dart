@@ -21,7 +21,7 @@ abstract class _Routes<T> extends Equatable {
 
   final String location;
   final T? arguments;
-  get uri => Uri(path: location);
+  Uri get uri => Uri(path: location);
 
   _Routes withArguments(T arguments);
 
@@ -253,17 +253,13 @@ mixin _DelegateMixin<T extends _Routes> on RouterDelegate<T>, ChangeNotifier {
     notifyListeners();
   }
 
-  bool _handlePopPage(Route<Object?> route, Object? result) {
-    final bool success = route.didPop(result);
-    if (success) {
-      if (_routes.length <= 1) {
-        assert(false, "Can't pop initial route");
-      } else {
-        _routes.removeLast();
-      }
-      notifyListeners();
+  void _handleRemovePage(Page<Object?> page) {
+    if (_routes.length <= 1) {
+      assert(false, "Can't pop initial route");
+    } else {
+      _routes.removeLast();
     }
-    return success;
+    notifyListeners();
   }
 }
 
@@ -425,7 +421,7 @@ class AppRouter extends RouterDelegate<AppRoutes<Object?>>
         return Navigator(
           key: navigatorKey,
           observers: [routeObserver],
-          onPopPage: _handlePopPage,
+          onDidRemovePage: _handleRemovePage,
           pages: pages,
         );
       },
@@ -632,7 +628,7 @@ class HomeRouter extends RouterDelegate<HomeRoutes<Object?>>
       child: Navigator(
         key: navigatorKey,
         observers: [observer],
-        onPopPage: _handlePopPage,
+        onDidRemovePage: _handleRemovePage,
         pages: pages,
       ),
     );
