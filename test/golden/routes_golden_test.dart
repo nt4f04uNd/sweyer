@@ -21,6 +21,9 @@ void main() {
     testAppGoldens(
       'searching_screen',
       setUp: () {
+        registerAppSetup(() {
+          FakeSweyerPluginPlatform.instance.songs = [];
+        });
         registerPostAppSetup((_) {
           ContentControl.instance.dispose();
           final fake = FakeContentControl();
@@ -200,7 +203,7 @@ void main() {
         await tester.tap(find.byType(SongTile));
         await tester.pump(); // Flush micro-tasks to flush the handling of the tap.
         // Stop the playback to avoid animations when taking the golden screenshot.
-        await MusicPlayer.handler!.stop();
+        await PlayerManager.handler!.stop();
         await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(playerRouteController.value, 1.0);
       },

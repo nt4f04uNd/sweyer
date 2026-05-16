@@ -161,6 +161,11 @@ class _CreatePlaylistInListActionState extends State<CreatePlaylistInListAction>
 
   @override
   Widget build(BuildContext context) {
+    // Don't show create playlist button on platforms that don't support creating playlists
+    if (!PlatformFeatures.supportsCreatePlaylists) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = getl10n(context);
     return InListContentAction.persistentQueue(
       onTap: widget.enabled ? _handleTap : null,

@@ -7,15 +7,15 @@ import '../test.dart';
 
 class FakeFirebaseApp extends MockFirebaseApp {
   static Future<void> install(TestWidgetsFlutterBinding binding) async {
-    TestFirebaseCoreHostApi.setUp(FakeFirebaseApp());
+    TestFirebaseCoreHostApi.setup(FakeFirebaseApp());
     CrashlyticsObserver(binding, throwFatalErrors: true); // Register throwing crashlytics observer.
     await Firebase.initializeApp();
   }
 
   @override
-  Future<CoreInitializeResponse> initializeApp(
+  Future<PigeonInitializeResponse> initializeApp(
     String appName,
-    CoreFirebaseOptions initializeAppRequest,
+    PigeonFirebaseOptions initializeAppRequest,
   ) async {
     var response = await super.initializeApp(appName, initializeAppRequest);
     (response.pluginConstants.putIfAbsent(MethodChannelFirebaseCrashlytics.channel.name, () => {})!
@@ -25,7 +25,7 @@ class FakeFirebaseApp extends MockFirebaseApp {
   }
 
   @override
-  Future<List<CoreInitializeResponse>> initializeCore() async {
+  Future<List<PigeonInitializeResponse?>> initializeCore() async {
     var responseList = await super.initializeCore();
     for (var response in responseList.nonNulls) {
       (response.pluginConstants.putIfAbsent(MethodChannelFirebaseCrashlytics.channel.name, () => {})!

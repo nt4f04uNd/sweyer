@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -57,6 +54,17 @@ class DefaultFirebaseOptions {
     messagingSenderId: '574502524315',
     projectId: 'sweyer-def42',
     databaseURL: 'https://sweyer-def42.firebaseio.com',
-    storageBucket: 'sweyer-def42.appspot.com',
+    storageBucket: 'sweyer-def42.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCChInWRDse65X3YviyULeoi4FoXFP_a-o',
+    appId: '1:574502524315:ios:6ec9eb013907ccb631fd3e',
+    messagingSenderId: '574502524315',
+    projectId: 'sweyer-def42',
+    databaseURL: 'https://sweyer-def42.firebaseio.com',
+    storageBucket: 'sweyer-def42.firebasestorage.app',
+    androidClientId: '574502524315-hmfneng06499ct46kt68g5ttrf3p5dvl.apps.googleusercontent.com',
+    iosBundleId: 'com.nt4f04und.sweyer',
   );
 }

@@ -522,9 +522,9 @@ class _ContentTabState extends State<_ContentTab>
                                                       );
                                                       break;
                                                   }
-                                                  MusicPlayer.instance
+                                                  PlayerManager.instance
                                                       .setSong(QueueControl.instance.state.current.songs[0]);
-                                                  MusicPlayer.instance.play();
+                                                  PlayerManager.instance.play();
                                                   playerRouteController.open();
                                                 },
                                         ),
@@ -556,9 +556,9 @@ class _ContentTabState extends State<_ContentTab>
                                                       );
                                                       break;
                                                   }
-                                                  MusicPlayer.instance
+                                                  PlayerManager.instance
                                                       .setSong(QueueControl.instance.state.current.songs[0]);
-                                                  MusicPlayer.instance.play();
+                                                  PlayerManager.instance.play();
                                                   playerRouteController.open();
                                                 },
                                         ),

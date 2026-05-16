@@ -1,0 +1,16 @@
+{
+   "version": "2.0.0",
+   "tasks": [
+      {
+         "label": "ios: terminate app if available",
+         "type": "shell",
+         "command": "tools/terminate_ios_app.sh",
+         "problemMatcher": [],
+         "presentation": {
+            "reveal": "silent",
+            "panel": "shared",
+            "clear": true
+         }
+      }
+   ]
+}

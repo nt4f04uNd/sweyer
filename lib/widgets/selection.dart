@@ -931,8 +931,8 @@ class SelectionActionsBar extends StatelessWidget {
           child: PlayerInterfaceColorWidget(
             color: () => theme.colorScheme.secondary,
             child: Container(
-              height: kSongTileHeight(context),
-              padding: const EdgeInsets.only(bottom: 6.0),
+              height: kSongTileHeight(context) + MediaQuery.paddingOf(context).bottom,
+              padding: EdgeInsets.only(bottom: 6.0 + MediaQuery.paddingOf(context).bottom),
               child: Material(
                 color: Colors.transparent,
                 child: ListTile(
@@ -1469,8 +1469,8 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
       shuffled: false,
       songs: songs,
     );
-    MusicPlayer.instance.setSong(songs.first);
-    MusicPlayer.instance.play();
+    PlayerManager.instance.setSong(songs.first);
+    PlayerManager.instance.play();
     playerRouteController.open();
     controller.close();
   }
@@ -1507,8 +1507,8 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
       shuffled: true,
       shuffleFrom: songs,
     );
-    MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-    MusicPlayer.instance.play();
+    PlayerManager.instance.setSong(QueueControl.instance.state.current.songs[0]);
+    PlayerManager.instance.play();
     playerRouteController.open();
     controller.close();
   }
