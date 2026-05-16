@@ -1,3 +1,15 @@
+## Community
+
+Want to collaborate?
+
+Join the Sweyer community on Discord:
+
+[![Discord](https://img.shields.io/badge/Discord-Sweyer%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/yEMT8Z54)
+
+There we can discuss ideas, UX, architecture, local-first software, or just chat with other contributors and users.
+
+GitHub issues and pull requests remain the primary place for tracking concrete bugs, tasks and code changes.
+
 ## Code style
 
 The repo has a set of lints in [analysis_options](https://github.com/nt4f04uNd/sweyer/blob/master/analysis_options.yaml),
