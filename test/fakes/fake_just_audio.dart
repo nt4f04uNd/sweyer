@@ -34,7 +34,7 @@ class MockJustAudio with MockPlatformInterfaceMixin implements JustAudioPlatform
 
   @override
   Future<DisposePlayerResponse> disposePlayer(DisposePlayerRequest request) async {
-    _players[request.id]!.dispose(DisposeRequest());
+    await _players[request.id]!.dispose(DisposeRequest());
     _players.remove(request.id);
     return DisposePlayerResponse();
   }
