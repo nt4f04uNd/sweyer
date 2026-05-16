@@ -105,17 +105,16 @@ void main() {
       });
     });
 
-    test('Keeps favorites when switching form MediaStore to local', () async {
-      final binding = TestWidgetsFlutterBinding.ensureInitialized();
-      await binding.runAppTestWithoutUi(() async {
+    testWidgets('Keeps favorites when switching form MediaStore to local', (tester) async {
+      await tester.runAppTestWithoutUi(() async {
         final favorSong = notFavoriteSong1;
         final unFavorSong = favoriteSong1;
         await Settings.useMediaStoreForFavoriteSongs.set(true);
-        await binding.pump();
+        await tester.pump();
         await FakeFavoritesControl.instance.setFavorite(contentTuple: ContentTuple(songs: [favorSong]), value: true);
         await FakeFavoritesControl.instance.setFavorite(contentTuple: ContentTuple(songs: [unFavorSong]), value: false);
         await Settings.useMediaStoreForFavoriteSongs.set(false);
-        await binding.pump();
+        await tester.pump();
         expect(FakeFavoritesControl.instance.isFavorite(unFavorSong), false);
         expect(FakeFavoritesControl.instance.isFavorite(notFavoriteSong2), false);
         expect(FakeFavoritesControl.instance.isFavorite(favorSong), true);

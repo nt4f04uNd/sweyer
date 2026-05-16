@@ -134,7 +134,7 @@ void main() {
     await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
       await tester.idle();
-      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
+      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding.defaultBinaryMessenger);
       // Expand the route
       await tester.expandPlayerRoute();
 
@@ -170,7 +170,7 @@ void main() {
     await tester.runAppTest(() async {
       PlaybackControl.instance.changeSong(songs[1]);
       await tester.idle();
-      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
+      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding.defaultBinaryMessenger);
       // Expand the route
       await tester.expandPlayerRoute();
 
@@ -197,7 +197,7 @@ void main() {
   testWidgets('play/pause button works', (WidgetTester tester) async {
     await tester.runAppTest(() async {
       await tester.idle(); // Wait for widget events from start to process.
-      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding);
+      final appWidgetChannelObserver = AppWidgetChannelObserver(tester.binding.defaultBinaryMessenger);
       // Expand the route
       await tester.expandPlayerRoute();
 
