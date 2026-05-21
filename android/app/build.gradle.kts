@@ -65,3 +65,16 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    constraints {
+        // TODO: Remove this once https://github.com/ABausG/home_widget/issues/417
+        //       is closed and the fix is available in a stable home_widget release.
+        implementation("androidx.glance:glance-appwidget") {
+            version {
+                strictly("1.1.1")
+            }
+            because("home_widget requests 1.+, which can resolve to pre-release Glance versions requiring newer Android tooling")
+        }
+    }
+}
