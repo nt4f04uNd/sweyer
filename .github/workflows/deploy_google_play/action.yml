@@ -6,10 +6,6 @@ inputs:
     required: false
     default: "stable"
     description: The channel of the Flutter used to build Sweyer with. 
-  flutter_version:
-    required: false
-    default: "3.29.2"
-    description: The version of Flutter used to build Sweyer with.
   ruby_version:
     required: false
     default: 3.3.0
@@ -38,7 +34,7 @@ runs:
     - name: 🐦 Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: ${{inputs.flutter_version}}
+        flutter-version-file: pubspec.yaml
         channel: ${{inputs.flutter_channel}}
         cache: true
 
