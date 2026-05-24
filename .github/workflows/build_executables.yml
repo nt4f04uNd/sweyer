@@ -26,8 +26,7 @@ jobs:
         with:
           path: ~/.pub-cache
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-          restore-keys: |
-            pub-${{ runner.os }}-
+          restore-keys: pub-${{ runner.os }}-
 
       - name: 💾 Cache Gradle
         uses: actions/cache@v5
@@ -36,8 +35,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
+          restore-keys: gradle-${{ runner.os }}-
 
       - name: 📦 Install Dependencies
         shell: bash

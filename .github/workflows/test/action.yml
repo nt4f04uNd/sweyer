@@ -26,8 +26,7 @@ runs:
       with:
         path: ~/.pub-cache
         key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-        restore-keys: |
-          pub-${{ runner.os }}-
+        restore-keys: pub-${{ runner.os }}-
 
     - name: 📦 Install Dependencies
       shell: bash
