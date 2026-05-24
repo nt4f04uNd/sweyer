@@ -135,7 +135,7 @@ runs:
       with:
         name: sweyer@${{ steps.read-version.outputs.version-number }}.apk
         path: ${{ github.workspace }}/build/app/outputs/flutter-apk/sweyer@${{ steps.read-version.outputs.version-number }}.apk
-        compression-level: 0  # Apk are already compressed
+        compression-level: 0  # Apk is already compressed
 
     - name: ⚙️ Decode Service Account Key JSON File
       uses: timheuer/base64-to-file@v1
