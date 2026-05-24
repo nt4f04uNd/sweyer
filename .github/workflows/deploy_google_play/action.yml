@@ -53,7 +53,7 @@ runs:
           pub-${{ runner.os }}-
 
     - name: ⚙️ Decode Keystore File
-      uses: timheuer/base64-to-file@v1
+      uses: timheuer/base64-to-file@v2
       id: android_keystore
       with:
         fileName: "keystore.jks"
@@ -76,7 +76,7 @@ runs:
         test -f "${{ steps.android_keystore.outputs.filePath }}"
 
     - name: 📖 Read app version
-      uses: NiklasLehnfeld/flutter-version-number-action@v1
+      uses: NiklasLehnfeld/flutter-version-number-action@v2
       id: read-version
       with:
         file-path: pubspec.yaml
@@ -117,21 +117,21 @@ runs:
         zip -r ${{ github.workspace }}/symbols.zip ${{ github.workspace }}/build/app/outputs/symbols/
 
     - name: 📁 Upload build artifacts (symbols)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: symbols
         path: ${{ github.workspace }}/symbols.zip
         compression-level: 0  # Zip is already compressed
 
     - name: 📁 Upload build artifacts (aab)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: sweyer@${{ steps.read-version.outputs.version-number }}.aab
         path: ${{ github.workspace }}/build/app/outputs/bundle/release/sweyer@${{ steps.read-version.outputs.version-number }}.aab
         compression-level: 0  # Aab is already compressed
 
     - name: 📁 Upload build artifacts (apk)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: sweyer@${{ steps.read-version.outputs.version-number }}.apk
         path: ${{ github.workspace }}/build/app/outputs/flutter-apk/sweyer@${{ steps.read-version.outputs.version-number }}.apk
@@ -175,7 +175,7 @@ runs:
         FASTLANE_ANDROID_JSON_KEY_FILE: ${{ steps.android_service_account_json_file.outputs.filePath }}
 
     - name: 📝 Draft a GitHub release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         name: ${{ steps.splitted-version.outputs._0 }}
         tag_name: ${{ steps.splitted-version.outputs._0 }}
