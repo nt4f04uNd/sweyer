@@ -44,6 +44,14 @@ runs:
         ruby-version: ${{inputs.ruby_version}}
         bundler-cache: true
 
+    - name: 💾 Cache Cache Pub
+      uses: actions/cache@v5
+      with:
+        path: ~/.pub-cache
+        key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+        restore-keys: |
+          pub-${{ runner.os }}-
+
     - name: ⚙️ Decode Keystore File
       uses: timheuer/base64-to-file@v1
       id: android_keystore
