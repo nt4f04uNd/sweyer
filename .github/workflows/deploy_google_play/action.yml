@@ -9,10 +9,6 @@ inputs:
   ruby_version:
     required: false
     default: 3.3.0
-  testing_arguments:
-    required: false
-    default: ""
-    description: Optional additional arguments to the flutter test command.
   secrets_ANDROID_KEYSTORE_FILE:
     required: true
   secrets_ANDROID_KEYSTORE_PASSWORD:
