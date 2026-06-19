@@ -15,7 +15,7 @@ jobs:
       contents: write
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🧪 Test Sweyer
         uses: ./.github/workflows/test
