@@ -31,8 +31,8 @@ class PermissionsChannelObserver {
 
   /// Create a new permissions observer, which automatically
   /// unregisters any previously created observer.
-  PermissionsChannelObserver(TestWidgetsFlutterBinding binding) {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(_channel, (call) async {
+  PermissionsChannelObserver(TestDefaultBinaryMessenger messenger) {
+    messenger.setMockMethodCallHandler(_channel, (call) async {
       switch (call.method) {
         case 'requestPermissions':
           final Map<int, int> permissionStatuses = {};
