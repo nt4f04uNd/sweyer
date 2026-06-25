@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../observer/observer.dart';
 import '../test.dart';
+import 'framework/golden.dart' show testAppGoldens;
 
 void main() {
   group('home_route', () {
