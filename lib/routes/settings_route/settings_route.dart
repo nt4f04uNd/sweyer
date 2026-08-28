@@ -113,7 +113,7 @@ class _FooterState extends State<_Footer> {
       return;
     }
     final int remainingClicks = clicksForDevMode - 1 - _clickCount;
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final theme = Theme.of(context);
     final textStyle = TextStyle(
       fontSize: 15.0,

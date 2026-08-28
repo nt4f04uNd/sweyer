@@ -141,7 +141,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = widget.color ?? theme.colorScheme.primary;
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final scaleFactor = textScaleFactor == 1.0 ? 1.0 : textScaleFactor * 1.1;
 
     final wrapLabels = textScaleFactor > 1.5;

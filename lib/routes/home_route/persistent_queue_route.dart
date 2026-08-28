@@ -356,7 +356,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   Widget _buildInfo() {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
-    final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     const titleFontSize = 24.0;
     const maxLines = 3;
     final title = Text(

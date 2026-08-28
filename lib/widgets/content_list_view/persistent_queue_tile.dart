@@ -39,7 +39,7 @@ double kPersistentQueueGridTileHeight(
     );
 
 double _calculatePersistentQueueTileHeight(ContentType contentType, BuildContext context) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
   final theme = Theme.of(context);
   return _calculatePersistentQueueTileHeightMemo(
     textScaleFactor,
@@ -68,7 +68,7 @@ double _calculatePersistentQueueGridTileHeight(
   BuildContext context,
   double gridArtSize,
 ) {
-  final textScaleFactor = MediaQuery.of(context).textScaleFactor;
+  final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
   final theme = Theme.of(context);
   return _calculatePersistentQueueGridTileHeightMemo(
     textScaleFactor,

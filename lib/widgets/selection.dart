@@ -23,7 +23,7 @@ const Duration kSelectionDuration = Duration(milliseconds: 350);
 ///
 /// See [SelectableState.selectionRoute] for discussion of how selection works
 /// when this is `true`.
-bool selectionRouteOf(context) {
+bool selectionRouteOf(BuildContext context) {
   return HomeRouter.maybeOf(context)?.selectionArguments != null;
 }
 
@@ -596,9 +596,9 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
       Future<void> animateSystemUi([SystemUiOverlayStyle? lastUi]) async {
         lastUi ??= SystemUiStyleController.instance.lastUi;
         _lastUi = lastUi;
-        _lastUiSub?.cancel();
-        _lastUiSub = null;
         final theme = Theme.of(context);
+        await _lastUiSub?.cancel();
+        _lastUiSub = null;
         final to = systemUiOverlayStyle?.call() ??
             lastUi.copyWith(
               systemNavigationBarColor: theme.systemUiThemeExtension.grey.systemNavigationBarColor,
@@ -613,7 +613,7 @@ class ContentSelectionController<T extends SelectionEntry> extends SelectionCont
         });
         if (SystemUiStyleController.instance.lastUi.systemNavigationBarColor != to.systemNavigationBarColor) {
           // Restart if we were interrupted by other system UI update
-          animateSystemUi(_lastUi);
+          await animateSystemUi(_lastUi);
         }
       }
 
@@ -1125,7 +1125,7 @@ class _ActionsSelectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = getl10n(context);
     final theme = Theme.of(context);
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
     final controller = ContentSelectionController._of(context);
     final Widget counterWidget = EmergeAnimation(
       animation: controller.animation,
@@ -1928,7 +1928,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
       if (DeviceInfoControl.instance.useScopedStorageForFileModifications) {
         // On Android R the deletion is performed with OS dialog.
         await ContentControl.instance.deleteSongs(entries.map((e) => e.data).toSet());
-        widget.controller.close();
+        await widget.controller.close();
       } else {
         // On all versions below show in app dialog.
         final list = entries.map((el) => el.data).toList();
@@ -2148,8 +2148,9 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
 
     final l10n = getl10n(context);
     final theme = Theme.of(context);
-    final mediaQuery = MediaQuery.of(context);
-    final correctedMoreTextWidth = moreTextWidth * mediaQuery.textScaleFactor;
+    final textScaleFactor = MediaQuery.textScalerOf(context).scale(1);
+    final mediaQuerySize = MediaQuery.sizeOf(context);
+    final correctedMoreTextWidth = moreTextWidth * textScaleFactor;
 
     return CustomBoxy(
       delegate: _BoxyArtsPreviewDelegate(
@@ -2181,7 +2182,7 @@ class _DeletionArtsPreviewState<T extends Content> extends State<_DeletionArtsPr
 
             final animation = Tween(
               begin: itemSize,
-              end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuery.size.height / 2),
+              end: math.min(gridItemSize * rows + (rows - 1) * spacing, mediaQuerySize.height / 2),
             ).animate(CurvedAnimation(
               curve: Curves.easeOut,
               reverseCurve: Curves.easeInCubic,
