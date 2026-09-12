@@ -438,7 +438,12 @@ class _ContentTabState extends State<_ContentTab>
                   onItemTap: (index) {
                     switch (contentType) {
                       case ContentType.song:
-                        QueueControl.instance.resetQueue();
+                        QueueControl.instance.setQueue(
+                          type: showOnlyFavorites ? QueueType.favouriteSongs : QueueType.allSongs,
+                          songs: list as List<Song>,
+                          modified: false,
+                          shuffled: false,
+                        );
                         break;
                       case ContentType.album:
                       case ContentType.playlist:
@@ -485,10 +490,13 @@ class _ContentTabState extends State<_ContentTab>
                                                   switch (contentType) {
                                                     case ContentType.song:
                                                       QueueControl.instance.setQueue(
-                                                        type: QueueType.allSongs,
+                                                        songs: (list as List<Song>)..shuffle(),
+                                                        type: showOnlyFavorites
+                                                            ? QueueType.favouriteSongs
+                                                            : QueueType.allSongs,
                                                         modified: false,
                                                         shuffled: true,
-                                                        shuffleFrom: list as List<Song>,
+                                                        shuffleFrom: list,
                                                       );
                                                       break;
                                                     case ContentType.album:
@@ -541,7 +549,14 @@ class _ContentTabState extends State<_ContentTab>
                                               : () {
                                                   switch (contentType) {
                                                     case ContentType.song:
-                                                      QueueControl.instance.resetQueue();
+                                                      QueueControl.instance.setQueue(
+                                                        type: showOnlyFavorites
+                                                            ? QueueType.favouriteSongs
+                                                            : QueueType.allSongs,
+                                                        songs: list as List<Song>,
+                                                        modified: false,
+                                                        shuffled: false,
+                                                      );
                                                       break;
                                                     case ContentType.album:
                                                       QueueControl.instance.setQueue(
