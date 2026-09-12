@@ -45,18 +45,18 @@ struct Provider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), songUri: nil, isPlaying: false)
+        let userDefaults = UserDefaults(suiteName: "group.com.nt4f04und.sweyer")
+        let songUri = userDefaults?.string(forKey: "song")
+        let isPlaying = userDefaults?.bool(forKey: "playing") ?? false
+        let entry = SimpleEntry(date: Date(), songUri: songUri, isPlaying: isPlaying)
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        let userDefaults = UserDefaults(suiteName: "group.com.nt4f04und.sweyer")
-        let songUri = userDefaults?.string(forKey: "song")
-        let isPlaying = userDefaults?.bool(forKey: "playing") ?? false
-        
-        let entry = SimpleEntry(date: Date(), songUri: songUri, isPlaying: isPlaying)
-        let timeline = Timeline(entries: [entry], policy: .atEnd)
-        completion(timeline)
+        getSnapshot(in: context) { entry in
+            let timeline = Timeline(entries: [entry], policy: .atEnd)
+            completion(timeline)
+        }
     }
 }
 
