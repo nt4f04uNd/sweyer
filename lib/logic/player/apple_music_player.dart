@@ -206,22 +206,22 @@ class AppleMusicPlayer implements SweyerPlayer {
   Stream<LoopMode> get loopModeStream => _loopModeSubject.stream;
 
   @override
-  bool get playing => _playingSubject.value;
+  bool get playing => _playingSubject.value ?? false;
 
   @override
-  Duration get position => _positionSubject.value;
+  Duration get position => _positionSubject.value ?? Duration.zero;
 
   @override
-  Duration get bufferedPosition => _positionSubject.value;
+  Duration get bufferedPosition => _positionSubject.value ?? Duration.zero;
 
   @override
-  ProcessingState get processingState => _processingStateSubject.value;
+  ProcessingState get processingState => _processingStateSubject.value ?? ProcessingState.idle;
 
   @override
   bool get looping => loopMode == LoopMode.one;
 
   @override
-  LoopMode get loopMode => _loopModeSubject.value;
+  LoopMode get loopMode => _loopModeSubject.value ?? LoopMode.off;
 
   @override
   double get speed => 1;
