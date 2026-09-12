@@ -24,6 +24,7 @@ class AppWidgetControl extends Control {
   static AppWidgetControl instance = AppWidgetControl();
   @visibleForTesting
   static const appWidgetName = 'MusicPlayerAppWidget';
+  static const _appGroupId = 'group.com.nt4f04und.sweyer';
   static const _songUriKey = 'song';
   static const _playingKey = 'playing';
 
@@ -37,8 +38,9 @@ class AppWidgetControl extends Control {
   bool? _lastPlayingState;
 
   @override
-  void init() {
+  Future<void> init() async {
     super.init();
+    await _configureHomeWidget();
     _lastSongContentUri = null;
     _lastPlayingState = null;
     _currentSongListener =
@@ -50,9 +52,17 @@ class AppWidgetControl extends Control {
     HomeWidget.registerInteractivityCallback(_backgroundCallback);
   }
 
-  // Background callback function that will be called when the widget is interacted with
+  static Future<void> _configureHomeWidget() async {
+    if (Platform.isIOS) {
+      await HomeWidget.setAppGroupId(_appGroupId);
+    }
+  }
+
+  /// Background callback invoked when an interactive widget control is used.
+  @pragma('vm:entry-point')
   static Future<void> _backgroundCallback(Uri? uri) async {
     if (uri == null) return;
+    await _configureHomeWidget();
 
     // The uri will be in the format: "sweyer://widget/action"
     // For example: "sweyer://widget/playPause"
@@ -78,7 +88,6 @@ class AppWidgetControl extends Control {
         await HomeWidget.saveWidgetData(_playingKey, PlayerManager.instance.playing);
         await HomeWidget.updateWidget(
           name: appWidgetName,
-          iOSName: appWidgetName,
         );
       }
     }
@@ -100,19 +109,10 @@ class AppWidgetControl extends Control {
     _lastPlayingState = playing;
 
     try {
-      // For iOS, we need to set the App Group ID
-      if (Platform.isIOS) {
-        // Use a dummy group ID for development/testing
-        // This will work in the simulator but not on real devices without a developer account
-        // TODO: move to constants?
-        await HomeWidget.setAppGroupId("group.com.nt4f04und.sweyer");
-      }
-
       await HomeWidget.saveWidgetData(_songUriKey, song.contentUri);
       await HomeWidget.saveWidgetData(_playingKey, playing);
       await HomeWidget.updateWidget(
         name: appWidgetName,
-        iOSName: appWidgetName,
       );
     } catch (e) {
       // Log the error but don't crash the app

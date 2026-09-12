@@ -253,7 +253,7 @@ class ContentControl extends Control {
           await PlayerManager.instance.init();
           await FavoritesControl.instance.init();
           PlayerInterfaceColorStyleControl.instance.init();
-          AppWidgetControl.instance.init();
+          await AppWidgetControl.instance.init();
         }
       } catch (error, stack) {
         _failedToInitialize = true;

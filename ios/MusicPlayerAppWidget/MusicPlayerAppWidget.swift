@@ -72,9 +72,6 @@ struct MusicPlayerAppWidgetEntryView : View {
     
     var body: some View {
         ZStack {
-            // Background color (matches Android's main color #7C4DFF)
-            Color(red: 124/255, green: 77/255, blue: 255/255)
-            
             // Album art (if available)
             if let songUri = entry.songUri, let url = URL(string: songUri) {
                 if let image = loadImageFromFileURL(url) {
@@ -187,7 +184,9 @@ struct MusicPlayerAppWidgetEntryView : View {
                 .padding(8)
             }
         }
-        .cornerRadius(16)
+        .containerBackground(for: .widget) {
+            Color(red: 124/255, green: 77/255, blue: 255/255)
+        }
         .widgetURL(URL(string: "sweyer://widget"))
     }
     
