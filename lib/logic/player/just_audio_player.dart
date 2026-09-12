@@ -37,35 +37,9 @@ class JustAudioPlayer implements SweyerPlayer {
   Future<void> setLoopMode(LoopMode mode) => _audioPlayer.setLoopMode(mode);
 
   @override
-  Future<void> switchLooping() async {
-    return setLoopMode(looping ? LoopMode.off : LoopMode.one);
-  }
-
-  @override
-  Future<void> playPause() async {
-    if (playing) {
-      return pause();
-    } else {
-      return play();
-    }
-  }
-
-  @override
   Future<void> setSong(Song song) async {
-    try {
-      await _audioPlayer.setAudioSource(
-        ProgressiveAudioSource(Uri.parse(song.contentUri)),
-      );
-    } catch (e) {
-      // Handle error
-    }
+    await _audioPlayer.setAudioSource(ProgressiveAudioSource(Uri.parse(song.contentUri)));
   }
-
-  @override
-  Future<void> playNext() => _audioPlayer.seekToNext();
-
-  @override
-  Future<void> playPrevious() => _audioPlayer.seekToPrevious();
 
   @override
   Stream<bool> get playingStream => _audioPlayer.playingStream;
@@ -77,7 +51,7 @@ class JustAudioPlayer implements SweyerPlayer {
   Stream<Duration> get bufferedPositionStream => _audioPlayer.bufferedPositionStream;
 
   @override
-  Stream<ProcessingState> get playerStateStream => _audioPlayer.processingStateStream;
+  Stream<ProcessingState> get processingStateStream => _audioPlayer.processingStateStream;
 
   @override
   Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.one);
@@ -89,16 +63,10 @@ class JustAudioPlayer implements SweyerPlayer {
   bool get playing => _audioPlayer.playing;
 
   @override
-  Duration get currentPosition => _audioPlayer.position;
-
-  @override
   Duration get position => _audioPlayer.position;
 
   @override
   Duration get bufferedPosition => _audioPlayer.bufferedPosition;
-
-  @override
-  ProcessingState get playerState => _audioPlayer.processingState;
 
   @override
   ProcessingState get processingState => _audioPlayer.processingState;

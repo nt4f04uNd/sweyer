@@ -10,39 +10,67 @@ abstract class SweyerPlayer {
   /// Dispose any resources used by the player.
   Future<void> dispose();
 
-  /// Playback control.
+  /// Starts or resumes playback.
   Future<void> play();
+
+  /// Pauses playback.
   Future<void> pause();
+
+  /// Stops playback.
   Future<void> stop();
+
+  /// Seeks to [position].
   Future<void> seek(Duration position);
+
+  /// Sets playback volume.
   Future<void> setVolume(double volume);
+
+  /// Sets playback speed.
   Future<void> setSpeed(double speed);
+
+  /// Sets the player loop [mode].
   Future<void> setLoopMode(LoopMode mode);
-  Future<void> playPause();
-  Future<void> switchLooping();
 
-  /// Queue management.
+  /// Prepares [song] for playback.
   Future<void> setSong(Song song);
-  Future<void> playNext();
-  Future<void> playPrevious();
 
-  /// State streams.
+  /// Emits whether playback is active.
   Stream<bool> get playingStream;
+
+  /// Emits the current playback position.
   Stream<Duration> get positionStream;
+
+  /// Emits the buffered playback position.
   Stream<Duration> get bufferedPositionStream;
-  Stream<ProcessingState> get playerStateStream;
+
+  /// Emits changes to the processing state.
+  Stream<ProcessingState> get processingStateStream;
+
+  /// Emits whether single-song looping is enabled.
   Stream<bool> get loopingStream;
+
+  /// Emits changes to the loop mode.
   Stream<LoopMode> get loopModeStream;
 
-  /// Current state.
+  /// Whether playback is active.
   bool get playing;
-  Duration get currentPosition;
+
+  /// Current playback position.
   Duration get position;
+
+  /// Current buffered playback position.
   Duration get bufferedPosition;
-  ProcessingState get playerState;
+
+  /// Current processing state.
   ProcessingState get processingState;
+
+  /// Whether single-song looping is enabled.
   bool get looping;
+
+  /// Current loop mode.
   LoopMode get loopMode;
+
+  /// Current playback speed.
   double get speed;
 
   factory SweyerPlayer.create() {

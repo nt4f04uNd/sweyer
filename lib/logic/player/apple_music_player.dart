@@ -1,181 +1,228 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:playify/playify.dart' as playify;
+import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/logic/models/song.dart';
 import 'package:sweyer/logic/player/sweyer_player.dart';
 
-/// Player implementation using Playify for Apple Music.
+/// Player implementation backed by Playify and Apple's system music player.
 class AppleMusicPlayer implements SweyerPlayer {
   AppleMusicPlayer() {
-    _playify = playify.Playify();
-    _statusPlayingSyncSubscription = _statusStream.listen((status) {
-      _playing = _mapStatusToPlaying(status);
-    });
-    _positionUpdateTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) async {
-      try {
-        final time = await _playify.getPlaybackTime();
-        _cachedPosition = Duration(milliseconds: (time * 1000).toInt());
-      } catch (e) {
-        _cachedPosition = Duration.zero;
-      }
-    });
+    _statusSubscription = _playify.statusStream.listen(_handleStatus);
   }
 
-  late final playify.Playify _playify;
-  Duration _cachedPosition = Duration.zero;
-  late Timer _positionUpdateTimer;
-  LoopMode _loopMode = LoopMode.off;
-  // Keep the instance, the plugin doens't support multiple.
-  late final _statusStream = _playify.statusStream;
-  late StreamSubscription _statusPlayingSyncSubscription;
-  bool _playing = false;
+  static const _positionUpdateInterval = Duration(seconds: 1);
 
-  @override
-  Future<void> dispose() async {
-    _positionUpdateTimer.cancel();
-    _statusPlayingSyncSubscription.cancel();
-  }
+  final playify.Playify _playify = playify.Playify.instance;
+  final BehaviorSubject<bool> _playingSubject = BehaviorSubject.seeded(false);
+  final BehaviorSubject<Duration> _positionSubject = BehaviorSubject.seeded(Duration.zero);
+  final BehaviorSubject<ProcessingState> _processingStateSubject = BehaviorSubject.seeded(ProcessingState.idle);
+  final BehaviorSubject<LoopMode> _loopModeSubject = BehaviorSubject.seeded(LoopMode.off);
+  late final Stream<bool> _loopingStream = _loopModeSubject.stream.map((mode) => mode == LoopMode.one).distinct();
 
-  @override
-  Future<void> play() async {
-    if (_preparedSongId != null) {
-      try {
-        await _playify.playItem(songID: _preparedSongId!);
-      } catch (e) {
-        // Handle Apple Music playback error
-      }
+  late final StreamSubscription<playify.PlayifyStatus> _statusSubscription;
+  Timer? _positionUpdateTimer;
+  Duration _duration = Duration.zero;
+  bool _preparing = false;
+  bool _positionUpdateInFlight = false;
+  int _positionRevision = 0;
+  int _loopModeRevision = 0;
+  int _loopModeRequest = 0;
+
+  void _handleStatus(playify.PlayifyStatus status) {
+    unawaited(_updateLoopMode());
+    final wasPlaying = playing;
+    final isPlaying = _mapStatusToPlaying(status);
+    if (_playingSubject.value != isPlaying) {
+      _playingSubject.add(isPlaying);
+    }
+
+    final reachedEnd =
+        !_preparing && wasPlaying && _duration > Duration.zero && position + const Duration(seconds: 2) >= _duration;
+    final processingState = switch (status) {
+      playify.PlayifyStatus.stopped => reachedEnd ? ProcessingState.completed : ProcessingState.idle,
+      playify.PlayifyStatus.playing ||
+      playify.PlayifyStatus.paused ||
+      playify.PlayifyStatus.interrupted ||
+      playify.PlayifyStatus.seekingForward ||
+      playify.PlayifyStatus.seekingBackward =>
+        ProcessingState.ready,
+      playify.PlayifyStatus.unknown => ProcessingState.loading,
+    };
+    if (_processingStateSubject.value != processingState) {
+      _processingStateSubject.add(processingState);
+    }
+
+    if (isPlaying) {
+      _startPositionUpdates();
     } else {
-      await _playify.play();
+      _stopPositionUpdates();
+      unawaited(_updatePosition());
     }
   }
-
-  @override
-  Future<void> pause() async {
-    await _playify.pause();
-  }
-
-  @override
-  Future<void> stop() async {
-    await _playify.pause();
-  }
-
-  @override
-  Future<void> seek(Duration position) => _playify.setPlaybackTime(position.inSeconds.toDouble());
-
-  @override
-  Future<void> setVolume(double volume) => _playify.setVolume(volume);
-
-  @override
-  Future<void> setSpeed(double speed) {
-    // Playify doesn't support playback speed
-    return Future.value();
-  }
-
-  @override
-  Future<void> setLoopMode(LoopMode mode) {
-    _loopMode = mode;
-    // Playify uses different enum for repeat modes
-    final playifyMode = mode == LoopMode.one ? playify.Repeat.one : playify.Repeat.none;
-    return _playify.setRepeatMode(playifyMode);
-  }
-
-  @override
-  Future<void> switchLooping() async {
-    return setLoopMode(looping ? LoopMode.off : LoopMode.one);
-  }
-
-  @override
-  Future<void> playPause() async {
-    if (playing) {
-      return pause();
-    } else {
-      return play();
-    }
-  }
-
-  String? _preparedSongId;
-
-  @override
-  Future<void> setSong(Song song) async {
-    _preparedSongId = song.sourceId.toString();
-  }
-
-  @override
-  Future<void> playNext() => _playify.next();
-
-  @override
-  Future<void> playPrevious() => _playify.previous();
 
   bool _mapStatusToPlaying(playify.PlayifyStatus status) =>
       status == playify.PlayifyStatus.playing ||
       status == playify.PlayifyStatus.seekingBackward ||
       status == playify.PlayifyStatus.seekingForward;
 
-  @override
-  Stream<bool> get playingStream => _statusStream.map(_mapStatusToPlaying);
+  void _startPositionUpdates() {
+    if (_positionUpdateTimer != null) {
+      return;
+    }
+    unawaited(_updatePosition());
+    _positionUpdateTimer = Timer.periodic(_positionUpdateInterval, (_) => unawaited(_updatePosition()));
+  }
 
-  @override
-  Stream<Duration> get positionStream {
-    return Stream.periodic(
-      const Duration(milliseconds: 200),
-      (_) async {
-        try {
-          final time = await _playify.getPlaybackTime();
-          return Duration(milliseconds: (time * 1000).toInt());
-        } catch (e) {
-          return Duration.zero;
-        }
-      },
-    ).asyncMap((event) => event);
+  void _stopPositionUpdates() {
+    _positionUpdateTimer?.cancel();
+    _positionUpdateTimer = null;
+  }
+
+  Future<void> _updatePosition() async {
+    if (_positionUpdateInFlight) {
+      return;
+    }
+    _positionUpdateInFlight = true;
+    final revision = _positionRevision;
+    try {
+      final seconds = await _playify.getPlaybackTime();
+      if (!seconds.isFinite || seconds < 0) {
+        return;
+      }
+      if (revision == _positionRevision && !_positionSubject.isClosed) {
+        _positionSubject.add(Duration(milliseconds: (seconds * 1000).round()));
+      }
+    } catch (error) {
+      debugPrint('Failed to update Apple Music playback position: $error');
+    } finally {
+      _positionUpdateInFlight = false;
+    }
+  }
+
+  Future<void> _updateLoopMode() async {
+    final revision = _loopModeRevision;
+    final request = ++_loopModeRequest;
+    try {
+      final mode = switch (await _playify.getRepeatMode()) {
+        playify.Repeat.none => LoopMode.off,
+        playify.Repeat.one => LoopMode.one,
+        playify.Repeat.all => LoopMode.all,
+      };
+      if (request == _loopModeRequest &&
+          revision == _loopModeRevision &&
+          !_loopModeSubject.isClosed &&
+          _loopModeSubject.value != mode) {
+        _loopModeSubject.add(mode);
+      }
+    } catch (error) {
+      debugPrint('Failed to update Apple Music repeat mode: $error');
+    }
   }
 
   @override
-  Stream<Duration> get bufferedPositionStream => positionStream;
+  Future<void> dispose() async {
+    _stopPositionUpdates();
+    await _statusSubscription.cancel();
+    await Future.wait([
+      _playingSubject.close(),
+      _positionSubject.close(),
+      _processingStateSubject.close(),
+      _loopModeSubject.close(),
+    ]);
+  }
 
   @override
-  Stream<ProcessingState> get playerStateStream => _statusStream.map((status) {
-        switch (status) {
-          case playify.PlayifyStatus.playing:
-          case playify.PlayifyStatus.paused:
-            return ProcessingState.ready;
-          case playify.PlayifyStatus.stopped:
-            return ProcessingState.idle;
-          default:
-            return ProcessingState.loading;
-        }
-      });
+  Future<void> play() => _playify.play();
 
   @override
-  Stream<bool> get loopingStream => Stream.value(looping);
+  Future<void> pause() => _playify.pause();
 
   @override
-  Stream<LoopMode> get loopModeStream => Stream.value(_loopMode);
+  Future<void> stop() => _playify.pause();
 
   @override
-  bool get playing => _playing;
+  Future<void> seek(Duration position) async {
+    final revision = ++_positionRevision;
+    await _playify.setPlaybackTime(position.inMilliseconds / 1000);
+    if (revision == _positionRevision) {
+      _positionSubject.add(position);
+    }
+  }
 
   @override
-  Duration get currentPosition => _cachedPosition;
+  Future<void> setVolume(double volume) => _playify.setVolume(volume);
 
   @override
-  Duration get position => _cachedPosition;
+  Future<void> setSpeed(double speed) async {}
 
   @override
-  Duration get bufferedPosition => _cachedPosition;
+  Future<void> setLoopMode(LoopMode mode) async {
+    final revision = ++_loopModeRevision;
+    final playifyMode = switch (mode) {
+      LoopMode.off => playify.Repeat.none,
+      LoopMode.one => playify.Repeat.one,
+      LoopMode.all => playify.Repeat.all,
+    };
+    await _playify.setRepeatMode(playifyMode);
+    if (revision == _loopModeRevision) {
+      _loopModeSubject.add(mode);
+    }
+  }
 
   @override
-  ProcessingState get playerState => playing ? ProcessingState.ready : ProcessingState.idle;
+  Future<void> setSong(Song song) async {
+    final songId = song.sourceId.toString();
+    _duration = Duration(milliseconds: song.duration);
+    _positionRevision++;
+    _positionSubject.add(Duration.zero);
+    _preparing = true;
+    try {
+      await _playify.setQueue(songIDs: [songId], startID: songId, startPlaying: false);
+    } finally {
+      _preparing = false;
+    }
+    _processingStateSubject.add(ProcessingState.ready);
+  }
 
   @override
-  ProcessingState get processingState => playing ? ProcessingState.ready : ProcessingState.idle;
+  Stream<bool> get playingStream => _playingSubject.stream;
 
   @override
-  bool get looping => _loopMode == LoopMode.one;
+  Stream<Duration> get positionStream => _positionSubject.stream;
 
   @override
-  LoopMode get loopMode => _loopMode;
+  Stream<Duration> get bufferedPositionStream => _positionSubject.stream;
 
   @override
-  double get speed => 1.0; // Playify doesn't support speed
+  Stream<ProcessingState> get processingStateStream => _processingStateSubject.stream;
+
+  @override
+  Stream<bool> get loopingStream => _loopingStream;
+
+  @override
+  Stream<LoopMode> get loopModeStream => _loopModeSubject.stream;
+
+  @override
+  bool get playing => _playingSubject.value;
+
+  @override
+  Duration get position => _positionSubject.value;
+
+  @override
+  Duration get bufferedPosition => _positionSubject.value;
+
+  @override
+  ProcessingState get processingState => _processingStateSubject.value;
+
+  @override
+  bool get looping => loopMode == LoopMode.one;
+
+  @override
+  LoopMode get loopMode => _loopModeSubject.value;
+
+  @override
+  double get speed => 1;
 }

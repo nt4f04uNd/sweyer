@@ -164,6 +164,8 @@ void main() {
         (validPlaylist.copyWith({'id': 3, 'filesystemPath': null}), playlistWith(id: 3, fileSystemPath: null)),
         (validPlaylist.copyWith({'id': 4}).copyWithout(['filesystemPath']), playlistWith(id: 4, fileSystemPath: null)),
         (validPlaylist.copyWith({'id': 5, 'dateAdded': -1}), playlistWith(id: 5, dateAdded: -1)),
+        (validPlaylist.copyWith({'id': 14, 'dateAdded': null}), playlistWith(id: 14, dateAdded: null)),
+        (validPlaylist.copyWith({'id': 15}).copyWithout(['dateAdded']), playlistWith(id: 15, dateAdded: null)),
         (validPlaylist.copyWith({'id': 6, 'dateModified': -1}), playlistWith(id: 6, dateModified: -1)),
         (validPlaylist.copyWith({'id': 7, 'dateModified': null}), playlistWith(id: 7, dateModified: null)),
         (validPlaylist.copyWith({'id': 8}).copyWithout(['dateModified']), playlistWith(id: 8, dateModified: null)),
@@ -327,7 +329,7 @@ void main() {
 
     test('Handles invalid or incomplete playlists', () async {
       final validPlaylist = playlistWith().toMap();
-      final propertiesThatCanBeMissing = ['filesystemPath', 'dateModified', 'songIds'];
+      final propertiesThatCanBeMissing = ['filesystemPath', 'dateAdded', 'dateModified', 'songIds'];
       final invalidPlaylists = [
         ...validPlaylist.createVariantsWithMissingNonNullableElements(propertiesThatCanBeMissing),
         ...validPlaylist

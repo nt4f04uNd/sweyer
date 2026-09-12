@@ -11,7 +11,6 @@ import 'package:sweyer/sweyer.dart';
 /// Manager for player functionality that handles business logic
 /// and uses SweyerPlayer for actual playback.
 class PlayerManager {
-  PlayerManager() : _player = SweyerPlayer.create();
   PlayerManager._() : _player = SweyerPlayer.create();
 
   static PlayerManager? _instance;
@@ -65,7 +64,7 @@ class PlayerManager {
       ),
     );
 
-    _player.playerStateStream.listen((state) {
+    _player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
         // Play next track if not in loop mode, in loop mode this event is not triggered.
         playNext();
@@ -121,7 +120,15 @@ class PlayerManager {
 
   ProcessingState get processingState => _player.processingState;
 
+  Stream<ProcessingState> get processingStateStream => _player.processingStateStream;
+
   double get speed => _player.speed;
+
+  void _showPlaybackError() {
+    final context = AppRouter.instance.navigatorKey.currentContext;
+    final l10n = context != null ? getl10n(context) : staticl10n;
+    ShowFunctions.instance.showToast(msg: l10n.playbackError);
+  }
 
   Future<void> setLoopMode(LoopMode mode) async {
     if (mode == LoopMode.all) {
@@ -133,7 +140,7 @@ class PlayerManager {
 
   /// Switches the [looping].
   Future<void> switchLooping() async {
-    return _player.switchLooping();
+    return setLoopMode(looping ? LoopMode.off : LoopMode.one);
   }
 
   /// Prepare the [song] to be played.
@@ -153,17 +160,17 @@ class PlayerManager {
     }
     try {
       await _player.setSong(song);
-    } catch (e) {
+    } catch (e, stack) {
       if (e is PlayerInterruptedException || e is PlatformException && e.code == 'abort') {
         // Do nothing
       } else if (e is PlayerException) {
-        final context = AppRouter.instance.navigatorKey.currentContext;
-        // ignore: use_build_context_synchronously
-        final l10n = context != null ? getl10n(context) : staticl10n;
-        ShowFunctions.instance.showToast(msg: l10n.playbackError);
+        _showPlaybackError();
         playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
         ContentControl.instance.refetch(ContentType.song);
+      } else if (e is PlatformException) {
+        await reportErrorToFirebase(e, stack, reason: 'preparing a song for playback');
+        _showPlaybackError();
       } else {
         // Other exceptions are not expected, rethrow.
         rethrow;
@@ -175,8 +182,16 @@ class PlayerManager {
     return _player.seek(position);
   }
 
-  Future<void> play() {
-    return _player.play();
+  Future<void> play() async {
+    try {
+      await _player.play();
+    } on PlatformException catch (error, stack) {
+      await reportErrorToFirebase(error, stack, reason: 'starting playback');
+      _showPlaybackError();
+    } on PlayerException catch (error, stack) {
+      await reportErrorToFirebase(error, stack, reason: 'starting playback');
+      _showPlaybackError();
+    }
   }
 
   Future<void> pause() {
@@ -192,7 +207,7 @@ class PlayerManager {
   }
 
   Future<void> playPause() async {
-    return _player.playPause();
+    return playing ? pause() : play();
   }
 
   /// Plays the song after current, or if specified, then after [song].
@@ -232,7 +247,7 @@ class PlayerManager {
   }
 }
 
-/// AudioHandler implementation for audio_service
+/// AudioHandler implementation for `audio_service`.
 @visibleForTesting
 class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObserver {
   @visibleForTesting
@@ -401,7 +416,9 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @override
   Future<void> stop() async {
     running = false;
-    await player.stop();
+    if (!_disposed) {
+      await player.stop();
+    }
     await super.stop();
   }
 

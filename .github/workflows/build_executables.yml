@@ -7,9 +7,6 @@ on:
       - master
       - 'releases/**'
 
-env:
-  cocoapods_version: 1.16.2
-
 jobs:
   build:
     name: Build ${{ matrix.name }}
@@ -50,8 +47,9 @@ jobs:
 
       - name: 🧱 Install CocoaPods
         if: runner.os == 'macOS'
-        shell: bash
-        run: sudo gem install cocoapods -v ${{ env.cocoapods_version }} --no-document
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          podfile-path: ios/Podfile.lock
 
       - name: 💾 Cache Pub
         uses: actions/cache@v5

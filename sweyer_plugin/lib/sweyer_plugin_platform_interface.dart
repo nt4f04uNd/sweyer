@@ -80,102 +80,53 @@ abstract class SweyerPluginPlatform extends PlatformInterface {
   }
 
   /// Loads album art for a song.
-  Future<Uint8List?> loadAlbumArt({
-    required String uri,
-    required Size size,
-    required String cancellationSignalId,
-  }) {
-    throw UnimplementedError('loadAlbumArt() has not been implemented.');
-  }
+  Future<Uint8List?> loadAlbumArt({required String uri, required Size size, required String cancellationSignalId});
 
   /// Cancels loading of album art.
-  Future<void> cancelAlbumArtLoad({required String id}) {
-    throw UnimplementedError('cancelAlbumArtLoad() has not been implemented.');
-  }
+  Future<void> cancelAlbumArtLoad({required String id});
 
   /// Fixes album art for an album.
-  Future<void> fixAlbumArt(int albumId) {
-    throw UnimplementedError('fixAlbumArt() has not been implemented.');
-  }
+  Future<void> fixAlbumArt(int albumId);
 
   /// Retrieves all songs from the device.
-  Future<Iterable<Map<String, dynamic>>> retrieveSongs() {
-    throw UnimplementedError('retrieveSongs() has not been implemented.');
-  }
+  Future<Iterable<Map<String, dynamic>>> retrieveSongs();
 
   /// Retrieves all albums from the device.
-  Future<Iterable<Map<String, dynamic>>> retrieveAlbums() {
-    throw UnimplementedError('retrieveAlbums() has not been implemented.');
-  }
+  Future<Iterable<Map<String, dynamic>>> retrieveAlbums();
 
   /// Retrieves all playlists from the device.
-  Future<Iterable<Map<String, dynamic>>> retrievePlaylists() {
-    throw UnimplementedError('retrievePlaylists() has not been implemented.');
-  }
+  Future<Iterable<Map<String, dynamic>>> retrievePlaylists();
 
   /// Retrieves all artists from the device.
-  Future<Iterable<Map<String, dynamic>>> retrieveArtists() {
-    throw UnimplementedError('retrieveArtists() has not been implemented.');
-  }
+  Future<Iterable<Map<String, dynamic>>> retrieveArtists();
 
   /// Retrieves all genres from the device.
-  Future<Iterable<Map<String, dynamic>>> retrieveGenres() {
-    throw UnimplementedError('retrieveGenres() has not been implemented.');
-  }
+  Future<Iterable<Map<String, dynamic>>> retrieveGenres();
 
   /// Sets songs as favorite.
-  Future<bool> setSongsFavorite(List<int> songsIds, bool value) {
-    throw UnimplementedError('setSongsFavorite() has not been implemented.');
-  }
+  Future<bool> setSongsFavorite(List<int> songsIds, bool value);
 
   /// Deletes songs from the device.
-  Future<bool> deleteSongs(List<Map<String, dynamic>> songs) {
-    throw UnimplementedError('deleteSongs() has not been implemented.');
-  }
+  Future<bool> deleteSongs(List<Map<String, dynamic>> songs);
 
   /// Creates a new playlist.
-  Future<void> createPlaylist(String name) {
-    throw UnimplementedError('createPlaylist() has not been implemented.');
-  }
+  Future<void> createPlaylist(String name);
 
   /// Renames a playlist.
-  Future<void> renamePlaylist(int playlistId, String name) {
-    throw UnimplementedError('renamePlaylist() has not been implemented.');
-  }
+  Future<void> renamePlaylist(int playlistId, String name);
 
   /// Removes playlists.
-  Future<void> removePlaylists(List<int> playlistIds) {
-    throw UnimplementedError('removePlaylists() has not been implemented.');
-  }
+  Future<void> removePlaylists(List<int> playlistIds);
 
   /// Inserts songs in a playlist at a specific index.
-  Future<void> insertSongsInPlaylist({
-    required int index,
-    required List<int> songIds,
-    required int playlistId,
-  }) {
-    throw UnimplementedError('insertSongsInPlaylist() has not been implemented.');
-  }
+  Future<void> insertSongsInPlaylist({required int index, required List<int> songIds, required int playlistId});
 
   /// Moves a song in a playlist from one index to another.
-  Future<bool> moveSongInPlaylist({
-    required int playlistId,
-    required int from,
-    required int to,
-  }) {
-    throw UnimplementedError('moveSongInPlaylist() has not been implemented.');
-  }
+  Future<bool> moveSongInPlaylist({required int playlistId, required int from, required int to});
 
   /// Removes songs from a playlist at specific indexes.
-  Future<void> removeFromPlaylistAt({
-    required List<int> indexes,
-    required int playlistId,
-  }) {
-    throw UnimplementedError('removeFromPlaylistAt() has not been implemented.');
-  }
+  Future<void> removeFromPlaylistAt({required List<int> indexes, required int playlistId});
 
   /// Checks if the app was started with an intent action view.
-  Future<bool> isIntentActionView() {
-    throw UnimplementedError('isIntentActionView() has not been implemented.');
-  }
+  Future<bool> isIntentActionView();
 }

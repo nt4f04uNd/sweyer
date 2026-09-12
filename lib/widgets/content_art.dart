@@ -31,11 +31,11 @@ const Duration kArtLoadAnimationDuration = Duration(milliseconds: 240);
 /// Used for loading arts in lists.
 const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 
-/// Whether should load arts from bytes.
+/// Whether art should be loaded from bytes.
 ///
-/// This is true:
-/// 1. When running on scoped storage, and should use bytes to load album
-/// arts from `MediaStore`.
+/// This is true in either of the following cases:
+/// 1. When running on scoped storage and bytes must be used to load album
+///    art from `MediaStore`.
 /// 2. When on iOS.
 bool get _useBytesLoader => DeviceInfoControl.instance.sdkInt >= 29 || Platform.isIOS;
 

@@ -169,7 +169,7 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
-  - playify (0.0.1):
+  - playify (2.2.1):
     - Flutter
   - PromisesObjC (2.4.0)
   - PromisesSwift (2.4.0):
@@ -309,7 +309,7 @@ SPEC CHECKSUMS:
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  playify: d97a95955b9b89db515216471331185a1a39f2d5
+  playify: 1805d5048ef46ce03999271c4326411098df96a0
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
@@ -319,4 +319,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: e7f6308c5f46dfbf291b1ee0e3a63cf79f1d46f9
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

@@ -26,11 +26,11 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   void initState() {
     super.initState();
     controller = AnimationController(vsync: this, duration: fadeDuration);
-    player = PlayerManager();
+    player = PlayerManager.instance;
     // player.setAsset();
     // player.play();
-    player.playingStream.listen((state) {
-      if (player.processingState == ProcessingState.completed && player.playing) {
+    player.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
         _show();
         player.pause();
       }
@@ -41,7 +41,6 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   void dispose() {
     timer?.cancel();
     controller.dispose();
-    player.dispose();
     super.dispose();
   }
 
