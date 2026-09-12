@@ -2,6 +2,7 @@
 [@ernince]: https://github.com/ernince
 
 ## Unreleased
+* Update to Flutter 3.35.5
 
 ## 1.0.14
 
