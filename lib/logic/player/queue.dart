@@ -8,14 +8,26 @@ enum QueueType {
   /// Queue of all songs.
   allSongs,
 
+  /// Queue of favourite songs.
+  favouriteSongs,
+
   /// Queue of all albums.
   allAlbums,
+
+  /// Queue of favourite albums.
+  favouriteAlbums,
 
   /// Queue of all playlists.
   allPlaylists,
 
+  /// Queue of favourite playlists.
+  favouritePlaylists,
+
   /// Queue of all artists.
   allArtists,
+
+  /// Queue of favourite artists.
+  favouriteArtists,
 
   /// Queue of searched tracks.
   searched,
