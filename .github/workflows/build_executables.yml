@@ -82,3 +82,13 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
           compression-level: 0  # Executables are already compressed
+
+  # Keep the required status context stable while the actual builds run as a
+  # matrix. Existing pull requests still report this context from the old job.
+  build_executables:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ always() }}
+    steps:
+      - name: Check executable builds
+        run: test "${{ needs.build.result }}" = "success"
