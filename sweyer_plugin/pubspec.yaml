@@ -46,8 +46,6 @@ flutter:
       android:
         package: com.nt4f04und.sweyer.sweyer_plugin
         pluginClass: SweyerPlugin
-      ios:
-        pluginClass: SweyerPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

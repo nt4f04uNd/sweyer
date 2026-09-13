@@ -191,7 +191,9 @@ void main() {
           ContentControl.instance.state.playlists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
               .map((playlist) => playlist.toMap()),
-          validPlaylists.map((element) => element.$2.toMap()),
+          validPlaylists.sorted((item1, item2) => item1.$2.id.compareTo(item2.$2.id)).map(
+                (element) => element.$2.toMap(),
+              ),
           reason: "Should be able to correctly parse all valid playlists",
         );
         expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any playlists");
