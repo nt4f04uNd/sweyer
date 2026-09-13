@@ -43,7 +43,7 @@ void main() {
     testWidgets('does not show when removed storage permission is permanently denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
       registerAppSetup(() {
-        FakeDeviceInfoControl.instance.sdkInt = 33;
+        FakeDeviceInfoControl.instance.androidSdkInt = 33;
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.permanentlyDenied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.granted);
@@ -61,7 +61,7 @@ void main() {
     testWidgets('does not show when non-existent audio permission is permanently denied', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
       registerAppSetup(() {
-        FakeDeviceInfoControl.instance.sdkInt = 32;
+        FakeDeviceInfoControl.instance.androidSdkInt = 32;
         permissionsObserver = PermissionsChannelObserver(tester.binding);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.permanentlyDenied);
@@ -103,12 +103,12 @@ void main() {
 
     testWidgets('on iOS checks and requests media library permission', (WidgetTester tester) async {
       late PermissionsChannelObserver permissionsObserver;
-      registerAppSetup(() {
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-        permissionsObserver = PermissionsChannelObserver(tester.binding);
-        permissionsObserver.setPermission(Permission.mediaLibrary, PermissionStatus.denied);
-      });
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       try {
+        registerAppSetup(() {
+          permissionsObserver = PermissionsChannelObserver(tester.binding);
+          permissionsObserver.setPermission(Permission.mediaLibrary, PermissionStatus.denied);
+        });
         await tester.runAppTest(() async {
           expect(permissionsObserver.checkedPermissions, [Permission.mediaLibrary]);
           expect(find.byType(Home), findsNothing, reason: 'Permissions are not granted yet');
@@ -138,13 +138,13 @@ void main() {
     registerPostAppSetup((_) {
       // Use fake
       ContentControl.instance.dispose();
-      fake = FakeContentControl();
-      fake.init();
+      expect(Permissions.instance.granted, true);
+      expect(ContentControl.instance.disposed.value, true);
+      expect(ContentControl.instance.initializing, false);
+      expect(ContentControl.instance.stateNullable, null);
 
-      // Fake ContentControl.init in a way to trigger the home screen rebuild.
-      fake.initializing = true;
-      fake.stateNullable = ContentState();
-      fake.disposed.value = false;
+      fake = FakeContentControl();
+      fake.simulateInitializing();
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);

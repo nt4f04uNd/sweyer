@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
-import 'package:sweyer/logic/widget_controls.dart';
 
 /// Builds up the error report message from the exception and stacktrace.
 String buildErrorReport(dynamic ex, dynamic stack) {
@@ -106,9 +105,6 @@ Future<void> main() async {
   ThemeControl.instance.initSystemUi();
   await Permissions.instance.init();
   await ContentControl.instance.init();
-
-  // Initialize widget controls handler
-  WidgetControlsHandler.instance.init();
 
   runApp(const ProviderScope(child: App()));
 }

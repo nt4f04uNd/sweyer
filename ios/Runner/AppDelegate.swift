@@ -29,30 +29,15 @@ import home_widget
       userDefaults?.removeObject(forKey: "widgetAction")
       userDefaults?.synchronize()
       
-      if let url = URL(string: actionString), let host = url.host {
-        if host == "widget" {
-          let action = url.lastPathComponent
-          var methodName = ""
-          
-          switch action {
-          case "playPause":
-            methodName = "togglePlayPause"
-          case "next":
-            methodName = "skipToNext"
-          case "previous":
-            methodName = "skipToPrevious"
-          default:
-            break
-          }
-          
-          if !methodName.isEmpty {
-            // Send the action to Flutter via method channel
-            let controller = window?.rootViewController as? FlutterViewController
-            let channel = FlutterMethodChannel(name: "com.nt4f04und.sweyer/player_controls", 
-                                              binaryMessenger: controller!.binaryMessenger)
-            channel.invokeMethod(methodName, arguments: nil)
-          }
-        }
+      if let url = URL(string: actionString),
+         url.host == "widget",
+         ["playPause", "next", "previous"].contains(url.lastPathComponent),
+         let controller = window?.rootViewController as? FlutterViewController {
+        let channel = FlutterMethodChannel(
+          name: "com.nt4f04und.sweyer/player_controls",
+          binaryMessenger: controller.binaryMessenger
+        )
+        channel.invokeMethod(url.lastPathComponent, arguments: nil)
       }
     }
   }

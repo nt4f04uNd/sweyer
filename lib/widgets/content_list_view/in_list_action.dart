@@ -162,7 +162,7 @@ class _CreatePlaylistInListActionState extends State<CreatePlaylistInListAction>
   @override
   Widget build(BuildContext context) {
     // Don't show create playlist button on platforms that don't support creating playlists
-    if (!PlatformFeatures.supportsCreatePlaylists) {
+    if (!DeviceInfoControl.instance.supportsCreatePlaylists) {
       return const SizedBox.shrink();
     }
 

@@ -632,7 +632,7 @@ class ContentControl extends Control {
   /// This operation is only supported on Android.
   Future<void> deleteSongs(Set<Song> songs) async {
     // TODO: Consider how to handle song deletion on iOS - possibly show a message directing users to use the native Music app
-    if (!PlatformFeatures.supportsDeleteSongs) {
+    if (!DeviceInfoControl.instance.supportsDeleteSongs) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
@@ -653,7 +653,7 @@ class ContentControl extends Control {
     }
 
     // On Android R the deletion is performed with OS dialog.
-    if (DeviceInfoControl.instance.sdkInt < 30) {
+    if (!DeviceInfoControl.instance.useScopedStorageForFileModifications) {
       removeFromState();
     }
 
@@ -736,7 +736,7 @@ class ContentControl extends Control {
   /// This operation is only supported on Android.
   Future<String> createPlaylist(String name) async {
     // TODO: Consider how to handle playlist creation on iOS - possibly use a local database
-    if (!PlatformFeatures.supportsCreatePlaylists) {
+    if (!DeviceInfoControl.instance.supportsCreatePlaylists) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
@@ -756,7 +756,7 @@ class ContentControl extends Control {
   /// This operation is only supported on Android.
   Future<String?> renamePlaylist(Playlist playlist, String name) async {
     // TODO: Consider how to handle playlist renaming on iOS - possibly use a local database
-    if (!PlatformFeatures.supportsRenamePlaylist) {
+    if (!DeviceInfoControl.instance.supportsRenamePlaylist) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
@@ -782,7 +782,7 @@ class ContentControl extends Control {
     required Playlist playlist,
   }) async {
     // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
-    if (!PlatformFeatures.supportsModifyPlaylistContents) {
+    if (!DeviceInfoControl.instance.supportsModifyPlaylistContents) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
@@ -803,7 +803,7 @@ class ContentControl extends Control {
     bool emitChangeEvent = true,
   }) async {
     // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
-    if (!PlatformFeatures.supportsModifyPlaylistContents) {
+    if (!DeviceInfoControl.instance.supportsModifyPlaylistContents) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
@@ -826,7 +826,7 @@ class ContentControl extends Control {
     required Playlist playlist,
   }) async {
     // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
-    if (!PlatformFeatures.supportsModifyPlaylistContents) {
+    if (!DeviceInfoControl.instance.supportsModifyPlaylistContents) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
@@ -842,7 +842,7 @@ class ContentControl extends Control {
   /// This operation is only supported on Android.
   Future<void> deletePlaylists(List<Playlist> playlists) async {
     // TODO: Consider how to handle playlist deletion on iOS - possibly use a local database
-    if (!PlatformFeatures.supportsRemovePlaylists) {
+    if (!DeviceInfoControl.instance.supportsRemovePlaylists) {
       ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );

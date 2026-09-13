@@ -37,7 +37,7 @@ const Duration kArtListLoadAnimationDuration = Duration(milliseconds: 200);
 /// 1. When running on scoped storage and bytes must be used to load album
 ///    art from `MediaStore`.
 /// 2. When on iOS.
-bool get _useBytesLoader => DeviceInfoControl.instance.sdkInt >= 29 || Platform.isIOS;
+bool get _useBytesLoader => DeviceInfoControl.instance.useBytesForAlbumArt;
 
 typedef ContentArtOnLoadCallback = FutureOr Function(ui.Image);
 

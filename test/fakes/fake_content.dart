@@ -30,11 +30,10 @@ class FakeContentControl extends ContentControl {
     }
   }
 
-  @override
-  // ignore: must_call_super
-  Future<void> init() async {
-    initializing = false;
-    stateNullable ??= ContentState();
+  /// Places the fake in the state shown while the native library is scanned.
+  void simulateInitializing() {
+    initializing = true;
+    stateNullable = ContentState();
     disposed.value = false;
     emitContentChange();
   }

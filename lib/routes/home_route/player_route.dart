@@ -1155,6 +1155,11 @@ class _SaveQueueAsPlaylistActionState extends State<_SaveQueueAsPlaylistAction> 
 
   @override
   Widget build(BuildContext context) {
+    if (!DeviceInfoControl.instance.supportsCreatePlaylists ||
+        !DeviceInfoControl.instance.supportsModifyPlaylistContents) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = getl10n(context);
     return NFIconButton(
       icon: const Icon(Icons.queue_rounded),

@@ -48,6 +48,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
   bool get isPlaylist => queue is Playlist;
   Album get album => queue as Album;
   Playlist get playlist => queue as Playlist;
+  bool get _canEditPlaylist =>
+      DeviceInfoControl.instance.supportsRenamePlaylist && DeviceInfoControl.instance.supportsModifyPlaylistContents;
   // List<Song> get songs => editing ? editingSongs : queueSongs;
   List<Song> get songs => queueSongs;
 
@@ -56,7 +58,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
     super.initState();
 
     _updateContent(true);
-    if (widget.arguments.editing) {
+    if (widget.arguments.editing && _canEditPlaylist) {
       _startEditing(true);
     }
 
@@ -469,7 +471,7 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
                                 ),
                               ),
                             ),
-                            if (isPlaylist && !selectionRoute)
+                            if (isPlaylist && !selectionRoute && _canEditPlaylist)
                               Padding(
                                 padding: const EdgeInsets.only(top: 6.0),
                                 child: AnimatedSwitcher(
@@ -582,7 +584,8 @@ class _PersistentQueueRouteState extends State<PersistentQueueRoute> with Select
         body: LayoutBuilder(
           builder: (context, constraints) {
             final mediaQuery = MediaQuery.of(context);
-            final showAddSongsAction = isPlaylist && !selectionRoute;
+            final showAddSongsAction =
+                isPlaylist && !selectionRoute && DeviceInfoControl.instance.supportsModifyPlaylistContents;
 
             final songTileHeight = kSongTileHeight(context);
 

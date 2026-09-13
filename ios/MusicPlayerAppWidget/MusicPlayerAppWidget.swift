@@ -9,6 +9,7 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 import home_widget
+import os
 
 // Define the intent for widget interactions
 @available(iOS 16, *)
@@ -29,7 +30,10 @@ struct MusicPlayerAppWidgetIntent: AppIntent {
     }
     
     public func perform() async throws -> some IntentResult {
-        await HomeWidgetBackgroundWorker.run(url: url, appGroup: appGroup!)
+        guard let appGroup else {
+            return .result()
+        }
+        await HomeWidgetBackgroundWorker.run(url: url, appGroup: appGroup)
         
         return .result()
     }
@@ -40,15 +44,15 @@ struct MusicPlayerAppWidgetIntent: AppIntent {
 extension MusicPlayerAppWidgetIntent: ForegroundContinuableIntent {}
 
 struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), songUri: nil, isPlaying: false)
+    func placeholder(in context: Context) -> MusicPlayerEntry {
+        MusicPlayerEntry(date: Date(), songUri: nil, isPlaying: false)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
+    func getSnapshot(in context: Context, completion: @escaping (MusicPlayerEntry) -> ()) {
         let userDefaults = UserDefaults(suiteName: "group.com.nt4f04und.sweyer")
         let songUri = userDefaults?.string(forKey: "song")
         let isPlaying = userDefaults?.bool(forKey: "playing") ?? false
-        let entry = SimpleEntry(date: Date(), songUri: songUri, isPlaying: isPlaying)
+        let entry = MusicPlayerEntry(date: Date(), songUri: songUri, isPlaying: isPlaying)
         completion(entry)
     }
 
@@ -60,33 +64,32 @@ struct Provider: TimelineProvider {
     }
 }
 
-struct SimpleEntry: TimelineEntry {
+struct MusicPlayerEntry: TimelineEntry {
     let date: Date
     let songUri: String?
     let isPlaying: Bool
 }
 
 struct MusicPlayerAppWidgetEntryView : View {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "com.nt4f04und.sweyer",
+        category: "MusicPlayerAppWidget"
+    )
+
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
     
     var body: some View {
         ZStack {
             // Album art (if available)
-            if let songUri = entry.songUri, let url = URL(string: songUri) {
-                if let image = loadImageFromFileURL(url) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } else {
-                    // Fallback logo when no album art
-                    Image("AppIcon")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding()
-                }
+            if let songUri = entry.songUri,
+               let url = URL(string: songUri),
+               let image = loadImageFromFileURL(url) {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
             } else {
-                // Fallback logo when no song
+                // Fallback logo when no song or album art is available
                 Image("AppIcon")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -108,20 +111,14 @@ struct MusicPlayerAppWidgetEntryView : View {
                                     appGroup: "group.com.nt4f04und.sweyer"
                                 )
                             ) {
-                                Image(systemName: "backward.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.black)
-                                    .frame(width: 48, height: 48)
+                                controlImage(systemName: "backward.fill")
                             }
                             .buttonStyle(.plain)
                         } else {
                             Button(action: {
                                 playPreviousTrack()
                             }) {
-                                Image(systemName: "backward.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.black)
-                                    .frame(width: 48, height: 48)
+                                controlImage(systemName: "backward.fill")
                             }
                         }
                     }
@@ -134,20 +131,14 @@ struct MusicPlayerAppWidgetEntryView : View {
                                 appGroup: "group.com.nt4f04und.sweyer"
                             )
                         ) {
-                            Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.black)
-                                .frame(width: 48, height: 48)
+                            controlImage(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                         }
                         .buttonStyle(.plain)
                     } else {
                         Button(action: {
                             togglePlayPause()
                         }) {
-                            Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.black)
-                                .frame(width: 48, height: 48)
+                            controlImage(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                         }
                     }
                     
@@ -160,20 +151,14 @@ struct MusicPlayerAppWidgetEntryView : View {
                                     appGroup: "group.com.nt4f04und.sweyer"
                                 )
                             ) {
-                                Image(systemName: "forward.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.black)
-                                    .frame(width: 48, height: 48)
+                                controlImage(systemName: "forward.fill")
                             }
                             .buttonStyle(.plain)
                         } else {
                             Button(action: {
                                 playNextTrack()
                             }) {
-                                Image(systemName: "forward.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.black)
-                                    .frame(width: 48, height: 48)
+                                controlImage(systemName: "forward.fill")
                             }
                         }
                     }
@@ -189,6 +174,13 @@ struct MusicPlayerAppWidgetEntryView : View {
         }
         .widgetURL(URL(string: "sweyer://widget"))
     }
+
+    private func controlImage(systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 20))
+            .foregroundColor(.black)
+            .frame(width: 48, height: 48)
+    }
     
     // Load image from file URL
     func loadImageFromFileURL(_ url: URL) -> UIImage? {
@@ -196,7 +188,7 @@ struct MusicPlayerAppWidgetEntryView : View {
             let data = try Data(contentsOf: url)
             return UIImage(data: data)
         } catch {
-            print("Error loading image: \(error)")
+            Self.logger.error("Failed to load album art: \(error.localizedDescription, privacy: .public)")
             return nil
         }
     }
@@ -226,15 +218,15 @@ struct MusicPlayerAppWidgetEntryView : View {
         userDefaults?.set(url.absoluteString, forKey: "widgetAction")
         userDefaults?.synchronize()
         
-        WidgetCenter.shared.reloadTimelines(ofKind: "MusicPlayerAppWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: MusicPlayerAppWidget.kind)
     }
 }
 
 struct MusicPlayerAppWidget: Widget {
-    let kind: String = "MusicPlayerAppWidget"
+    static let kind = "MusicPlayerAppWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+        StaticConfiguration(kind: Self.kind, provider: Provider()) { entry in
             MusicPlayerAppWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Music Player")
@@ -246,6 +238,6 @@ struct MusicPlayerAppWidget: Widget {
 #Preview(as: .systemSmall) {
     MusicPlayerAppWidget()
 } timeline: {
-    SimpleEntry(date: .now, songUri: nil, isPlaying: false)
-    SimpleEntry(date: .now, songUri: "file://example", isPlaying: true)
+    MusicPlayerEntry(date: .now, songUri: nil, isPlaying: false)
+    MusicPlayerEntry(date: .now, songUri: "file://example", isPlaying: true)
 }

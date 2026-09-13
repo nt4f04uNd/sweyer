@@ -242,15 +242,6 @@ void main() {
           validSong.copyWith({'id': 32}).copyWithout(['isFavoriteInMediaStore']),
           songWith(id: 32, isFavoriteInMediaStore: false)
         ),
-        (validSong.copyWith({'id': 33, 'generationAdded': -1}), songWith(id: 33, generationAdded: -1)),
-        (validSong.copyWith({'id': 34, 'generationAdded': null}), songWith(id: 34, generationAdded: null)),
-        (validSong.copyWith({'id': 35}).copyWithout(['generationAdded']), songWith(id: 35, generationAdded: null)),
-        (validSong.copyWith({'id': 36, 'generationModified': -1}), songWith(id: 36, generationModified: -1)),
-        (validSong.copyWith({'id': 37, 'generationModified': null}), songWith(id: 37, generationModified: null)),
-        (
-          validSong.copyWith({'id': 38}).copyWithout(['generationModified']),
-          songWith(id: 38, generationModified: null)
-        ),
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
@@ -369,8 +360,6 @@ void main() {
         'size',
         'filesystemPath',
         'isFavoriteInMediaStore',
-        'generationAdded',
-        'generationModified',
       ];
       final invalidSongs = [
         ...validSong.createVariantsWithMissingNonNullableElements(propertiesThatCanBeMissing),

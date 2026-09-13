@@ -44,8 +44,6 @@ final _testSong = Song(
   size: 0,
   filesystemPath: '/path/to/song',
   isFavoriteInMediaStore: false,
-  generationAdded: 0,
-  generationModified: 0,
 );
 
 const _testAlbum = Album(

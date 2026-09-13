@@ -16,13 +16,13 @@ class WidgetControlsHandler {
   /// Handle method calls from the widget.
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'togglePlayPause':
+      case 'playPause':
         await PlayerManager.instance.playPause();
         break;
-      case 'skipToNext':
+      case 'next':
         await PlayerManager.instance.playNext();
         break;
-      case 'skipToPrevious':
+      case 'previous':
         await PlayerManager.instance.playPrev();
         break;
       default:

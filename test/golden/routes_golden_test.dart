@@ -27,11 +27,7 @@ void main() {
         registerPostAppSetup((_) {
           ContentControl.instance.dispose();
           final fake = FakeContentControl();
-          fake.init();
-          // Fake ContentControl.init in a way to trigger the home screen rebuild
-          fake.initializing = true;
-          fake.stateNullable = ContentState();
-          fake.disposed.value = false;
+          fake.simulateInitializing();
         });
       },
       (WidgetTester tester) async {
@@ -106,7 +102,7 @@ void main() {
       registerAppSetup(() {
         final fake = FakeDeviceInfoControl();
         DeviceInfoControl.instance = fake;
-        fake.sdkInt = 29;
+        fake.androidSdkInt = 29;
         FakeSweyerPluginPlatform.instance.songs = List.unmodifiable(List.generate(10, (index) => songWith(id: index)));
       });
     }, (WidgetTester tester) async {
