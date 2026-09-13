@@ -989,8 +989,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: 7bad46f30ed82dee5cc0dc7e7105b5cdf432b6d2
-      resolved-ref: 7bad46f30ed82dee5cc0dc7e7105b5cdf432b6d2
+      ref: "7bad46f30ed82dee5cc0dc7e7105b5cdf432b6d2"
+      resolved-ref: "7bad46f30ed82dee5cc0dc7e7105b5cdf432b6d2"
       url: "https://github.com/nt4f04uNd/playify"
     source: git
     version: "2.2.1+sweyer.1"
