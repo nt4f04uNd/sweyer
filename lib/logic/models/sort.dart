@@ -382,8 +382,8 @@ class PlaylistSort extends Sort<Playlist> {
         break;
       case PlaylistSortFeature.dateAdded:
         c = (a, b) {
-          final compare = a.dateAdded
-              .compareToNullable(b.dateAdded, nullCompareResult: order == SortOrder.descending ? 1 : -1);
+          final compare =
+              a.dateAdded.compareToNullable(b.dateAdded, nullCompareResult: order == SortOrder.descending ? 1 : -1);
           if (compare == 0) {
             return _fallbackName(a, b);
           }
