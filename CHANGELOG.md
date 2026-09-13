@@ -2,7 +2,7 @@
 [@ernince]: https://github.com/ernince
 
 ## Unreleased
-* Update to Flutter 3.35.5
+* Update to Flutter 3.35.7
 
 * Fix track favourite filter not applying to queue
 
