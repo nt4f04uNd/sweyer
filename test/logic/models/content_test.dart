@@ -164,6 +164,8 @@ void main() {
         (validPlaylist.copyWith({'id': 3, 'filesystemPath': null}), playlistWith(id: 3, fileSystemPath: null)),
         (validPlaylist.copyWith({'id': 4}).copyWithout(['filesystemPath']), playlistWith(id: 4, fileSystemPath: null)),
         (validPlaylist.copyWith({'id': 5, 'dateAdded': -1}), playlistWith(id: 5, dateAdded: -1)),
+        (validPlaylist.copyWith({'id': 14, 'dateAdded': null}), playlistWith(id: 14, dateAdded: null)),
+        (validPlaylist.copyWith({'id': 15}).copyWithout(['dateAdded']), playlistWith(id: 15, dateAdded: null)),
         (validPlaylist.copyWith({'id': 6, 'dateModified': -1}), playlistWith(id: 6, dateModified: -1)),
         (validPlaylist.copyWith({'id': 7, 'dateModified': null}), playlistWith(id: 7, dateModified: null)),
         (validPlaylist.copyWith({'id': 8}).copyWithout(['dateModified']), playlistWith(id: 8, dateModified: null)),
@@ -189,7 +191,9 @@ void main() {
           ContentControl.instance.state.playlists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
               .map((playlist) => playlist.toMap()),
-          validPlaylists.map((element) => element.$2.toMap()),
+          validPlaylists.sorted((item1, item2) => item1.$2.id.compareTo(item2.$2.id)).map(
+                (element) => element.$2.toMap(),
+              ),
           reason: "Should be able to correctly parse all valid playlists",
         );
         expect(crashlyticsObserver.nonFatalErrorCount, 0, reason: "Should not reject any playlists");
@@ -239,15 +243,6 @@ void main() {
         (
           validSong.copyWith({'id': 32}).copyWithout(['isFavoriteInMediaStore']),
           songWith(id: 32, isFavoriteInMediaStore: false)
-        ),
-        (validSong.copyWith({'id': 33, 'generationAdded': -1}), songWith(id: 33, generationAdded: -1)),
-        (validSong.copyWith({'id': 34, 'generationAdded': null}), songWith(id: 34, generationAdded: null)),
-        (validSong.copyWith({'id': 35}).copyWithout(['generationAdded']), songWith(id: 35, generationAdded: null)),
-        (validSong.copyWith({'id': 36, 'generationModified': -1}), songWith(id: 36, generationModified: -1)),
-        (validSong.copyWith({'id': 37, 'generationModified': null}), songWith(id: 37, generationModified: null)),
-        (
-          validSong.copyWith({'id': 38}).copyWithout(['generationModified']),
-          songWith(id: 38, generationModified: null)
         ),
       ];
       late CrashlyticsObserver crashlyticsObserver;
@@ -327,7 +322,7 @@ void main() {
 
     test('Handles invalid or incomplete playlists', () async {
       final validPlaylist = playlistWith().toMap();
-      final propertiesThatCanBeMissing = ['filesystemPath', 'dateModified', 'songIds'];
+      final propertiesThatCanBeMissing = ['filesystemPath', 'dateAdded', 'dateModified', 'songIds'];
       final invalidPlaylists = [
         ...validPlaylist.createVariantsWithMissingNonNullableElements(propertiesThatCanBeMissing),
         ...validPlaylist
@@ -367,8 +362,6 @@ void main() {
         'size',
         'filesystemPath',
         'isFavoriteInMediaStore',
-        'generationAdded',
-        'generationModified',
       ];
       final invalidSongs = [
         ...validSong.createVariantsWithMissingNonNullableElements(propertiesThatCanBeMissing),

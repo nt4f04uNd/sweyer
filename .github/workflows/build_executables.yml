@@ -8,11 +8,35 @@ on:
       - 'releases/**'
 
 jobs:
-  build_executables:
-    runs-on: ubuntu-latest
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Android APK
+            os: ubuntu-latest
+            artifact_name: Android Apk
+            artifact_path: build/app/outputs/flutter-apk/app-profile.apk
+            build_command: |
+              export JAVA_HOME="$JAVA_HOME_17_X64"
+              flutter build apk --profile
+          - name: iOS simulator app
+            os: macos-latest
+            artifact_name: iOS Simulator App
+            artifact_path: build/ios/iphonesimulator/Runner.app
+            build_command: flutter build ios --simulator --debug
+
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
+
+      - name: 🧰 Select Xcode
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
@@ -20,6 +44,12 @@ jobs:
           flutter-version-file: pubspec.yaml
           channel: stable
           cache: true
+
+      - name: 🧱 Install CocoaPods
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          podfile-path: ios/Podfile.lock
 
       - name: 💾 Cache Pub
         uses: actions/cache@v6
@@ -29,6 +59,7 @@ jobs:
           restore-keys: pub-${{ runner.os }}-
 
       - name: 💾 Cache Gradle
+        if: runner.os == 'Linux'
         uses: actions/cache@v6
         with:
           path: |
@@ -41,15 +72,23 @@ jobs:
         shell: bash
         run: flutter pub get
 
-      - name: 🔨 Build Apk
+      - name: 🔨 Build ${{ matrix.name }}
         shell: bash
-        run: |
-          export JAVA_HOME="$JAVA_HOME_17_X64"
-          flutter build apk --profile
+        run: ${{ matrix.build_command }}
 
       - name: 📁 Save executables
         uses: actions/upload-artifact@v7
         with:
-          name: Android Apk
-          path: build/app/outputs/flutter-apk/app-profile.apk
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
           compression-level: 0  # Executables are already compressed
+
+  # Keep the required status context stable while the actual builds run as a
+  # matrix. Existing pull requests still report this context from the old job.
+  build_executables:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ always() }}
+    steps:
+      - name: Check executable builds
+        run: test "${{ needs.build.result }}" = "success"

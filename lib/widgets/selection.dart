@@ -931,8 +931,8 @@ class SelectionActionsBar extends StatelessWidget {
           child: PlayerInterfaceColorWidget(
             color: () => theme.colorScheme.secondary,
             child: Container(
-              height: kSongTileHeight(context),
-              padding: const EdgeInsets.only(bottom: 6.0),
+              height: kSongTileHeight(context) + MediaQuery.paddingOf(context).bottom,
+              padding: EdgeInsets.only(bottom: 6.0 + MediaQuery.paddingOf(context).bottom),
               child: Material(
                 color: Colors.transparent,
                 child: ListTile(
@@ -1469,8 +1469,8 @@ class _PlayAsQueueSelectionAction extends StatelessWidget {
       shuffled: false,
       songs: songs,
     );
-    MusicPlayer.instance.setSong(songs.first);
-    MusicPlayer.instance.play();
+    PlayerManager.instance.setSong(songs.first);
+    PlayerManager.instance.play();
     playerRouteController.open();
     controller.close();
   }
@@ -1507,8 +1507,8 @@ class _ShuffleAsQueueSelectionAction extends StatelessWidget {
       shuffled: true,
       shuffleFrom: songs,
     );
-    MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-    MusicPlayer.instance.play();
+    PlayerManager.instance.setSong(QueueControl.instance.state.current.songs[0]);
+    PlayerManager.instance.play();
     playerRouteController.open();
     controller.close();
   }
@@ -1695,7 +1695,10 @@ class _EditPlaylistSelectionAction extends StatelessWidget {
     return _ActionBuilder(
       controller: controller,
       shown: () {
-        return data.length == 1 && data.first.data is Playlist;
+        return DeviceInfoControl.instance.supportsRenamePlaylist &&
+            DeviceInfoControl.instance.supportsModifyPlaylistContents &&
+            data.length == 1 &&
+            data.first.data is Playlist;
       },
       builder: (context, child) => child!,
       child: EmergeAnimation(
@@ -1782,7 +1785,7 @@ class _AddToPlaylistSelectionAction extends StatelessWidget {
     final controller = ContentSelectionController._of(context);
     return _ActionBuilder(
       controller: controller,
-      shown: () => true,
+      shown: () => DeviceInfoControl.instance.supportsModifyPlaylistContents,
       builder: (context, child) => EmergeAnimation(
         animation: controller.animation,
         child: NFIconButton(
@@ -1880,7 +1883,7 @@ class RemoveFromPlaylistSelectionAction extends StatelessWidget {
     final l10n = getl10n(context);
     return _ActionBuilder(
       controller: controller,
-      shown: () => true,
+      shown: () => DeviceInfoControl.instance.supportsModifyPlaylistContents,
       builder: (context, child) => child!,
       child: NFIconButton(
         tooltip: l10n.removeFromPlaylist,
@@ -1969,7 +1972,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
       shown: () {
         if (type == Song || type == Playlist) {
           typeToDelete = type;
-          return true;
+          return _supportsDeletion(typeToDelete);
         }
         if (type == Content) {
           SelectionEntry? initEntry;
@@ -1987,7 +1990,7 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
               }
             }
           }
-          return true;
+          return initEntry != null && _supportsDeletion(typeToDelete);
         }
         return false;
       },
@@ -1997,6 +2000,16 @@ class _DeleteSongsAppBarActionState<T extends Content> extends State<DeleteSongs
         onPressed: _handleDelete,
       ),
     );
+  }
+
+  bool _supportsDeletion(Type contentType) {
+    if (contentType == Song) {
+      return DeviceInfoControl.instance.supportsDeleteSongs;
+    }
+    if (contentType == Playlist) {
+      return DeviceInfoControl.instance.supportsRemovePlaylists;
+    }
+    return false;
   }
 }
 

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 
 import 'package:sweyer/sweyer.dart';
 
@@ -20,7 +19,7 @@ class Seekbar extends StatefulWidget {
   final Color? color;
 
   /// Player to use instead of [MusicPlayer], which is used by default.
-  final AudioPlayer? player;
+  final PlayerManager? player;
 
   /// Predefined duration to use.
   final Duration? duration;
@@ -48,7 +47,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
   late StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song>? _songChangeSubscription;
 
-  AudioPlayer get player => widget.player ?? MusicPlayer.instance;
+  PlayerManager get player => widget.player ?? PlayerManager.instance;
 
   late AnimationController animationController;
   late Animation<double> thumbSizeAnimation;
@@ -77,7 +76,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
           _localValue = 0.0;
           // Not setting to 0, because even though I'm initializing player in proper order, i.e.
           // set song and then seek to needed position, it still fires in reverse, not sure why.
-          _value = _positionToValue(MusicPlayer.instance.position);
+          _value = _positionToValue(PlayerManager.instance.position);
           _duration = Duration(milliseconds: song.duration);
         });
       });
