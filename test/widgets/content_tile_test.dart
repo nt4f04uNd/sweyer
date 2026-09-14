@@ -5,6 +5,7 @@ void main() {
     await tester.runAppTest(() async {
       expect(MusicPlayer.handler!.running, false);
       await tester.tap(find.byType(SongTile));
+      await tester.binding.flushAsyncEvents();
       expect(MusicPlayer.handler!.running, true);
       await tester.pump(); // Flush micro-tasks so to flush handling of the tap.
       // Don't use `pumpAndSettle` because we have animations because we are playing a song.

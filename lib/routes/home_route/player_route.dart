@@ -940,9 +940,11 @@ class _TrackShowcaseState extends State<TrackShowcase> with TickerProviderStateM
     _songChangeSubscription = PlaybackControl.instance.onSongChange.listen((event) async {
       if (useFade) {
         fadeController.reset();
-        fadeController.forward();
+        // Don't wait for the animation to complete before updating the Ui
+        unawaited(fadeController.forward());
       } else {
-        controller.forward();
+        // Don't wait for the animation to complete before updating the Ui
+        unawaited(controller.forward());
       }
       setState(() {/* update track in ui */});
     });
