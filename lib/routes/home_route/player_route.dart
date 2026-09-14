@@ -305,9 +305,13 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         }
         return;
       case QueueType.allSongs:
+      case QueueType.favouriteSongs:
       case QueueType.allAlbums:
+      case QueueType.favouriteAlbums:
       case QueueType.allPlaylists:
+      case QueueType.favouritePlaylists:
       case QueueType.allArtists:
+      case QueueType.favouriteArtists:
       case QueueType.arbitrary:
         return;
     }
@@ -337,17 +341,33 @@ class _QueueTabState extends State<_QueueTab> with SelectionHandlerMixin {
         text = TextSpan(text: l10n.allTracks);
         key = ValueKey(l10n.allTracks);
         break;
+      case QueueType.favouriteSongs:
+        text = TextSpan(text: l10n.favouriteTracks);
+        key = ValueKey(l10n.favouriteTracks);
+        break;
       case QueueType.allAlbums:
         text = TextSpan(text: l10n.allAlbums);
         key = ValueKey(l10n.allAlbums);
+        break;
+      case QueueType.favouriteAlbums:
+        text = TextSpan(text: l10n.favouriteAlbums);
+        key = ValueKey(l10n.favouriteAlbums);
         break;
       case QueueType.allPlaylists:
         text = TextSpan(text: l10n.allPlaylists);
         key = ValueKey(l10n.allPlaylists);
         break;
+      case QueueType.favouritePlaylists:
+        text = TextSpan(text: l10n.favouritePlaylists);
+        key = ValueKey(l10n.favouritePlaylists);
+        break;
       case QueueType.allArtists:
         text = TextSpan(text: l10n.allArtists);
         key = ValueKey(l10n.allArtists);
+        break;
+      case QueueType.favouriteArtists:
+        text = TextSpan(text: l10n.favouriteArtists);
+        key = ValueKey(l10n.favouriteArtists);
         break;
       case QueueType.searched:
         final theme = Theme.of(context);
