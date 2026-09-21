@@ -21,7 +21,7 @@ abstract class _Routes<T> extends Equatable {
 
   final String location;
   final T? arguments;
-  get uri => Uri(path: location);
+  Uri get uri => Uri(path: location);
 
   _Routes withArguments(T arguments);
 

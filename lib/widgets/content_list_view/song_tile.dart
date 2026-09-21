@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sweyer/sweyer.dart';
@@ -229,7 +230,8 @@ class _SongTileState extends SelectableState<SelectionEntry<Song>, SongTile> wit
       final song = widget.song;
       final player = MusicPlayer.instance;
       if (!selectionRoute && widget.clickBehavior == SongTileClickBehavior.play) {
-        playerRouteController.open();
+        // Don't wait for the animation to complete to start playing
+        unawaited(playerRouteController.open());
         await player.setSong(song);
         await player.play();
       } else {
