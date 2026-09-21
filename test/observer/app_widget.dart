@@ -19,8 +19,8 @@ class AppWidgetChannelObserver {
 
   /// Create a new app widget observer, which automatically
   /// unregisters any previously created observer.
-  AppWidgetChannelObserver(TestWidgetsFlutterBinding binding) {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(_channel, (call) async {
+  AppWidgetChannelObserver(TestDefaultBinaryMessenger messenger) {
+    messenger.setMockMethodCallHandler(_channel, (call) async {
       switch (call.method) {
         case 'saveWidgetData':
           var arguments = Map.castFrom<dynamic, dynamic, String, dynamic>(call.arguments);

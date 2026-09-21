@@ -6,7 +6,7 @@ void main() {
     album = albumWith();
   });
 
-  test('Sorts tracks', () async {
+  testWidgets('Sorts tracks', (tester) async {
     final nullSong1 = songWith(id: 0, track: null, title: 'Null Song 1');
     final nullSong2 = songWith(id: 5, track: null, title: 'Null Song 2');
     final song1 = songWith(id: 6, track: '1', title: 'First Song');
@@ -17,12 +17,12 @@ void main() {
     registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = [nullSong1, nullSong2, song1, song2, song3, song4, song10];
     });
-    await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+    await tester.runAppTestWithoutUi(() {
       expect(album.songs, [song1, song2, song3, song4, song10, nullSong1, nullSong2]);
     });
   });
 
-  test('Sorts tracks with total track count', () async {
+  testWidgets('Sorts tracks with total track count', (tester) async {
     final nullSong1 = songWith(id: 0, track: null, title: 'Null Song 1');
     final song1 = songWith(id: 6, track: '1/10', title: 'First Song');
     final song2 = songWith(id: 2, track: '2/', title: 'Second Song');
@@ -32,12 +32,12 @@ void main() {
     registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = [nullSong1, song1, song2, song3, song4, song10];
     });
-    await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+    await tester.runAppTestWithoutUi(() {
       expect(album.songs, [song1, song2, song3, song4, song10, nullSong1]);
     });
   });
 
-  test('Sorts tracks with spaces in track field', () async {
+  testWidgets('Sorts tracks with spaces in track field', (tester) async {
     final nullSong1 = songWith(id: 0, track: null, title: 'Null Song 1');
     final song1 = songWith(id: 6, track: '1   ', title: 'First Song');
     final song2 = songWith(id: 2, track: ' 2 ', title: 'Second Song');
@@ -47,7 +47,7 @@ void main() {
     registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = [nullSong1, song1, song2, song3, song4, song10];
     });
-    await TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+    await tester.runAppTestWithoutUi(() {
       expect(album.songs, [song1, song2, song3, song4, song10, nullSong1]);
     });
   });

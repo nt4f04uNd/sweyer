@@ -88,33 +88,6 @@ const kScreenPixelRatio = 3.0;
 const kScreenSize = Size(kScreenWidth, kScreenHeight);
 
 extension AppInitExtension on TestWidgetsFlutterBinding {
-  /// Run a test that doesn't need the App UI using the following procedure:
-  ///  1. Initializes the application, optionally running callbacks
-  ///     registered with [registerAppSetup] and [registerPostAppSetup].
-  ///  2. Runs the test from the [callback].
-  ///  3. Stops and disposes the player and app state.
-  ///  4. Flushes all micro-tasks and stream events.
-  ///
-  /// This method is preferred for tests that don't interact with the user interface layer.
-  /// See also [WidgetTesterExtension.runAppTest] for running a test which initializes the app
-  /// and in addition loads the user interface for tests that want to test the user interface.
-  Future<void> runAppTestWithoutUi(FutureOr<void> Function() callback) async {
-    addTearDown(postTest);
-    return runTest(
-      () => withClock(clock, () async {
-        await _setUpAppTest();
-        try {
-          await callback();
-        } finally {
-          await _teardownAppTest();
-          // Wait for any asynchronous events and stream callbacks to finish.
-          await pump(const Duration(seconds: 1));
-        }
-      }),
-      () {},
-    );
-  }
-
   /// Sets the fake data providers and initializes the app state.
   ///
   /// Calls and clears all callbacks in [_setupRegistry] which can be used to modify the fake data providers
@@ -145,15 +118,15 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
     Backend.instance = FakeBackend();
     DeviceInfoControl.instance = FakeDeviceInfoControl();
     FavoritesControl.instance = FakeFavoritesControl();
-    PermissionsChannelObserver(this); // Grant all permissions by default.
-    AppWidgetChannelObserver(this); // Ignore app widget updates by default.
-    SweyerPluginPlatform.instance = FakeSweyerPluginPlatform(this);
+    PermissionsChannelObserver(defaultBinaryMessenger); // Grant all permissions by default.
+    AppWidgetChannelObserver(defaultBinaryMessenger); // Ignore app widget updates by default.
+    SweyerPluginPlatform.instance = FakeSweyerPluginPlatform(defaultBinaryMessenger);
     QueueControl.instance = FakeQueueControl();
     ThemeControl.instance = FakeThemeControl();
     JustAudioPlatform.instance = MockJustAudio(this);
     PackageInfoPlatform.instance = MethodChannelPackageInfo();
     PlayerInterfaceColorStyleControl.instance = PlayerInterfaceColorStyleControl();
-    await FakeFirebaseApp.install(this);
+    await FakeFirebaseApp.install(defaultBinaryMessenger);
     defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('dev.fluttercommunity.plus/package_info'),
         (MethodCall methodCall) async {
       return {
@@ -264,6 +237,29 @@ void registerPostAppSetup(FutureOr<void> Function(TestWidgetsFlutterBinding) pos
 }
 
 extension WidgetTesterExtension on WidgetTester {
+  /// Run a test that doesn't need the App UI using the following procedure:
+  ///  1. Initializes the application, optionally running callbacks
+  ///     registered with [registerAppSetup] and [registerPostAppSetup].
+  ///  2. Runs the test from the [callback].
+  ///  3. Stops and disposes the player and app state.
+  ///  4. Flushes all micro-tasks and stream events.
+  ///
+  /// This method is preferred for tests that don't interact with the user interface layer.
+  /// See also [WidgetTesterExtension.runAppTest] for running a test which initializes the app
+  /// and in addition loads the user interface for tests that want to test the user interface.
+  Future<void> runAppTestWithoutUi(FutureOr<void> Function() callback) async {
+    withClock(clock, () async {
+      await binding._setUpAppTest();
+      try {
+        await callback();
+      } finally {
+        await binding._teardownAppTest();
+        // Wait for any asynchronous events and stream callbacks to finish.
+        await pump(const Duration(seconds: 1));
+      }
+    });
+  }
+
   /// Run a test that uses the App UI using the following procedure:
   ///  1. Initializes the application, optionally running callbacks
   ///     registered with [registerAppSetup] and [registerPostAppSetup].
