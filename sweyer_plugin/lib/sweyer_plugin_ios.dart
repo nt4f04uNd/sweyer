@@ -146,7 +146,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
       final songs = await _retrieveSongsOnce();
       final songsByArtist = <int, List<playify.Song>>{};
       for (final song in songs) {
-        final artistId = _albumArtistId(song);
+        final artistId = _optionalId(song.artistID);
         if (artistId != null) {
           (songsByArtist[artistId] ??= []).add(song);
         }
@@ -156,7 +156,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
         final songs = entry.value;
         return <String, dynamic>{
           'id': entry.key,
-          'artist': _artistName(songs.first),
+          'artist': songs.first.artistName,
           'numberOfAlbums': songs.map((song) => _optionalId(song.albumID)).nonNulls.toSet().length,
           'numberOfTracks': songs.length,
         };
