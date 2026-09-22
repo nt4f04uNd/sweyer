@@ -15,6 +15,11 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
   uuid: ^4.4.0
+  playify:
+    git:
+      url: https://github.com/nt4f04uNd/playify
+      ref: c92ad33abd5586019a7a0ee020fd76cc4d4cc560
+    # path: ../../playify
 
 dev_dependencies:
   flutter_test:

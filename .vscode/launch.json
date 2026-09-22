@@ -25,6 +25,14 @@
          "flutterMode": "release"
       },
       {
+         "name": "release ios physical devices workaround",
+         "type": "dart",
+         "request": "launch",
+         "program": "lib/main.dart",
+         "flutterMode": "release",
+         "preLaunchTask": "ios: terminate app if available"
+      },
+      {
          "name": "golden",
          "request": "launch",
          "type": "dart",

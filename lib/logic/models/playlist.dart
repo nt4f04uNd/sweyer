@@ -6,7 +6,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
   @override
   ContentType get type => ContentType.playlist;
   final String? filesystemPath;
-  final int dateAdded;
+  final int? dateAdded;
   final int? dateModified;
   final String name;
   @override
@@ -112,7 +112,7 @@ class Playlist extends PersistentQueue with DuplicatingSongOriginMixin implement
       return Playlist(
         id: map['id'] as int,
         filesystemPath: map['filesystemPath'] as String?,
-        dateAdded: map['dateAdded'] as int,
+        dateAdded: map['dateAdded'] as int?,
         dateModified: map['dateModified'] as int?,
         name: map['name'] as String,
         songIds: (map['songIds'] as List?)?.cast<int>().toList() ?? [],
@@ -139,7 +139,7 @@ abstract class PlaylistCopyWith {
   Playlist call({
     int id,
     String? fileSystemPath,
-    int dateAdded,
+    int? dateAdded,
     int? dateModified,
     String name,
     List<int> songIds,
@@ -160,7 +160,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
   Playlist call({
     Object id = _undefined,
     Object? fileSystemPath = _undefined,
-    Object dateAdded = _undefined,
+    Object? dateAdded = _undefined,
     Object? dateModified = _undefined,
     Object name = _undefined,
     Object songIds = _undefined,
@@ -168,7 +168,7 @@ class _PlaylistCopyWith extends PlaylistCopyWith {
     return Playlist(
       id: id == _undefined ? value.id : id as int,
       filesystemPath: fileSystemPath == _undefined ? value.filesystemPath : fileSystemPath as String?,
-      dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int,
+      dateAdded: dateAdded == _undefined ? value.dateAdded : dateAdded as int?,
       dateModified: dateModified == _undefined ? value.dateModified : dateModified as int?,
       name: name == _undefined ? value.name : name as String,
       songIds: songIds == _undefined ? value.songIds : songIds as List<int>,
