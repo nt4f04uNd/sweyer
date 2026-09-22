@@ -64,7 +64,7 @@ dependencies:
   playify:
     git:
       url: https://github.com/nt4f04uNd/playify
-      ref: 7bad46f30ed82dee5cc0dc7e7105b5cdf432b6d2
+      ref: c92ad33abd5586019a7a0ee020fd76cc4d4cc560
     # path: ../playify
   audio_service:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer

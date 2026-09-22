@@ -39,12 +39,9 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
 
   int _id(String value) => int.parse(value);
 
-  int? _optionalId(String value) {
-    final id = _id(value);
-    return id == 0 ? null : id;
-  }
+  int? _optionalId(String? value) => value == null ? null : _id(value);
 
-  int _artistId(playify.Song song) => _optionalId(song.albumArtistID) ?? _id(song.artistID);
+  int? _albumArtistId(playify.Song song) => _optionalId(song.albumArtistID) ?? _optionalId(song.artistID);
 
   String _artistName(playify.Song song) => song.albumArtistName.isEmpty ? song.artistName : song.albumArtistName;
 
@@ -100,7 +97,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'artist': song.artistName,
           'album': song.albumTitle.isEmpty ? null : song.albumTitle,
           'albumId': _optionalId(song.albumID),
-          'artistId': _artistId(song),
+          'artistId': _optionalId(song.artistID),
           'genre': song.genre.isEmpty ? null : song.genre,
           'genreId': _optionalId(song.genreID),
           'track': song.trackNumber == 0 ? null : song.trackNumber.toString(),
@@ -128,16 +125,13 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
       return songsByAlbum.entries.map((entry) {
         final songs = entry.value;
         final firstSong = songs.first;
-        final years = songs
-            .where((song) => song.releaseDate.millisecondsSinceEpoch > 0)
-            .map((song) => song.releaseDate.year)
-            .toList(growable: false);
+        final years = songs.map((song) => song.releaseDate?.year).nonNulls.toList(growable: false);
         return <String, dynamic>{
           'id': entry.key,
           'album': firstSong.albumTitle,
           'albumArt': _songUri(firstSong),
           'artist': _artistName(firstSong),
-          'artistId': _artistId(firstSong),
+          'artistId': _albumArtistId(firstSong),
           'firstYear': years.isEmpty ? null : years.reduce((a, b) => a < b ? a : b),
           'lastYear': years.isEmpty ? null : years.reduce((a, b) => a > b ? a : b),
           'numberOfSongs': songs.length,
@@ -152,7 +146,10 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
       final songs = await _retrieveSongsOnce();
       final songsByArtist = <int, List<playify.Song>>{};
       for (final song in songs) {
-        (songsByArtist[_artistId(song)] ??= []).add(song);
+        final artistId = _albumArtistId(song);
+        if (artistId != null) {
+          (songsByArtist[artistId] ??= []).add(song);
+        }
       }
 
       return songsByArtist.entries.map((entry) {
