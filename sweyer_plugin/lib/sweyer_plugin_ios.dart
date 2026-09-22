@@ -104,7 +104,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'genre': song.genre.isEmpty ? null : song.genre,
           'genreId': _optionalId(song.genreID),
           'track': song.trackNumber == 0 ? null : song.trackNumber.toString(),
-          'dateAdded': song.dateAdded.millisecondsSinceEpoch,
+          'dateAdded': song.dateAdded.millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond,
           'duration': (song.duration * 1000).round(),
           'size': null,
           'filesystemPath': null,

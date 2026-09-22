@@ -24,6 +24,8 @@ class PlayerManager {
 
   final SweyerPlayer _player;
   static AudioHandler? handler;
+  StreamSubscription<ProcessingState>? _processingStateSubscription;
+  StreamSubscription<Duration>? _positionSubscription;
 
   /// Updates service state media item.
   void updateServiceMediaItem() {
@@ -40,7 +42,7 @@ class PlayerManager {
     // initialized by the AudioService. The AudioService must only ever be
     // initialized once per process, but the handler depends on the PlayerManager,
     // which can be disposed and recreated.
-    handler?._init(this);
+    await handler?._reinitialize(this);
     handler ??= await AudioService.init(
       builder: () {
         return AudioHandler(PlayerManager.instance);
@@ -64,14 +66,16 @@ class PlayerManager {
       ),
     );
 
-    _player.processingStateStream.listen((state) {
+    await _processingStateSubscription?.cancel();
+    _processingStateSubscription = _player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
         // Play next track if not in loop mode, in loop mode this event is not triggered.
         playNext();
       }
     });
 
-    _player.positionStream.listen((position) {
+    await _positionSubscription?.cancel();
+    _positionSubscription = _player.positionStream.listen((position) {
       Prefs.songPosition.set(position.inSeconds);
     });
 
@@ -82,10 +86,12 @@ class PlayerManager {
     ]);
   }
 
-  Future<void> dispose() {
+  Future<void> dispose() async {
     _instance = null;
-    handler?.dispose();
-    return _player.dispose();
+    await handler?.dispose();
+    await _processingStateSubscription?.cancel();
+    await _positionSubscription?.cancel();
+    await _player.dispose();
   }
 
   /// Function that fires right after json has fetched and when initial songs fetch has done.
@@ -263,8 +269,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
   @visibleForTesting
   bool running = false;
   late PlayerManager player;
-  late StreamSubscription playbackSubscriber;
-  late StreamSubscription queueSubscriber;
+  final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   void _init(PlayerManager player) {
     _disposed = false;
@@ -272,38 +277,52 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     WidgetsBinding.instance.addObserver(this);
 
     DateTime? lastEvent;
-    player.positionStream.listen((event) {
-      final now = clock.now();
-      if (lastEvent == null || now.difference(lastEvent!) > const Duration(milliseconds: 1000)) {
-        lastEvent = now;
+    _subscriptions.addAll([
+      player.positionStream.listen((event) {
+        final now = clock.now();
+        if (lastEvent == null || now.difference(lastEvent!) > const Duration(milliseconds: 1000)) {
+          lastEvent = now;
+          _setState();
+        }
+      }),
+      player.playingStream.listen((playing) {
         _setState();
-      }
-    });
-    player.playingStream.listen((playing) {
-      _setState();
-      lastEvent = clock.now();
-      if (playing) {
-        running = true;
-      }
-    });
-    player.loopingStream.listen((event) => _setState());
-    playbackSubscriber = PlaybackControl.instance.onSongChange.listen((song) {
-      mediaItem.add(song.toMediaItem());
-      _setState();
-    });
-    queueSubscriber = QueueControl.instance.onQueueChanged.listen((_) {
-      queue.add(
-        QueueControl.instance.state.current.songs.map((el) => el.toMediaItem()).toList(),
-      );
-      _setState();
-    });
+        lastEvent = clock.now();
+        if (playing) {
+          running = true;
+        }
+      }),
+      player.processingStateStream.listen((_) => _setState()),
+      player.loopingStream.listen((event) => _setState()),
+      PlaybackControl.instance.onSongChange.listen((song) {
+        mediaItem.add(song.toMediaItem());
+        _setState();
+      }),
+      QueueControl.instance.onQueueChanged.listen((_) {
+        queue.add(
+          QueueControl.instance.state.current.songs.map((el) => el.toMediaItem()).toList(),
+        );
+        _setState();
+      }),
+    ]);
   }
 
-  void dispose() {
+  Future<void> _reinitialize(PlayerManager player) async {
+    await _cancelSubscriptions();
+    WidgetsBinding.instance.removeObserver(this);
+    _init(player);
+  }
+
+  Future<void> _cancelSubscriptions() async {
+    final subscriptions = List<StreamSubscription<dynamic>>.of(_subscriptions);
+    _subscriptions.clear();
+    await Future.wait(subscriptions.map((subscription) => subscription.cancel()));
+  }
+
+  Future<void> dispose() async {
     _disposed = true;
-    stop();
-    playbackSubscriber.cancel();
-    queueSubscriber.cancel();
+    await stop();
+    await _cancelSubscriptions();
     WidgetsBinding.instance.removeObserver(this);
   }
 

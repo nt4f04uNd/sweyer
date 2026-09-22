@@ -9,13 +9,16 @@ class FakeDeviceInfoControl extends DeviceInfoControl {
   int androidSdkInt = 30;
 
   @override
-  bool get useScopedStorageForFileModifications => androidSdkInt >= 30;
+  bool get useScopedStorageForFileModifications =>
+      defaultTargetPlatform == TargetPlatform.android && androidSdkInt >= 30;
 
   @override
-  bool get useAudioPermission => androidSdkInt >= 33;
+  bool get useAudioPermission => defaultTargetPlatform == TargetPlatform.android && androidSdkInt >= 33;
 
   @override
-  bool get useBytesForAlbumArt => defaultTargetPlatform == TargetPlatform.iOS || androidSdkInt >= 29;
+  bool get useBytesForAlbumArt =>
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.android && androidSdkInt >= 29;
 
   @override
   // ignore: must_call_super

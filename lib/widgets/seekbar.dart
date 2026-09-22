@@ -18,7 +18,7 @@ class Seekbar extends StatefulWidget {
   /// If non specified [ColorScheme.primary] color will be used.
   final Color? color;
 
-  /// Player to use instead of [MusicPlayer], which is used by default.
+  /// Player to use instead of [PlayerManager.instance], which is used by default.
   final PlayerManager? player;
 
   /// Predefined duration to use.
