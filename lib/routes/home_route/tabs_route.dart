@@ -490,13 +490,12 @@ class _ContentTabState extends State<_ContentTab>
                                                   switch (contentType) {
                                                     case ContentType.song:
                                                       QueueControl.instance.setQueue(
-                                                        songs: (list as List<Song>)..shuffle(),
                                                         type: showOnlyFavorites
                                                             ? QueueType.favouriteSongs
                                                             : QueueType.allSongs,
                                                         modified: false,
                                                         shuffled: true,
-                                                        shuffleFrom: list,
+                                                        shuffleFrom: list as List<Song>,
                                                       );
                                                       break;
                                                     case ContentType.album:
