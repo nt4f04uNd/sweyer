@@ -24,7 +24,7 @@ class AppleMusicPlayer implements SweyerPlayer {
 
   late final StreamSubscription<playify.PlayifyStatus> _statusSubscription;
   Timer? _positionUpdateTimer;
-  Duration _duration = Duration.zero;
+  Duration _songDuration = Duration.zero;
   bool _preparing = false;
   bool _positionUpdateInFlight = false;
   int _positionRevision = 0;
@@ -40,7 +40,10 @@ class AppleMusicPlayer implements SweyerPlayer {
     }
 
     final reachedEnd =
-        !_preparing && wasPlaying && _duration > Duration.zero && position + const Duration(seconds: 2) >= _duration;
+        !_preparing &&
+        wasPlaying &&
+        _songDuration > Duration.zero &&
+        position + const Duration(seconds: 2) >= _songDuration;
     final processingState = switch (status) {
       playify.PlayifyStatus.stopped => reachedEnd ? ProcessingState.completed : ProcessingState.idle,
       playify.PlayifyStatus.playing ||
@@ -175,7 +178,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   @override
   Future<void> setSong(Song song) async {
     final songId = song.sourceId.toString();
-    _duration = Duration(milliseconds: song.duration);
+    _songDuration = Duration(milliseconds: song.duration);
     _positionRevision++;
     _positionSubject.add(Duration.zero);
     _preparing = true;
