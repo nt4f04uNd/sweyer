@@ -1232,7 +1232,7 @@ class _SuggestionTile extends StatelessWidget {
     _SearchStateDelegate._of(context)!.searchDelegate.setState();
   }
 
-  void _handleTap(context) {
+  void _handleTap(BuildContext context) {
     final delegate = _SearchStateDelegate._of(context)!;
     delegate.searchDelegate.query = SearchHistory.instance.history![index];
     delegate.focusNode.unfocus();

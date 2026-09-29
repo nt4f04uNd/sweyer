@@ -258,7 +258,8 @@ class ContentControl extends Control {
       } catch (error, stack) {
         _failedToInitialize = true;
         await reportFatalErrorToFirebase(error, stack, reason: 'initializing ContentControl');
-        dispose();
+        // Awaiting here can cause the error_screen test to randomly stall out
+        unawaited(dispose());
       }
       _initializeCompleter = null;
     }
@@ -269,30 +270,32 @@ class ContentControl extends Control {
   /// Disposes the [state] and stops the currently going [init] process,
   /// if any.
   @override
-  void dispose() {
-    if (!disposed.value) {
+  Future<void> dispose() async {
+    if (disposed.value) {
+      super.dispose();
+    } else {
       // WidgetsBinding.instance!.removeObserver(bindingObserver);
       // _quickActions.clearShortcutItems();
       _initializeCompleter?.complete();
       _initializeCompleter = null;
+      super.dispose();
       // TODO: This might still deliver some pending events to listeners, see https://github.com/dart-lang/sdk/issues/45653
-      _contentSubject.close();
+      await _contentSubject.close();
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         selectionNotifier.dispose();
       });
       _state = null;
-      QueueControl.instance.dispose();
-      PlaybackControl.instance.dispose();
-      MusicPlayer.instance.dispose();
+      await QueueControl.instance.dispose();
+      await PlaybackControl.instance.dispose();
       FavoritesControl.instance.dispose();
       PlayerInterfaceColorStyleControl.instance.dispose();
       AppWidgetControl.instance.dispose();
+      await MusicPlayer.instanceIfInitialized?.dispose();
     }
-    super.dispose();
   }
 
   /// Restores [sorts] from [Prefs].
-  Future<void> _restoreSorts() async {
+  void _restoreSorts() {
     state.sorts = ContentMap(
       songValue: repository.songSort.get(),
       albumValue: repository.albumSort.get(),
@@ -389,7 +392,7 @@ class ContentControl extends Control {
         case ContentType.song:
           state.allSongs.setSongs((await SweyerPlugin.instance.retrieveSongs(Song.fromMap)).toList());
           if (_empty) {
-            dispose();
+            await dispose();
             return;
           }
           sort(emitChangeEvent: false, contentType: contentType);
@@ -436,7 +439,7 @@ class ContentControl extends Control {
       }
     } on SweyerPluginException catch (ex, stack) {
       await reportErrorToFirebase(ex, stack, reason: 'in re-fetch ${contentType.name}');
-      ShowFunctions.instance.showToast(msg: staticl10n.oopsErrorOccurred);
+      await ShowFunctions.instance.showToast(msg: staticl10n.oopsErrorOccurred);
     }
   }
 
@@ -615,7 +618,7 @@ class ContentControl extends Control {
         }
       } catch (ex, stack) {
         await reportErrorToFirebase(ex, stack, reason: 'in setSongsFavorite');
-        ShowFunctions.instance.showToast(
+        await ShowFunctions.instance.showToast(
           msg: staticl10n.oopsErrorOccurred,
         );
         debugPrint('setSongsFavorite error: $ex');
@@ -653,7 +656,7 @@ class ContentControl extends Control {
       }
     } catch (ex, stack) {
       await reportErrorToFirebase(ex, stack, reason: 'in deleteSongs');
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
       debugPrint('deleteSongs error: $ex');
@@ -782,7 +785,7 @@ class ContentControl extends Control {
       await refetchSongsAndPlaylists();
     } catch (ex, stack) {
       await reportErrorToFirebase(ex, stack, reason: 'in deletePlaylists');
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
       debugPrint('deletePlaylists error: $ex');

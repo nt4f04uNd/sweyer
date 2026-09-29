@@ -35,8 +35,9 @@ class AppWidgetControl extends Control {
 
   @override
   void dispose() {
-    _currentSongListener?.cancel();
-    _playingStateListener?.cancel();
+    // Awaiting these can make the tests hang during teardown, even when using `runAsync`.
+    unawaited(_currentSongListener?.cancel());
+    unawaited(_playingStateListener?.cancel());
     super.dispose();
   }
 

@@ -34,8 +34,8 @@ android {
 
     defaultConfig {
         applicationId = "com.nt4f04und.sweyer"
-        minSdk = Math.max(23, flutter.minSdkVersion)
-        targetSdk = Math.max(34, flutter.targetSdkVersion)
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -55,10 +55,6 @@ android {
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
         }
-    }
-
-    buildFeatures {
-        viewBinding = true
     }
 }
 
