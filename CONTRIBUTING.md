@@ -4,7 +4,7 @@ Want to collaborate?
 
 Join the Sweyer community on Discord:
 
-[![Discord](https://img.shields.io/badge/Discord-Sweyer%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/yEMT8Z54)
+[![Discord](https://img.shields.io/badge/Discord-Sweyer%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/qcQk2uq33d)
 
 There we can discuss ideas, UX, architecture, local-first software, or just chat with other contributors and users.
 
