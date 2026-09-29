@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:sweyer/logic/models/song.dart';
 import 'package:sweyer/logic/player/apple_music_player.dart';
@@ -110,7 +111,7 @@ abstract class SweyerPlayer {
 
   /// Creates the platform player. System-backed implementations use
   /// [currentSongDuration] to interpret native playback-completion events.
-  factory SweyerPlayer.create({required Duration Function() currentSongDuration}) {
+  factory SweyerPlayer.create({required ValueGetter<Duration> currentSongDuration}) {
     if (Platform.isIOS) {
       return AppleMusicPlayer(currentSongDuration: currentSongDuration);
     }

@@ -10,7 +10,7 @@ import 'package:sweyer/logic/player/sweyer_player.dart';
 
 /// Player implementation backed by Playify and Apple's system music player.
 class AppleMusicPlayer implements SweyerPlayer {
-  AppleMusicPlayer({required Duration Function() currentSongDuration}) : _currentSongDuration = currentSongDuration {
+  AppleMusicPlayer({required ValueGetter<Duration> currentSongDuration}) : _currentSongDuration = currentSongDuration {
     _statusSubscription = _playify.statusStream.listen(_handleStatus);
   }
 
@@ -21,7 +21,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   static const _playbackCompletionTolerance = Duration(seconds: 2);
 
   final playify.Playify _playify = playify.Playify.instance;
-  final Duration Function() _currentSongDuration;
+  final ValueGetter<Duration> _currentSongDuration;
   final BehaviorSubject<bool> _playingSubject = BehaviorSubject.seeded(false);
   final BehaviorSubject<Duration> _positionSubject = BehaviorSubject.seeded(Duration.zero);
   final BehaviorSubject<ProcessingState> _processingStateSubject = BehaviorSubject.seeded(ProcessingState.idle);
