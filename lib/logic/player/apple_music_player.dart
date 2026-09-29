@@ -40,7 +40,7 @@ class AppleMusicPlayer implements SweyerPlayer {
     unawaited(_updateLoopMode());
     final wasPlaying = playing;
     final isPlaying = _mapStatusToPlaying(status);
-    if (_playingSubject.value != isPlaying) {
+    if (!_playingSubject.isClosed && _playingSubject.requireValue != isPlaying) {
       _playingSubject.add(isPlaying);
     }
 
@@ -59,7 +59,7 @@ class AppleMusicPlayer implements SweyerPlayer {
         ProcessingState.ready,
       playify.PlayifyStatus.unknown => ProcessingState.loading,
     };
-    if (_processingStateSubject.value != processingState) {
+    if (!_processingStateSubject.isClosed && _processingStateSubject.requireValue != processingState) {
       _processingStateSubject.add(processingState);
     }
 
@@ -122,7 +122,7 @@ class AppleMusicPlayer implements SweyerPlayer {
       if (request == _loopModeRequest &&
           revision == _loopModeRevision &&
           !_loopModeSubject.isClosed &&
-          _loopModeSubject.value != mode) {
+          _loopModeSubject.requireValue != mode) {
         _loopModeSubject.add(mode);
       }
     } catch (error) {
@@ -162,7 +162,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   Future<void> seek(Duration position) async {
     final revision = ++_positionRevision;
     await _playify.setPlaybackTime(position.inMilliseconds / 1000);
-    if (revision == _positionRevision) {
+    if (revision == _positionRevision && !_positionSubject.isClosed) {
       _positionSubject.add(position);
     }
   }
@@ -179,7 +179,7 @@ class AppleMusicPlayer implements SweyerPlayer {
       LoopMode.all => playify.Repeat.all,
     };
     await _playify.setRepeatMode(playifyMode);
-    if (revision == _loopModeRevision) {
+    if (revision == _loopModeRevision && !_loopModeSubject.isClosed) {
       _loopModeSubject.add(mode);
     }
   }
@@ -189,7 +189,9 @@ class AppleMusicPlayer implements SweyerPlayer {
     final songId = song.sourceId.toString();
     _songDuration = Duration(milliseconds: song.duration);
     _positionRevision++;
-    _positionSubject.add(Duration.zero);
+    if (!_positionSubject.isClosed) {
+      _positionSubject.add(Duration.zero);
+    }
     _preparing = true;
     try {
       await _playify.setQueue(songIDs: [songId], startID: songId, startPlaying: false);
@@ -198,7 +200,9 @@ class AppleMusicPlayer implements SweyerPlayer {
     } finally {
       _preparing = false;
     }
-    _processingStateSubject.add(ProcessingState.ready);
+    if (!_processingStateSubject.isClosed) {
+      _processingStateSubject.add(ProcessingState.ready);
+    }
     return const SetSongSuccess();
   }
 
@@ -215,19 +219,19 @@ class AppleMusicPlayer implements SweyerPlayer {
   Stream<bool> get loopingStream => _loopingStream;
 
   @override
-  bool get playing => _playingSubject.value ?? false;
+  bool get playing => _playingSubject.requireValue;
 
   @override
-  Duration get position => _positionSubject.value ?? Duration.zero;
+  Duration get position => _positionSubject.requireValue;
 
   @override
-  Duration get bufferedPosition => _positionSubject.value ?? Duration.zero;
+  Duration get bufferedPosition => _positionSubject.requireValue;
 
   @override
-  ProcessingState get processingState => _processingStateSubject.value ?? ProcessingState.idle;
+  ProcessingState get processingState => _processingStateSubject.requireValue;
 
   @override
-  bool get looping => _loopModeSubject.value == LoopMode.one;
+  bool get looping => _loopModeSubject.requireValue == LoopMode.one;
 
   @override
   double get speed => 1;

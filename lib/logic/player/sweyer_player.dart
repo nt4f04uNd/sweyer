@@ -90,22 +90,22 @@ abstract class SweyerPlayer {
   /// Emits whether single-song looping is enabled.
   Stream<bool> get loopingStream;
 
-  /// Whether playback is active.
+  /// Whether playback is active, or `false` before the first state update.
   bool get playing;
 
-  /// Current playback position.
+  /// Current playback position, or [Duration.zero] before the first update.
   Duration get position;
 
-  /// Current buffered playback position.
+  /// Current buffered playback position, or [Duration.zero] before the first update.
   Duration get bufferedPosition;
 
-  /// Current processing state.
+  /// Current processing state, or [ProcessingState.idle] before the first update.
   ProcessingState get processingState;
 
-  /// Whether single-song looping is enabled.
+  /// Whether single-song looping is enabled, or `false` before the first update.
   bool get looping;
 
-  /// Current playback speed.
+  /// Current playback speed, or `1` before the first update.
   double get speed;
 
   factory SweyerPlayer.create() {
