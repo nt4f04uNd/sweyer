@@ -89,11 +89,11 @@ class PlayerManager {
   Future<void> dispose() async {
     _instance = null;
     await Future.wait([
-      if (handler != null) handler!.dispose(),
-      if (_processingStateSubscription != null) _processingStateSubscription!.cancel(),
-      if (_positionSubscription != null) _positionSubscription!.cancel(),
+      handler?.dispose(),
+      _processingStateSubscription?.cancel(),
+      _positionSubscription?.cancel(),
       _player.dispose(),
-    ]);
+    ].nonNulls);
   }
 
   /// Function that fires right after json has fetched and when initial songs fetch has done.
