@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:clock/clock.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
+
+import 'apple_music_player.dart';
 
 /// Manager for player functionality that handles business logic
 /// and uses SweyerPlayer for actual playback.
@@ -187,6 +190,17 @@ class PlayerManager {
         await playNext(song: song);
         return;
     }
+  }
+
+  /// Adopts a song selected by an external iOS playback control without
+  /// replacing or seeking the queue already prepared by the system player.
+  void synchronizeExternalSong(Song song) {
+    PlaybackControl.instance.changeSong(song);
+    final player = _player;
+    if (player is AppleMusicPlayer) {
+      player.synchronizeSong(song);
+    }
+    updateServiceMediaItem();
   }
 
   Future<void> seek(Duration position) {

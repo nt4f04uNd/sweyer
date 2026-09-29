@@ -206,6 +206,14 @@ class AppleMusicPlayer implements SweyerPlayer {
     return const SetSongSuccess();
   }
 
+  /// Synchronizes metadata after the system player was controlled outside the
+  /// main Flutter isolate, without replacing its queue or playback position.
+  void synchronizeSong(Song song) {
+    _songDuration = Duration(milliseconds: song.duration);
+    _positionRevision++;
+    unawaited(_updatePosition());
+  }
+
   @override
   Stream<bool> get playingStream => _playingSubject.stream;
 
