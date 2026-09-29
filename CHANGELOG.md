@@ -3,6 +3,8 @@
 
 ## Unreleased
 
+* Fix track favourite filter not applying to queue
+
 ## 1.0.14
 
 * Update to Flutter 3.29.2

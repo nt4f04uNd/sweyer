@@ -94,9 +94,13 @@
   "albumNotFound": "Albüm bulunamadı",
   "artistNotFound": "Sanatçı bulunamadı",
   "allTracks": "Tüm parçalar",
+  "favouriteTracks": "Favori parçalar",
   "allAlbums": "Tüm albümler",
+  "favouriteAlbums": "Favori albümler",
   "allPlaylists": "Tüm oynatma listeleri",
+  "favouritePlaylists": "Favori çalma listeleri",
   "allArtists": "Tüm sanatçılar",
+  "favouriteArtists": "Favori sanatçılar",
   "arbitraryQueue": "Keyfi sıra",
   "shuffled": "Karıştırmak",
   "@shuffled": {
