@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:sweyer/logic/models/song.dart';
 import 'package:sweyer/logic/player/sweyer_player.dart';
@@ -16,7 +17,16 @@ class JustAudioPlayer implements SweyerPlayer {
   }
 
   @override
-  Future<void> play() => _audioPlayer.play();
+  Future<PlayResult> play() async {
+    try {
+      await _audioPlayer.play();
+      return const PlaySuccess();
+    } on PlayerException catch (error, stackTrace) {
+      return PlayFailure(error, stackTrace);
+    } on PlatformException catch (error, stackTrace) {
+      return PlayFailure(error, stackTrace);
+    }
+  }
 
   @override
   Future<void> pause() => _audioPlayer.pause();
@@ -37,8 +47,20 @@ class JustAudioPlayer implements SweyerPlayer {
   Future<void> setLoopMode(LoopMode mode) => _audioPlayer.setLoopMode(mode);
 
   @override
-  Future<void> setSong(Song song) async {
-    await _audioPlayer.setAudioSource(ProgressiveAudioSource(Uri.parse(song.contentUri)));
+  Future<SetSongResult> setSong(Song song) async {
+    try {
+      await _audioPlayer.setAudioSource(ProgressiveAudioSource(Uri.parse(song.contentUri)));
+      return const SetSongSuccess();
+    } on PlayerInterruptedException {
+      return const SetSongInterrupted();
+    } on PlayerException catch (error, stackTrace) {
+      return SetSongUnavailable(error, stackTrace);
+    } on PlatformException catch (error, stackTrace) {
+      if (error.code == 'abort') {
+        return const SetSongInterrupted();
+      }
+      return SetSongFailure(error, stackTrace);
+    }
   }
 
   @override

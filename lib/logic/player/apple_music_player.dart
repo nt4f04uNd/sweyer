@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:playify/playify.dart' as playify;
 import 'package:rxdart/rxdart.dart';
@@ -142,7 +143,14 @@ class AppleMusicPlayer implements SweyerPlayer {
   }
 
   @override
-  Future<void> play() => _playify.play();
+  Future<PlayResult> play() async {
+    try {
+      await _playify.play();
+      return const PlaySuccess();
+    } on PlatformException catch (error, stackTrace) {
+      return PlayFailure(error, stackTrace);
+    }
+  }
 
   @override
   Future<void> pause() => _playify.pause();
@@ -180,7 +188,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   }
 
   @override
-  Future<void> setSong(Song song) async {
+  Future<SetSongResult> setSong(Song song) async {
     final songId = song.sourceId.toString();
     _songDuration = Duration(milliseconds: song.duration);
     _positionRevision++;
@@ -188,10 +196,13 @@ class AppleMusicPlayer implements SweyerPlayer {
     _preparing = true;
     try {
       await _playify.setQueue(songIDs: [songId], startID: songId, startPlaying: false);
+    } on PlatformException catch (error, stackTrace) {
+      return SetSongFailure(error, stackTrace);
     } finally {
       _preparing = false;
     }
     _processingStateSubject.add(ProcessingState.ready);
+    return const SetSongSuccess();
   }
 
   @override

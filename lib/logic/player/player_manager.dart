@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
@@ -166,23 +165,21 @@ class PlayerManager {
       }
       return;
     }
-    try {
-      await _player.setSong(song);
-    } catch (e, stack) {
-      if (e is PlayerInterruptedException || e is PlatformException && e.code == 'abort') {
-        // Do nothing
-      } else if (e is PlayerException) {
+    switch (await _player.setSong(song)) {
+      case SetSongSuccess():
+      case SetSongInterrupted():
+        return;
+      case SetSongUnavailable():
         _showPlaybackError();
-        playNext(song: song);
+        await playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
-        ContentControl.instance.refetch(ContentType.song);
-      } else if (e is PlatformException) {
-        await reportErrorToFirebase(e, stack, reason: 'preparing a song for playback');
+        await ContentControl.instance.refetch(ContentType.song);
+        return;
+      case SetSongFailure(:final error, :final stackTrace):
+        await reportErrorToFirebase(error, stackTrace, reason: 'preparing a song for playback');
         _showPlaybackError();
-      } else {
-        // Other exceptions are not expected, rethrow.
-        rethrow;
-      }
+        await playNext(song: song);
+        return;
     }
   }
 
@@ -191,14 +188,13 @@ class PlayerManager {
   }
 
   Future<void> play() async {
-    try {
-      await _player.play();
-    } on PlatformException catch (error, stack) {
-      await reportErrorToFirebase(error, stack, reason: 'starting playback');
-      _showPlaybackError();
-    } on PlayerException catch (error, stack) {
-      await reportErrorToFirebase(error, stack, reason: 'starting playback');
-      _showPlaybackError();
+    switch (await _player.play()) {
+      case PlaySuccess():
+        return;
+      case PlayFailure(:final error, :final stackTrace):
+        await reportErrorToFirebase(error, stackTrace, reason: 'starting playback');
+        _showPlaybackError();
+        return;
     }
   }
 
