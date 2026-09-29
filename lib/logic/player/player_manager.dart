@@ -296,7 +296,6 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
           running = true;
         }
       }),
-      player.processingStateStream.listen((_) => _setState()),
       player.loopingStream.listen((event) => _setState()),
       PlaybackControl.instance.onSongChange.listen((song) {
         mediaItem.add(song.toMediaItem());
