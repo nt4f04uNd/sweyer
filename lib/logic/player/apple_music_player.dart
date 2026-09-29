@@ -10,7 +10,7 @@ import 'package:sweyer/logic/player/sweyer_player.dart';
 
 /// Player implementation backed by Playify and Apple's system music player.
 class AppleMusicPlayer implements SweyerPlayer {
-  AppleMusicPlayer() {
+  AppleMusicPlayer({required Duration Function() currentSongDuration}) : _currentSongDuration = currentSongDuration {
     _statusSubscription = _playify.statusStream.listen(_handleStatus);
   }
 
@@ -21,6 +21,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   static const _playbackCompletionTolerance = Duration(seconds: 2);
 
   final playify.Playify _playify = playify.Playify.instance;
+  final Duration Function() _currentSongDuration;
   final BehaviorSubject<bool> _playingSubject = BehaviorSubject.seeded(false);
   final BehaviorSubject<Duration> _positionSubject = BehaviorSubject.seeded(Duration.zero);
   final BehaviorSubject<ProcessingState> _processingStateSubject = BehaviorSubject.seeded(ProcessingState.idle);
@@ -29,7 +30,6 @@ class AppleMusicPlayer implements SweyerPlayer {
 
   late final StreamSubscription<playify.PlayifyStatus> _statusSubscription;
   Timer? _positionUpdateTimer;
-  Duration _songDuration = Duration.zero;
   bool _preparing = false;
   bool _positionUpdateInFlight = false;
   int _positionRevision = 0;
@@ -44,11 +44,12 @@ class AppleMusicPlayer implements SweyerPlayer {
       _playingSubject.add(isPlaying);
     }
 
+    final songDuration = _currentSongDuration();
     final reachedEnd =
         !_preparing &&
         wasPlaying &&
-        _songDuration > Duration.zero &&
-        position + _playbackCompletionTolerance >= _songDuration;
+        songDuration > Duration.zero &&
+        position + _playbackCompletionTolerance >= songDuration;
     final processingState = switch (status) {
       playify.PlayifyStatus.stopped => reachedEnd ? ProcessingState.completed : ProcessingState.idle,
       playify.PlayifyStatus.playing ||
@@ -187,7 +188,6 @@ class AppleMusicPlayer implements SweyerPlayer {
   @override
   Future<SetSongResult> setSong(Song song) async {
     final songId = song.sourceId.toString();
-    _songDuration = Duration(milliseconds: song.duration);
     _positionRevision++;
     if (!_positionSubject.isClosed) {
       _positionSubject.add(Duration.zero);
@@ -204,14 +204,6 @@ class AppleMusicPlayer implements SweyerPlayer {
       _processingStateSubject.add(ProcessingState.ready);
     }
     return const SetSongSuccess();
-  }
-
-  /// Synchronizes metadata after the system player was controlled outside the
-  /// main Flutter isolate, without replacing its queue or playback position.
-  void synchronizeSong(Song song) {
-    _songDuration = Duration(milliseconds: song.duration);
-    _positionRevision++;
-    unawaited(_updatePosition());
   }
 
   @override

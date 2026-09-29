@@ -108,9 +108,11 @@ abstract class SweyerPlayer {
   /// Current playback speed, or `1` before the first update.
   double get speed;
 
-  factory SweyerPlayer.create() {
+  /// Creates the platform player. System-backed implementations use
+  /// [currentSongDuration] to interpret native playback-completion events.
+  factory SweyerPlayer.create({required Duration Function() currentSongDuration}) {
     if (Platform.isIOS) {
-      return AppleMusicPlayer();
+      return AppleMusicPlayer(currentSongDuration: currentSongDuration);
     }
     return JustAudioPlayer();
   }

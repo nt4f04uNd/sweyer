@@ -8,12 +8,16 @@ import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sweyer/sweyer.dart';
 
-import 'apple_music_player.dart';
-
 /// Manager for player functionality that handles business logic
 /// and uses SweyerPlayer for actual playback.
 class PlayerManager {
-  PlayerManager._() : _player = SweyerPlayer.create();
+  PlayerManager._()
+      : _player = SweyerPlayer.create(
+          currentSongDuration: () {
+            final song = PlaybackControl.instance.currentSongNullable;
+            return song == null ? Duration.zero : Duration(milliseconds: song.duration);
+          },
+        );
 
   static PlayerManager? _instance;
   static PlayerManager get instance {
@@ -190,17 +194,6 @@ class PlayerManager {
         await playNext(song: song);
         return;
     }
-  }
-
-  /// Adopts a song selected by an external iOS playback control without
-  /// replacing or seeking the queue already prepared by the system player.
-  void synchronizeExternalSong(Song song) {
-    PlaybackControl.instance.changeSong(song);
-    final player = _player;
-    if (player is AppleMusicPlayer) {
-      player.synchronizeSong(song);
-    }
-    updateServiceMediaItem();
   }
 
   Future<void> seek(Duration position) {
