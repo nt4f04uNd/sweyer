@@ -14,6 +14,9 @@ class AppleMusicPlayer implements SweyerPlayer {
   }
 
   static const _positionUpdateInterval = Duration(seconds: 1);
+  // Position polling can lag behind the stopped event by one interval plus
+  // method-channel and scheduling latency.
+  static const _playbackCompletionTolerance = Duration(seconds: 2);
 
   final playify.Playify _playify = playify.Playify.instance;
   final BehaviorSubject<bool> _playingSubject = BehaviorSubject.seeded(false);
@@ -43,7 +46,7 @@ class AppleMusicPlayer implements SweyerPlayer {
         !_preparing &&
         wasPlaying &&
         _songDuration > Duration.zero &&
-        position + const Duration(seconds: 2) >= _songDuration;
+        position + _playbackCompletionTolerance >= _songDuration;
     final processingState = switch (status) {
       playify.PlayifyStatus.stopped => reachedEnd ? ProcessingState.completed : ProcessingState.idle,
       playify.PlayifyStatus.playing ||
