@@ -14,6 +14,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   }
 
   static const _positionUpdateInterval = Duration(seconds: 1);
+
   // Position polling can lag behind the stopped event by one interval plus
   // method-channel and scheduling latency.
   static const _playbackCompletionTolerance = Duration(seconds: 2);
