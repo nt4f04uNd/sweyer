@@ -168,9 +168,6 @@ class AppleMusicPlayer implements SweyerPlayer {
   }
 
   @override
-  Future<void> setVolume(double volume) => _playify.setVolume(volume);
-
-  @override
   Future<void> setSpeed(double speed) async {}
 
   @override
@@ -212,16 +209,10 @@ class AppleMusicPlayer implements SweyerPlayer {
   Stream<Duration> get positionStream => _positionSubject.stream;
 
   @override
-  Stream<Duration> get bufferedPositionStream => _positionSubject.stream;
-
-  @override
   Stream<ProcessingState> get processingStateStream => _processingStateSubject.stream;
 
   @override
   Stream<bool> get loopingStream => _loopingStream;
-
-  @override
-  Stream<LoopMode> get loopModeStream => _loopModeSubject.stream;
 
   @override
   bool get playing => _playingSubject.value ?? false;
@@ -236,10 +227,7 @@ class AppleMusicPlayer implements SweyerPlayer {
   ProcessingState get processingState => _processingStateSubject.value ?? ProcessingState.idle;
 
   @override
-  bool get looping => loopMode == LoopMode.one;
-
-  @override
-  LoopMode get loopMode => _loopModeSubject.value ?? LoopMode.off;
+  bool get looping => _loopModeSubject.value == LoopMode.one;
 
   @override
   double get speed => 1;

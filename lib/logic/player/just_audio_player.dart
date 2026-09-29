@@ -38,9 +38,6 @@ class JustAudioPlayer implements SweyerPlayer {
   Future<void> seek(Duration position) => _audioPlayer.seek(position);
 
   @override
-  Future<void> setVolume(double volume) => _audioPlayer.setVolume(volume);
-
-  @override
   Future<void> setSpeed(double speed) => _audioPlayer.setSpeed(speed);
 
   @override
@@ -70,16 +67,10 @@ class JustAudioPlayer implements SweyerPlayer {
   Stream<Duration> get positionStream => _audioPlayer.positionStream;
 
   @override
-  Stream<Duration> get bufferedPositionStream => _audioPlayer.bufferedPositionStream;
-
-  @override
   Stream<ProcessingState> get processingStateStream => _audioPlayer.processingStateStream;
 
   @override
-  Stream<bool> get loopingStream => loopModeStream.map((event) => event == LoopMode.one);
-
-  @override
-  Stream<LoopMode> get loopModeStream => _audioPlayer.loopModeStream;
+  Stream<bool> get loopingStream => _audioPlayer.loopModeStream.map((event) => event == LoopMode.one);
 
   @override
   bool get playing => _audioPlayer.playing;
@@ -94,10 +85,7 @@ class JustAudioPlayer implements SweyerPlayer {
   ProcessingState get processingState => _audioPlayer.processingState;
 
   @override
-  bool get looping => loopMode == LoopMode.one;
-
-  @override
-  LoopMode get loopMode => _audioPlayer.loopMode;
+  bool get looping => _audioPlayer.loopMode == LoopMode.one;
 
   @override
   double get speed => _audioPlayer.speed;
