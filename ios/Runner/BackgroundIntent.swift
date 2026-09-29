@@ -3,7 +3,7 @@ import Flutter
 import Foundation
 import home_widget
 
-@available(iOS 16, *)
+@available(iOS 17, *)
 public struct BackgroundIntent: AppIntent {
   static public var title: LocalizedStringResource = "HomeWidget Background Intent"
 
@@ -29,6 +29,6 @@ public struct BackgroundIntent: AppIntent {
   }
 }
 
-@available(iOS 16, *)
+@available(iOS 17, *)
 @available(iOSApplicationExtension, unavailable)
 extension BackgroundIntent: ForegroundContinuableIntent {}
