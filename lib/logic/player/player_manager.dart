@@ -29,41 +29,47 @@ class PlayerManager {
   /// Updates service state media item.
   void updateServiceMediaItem() {
     final song = PlaybackControl.instance.currentSongNullable;
-    if (song != null && handler!.running) {
-      handler!.mediaItem.add(song.toMediaItem());
+    final audioHandler = handler;
+    if (song != null && audioHandler != null && audioHandler.running) {
+      audioHandler.mediaItem.add(song.toMediaItem());
     }
   }
 
   Future<void> init() async {
     await restoreLastSong();
 
-    // Reinitialize the AudioHandler if it already exists. Otherwise it is
-    // initialized by the AudioService. The AudioService must only ever be
-    // initialized once per process, but the handler depends on the PlayerManager,
-    // which can be disposed and recreated.
-    await handler?._reinitialize(this);
-    handler ??= await AudioService.init(
-      builder: () {
-        return AudioHandler(PlayerManager.instance);
-      },
-      config: AudioServiceConfig(
-        androidResumeOnClick: true,
-        androidNotificationChannelName: staticl10n.playback,
-        androidNotificationChannelDescription: staticl10n.playbackControls,
-        // notificationColor,
-        androidNotificationIcon: 'drawable/round_music_note',
-        androidShowNotificationBadge: false,
-        androidNotificationClickStartsActivity: true,
-        androidNotificationOngoing: false,
-        androidStopForegroundOnPause: true,
-        // artDownscaleWidth,
-        // artDownscaleHeight,
-        fastForwardInterval: const Duration(seconds: 5),
-        rewindInterval: const Duration(seconds: 5),
-        preloadArtwork: false,
-        // androidBrowsableRootExtras,
-      ),
-    );
+    // Apple Music owns the iOS Now Playing session while playback uses the
+    // system music player. Initializing audio_service there would register a
+    // second, competing media session without making Sweyer its owner.
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      // Reinitialize the AudioHandler if it already exists. Otherwise it is
+      // initialized by the AudioService. The AudioService must only ever be
+      // initialized once per process, but the handler depends on the PlayerManager,
+      // which can be disposed and recreated.
+      await handler?._reinitialize(this);
+      handler ??= await AudioService.init(
+        builder: () {
+          return AudioHandler(PlayerManager.instance);
+        },
+        config: AudioServiceConfig(
+          androidResumeOnClick: true,
+          androidNotificationChannelName: staticl10n.playback,
+          androidNotificationChannelDescription: staticl10n.playbackControls,
+          // notificationColor,
+          androidNotificationIcon: 'drawable/round_music_note',
+          androidShowNotificationBadge: false,
+          androidNotificationClickStartsActivity: true,
+          androidNotificationOngoing: false,
+          androidStopForegroundOnPause: true,
+          // artDownscaleWidth,
+          // artDownscaleHeight,
+          fastForwardInterval: const Duration(seconds: 5),
+          rewindInterval: const Duration(seconds: 5),
+          preloadArtwork: false,
+          // androidBrowsableRootExtras,
+        ),
+      );
+    }
 
     await _processingStateSubscription?.cancel();
     _processingStateSubscription = _player.processingStateStream.listen((state) {
