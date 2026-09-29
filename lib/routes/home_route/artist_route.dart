@@ -227,8 +227,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                         songs: songs,
                         shuffled: true,
                       );
-                      MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                      MusicPlayer.instance.play();
+                      PlayerManager.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                      PlayerManager.instance.play();
                       playerRouteController.open();
                     },
                   ),
@@ -238,8 +238,8 @@ class _ArtistRouteState extends State<ArtistRoute> with TickerProviderStateMixin
                   child: PlayQueueButton(
                     onPressed: () {
                       QueueControl.instance.setOriginQueue(origin: widget.artist, songs: songs);
-                      MusicPlayer.instance.setSong(songs[0]);
-                      MusicPlayer.instance.play();
+                      PlayerManager.instance.setSong(songs[0]);
+                      PlayerManager.instance.play();
                       playerRouteController.open();
                     },
                   ),

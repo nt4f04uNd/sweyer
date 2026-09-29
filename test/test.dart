@@ -44,8 +44,6 @@ final _testSong = Song(
   size: 0,
   filesystemPath: '/path/to/song',
   isFavoriteInMediaStore: false,
-  generationAdded: 0,
-  generationModified: 0,
 );
 
 const _testAlbum = Album(
@@ -243,7 +241,7 @@ extension AppInitExtension on TestWidgetsFlutterBinding {
 
   /// Cleans up and disposes all relevant app state after an app test.
   Future<void> _teardownAppTest() async {
-    await MusicPlayer.instanceIfInitialized?.stop();
+    await PlayerManager.instanceIfInitialized?.stop();
     DeviceInfoControl.instance.dispose();
     ContentControl.instance.dispose();
   }
