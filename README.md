@@ -5,7 +5,7 @@ I don't mind accepting someone's PR tweaking this
 
 Join our Discord community if you'd like to collaborate!
 
-[![Discord](https://img.shields.io/badge/Discord-Sweyer%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/yEMT8Z54)
+[![Discord](https://img.shields.io/badge/Discord-Sweyer%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/qcQk2uq33d)
 
 #### A huge thank you to the contributors! ❤️
 - [@Abestanis](https://github.com/Abestanis)
