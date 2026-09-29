@@ -8,40 +8,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
-import home_widget
 import os
-
-// Define the intent for widget interactions
-@available(iOS 16, *)
-struct MusicPlayerAppWidgetIntent: AppIntent {
-    static public var title: LocalizedStringResource = "HomeWidget Background Intent"
-    
-    @Parameter(title: "Widget URI")
-    var url: URL?
-    
-    @Parameter(title: "AppGroup")
-    var appGroup: String?
-    
-    public init() {}
-    
-    public init(url: URL?, appGroup: String?) {
-        self.url = url
-        self.appGroup = appGroup
-    }
-    
-    public func perform() async throws -> some IntentResult {
-        guard let appGroup else {
-            return .result()
-        }
-        await HomeWidgetBackgroundWorker.run(url: url, appGroup: appGroup)
-        
-        return .result()
-    }
-}
-
-@available(iOS 16, *)
-@available(iOSApplicationExtension, unavailable)
-extension MusicPlayerAppWidgetIntent: ForegroundContinuableIntent {}
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> MusicPlayerEntry {
@@ -104,63 +71,39 @@ struct MusicPlayerAppWidgetEntryView : View {
                 HStack {
                     // Only show previous button in medium and large widgets
                     if family != .systemSmall {
-                        if #available(iOS 16, *) {
-                            Button(
-                                intent: MusicPlayerAppWidgetIntent(
-                                    url: URL(string: "sweyer://widget/previous"),
-                                    appGroup: "group.com.nt4f04und.sweyer"
-                                )
-                            ) {
-                                controlImage(systemName: "backward.fill")
-                            }
-                            .buttonStyle(.plain)
-                        } else {
-                            Button(action: {
-                                playPreviousTrack()
-                            }) {
-                                controlImage(systemName: "backward.fill")
-                            }
-                        }
-                    }
-                    
-                    // Play/Pause button
-                    if #available(iOS 16, *) {
                         Button(
-                            intent: MusicPlayerAppWidgetIntent(
-                                url: URL(string: "sweyer://widget/playPause"),
+                            intent: BackgroundIntent(
+                                url: URL(string: "sweyer://widget/previous"),
                                 appGroup: "group.com.nt4f04und.sweyer"
                             )
                         ) {
-                            controlImage(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
+                            controlImage(systemName: "backward.fill")
                         }
                         .buttonStyle(.plain)
-                    } else {
-                        Button(action: {
-                            togglePlayPause()
-                        }) {
-                            controlImage(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
-                        }
                     }
                     
+                    // Play/Pause button
+                    Button(
+                        intent: BackgroundIntent(
+                            url: URL(string: "sweyer://widget/playPause"),
+                            appGroup: "group.com.nt4f04und.sweyer"
+                        )
+                    ) {
+                        controlImage(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
+                    }
+                    .buttonStyle(.plain)
+
                     // Only show next button in medium and large widgets
                     if family != .systemSmall {
-                        if #available(iOS 16, *) {
-                            Button(
-                                intent: MusicPlayerAppWidgetIntent(
-                                    url: URL(string: "sweyer://widget/next"),
-                                    appGroup: "group.com.nt4f04und.sweyer"
-                                )
-                            ) {
-                                controlImage(systemName: "forward.fill")
-                            }
-                            .buttonStyle(.plain)
-                        } else {
-                            Button(action: {
-                                playNextTrack()
-                            }) {
-                                controlImage(systemName: "forward.fill")
-                            }
+                        Button(
+                            intent: BackgroundIntent(
+                                url: URL(string: "sweyer://widget/next"),
+                                appGroup: "group.com.nt4f04und.sweyer"
+                            )
+                        ) {
+                            controlImage(systemName: "forward.fill")
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(8)
@@ -191,34 +134,6 @@ struct MusicPlayerAppWidgetEntryView : View {
             Self.logger.error("Failed to load album art: \(error.localizedDescription, privacy: .public)")
             return nil
         }
-    }
-    
-    // Media control functions
-    func togglePlayPause() {
-        widgetPerformAction(action: "playPause")
-    }
-    
-    func playNextTrack() {
-        widgetPerformAction(action: "next")
-    }
-    
-    func playPreviousTrack() {
-        widgetPerformAction(action: "previous")
-    }
-    
-    func widgetPerformAction(action: String) {
-        if let url = URL(string: "sweyer://widget/\(action)") {
-            // Use UserDefaults method for all iOS versions
-            openURL(url)
-        }
-    }
-    
-    func openURL(_ url: URL) {
-        let userDefaults = UserDefaults(suiteName: "group.com.nt4f04und.sweyer")
-        userDefaults?.set(url.absoluteString, forKey: "widgetAction")
-        userDefaults?.synchronize()
-        
-        WidgetCenter.shared.reloadTimelines(ofKind: MusicPlayerAppWidget.kind)
     }
 }
 

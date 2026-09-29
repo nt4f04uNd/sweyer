@@ -19,6 +19,8 @@
 		66F42E262DA0C79D00774BD9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66F42E252DA0C79D00774BD9 /* Assets.xcassets */; };
 		66F42E2A2DA0C79D00774BD9 /* MusicPlayerAppWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 66F42E172DA0C79D00774BD9 /* MusicPlayerAppWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		A7C1F0012F7A000100000001 /* BackgroundIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C1F0032F7A000100000001 /* BackgroundIntent.swift */; };
+		A7C1F0022F7A000100000001 /* BackgroundIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C1F0032F7A000100000001 /* BackgroundIntent.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
@@ -91,6 +93,7 @@
 		70FA7F885B2E50F60A51EC54 /* Pods-MusicPlayerAppWidgetExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MusicPlayerAppWidgetExtension.debug.xcconfig"; path = "Target Support Files/Pods-MusicPlayerAppWidgetExtension/Pods-MusicPlayerAppWidgetExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A7C1F0032F7A000100000001 /* BackgroundIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundIntent.swift; sourceTree = "<group>"; };
 		76BAD9F14BA2E4FBEEBBD564 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		819ACABBCAB4D2F87537CAD6 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
@@ -203,6 +206,7 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				A7C1F0032F7A000100000001 /* BackgroundIntent.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
@@ -565,6 +569,7 @@
 			files = (
 				66F42E1E2DA0C79D00774BD9 /* MusicPlayerAppWidgetBundle.swift in Sources */,
 				66F42E222DA0C79D00774BD9 /* MusicPlayerAppWidget.swift in Sources */,
+				A7C1F0022F7A000100000001 /* BackgroundIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +578,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				A7C1F0012F7A000100000001 /* BackgroundIntent.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

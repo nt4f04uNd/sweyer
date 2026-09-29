@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:home_widget/home_widget.dart';
 
 import '../sweyer.dart';
-import 'widget_controls.dart';
 
 /// Controller for native app widgets.
 ///
@@ -42,7 +41,6 @@ class AppWidgetControl extends Control {
   Future<void> init() async {
     super.init();
     await _configureHomeWidget();
-    WidgetControlsHandler.instance.init();
     _lastSongContentUri = null;
     _lastPlayingState = null;
     _currentSongListener =
