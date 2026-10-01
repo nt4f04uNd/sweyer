@@ -84,7 +84,7 @@ extension on List<Map<String, dynamic>> {
 
 void main() {
   group('Handles valid values from the media store', () {
-    test('Handles valid albums', () async {
+    testWidgets('Handles valid albums', (tester) async {
       final validAlbum = albumWith().toMap();
       final validAlbums = [
         (validAlbum.copyWith({'id': 1}), albumWith(id: 1)),
@@ -112,10 +112,10 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.albumsFactory = () => validAlbums.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.albums.values
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -127,7 +127,7 @@ void main() {
       });
     });
 
-    test('Handles valid artists', () async {
+    testWidgets('Handles valid artists', (tester) async {
       final validArtist = artistWith().toMap();
       final validArtists = [
         (validArtist.copyWith({'id': 1}), artistWith(id: 1)),
@@ -141,10 +141,10 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.artistsFactory = () => validArtists.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.artists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -156,7 +156,7 @@ void main() {
       });
     });
 
-    test('Handles valid playlists', () async {
+    testWidgets('Handles valid playlists', (tester) async {
       final validPlaylist = playlistWith().toMap();
       final validPlaylists = [
         (validPlaylist.copyWith({'id': 1}), playlistWith(id: 1)),
@@ -181,10 +181,10 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.playlistsFactory = () => validPlaylists.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.playlists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -196,7 +196,7 @@ void main() {
       });
     });
 
-    test('Handles valid songs', () async {
+    testWidgets('Handles valid songs', (tester) async {
       final validSong = songWith().toMap();
       final validSongs = [
         (validSong.copyWith({'id': 1}), songWith(id: 1)),
@@ -252,10 +252,10 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.songsFactory = () => validSongs.map((element) => element.$1).toList();
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.allSongs.songs
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -269,7 +269,7 @@ void main() {
   });
 
   group('Handles invalid or incomplete values from the media store', () {
-    test('Handles invalid or incomplete albums', () async {
+    testWidgets('Handles invalid or incomplete albums', (tester) async {
       final validAlbum = albumWith().toMap();
       final propertiesThatCanBeMissing = ['albumArt', 'artistId', 'firstYear', 'lastYear', 'numberOfSongs'];
       final invalidAlbums = [
@@ -278,10 +278,10 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.albumsFactory = () => invalidAlbums;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.albums.values
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -297,7 +297,7 @@ void main() {
       });
     });
 
-    test('Handles invalid or incomplete artists', () async {
+    testWidgets('Handles invalid or incomplete artists', (tester) async {
       final validArtist = artistWith().toMap();
       final propertiesThatCanBeMissing = <String>[];
       final invalidArtists = [
@@ -306,10 +306,10 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.artistsFactory = () => invalidArtists;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.artists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -325,7 +325,7 @@ void main() {
       });
     });
 
-    test('Handles invalid or incomplete playlists', () async {
+    testWidgets('Handles invalid or incomplete playlists', (tester) async {
       final validPlaylist = playlistWith().toMap();
       final propertiesThatCanBeMissing = ['filesystemPath', 'dateModified', 'songIds'];
       final invalidPlaylists = [
@@ -336,10 +336,10 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.playlistsFactory = () => invalidPlaylists;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           ContentControl.instance.state.playlists
               .sorted((item1, item2) => item1.id.compareTo(item2.id))
@@ -355,7 +355,7 @@ void main() {
       });
     });
 
-    test('Handles invalid or incomplete songs', () async {
+    testWidgets('Handles invalid or incomplete songs', (tester) async {
       final validSong = songWith().toMap();
       final propertiesThatCanBeMissing = [
         'album',
@@ -376,10 +376,10 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
         FakeSweyerPluginPlatform.instance.songsFactory = () => invalidSongs;
       });
-      TestWidgetsFlutterBinding.ensureInitialized().runAppTestWithoutUi(() {
+      tester.runAppTestWithoutUi(() {
         expect(
           // The state is disposed if there is not songs, so use an empty list in that case.
           (ContentControl.instance.stateNullable?.allSongs.songs ?? [])
