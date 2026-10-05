@@ -989,7 +989,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: c92ad33abd5586019a7a0ee020fd76cc4d4cc560
+      ref: codex/sweyer-ios-support
       resolved-ref: c92ad33abd5586019a7a0ee020fd76cc4d4cc560
       url: "https://github.com/nt4f04uNd/playify"
     source: git
