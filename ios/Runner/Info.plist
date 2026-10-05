@@ -61,8 +61,6 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>kTCCServiceMediaLibrary</key>
 	<string>Sweyer needs access to your music library to play your songs and display your playlists.</string>
