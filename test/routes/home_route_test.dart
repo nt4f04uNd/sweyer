@@ -141,11 +141,11 @@ void main() {
       expect(ContentControl.instance.stateNullable, null);
 
       fake = FakeContentControl();
+      fake.disposed.value = false;
       await fake.init();
       // Fake ContentControl.init in a way to trigger the home screen rebuild.
       fake.initializing = true;
       fake.stateNullable = ContentState();
-      fake.disposed.value = false;
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);
