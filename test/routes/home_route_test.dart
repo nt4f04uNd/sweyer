@@ -132,9 +132,6 @@ void main() {
   testWidgets('searching screen - shows when permissions are granted and searching for tracks',
       (WidgetTester tester) async {
     late FakeContentControl fake;
-    registerAppSetup(() {
-      FakeSweyerPluginPlatform.instance.songs = [];
-    });
     registerPostAppSetup((_) async {
       // Use fake
       ContentControl.instance.dispose();
