@@ -103,8 +103,6 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'track': song.trackNumber == 0 ? null : song.trackNumber.toString(),
           'dateAdded': song.dateAdded.millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond,
           'duration': (song.duration * 1000).round(),
-          'size': null,
-          'filesystemPath': null,
         };
       }).toList(growable: false);
     });
@@ -136,7 +134,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'lastYear': years.isEmpty ? null : years.reduce((a, b) => a > b ? a : b),
           'numberOfSongs': songs.length,
         };
-      }).toList(growable: false);
+      });
     });
   }
 
@@ -160,7 +158,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'numberOfAlbums': songs.map((song) => _optionalId(song.albumID)).nonNulls.toSet().length,
           'numberOfTracks': songs.length,
         };
-      }).toList(growable: false);
+      });
     });
   }
 
@@ -182,7 +180,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'name': entry.value.first.genre,
           'songIds': entry.value.map((song) => _id(song.songID)).toList(growable: false),
         };
-      }).toList(growable: false);
+      });
     });
   }
 
@@ -193,13 +191,10 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
       return playlists.map((playlist) {
         return <String, dynamic>{
           'id': _id(playlist.playlistID),
-          'filesystemPath': null,
-          'dateAdded': null,
-          'dateModified': null,
           'name': playlist.title,
           'songIds': playlist.songs.map((song) => _id(song.songID)).toList(growable: false),
         };
-      }).toList(growable: false);
+      });
     });
   }
 

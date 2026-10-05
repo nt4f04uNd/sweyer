@@ -103,7 +103,7 @@ abstract class SweyerPluginPlatform extends PlatformInterface {
   /// Retrieves all genres from the device.
   Future<Iterable<Map<String, dynamic>>> retrieveGenres();
 
-  /// Sets songs as favorite.
+  /// Sets the favourite state of the songs.
   Future<bool> setSongsFavorite(List<int> songsIds, bool value);
 
   /// Deletes songs from the device.
