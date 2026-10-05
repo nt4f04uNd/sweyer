@@ -135,7 +135,7 @@ void main() {
     registerAppSetup(() {
       FakeSweyerPluginPlatform.instance.songs = [];
     });
-    registerPostAppSetup((_) {
+    registerPostAppSetup((_) async {
       // Use fake
       ContentControl.instance.dispose();
       expect(Permissions.instance.granted, true);
@@ -144,7 +144,11 @@ void main() {
       expect(ContentControl.instance.stateNullable, null);
 
       fake = FakeContentControl();
-      fake.simulateInitializing();
+      await fake.init();
+      // Fake ContentControl.init in a way to trigger the home screen rebuild.
+      fake.initializing = true;
+      fake.stateNullable = ContentState();
+      fake.disposed.value = false;
     });
     await tester.runAppTest(() async {
       expect(Permissions.instance.granted, true);

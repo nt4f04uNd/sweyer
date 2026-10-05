@@ -24,10 +24,14 @@ void main() {
         registerAppSetup(() {
           FakeSweyerPluginPlatform.instance.songs = [];
         });
-        registerPostAppSetup((_) {
+        registerPostAppSetup((_) async {
           ContentControl.instance.dispose();
           final fake = FakeContentControl();
-          fake.simulateInitializing();
+          await fake.init();
+          // Fake ContentControl.init in a way to trigger the home screen rebuild.
+          fake.initializing = true;
+          fake.stateNullable = ContentState();
+          fake.disposed.value = false;
         });
       },
       (WidgetTester tester) async {
