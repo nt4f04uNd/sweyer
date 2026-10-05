@@ -15,8 +15,39 @@ class _StandalonePlayer extends StatefulWidget {
   _StandalonePlayerState createState() => _StandalonePlayerState();
 }
 
+class _StandalonePlaybackController implements PlaybackController {
+  const _StandalonePlaybackController(this.player);
+
+  final AudioPlayer player;
+
+  @override
+  Future<void> play() => player.play();
+
+  @override
+  Future<void> pause() => player.pause();
+
+  @override
+  Future<void> seek(Duration position) => player.seek(position);
+
+  @override
+  bool get playing => player.playing;
+
+  @override
+  Stream<bool> get playingStream => player.playingStream;
+
+  @override
+  Duration get position => player.position;
+
+  @override
+  Stream<Duration> get positionStream => player.positionStream;
+
+  @override
+  Duration? get duration => player.duration;
+}
+
 class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerProviderStateMixin {
-  late PlayerManager player;
+  late final AudioPlayer player;
+  late final PlaybackController playbackController;
   late AnimationController controller;
   Timer? timer;
 
@@ -26,7 +57,9 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   void initState() {
     super.initState();
     controller = AnimationController(vsync: this, duration: fadeDuration);
-    player = PlayerManager.instance;
+    unawaited(PlayerManager.instance.pause());
+    player = AudioPlayer();
+    playbackController = _StandalonePlaybackController(player);
     // player.setAsset();
     // player.play();
     player.processingStateStream.listen((state) {
@@ -41,6 +74,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
   void dispose() {
     timer?.cancel();
     controller.dispose();
+    unawaited(player.dispose());
     super.dispose();
   }
 
@@ -95,7 +129,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
                             color: Colors.black38,
                             child: IgnorePointer(
                               child: AnimatedPlayPauseButton(
-                                player: player,
+                                player: playbackController,
                                 iconSize: 46,
                               ),
                             ),
@@ -123,7 +157,7 @@ class _StandalonePlayerState extends State<_StandalonePlayer> with SingleTickerP
               child: Seekbar(
                 color: Colors.white,
                 duration: const Duration(seconds: 215),
-                player: player,
+                player: playbackController,
               ),
             ),
           ],

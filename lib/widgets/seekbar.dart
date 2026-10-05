@@ -19,7 +19,7 @@ class Seekbar extends StatefulWidget {
   final Color? color;
 
   /// Player to use instead of [PlayerManager.instance], which is used by default.
-  final PlayerManager? player;
+  final PlaybackController? player;
 
   /// Predefined duration to use.
   final Duration? duration;
@@ -47,7 +47,7 @@ class _SeekbarState extends State<Seekbar> with SingleTickerProviderStateMixin {
   late StreamSubscription<Duration> _positionSubscription;
   StreamSubscription<Song>? _songChangeSubscription;
 
-  PlayerManager get player => widget.player ?? PlayerManager.instance;
+  PlaybackController get player => widget.player ?? PlayerManager.instance;
 
   late AnimationController animationController;
   late Animation<double> thumbSizeAnimation;

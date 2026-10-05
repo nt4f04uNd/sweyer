@@ -10,7 +10,7 @@ import 'package:sweyer/sweyer.dart';
 
 /// Manager for player functionality that handles business logic
 /// and uses SweyerPlayer for actual playback.
-class PlayerManager {
+class PlayerManager implements PlaybackController {
   PlayerManager._()
       : _player = SweyerPlayer.create(
           currentSongDuration: () {
@@ -126,16 +126,21 @@ class PlayerManager {
   bool get looping => _player.looping;
   Stream<bool> get loopingStream => _player.loopingStream;
 
+  @override
   Duration get duration => Duration(milliseconds: PlaybackControl.instance.currentSong.duration);
 
+  @override
   Duration get position => _player.position;
 
   Duration get bufferedPosition => _player.bufferedPosition;
 
+  @override
   bool get playing => _player.playing;
 
+  @override
   Stream<bool> get playingStream => _player.playingStream;
 
+  @override
   Stream<Duration> get positionStream => _player.positionStream;
 
   ProcessingState get processingState => _player.processingState;
@@ -196,10 +201,12 @@ class PlayerManager {
     }
   }
 
+  @override
   Future<void> seek(Duration position) {
     return _player.seek(position);
   }
 
+  @override
   Future<void> play() async {
     switch (await _player.play()) {
       case PlaySuccess():
@@ -211,6 +218,7 @@ class PlayerManager {
     }
   }
 
+  @override
   Future<void> pause() {
     return _player.pause();
   }

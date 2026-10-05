@@ -18,7 +18,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
     this.iconColor,
   });
 
-  final PlayerManager? player;
+  final PlaybackController? player;
   final double? iconSize;
   final double? size;
   final Color? iconColor;
@@ -30,7 +30,7 @@ class AnimatedPlayPauseButton extends StatefulWidget {
 class AnimatedPlayPauseButtonState extends State<AnimatedPlayPauseButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   StreamSubscription<bool>? _playingSubscription;
-  PlayerManager get player => widget.player ?? PlayerManager.instance;
+  PlaybackController get player => widget.player ?? PlayerManager.instance;
 
   @override
   void initState() {

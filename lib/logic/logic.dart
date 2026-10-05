@@ -3,6 +3,7 @@ library;
 
 export 'models/models.dart';
 export 'player/player_manager.dart';
+export 'player/playback_controller.dart';
 export 'player/sweyer_player.dart';
 export 'player/backend.dart';
 export 'player/content.dart';
