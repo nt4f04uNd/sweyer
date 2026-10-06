@@ -21,14 +21,14 @@ void main() {
     testAppGoldens(
       'searching_screen',
       setUp: () {
-        registerPostAppSetup((_) async {
+        registerPostAppSetup((_) {
           ContentControl.instance.dispose();
           final fake = FakeContentControl();
-          fake.disposed.value = false;
-          await fake.init();
-          // Fake ContentControl.init in a way to trigger the home screen rebuild.
+          fake.init();
+          // Fake ContentControl.init in a way to trigger the home screen rebuild
           fake.initializing = true;
           fake.stateNullable = ContentState();
+          fake.disposed.value = false;
         });
       },
       (WidgetTester tester) async {

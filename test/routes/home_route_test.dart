@@ -131,32 +131,25 @@ void main() {
 
   testWidgets('searching screen - shows when permissions are granted and searching for tracks',
       (WidgetTester tester) async {
-    late FakeContentControl fake;
-    registerPostAppSetup((_) async {
-      // Use fake
-      ContentControl.instance.dispose();
-      expect(Permissions.instance.granted, true);
-      expect(ContentControl.instance.disposed.value, true);
-      expect(ContentControl.instance.initializing, false);
-      expect(ContentControl.instance.stateNullable, null);
-
-      fake = FakeContentControl();
-      fake.disposed.value = false;
-      await fake.init();
-      // Fake ContentControl.init in a way to trigger the home screen rebuild.
-      fake.initializing = true;
-      fake.stateNullable = ContentState();
+    late PermissionsChannelObserver permissionsObserver;
+    final songsCompleter = Completer<Iterable<Map<String, dynamic>>>();
+    registerAppSetup(() {
+      permissionsObserver = PermissionsChannelObserver(tester.binding);
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
     });
     await tester.runAppTest(() async {
-      expect(Permissions.instance.granted, true);
-      expect(ContentControl.instance, same(fake));
-      expect(ContentControl.instance.initializing, true);
-      expect(ContentControl.instance.stateNullable, isNotNull);
-      expect(ContentControl.instance.disposed.value, false);
+      FakeSweyerPluginPlatform.instance.songsFactory = () => songsCompleter.future;
+      permissionsObserver.setPermission(Permission.storage, PermissionStatus.granted);
 
-      // Expect appropriate ui
+      await tester.tap(find.text(l10n.grant));
+      await tester.pump();
+
       expect(find.text(l10n.searchingForTracks), findsOneWidget);
       expect(find.byType(Spinner), findsOneWidget);
+
+      songsCompleter.complete([songWith().toMap()]);
+      await tester.pumpAndSettle();
+      expect(find.byType(Home), findsOneWidget);
     });
   });
 
