@@ -33,7 +33,7 @@ void main() {
     await player.setSong(_songWithUri('https://example.com/song'));
 
     final playFuture = player.play();
-    await binding.pump();
+    await Future<void>.delayed(Duration.zero);
     await player.pause();
 
     expect(await playFuture, isA<PlaySuccess>());
@@ -42,25 +42,27 @@ void main() {
 
 Song _songWithUri(String uri) => _SongWithUri(uri);
 
+// Song itself has mutable identity fields; this test subclass only overrides its URI.
+// ignore: must_be_immutable
 class _SongWithUri extends Song {
   _SongWithUri(this._uri)
-    : super(
-        id: 1,
-        album: null,
-        albumId: null,
-        artist: 'Artist',
-        artistId: 1,
-        genre: null,
-        genreId: null,
-        title: 'Song',
-        track: null,
-        dateAdded: 0,
-        dateModified: 0,
-        duration: 120000,
-        size: null,
-        filesystemPath: null,
-        isFavoriteInMediaStore: false,
-      );
+      : super(
+          id: 1,
+          album: null,
+          albumId: null,
+          artist: 'Artist',
+          artistId: 1,
+          genre: null,
+          genreId: null,
+          title: 'Song',
+          track: null,
+          dateAdded: 0,
+          dateModified: 0,
+          duration: 120000,
+          size: null,
+          filesystemPath: null,
+          isFavoriteInMediaStore: false,
+        );
 
   final String _uri;
 
