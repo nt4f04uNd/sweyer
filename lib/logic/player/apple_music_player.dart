@@ -45,8 +45,7 @@ class AppleMusicPlayer implements SweyerPlayer {
     }
 
     final songDuration = _currentSongDuration();
-    final reachedEnd =
-        !_preparing &&
+    final reachedEnd = !_preparing &&
         wasPlaying &&
         songDuration > Duration.zero &&
         position + _playbackCompletionTolerance >= songDuration;
