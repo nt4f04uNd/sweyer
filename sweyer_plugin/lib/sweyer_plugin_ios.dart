@@ -7,6 +7,9 @@ import 'sweyer_plugin_platform_interface.dart';
 
 /// iOS-specific implementation of [SweyerPluginPlatform].
 class IOSSweyerPlugin extends SweyerPluginPlatform {
+  // MediaPlayer uses 0 when an artist persistent ID is unavailable.
+  static const int _unknownArtistId = 0;
+
   final playify.Playify _playify = playify.Playify.instance;
   final Map<String, bool> _albumArtCancellations = {};
 
@@ -40,6 +43,8 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
   int _id(String value) => int.parse(value);
 
   int? _optionalId(String? value) => value == null ? null : _id(value);
+
+  int _artistId(playify.Song song) => _optionalId(song.artistID) ?? _unknownArtistId;
 
   int? _albumArtistId(playify.Song song) => _optionalId(song.albumArtistID) ?? _optionalId(song.artistID);
 
@@ -97,7 +102,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
           'artist': song.artistName,
           'album': song.albumTitle.isEmpty ? null : song.albumTitle,
           'albumId': _optionalId(song.albumID),
-          'artistId': _optionalId(song.artistID),
+          'artistId': _artistId(song),
           'genre': song.genre.isEmpty ? null : song.genre,
           'genreId': _optionalId(song.genreID),
           'track': song.trackNumber == 0 ? null : song.trackNumber.toString(),
@@ -144,10 +149,7 @@ class IOSSweyerPlugin extends SweyerPluginPlatform {
       final songs = await _retrieveSongsOnce();
       final songsByArtist = <int, List<playify.Song>>{};
       for (final song in songs) {
-        final artistId = _optionalId(song.artistID);
-        if (artistId != null) {
-          (songsByArtist[artistId] ??= []).add(song);
-        }
+        (songsByArtist[_artistId(song)] ??= []).add(song);
       }
 
       return songsByArtist.entries.map((entry) {
