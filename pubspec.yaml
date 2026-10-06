@@ -67,7 +67,7 @@ dependencies:
   playify:
     git:
       url: https://github.com/nt4f04uNd/playify
-      ref: 2e606b184c48cc28493214c12f95e969594bc4bd
+      ref: codex/sweyer-ios-support
     # path: ../playify
   audio_service:
     # Using this branch for custom notifications https://github.com/nt4f04uNd/audio_service/commits/sweyer
