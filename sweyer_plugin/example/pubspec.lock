@@ -190,8 +190,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: codex/sweyer-ios-support
-      resolved-ref: c92ad33abd5586019a7a0ee020fd76cc4d4cc560
+      ref: "2e606b184c48cc28493214c12f95e969594bc4bd"
+      resolved-ref: "2e606b184c48cc28493214c12f95e969594bc4bd"
       url: "https://github.com/nt4f04uNd/playify"
     source: git
     version: "2.2.1+sweyer.1"
