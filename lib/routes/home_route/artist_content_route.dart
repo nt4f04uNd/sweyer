@@ -136,8 +136,8 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                                 case ContentType.artist:
                                   throw UnimplementedError();
                               }
-                              MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                              MusicPlayer.instance.play();
+                              PlayerManager.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                              PlayerManager.instance.play();
                               playerRouteController.open();
                             },
                           ),
@@ -161,8 +161,8 @@ class _ArtistContentRouteState<T extends Content> extends State<ArtistContentRou
                                 case ContentType.artist:
                                   throw UnimplementedError();
                               }
-                              MusicPlayer.instance.setSong(QueueControl.instance.state.current.songs[0]);
-                              MusicPlayer.instance.play();
+                              PlayerManager.instance.setSong(QueueControl.instance.state.current.songs[0]);
+                              PlayerManager.instance.play();
                               playerRouteController.open();
                             },
                           ),

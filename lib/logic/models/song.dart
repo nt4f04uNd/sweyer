@@ -52,16 +52,6 @@ class Song extends Content implements PlatformSong {
   ///  * [isFavorite] getter
   final bool isFavoriteInMediaStore;
 
-  /// Generation number at which metadata for this media item was first inserted.
-  ///
-  /// Available starting from Android R, in lower is `null`.
-  final int? generationAdded;
-
-  /// Generation number at which metadata for this media item was last changed.
-  ///
-  /// Available starting from Android R, in lower is `null`.
-  final int? generationModified;
-
   /// The origin this song comes from.
   ///
   /// Particularly, this will help determining where the song comes from to show [CurrentIndicator]s.
@@ -123,8 +113,6 @@ class Song extends Content implements PlatformSong {
     required this.size,
     required this.filesystemPath,
     required this.isFavoriteInMediaStore,
-    required this.generationAdded,
-    required this.generationModified,
     this.duplicationIndex,
     this.origin,
   });
@@ -169,8 +157,6 @@ class Song extends Content implements PlatformSong {
         size: map['size'] as int?,
         filesystemPath: map['filesystemPath'] as String?,
         isFavoriteInMediaStore: map['isFavoriteInMediaStore'] as bool? ?? false,
-        generationAdded: map['generationAdded'] as int?,
-        generationModified: map['generationModified'] as int?,
       );
     } on TypeError catch (error, stack) {
       reportErrorToFirebase(error, stack, reason: 'trying to parse a song');
@@ -195,8 +181,6 @@ class Song extends Content implements PlatformSong {
         'size': size,
         'filesystemPath': filesystemPath,
         'isFavoriteInMediaStore': isFavoriteInMediaStore,
-        'generationAdded': generationAdded,
-        'generationModified': generationModified,
       };
 
   /// Try to parse the numeric album track from the text [position].
@@ -230,8 +214,6 @@ abstract class SongCopyWith {
     int? size,
     String? filesystemPath,
     bool isFavoriteInMediaStore,
-    int? generationAdded,
-    int? generationModified,
     int? duplicationIndex,
     SongOrigin? origin,
   });
@@ -264,8 +246,6 @@ class _SongCopyWith extends SongCopyWith {
     Object? size = _undefined,
     Object? filesystemPath = _undefined,
     Object? isFavoriteInMediaStore = _undefined,
-    Object? generationAdded = _undefined,
-    Object? generationModified = _undefined,
     Object? duplicationIndex = _undefined,
     Object? origin = _undefined,
   }) {
@@ -286,8 +266,6 @@ class _SongCopyWith extends SongCopyWith {
       filesystemPath: filesystemPath == _undefined ? value.filesystemPath : filesystemPath as String?,
       isFavoriteInMediaStore:
           isFavoriteInMediaStore == _undefined ? value.isFavoriteInMediaStore : isFavoriteInMediaStore as bool,
-      generationAdded: generationAdded == _undefined ? value.generationAdded : generationAdded as int?,
-      generationModified: generationModified == _undefined ? value.generationModified : generationModified as int?,
       duplicationIndex: duplicationIndex == _undefined ? value.duplicationIndex : duplicationIndex as int?,
       origin: origin == _undefined ? value.origin : origin as SongOrigin?,
     );

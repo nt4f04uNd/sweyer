@@ -104,10 +104,6 @@ object FetchHandler {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 put(MediaStore.Audio.Media.IS_FAVORITE,
                     "isFavoriteInMediaStore" to { cursor, index -> cursor.getInt(index) == 1 })
-                put(MediaStore.Audio.Media.GENERATION_ADDED,
-                    "generationAdded" to { cursor, index -> cursor.getInt(index) })
-                put(MediaStore.Audio.Media.GENERATION_MODIFIED,
-                    "generationModified" to { cursor, index -> cursor.getInt(index) })
                 put(MediaStore.Audio.Media.GENRE, "genre" to { cursor, index -> cursor.getString(index) })
                 put(MediaStore.Audio.Media.GENRE_ID, "genreId" to { cursor, index -> cursor.getInt(index) })
             }
