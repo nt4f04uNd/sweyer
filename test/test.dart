@@ -6,16 +6,13 @@ export 'package:flutter/foundation.dart';
 export 'package:flutter_test/flutter_test.dart';
 import 'package:android_content_provider/android_content_provider.dart';
 import 'package:clock/clock.dart';
-import 'package:test_api/src/backend/invoker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:package_info_plus_platform_interface/package_info_platform_interface.dart';
 import 'package:package_info_plus_platform_interface/method_channel_package_info.dart';
 import 'package:just_audio_platform_interface/just_audio_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:meta/meta.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sweyer/constants.dart' as constants;
 import 'package:sweyer/localization/generated/app_localizations_en.dart';
@@ -26,7 +23,6 @@ export 'fakes/fakes.dart';
 import 'observer/app_widget.dart';
 import 'observer/observer.dart';
 import 'test.dart';
-import 'test_description.dart';
 
 final _testSong = Song(
   id: 0,
@@ -308,34 +304,6 @@ extension WidgetTesterExtension on WidgetTester {
     });
   }
 
-  /// Whether the current tester is running in [testAppGoldens] and
-  /// in light mode.
-  bool get lightThemeGolden => _testersLightTheme[this] ?? false;
-
-  /// Whether the current tester is running in [testAppGoldens] and
-  /// has non-default player interface style.
-  PlayerInterfaceColorStyle? get nonDefaultPlayerInterfaceColorStyle => _testersPlayerInterfaceColorStyle[this];
-
-  Future<void> _screenMatchesGolden(
-    String name, {
-    bool? autoHeight,
-    Finder? finder,
-    CustomPump? customPump,
-  }) {
-    final testDescription = getTestDescription(
-      lightTheme: lightThemeGolden,
-      playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle,
-    );
-    name = testDescription.buildFileName(name);
-    return screenMatchesGolden(
-      this,
-      name,
-      autoHeight: autoHeight,
-      finder: finder,
-      customPump: customPump,
-    );
-  }
-
   /// Expect the app to render a list of songs in [SongTile]s.
   void expectSongTiles(Iterable<Song> songs) {
     final songTiles = widgetList<SongTile>(find.byType(SongTile));
@@ -357,77 +325,6 @@ extension WidgetTesterExtension on WidgetTester {
     await pumpAndSettle();
   }
 }
-
-final _testersLightTheme = <WidgetTester, bool>{};
-final _testersPlayerInterfaceColorStyle = <WidgetTester, PlayerInterfaceColorStyle?>{};
-const _defaultPlayerInterfaceColorStyle = PlayerInterfaceColorStyle.artColor;
-const Object _defaultTagObject = Object();
-
-/// Creates a golden test in two variants - in dark and light mode.
-//
-// TODO: weird, when run individually from IDE for some reason Dart extension throws
-// "No tests match regular expression "^tabs_route idle_drawer( \(variant: .*\))?$"."
-// report it here https://github.com/Dart-Code/Dart-Code/issues/new/choose
-//
-// More weird, just `testGoldens` itself works ok
-@isTest
-void testAppGoldens(
-  String description,
-  Future<void> Function(WidgetTester) test, {
-  bool? skip,
-  Object? tags = _defaultTagObject,
-  Set<PlayerInterfaceColorStyle> playerInterfaceColorStylesToTest = const {_defaultPlayerInterfaceColorStyle},
-  VoidCallback? setUp,
-  CustomPump? customGoldenPump,
-}) {
-  assert(playerInterfaceColorStylesToTest.isNotEmpty);
-  for (final lightTheme in [false, true]) {
-    final nonDefaultPlayerInterfaceColorStyle = playerInterfaceColorStylesToTest.length > 1 ||
-        !playerInterfaceColorStylesToTest.contains(_defaultPlayerInterfaceColorStyle);
-
-    for (final playerInterfaceColorStyle in playerInterfaceColorStylesToTest) {
-      final testDescription = getTestDescription(
-        lightTheme: lightTheme,
-        playerInterfaceColorStyle: nonDefaultPlayerInterfaceColorStyle ? playerInterfaceColorStyle : null,
-      ).buildDescription(description);
-      testGoldens(
-        testDescription,
-        (tester) async {
-          final previousDeterministicCursor = EditableText.debugDeterministicCursor;
-          addTearDown(() {
-            EditableText.debugDeterministicCursor = previousDeterministicCursor;
-            _testersLightTheme.remove(tester);
-            _testersPlayerInterfaceColorStyle.remove(tester);
-          });
-          EditableText.debugDeterministicCursor = true;
-          _testersLightTheme[tester] = lightTheme;
-          if (nonDefaultPlayerInterfaceColorStyle) {
-            _testersPlayerInterfaceColorStyle[tester] = playerInterfaceColorStyle;
-          }
-          registerPostAppSetup((_) {
-            ThemeControl.instance.setThemeLightMode(lightTheme);
-            Settings.playerInterfaceColorStyle.set(playerInterfaceColorStyle);
-          });
-          setUp?.call();
-          return tester.runAppTest(
-            () => test(tester),
-            goldenCaptureCallback: () {
-              final group = Invoker.current!.liveTest.test.name.split(testDescription)[0].trim().replaceAll(' ', '.');
-              return tester._screenMatchesGolden(
-                "$group.${description.replaceAll(' ', '.')}",
-                customPump: customGoldenPump,
-              );
-            },
-          );
-        },
-        tags: tags != _defaultTagObject ? tags : GoldenToolkit.configuration.tags,
-      );
-    }
-  }
-}
-
-/// Signature used in [runGoldenAppTest].
-typedef GoldenCaptureCallback = Future<void> Function(bool lightTheme);
 
 class FakeLicenseEntry extends LicenseEntry {
   const FakeLicenseEntry();
