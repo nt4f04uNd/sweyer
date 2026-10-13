@@ -36,12 +36,12 @@ class PlaybackControl extends Control {
 
   /// The current playing song.
   Song get currentSong {
-    return _songSubject.value!;
+    return _songSubject.value;
   }
 
   /// The current playing song, may be `null`.
   Song? get currentSongNullable {
-    return _songSubject.value;
+    return _songSubject.valueOrNull;
   }
 
   /// Returns index of [currentSong] in the current queue.
