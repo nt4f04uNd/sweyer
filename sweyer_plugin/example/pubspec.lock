@@ -186,6 +186,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
+  playify:
+    dependency: transitive
+    description:
+      path: "."
+      ref: codex/sweyer-ios-support
+      resolved-ref: "2e606b184c48cc28493214c12f95e969594bc4bd"
+      url: "https://github.com/nt4f04uNd/playify"
+    source: git
+    version: "2.2.1+sweyer.1"
   plugin_platform_interface:
     dependency: transitive
     description:

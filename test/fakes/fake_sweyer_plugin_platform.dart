@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/services.dart';
@@ -26,7 +27,7 @@ class FavoriteLogEntry {
 }
 
 /// A function that produces raw content data.
-typedef RawContentFactory = Iterable<Map<String, dynamic>> Function();
+typedef RawContentFactory = FutureOr<Iterable<Map<String, dynamic>>> Function();
 
 class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
   FakeSweyerPluginPlatform(TestWidgetsFlutterBinding binding) {
@@ -67,7 +68,7 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
     required List<int> songIds,
     required int playlistId,
   }) async {
-    final playlists = playlistsFactory().toList();
+    final playlists = (await playlistsFactory()).toList();
     final playlist = playlists.firstWhere((playlist) => playlist['id'] == playlistId);
     (playlist.putIfAbsent('songIds', () => []) as List).insertAll(index, songIds);
     playlistsFactory = () => playlists;
@@ -106,12 +107,12 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrieveAlbums() async {
-    return albumsFactory();
+    return await albumsFactory();
   }
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrieveArtists() async {
-    return artistsFactory();
+    return await artistsFactory();
   }
 
   @override
@@ -121,12 +122,12 @@ class FakeSweyerPluginPlatform extends SweyerPluginPlatform {
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrievePlaylists() async {
-    return playlistsFactory();
+    return await playlistsFactory();
   }
 
   @override
   Future<Iterable<Map<String, dynamic>>> retrieveSongs() async {
-    return songsFactory();
+    return await songsFactory();
   }
 
   /// The log of all recorded [setSongsFavorite] calls.

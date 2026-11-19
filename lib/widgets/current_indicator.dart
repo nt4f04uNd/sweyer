@@ -119,10 +119,10 @@ class _BarState extends State<_Bar> {
   void initState() {
     super.initState();
     index = math.Random(clock.now().second).nextInt(widget.values.length);
-    if (MusicPlayer.instance.playing) {
+    if (PlayerManager.instance.playing) {
       start();
     }
-    _playingSubscription = MusicPlayer.instance.playingStream.listen(_handlePlayerStateChange);
+    _playingSubscription = PlayerManager.instance.playingStream.listen(_handlePlayerStateChange);
   }
 
   void _handlePlayerStateChange(playing) {
