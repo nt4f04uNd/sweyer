@@ -18,7 +18,7 @@ dependencies:
   playify:
     git:
       url: https://github.com/nt4f04uNd/playify
-      ref: codex/sweyer-ios-support
+      ref: sweyer-ios
     # path: ../../playify
 
 dev_dependencies:
