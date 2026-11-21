@@ -134,7 +134,7 @@ runs:
         compression-level: 0  # Apk is already compressed
 
     - name: ⚙️ Decode Service Account Key JSON File
-      uses: timheuer/base64-to-file@v1
+      uses: timheuer/base64-to-file@v2
       id: android_service_account_json_file
       with:
         fileName: "androidServiceAccount.json"
