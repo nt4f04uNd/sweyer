@@ -94,9 +94,13 @@
   "albumNotFound": "Album not found",
   "artistNotFound": "Artist not found",
   "allTracks": "All tracks",
+  "favouriteTracks": "Favourite tracks",
   "allAlbums": "All albums",
+  "favouriteAlbums": "Favourite albums",
   "allPlaylists": "All playlists",
+  "favouritePlaylists": "Favourite playlists",
   "allArtists": "All artists",
+  "favouriteArtists": "Favourite artists",
   "arbitraryQueue": "Arbitrary queue",
   "shuffled": "Shuffled",
   "@shuffled": {
