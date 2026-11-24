@@ -116,9 +116,12 @@ class MockAudioPlayer extends AudioPlayerPlatform {
 
   @override
   Future<LoadResponse> load(LoadRequest request) async {
-    final audioSource = request.audioSourceMessage;
+    var audioSource = request.audioSourceMessage;
     _processingState = ProcessingStateMessage.loading;
     _broadcastPlaybackEvent();
+    if (audioSource is ConcatenatingAudioSourceMessage && audioSource.children.length == 1) {
+      audioSource = audioSource.children.first;
+    }
     if (audioSource is UriAudioSourceMessage) {
       if (audioSource.uri.contains('abort')) {
         throw PlatformException(code: 'abort', message: 'Failed to load URL');
