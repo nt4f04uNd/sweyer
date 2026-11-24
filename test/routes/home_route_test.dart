@@ -122,7 +122,7 @@ void main() {
           expect(find.byType(CircularProgressIndicator), findsOneWidget,
               reason: 'Indicate while waiting for the permission to be granted');
           permissionGrantCompleter.complete(PermissionStatus.granted);
-          await tester.pumpAndSettle();
+          await tester.runAsync(tester.pumpAndSettle);
           expect(find.byType(Home), findsOneWidget);
         });
       } finally {
@@ -150,7 +150,7 @@ void main() {
       expect(find.byType(Spinner), findsOneWidget);
 
       songsCompleter.complete([songWith().toMap()]);
-      await tester.pumpAndSettle();
+      await tester.runAsync(tester.pumpAndSettle);
       expect(find.byType(Home), findsOneWidget);
     });
   });
