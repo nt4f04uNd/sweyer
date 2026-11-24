@@ -110,7 +110,8 @@ flutter_native_splash:
   ios_content_mode: scaleAspectFit
 
 flutter:
-  disable-swift-package-manager: true
+  config:
+    enable-swift-package-manager: false
   uses-material-design: true
   generate: true
 
