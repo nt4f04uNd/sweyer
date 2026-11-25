@@ -51,7 +51,7 @@ dependencies:
   android_content_provider: ^0.5.2
   collection: ^1.16.0
   theme_tailor_annotation: ^3.0.2
-  riverpod: ^3.0.0
+  riverpod: ^3.3.2
   flutter_riverpod: ^3.0.0
   hooks_riverpod: ^3.0.0
   flutter_hooks: ^0.21.2
