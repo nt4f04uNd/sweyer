@@ -149,10 +149,10 @@ class PlayerManager implements PlaybackController {
 
   double get speed => _player.speed;
 
-  void _showPlaybackError() {
+  Future<void> _showPlaybackError() async {
     final context = AppRouter.instance.navigatorKey.currentContext;
     final l10n = context != null ? getl10n(context) : staticl10n;
-    ShowFunctions.instance.showToast(msg: l10n.playbackError);
+    await ShowFunctions.instance.showToast(msg: l10n.playbackError);
   }
 
   Future<void> setLoopMode(LoopMode mode) async {
@@ -160,7 +160,7 @@ class PlayerManager implements PlaybackController {
       mode = LoopMode.off;
     }
     await _player.setLoopMode(mode);
-    Prefs.loopMode.set(looping);
+    await Prefs.loopMode.set(looping);
   }
 
   /// Switches the [looping].
@@ -188,14 +188,14 @@ class PlayerManager implements PlaybackController {
       case SetSongInterrupted():
         return;
       case SetSongUnavailable():
-        _showPlaybackError();
+        await _showPlaybackError();
         await playNext(song: song);
         ContentControl.instance.state.allSongs.remove(song);
         await ContentControl.instance.refetch(ContentType.song);
         return;
       case SetSongFailure(:final error, :final stackTrace):
         await reportErrorToFirebase(error, stackTrace, reason: 'preparing a song for playback');
-        _showPlaybackError();
+        await _showPlaybackError();
         await playNext(song: song);
         return;
     }
@@ -213,7 +213,7 @@ class PlayerManager implements PlaybackController {
         return;
       case PlayFailure(:final error, :final stackTrace):
         await reportErrorToFirebase(error, stackTrace, reason: 'starting playback');
-        _showPlaybackError();
+        await _showPlaybackError();
         return;
     }
   }
@@ -231,7 +231,7 @@ class PlayerManager implements PlaybackController {
     return _player.setSpeed(speed);
   }
 
-  Future<void> playPause() async {
+  Future<void> playPause() {
     return playing ? pause() : play();
   }
 
@@ -497,7 +497,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
         songs: songs,
       );
       if (!songs.contains(PlaybackControl.instance.currentSong)) {
-        PlayerManager.instance.setSong(songs[0]);
+        await PlayerManager.instance.setSong(songs[0]);
       }
     }
   }
@@ -633,7 +633,7 @@ class AudioHandler extends BaseAudioHandler with SeekHandler, WidgetsBindingObse
     }
     final playing = player.playing;
     final l10n = staticl10n;
-    playbackState.add(playbackState.value!.copyWith(
+    playbackState.add(playbackState.value.copyWith(
       controls: [
         if (player.looping)
           MediaControl.custom(

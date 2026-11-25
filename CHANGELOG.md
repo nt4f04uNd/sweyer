@@ -2,6 +2,8 @@
 [@ernince]: https://github.com/ernince
 
 ## Unreleased
+* Update to Flutter 3.35.7
+* Now requires Android 7.0 or newer
 
 * Fix track favourite filter not applying to queue
 

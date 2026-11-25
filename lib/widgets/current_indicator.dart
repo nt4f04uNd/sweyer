@@ -125,7 +125,7 @@ class _BarState extends State<_Bar> {
     _playingSubscription = PlayerManager.instance.playingStream.listen(_handlePlayerStateChange);
   }
 
-  void _handlePlayerStateChange(playing) {
+  void _handlePlayerStateChange(bool playing) {
     if (playing) {
       start();
     } else {

@@ -122,7 +122,7 @@ abstract class Theme {
         elevation: 2.0,
         titleSpacing: 0.0,
         toolbarHeight: NFConstants.toolbarHeight,
-        color: AppColors.eee,
+        backgroundColor: AppColors.eee,
         titleTextStyle: TextStyle(
           color: AppColors.greyText,
           fontWeight: FontWeight.w600,
@@ -249,7 +249,7 @@ abstract class Theme {
         labelSmall: TextStyle(fontWeight: FontWeight.w600),
       ),
       appBarTheme: const AppBarTheme(
-        color: AppColors.grey,
+        backgroundColor: AppColors.grey,
         elevation: 0.0,
         titleSpacing: 0.0,
         toolbarHeight: NFConstants.toolbarHeight,

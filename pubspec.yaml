@@ -8,7 +8,7 @@ version: 1.0.14+17
 
 environment:
   sdk: ^3.6.0
-  flutter: 3.29.2
+  flutter: 3.35.7
 
 dependencies:
   flutter:
@@ -18,7 +18,7 @@ dependencies:
   uuid: ^4.5.3
   path: ^1.8.0
   async: ^2.5.0
-  rxdart: ^0.26.0
+  rxdart: ^0.28.0
   sliver_tools: ^0.2.1
   animations: ^2.1.0
   permission_handler: ^12.0.1
@@ -42,8 +42,8 @@ dependencies:
   sqflite: ^2.0.0+3
   boxy: ^2.3.0
   back_button_interceptor: ^8.0.4
-  flutter_sticky_header: ^0.7.0
-  palette_generator: ^0.3.3+2
+  flutter_sticky_header: ^0.8.0
+  palette_generator: ^0.3.3+2  # TODO: Discontinued, replace
   cached_network_image: ^3.0.0
   flutter_cache_manager: ^3.1.1
   clock: ^1.1.0
@@ -51,9 +51,9 @@ dependencies:
   android_content_provider: ^0.5.2
   collection: ^1.16.0
   theme_tailor_annotation: ^3.0.2
-  riverpod: ^2.6.1
-  flutter_riverpod: ^2.1.1
-  hooks_riverpod: ^2.6.0
+  riverpod: ^3.0.0
+  flutter_riverpod: ^3.0.0
+  hooks_riverpod: ^3.0.0
   flutter_hooks: ^0.21.2
   freezed_annotation: ^3.0.0
   json_annotation: ^4.7.0
@@ -62,8 +62,8 @@ dependencies:
 
   # quick_actions: ^0.6.0 # TODO: quick actions are blocked on https://github.com/ryanheise/audio_service/issues/671
 
-  fluttertoast: ^8.2.12
-  just_audio: ^0.9.46
+  fluttertoast: ^9.0.0
+  just_audio: ^0.10.3
   playify:
     git:
       url: https://github.com/nt4f04uNd/playify
@@ -86,7 +86,7 @@ dependencies:
 
     git:
       url: https://github.com/nt4f04uNd/nt4f04unds_widgets
-      ref: 5.0.0
+      ref: 7.0.0
 
   sweyer_plugin:
     path: sweyer_plugin
@@ -96,8 +96,8 @@ dev_dependencies:
     sdk: flutter
 
   build_runner: ^2.5.4
-  flutter_lints: ^5.0.0
-  golden_toolkit: ^0.15.0
+  flutter_lints: ^6.0.0
+  golden_toolkit: ^0.15.0  # TODO: Discontinued, replace
   theme_tailor: ^3.0.3
   freezed: ^3.1.0
   json_serializable: ^6.9.5
@@ -113,7 +113,8 @@ flutter_native_splash:
   ios_content_mode: scaleAspectFit
 
 flutter:
-  disable-swift-package-manager: true
+  config:
+    enable-swift-package-manager: false
   uses-material-design: true
   generate: true
 
