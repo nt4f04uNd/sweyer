@@ -737,6 +737,10 @@ class _MainTabState extends State<_MainTab> {
       curve: const Interval(0.6, 1.0),
       parent: playerRouteController,
     );
+    final toolbarHeightAnimation = Tween(
+      begin: PlayerRoute.minimizedBottomInset(context),
+      end: TrackPanel.height(context),
+    ).animate(playerRouteController);
     final mediaQuery = MediaQuery.of(context);
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     return AnimatedBuilder(
@@ -750,7 +754,7 @@ class _MainTabState extends State<_MainTab> {
             elevation: 0.0,
             backgroundColor: Colors.transparent,
             toolbarHeight: math.max(
-              TrackPanel.height(context) - mediaQuery.padding.top,
+              toolbarHeightAnimation.value - mediaQuery.padding.top,
               theme.appBarTheme.toolbarHeight ?? kToolbarHeight,
             ),
             leading: FadeTransition(
