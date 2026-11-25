@@ -636,7 +636,7 @@ class ContentControl extends Control {
   Future<void> deleteSongs(Set<Song> songs) async {
     // TODO: Consider how to handle song deletion on iOS - possibly show a message directing users to use the native Music app
     if (!DeviceInfoControl.instance.supportsDeleteSongs) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
       return;
@@ -740,7 +740,7 @@ class ContentControl extends Control {
   Future<String> createPlaylist(String name) async {
     // TODO: Consider how to handle playlist creation on iOS - possibly use a local database
     if (!DeviceInfoControl.instance.supportsCreatePlaylists) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
       return name;
@@ -760,7 +760,7 @@ class ContentControl extends Control {
   Future<String?> renamePlaylist(Playlist playlist, String name) async {
     // TODO: Consider how to handle playlist renaming on iOS - possibly use a local database
     if (!DeviceInfoControl.instance.supportsRenamePlaylist) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
       return null;
@@ -786,7 +786,7 @@ class ContentControl extends Control {
   }) async {
     // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
     if (!DeviceInfoControl.instance.supportsModifyPlaylistContents) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
       return;
@@ -807,7 +807,7 @@ class ContentControl extends Control {
   }) async {
     // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
     if (!DeviceInfoControl.instance.supportsModifyPlaylistContents) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
       return;
@@ -830,7 +830,7 @@ class ContentControl extends Control {
   }) async {
     // TODO: Consider how to handle playlist modification on iOS - possibly use a local database
     if (!DeviceInfoControl.instance.supportsModifyPlaylistContents) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.oopsErrorOccurred,
       );
       return;
@@ -846,7 +846,7 @@ class ContentControl extends Control {
   Future<void> deletePlaylists(List<Playlist> playlists) async {
     // TODO: Consider how to handle playlist deletion on iOS - possibly use a local database
     if (!DeviceInfoControl.instance.supportsRemovePlaylists) {
-      ShowFunctions.instance.showToast(
+      await ShowFunctions.instance.showToast(
         msg: staticl10n.deletionError,
       );
       return;
