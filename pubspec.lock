@@ -1235,10 +1235,10 @@ packages:
     dependency: "direct dev"
     description:
       name: sqflite_common_ffi
-      sha256: "9faa2fedc5385ef238ce772589f7718c24cdddd27419b609bb9c6f703ea27988"
+      sha256: "8d7b8749a516cbf6e9057f9b480b716ad14fc4f3d3873ca6938919cc626d9025"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.6"
+    version: "2.3.7+1"
   sqflite_darwin:
     dependency: transitive
     description:
@@ -1259,10 +1259,10 @@ packages:
     dependency: transitive
     description:
       name: sqlite3
-      sha256: "5c225083e72ea56c96d94ba1dd14fb89c8bb7731c8496ee840ab77be9bb67ae2"
+      sha256: "3145bd74dcdb4fd6f5c6dda4d4e4490a8087d7f286a14dee5d37087290f0f8a2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.1"
+    version: "2.9.4"
   stack_trace:
     dependency: transitive
     description:
