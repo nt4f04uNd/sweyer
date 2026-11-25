@@ -15,6 +15,11 @@ final SpringDescription playerRouteSpringDescription = SpringDescription.withDam
 class PlayerRoute extends StatefulWidget {
   const PlayerRoute({super.key});
 
+  /// The minimum height in pixels from the bottom of the screen to the top of the player route
+  /// while it is fully minimized.
+  static double minimizedBottomInset(BuildContext context) =>
+      TrackPanel.height(context) + MediaQuery.paddingOf(context).bottom;
+
   @override
   _PlayerRouteState createState() => _PlayerRouteState();
 }
@@ -120,7 +125,7 @@ class _PlayerRouteState extends State<PlayerRoute> with SingleTickerProviderStat
     final screenHeight = mediaQuery.size.height;
     return Slidable(
       controller: controller,
-      start: 1.0 - (TrackPanel.height(context) + MediaQuery.paddingOf(context).bottom) / screenHeight,
+      start: 1.0 - PlayerRoute.minimizedBottomInset(context) / screenHeight,
       end: 0.0,
       direction: slideDirection,
       barrier: Container(

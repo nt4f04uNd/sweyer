@@ -124,7 +124,7 @@ class HomeState extends State<Home> {
           child: Stack(
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(bottom: kSongTileHeight(context)),
+                padding: EdgeInsets.only(bottom: PlayerRoute.minimizedBottomInset(context)),
                 child: Router<HomeRoutes>(
                   routerDelegate: router,
                   routeInformationParser: HomeRouteInformationParser(),
