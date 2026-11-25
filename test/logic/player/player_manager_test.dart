@@ -12,11 +12,10 @@ void main() {
     });
   });
 
-  test('Player can pause', () async {
-    final binding = TestWidgetsFlutterBinding.ensureInitialized();
-    await binding.runAppTestWithoutUi(() async {
+  testWidgets('Player can pause', (tester) async {
+    await tester.runAppTestWithoutUi(() async {
       var playFutureCompleted = false;
-      unawaited(binding.runAsync(PlayerManager.instance.play).whenComplete(() => playFutureCompleted = true));
+      unawaited(tester.runAsync(PlayerManager.instance.play).whenComplete(() => playFutureCompleted = true));
       expect(PlayerManager.instance.playing, true);
       await PlayerManager.instance.pause();
       expect(playFutureCompleted, true);
@@ -25,11 +24,10 @@ void main() {
   });
 
   group('Player notification', () {
-    test('Is updated when playing', () async {
-      final binding = TestWidgetsFlutterBinding.ensureInitialized();
-      await binding.runAppTestWithoutUi(() async {
+    testWidgets('Is updated when playing', (tester) async {
+      await tester.runAppTestWithoutUi(() async {
         unawaited(PlayerManager.instance.play());
-        await binding.runAsync(binding.idle);
+        await tester.runAsync(tester.idle);
         final playbackState = PlayerManager.handler!.playbackState.value;
         expect(playbackState.playing, true);
         expect(playbackState.processingState, AudioProcessingState.ready);
@@ -50,13 +48,12 @@ void main() {
       });
     });
 
-    test('Is updated when paused', () async {
-      final binding = TestWidgetsFlutterBinding.ensureInitialized();
-      await binding.runAppTestWithoutUi(() async {
+    testWidgets('Is updated when paused', (tester) async {
+      await tester.runAppTestWithoutUi(() async {
         unawaited(PlayerManager.instance.play());
-        await binding.pump();
-        await binding.runAsync(PlayerManager.instance.pause);
-        await binding.pump();
+        await tester.pump();
+        await tester.runAsync(PlayerManager.instance.pause);
+        await tester.pump();
         final playbackState = PlayerManager.handler!.playbackState.value;
         expect(PlayerManager.instance.playing, false);
         expect(playbackState.playing, false);
@@ -78,13 +75,12 @@ void main() {
       });
     });
 
-    test('Is updated when stopped', () async {
-      final binding = TestWidgetsFlutterBinding.ensureInitialized();
-      await binding.runAppTestWithoutUi(() async {
+    testWidgets('Is updated when stopped', (tester) async {
+      await tester.runAppTestWithoutUi(() async {
         unawaited(PlayerManager.instance.play());
-        await binding.pump();
-        await binding.runAsync(PlayerManager.handler!.stop);
-        await binding.pump();
+        await tester.pump();
+        await tester.runAsync(PlayerManager.handler!.stop);
+        await tester.pump();
         final playbackState = PlayerManager.handler!.playbackState.value;
         expect(playbackState.playing, false);
         expect(playbackState.processingState, AudioProcessingState.idle);

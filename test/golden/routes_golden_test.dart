@@ -9,7 +9,8 @@ void main() {
     late PermissionsChannelObserver permissionsObserver;
     testAppGoldens('permissions_screen', setUp: () {
       registerAppSetup(() {
-        permissionsObserver = PermissionsChannelObserver(TestWidgetsFlutterBinding.ensureInitialized());
+        permissionsObserver =
+            PermissionsChannelObserver(TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger);
         permissionsObserver.setPermission(Permission.storage, PermissionStatus.denied);
         permissionsObserver.setPermission(Permission.audio, PermissionStatus.denied);
       });
@@ -47,7 +48,10 @@ void main() {
 
     testAppGoldens('init_error_screen', setUp: () {
       registerAppSetup(() {
-        CrashlyticsObserver(TestWidgetsFlutterBinding.ensureInitialized(), throwFatalErrors: false);
+        CrashlyticsObserver(
+          TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger,
+          throwFatalErrors: false,
+        );
         FakeSweyerPluginPlatform.instance.songsFactory = () => throw TypeError();
       });
     }, (WidgetTester tester) async {
