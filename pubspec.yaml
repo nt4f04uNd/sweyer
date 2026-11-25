@@ -101,7 +101,7 @@ dev_dependencies:
   theme_tailor: ^3.0.3
   freezed: ^3.1.0
   json_serializable: ^6.9.5
-  sqflite_common_ffi: ^2.3.6
+  sqflite_common_ffi: ^2.3.7+1
   flutter_native_splash: ^2.4.6
 
 flutter_native_splash:
