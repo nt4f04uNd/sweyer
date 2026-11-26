@@ -21,12 +21,12 @@ jobs:
             artifact_path: build/app/outputs/flutter-apk/app-profile.apk
             build_command: |
               export JAVA_HOME="$JAVA_HOME_17_X64"
-              flutter build apk --profile
+              flutter build apk --profile --no-pub
           - name: iOS simulator app
             os: macos-latest
             artifact_name: iOS Simulator App
             artifact_path: build/ios/iphonesimulator/Runner.app
-            build_command: flutter build ios --simulator --debug
+            build_command: flutter build ios --simulator --debug --no-codesign --no-pub
 
     steps:
       - name: 📚 Git Checkout
@@ -57,6 +57,13 @@ jobs:
           path: ~/.pub-cache
           key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
           restore-keys: pub-${{ runner.os }}-
+
+      - name: 💾 Cache CocoaPods
+        if: runner.os == 'macOS'
+        uses: actions/cache@v6
+        with:
+          path: ios/Pods
+          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}
 
       - name: 💾 Cache Gradle
         if: runner.os == 'Linux'
