@@ -530,10 +530,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_sticky_header
-      sha256: fb4fda6164ef3e5fc7ab73aba34aad253c17b7c6ecf738fa26f1a905b7d2d1e2
+      sha256: "62fe8f8602d294617c5a2ea91b0d9fcdb011747e73481182ffbff3ff8acef7b7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.0"
+    version: "0.11.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
