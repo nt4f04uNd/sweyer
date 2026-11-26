@@ -22,7 +22,7 @@ dependencies:
   sliver_tools: ^0.2.1
   animations: ^2.2.0
   permission_handler: ^12.0.1
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.5.5
   path_provider: ^2.1.5
   percent_indicator: ^4.2.5
   # cloud_functions 5.4.0 introduced SPM support and regressed iOS IPA/archive builds.
