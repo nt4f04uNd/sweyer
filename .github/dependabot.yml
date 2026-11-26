@@ -9,6 +9,21 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      firebase:
+        patterns:
+          - "firebase_*"
+          - "cloud_functions"
+      riverpod:
+        patterns:
+          - "riverpod"
+          - "flutter_riverpod"
+          - "hooks_riverpod"
+          - "flutter_hooks"
+      sqflite:
+        patterns:
+          - "sqflite"
+          - "sqflite_common_ffi"
 
   - package-ecosystem: "pub"
     directory: "/sweyer_plugin"
