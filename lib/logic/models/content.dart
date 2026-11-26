@@ -26,7 +26,7 @@ enum ContentType<T extends Content> {
 /// Represents some content in the app (songs, album, etc).
 ///
 /// Each type of content have an appropriate [Sort]s implemented.
-abstract class Content with EquatableMixin {
+abstract class Content with Equatable {
   const Content();
 
   // The type of this content.
