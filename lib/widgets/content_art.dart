@@ -41,7 +41,7 @@ bool get _useBytesLoader => DeviceInfoControl.instance.useBytesForAlbumArt;
 
 typedef ContentArtOnLoadCallback = FutureOr Function(ui.Image);
 
-class ContentArtSource with EquatableMixin {
+class ContentArtSource with Equatable {
   const ContentArtSource(Content content) : _content = content;
 
   const ContentArtSource.song(Song song) : _content = song;
