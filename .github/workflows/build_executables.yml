@@ -26,7 +26,7 @@ jobs:
             os: macos-latest
             artifact_name: iOS Simulator App
             artifact_path: build/ios/iphonesimulator/Runner.app
-            build_command: flutter build ios --simulator --debug --no-codesign
+            build_command: flutter build ios --simulator --debug --no-codesign -v
 
     steps:
       - name: 📚 Git Checkout
@@ -71,6 +71,13 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
+
+      - name: Profile pod install
+        if: runner.os == 'macOS'
+        run: |
+          flutter pub get
+          cd ios
+          time pod install --verbose
 
       - name: 🔨 Build ${{ matrix.name }}
         shell: bash
