@@ -51,6 +51,17 @@ jobs:
         with:
           podfile-path: ios/Podfile.lock
 
+      - name: 💾 Cache Pods
+        if: runner.os == 'macOS'
+        uses: actions/cache@v6
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods/repos
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
+
       - name: 💾 Cache Gradle
         if: runner.os == 'Linux'
         uses: actions/cache@v6
