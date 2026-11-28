@@ -1,0 +1,35 @@
+name: Update Pods
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v7
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+          cache: true
+
+      - name: 🧱 Install CocoaPods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          podfile-path: ios/Podfile.lock
+
+      - name: 🔄 Update Pods
+        run: |
+          flutter pub get
+          cd ios
+          pod update
+
+      - name: 💾 Commit updated Pod lockfile
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 🤖 Update Pods 🤖
