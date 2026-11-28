@@ -4,7 +4,7 @@
 ## Unreleased
 * Update to Flutter 3.35.7
 * Now requires Android 7.0 or newer
-
+* Add iOS support
 * Fix track favourite filter not applying to queue
 
 ## 1.0.14
