@@ -1,6 +1,6 @@
 An open-source non-commercial music player built with Flutter
 
-The app currently runs on Android and IOS, PRs adding support for other platforms are welcome.
+The app currently runs on Android and iOS, PRs adding support for other platforms are welcome.
 
 Join our Discord community if you'd like to collaborate!
 
