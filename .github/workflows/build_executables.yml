@@ -26,7 +26,7 @@ jobs:
             os: macos-latest
             artifact_name: iOS Simulator App
             artifact_path: build/ios/iphonesimulator/Runner.app
-            build_command: flutter build ios --simulator --debug
+            build_command: flutter build ios --simulator --debug --no-codesign
 
     steps:
       - name: 📚 Git Checkout
@@ -44,6 +44,7 @@ jobs:
           flutter-version-file: pubspec.yaml
           channel: stable
           cache: true
+          pub-cache: true
 
       - name: 🧱 Install CocoaPods
         if: runner.os == 'macOS'
@@ -51,12 +52,16 @@ jobs:
         with:
           podfile-path: ios/Podfile.lock
 
-      - name: 💾 Cache Pub
+      - name: 💾 Cache Pods
+        if: runner.os == 'macOS'
         uses: actions/cache@v6
         with:
-          path: ~/.pub-cache
-          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
-          restore-keys: pub-${{ runner.os }}-
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: ${{ runner.os }}-pods-
 
       - name: 💾 Cache Gradle
         if: runner.os == 'Linux'
@@ -67,10 +72,6 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
-
-      - name: 📦 Install Dependencies
-        shell: bash
-        run: flutter pub get
 
       - name: 🔨 Build ${{ matrix.name }}
         shell: bash
