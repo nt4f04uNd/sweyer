@@ -112,7 +112,7 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.albumsFactory = () => validAlbums.map((element) => element.$1).toList();
       });
       await tester.runAppTestWithoutUi(() {
@@ -141,7 +141,7 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.artistsFactory = () => validArtists.map((element) => element.$1).toList();
       });
       await tester.runAppTestWithoutUi(() {
@@ -183,7 +183,7 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.playlistsFactory = () => validPlaylists.map((element) => element.$1).toList();
       });
       await tester.runAppTestWithoutUi(() {
@@ -247,7 +247,7 @@ void main() {
       ];
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.songsFactory = () => validSongs.map((element) => element.$1).toList();
       });
       await tester.runAppTestWithoutUi(() {
@@ -273,7 +273,7 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.albumsFactory = () => invalidAlbums;
       });
       await tester.runAppTestWithoutUi(() {
@@ -301,7 +301,7 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.artistsFactory = () => invalidArtists;
       });
       await tester.runAppTestWithoutUi(() {
@@ -331,7 +331,7 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.playlistsFactory = () => invalidPlaylists;
       });
       await tester.runAppTestWithoutUi(() {
@@ -369,7 +369,7 @@ void main() {
       ].assignUniqueIds(startId: 0);
       late CrashlyticsObserver crashlyticsObserver;
       registerAppSetup(() {
-        crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger);
+        crashlyticsObserver = CrashlyticsObserver();
         FakeSweyerPluginPlatform.instance.songsFactory = () => invalidSongs;
       });
       await tester.runAppTestWithoutUi(() {

@@ -159,7 +159,7 @@ void main() {
     late CrashlyticsObserver crashlyticsObserver;
     var songsFactoryCallCount = 0;
     registerAppSetup(() {
-      crashlyticsObserver = CrashlyticsObserver(tester.binding.defaultBinaryMessenger, throwFatalErrors: false);
+      crashlyticsObserver = CrashlyticsObserver(throwFatalErrors: false);
       FakeSweyerPluginPlatform.instance.songsFactory = () {
         songsFactoryCallCount += 1;
         if (songsFactoryCallCount <= 2) {

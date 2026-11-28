@@ -2,7 +2,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 
 @visibleForTesting
-bool printFirebaseErrors = true;
+FirebaseCrashlytics? crashlytics;
+
+FirebaseCrashlytics _getCrashlytics() => crashlytics ??= FirebaseCrashlytics.instance;
 
 Future<void> reportErrorToFirebase(
   dynamic exception,
@@ -10,12 +12,12 @@ Future<void> reportErrorToFirebase(
   dynamic reason,
   Iterable<Object> information = const [],
 }) =>
-    FirebaseCrashlytics.instance.recordError(
+    _getCrashlytics().recordError(
       exception,
       stack,
       reason: reason,
       fatal: false,
-      printDetails: printFirebaseErrors,
+      printDetails: true,
     );
 
 Future<void> reportFatalErrorToFirebase(
@@ -24,10 +26,10 @@ Future<void> reportFatalErrorToFirebase(
   dynamic reason,
   Iterable<Object> information = const [],
 }) =>
-    FirebaseCrashlytics.instance.recordError(
+    _getCrashlytics().recordError(
       exception,
       stack,
       reason: reason,
       fatal: true,
-      printDetails: printFirebaseErrors,
+      printDetails: true,
     );

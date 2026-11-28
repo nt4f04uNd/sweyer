@@ -48,10 +48,7 @@ void main() {
 
     testAppGoldens('init_error_screen', setUp: () {
       registerAppSetup(() {
-        CrashlyticsObserver(
-          TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger,
-          throwFatalErrors: false,
-        );
+        CrashlyticsObserver(throwFatalErrors: false);
         FakeSweyerPluginPlatform.instance.songsFactory = () => throw TypeError();
       });
     }, (WidgetTester tester) async {
